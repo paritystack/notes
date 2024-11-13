@@ -24,3 +24,4 @@
 - The `github_token` is a token that the action will use to push the changes to the repository.
 - The `GITHUB_TOKEN` is automatically created by Github when the repository is created.
 - The `GITHUB_TOKEN` has the `contents` permission, which is required by the action.
+- Add custom domain in the repository settings.

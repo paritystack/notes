@@ -25,3 +25,4 @@
 - The `GITHUB_TOKEN` is automatically created by Github when the repository is created.
 - The `GITHUB_TOKEN` has the `contents` permission, which is required by the action.
 - Add custom domain in the repository settings.
+    - CNAME file in the root of the repository in gh-pages branch. if not present, the site will not be accessible via the custom domain.

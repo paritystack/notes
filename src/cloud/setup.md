@@ -2,6 +2,8 @@
 
 ## Setup GPU instances
 
+Make sure the hardisk size is at least 30GB
+
 ```bash
 curl https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py --output install_gpu_driver.py 
 

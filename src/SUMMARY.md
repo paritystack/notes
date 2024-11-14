@@ -135,7 +135,7 @@
     - [UART](embedded/uart.md)
     - [USB](embedded/usb.md)
     - [CAN](embedded/can.md)
-    - [SPIO](embedded/spio.md)
+    - [SDIO](embedded/sdio.md)
     - [Ethernet](embedded/ethernet.md)
     - [PWM](embedded/pwm.md)
     - [ADC](embedded/adc.md)
@@ -148,3 +148,13 @@
     - [Power Management](embedded/power_management.md)
     - [Debugging](embedded/debugging.md)
 
+
+- [Networking](networking/README.md)
+    - [OSI Model](networking/osi_model.md)
+    - [TCP/IP Model](networking/tcp_ip_model.md)
+    - [IP](networking/ip.md)
+    - [TCP](networking/tcp.md)
+    - [UDP](networking/udp.md)
+    - [HTTP](networking/http.md)
+    - [DNS](networking/dns.md)
+    - [Firewalls](networking/firewalls.md)

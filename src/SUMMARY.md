@@ -118,7 +118,7 @@
     - [Docker](tools/docker.md)
     * [Ansible](tools/ansible.md)
 
-* Embedded
+- [Embedded](embedded/README.md)
     - [AVR](embedded/avr.md)
     - [STM32](embedded/stm32.md)
     - [ESP32](embedded/esp32.md)

@@ -2,6 +2,8 @@
 
 [Introduction](README.md)
 
+--------------------------------
+
 - [Git](git/README.md)
     - [Git Cheatsheet](git/cheatsheet.md)
     - [Git Commands](git/commands.md)
@@ -96,17 +98,21 @@
     - [Generative AI](ai/generative_ai.md)
     - [LLMs](ai/llms.md)
     - [Prompt Engineering](ai/prompt_engineering.md)
-    - [Stable Diffusion](ai/stable_diffusion.md)
     - [LLAMA](ai/llama.md)
+    - [Stable Diffusion](ai/stable_diffusion.md)
     - [Fluxdev](ai/fluxdev.md)
+    - [ComfyUI](ai/comfyui.md)
+    - [Fine Tuning](ai/fine_tuning.md)
 
 
 - [Cloud](cloud/README.md)
+    - [Setup](cloud/setup.md)
     - [Google Cloud](cloud/google_cloud.md)
     - [AWS](cloud/aws.md)
     - [Azure](cloud/azure.md)
 
 - [Tools](tools/README.md)
+    - [tmux](tools/tmux.md)
     - [sed](tools/sed.md)
     - [awk](tools/awk.md)
     - [curl](tools/curl.md)

@@ -158,3 +158,10 @@
     - [HTTP](networking/http.md)
     - [DNS](networking/dns.md)
     - [Firewalls](networking/firewalls.md)
+
+- [Finance](finance/README.md)
+    - [General](finance/general.md)
+    - [Stocks](finance/stocks.md)
+    - [Options](finance/options.md)
+    - [Futures](finance/futures.md)
+    - [Crypto](finance/crypto.md)

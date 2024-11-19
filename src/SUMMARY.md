@@ -113,6 +113,10 @@
 
 - [Tools](tools/README.md)
     - [tmux](tools/tmux.md)
+    - [vim](tools/vim.md)
+    - [cscope](tools/cscope.md)
+    - [ctags](tools/ctags.md)
+    - [mdbook](tools/mdbook.md)
     - [sed](tools/sed.md)
     - [awk](tools/awk.md)
     - [curl](tools/curl.md)

@@ -4,21 +4,21 @@ Welcome to a curated collection of notes and resources spanning a wide array of 
 
 ## Table of Contents
 
-- [Git](git/README.md)
-- [Programming Languages](programming/README.md)
-- [Linux](linux/README.md)
-- [Android](android/README.md)
-- [Data Structures](data_structures/README.md)
-- [Algorithms](algorithms/README.md)
-- [Security](security/README.md)
-- [Computer Networking](networking/README.md)
-- [Wifi](wifi/README.md)
-- [Machine Learning](machine_learning/README.md)
-- [AI](ai/README.md)
-- [Cloud](cloud/README.md)
-- [Finance](finance/README.md)
-- [Tools](tools/README.md)
-- [Embedded](embedded/README.md)
+- [Git] git/README.md
+- [Programming Languages] programming/README.md
+- [Linux] linux/README.md
+- [Android] android/README.md
+- [Data Structures] data_structures/README.md
+- [Algorithms] algorithms/README.md
+- [Security] security/README.md
+- [Computer Networking] networking/README.md
+- [Wifi] wifi/README.md
+- [Machine Learning] machine_learning/README.md
+- [AI] ai/README.md
+- [Cloud] cloud/README.md
+- [Finance] finance/README.md
+- [Tools] tools/README.md
+- [Embedded] embedded/README.md
 
 Feel free to explore the sections and delve into the topics that pique your interest. Happy learning!
 

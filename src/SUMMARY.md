@@ -20,6 +20,7 @@
     - [SQL](programming/sql.md)
 
 - [Linux](linux/README.md)
+    - [Networking](linux/networking.md)
     - [Kernel](linux/kernel.md)
     - [Linux Commands](linux/commands.md)
     - [Netfilter](linux/netfilter.md)
@@ -161,7 +162,11 @@
     - [UDP](networking/udp.md)
     - [HTTP](networking/http.md)
     - [DNS](networking/dns.md)
+    - [mDNS](networking/mdns.md)
     - [Firewalls](networking/firewalls.md)
+    - [STUN](networking/stun.md)
+    - [TURN](networking/turn.md)
+    - [UPnP](networking/upnp.md)
 
 - [Finance](finance/README.md)
     - [General](finance/general.md)

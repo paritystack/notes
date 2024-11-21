@@ -19,6 +19,7 @@
     - [Rust](programming/rust.md)
     - [SQL](programming/sql.md)
     - [Interview Questions](programming/interview_questions.md)
+    - [Design Patterns](programming/design_patterns.md)
 
 - [Linux](linux/README.md)
     - [Networking](linux/networking.md)

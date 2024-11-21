@@ -18,6 +18,7 @@
     - [Java](programming/java.md)
     - [Rust](programming/rust.md)
     - [SQL](programming/sql.md)
+    - [Interview Questions](programming/interview_questions.md)
 
 - [Linux](linux/README.md)
     - [Networking](linux/networking.md)
@@ -72,13 +73,8 @@
     - [Wifi Basics](wifi/basics.md)
     - [Wifi Standards](wifi/standards.md)
     - [Wifi Security](wifi/security.md)
-    - [WPA2](wifi/wpa2.md)
-    - [WPA3](wifi/wpa3.md)
     - [Scanning](wifi/scanning.md)
     - [Roaming](wifi/roaming.md)
-    - [Wifi 6](wifi/wifi6.md)
-    - [Wifi 6E](wifi/wifi6e.md)
-    - [Wifi 7](wifi/wifi7.md)
     - [QoS Management](wifi/qos_management.md)
 
 - [Machine Learning](machine_learning/README.md)

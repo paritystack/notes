@@ -1,5 +1,7 @@
 # ffmpeg
 
+ffmpeg is a powerful tool for processing video and audio files. It is a powerful tool that can be used to convert video and audio files, create video and audio files, and more.
+
 ## Convert video to mp4
 
 ```bash

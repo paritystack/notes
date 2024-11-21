@@ -170,6 +170,8 @@
 
 - [Finance](finance/README.md)
     - [General](finance/general.md)
+    - [Technical Analysis](finance/technical_analysis.md)
+    - [Fundamental Analysis](finance/fundamental_analysis.md)
     - [Stocks](finance/stocks.md)
     - [Options](finance/options.md)
     - [Futures](finance/futures.md)

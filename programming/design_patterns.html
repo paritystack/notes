@@ -1,0 +1,457 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Design Patterns - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="design-patterns"><a class="header" href="#design-patterns">Design Patterns</a></h1>
+<p>// Start Generation Here</p>
+<h2 id="introduction-to-design-patterns"><a class="header" href="#introduction-to-design-patterns">Introduction to Design Patterns</a></h2>
+<p>Design patterns are proven solutions to common problems encountered in software development. They provide a standardized approach to solving issues related to object creation, structure, and behavior, promoting code reusability, scalability, and maintainability. Understanding design patterns is essential for building robust and efficient software systems.</p>
+<h3 id="categories-of-design-patterns"><a class="header" href="#categories-of-design-patterns">Categories of Design Patterns</a></h3>
+<p>Design patterns are typically categorized into three main types:</p>
+<ol>
+<li><strong>Creational Patterns</strong>: Focus on object creation mechanisms, aiming to create objects in a manner suitable to the situation.</li>
+<li><strong>Structural Patterns</strong>: Deal with object composition, identifying simple ways to realize relationships between objects.</li>
+<li><strong>Behavioral Patterns</strong>: Concerned with communication between objects, highlighting patterns of interaction.</li>
+</ol>
+<h2 id="list-of-design-patterns-and-their-uses"><a class="header" href="#list-of-design-patterns-and-their-uses">List of Design Patterns and Their Uses</a></h2>
+<h3 id="creational-patterns"><a class="header" href="#creational-patterns">Creational Patterns</a></h3>
+<ol>
+<li>
+<p><strong>Singleton</strong>: Ensures a class has only one instance and provides a global point of access to it. Useful for managing shared resources like logging or configuration settings.</p>
+</li>
+<li>
+<p><strong>Factory Method</strong>: Defines an interface for creating an object but lets subclasses alter the type of objects that will be created. Useful for creating objects without specifying the exact class of the object to be created.</p>
+</li>
+<li>
+<p><strong>Abstract Factory</strong>: Provides an interface for creating families of related or dependent objects without specifying their concrete classes. Useful when the system needs to be independent of how its objects are created.</p>
+</li>
+<li>
+<p><strong>Builder</strong>: Separates the construction of a complex object from its representation, allowing the same construction process to create various representations. Useful for constructing complex objects step by step.</p>
+</li>
+<li>
+<p><strong>Prototype</strong>: Specifies the kinds of objects to create using a prototypical instance and creates new objects by copying this prototype. Useful when object creation is expensive or complex.</p>
+</li>
+</ol>
+<h3 id="structural-patterns"><a class="header" href="#structural-patterns">Structural Patterns</a></h3>
+<ol>
+<li>
+<p><strong>Adapter</strong>: Allows incompatible interfaces to work together by converting the interface of one class into another expected by the clients. Useful when integrating legacy systems or third-party libraries.</p>
+</li>
+<li>
+<p><strong>Bridge</strong>: Decouples an abstraction from its implementation so that the two can vary independently. Useful for handling multiple implementations of an abstraction.</p>
+</li>
+<li>
+<p><strong>Composite</strong>: Composes objects into tree structures to represent part-whole hierarchies, allowing clients to treat individual objects and compositions uniformly. Useful for representing hierarchical structures like file systems.</p>
+</li>
+<li>
+<p><strong>Decorator</strong>: Adds additional responsibilities to an object dynamically without altering its structure. Useful for enhancing functionalities of objects without subclassing.</p>
+</li>
+<li>
+<p><strong>Facade</strong>: Provides a simplified interface to a complex subsystem, making the subsystem easier to use. Useful for reducing dependencies and simplifying client interaction.</p>
+</li>
+<li>
+<p><strong>Flyweight</strong>: Reduces the cost of creating and maintaining a large number of similar objects by sharing as much data as possible. Useful for handling large numbers of objects efficiently.</p>
+</li>
+<li>
+<p><strong>Proxy</strong>: Provides a surrogate or placeholder for another object to control access to it. Useful for lazy initialization, access control, or logging.</p>
+</li>
+</ol>
+<h3 id="behavioral-patterns"><a class="header" href="#behavioral-patterns">Behavioral Patterns</a></h3>
+<ol>
+<li>
+<p><strong>Chain of Responsibility</strong>: Passes a request along a chain of handlers, allowing each handler to process or pass it along. Useful for decoupling senders and receivers of requests.</p>
+</li>
+<li>
+<p><strong>Command</strong>: Encapsulates a request as an object, thereby allowing for parameterization and queuing of requests. Useful for implementing undoable operations or task scheduling.</p>
+</li>
+<li>
+<p><strong>Interpreter</strong>: Defines a representation for a language's grammar and interprets sentences in the language. Useful for parsing and interpreting expressions or languages.</p>
+</li>
+<li>
+<p><strong>Iterator</strong>: Provides a way to access elements of an aggregate object sequentially without exposing its underlying representation. Useful for traversing collections.</p>
+</li>
+<li>
+<p><strong>Mediator</strong>: Defines an object that encapsulates how a set of objects interact, promoting loose coupling by keeping objects from referring to each other explicitly. Useful for reducing complexity in object interactions.</p>
+</li>
+<li>
+<p><strong>Memento</strong>: Captures and externalizes an object's internal state without violating encapsulation, allowing the object to be restored to this state later. Useful for implementing undo functionality.</p>
+</li>
+<li>
+<p><strong>Observer</strong>: Defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically. Useful for event handling and implementing distributed event systems.</p>
+</li>
+<li>
+<p><strong>State</strong>: Allows an object to alter its behavior when its internal state changes, appearing as if it has changed its class. Useful for managing state-dependent behavior.</p>
+</li>
+<li>
+<p><strong>Strategy</strong>: Defines a family of algorithms, encapsulates each one, and makes them interchangeable, allowing the algorithm to vary independently from clients that use it. Useful for selecting algorithms dynamically at runtime.</p>
+</li>
+<li>
+<p><strong>Template Method</strong>: Defines the skeleton of an algorithm in a method, deferring some steps to subclasses, allowing subclasses to redefine certain steps without changing the algorithm's structure. Useful for implementing invariant parts of an algorithm and varying certain steps.</p>
+</li>
+<li>
+<p><strong>Visitor</strong>: Represents an operation to be performed on elements of an object structure, allowing new operations to be added without modifying the classes of the elements on which it operates. Useful for separating algorithms from object structures.</p>
+</li>
+</ol>
+<h3 id="creational-patterns-1"><a class="header" href="#creational-patterns-1">Creational Patterns</a></h3>
+<h4 id="singleton-pattern"><a class="header" href="#singleton-pattern">Singleton Pattern</a></h4>
+<p>The Singleton Pattern ensures that a class has only one instance and provides a global point of access to it. This is useful when exactly one object is needed to coordinate actions across the system.</p>
+<p><strong>Example Scenario</strong>: Implementing a logger where a single instance manages all logging operations.</p>
+<p><strong>Example Implementation in C++:</strong></p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;mutex&gt;
+
+class Logger {
+public:
+    // Static method to get the single instance
+    static Logger&amp; getInstance() {
+        static Logger instance; // Guaranteed to be destroyed and instantiated on first use
+        return instance;
+    }
+
+    // Delete copy constructor and assignment operator to prevent copies
+    Logger(const Logger&amp;) = delete;
+    Logger&amp; operator=(const Logger&amp;) = delete;
+
+    // Public method to log messages
+    void log(const std::string&amp; message) {
+        std::lock_guard&lt;std::mutex&gt; lock(mutex_);
+        std::cout &lt;&lt; "Log: " &lt;&lt; message &lt;&lt; std::endl;
+    }
+
+private:
+    Logger() {} // Private constructor
+    std::mutex mutex_;
+};
+
+int main() {
+    Logger::getInstance().log("Application started.");
+    Logger::getInstance().log("An error occurred.");
+    return 0;
+}
+</code></pre>
+<p><strong>Explanation</strong>:</p>
+<ul>
+<li>The <code>Logger</code> class has a private constructor to prevent direct instantiation.</li>
+<li>The static method <code>getInstance()</code> returns a reference to the single <code>Logger</code> instance.</li>
+<li>Copy constructor and assignment operator are deleted to prevent creating additional instances.</li>
+<li>A mutex is used to ensure thread-safe logging operations.</li>
+</ul>
+<h3 id="structural-patterns-1"><a class="header" href="#structural-patterns-1">Structural Patterns</a></h3>
+<h4 id="adapter-pattern"><a class="header" href="#adapter-pattern">Adapter Pattern</a></h4>
+<p>The Adapter Pattern allows incompatible interfaces to work together. It acts as a bridge between two incompatible interfaces, enabling classes to collaborate without modifying their existing code.</p>
+<p><strong>Example Scenario</strong>: Integrating a new payment system into an existing application that expects a different payment interface.</p>
+<p><strong>Example Implementation in C++:</strong></p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+
+// Existing interface expected by the application
+class PaymentProcessor {
+public:
+    virtual void pay(int amount) = 0;
+};
+
+// New payment system with a different interface
+class NewPaymentSystem {
+public:
+    void makePayment(int amount) {
+        std::cout &lt;&lt; "Processing payment of $" &lt;&lt; amount &lt;&lt; " through the new system." &lt;&lt; std::endl;
+    }
+};
+
+// Adapter to make NewPaymentSystem compatible with PaymentProcessor
+class PaymentAdapter : public PaymentProcessor {
+public:
+    PaymentAdapter(NewPaymentSystem* newPaymentSystem) : newPaymentSystem_(newPaymentSystem) {}
+
+    void pay(int amount) override {
+        newPaymentSystem_-&gt;makePayment(amount);
+    }
+
+private:
+    NewPaymentSystem* newPaymentSystem_;
+};
+
+int main() {
+    NewPaymentSystem newSystem;
+    PaymentAdapter adapter(&amp;newSystem);
+    adapter.pay(100); // Output: Processing payment of $100 through the new system.
+    return 0;
+}
+</code></pre>
+<p><strong>Explanation</strong>:</p>
+<ul>
+<li><code>PaymentProcessor</code> is the existing interface that the application expects.</li>
+<li><code>NewPaymentSystem</code> is the new class with an incompatible interface (<code>makePayment</code> method).</li>
+<li><code>PaymentAdapter</code> implements <code>PaymentProcessor</code> and internally uses an instance of <code>NewPaymentSystem</code> to fulfill the <code>pay</code> request.</li>
+</ul>
+<h3 id="behavioral-patterns-1"><a class="header" href="#behavioral-patterns-1">Behavioral Patterns</a></h3>
+<h4 id="observer-pattern"><a class="header" href="#observer-pattern">Observer Pattern</a></h4>
+<p>The Observer Pattern defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically. This pattern is commonly used in event handling systems.</p>
+<p><strong>Example Scenario</strong>: Implementing a publish-subscribe mechanism where multiple subscribers listen to updates from a publisher.</p>
+<p><strong>Example Implementation in C++:</strong></p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+
+// Observer interface
+class Observer {
+public:
+    virtual void update(const std::string&amp; message) = 0;
+};
+
+// Subject class
+class Subject {
+public:
+    void addObserver(Observer* observer) {
+        observers_.push_back(observer);
+    }
+
+    void notify(const std::string&amp; message) {
+        for(auto observer : observers_) {
+            observer-&gt;update(message);
+        }
+    }
+
+private:
+    std::vector&lt;Observer*&gt; observers_;
+};
+
+// Concrete Observer
+class ConcreteObserver : public Observer {
+public:
+    ConcreteObserver(const std::string&amp; name) : name_(name) {}
+
+    void update(const std::string&amp; message) override {
+        std::cout &lt;&lt; name_ &lt;&lt; " received message: " &lt;&lt; message &lt;&lt; std::endl;
+    }
+
+private:
+    std::string name_;
+};
+
+int main() {
+    Subject subject;
+
+    ConcreteObserver observer1("Observer 1");
+    ConcreteObserver observer2("Observer 2");
+
+    subject.addObserver(&amp;observer1);
+    subject.addObserver(&amp;observer2);
+
+    subject.notify("Event occurred!");
+
+    return 0;
+}
+</code></pre>
+<p><strong>Explanation</strong>:</p>
+<ul>
+<li><code>Observer</code> is an interface with an <code>update</code> method.</li>
+<li><code>Subject</code> maintains a list of observers and notifies them of events.</li>
+<li><code>ConcreteObserver</code> implements the <code>Observer</code> interface and reacts to notifications.</li>
+<li>In <code>main</code>, observers are added to the subject, and when <code>notify</code> is called, all observers receive the message.</li>
+</ul>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Design patterns are invaluable tools for software developers, providing standardized solutions to recurring design problems. By understanding and applying appropriate design patterns, developers can create more flexible, reusable, and maintainable codebases.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../programming/interview_questions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../linux/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../programming/interview_questions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../linux/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

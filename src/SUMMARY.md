@@ -63,13 +63,6 @@
     - [SSL/TLS](security/ssl_tls.md)
     - [HMAC](security/hmac.md)
 
-- [Computer Networking](networking/README.md)
-    - [OSI Model](networking/osi_model.md)
-    - [TCP/IP Model](networking/tcp_ip_model.md)
-    - [HTTP](networking/http.md)
-    - [DNS](networking/dns.md)
-    - [Firewalls](networking/firewalls.md)
-
 - [Wifi](wifi/README.md)
     - [Wifi Basics](wifi/basics.md)
     - [Wifi Standards](wifi/standards.md)
@@ -173,3 +166,25 @@
     - [Options](finance/options.md)
     - [Futures](finance/futures.md)
     - [Crypto](finance/crypto.md)
+
+- [Databases](databases/README.md)
+    - [SQL](databases/sql.md)
+    - [NoSQL](databases/nosql.md)
+
+- [Web Development](web_development/README.md)
+    - [REST APIs](web_development/rest_apis.md)
+    - [React](web_development/react.md)
+    - [GraphQL](web_development/graphql.md)
+
+- [DevOps](devops/README.md)
+    - [Docker](devops/docker.md)
+    - [Kubernetes](devops/kubernetes.md)
+    - [CI/CD](devops/cicd.md)
+
+- [System Design](system_design/README.md)
+    - [Scalability](system_design/scalability.md)
+    - [Caching](system_design/caching.md)
+
+- [Testing](testing/README.md)
+    - [Unit Testing](testing/unit_testing.md)
+    - [TDD](testing/tdd.md)

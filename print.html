@@ -543,6 +543,322 @@ ptr = &amp;b; // Invalid, cannot change the pointer to point to 'b'
 </li>
 </ol>
 <p>These different types of constant pointers provide various levels of protection and control over the data and pointers in your program, helping to prevent unintended modifications and ensuring code reliability.</p>
+<h2 id="dynamic-memory-allocation"><a class="header" href="#dynamic-memory-allocation">Dynamic Memory Allocation</a></h2>
+<p>Dynamic memory allocation allows you to allocate memory at runtime instead of compile time. This is essential for creating data structures of variable size.</p>
+<h3 id="memory-layout"><a class="header" href="#memory-layout">Memory Layout</a></h3>
+<pre><code>Stack (grows down)   |  Local variables, function parameters
+                     |
+                     V
+=====================|======================  &lt;- Stack limit
+                     ^
+                     |
+                     |  Free memory
+                     |
+                     V
+=====================|======================  &lt;- Heap limit
+Heap (grows up)      |  malloc, calloc, realloc allocations
+                     ^
+</code></pre>
+<h3 id="malloc---memory-allocation"><a class="header" href="#malloc---memory-allocation">malloc() - Memory Allocation</a></h3>
+<p>Allocates memory and returns a void pointer:</p>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+
+// Allocate memory for single integer
+int *ptr = (int *)malloc(sizeof(int));
+if (ptr == NULL) {
+    printf("Memory allocation failed\n");
+    return 1;
+}
+*ptr = 42;
+printf("Value: %d\n", *ptr);
+free(ptr);
+ptr = NULL;  // Good practice: set to NULL after free
+
+// Allocate memory for array
+int *arr = (int *)malloc(10 * sizeof(int));
+if (arr == NULL) {
+    printf("Memory allocation failed\n");
+    return 1;
+}
+arr[0] = 100;
+arr[9] = 999;
+free(arr);
+arr = NULL;
+</code></pre>
+<h3 id="calloc---contiguous-memory-allocation"><a class="header" href="#calloc---contiguous-memory-allocation">calloc() - Contiguous Memory Allocation</a></h3>
+<p>Allocates memory and initializes all bytes to zero:</p>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+
+// calloc(number_of_elements, size_of_each_element)
+int *arr = (int *)calloc(10, sizeof(int));  // 10 integers, all initialized to 0
+if (arr == NULL) {
+    printf("Memory allocation failed\n");
+    return 1;
+}
+
+for (int i = 0; i &lt; 10; i++) {
+    printf("%d ", arr[i]);  // Prints: 0 0 0 0 0 0 0 0 0 0
+}
+
+free(arr);
+arr = NULL;
+</code></pre>
+<h3 id="realloc---resize-memory"><a class="header" href="#realloc---resize-memory">realloc() - Resize Memory</a></h3>
+<p>Resizes previously allocated memory block:</p>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+
+int *arr = (int *)malloc(5 * sizeof(int));
+for (int i = 0; i &lt; 5; i++) arr[i] = i;
+
+// Resize to 10 integers
+int *new_arr = (int *)realloc(arr, 10 * sizeof(int));
+if (new_arr == NULL) {
+    printf("Reallocation failed\n");
+    free(arr);  // Original block still exists
+    return 1;
+}
+
+arr = new_arr;
+for (int i = 5; i &lt; 10; i++) arr[i] = i;
+
+free(arr);
+arr = NULL;
+</code></pre>
+<h3 id="free---deallocate-memory"><a class="header" href="#free---deallocate-memory">free() - Deallocate Memory</a></h3>
+<p>Deallocates previously allocated memory:</p>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+
+int *ptr = (int *)malloc(sizeof(int));
+*ptr = 42;
+
+// When done, free the memory
+free(ptr);
+
+// IMPORTANT: Set to NULL to avoid dangling pointer
+ptr = NULL;
+</code></pre>
+<h3 id="memory-allocation-pattern-safe"><a class="header" href="#memory-allocation-pattern-safe">Memory Allocation Pattern (Safe)</a></h3>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+int main(void) {
+    // 1. Declare pointer
+    int *ptr;
+
+    // 2. Allocate memory with error checking
+    ptr = (int *)malloc(sizeof(int));
+    if (ptr == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        return 1;
+    }
+
+    // 3. Use the memory
+    *ptr = 100;
+    printf("Value: %d\n", *ptr);
+
+    // 4. Free the memory
+    free(ptr);
+
+    // 5. Set to NULL (avoid dangling pointer)
+    ptr = NULL;
+
+    return 0;
+}
+</code></pre>
+<h3 id="dynamic-array-implementation"><a class="header" href="#dynamic-array-implementation">Dynamic Array Implementation</a></h3>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+typedef struct {
+    int *data;
+    int size;
+    int capacity;
+} DynamicArray;
+
+// Create dynamic array
+DynamicArray* array_create(int initial_capacity) {
+    DynamicArray *arr = (DynamicArray *)malloc(sizeof(DynamicArray));
+    if (arr == NULL) return NULL;
+
+    arr-&gt;data = (int *)malloc(initial_capacity * sizeof(int));
+    if (arr-&gt;data == NULL) {
+        free(arr);
+        return NULL;
+    }
+
+    arr-&gt;size = 0;
+    arr-&gt;capacity = initial_capacity;
+    return arr;
+}
+
+// Add element to array
+int array_push(DynamicArray *arr, int value) {
+    if (arr-&gt;size == arr-&gt;capacity) {
+        // Resize: double the capacity
+        int new_capacity = arr-&gt;capacity * 2;
+        int *new_data = (int *)realloc(arr-&gt;data, new_capacity * sizeof(int));
+        if (new_data == NULL) return -1;
+
+        arr-&gt;data = new_data;
+        arr-&gt;capacity = new_capacity;
+    }
+
+    arr-&gt;data[arr-&gt;size++] = value;
+    return 0;
+}
+
+// Get element from array
+int array_get(DynamicArray *arr, int index) {
+    if (index &lt; 0 || index &gt;= arr-&gt;size) {
+        fprintf(stderr, "Index out of bounds\n");
+        return -1;
+    }
+    return arr-&gt;data[index];
+}
+
+// Free array
+void array_free(DynamicArray *arr) {
+    if (arr == NULL) return;
+    free(arr-&gt;data);
+    free(arr);
+}
+
+// Usage
+int main(void) {
+    DynamicArray *arr = array_create(10);
+    if (arr == NULL) {
+        fprintf(stderr, "Failed to create array\n");
+        return 1;
+    }
+
+    for (int i = 0; i &lt; 20; i++) {
+        array_push(arr, i * 10);
+    }
+
+    for (int i = 0; i &lt; arr-&gt;size; i++) {
+        printf("%d ", array_get(arr, i));
+    }
+
+    array_free(arr);
+    return 0;
+}
+</code></pre>
+<h3 id="common-memory-errors"><a class="header" href="#common-memory-errors">Common Memory Errors</a></h3>
+<h4 id="1-memory-leak-forgot-to-free"><a class="header" href="#1-memory-leak-forgot-to-free">1. Memory Leak (forgot to free)</a></h4>
+<pre><code class="language-c">void memory_leak(void) {
+    int *ptr = (int *)malloc(sizeof(int));
+    *ptr = 42;
+    // Missing: free(ptr);
+    // Memory is lost when function exits
+}
+</code></pre>
+<h4 id="2-double-free"><a class="header" href="#2-double-free">2. Double Free</a></h4>
+<pre><code class="language-c">int *ptr = (int *)malloc(sizeof(int));
+free(ptr);
+free(ptr);  // ERROR: Undefined behavior!
+</code></pre>
+<h4 id="3-use-after-free-dangling-pointer"><a class="header" href="#3-use-after-free-dangling-pointer">3. Use After Free (Dangling Pointer)</a></h4>
+<pre><code class="language-c">int *ptr = (int *)malloc(sizeof(int));
+*ptr = 42;
+free(ptr);
+printf("%d\n", *ptr);  // ERROR: ptr points to freed memory!
+ptr = NULL;  // Should do this after free
+</code></pre>
+<h4 id="4-buffer-overflow"><a class="header" href="#4-buffer-overflow">4. Buffer Overflow</a></h4>
+<pre><code class="language-c">char *str = (char *)malloc(5);
+strcpy(str, "Hello World");  // ERROR: Buffer overflow!
+                             // "Hello World" needs 12 bytes, only allocated 5
+free(str);
+</code></pre>
+<h4 id="5-null-pointer-dereference"><a class="header" href="#5-null-pointer-dereference">5. Null Pointer Dereference</a></h4>
+<pre><code class="language-c">int *ptr = (int *)malloc(sizeof(int));
+// Allocation failed
+if (ptr == NULL) {
+    *ptr = 42;  // ERROR: Dereferencing NULL!
+}
+</code></pre>
+<h3 id="best-practices-for-dynamic-memory"><a class="header" href="#best-practices-for-dynamic-memory">Best Practices for Dynamic Memory</a></h3>
+<pre><code class="language-c">// 1. Always check if malloc/calloc/realloc succeeded
+int *ptr = (int *)malloc(sizeof(int));
+if (ptr == NULL) {
+    // Handle error
+    return -1;
+}
+
+// 2. Use sizeof for type safety
+int *arr = (int *)malloc(100 * sizeof(int));  // Good
+int *arr = (int *)malloc(100 * 4);            // Avoid - hardcoded size
+
+// 3. Free in reverse order of allocation
+void *p1 = malloc(100);
+void *p2 = malloc(200);
+void *p3 = malloc(300);
+
+free(p3);
+free(p2);
+free(p1);
+
+// 4. Set pointer to NULL after free
+free(ptr);
+ptr = NULL;
+
+// 5. Avoid memory leaks - create cleanup paths
+FILE *file = fopen("data.txt", "r");
+int *data = (int *)malloc(1000 * sizeof(int));
+
+if (file == NULL) {
+    free(data);  // Clean up before returning
+    return -1;
+}
+
+// Process file
+if (some_error) {
+    fclose(file);
+    free(data);  // Clean up before returning
+    return -1;
+}
+
+fclose(file);
+free(data);
+return 0;
+
+// 6. Use wrapper functions for consistency
+void* safe_malloc(size_t size) {
+    void *ptr = malloc(size);
+    if (ptr == NULL) {
+        fprintf(stderr, "malloc failed: requested %zu bytes\n", size);
+        exit(1);  // Or handle error differently
+    }
+    return ptr;
+}
+
+int *arr = (int *)safe_malloc(100 * sizeof(int));
+</code></pre>
+<h3 id="memory-leak-detection-tools"><a class="header" href="#memory-leak-detection-tools">Memory Leak Detection Tools</a></h3>
+<pre><code class="language-bash"># Valgrind - memory error detector
+valgrind --leak-check=full --show-leak-kinds=all ./program
+
+# AddressSanitizer (GCC/Clang)
+gcc -fsanitize=address -g program.c -o program
+./program
+
+# Dr. Memory (Windows)
+drmemory -leaks_only -- program.exe
+</code></pre>
+<h3 id="comparison-of-allocation-functions"><a class="header" href="#comparison-of-allocation-functions">Comparison of Allocation Functions</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Function</th><th>Initialization</th><th>Returns NULL on Fail</th><th>Use Case</th></tr></thead><tbody>
+<tr><td><strong>malloc</strong></td><td>No (garbage values)</td><td>Yes</td><td>When you'll initialize manually</td></tr>
+<tr><td><strong>calloc</strong></td><td>Yes (all zeros)</td><td>Yes</td><td>When you need zeroed memory</td></tr>
+<tr><td><strong>realloc</strong></td><td>Preserves existing</td><td>Yes</td><td>When resizing allocations</td></tr>
+</tbody></table>
+</div>
+<h3 id="memory-allocation-time-complexity"><a class="header" href="#memory-allocation-time-complexity">Memory Allocation Time Complexity</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Time Complexity</th><th>Space Complexity</th></tr></thead><tbody>
+<tr><td><strong>malloc/calloc</strong></td><td>O(1) amortized</td><td>O(1)</td></tr>
+<tr><td><strong>free</strong></td><td>O(1) amortized</td><td>O(1)</td></tr>
+<tr><td><strong>realloc</strong></td><td>O(n)</td><td>O(n)</td></tr>
+</tbody></table>
+</div>
 <h2 id="commonly-used-string-library-functions"><a class="header" href="#commonly-used-string-library-functions">Commonly Used String Library Functions</a></h2>
 <p>The C standard library provides a set of functions for manipulating strings. Here are some commonly used string functions:</p>
 <ol>
@@ -2266,7 +2582,7 @@ int main() {
 <li><strong>Homogeneous</strong>: All elements must be of the same type</li>
 <li><strong>Fast Access</strong>: O(1) time complexity for accessing any element</li>
 </ul>
-<h3 id="memory-layout"><a class="header" href="#memory-layout">Memory Layout</a></h3>
+<h3 id="memory-layout-1"><a class="header" href="#memory-layout-1">Memory Layout</a></h3>
 <pre><code>Index:     0    1    2    3    4
 Array:   | 10 | 20 | 30 | 40 | 50 |
 Address: 1000 1004 1008 1012 1016  (for 4-byte integers)

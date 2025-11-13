@@ -183,7 +183,7 @@ vim src/category/topic.md
 | **Programming** | 12 | Python, C/C++, TypeScript, JavaScript, Rust, Java, Go, Lua | ✅ Complete |
 | **Cloud** | 5 | AWS, GCP, Azure services | ✅ Complete |
 | **Finance** | 8 | Markets, analysis, crypto | ✅ Complete |
-| **Tools** | 16 | Vim, tmux, grep, git, docker | ✅ Complete |
+| **Tools** | 18 | Vim, tmux, grep, git, docker, wpa_supplicant, hostapd | ✅ Complete |
 | **WiFi** | 7 | Standards, security, roaming | ✅ Complete |
 | **Android** | 4 | Development, ADB, internals | ✅ Complete |
 | **Git** | 4 | Commands, workflows, GitHub | ✅ Complete |

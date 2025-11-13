@@ -131,7 +131,9 @@
     - [ffmpeg](tools/ffmpeg.md)
     - [make](tools/make.md)
     - [Docker](tools/docker.md)
-    * [Ansible](tools/ansible.md)
+    - [Ansible](tools/ansible.md)
+    - [wpa_supplicant](tools/wpa_supplicant.md)
+    - [hostapd](tools/hostapd.md)
 
 - [Embedded](embedded/README.md)
     - [AVR](embedded/avr.md)

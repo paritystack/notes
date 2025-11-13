@@ -19,5 +19,7 @@ This section provides an overview of various tools that can enhance your product
 13. **[make](make.md)**: A build automation tool that automatically builds executable programs and libraries from source code.
 14. **[Docker](docker.md)**: A set of platform-as-a-service products that use OS-level virtualization to deliver software in packages called containers.
 15. **[Ansible](ansible.md)**: An open-source software provisioning, configuration management, and application-deployment tool.
+16. **[wpa_supplicant](wpa_supplicant.md)**: WiFi client authentication daemon for connecting to wireless networks.
+17. **[hostapd](hostapd.md)**: WiFi access point and authentication server for creating wireless access points.
 
 Each tool listed above has its own dedicated page with detailed instructions on how to install, configure, and use it effectively. Click on the tool name to navigate to its respective guide.

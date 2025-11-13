@@ -20,8 +20,8 @@ hash("email") = 5  (collision!)
 ```
 Index 0: None
 Index 1: None
-Index 2: 123 ’ "John"
-Index 3: 456 ’ "Jane" ’ 789 ’ "Jack"
+Index 2: 123 -> "John"
+Index 3: 456 -> "Jane" -> 789 -> "Jack"
 ```
 
 **Open Addressing**: Find next empty slot

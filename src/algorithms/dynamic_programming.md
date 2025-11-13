@@ -106,9 +106,9 @@ def editDistance(word1, word2):
 
 | Problem | Naive | DP |
 |---------|-------|-----|
-| Fibonacci | O(2^n) | O(n) |
-| Coin Change | O(n^m) | O(n*m) |
-| Knapsack | O(2^n) | O(n*w) |
+| Fibonacci | $O(2^n)$ | $O(n)$ |
+| Coin Change | $O(n^m)$ | $O(n \times m)$ |
+| Knapsack | $O(2^n)$ | $O(n \times w)$ |
 
 ## ELI10
 

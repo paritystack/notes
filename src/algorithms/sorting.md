@@ -8,7 +8,7 @@ Sorting arranges elements in order. Different algorithms have different trade-of
 
 ### Bubble Sort
 
-**Time**: O(n²) | **Space**: O(1)
+**Time**: $O(n^2)$ | **Space**: $O(1)$
 
 ```python
 def bubble_sort(arr):
@@ -22,7 +22,7 @@ def bubble_sort(arr):
 
 ### Selection Sort
 
-**Time**: O(n²) | **Space**: O(1)
+**Time**: $O(n^2)$ | **Space**: $O(1)$
 
 ```python
 def selection_sort(arr):
@@ -37,7 +37,7 @@ def selection_sort(arr):
 
 ### Insertion Sort
 
-**Time**: O(n²) | **Space**: O(1) | **Best**: O(n)
+**Time**: $O(n^2)$ | **Space**: $O(1)$ | **Best**: $O(n)$
 
 ```python
 def insertion_sort(arr):
@@ -53,7 +53,7 @@ def insertion_sort(arr):
 
 ### Merge Sort
 
-**Time**: O(n log n) | **Space**: O(n) | **Stable**: ✓
+**Time**: $O(n \log n)$ | **Space**: $O(n)$ | **Stable**: ✓
 
 ```python
 def merge_sort(arr):
@@ -83,7 +83,7 @@ def merge(left, right):
 
 ### Quick Sort
 
-**Time**: O(n log n) avg, O(n²) worst | **Space**: O(log n)
+**Time**: $O(n \log n)$ avg, $O(n^2)$ worst | **Space**: $O(\log n)$
 
 ```python
 def quick_sort(arr):
@@ -100,7 +100,7 @@ def quick_sort(arr):
 
 ### Heap Sort
 
-**Time**: O(n log n) | **Space**: O(1)
+**Time**: $O(n \log n)$ | **Space**: $O(1)$
 
 ```python
 def heap_sort(arr):
@@ -133,19 +133,19 @@ def heap_sort(arr):
 
 | Algorithm | Best | Average | Worst | Space | Stable |
 |-----------|------|---------|-------|-------|--------|
-| **Bubble** | O(n) | O(n²) | O(n²) | O(1) | ✓ |
-| **Selection** | O(n²) | O(n²) | O(n²) | O(1) | ✗ |
-| **Insertion** | O(n) | O(n²) | O(n²) | O(1) | ✓ |
-| **Merge** | O(n log n) | O(n log n) | O(n log n) | O(n) | ✓ |
-| **Quick** | O(n log n) | O(n log n) | O(n²) | O(log n) | ✗ |
-| **Heap** | O(n log n) | O(n log n) | O(n log n) | O(1) | ✗ |
+| **Bubble** | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✓ |
+| **Selection** | $O(n^2)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✗ |
+| **Insertion** | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✓ |
+| **Merge** | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | ✓ |
+| **Quick** | $O(n \log n)$ | $O(n \log n)$ | $O(n^2)$ | $O(\log n)$ | ✗ |
+| **Heap** | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(1)$ | ✗ |
 
 ## When to Use
 
 - **Insertion Sort**: Small arrays, nearly sorted
 - **Merge Sort**: Need stability, external sorting
 - **Quick Sort**: General purpose, good cache
-- **Heap Sort**: Guaranteed O(n log n), no extra space
+- **Heap Sort**: Guaranteed $O(n \log n)$, no extra space
 
 ## Python Built-in
 

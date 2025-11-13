@@ -42,19 +42,19 @@ Contiguous memory locations storing elements of the same type.
 # Array operations
 arr = [1, 2, 3, 4, 5]
 
-# Access - O(1)
+# Access - $O(1)$
 element = arr[2]  # 3
 
-# Insert at end - O(1) amortized
+# Insert at end - $O(1)$ amortized
 arr.append(6)
 
-# Insert at position - O(n)
+# Insert at position - $O(n)$
 arr.insert(2, 10)
 
-# Delete - O(n)
+# Delete - $O(n)$
 arr.remove(10)
 
-# Search - O(n)
+# Search - $O(n)$
 if 4 in arr:
     print("Found")
 
@@ -70,12 +70,12 @@ value = matrix[1][2]  # 6
 ```
 
 **Time Complexity:**
-- Access: O(1)
-- Search: O(n)
-- Insert: O(n)
-- Delete: O(n)
+- Access: $O(1)$
+- Search: $O(n)$
+- Insert: $O(n)$
+- Delete: $O(n)$
 
-**Space Complexity:** O(n)
+**Space Complexity:** $O(n)$
 
 See: [Arrays](arrays.md)
 
@@ -150,11 +150,11 @@ class LinkedList:
 - Circular Linked List
 
 **Time Complexity:**
-- Access: O(n)
-- Search: O(n)
-- Insert at beginning: O(1)
-- Insert at end: O(n) or O(1) with tail pointer
-- Delete: O(n)
+- Access: $O(n)$
+- Search: $O(n)$
+- Insert at beginning: $O(1)$
+- Insert at end: $O(n)$ or $O(1)$ with tail pointer
+- Delete: $O(n)$
 
 See: [Linked Lists](linked_lists.md)
 
@@ -168,27 +168,27 @@ class Stack:
         self.items = []
     
     def push(self, item):
-        """Add item to top - O(1)"""
+        """Add item to top - $O(1)$"""
         self.items.append(item)
-    
+
     def pop(self):
-        """Remove and return top item - O(1)"""
+        """Remove and return top item - $O(1)$"""
         if not self.is_empty():
             return self.items.pop()
         raise IndexError("Stack is empty")
-    
+
     def peek(self):
-        """Return top item without removing - O(1)"""
+        """Return top item without removing - $O(1)$"""
         if not self.is_empty():
             return self.items[-1]
         raise IndexError("Stack is empty")
-    
+
     def is_empty(self):
-        """Check if stack is empty - O(1)"""
+        """Check if stack is empty - $O(1)$"""
         return len(self.items) == 0
-    
+
     def size(self):
-        """Return number of items - O(1)"""
+        """Return number of items - $O(1)$"""
         return len(self.items)
 
 # Usage
@@ -243,27 +243,27 @@ class Queue:
         self.items = deque()
     
     def enqueue(self, item):
-        """Add item to rear - O(1)"""
+        """Add item to rear - $O(1)$"""
         self.items.append(item)
-    
+
     def dequeue(self):
-        """Remove and return front item - O(1)"""
+        """Remove and return front item - $O(1)$"""
         if not self.is_empty():
             return self.items.popleft()
         raise IndexError("Queue is empty")
-    
+
     def front(self):
-        """Return front item - O(1)"""
+        """Return front item - $O(1)$"""
         if not self.is_empty():
             return self.items[0]
         raise IndexError("Queue is empty")
-    
+
     def is_empty(self):
-        """Check if queue is empty - O(1)"""
+        """Check if queue is empty - $O(1)$"""
         return len(self.items) == 0
-    
+
     def size(self):
-        """Return number of items - O(1)"""
+        """Return number of items - $O(1)$"""
         return len(self.items)
 
 # Priority Queue
@@ -274,11 +274,11 @@ class PriorityQueue:
         self.heap = []
     
     def push(self, item, priority):
-        """Add item with priority - O(log n)"""
+        """Add item with priority - $O(\log n)$"""
         heapq.heappush(self.heap, (priority, item))
-    
+
     def pop(self):
-        """Remove and return highest priority item - O(log n)"""
+        """Remove and return highest priority item - $O(\log n)$"""
         if self.heap:
             return heapq.heappop(self.heap)[1]
         raise IndexError("Queue is empty")
@@ -331,7 +331,7 @@ See: [Queues](queues.md)
 
 ### 5. Hash Tables
 
-Key-value pairs with O(1) average-case operations.
+Key-value pairs with $O(1)$ average-case operations.
 
 ```python
 class HashTable:
@@ -340,11 +340,11 @@ class HashTable:
         self.table = [[] for _ in range(size)]
     
     def _hash(self, key):
-        """Hash function - O(1)"""
+        """Hash function - $O(1)$"""
         return hash(key) % self.size
-    
+
     def insert(self, key, value):
-        """Insert key-value pair - O(1) average"""
+        """Insert key-value pair - $O(1)$ average"""
         index = self._hash(key)
         
         # Update if key exists
@@ -357,7 +357,7 @@ class HashTable:
         self.table[index].append((key, value))
     
     def get(self, key):
-        """Get value by key - O(1) average"""
+        """Get value by key - $O(1)$ average"""
         index = self._hash(key)
         
         for k, v in self.table[index]:
@@ -367,7 +367,7 @@ class HashTable:
         raise KeyError(f"Key '{key}' not found")
     
     def delete(self, key):
-        """Delete key-value pair - O(1) average"""
+        """Delete key-value pair - $O(1)$ average"""
         index = self._hash(key)
         
         for i, (k, v) in enumerate(self.table[index]):
@@ -378,7 +378,7 @@ class HashTable:
         raise KeyError(f"Key '{key}' not found")
     
     def contains(self, key):
-        """Check if key exists - O(1) average"""
+        """Check if key exists - $O(1)$ average"""
         try:
             self.get(key)
             return True
@@ -401,8 +401,8 @@ char_count = Counter(text)
 - Open addressing (linear probing, quadratic probing, double hashing)
 
 **Time Complexity:**
-- Average: O(1) for insert, delete, search
-- Worst: O(n) with many collisions
+- Average: $O(1)$ for insert, delete, search
+- Worst: $O(n)$ with many collisions
 
 See: [Hash Tables](hash_tables.md)
 
@@ -424,7 +424,7 @@ class BinarySearchTree:
         self.root = None
     
     def insert(self, value):
-        """Insert value - O(log n) average, O(n) worst"""
+        """Insert value - $O(\log n)$ average, $O(n)$ worst"""
         if not self.root:
             self.root = TreeNode(value)
         else:
@@ -443,7 +443,7 @@ class BinarySearchTree:
                 self._insert_recursive(node.right, value)
     
     def search(self, value):
-        """Search for value - O(log n) average"""
+        """Search for value - $O(\log n)$ average"""
         return self._search_recursive(self.root, value)
     
     def _search_recursive(self, node, value):
@@ -488,18 +488,18 @@ class Graph:
         self.graph = {}
     
     def add_vertex(self, vertex):
-        """Add vertex - O(1)"""
+        """Add vertex - $O(1)$"""
         if vertex not in self.graph:
             self.graph[vertex] = []
-    
+
     def add_edge(self, v1, v2):
-        """Add edge - O(1)"""
+        """Add edge - $O(1)$"""
         if v1 in self.graph and v2 in self.graph:
             self.graph[v1].append(v2)
             self.graph[v2].append(v1)  # For undirected graph
     
     def bfs(self, start):
-        """Breadth-First Search - O(V + E)"""
+        """Breadth-First Search - $O(V + E)$"""
         visited = set()
         queue = [start]
         result = []
@@ -514,7 +514,7 @@ class Graph:
         return result
     
     def dfs(self, start, visited=None):
-        """Depth-First Search - O(V + E)"""
+        """Depth-First Search - $O(V + E)$"""
         if visited is None:
             visited = set()
         
@@ -580,7 +580,7 @@ See: [Graph algorithms](../algorithms/graphs.md)
 ### Hash Table vs Tree
 
 **Use Hash Table when:**
-- Need O(1) lookup
+- Need $O(1)$ lookup
 - Order doesn't matter
 - No range queries needed
 - Keys are hashable
@@ -595,10 +595,10 @@ See: [Graph algorithms](../algorithms/graphs.md)
 
 | Operation | Array | Linked List | Stack | Queue | Hash Table | BST |
 |-----------|-------|-------------|-------|-------|------------|-----|
-| Access | O(1) | O(n) | O(n) | O(n) | - | O(log n) |
-| Search | O(n) | O(n) | O(n) | O(n) | O(1)* | O(log n) |
-| Insert | O(n) | O(1)** | O(1) | O(1) | O(1)* | O(log n) |
-| Delete | O(n) | O(1)** | O(1) | O(1) | O(1)* | O(log n) |
+| Access | $O(1)$ | $O(n)$ | $O(n)$ | $O(n)$ | - | $O(\log n)$ |
+| Search | $O(n)$ | $O(n)$ | $O(n)$ | $O(n)$ | $O(1)$* | $O(\log n)$ |
+| Insert | $O(n)$ | $O(1)$** | $O(1)$ | $O(1)$ | $O(1)$* | $O(\log n)$ |
+| Delete | $O(n)$ | $O(1)$** | $O(1)$ | $O(1)$ | $O(1)$* | $O(\log n)$ |
 
 \* Average case, \*\* At beginning/with reference
 
@@ -640,17 +640,17 @@ def bfs(graph, start):
 ### Searching Patterns
 
 ```python
-# Linear search - O(n)
+# Linear search - $O(n)$
 def linear_search(arr, target):
     for i, val in enumerate(arr):
         if val == target:
             return i
     return -1
 
-# Binary search - O(log n)
+# Binary search - $O(\log n)$
 def binary_search(arr, target):
     left, right = 0, len(arr) - 1
-    
+
     while left <= right:
         mid = (left + right) // 2
         if arr[mid] == target:
@@ -659,10 +659,10 @@ def binary_search(arr, target):
             left = mid + 1
         else:
             right = mid - 1
-    
+
     return -1
 
-# Hash table search - O(1)
+# Hash table search - $O(1)$
 def hash_search(hash_table, key):
     return hash_table.get(key)
 ```

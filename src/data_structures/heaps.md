@@ -22,7 +22,7 @@ Heaps are widely used in various applications, including:
 
 - **Priority Queues**: Heaps provide an efficient way to implement priority queues, allowing for quick access to the highest (or lowest) priority element.
 
-- **Heap Sort**: A comparison-based sorting algorithm that uses the heap data structure to sort elements in O(n log n) time.
+- **Heap Sort**: A comparison-based sorting algorithm that uses the heap data structure to sort elements in $O(n \log n)$ time.
 
 - **Graph Algorithms**: Heaps are used in algorithms like Dijkstra's and Prim's to efficiently manage the set of vertices being processed.
 

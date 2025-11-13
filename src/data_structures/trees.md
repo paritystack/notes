@@ -28,8 +28,8 @@ class TreeNode:
 def preorder_traversal_recursive(root):
     """
     Preorder traversal: Root -> Left -> Right
-    Time Complexity: O(n) where n is the number of nodes
-    Space Complexity: O(h) where h is the height (due to recursion stack)
+    Time Complexity: $O(n)$ where n is the number of nodes
+    Space Complexity: $O(h)$ where h is the height (due to recursion stack)
     """
     result = []
 
@@ -50,8 +50,8 @@ def preorder_traversal_recursive(root):
 def preorder_traversal_iterative(root):
     """
     Iterative preorder traversal using a stack.
-    Time Complexity: O(n)
-    Space Complexity: O(h) in worst case, O(log n) for balanced tree
+    Time Complexity: $O(n)$
+    Space Complexity: $O(h)$ in worst case, $O(\log n)$ for balanced tree
     """
     if not root:
         return []
@@ -103,8 +103,8 @@ In inorder traversal, the nodes are visited in the following order:
 def inorder_traversal_recursive(root):
     """
     Inorder traversal: Left -> Root -> Right
-    Time Complexity: O(n)
-    Space Complexity: O(h) due to recursion stack
+    Time Complexity: $O(n)$
+    Space Complexity: $O(h)$ due to recursion stack
     """
     result = []
 
@@ -125,8 +125,8 @@ def inorder_traversal_recursive(root):
 def inorder_traversal_iterative(root):
     """
     Iterative inorder traversal using a stack.
-    Time Complexity: O(n)
-    Space Complexity: O(h)
+    Time Complexity: $O(n)$
+    Space Complexity: $O(h)$
     """
     result = []
     stack = []
@@ -181,8 +181,8 @@ In postorder traversal, the nodes are visited in the following order:
 def postorder_traversal_recursive(root):
     """
     Postorder traversal: Left -> Right -> Root
-    Time Complexity: O(n)
-    Space Complexity: O(h)
+    Time Complexity: $O(n)$
+    Space Complexity: $O(h)$
     """
     result = []
 
@@ -203,8 +203,8 @@ def postorder_traversal_recursive(root):
 def postorder_traversal_iterative(root):
     """
     Iterative postorder traversal using two stacks.
-    Time Complexity: O(n)
-    Space Complexity: O(h)
+    Time Complexity: $O(n)$
+    Space Complexity: $O(h)$
     """
     if not root:
         return []
@@ -261,8 +261,8 @@ from collections import deque
 def level_order_traversal(root):
     """
     Level order traversal using a queue (BFS).
-    Time Complexity: O(n)
-    Space Complexity: O(w) where w is the maximum width of the tree
+    Time Complexity: $O(n)$
+    Space Complexity: $O(w)$ where w is the maximum width of the tree
     """
     if not root:
         return []
@@ -288,8 +288,8 @@ def level_order_traversal(root):
 def level_order_by_level(root):
     """
     Returns nodes grouped by level.
-    Time Complexity: O(n)
-    Space Complexity: O(w) where w is maximum width
+    Time Complexity: $O(n)$
+    Space Complexity: $O(w)$ where w is maximum width
     """
     if not root:
         return []
@@ -426,8 +426,8 @@ class BST:
     def insert(self, val):
         """
         Insert a value into the BST.
-        Time Complexity: O(h) where h is height
-        Average: O(log n), Worst: O(n) for skewed tree
+        Time Complexity: $O(h)$ where h is height
+        Average: $O(\log n)$, Worst: $O(n)$ for skewed tree
         """
         def _insert(node, val):
             if not node:
@@ -446,7 +446,7 @@ class BST:
     def search(self, val):
         """
         Search for a value in the BST.
-        Time Complexity: O(h)
+        Time Complexity: $O(h)$
         """
         def _search(node, val):
             if not node or node.val == val:
@@ -462,7 +462,7 @@ class BST:
     def delete(self, val):
         """
         Delete a value from the BST.
-        Time Complexity: O(h)
+        Time Complexity: $O(h)$
         """
         def _min_value_node(node):
             """Find the minimum value node in a subtree."""
@@ -522,7 +522,7 @@ class BST:
     def is_valid_bst(self):
         """
         Validate if the tree is a valid BST.
-        Time Complexity: O(n)
+        Time Complexity: $O(n)$
         """
         def _validate(node, min_val, max_val):
             if not node:
@@ -643,7 +643,7 @@ class AVLTree:
     def insert(self, root, val):
         """
         Insert a value and rebalance the tree.
-        Time Complexity: O(log n) - guaranteed!
+        Time Complexity: $O(\log n)$ - guaranteed!
         """
         # 1. Perform standard BST insert
         if not root:
@@ -731,7 +731,7 @@ Right-Left (RL) Imbalance:
 def max_depth(root):
     """
     Find the maximum depth of a binary tree.
-    Time: O(n), Space: O(h)
+    Time: $O(n)$, Space: $O(h)$
     """
     if not root:
         return 0
@@ -740,7 +740,7 @@ def max_depth(root):
 def min_depth(root):
     """
     Find the minimum depth (root to nearest leaf).
-    Time: O(n), Space: O(h)
+    Time: $O(n)$, Space: $O(h)$
     """
     if not root:
         return 0
@@ -760,7 +760,7 @@ def diameter_of_binary_tree(root):
     """
     The diameter is the length of the longest path between any two nodes.
     The path may or may not pass through the root.
-    Time: O(n), Space: O(h)
+    Time: $O(n)$, Space: $O(h)$
     """
     diameter = [0]
 
@@ -786,7 +786,7 @@ def diameter_of_binary_tree(root):
 def has_path_sum(root, target_sum):
     """
     Check if tree has root-to-leaf path that sums to target.
-    Time: O(n), Space: O(h)
+    Time: $O(n)$, Space: $O(h)$
     """
     if not root:
         return False
@@ -801,7 +801,7 @@ def has_path_sum(root, target_sum):
 def path_sum_all(root, target_sum):
     """
     Find all root-to-leaf paths that sum to target.
-    Time: O(n), Space: O(h)
+    Time: $O(n)$, Space: $O(h)$
     """
     result = []
 
@@ -831,7 +831,7 @@ def path_sum_all(root, target_sum):
 def lowest_common_ancestor(root, p, q):
     """
     Find the lowest common ancestor of two nodes in a binary tree.
-    Time: O(n), Space: O(h)
+    Time: $O(n)$, Space: $O(h)$
     """
     if not root or root == p or root == q:
         return root
@@ -849,7 +849,7 @@ def lowest_common_ancestor(root, p, q):
 def lca_bst(root, p, q):
     """
     LCA for Binary Search Tree (more efficient).
-    Time: O(h), Space: O(1) iterative
+    Time: $O(h)$, Space: $O(1)$ iterative
     """
     while root:
         # Both nodes are in left subtree
@@ -869,7 +869,7 @@ def lca_bst(root, p, q):
 def serialize(root):
     """
     Serialize a binary tree to a string.
-    Time: O(n), Space: O(n)
+    Time: $O(n)$, Space: $O(n)$
     """
     def dfs(node):
         if not node:
@@ -881,7 +881,7 @@ def serialize(root):
 def deserialize(data):
     """
     Deserialize a string to a binary tree.
-    Time: O(n), Space: O(n)
+    Time: $O(n)$, Space: $O(n)$
     """
     def dfs(values):
         val = next(values)
@@ -901,7 +901,7 @@ def deserialize(data):
 def build_tree_from_inorder_preorder(preorder, inorder):
     """
     Construct binary tree from preorder and inorder traversals.
-    Time: O(n), Space: O(n)
+    Time: $O(n)$, Space: $O(n)$
     """
     if not preorder or not inorder:
         return None
@@ -932,7 +932,7 @@ def build_tree_from_inorder_preorder(preorder, inorder):
 def is_symmetric(root):
     """
     Check if a tree is symmetric (mirror of itself).
-    Time: O(n), Space: O(h)
+    Time: $O(n)$, Space: $O(h)$
     """
     def is_mirror(left, right):
         if not left and not right:
@@ -952,7 +952,7 @@ def is_symmetric(root):
 def flatten_to_linked_list(root):
     """
     Flatten binary tree to a linked list (preorder).
-    Time: O(n), Space: O(1)
+    Time: $O(n)$, Space: $O(1)$
     """
     if not root:
         return
@@ -977,15 +977,15 @@ def flatten_to_linked_list(root):
 
 | Operation | BST Average | BST Worst | AVL Tree | Red-Black Tree |
 |-----------|-------------|-----------|----------|----------------|
-| Search    | O(log n)    | O(n)      | O(log n) | O(log n)       |
-| Insert    | O(log n)    | O(n)      | O(log n) | O(log n)       |
-| Delete    | O(log n)    | O(n)      | O(log n) | O(log n)       |
-| Space     | O(n)        | O(n)      | O(n)     | O(n)           |
+| Search    | $O(\log n)$ | $O(n)$    | $O(\log n)$ | $O(\log n)$    |
+| Insert    | $O(\log n)$ | $O(n)$    | $O(\log n)$ | $O(\log n)$    |
+| Delete    | $O(\log n)$ | $O(n)$    | $O(\log n)$ | $O(\log n)$    |
+| Space     | $O(n)$      | $O(n)$    | $O(n)$      | $O(n)$         |
 
 | Traversal | Time | Space |
 |-----------|------|-------|
-| DFS (all) | O(n) | O(h)  |
-| BFS       | O(n) | O(w)  |
+| DFS (all) | $O(n)$ | $O(h)$  |
+| BFS       | $O(n)$ | $O(w)$  |
 
 where:
 - n = number of nodes
@@ -1041,9 +1041,9 @@ where:
    - Perfect binary tree
 
 3. **Space vs Time tradeoffs**:
-   - Recursive solutions: Clean code but O(h) stack space
+   - Recursive solutions: Clean code but $O(h)$ stack space
    - Iterative solutions: More complex but explicit stack control
-   - Morris Traversal: O(1) space but modifies tree temporarily
+   - Morris Traversal: $O(1)$ space but modifies tree temporarily
 
 4. **Optimization techniques**:
    - Early termination when answer is found
@@ -1051,16 +1051,16 @@ where:
    - Cache results to avoid recomputation
    - Use iterative DP for bottom-up approaches
 
-### Morris Traversal (O(1) Space)
+### Morris Traversal ($O(1)$ Space)
 
-For space-constrained environments, Morris Traversal allows inorder traversal with O(1) space by temporarily modifying the tree:
+For space-constrained environments, Morris Traversal allows inorder traversal with $O(1)$ space by temporarily modifying the tree:
 
 ```python
 def morris_inorder_traversal(root):
     """
-    Inorder traversal with O(1) space.
+    Inorder traversal with $O(1)$ space.
     Temporarily modifies tree structure but restores it.
-    Time: O(n), Space: O(1)
+    Time: $O(n)$, Space: $O(1)$
     """
     result = []
     current = root
@@ -1095,7 +1095,7 @@ Trees are fundamental data structures in computer science with wide-ranging appl
 
 - **Tree traversals** provide different ways to visit nodes, each with specific use cases
 - **Binary Search Trees** enable efficient searching, insertion, and deletion operations
-- **Balanced trees** (AVL, Red-Black) guarantee O(log n) operations even in worst case
+- **Balanced trees** (AVL, Red-Black) guarantee $O(\log n)$ operations even in worst case
 - **Understanding tree patterns** is crucial for solving complex algorithmic problems
 
 Key takeaways:

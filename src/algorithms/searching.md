@@ -6,7 +6,7 @@ Searching algorithms help find elements in data structures. The choice depends o
 
 ## Linear Search
 
-**Time**: O(n) | **Space**: O(1) | **Works on**: Unsorted arrays
+**Time**: $O(n)$ | **Space**: $O(1)$ | **Works on**: Unsorted arrays
 
 ```python
 def linear_search(arr, target):
@@ -20,7 +20,7 @@ def linear_search(arr, target):
 
 ## Binary Search
 
-**Time**: O(log n) | **Space**: O(1) | **Requires**: Sorted array
+**Time**: $O(\log n)$ | **Space**: $O(1)$ | **Requires**: Sorted array
 
 ```python
 def binary_search(arr, target):
@@ -78,7 +78,7 @@ def find_last(arr, target):
 
 ## Two Pointer Technique
 
-**Time**: O(n) | **Space**: O(1)
+**Time**: $O(n)$ | **Space**: $O(1)$
 
 ```python
 def two_sum(arr, target):
@@ -99,7 +99,7 @@ def two_sum(arr, target):
 
 ## Jump Search
 
-**Time**: O(n) | **Space**: O(1) | **Requires**: Sorted array
+**Time**: O(n) | **Space**: $O(1)$ | **Requires**: Sorted array
 
 ```python
 import math
@@ -131,7 +131,7 @@ def jump_search(arr, target):
 
 ## Interpolation Search
 
-**Time**: O(log log n) average, O(n) worst | **Requires**: Sorted uniformly distributed data
+**Time**: $O(\log \log n)$ average, $O(n)$ worst | **Requires**: Sorted uniformly distributed data
 
 ```python
 def interpolation_search(arr, target):
@@ -157,7 +157,7 @@ def interpolation_search(arr, target):
 
 ## Exponential Search
 
-**Time**: O(log n) | **Space**: O(1) | **Requires**: Sorted array
+**Time**: $O(\log n)$ | **Space**: $O(1)$ | **Requires**: Sorted array
 
 ```python
 def exponential_search(arr, target):
@@ -209,18 +209,18 @@ def sentinel_search(arr, target):
 
 | Algorithm | Time (Avg) | Time (Worst) | Space | Requires Sorted |
 |-----------|-----------|-------------|-------|-----------------|
-| Linear | O(n) | O(n) | O(1) | No |
-| Binary | O(log n) | O(log n) | O(1) | Yes |
-| Jump | O(n) | O(n) | O(1) | Yes |
-| Interpolation | O(log log n) | O(n) | O(1) | Yes |
-| Exponential | O(log n) | O(log n) | O(1) | Yes |
+| Linear | $O(n)$ | $O(n)$ | $O(1)$ | No |
+| Binary | $O(\log n)$ | $O(\log n)$ | $O(1)$ | Yes |
+| Jump | O(n) | O(n) | $O(1)$ | Yes |
+| Interpolation | $O(\log \log n)$ | $O(n)$ | $O(1)$ | Yes |
+| Exponential | $O(\log n)$ | $O(\log n)$ | $O(1)$ | Yes |
 
 ## Key Takeaways
 
 1. **Unsorted data?** Use Linear Search or Hash Table
-2. **Sorted data?** Use Binary Search for O(log n)
+2. **Sorted data?** Use Binary Search for $O(\log n)$
 3. **Uniformly distributed?** Try Interpolation Search
-4. **Need flexibility?** Build a Hash Table for O(1) lookup
+4. **Need flexibility?** Build a Hash Table for $O(1)$ lookup
 
 ## ELI10
 

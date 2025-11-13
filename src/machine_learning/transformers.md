@@ -17,20 +17,18 @@ The attention mechanism is the heart of the transformer architecture. It allows 
 ### Scaled Dot-Product Attention
 
 The fundamental building block of transformer attention is the **Scaled Dot-Product Attention**. Given three matrices:
-- **Q** (Query): What we're looking for
-- **K** (Key): What we're matching against
-- **V** (Value): The actual information we want to retrieve
+- $Q$ (Query): What we're looking for
+- $K$ (Key): What we're matching against
+- $V$ (Value): The actual information we want to retrieve
 
 The attention mechanism computes:
 
-```
-Attention(Q, K, V) = softmax(QK^T / √d_k) V
-```
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V$$
 
 Where:
-- `d_k` is the dimension of the key vectors
-- The division by `√d_k` is scaling to prevent the dot products from growing too large
-- `softmax` normalizes the scores to create a probability distribution
+- $d_k$ is the dimension of the key vectors
+- The division by $\sqrt{d_k}$ is scaling to prevent the dot products from growing too large
+- softmax normalizes the scores to create a probability distribution
 
 #### PyTorch Implementation: Scaled Dot-Product Attention
 
@@ -153,13 +151,13 @@ Final output - Shape: torch.Size([2, 1, 4, 8])
 
 Let's break down what's happening at each step:
 
-1. **Query-Key Dot Product (Q @ K^T)**:
-   - Each query vector (row in Q) is compared against all key vectors (rows in K)
+1. **Query-Key Dot Product ($QK^T$)**:
+   - Each query vector (row in $Q$) is compared against all key vectors (rows in $K$)
    - The dot product measures similarity: higher values = more similar
    - Shape: `(batch, heads, seq_len_q, d_k) @ (batch, heads, d_k, seq_len_k) → (batch, heads, seq_len_q, seq_len_k)`
 
 2. **Scaling**:
-   - Dividing by `√d_k` prevents the dot products from becoming too large
+   - Dividing by $\sqrt{d_k}$ prevents the dot products from becoming too large
    - Large dot products → very small gradients after softmax → slow learning
    - This is crucial for stable training
 
@@ -550,7 +548,8 @@ class FeedForward(nn.Module):
     """
     Position-wise Feed-Forward Network.
     Consists of two linear transformations with ReLU activation.
-    FFN(x) = max(0, xW1 + b1)W2 + b2
+
+    $$\text{FFN}(x) = \max(0, xW_1 + b_1)W_2 + b_2$$
     """
     def __init__(self, d_model, d_ff, dropout=0.1):
         super().__init__()

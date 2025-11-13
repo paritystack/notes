@@ -348,10 +348,10 @@ def backtrack_template(input_data):
 ## Time Complexity
 
 Most backtracking algorithms have exponential time complexity:
-- **Subsets**: O(2^n) - each element can be included or excluded
-- **Permutations**: O(n!) - n choices for first, n-1 for second, etc.
-- **N-Queens**: O(n!) - approximately, with pruning
-- **Sudoku**: O(9^m) where m is number of empty cells
+- **Subsets**: $O(2^n)$ - each element can be included or excluded
+- **Permutations**: $O(n!)$ - n choices for first, n-1 for second, etc.
+- **N-Queens**: $O(n!)$ - approximately, with pruning
+- **Sudoku**: $O(9^m)$ where m is number of empty cells
 
 ## Applications
 

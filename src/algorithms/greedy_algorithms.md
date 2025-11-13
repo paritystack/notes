@@ -35,8 +35,8 @@ for activity in result:
     print(f"  Start: {activity[0]}, Finish: {activity[1]}")
 ```
 
-**Time Complexity**: O(n log n) for sorting
-**Space Complexity**: O(n)
+**Time Complexity**: $O(n \log n)$ for sorting
+**Space Complexity**: $O(n)$
 
 ## Fractional Knapsack
 
@@ -77,7 +77,7 @@ for value, weight, fraction in taken:
     print(f"  Value={value}, Weight={weight}, Fraction={fraction:.2f}")
 ```
 
-**Time Complexity**: O(n log n)
+**Time Complexity**: $O(n \log n)$
 
 ## Coin Change (Greedy - doesn't always work!)
 
@@ -182,7 +182,7 @@ print(f"Encoded size: {len(encoded)} bits")
 print(f"Compression ratio: {len(encoded) / (len(text) * 8):.2%}")
 ```
 
-**Time Complexity**: O(n log n)
+**Time Complexity**: $O(n \log n)$
 
 ## Job Sequencing
 
@@ -229,7 +229,7 @@ for job_id, profit in scheduled:
     print(f"  Job {job_id}: ${profit}")
 ```
 
-**Time Complexity**: O(n²)
+**Time Complexity**: $O(n^2)$
 
 ## Minimum Spanning Tree - Prim's Algorithm
 
@@ -277,7 +277,7 @@ for frm, to, weight in mst:
     print(f"  {frm} -- {to} (weight: {weight})")
 ```
 
-**Time Complexity**: O(E log V) with binary heap
+**Time Complexity**: $O(E \log V)$ with binary heap
 
 ## Minimum Spanning Tree - Kruskal's Algorithm
 
@@ -335,7 +335,7 @@ for u, v, weight in mst:
     print(f"  {u} -- {v} (weight: {weight})")
 ```
 
-**Time Complexity**: O(E log E) or O(E log V)
+**Time Complexity**: $O(E \log E)$ or $O(E \log V)$
 
 ## Dijkstra's Shortest Path
 
@@ -379,7 +379,7 @@ for i, d in enumerate(distances):
     print(f"  To node {i}: {d}")
 ```
 
-**Time Complexity**: O((V + E) log V) with binary heap
+**Time Complexity**: $O((V + E) \log V)$ with binary heap
 
 ## Gas Station Problem
 
@@ -414,7 +414,7 @@ start = can_complete_circuit(gas, cost)
 print(f"Start at station: {start}")  # Output: 3
 ```
 
-**Time Complexity**: O(n)
+**Time Complexity**: $O(n)$
 
 ## Greedy vs Dynamic Programming
 

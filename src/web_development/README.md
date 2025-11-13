@@ -11,6 +11,17 @@ Modern web development covering frontend, backend, APIs, and full-stack technolo
 - **[Svelte](svelte.md)**: Compiled framework with reactive programming
 - **[Tailwind CSS](tailwind.md)**: Utility-first CSS framework
 
+### Browser APIs
+
+- **[Web APIs](web_apis.md)**: Browser APIs for storage, workers, notifications, and more
+  - Storage: localStorage, sessionStorage, IndexedDB, Cache API
+  - Workers: Web Workers, Service Workers, Shared Workers
+  - Notifications: Notification API, Push API
+  - Device APIs: Geolocation, Battery Status
+  - File APIs: File, Blob, FileReader
+  - Observers: Intersection, Mutation, Resize Observer
+  - Other: Clipboard, History, Performance, Page Visibility
+
 ### API & Communication
 
 - **[REST APIs](rest_apis.md)**: RESTful API design and best practices

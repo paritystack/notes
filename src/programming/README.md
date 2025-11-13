@@ -10,5 +10,7 @@ This section contains references and guides for various programming languages.
 - [JavaScript](javascript.md) - A scripting language for web development
 - [Bash](bash.md) - A Unix shell and command language
 - [Java](java.md) - A class-based, object-oriented programming language
+- [Go](go.md) - A statically typed, compiled language with built-in concurrency
+- [Lua](lua.md) - A lightweight, embeddable scripting language
 - [Rust](rust.md) - A systems programming language focused on safety and performance
 - [SQL](sql.md) - A domain-specific language for managing databases 

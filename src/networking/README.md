@@ -105,6 +105,22 @@ The practical 4-layer model used in modern networks:
 - Handles symmetric NAT and firewalls
 - Used by WebRTC and VoIP
 
+### [PCP (Port Control Protocol)](pcp.md)
+- Automatic port mapping and firewall control
+- Successor to NAT-PMP with IPv6 support
+- MAP and PEER opcodes for different use cases
+- Works with multiple NATs in path
+- Third-party mappings and explicit lifetimes
+- Used by modern applications and IoT
+
+### [NAT-PMP (NAT Port Mapping Protocol)](nat_pmp.md)
+- Simple automatic port forwarding protocol
+- Lightweight UDP-based (12-16 byte packets)
+- IPv4 support with time-limited mappings
+- Developed by Apple, widely deployed
+- Gateway discovery and external IP detection
+- Used by BitTorrent, VoIP, and gaming
+
 ## Real-Time Communication
 
 ### [WebSocket](websocket.md)

@@ -177,35 +177,572 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="github"><a class="header" href="#github">Github</a></h1>
-<h2 id="quick-start"><a class="header" href="#quick-start">Quick start</a></h2>
+                        <h1 id="github"><a class="header" href="#github">GitHub</a></h1>
+<p>GitHub is a web-based platform that provides hosting for Git repositories along with collaboration features, CI/CD, project management, and more.</p>
+<h2 id="quick-start"><a class="header" href="#quick-start">Quick Start</a></h2>
+<h3 id="ssh-setup"><a class="header" href="#ssh-setup">SSH Setup</a></h3>
+<pre><code class="language-bash"># Generate SSH key
+ssh-keygen -t ed25519 -C "your.email@example.com"
+
+# Start SSH agent
+eval "$(ssh-agent -s)"
+
+# Add SSH key to agent
+ssh-add ~/.ssh/id_ed25519
+
+# Copy public key to clipboard
+cat ~/.ssh/id_ed25519.pub
+# Then paste in GitHub Settings → SSH and GPG keys → New SSH key
+</code></pre>
+<h3 id="clone-repository"><a class="header" href="#clone-repository">Clone Repository</a></h3>
+<pre><code class="language-bash"># Using SSH (recommended)
+git clone git@github.com:&lt;username&gt;/&lt;repository&gt;.git
+
+# Using HTTPS
+git clone https://github.com/&lt;username&gt;/&lt;repository&gt;.git
+
+# Create new branch
+git switch -c &lt;new_branch&gt;
+
+# Push branch to remote
+git push -u origin &lt;new_branch&gt;
+</code></pre>
+<h2 id="pull-request-workflow"><a class="header" href="#pull-request-workflow">Pull Request Workflow</a></h2>
+<h3 id="creating-a-pull-request"><a class="header" href="#creating-a-pull-request">Creating a Pull Request</a></h3>
+<pre><code class="language-bash"># 1. Create and switch to feature branch
+git checkout -b feature/new-feature
+
+# 2. Make changes and commit
+git add .
+git commit -m "feat: Add new feature"
+
+# 3. Push branch to GitHub
+git push -u origin feature/new-feature
+
+# 4. Open browser and create PR
+# Navigate to repository → Pull requests → New pull request
+# Select your branch → Create pull request
+
+# Or use GitHub CLI
+gh pr create --title "Add new feature" --body "Description of changes"
+</code></pre>
+<h3 id="working-on-pull-request"><a class="header" href="#working-on-pull-request">Working on Pull Request</a></h3>
+<pre><code class="language-bash"># After creating PR, make additional commits
+git add .
+git commit -m "Address feedback"
+git push origin feature/new-feature
+
+# Update PR with latest main
+git checkout main
+git pull origin main
+git checkout feature/new-feature
+git rebase main
+git push --force-with-lease origin feature/new-feature
+
+# Request review
+gh pr review &lt;pr-number&gt; --request-changes --body "Please fix..."
+gh pr review &lt;pr-number&gt; --approve --body "LGTM!"
+</code></pre>
+<h3 id="reviewing-pull-requests"><a class="header" href="#reviewing-pull-requests">Reviewing Pull Requests</a></h3>
+<pre><code class="language-bash"># Check out PR locally
+gh pr checkout &lt;pr-number&gt;
+# Or manually:
+git fetch origin pull/&lt;pr-number&gt;/head:pr-&lt;pr-number&gt;
+git checkout pr-&lt;pr-number&gt;
+
+# Test changes
+npm test
+npm run build
+
+# Add review comments
+gh pr review &lt;pr-number&gt; --comment --body "Looks good!"
+
+# Approve PR
+gh pr review &lt;pr-number&gt; --approve
+
+# Request changes
+gh pr review &lt;pr-number&gt; --request-changes --body "Please address..."
+</code></pre>
+<h3 id="merging-pull-requests"><a class="header" href="#merging-pull-requests">Merging Pull Requests</a></h3>
+<pre><code class="language-bash"># Merge via GitHub CLI
+gh pr merge &lt;pr-number&gt; --merge
+gh pr merge &lt;pr-number&gt; --squash
+gh pr merge &lt;pr-number&gt; --rebase
+
+# Via web interface:
+# - Merge commit: Preserves all commits
+# - Squash and merge: Combines all commits into one
+# - Rebase and merge: Adds commits to base branch
+
+# After merging, cleanup
+git checkout main
+git pull origin main
+git branch -d feature/new-feature
+</code></pre>
+<h2 id="github-issues"><a class="header" href="#github-issues">GitHub Issues</a></h2>
+<h3 id="creating-issues"><a class="header" href="#creating-issues">Creating Issues</a></h3>
+<pre><code class="language-bash"># Create issue via CLI
+gh issue create --title "Bug: Login fails" --body "Description of bug"
+
+# Create with labels
+gh issue create --title "Feature request" --label "enhancement"
+
+# List issues
+gh issue list
+gh issue list --label "bug"
+gh issue list --assignee "@me"
+
+# View issue
+gh issue view &lt;issue-number&gt;
+</code></pre>
+<h3 id="working-with-issues"><a class="header" href="#working-with-issues">Working with Issues</a></h3>
+<pre><code class="language-bash"># Assign issue
+gh issue edit &lt;issue-number&gt; --add-assignee "@me"
+
+# Add labels
+gh issue edit &lt;issue-number&gt; --add-label "bug,high-priority"
+
+# Close issue
+gh issue close &lt;issue-number&gt;
+
+# Reopen issue
+gh issue reopen &lt;issue-number&gt;
+
+# Link PR to issue (in commit or PR description)
+git commit -m "Fix login bug
+
+Fixes #123"
+# Or "Closes #123", "Resolves #123"
+</code></pre>
+<h3 id="issue-templates"><a class="header" href="#issue-templates">Issue Templates</a></h3>
+<p>Create <code>.github/ISSUE_TEMPLATE/bug_report.md</code>:</p>
+<pre><code class="language-markdown">---
+name: Bug Report
+about: Create a report to help us improve
+title: '[BUG] '
+labels: bug
+assignees: ''
+---
+
+**Describe the bug**
+A clear and concise description of what the bug is.
+
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. See error
+
+**Expected behavior**
+A clear description of what you expected to happen.
+
+**Screenshots**
+If applicable, add screenshots.
+
+**Environment:**
+- OS: [e.g. Ubuntu 22.04]
+- Browser: [e.g. Chrome 120]
+- Version: [e.g. v1.2.3]
+</code></pre>
+<h2 id="github-actions-cicd"><a class="header" href="#github-actions-cicd">GitHub Actions (CI/CD)</a></h2>
+<h3 id="basic-workflow"><a class="header" href="#basic-workflow">Basic Workflow</a></h3>
+<p>Create <code>.github/workflows/ci.yml</code>:</p>
+<pre><code class="language-yaml">name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+
+    - name: Run linter
+      run: npm run lint
+
+    - name: Build
+      run: npm run build
+</code></pre>
+<h3 id="action-permissions"><a class="header" href="#action-permissions">Action Permissions</a></h3>
+<pre><code class="language-bash"># Enable workflow permissions
+# Repository Settings → Actions → General → Workflow permissions
+# Select: Read and write permissions
+
+# Or in workflow file
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+</code></pre>
+<h3 id="deployment-workflow"><a class="header" href="#deployment-workflow">Deployment Workflow</a></h3>
+<p>Create <code>.github/workflows/deploy.yml</code>:</p>
+<pre><code class="language-yaml">name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build
+      run: npm run build
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build
+        cname: yourdomain.com
+</code></pre>
+<h3 id="useful-github-actions"><a class="header" href="#useful-github-actions">Useful GitHub Actions</a></h3>
+<pre><code class="language-yaml"># Test on multiple Node versions
+strategy:
+  matrix:
+    node-version: [16, 18, 20]
+
+# Cache dependencies
+- name: Cache node modules
+  uses: actions/cache@v3
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+# Create release
+- name: Create Release
+  uses: actions/create-release@v1
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    tag_name: ${{ github.ref }}
+    release_name: Release ${{ github.ref }}
+
+# Comment on PR
+- name: Comment on PR
+  uses: actions/github-script@v6
+  with:
+    script: |
+      github.rest.issues.createComment({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        body: 'Build successful! ✅'
+      })
+</code></pre>
+<h2 id="github-pages"><a class="header" href="#github-pages">GitHub Pages</a></h2>
+<h3 id="setup-github-pages"><a class="header" href="#setup-github-pages">Setup GitHub Pages</a></h3>
+<pre><code class="language-bash"># 1. Create gh-pages branch
+git checkout --orphan gh-pages
+git rm -rf .
+echo "&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;" &gt; index.html
+git add index.html
+git commit -m "Initial GitHub Pages commit"
+git push origin gh-pages
+
+# 2. Enable in repository settings
+# Settings → Pages → Source → Select branch: gh-pages, folder: /(root)
+
+# 3. Add custom domain (optional)
+echo "yourdomain.com" &gt; CNAME
+git add CNAME
+git commit -m "Add custom domain"
+git push origin gh-pages
+</code></pre>
+<h3 id="deploy-with-actions"><a class="header" href="#deploy-with-actions">Deploy with Actions</a></h3>
+<pre><code class="language-yaml">name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Build
+      run: |
+        npm ci
+        npm run build
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build
+        cname: yourdomain.com  # Optional
+</code></pre>
+<h2 id="github-cli-gh"><a class="header" href="#github-cli-gh">GitHub CLI (gh)</a></h2>
+<h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
+<pre><code class="language-bash"># macOS
+brew install gh
+
+# Linux (Debian/Ubuntu)
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list &gt; /dev/null
+sudo apt update
+sudo apt install gh
+
+# Authenticate
+gh auth login
+</code></pre>
+<h3 id="common-gh-commands"><a class="header" href="#common-gh-commands">Common gh Commands</a></h3>
+<pre><code class="language-bash"># Repository
+gh repo create &lt;name&gt;
+gh repo clone &lt;repo&gt;
+gh repo view
+gh repo fork
+
+# Pull Requests
+gh pr create
+gh pr list
+gh pr view &lt;number&gt;
+gh pr checkout &lt;number&gt;
+gh pr merge &lt;number&gt;
+gh pr diff &lt;number&gt;
+gh pr review &lt;number&gt;
+
+# Issues
+gh issue create
+gh issue list
+gh issue view &lt;number&gt;
+gh issue close &lt;number&gt;
+
+# Releases
+gh release create v1.0.0
+gh release list
+gh release download v1.0.0
+
+# Workflows
+gh workflow list
+gh workflow run &lt;workflow&gt;
+gh run list
+gh run view &lt;run-id&gt;
+
+# Gists
+gh gist create &lt;file&gt;
+gh gist list
+</code></pre>
+<h2 id="collaboration-workflows"><a class="header" href="#collaboration-workflows">Collaboration Workflows</a></h2>
+<h3 id="fork-and-contribute"><a class="header" href="#fork-and-contribute">Fork and Contribute</a></h3>
+<pre><code class="language-bash"># 1. Fork repository on GitHub (click Fork button)
+
+# 2. Clone your fork
+gh repo fork &lt;original-repo&gt; --clone
+
+# 3. Add upstream remote
+git remote add upstream https://github.com/original-owner/repo.git
+
+# 4. Create feature branch
+git checkout -b feature/my-contribution
+
+# 5. Make changes and commit
+git add .
+git commit -m "Add feature"
+
+# 6. Keep fork updated
+git fetch upstream
+git checkout main
+git merge upstream/main
+git push origin main
+
+# 7. Push feature branch
+git push origin feature/my-contribution
+
+# 8. Create pull request
+gh pr create --base main --head feature/my-contribution
+</code></pre>
+<h3 id="code-review-best-practices"><a class="header" href="#code-review-best-practices">Code Review Best Practices</a></h3>
+<pre><code class="language-bash"># As PR author:
+# - Keep PRs small and focused
+# - Write clear description
+# - Link related issues
+# - Respond to feedback promptly
+
+# As reviewer:
+# - Review promptly
+# - Be constructive and specific
+# - Test changes locally
+# - Approve or request changes
+
+# Request specific reviewers
+gh pr create --reviewer @username1,@username2
+
+# Check PR status
+gh pr status
+
+# View PR checks
+gh pr checks &lt;pr-number&gt;
+</code></pre>
+<h3 id="team-collaboration"><a class="header" href="#team-collaboration">Team Collaboration</a></h3>
+<pre><code class="language-bash"># Protect branches
+# Repository Settings → Branches → Add branch protection rule
+# - Require pull request reviews
+# - Require status checks to pass
+# - Require branches to be up to date
+# - Include administrators
+
+# Add collaborators
+# Repository Settings → Collaborators → Add people
+
+# Use code owners (.github/CODEOWNERS)
+# Require approval from code owners
+* @team-name
+/docs/ @docs-team
+*.js @frontend-team
+</code></pre>
+<h2 id="project-management"><a class="header" href="#project-management">Project Management</a></h2>
+<h3 id="github-projects"><a class="header" href="#github-projects">GitHub Projects</a></h3>
+<pre><code class="language-bash"># Create project
+gh project create --title "My Project"
+
+# Add issues to project
+gh issue create --project "My Project"
+
+# View project
+gh project view &lt;project-number&gt;
+</code></pre>
+<h3 id="milestones"><a class="header" href="#milestones">Milestones</a></h3>
+<pre><code class="language-bash"># Create milestone
+# Issues → Milestones → New milestone
+
+# Assign issue to milestone
+gh issue edit &lt;number&gt; --milestone "v1.0"
+
+# View milestone progress
+# Issues → Milestones
+</code></pre>
+<h2 id="security-features"><a class="header" href="#security-features">Security Features</a></h2>
+<h3 id="dependabot"><a class="header" href="#dependabot">Dependabot</a></h3>
+<p>Enable in Settings → Security → Dependabot:</p>
 <ul>
-<li>Copy the public key to the settings.</li>
-<li>Clone the repository using <code>git clone git@github.com:&lt;username&gt;/&lt;repository&gt;.git</code></li>
-<li>Create a new branch from the main branch using <code>git switch -c &lt;new branch&gt;</code></li>
-<li>Push the new branch to the remote repository using <code>git push -u origin &lt;new branch&gt;</code></li>
+<li>Dependabot alerts</li>
+<li>Dependabot security updates</li>
+<li>Dependabot version updates</li>
 </ul>
-<h2 id="action-permissions"><a class="header" href="#action-permissions">Action Permissions</a></h2>
-<ul>
-<li>Workflow permissions are disabled by default.</li>
-<li>To enable them, go to the repository settings, click on <code>Actions</code>, then click on <code>General</code>, and enable <code>Read and write permissions</code> for the <code>Workflow Permissions</code>.</li>
-<li>NOTE: Without workflow permissions enabled, the publishing action will fail.</li>
-</ul>
-<h2 id="publishing"><a class="header" href="#publishing">Publishing</a></h2>
-<ul>
-<li>Select the branch <code>gh-pages</code> <code>/(root)</code> from the repository settings.</li>
-<li>The publishing action is defined in <code>.github/workflows/deploy.yml</code>.</li>
-<li>This action uses the <code>peaceiris/actions-mdbook</code> action to build and publish the book.</li>
-<li>The <code>publish_dir</code> is the directory that the action will publish. In this case, it is the <code>book</code> directory.</li>
-<li>The <code>github_token</code> is a token that the action will use to push the changes to the repository.</li>
-<li>The <code>GITHUB_TOKEN</code> is automatically created by Github when the repository is created.</li>
-<li>The <code>GITHUB_TOKEN</code> has the <code>contents</code> permission, which is required by the action.</li>
-<li>Add custom domain in the repository settings.
-<ul>
-<li>CNAME file in the root of the repository in gh-pages branch. if not present, the site will not be accessible via the custom domain.</li>
-</ul>
-</li>
-</ul>
+<p>Create <code>.github/dependabot.yml</code>:</p>
+<pre><code class="language-yaml">version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+</code></pre>
+<h3 id="secret-scanning"><a class="header" href="#secret-scanning">Secret Scanning</a></h3>
+<pre><code class="language-bash"># Enable in Settings → Security → Code security and analysis
+# - Secret scanning
+# - Secret scanning push protection
+
+# Use secrets in workflows
+steps:
+  - name: Deploy
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+    run: deploy.sh
+</code></pre>
+<h3 id="security-advisories"><a class="header" href="#security-advisories">Security Advisories</a></h3>
+<pre><code class="language-bash"># Create security advisory
+# Security → Advisories → New draft security advisory
+
+# Report vulnerability privately
+# Contact repository maintainers through security tab
+</code></pre>
+<h2 id="webhooks-and-api"><a class="header" href="#webhooks-and-api">Webhooks and API</a></h2>
+<h3 id="setup-webhook"><a class="header" href="#setup-webhook">Setup Webhook</a></h3>
+<pre><code class="language-bash"># Repository Settings → Webhooks → Add webhook
+# Payload URL: https://your-server.com/webhook
+# Content type: application/json
+# Events: Push, Pull request, Issues, etc.
+</code></pre>
+<h3 id="github-api"><a class="header" href="#github-api">GitHub API</a></h3>
+<pre><code class="language-bash"># Using curl
+curl -H "Authorization: token YOUR_TOKEN" \
+  https://api.github.com/user/repos
+
+# Using gh CLI with API
+gh api repos/&lt;owner&gt;/&lt;repo&gt;/pulls
+
+gh api graphql -f query='
+  query {
+    repository(owner: "owner", name: "repo") {
+      pullRequests(first: 10) {
+        nodes {
+          title
+          number
+        }
+      }
+    }
+  }
+'
+</code></pre>
+<h2 id="advanced-features"><a class="header" href="#advanced-features">Advanced Features</a></h2>
+<h3 id="github-codespaces"><a class="header" href="#github-codespaces">GitHub Codespaces</a></h3>
+<pre><code class="language-bash"># Create codespace
+gh codespace create --repo &lt;repo&gt;
+
+# List codespaces
+gh codespace list
+
+# Connect to codespace
+gh codespace ssh
+</code></pre>
+<h3 id="github-packages"><a class="header" href="#github-packages">GitHub Packages</a></h3>
+<p>Publish package:</p>
+<pre><code class="language-yaml">- name: Publish to GitHub Packages
+  run: npm publish
+  env:
+    NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+</code></pre>
+<h3 id="github-discussions"><a class="header" href="#github-discussions">GitHub Discussions</a></h3>
+<pre><code class="language-bash"># Enable in Settings → General → Features → Discussions
+
+# Create discussion
+gh api repos/&lt;owner&gt;/&lt;repo&gt;/discussions \
+  -f title="Discussion title" \
+  -f body="Discussion body"
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Branch Protection</strong>: Enable branch protection on main/develop</li>
+<li><strong>Required Reviews</strong>: Require at least one approval before merging</li>
+<li><strong>Status Checks</strong>: Require CI/CD to pass before merging</li>
+<li><strong>Linear History</strong>: Use squash or rebase merging for clean history</li>
+<li><strong>Signed Commits</strong>: Enable commit signing for security</li>
+<li><strong>Templates</strong>: Use PR and issue templates for consistency</li>
+<li><strong>Labels</strong>: Use labels to categorize issues and PRs</li>
+<li><strong>Milestones</strong>: Track progress with milestones</li>
+<li><strong>Projects</strong>: Use GitHub Projects for project management</li>
+<li><strong>Documentation</strong>: Keep README and CONTRIBUTING.md updated</li>
+</ol>
 
                     </main>
 

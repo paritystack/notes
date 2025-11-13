@@ -1,0 +1,1729 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>cfg80211 &amp; mac80211 - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="cfg80211-and-mac80211"><a class="header" href="#cfg80211-and-mac80211">cfg80211 and mac80211</a></h1>
+<p>Linux wireless subsystem frameworks for 802.11 (WiFi) device drivers and configuration.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#cfg80211">cfg80211</a></li>
+<li><a href="#mac80211">mac80211</a></li>
+<li><a href="#driver-development">Driver Development</a></li>
+<li><a href="#nl80211">nl80211</a></li>
+<li><a href="#regulatory-framework">Regulatory Framework</a></li>
+<li><a href="#power-management">Power Management</a></li>
+<li><a href="#scanning">Scanning</a></li>
+<li><a href="#connection-management">Connection Management</a></li>
+<li><a href="#mesh-networking">Mesh Networking</a></li>
+<li><a href="#debugging">Debugging</a></li>
+</ul>
+<hr />
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>The Linux wireless stack consists of two main components:</p>
+<ul>
+<li><strong>cfg80211</strong>: Configuration API and regulatory database for 802.11 devices</li>
+<li><strong>mac80211</strong>: Generic IEEE 802.11 MAC layer implementation</li>
+</ul>
+<h3 id="why-two-layers"><a class="header" href="#why-two-layers">Why Two Layers?</a></h3>
+<pre><code>┌─────────────────────────────────────┐
+│        User Space (iw, wpa_supplicant)  │
+└─────────────────────────────────────┘
+              │ nl80211
+┌─────────────────────────────────────┐
+│          cfg80211                    │  ← Configuration &amp; regulatory
+│   (wireless configuration API)       │
+└─────────────────────────────────────┘
+              │
+┌─────────────────────────────────────┐
+│          mac80211                    │  ← MAC layer (optional)
+│   (generic MAC implementation)       │
+└─────────────────────────────────────┘
+              │
+┌─────────────────────────────────────┐
+│      WiFi Device Driver              │  ← Hardware-specific
+│   (ath9k, iwlwifi, rtl8xxxu, etc.)  │
+└─────────────────────────────────────┘
+              │
+┌─────────────────────────────────────┐
+│      Hardware (WiFi Chip)            │
+└─────────────────────────────────────┘
+</code></pre>
+<p><strong>cfg80211</strong> is mandatory for all wireless drivers. It provides:</p>
+<ul>
+<li>Configuration interface via nl80211</li>
+<li>Regulatory domain management</li>
+<li>Scanning coordination</li>
+<li>Authentication/association state machine</li>
+</ul>
+<p><strong>mac80211</strong> is optional and provides a generic MAC layer implementation for devices that only implement hardware-specific functions (PHY layer). Drivers can choose to:</p>
+<ol>
+<li>Use mac80211 (most SoftMAC drivers: ath9k, iwlwifi, rtl8xxxu)</li>
+<li>Implement their own MAC (FullMAC drivers: brcmfmac, mwifiex)</li>
+</ol>
+<hr />
+<h2 id="architecture"><a class="header" href="#architecture">Architecture</a></h2>
+<h3 id="layer-responsibilities"><a class="header" href="#layer-responsibilities">Layer Responsibilities</a></h3>
+<pre><code>User Space
+    │
+    ├─ iw: Configuration tool
+    ├─ wpa_supplicant: WPA/WPA2 authentication
+    └─ hostapd: Access Point daemon
+    │
+    ▼ nl80211 (netlink)
+    │
+cfg80211
+    │
+    ├─ Configuration API
+    ├─ Regulatory database
+    ├─ Scan results management
+    ├─ Connection tracking
+    └─ nl80211 ↔ cfg80211_ops translation
+    │
+    ▼ cfg80211_ops
+    │
+mac80211 (optional)
+    │
+    ├─ Beacon handling
+    ├─ Power save
+    ├─ Aggregation (A-MPDU/A-MSDU)
+    ├─ Rate control
+    ├─ TX/RX queuing
+    └─ Frame filtering
+    │
+    ▼ ieee80211_ops
+    │
+Driver (hardware-specific)
+    │
+    ├─ Channel switching
+    ├─ TX/RX DMA
+    ├─ Interrupt handling
+    └─ Register access
+    │
+    ▼
+Hardware
+</code></pre>
+<h3 id="data-flow"><a class="header" href="#data-flow">Data Flow</a></h3>
+<p><strong>TX Path:</strong></p>
+<pre><code>Application
+    ↓
+Socket/Network Stack
+    ↓
+cfg80211 (for management frames)
+    ↓
+mac80211 (encryption, aggregation, queuing)
+    ↓
+Driver (DMA, hardware TX)
+    ↓
+Hardware
+</code></pre>
+<p><strong>RX Path:</strong></p>
+<pre><code>Hardware
+    ↓
+Driver (interrupt, DMA)
+    ↓
+mac80211 (decryption, defragmentation)
+    ↓
+cfg80211 (scan results, regulatory info)
+    ↓
+Network Stack
+    ↓
+Application
+</code></pre>
+<hr />
+<h2 id="cfg80211"><a class="header" href="#cfg80211">cfg80211</a></h2>
+<h3 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h3>
+<p>cfg80211 is the configuration API for 802.11 devices. It abstracts hardware differences and provides a unified interface.</p>
+<h3 id="key-data-structures"><a class="header" href="#key-data-structures">Key Data Structures</a></h3>
+<pre><code class="language-c">#include &lt;net/cfg80211.h&gt;
+
+/* Wireless device (wiphy) - represents physical device */
+struct wiphy {
+	int n_addresses;
+	struct mac_address *addresses;
+
+	/* Supported bands */
+	struct ieee80211_supported_band *bands[NUM_NL80211_BANDS];
+
+	/* Regulatory domain */
+	const struct ieee80211_regdomain *regd;
+
+	/* Driver callbacks */
+	const struct cfg80211_ops *ops;
+
+	/* Flags */
+	u32 flags;
+
+	/* Interface modes supported */
+	u16 interface_modes;
+
+	/* Cipher suites */
+	const u32 *cipher_suites;
+	int n_cipher_suites;
+
+	/* Maximum scan SSIDs */
+	u8 max_scan_ssids;
+
+	/* Maximum scheduled scan SSIDs */
+	u8 max_sched_scan_ssids;
+
+	/* Private driver data */
+	void *priv;
+};
+
+/* Wireless interface (wdev) - represents virtual interface */
+struct wireless_dev {
+	struct wiphy *wiphy;
+	enum nl80211_iftype iftype;
+
+	struct net_device *netdev;
+
+	/* Current BSS */
+	struct cfg80211_bss *current_bss;
+
+	/* Connection parameters */
+	u8 ssid[IEEE80211_MAX_SSID_LEN];
+	u8 ssid_len;
+
+	/* Wireless extensions compatibility */
+	struct cfg80211_internal_bss *authtry_bsses[4];
+	struct cfg80211_internal_bss *auth_bsses[4];
+	struct cfg80211_internal_bss *assoc_bsses[4];
+};
+
+/* BSS information */
+struct cfg80211_bss {
+	struct ieee80211_channel *channel;
+
+	u8 bssid[ETH_ALEN];
+	u64 tsf;
+	u16 beacon_interval;
+	u16 capability;
+
+	const u8 *ies;
+	size_t ies_len;
+
+	s32 signal;
+	u64 parent_tsf;
+};
+</code></pre>
+<h3 id="cfg80211_ops---driver-callbacks"><a class="header" href="#cfg80211_ops---driver-callbacks">cfg80211_ops - Driver Callbacks</a></h3>
+<pre><code class="language-c">struct cfg80211_ops {
+	/* Interface management */
+	int (*add_virtual_intf)(struct wiphy *wiphy,
+				const char *name,
+				enum nl80211_iftype type,
+				struct vif_params *params);
+
+	int (*del_virtual_intf)(struct wiphy *wiphy,
+				struct wireless_dev *wdev);
+
+	int (*change_virtual_intf)(struct wiphy *wiphy,
+				   struct net_device *dev,
+				   enum nl80211_iftype type,
+				   struct vif_params *params);
+
+	/* Scanning */
+	int (*scan)(struct wiphy *wiphy,
+		    struct cfg80211_scan_request *request);
+
+	/* Connection */
+	int (*connect)(struct wiphy *wiphy,
+		       struct net_device *dev,
+		       struct cfg80211_connect_params *sme);
+
+	int (*disconnect)(struct wiphy *wiphy,
+			  struct net_device *dev,
+			  u16 reason_code);
+
+	/* Authentication &amp; Association */
+	int (*auth)(struct wiphy *wiphy,
+		    struct net_device *dev,
+		    struct cfg80211_auth_request *req);
+
+	int (*assoc)(struct wiphy *wiphy,
+		     struct net_device *dev,
+		     struct cfg80211_assoc_request *req);
+
+	int (*deauth)(struct wiphy *wiphy,
+		      struct net_device *dev,
+		      struct cfg80211_deauth_request *req);
+
+	int (*disassoc)(struct wiphy *wiphy,
+			struct net_device *dev,
+			struct cfg80211_disassoc_request *req);
+
+	/* Configuration */
+	int (*set_channel)(struct wiphy *wiphy,
+			   struct cfg80211_chan_def *chandef);
+
+	int (*set_txq_params)(struct wiphy *wiphy,
+			      struct net_device *dev,
+			      struct ieee80211_txq_params *params);
+
+	int (*set_tx_power)(struct wiphy *wiphy,
+			    struct wireless_dev *wdev,
+			    enum nl80211_tx_power_setting type,
+			    int mbm);
+
+	int (*get_tx_power)(struct wiphy *wiphy,
+			    struct wireless_dev *wdev,
+			    int *dbm);
+
+	/* AP mode */
+	int (*start_ap)(struct wiphy *wiphy,
+			struct net_device *dev,
+			struct cfg80211_ap_settings *settings);
+
+	int (*stop_ap)(struct wiphy *wiphy,
+		       struct net_device *dev);
+
+	/* Station management */
+	int (*add_station)(struct wiphy *wiphy,
+			   struct net_device *dev,
+			   const u8 *mac,
+			   struct station_parameters *params);
+
+	int (*del_station)(struct wiphy *wiphy,
+			   struct net_device *dev,
+			   struct station_del_parameters *params);
+
+	int (*change_station)(struct wiphy *wiphy,
+			      struct net_device *dev,
+			      const u8 *mac,
+			      struct station_parameters *params);
+
+	int (*get_station)(struct wiphy *wiphy,
+			   struct net_device *dev,
+			   const u8 *mac,
+			   struct station_info *sinfo);
+
+	/* Power management */
+	int (*set_power_mgmt)(struct wiphy *wiphy,
+			      struct net_device *dev,
+			      bool enabled,
+			      int timeout);
+
+	/* Regulatory */
+	void (*reg_notifier)(struct wiphy *wiphy,
+			     struct regulatory_request *request);
+};
+</code></pre>
+<h3 id="registering-a-wiphy"><a class="header" href="#registering-a-wiphy">Registering a Wiphy</a></h3>
+<pre><code class="language-c">#include &lt;net/cfg80211.h&gt;
+
+static const struct cfg80211_ops my_cfg_ops = {
+	.scan = my_scan,
+	.connect = my_connect,
+	.disconnect = my_disconnect,
+	/* ... other callbacks ... */
+};
+
+static int my_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+{
+	struct wiphy *wiphy;
+	struct my_priv *priv;
+	int ret;
+
+	/* Allocate wiphy with private data */
+	wiphy = wiphy_new(&amp;my_cfg_ops, sizeof(*priv));
+	if (!wiphy)
+		return -ENOMEM;
+
+	priv = wiphy_priv(wiphy);
+
+	/* Set wiphy parameters */
+	wiphy-&gt;interface_modes = BIT(NL80211_IFTYPE_STATION) |
+				 BIT(NL80211_IFTYPE_AP);
+
+	wiphy-&gt;max_scan_ssids = 4;
+	wiphy-&gt;max_scan_ie_len = 256;
+
+	/* Set supported bands */
+	wiphy-&gt;bands[NL80211_BAND_2GHZ] = &amp;my_band_2ghz;
+	wiphy-&gt;bands[NL80211_BAND_5GHZ] = &amp;my_band_5ghz;
+
+	/* Set supported cipher suites */
+	wiphy-&gt;cipher_suites = my_cipher_suites;
+	wiphy-&gt;n_cipher_suites = ARRAY_SIZE(my_cipher_suites);
+
+	/* Set regulatory domain */
+	wiphy-&gt;regulatory_flags = REGULATORY_STRICT_REG;
+
+	/* Register wiphy */
+	ret = wiphy_register(wiphy);
+	if (ret) {
+		wiphy_free(wiphy);
+		return ret;
+	}
+
+	return 0;
+}
+
+static void my_remove(struct pci_dev *pdev)
+{
+	struct wiphy *wiphy = pci_get_drvdata(pdev);
+
+	wiphy_unregister(wiphy);
+	wiphy_free(wiphy);
+}
+</code></pre>
+<h3 id="band-and-channel-definition"><a class="header" href="#band-and-channel-definition">Band and Channel Definition</a></h3>
+<pre><code class="language-c">/* 2.4 GHz band channels */
+static struct ieee80211_channel my_2ghz_channels[] = {
+	{ .band = NL80211_BAND_2GHZ, .center_freq = 2412, .hw_value = 1 },
+	{ .band = NL80211_BAND_2GHZ, .center_freq = 2417, .hw_value = 2 },
+	{ .band = NL80211_BAND_2GHZ, .center_freq = 2422, .hw_value = 3 },
+	/* ... channels 4-13 ... */
+};
+
+/* Supported rates for 2.4 GHz */
+static struct ieee80211_rate my_2ghz_rates[] = {
+	{ .bitrate = 10 },   /* 1 Mbps */
+	{ .bitrate = 20 },   /* 2 Mbps */
+	{ .bitrate = 55 },   /* 5.5 Mbps */
+	{ .bitrate = 110 },  /* 11 Mbps */
+	{ .bitrate = 60 },   /* 6 Mbps */
+	{ .bitrate = 90 },   /* 9 Mbps */
+	{ .bitrate = 120 },  /* 12 Mbps */
+	/* ... more rates ... */
+};
+
+/* 2.4 GHz band definition */
+static struct ieee80211_supported_band my_band_2ghz = {
+	.channels = my_2ghz_channels,
+	.n_channels = ARRAY_SIZE(my_2ghz_channels),
+	.bitrates = my_2ghz_rates,
+	.n_bitrates = ARRAY_SIZE(my_2ghz_rates),
+	.ht_cap = {
+		.cap = IEEE80211_HT_CAP_SGI_20 |
+		       IEEE80211_HT_CAP_SGI_40 |
+		       IEEE80211_HT_CAP_SUP_WIDTH_20_40,
+		.ht_supported = true,
+	},
+};
+</code></pre>
+<hr />
+<h2 id="mac80211"><a class="header" href="#mac80211">mac80211</a></h2>
+<h3 id="overview-1"><a class="header" href="#overview-1">Overview</a></h3>
+<p>mac80211 is a framework for SoftMAC 802.11 drivers. It implements the MAC layer so drivers only need to implement hardware-specific operations.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Frame handling</strong>: Beacon, probe, authentication, association</li>
+<li><strong>Encryption</strong>: WEP, TKIP, CCMP (AES)</li>
+<li><strong>Power save</strong>: PS-Poll, U-APSD</li>
+<li><strong>Aggregation</strong>: A-MPDU, A-MSDU</li>
+<li><strong>Rate control</strong>: Minstrel, Minstrel HT</li>
+<li><strong>Quality of Service</strong>: WMM/802.11e</li>
+<li><strong>Block ACK</strong>: Aggregation acknowledgment</li>
+</ul>
+<h3 id="core-data-structures"><a class="header" href="#core-data-structures">Core Data Structures</a></h3>
+<pre><code class="language-c">#include &lt;net/mac80211.h&gt;
+
+/* Hardware structure */
+struct ieee80211_hw {
+	struct ieee80211_conf conf;
+	struct wiphy *wiphy;
+	const char *rate_control_algorithm;
+	void *priv;
+	unsigned long flags;
+
+	/* Queues */
+	u16 queues;
+	u16 max_listen_interval;
+	s8 max_signal;
+
+	/* TX aggregation */
+	u8 max_rx_aggregation_subframes;
+	u8 max_tx_aggregation_subframes;
+
+	/* Offload capabilities */
+	u32 offchannel_tx_hw_queue;
+	netdev_features_t netdev_features;
+};
+
+/* Virtual interface (VIF) */
+struct ieee80211_vif {
+	enum nl80211_iftype type;
+	struct ieee80211_bss_conf bss_conf;
+	u8 addr[ETH_ALEN];
+	bool p2p;
+
+	/* Driver private data */
+	u8 drv_priv[0] __aligned(sizeof(void *));
+};
+
+/* BSS configuration */
+struct ieee80211_bss_conf {
+	u8 bssid[ETH_ALEN];
+	bool assoc;
+	u16 aid;
+
+	bool use_cts_prot;
+	bool use_short_preamble;
+	bool use_short_slot;
+	bool enable_beacon;
+
+	u16 beacon_int;
+	u8 dtim_period;
+
+	u32 basic_rates;
+	u32 beacon_rate;
+
+	struct ieee80211_p2p_noa_attr p2p_noa_attr;
+};
+
+/* Station information */
+struct ieee80211_sta {
+	u8 addr[ETH_ALEN];
+	u16 aid;
+	u16 max_amsdu_len;
+
+	struct ieee80211_sta_ht_cap ht_cap;
+	struct ieee80211_sta_vht_cap vht_cap;
+
+	u8 max_sp;
+	u8 rx_nss;
+
+	/* Driver private data */
+	u8 drv_priv[0] __aligned(sizeof(void *));
+};
+
+/* TX info - attached to each TX skb */
+struct ieee80211_tx_info {
+	u32 flags;
+	u8 band;
+
+	struct ieee80211_tx_rate rates[IEEE80211_TX_MAX_RATES];
+
+	union {
+		struct {
+			struct ieee80211_vif *vif;
+			struct ieee80211_key_conf *hw_key;
+		} control;
+		struct {
+			u64 cookie;
+		} ack;
+		struct {
+			struct ieee80211_tx_rate rates[IEEE80211_TX_MAX_RATES];
+			u8 ack_signal;
+		} status;
+	};
+};
+
+/* RX status - filled by driver */
+struct ieee80211_rx_status {
+	u64 mactime;
+	u32 device_timestamp;
+	u16 flag;
+	u16 freq;
+	u8 rate_idx;
+	u8 vht_nss;
+	u8 rx_flags;
+	u8 band;
+	u8 antenna;
+	s8 signal;
+	u8 chains;
+	s8 chain_signal[IEEE80211_MAX_CHAINS];
+};
+</code></pre>
+<h3 id="ieee80211_ops---driver-operations"><a class="header" href="#ieee80211_ops---driver-operations">ieee80211_ops - Driver Operations</a></h3>
+<pre><code class="language-c">struct ieee80211_ops {
+	/* Basic operations */
+	int (*start)(struct ieee80211_hw *hw);
+	void (*stop)(struct ieee80211_hw *hw);
+
+	/* Interface handling */
+	int (*add_interface)(struct ieee80211_hw *hw,
+			     struct ieee80211_vif *vif);
+	void (*remove_interface)(struct ieee80211_hw *hw,
+				 struct ieee80211_vif *vif);
+
+	/* Configuration */
+	int (*config)(struct ieee80211_hw *hw, u32 changed);
+	void (*bss_info_changed)(struct ieee80211_hw *hw,
+				 struct ieee80211_vif *vif,
+				 struct ieee80211_bss_conf *info,
+				 u32 changed);
+
+	/* TX/RX */
+	void (*tx)(struct ieee80211_hw *hw,
+		   struct ieee80211_tx_control *control,
+		   struct sk_buff *skb);
+
+	int (*set_key)(struct ieee80211_hw *hw,
+		       enum set_key_cmd cmd,
+		       struct ieee80211_vif *vif,
+		       struct ieee80211_sta *sta,
+		       struct ieee80211_key_conf *key);
+
+	/* Scanning */
+	void (*sw_scan_start)(struct ieee80211_hw *hw,
+			      struct ieee80211_vif *vif,
+			      const u8 *mac_addr);
+	void (*sw_scan_complete)(struct ieee80211_hw *hw,
+				 struct ieee80211_vif *vif);
+
+	int (*hw_scan)(struct ieee80211_hw *hw,
+		       struct ieee80211_vif *vif,
+		       struct ieee80211_scan_request *req);
+
+	/* Aggregation */
+	int (*ampdu_action)(struct ieee80211_hw *hw,
+			    struct ieee80211_vif *vif,
+			    struct ieee80211_ampdu_params *params);
+
+	/* Station management */
+	int (*sta_add)(struct ieee80211_hw *hw,
+		       struct ieee80211_vif *vif,
+		       struct ieee80211_sta *sta);
+
+	int (*sta_remove)(struct ieee80211_hw *hw,
+			  struct ieee80211_vif *vif,
+			  struct ieee80211_sta *sta);
+
+	void (*sta_notify)(struct ieee80211_hw *hw,
+			   struct ieee80211_vif *vif,
+			   enum sta_notify_cmd cmd,
+			   struct ieee80211_sta *sta);
+
+	/* Power management */
+	int (*set_rts_threshold)(struct ieee80211_hw *hw, u32 value);
+	void (*set_coverage_class)(struct ieee80211_hw *hw, s16 coverage_class);
+
+	/* Multicast filter */
+	void (*configure_filter)(struct ieee80211_hw *hw,
+				 unsigned int changed_flags,
+				 unsigned int *total_flags,
+				 u64 multicast);
+};
+</code></pre>
+<h3 id="registering-with-mac80211"><a class="header" href="#registering-with-mac80211">Registering with mac80211</a></h3>
+<pre><code class="language-c">static const struct ieee80211_ops my_ops = {
+	.start = my_start,
+	.stop = my_stop,
+	.add_interface = my_add_interface,
+	.remove_interface = my_remove_interface,
+	.config = my_config,
+	.bss_info_changed = my_bss_info_changed,
+	.tx = my_tx,
+	.set_key = my_set_key,
+	/* ... */
+};
+
+static int my_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+{
+	struct ieee80211_hw *hw;
+	struct my_priv *priv;
+	int ret;
+
+	/* Allocate hardware structure */
+	hw = ieee80211_alloc_hw(sizeof(*priv), &amp;my_ops);
+	if (!hw)
+		return -ENOMEM;
+
+	priv = hw-&gt;priv;
+	priv-&gt;pdev = pdev;
+
+	/* Set hardware capabilities */
+	hw-&gt;flags = IEEE80211_HW_SIGNAL_DBM |
+		    IEEE80211_HW_AMPDU_AGGREGATION |
+		    IEEE80211_HW_SUPPORTS_PS |
+		    IEEE80211_HW_MFP_CAPABLE;
+
+	hw-&gt;queues = 4;  /* Number of TX queues */
+	hw-&gt;max_rates = 4;
+	hw-&gt;max_rate_tries = 7;
+
+	/* Set channel bands */
+	hw-&gt;wiphy-&gt;bands[NL80211_BAND_2GHZ] = &amp;my_band_2ghz;
+	hw-&gt;wiphy-&gt;bands[NL80211_BAND_5GHZ] = &amp;my_band_5ghz;
+
+	/* Set supported interface modes */
+	hw-&gt;wiphy-&gt;interface_modes =
+		BIT(NL80211_IFTYPE_STATION) |
+		BIT(NL80211_IFTYPE_AP) |
+		BIT(NL80211_IFTYPE_P2P_CLIENT) |
+		BIT(NL80211_IFTYPE_P2P_GO);
+
+	/* Register hardware */
+	ret = ieee80211_register_hw(hw);
+	if (ret) {
+		ieee80211_free_hw(hw);
+		return ret;
+	}
+
+	return 0;
+}
+</code></pre>
+<h3 id="tx-path-implementation"><a class="header" href="#tx-path-implementation">TX Path Implementation</a></h3>
+<pre><code class="language-c">static void my_tx(struct ieee80211_hw *hw,
+		  struct ieee80211_tx_control *control,
+		  struct sk_buff *skb)
+{
+	struct my_priv *priv = hw-&gt;priv;
+	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
+	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb-&gt;data;
+
+	/* Get TX rate from mac80211 rate control */
+	u8 rate_idx = info-&gt;control.rates[0].idx;
+
+	/* Determine hardware queue */
+	u8 queue = skb_get_queue_mapping(skb);
+
+	/* Add hardware-specific TX descriptor */
+	struct my_tx_desc *desc = (struct my_tx_desc *)skb_push(skb, sizeof(*desc));
+	memset(desc, 0, sizeof(*desc));
+
+	desc-&gt;rate = rate_idx;
+	desc-&gt;retry_limit = info-&gt;control.rates[0].count;
+
+	/* Handle encryption if needed */
+	if (info-&gt;control.hw_key) {
+		/* Hardware encryption */
+		desc-&gt;key_idx = info-&gt;control.hw_key-&gt;hw_key_idx;
+		desc-&gt;flags |= TX_FLAGS_ENCRYPT;
+	}
+
+	/* Submit to hardware TX queue */
+	spin_lock_bh(&amp;priv-&gt;tx_lock);
+
+	if (my_tx_queue_full(priv, queue)) {
+		/* Queue full, stop mac80211 queue */
+		ieee80211_stop_queue(hw, queue);
+		spin_unlock_bh(&amp;priv-&gt;tx_lock);
+		dev_kfree_skb_any(skb);
+		return;
+	}
+
+	/* Add to DMA ring */
+	my_tx_add_to_ring(priv, queue, skb);
+
+	/* Kick hardware */
+	my_tx_kick(priv, queue);
+
+	spin_unlock_bh(&amp;priv-&gt;tx_lock);
+}
+
+/* TX completion interrupt handler */
+static void my_tx_complete(struct my_priv *priv)
+{
+	struct ieee80211_hw *hw = priv-&gt;hw;
+	struct sk_buff *skb;
+	struct ieee80211_tx_info *info;
+	u8 queue;
+
+	while ((skb = my_get_completed_frame(priv, &amp;queue))) {
+		info = IEEE80211_SKB_CB(skb);
+
+		/* Fill in TX status */
+		if (my_tx_was_successful(skb)) {
+			info-&gt;flags |= IEEE80211_TX_STAT_ACK;
+		}
+
+		/* Remove hardware TX descriptor */
+		skb_pull(skb, sizeof(struct my_tx_desc));
+
+		/* Report to mac80211 */
+		ieee80211_tx_status(hw, skb);
+
+		/* Wake queue if needed */
+		if (ieee80211_queue_stopped(hw, queue))
+			ieee80211_wake_queue(hw, queue);
+	}
+}
+</code></pre>
+<h3 id="rx-path-implementation"><a class="header" href="#rx-path-implementation">RX Path Implementation</a></h3>
+<pre><code class="language-c">static void my_rx_tasklet(unsigned long data)
+{
+	struct my_priv *priv = (struct my_priv *)data;
+	struct ieee80211_hw *hw = priv-&gt;hw;
+	struct sk_buff *skb;
+	struct ieee80211_rx_status *rx_status;
+	struct my_rx_desc *desc;
+
+	while ((skb = my_get_rx_frame(priv))) {
+		desc = (struct my_rx_desc *)skb-&gt;data;
+
+		/* Allocate rx_status */
+		rx_status = IEEE80211_SKB_RXCB(skb);
+		memset(rx_status, 0, sizeof(*rx_status));
+
+		/* Fill in RX status from hardware descriptor */
+		rx_status-&gt;freq = ieee80211_channel_to_frequency(
+					desc-&gt;channel,
+					NL80211_BAND_2GHZ);
+		rx_status-&gt;band = NL80211_BAND_2GHZ;
+		rx_status-&gt;signal = desc-&gt;rssi;
+		rx_status-&gt;rate_idx = desc-&gt;rate;
+		rx_status-&gt;antenna = desc-&gt;antenna;
+
+		/* Set flags */
+		if (desc-&gt;flags &amp; RX_FLAG_SHORT_PREAMBLE)
+			rx_status-&gt;flag |= RX_FLAG_SHORTPRE;
+
+		if (desc-&gt;flags &amp; RX_FLAG_DECRYPTED) {
+			rx_status-&gt;flag |= RX_FLAG_DECRYPTED;
+			rx_status-&gt;flag |= RX_FLAG_IV_STRIPPED;
+			rx_status-&gt;flag |= RX_FLAG_MMIC_STRIPPED;
+		}
+
+		/* Remove hardware RX descriptor */
+		skb_pull(skb, sizeof(*desc));
+
+		/* Pass to mac80211 */
+		ieee80211_rx(hw, skb);
+	}
+}
+</code></pre>
+<hr />
+<h2 id="driver-development"><a class="header" href="#driver-development">Driver Development</a></h2>
+<h3 id="fullmac-driver-example"><a class="header" href="#fullmac-driver-example">FullMAC Driver Example</a></h3>
+<p>FullMAC drivers implement their own MAC and only use cfg80211.</p>
+<pre><code class="language-c">#include &lt;net/cfg80211.h&gt;
+
+/* FullMAC driver - implements own MAC */
+static int my_fullmac_scan(struct wiphy *wiphy,
+			   struct cfg80211_scan_request *request)
+{
+	struct my_priv *priv = wiphy_priv(wiphy);
+	int i;
+
+	/* Send scan command to firmware */
+	for (i = 0; i &lt; request-&gt;n_ssids; i++) {
+		my_fw_scan_ssid(priv,
+				request-&gt;ssids[i].ssid,
+				request-&gt;ssids[i].ssid_len);
+	}
+
+	for (i = 0; i &lt; request-&gt;n_channels; i++) {
+		my_fw_scan_channel(priv,
+				   request-&gt;channels[i]-&gt;center_freq);
+	}
+
+	my_fw_start_scan(priv);
+
+	return 0;
+}
+
+/* Firmware event: scan result */
+static void my_handle_scan_result(struct my_priv *priv,
+				   struct my_scan_result *result)
+{
+	struct wiphy *wiphy = priv-&gt;wiphy;
+	struct cfg80211_bss *bss;
+	struct ieee80211_channel *channel;
+	struct cfg80211_inform_bss data = {};
+
+	channel = ieee80211_get_channel(wiphy, result-&gt;frequency);
+	if (!channel)
+		return;
+
+	/* Inform cfg80211 about BSS */
+	bss = cfg80211_inform_bss_data(
+		wiphy,
+		&amp;data,
+		CFG80211_BSS_FTYPE_UNKNOWN,
+		result-&gt;bssid,
+		result-&gt;tsf,
+		result-&gt;capability,
+		result-&gt;beacon_interval,
+		result-&gt;ie,
+		result-&gt;ie_len,
+		result-&gt;signal,
+		GFP_KERNEL);
+
+	cfg80211_put_bss(wiphy, bss);
+}
+
+/* Firmware event: scan complete */
+static void my_handle_scan_complete(struct my_priv *priv)
+{
+	struct cfg80211_scan_info info = {
+		.aborted = false,
+	};
+
+	cfg80211_scan_done(priv-&gt;scan_request, &amp;info);
+	priv-&gt;scan_request = NULL;
+}
+
+/* Connect */
+static int my_fullmac_connect(struct wiphy *wiphy,
+			      struct net_device *dev,
+			      struct cfg80211_connect_params *sme)
+{
+	struct my_priv *priv = wiphy_priv(wiphy);
+
+	/* Send connect command to firmware */
+	my_fw_connect(priv,
+		      sme-&gt;ssid, sme-&gt;ssid_len,
+		      sme-&gt;bssid,
+		      sme-&gt;channel,
+		      sme-&gt;auth_type);
+
+	return 0;
+}
+
+/* Firmware event: connected */
+static void my_handle_connected(struct my_priv *priv)
+{
+	cfg80211_connect_result(priv-&gt;dev,
+				priv-&gt;bssid,
+				NULL, 0,
+				NULL, 0,
+				WLAN_STATUS_SUCCESS,
+				GFP_KERNEL);
+}
+
+/* Firmware event: disconnected */
+static void my_handle_disconnected(struct my_priv *priv, u16 reason)
+{
+	cfg80211_disconnected(priv-&gt;dev, reason, NULL, 0, true, GFP_KERNEL);
+}
+</code></pre>
+<h3 id="softmac-driver-example"><a class="header" href="#softmac-driver-example">SoftMAC Driver Example</a></h3>
+<p>SoftMAC drivers use mac80211 for MAC implementation.</p>
+<pre><code class="language-c">#include &lt;net/mac80211.h&gt;
+
+static int my_softmac_start(struct ieee80211_hw *hw)
+{
+	struct my_priv *priv = hw-&gt;priv;
+
+	/* Power on hardware */
+	my_hw_power_on(priv);
+
+	/* Load firmware if needed */
+	my_load_firmware(priv);
+
+	/* Initialize hardware */
+	my_hw_init(priv);
+
+	/* Enable interrupts */
+	my_enable_interrupts(priv);
+
+	return 0;
+}
+
+static void my_softmac_stop(struct ieee80211_hw *hw)
+{
+	struct my_priv *priv = hw-&gt;priv;
+
+	/* Disable interrupts */
+	my_disable_interrupts(priv);
+
+	/* Shutdown hardware */
+	my_hw_shutdown(priv);
+
+	/* Power off */
+	my_hw_power_off(priv);
+}
+
+static int my_softmac_add_interface(struct ieee80211_hw *hw,
+				    struct ieee80211_vif *vif)
+{
+	struct my_priv *priv = hw-&gt;priv;
+
+	/* Set MAC address */
+	my_hw_set_mac_address(priv, vif-&gt;addr);
+
+	/* Set interface type */
+	switch (vif-&gt;type) {
+	case NL80211_IFTYPE_STATION:
+		my_hw_set_mode(priv, MODE_STA);
+		break;
+	case NL80211_IFTYPE_AP:
+		my_hw_set_mode(priv, MODE_AP);
+		break;
+	default:
+		return -EOPNOTSUPP;
+	}
+
+	return 0;
+}
+
+static void my_softmac_bss_info_changed(struct ieee80211_hw *hw,
+					struct ieee80211_vif *vif,
+					struct ieee80211_bss_conf *info,
+					u32 changed)
+{
+	struct my_priv *priv = hw-&gt;priv;
+
+	if (changed &amp; BSS_CHANGED_BSSID) {
+		/* BSSID changed */
+		my_hw_set_bssid(priv, info-&gt;bssid);
+	}
+
+	if (changed &amp; BSS_CHANGED_ASSOC) {
+		if (info-&gt;assoc) {
+			/* Associated */
+			my_hw_set_associated(priv, true);
+			my_hw_set_aid(priv, info-&gt;aid);
+		} else {
+			/* Disassociated */
+			my_hw_set_associated(priv, false);
+		}
+	}
+
+	if (changed &amp; BSS_CHANGED_BEACON_INT) {
+		/* Beacon interval changed */
+		my_hw_set_beacon_interval(priv, info-&gt;beacon_int);
+	}
+
+	if (changed &amp; BSS_CHANGED_ERP_CTS_PROT) {
+		/* CTS protection changed */
+		my_hw_set_cts_protection(priv, info-&gt;use_cts_prot);
+	}
+
+	if (changed &amp; BSS_CHANGED_ERP_SLOT) {
+		/* Slot time changed */
+		my_hw_set_short_slot(priv, info-&gt;use_short_slot);
+	}
+}
+
+static int my_softmac_config(struct ieee80211_hw *hw, u32 changed)
+{
+	struct my_priv *priv = hw-&gt;priv;
+	struct ieee80211_conf *conf = &amp;hw-&gt;conf;
+
+	if (changed &amp; IEEE80211_CONF_CHANGE_CHANNEL) {
+		/* Channel changed */
+		struct ieee80211_channel *chan = conf-&gt;chandef.chan;
+		my_hw_set_channel(priv, chan-&gt;center_freq);
+	}
+
+	if (changed &amp; IEEE80211_CONF_CHANGE_POWER) {
+		/* TX power changed */
+		my_hw_set_tx_power(priv, conf-&gt;power_level);
+	}
+
+	if (changed &amp; IEEE80211_CONF_CHANGE_IDLE) {
+		/* Idle state changed */
+		if (conf-&gt;flags &amp; IEEE80211_CONF_IDLE)
+			my_hw_enter_idle(priv);
+		else
+			my_hw_exit_idle(priv);
+	}
+
+	return 0;
+}
+</code></pre>
+<hr />
+<h2 id="nl80211"><a class="header" href="#nl80211">nl80211</a></h2>
+<p>nl80211 is the netlink-based configuration interface for wireless devices.</p>
+<h3 id="user-space-tools"><a class="header" href="#user-space-tools">User Space Tools</a></h3>
+<pre><code class="language-bash"># iw - nl80211 configuration utility
+
+# List wireless devices
+iw dev
+
+# Scan for networks
+iw dev wlan0 scan
+
+# Connect to network
+iw dev wlan0 connect MyNetwork
+
+# Set channel
+iw dev wlan0 set channel 6
+
+# Set TX power
+iw dev wlan0 set txpower fixed 2000  # 20 dBm
+
+# Create AP
+iw dev wlan0 set type __ap
+ip link set wlan0 up
+iw dev wlan0 set channel 6
+
+# Monitor mode
+iw dev wlan0 set type monitor
+ip link set wlan0 up
+
+# Station info
+iw dev wlan0 station dump
+
+# Link statistics
+iw dev wlan0 link
+
+# Survey (channel usage)
+iw dev wlan0 survey dump
+</code></pre>
+<h3 id="nl80211-in-code"><a class="header" href="#nl80211-in-code">nl80211 in Code</a></h3>
+<pre><code class="language-c">#include &lt;net/nl80211.h&gt;
+
+/* User space typically uses libnl */
+#include &lt;netlink/netlink.h&gt;
+#include &lt;netlink/genl/genl.h&gt;
+#include &lt;netlink/genl/ctrl.h&gt;
+
+/* Send scan request */
+static int nl80211_scan(const char *ifname)
+{
+	struct nl_sock *sk;
+	struct nl_msg *msg;
+	int ret, family_id;
+
+	sk = nl_socket_alloc();
+	genl_connect(sk);
+
+	family_id = genl_ctrl_resolve(sk, "nl80211");
+
+	msg = nlmsg_alloc();
+	genlmsg_put(msg, 0, 0, family_id, 0, 0, NL80211_CMD_TRIGGER_SCAN, 0);
+
+	nla_put_u32(msg, NL80211_ATTR_IFINDEX, if_nametoindex(ifname));
+
+	ret = nl_send_auto(sk, msg);
+	nlmsg_free(msg);
+
+	nl_socket_free(sk);
+
+	return ret;
+}
+</code></pre>
+<hr />
+<h2 id="regulatory-framework"><a class="header" href="#regulatory-framework">Regulatory Framework</a></h2>
+<p>The regulatory framework enforces regional wireless regulations.</p>
+<h3 id="regulatory-database"><a class="header" href="#regulatory-database">Regulatory Database</a></h3>
+<pre><code class="language-c">/* Regulatory domain definition */
+static const struct ieee80211_regdomain my_regdom = {
+	.n_reg_rules = 2,
+	.alpha2 = "US",
+	.reg_rules = {
+		/* 2.4 GHz */
+		REG_RULE(2412-10, 2462+10, 40, 6, 20, 0),
+		/* 5 GHz */
+		REG_RULE(5180-10, 5320+10, 160, 6, 23, 0),
+	}
+};
+
+/* Set regulatory domain */
+static void my_set_regdom(struct wiphy *wiphy)
+{
+	regulatory_hint(wiphy, "US");
+}
+
+/* Regulatory notifier */
+static void my_reg_notifier(struct wiphy *wiphy,
+			    struct regulatory_request *request)
+{
+	struct my_priv *priv = wiphy_priv(wiphy);
+
+	pr_info("Regulatory domain: %c%c\n",
+		request-&gt;alpha2[0], request-&gt;alpha2[1]);
+
+	/* Update hardware with new regulatory settings */
+	my_hw_update_regulatory(priv, request);
+}
+</code></pre>
+<h3 id="country-ie-handling"><a class="header" href="#country-ie-handling">Country IE Handling</a></h3>
+<pre><code class="language-c">/* Parse country IE from beacon */
+static void my_parse_country_ie(struct my_priv *priv,
+				const u8 *country_ie, size_t len)
+{
+	char alpha2[2];
+	struct ieee80211_regdomain *rd;
+
+	if (len &lt; 6)
+		return;
+
+	/* Extract country code */
+	alpha2[0] = country_ie[0];
+	alpha2[1] = country_ie[1];
+
+	/* Hint regulatory domain */
+	regulatory_hint(priv-&gt;wiphy, alpha2);
+}
+</code></pre>
+<hr />
+<h2 id="power-management"><a class="header" href="#power-management">Power Management</a></h2>
+<h3 id="station-power-save"><a class="header" href="#station-power-save">Station Power Save</a></h3>
+<pre><code class="language-c">/* Enable power save */
+static int my_set_power_mgmt(struct wiphy *wiphy,
+			     struct net_device *dev,
+			     bool enabled, int timeout)
+{
+	struct my_priv *priv = wiphy_priv(wiphy);
+
+	if (enabled) {
+		my_hw_enable_power_save(priv);
+		my_hw_set_ps_timeout(priv, timeout);
+	} else {
+		my_hw_disable_power_save(priv);
+	}
+
+	return 0;
+}
+
+/* Handle beacon from AP (in power save mode) */
+static void my_handle_beacon(struct my_priv *priv, struct sk_buff *skb)
+{
+	struct ieee80211_mgmt *mgmt = (void *)skb-&gt;data;
+	u8 *tim_ie;
+	bool has_buffered;
+
+	/* Find TIM IE */
+	tim_ie = my_find_ie(mgmt-&gt;u.beacon.variable,
+			    skb-&gt;len - offsetof(struct ieee80211_mgmt,
+						u.beacon.variable),
+			    WLAN_EID_TIM);
+
+	if (!tim_ie)
+		return;
+
+	/* Check if AP has buffered frames */
+	has_buffered = my_check_tim(tim_ie, priv-&gt;aid);
+
+	if (has_buffered) {
+		/* Send PS-Poll to retrieve frames */
+		my_send_pspoll(priv);
+	}
+}
+</code></pre>
+<h3 id="ap-power-save"><a class="header" href="#ap-power-save">AP Power Save</a></h3>
+<pre><code class="language-c">/* Client entered power save */
+static void my_sta_ps_start(struct my_priv *priv, struct ieee80211_sta *sta)
+{
+	/* Mark station as sleeping */
+	set_sta_flag(sta, WLAN_STA_PS_STA);
+
+	/* Queue frames instead of transmitting */
+}
+
+/* Client exited power save */
+static void my_sta_ps_end(struct my_priv *priv, struct ieee80211_sta *sta)
+{
+	/* Mark station as awake */
+	clear_sta_flag(sta, WLAN_STA_PS_STA);
+
+	/* Transmit buffered frames */
+	my_deliver_buffered_frames(priv, sta);
+}
+</code></pre>
+<hr />
+<h2 id="scanning"><a class="header" href="#scanning">Scanning</a></h2>
+<h3 id="active-scan"><a class="header" href="#active-scan">Active Scan</a></h3>
+<pre><code class="language-c">/* Send probe request */
+static void my_send_probe_req(struct my_priv *priv,
+			      const u8 *ssid, size_t ssid_len,
+			      u32 freq)
+{
+	struct sk_buff *skb;
+	struct ieee80211_mgmt *mgmt;
+	u8 *pos;
+
+	skb = dev_alloc_skb(200);
+	mgmt = (struct ieee80211_mgmt *)skb_put(skb,
+		offsetof(struct ieee80211_mgmt, u.probe_req.variable));
+
+	/* Fill in header */
+	mgmt-&gt;frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT |
+					  IEEE80211_STYPE_PROBE_REQ);
+	eth_broadcast_addr(mgmt-&gt;da);
+	memcpy(mgmt-&gt;sa, priv-&gt;mac_addr, ETH_ALEN);
+	eth_broadcast_addr(mgmt-&gt;bssid);
+
+	/* Add SSID IE */
+	pos = skb_put(skb, 2 + ssid_len);
+	*pos++ = WLAN_EID_SSID;
+	*pos++ = ssid_len;
+	memcpy(pos, ssid, ssid_len);
+
+	/* Add supported rates IE */
+	/* ... */
+
+	/* Transmit */
+	my_tx_mgmt_frame(priv, skb, freq);
+}
+</code></pre>
+<h3 id="passive-scan"><a class="header" href="#passive-scan">Passive Scan</a></h3>
+<pre><code class="language-c">/* Listen for beacons on channel */
+static void my_passive_scan_channel(struct my_priv *priv, u32 freq)
+{
+	/* Switch to channel */
+	my_hw_set_channel(priv, freq);
+
+	/* Wait for beacons (typically 100-200ms per channel) */
+	msleep(100);
+
+	/* Process received beacons in RX handler */
+}
+</code></pre>
+<hr />
+<h2 id="connection-management"><a class="header" href="#connection-management">Connection Management</a></h2>
+<h3 id="station-connection-flow"><a class="header" href="#station-connection-flow">Station Connection Flow</a></h3>
+<pre><code class="language-c">/* 1. Authentication */
+static int my_authenticate(struct my_priv *priv,
+			   const u8 *bssid,
+			   enum nl80211_auth_type auth_type)
+{
+	struct sk_buff *skb;
+	struct ieee80211_mgmt *mgmt;
+
+	skb = dev_alloc_skb(256);
+	mgmt = (struct ieee80211_mgmt *)skb_put(skb,
+		offsetof(struct ieee80211_mgmt, u.auth.variable));
+
+	mgmt-&gt;frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT |
+					  IEEE80211_STYPE_AUTH);
+	memcpy(mgmt-&gt;da, bssid, ETH_ALEN);
+	memcpy(mgmt-&gt;sa, priv-&gt;mac_addr, ETH_ALEN);
+	memcpy(mgmt-&gt;bssid, bssid, ETH_ALEN);
+
+	mgmt-&gt;u.auth.auth_alg = cpu_to_le16(auth_type);
+	mgmt-&gt;u.auth.auth_transaction = cpu_to_le16(1);
+	mgmt-&gt;u.auth.status_code = 0;
+
+	my_tx_mgmt_frame(priv, skb, priv-&gt;channel_freq);
+
+	return 0;
+}
+
+/* 2. Handle authentication response */
+static void my_handle_auth_resp(struct my_priv *priv, struct sk_buff *skb)
+{
+	struct ieee80211_mgmt *mgmt = (void *)skb-&gt;data;
+	u16 status = le16_to_cpu(mgmt-&gt;u.auth.status_code);
+
+	if (status == WLAN_STATUS_SUCCESS) {
+		/* Authenticated, proceed to association */
+		cfg80211_tx_mlme_mgmt(priv-&gt;dev, skb-&gt;data, skb-&gt;len);
+		my_associate(priv, mgmt-&gt;bssid);
+	} else {
+		cfg80211_tx_mlme_mgmt(priv-&gt;dev, skb-&gt;data, skb-&gt;len);
+	}
+}
+
+/* 3. Association */
+static int my_associate(struct my_priv *priv, const u8 *bssid)
+{
+	struct sk_buff *skb;
+	struct ieee80211_mgmt *mgmt;
+	u8 *pos;
+
+	skb = dev_alloc_skb(512);
+	mgmt = (struct ieee80211_mgmt *)skb_put(skb,
+		offsetof(struct ieee80211_mgmt, u.assoc_req.variable));
+
+	mgmt-&gt;frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT |
+					  IEEE80211_STYPE_ASSOC_REQ);
+	memcpy(mgmt-&gt;da, bssid, ETH_ALEN);
+	memcpy(mgmt-&gt;sa, priv-&gt;mac_addr, ETH_ALEN);
+	memcpy(mgmt-&gt;bssid, bssid, ETH_ALEN);
+
+	mgmt-&gt;u.assoc_req.capab_info = cpu_to_le16(WLAN_CAPABILITY_ESS);
+	mgmt-&gt;u.assoc_req.listen_interval = cpu_to_le16(10);
+
+	pos = mgmt-&gt;u.assoc_req.variable;
+
+	/* Add SSID IE */
+	/* Add supported rates IE */
+	/* Add HT capabilities IE */
+	/* Add VHT capabilities IE */
+	/* ... */
+
+	my_tx_mgmt_frame(priv, skb, priv-&gt;channel_freq);
+
+	return 0;
+}
+
+/* 4. Handle association response */
+static void my_handle_assoc_resp(struct my_priv *priv, struct sk_buff *skb)
+{
+	struct ieee80211_mgmt *mgmt = (void *)skb-&gt;data;
+	u16 status = le16_to_cpu(mgmt-&gt;u.assoc_resp.status_code);
+	u16 aid = le16_to_cpu(mgmt-&gt;u.assoc_resp.aid);
+
+	if (status == WLAN_STATUS_SUCCESS) {
+		priv-&gt;aid = aid &amp; 0x3fff;
+		cfg80211_connect_result(priv-&gt;dev,
+					mgmt-&gt;bssid,
+					NULL, 0, NULL, 0,
+					status, GFP_KERNEL);
+	} else {
+		cfg80211_connect_result(priv-&gt;dev,
+					mgmt-&gt;bssid,
+					NULL, 0, NULL, 0,
+					status, GFP_KERNEL);
+	}
+}
+</code></pre>
+<hr />
+<h2 id="mesh-networking"><a class="header" href="#mesh-networking">Mesh Networking</a></h2>
+<pre><code class="language-c">/* Start mesh interface */
+static int my_join_mesh(struct wiphy *wiphy,
+			struct net_device *dev,
+			const struct mesh_config *conf,
+			const struct mesh_setup *setup)
+{
+	struct my_priv *priv = wiphy_priv(wiphy);
+
+	/* Set mesh ID */
+	memcpy(priv-&gt;mesh_id, setup-&gt;mesh_id, setup-&gt;mesh_id_len);
+	priv-&gt;mesh_id_len = setup-&gt;mesh_id_len;
+
+	/* Enable mesh mode in hardware */
+	my_hw_enable_mesh(priv);
+
+	/* Start beaconing */
+	my_start_mesh_beaconing(priv);
+
+	return 0;
+}
+
+/* Handle mesh peering */
+static void my_mesh_peer_open(struct my_priv *priv,
+			      const u8 *peer_addr)
+{
+	/* Send peer link open frame */
+	my_send_mesh_peering_frame(priv, peer_addr,
+				    MESH_PEERING_OPEN);
+}
+</code></pre>
+<hr />
+<h2 id="debugging"><a class="header" href="#debugging">Debugging</a></h2>
+<h3 id="enable-cfg80211-debug"><a class="header" href="#enable-cfg80211-debug">Enable cfg80211 Debug</a></h3>
+<pre><code class="language-bash"># Enable cfg80211 debug messages
+echo 'module cfg80211 +p' &gt; /sys/kernel/debug/dynamic_debug/control
+
+# Or at boot
+cfg80211.debug=0xffffffff
+</code></pre>
+<h3 id="enable-mac80211-debug"><a class="header" href="#enable-mac80211-debug">Enable mac80211 Debug</a></h3>
+<pre><code class="language-bash"># Enable mac80211 debug
+echo 'module mac80211 +p' &gt; /sys/kernel/debug/dynamic_debug/control
+
+# Or at module load
+modprobe mac80211 debug=0xffffffff
+
+# Debug categories (bitfield):
+# 0x00000001 - INFO
+# 0x00000002 - PS (power save)
+# 0x00000004 - HT (high throughput)
+# 0x00000008 - TX status
+</code></pre>
+<h3 id="driver-debug"><a class="header" href="#driver-debug">Driver Debug</a></h3>
+<pre><code class="language-c">/* Use dev_dbg for driver messages */
+dev_dbg(&amp;pdev-&gt;dev, "Channel: %d, Freq: %d\n", channel, freq);
+
+/* Conditional debugging */
+#ifdef DEBUG
+#define my_dbg(fmt, ...) pr_debug(fmt, ##__VA_ARGS__)
+#else
+#define my_dbg(fmt, ...) no_printk(fmt, ##__VA_ARGS__)
+#endif
+
+/* Rate control debugging */
+#ifdef CONFIG_MAC80211_RC_MINSTREL_DEBUGFS
+/* Rate stats available in debugfs */
+/* /sys/kernel/debug/ieee80211/phyX/netdev:wlanX/stations/&lt;MAC&gt;/rc_stats */
+#endif
+</code></pre>
+<h3 id="useful-debugfs-entries"><a class="header" href="#useful-debugfs-entries">Useful debugfs Entries</a></h3>
+<pre><code class="language-bash"># List all wireless devices
+ls /sys/kernel/debug/ieee80211/
+
+# Per-PHY info
+cat /sys/kernel/debug/ieee80211/phy0/hwflags
+cat /sys/kernel/debug/ieee80211/phy0/queues
+
+# Per-netdev info
+ls /sys/kernel/debug/ieee80211/phy0/netdev:wlan0/
+
+# Station info
+ls /sys/kernel/debug/ieee80211/phy0/netdev:wlan0/stations/
+
+# Rate control stats
+cat /sys/kernel/debug/ieee80211/phy0/netdev:wlan0/stations/&lt;MAC&gt;/rc_stats
+
+# Reset stats
+echo 1 &gt; /sys/kernel/debug/ieee80211/phy0/reset
+</code></pre>
+<h3 id="packet-capture"><a class="header" href="#packet-capture">Packet Capture</a></h3>
+<pre><code class="language-bash"># Monitor mode for packet capture
+iw dev wlan0 set type monitor
+ip link set wlan0 up
+iw dev wlan0 set channel 6
+
+# Capture with tcpdump
+tcpdump -i wlan0 -w capture.pcap
+
+# Or with wireshark
+wireshark -i wlan0 -k
+</code></pre>
+<hr />
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="driver-development-1"><a class="header" href="#driver-development-1">Driver Development</a></h3>
+<ol>
+<li><strong>Use mac80211 when possible</strong>: Unless hardware has a full MAC, use mac80211</li>
+<li><strong>Implement all required callbacks</strong>: Check return values</li>
+<li><strong>Handle errors gracefully</strong>: Don't crash the kernel</li>
+<li><strong>Test with multiple APs</strong>: Different vendors, security types</li>
+<li><strong>Support monitor mode</strong>: Essential for debugging</li>
+<li><strong>Implement regulatory</strong>: Country codes, power limits</li>
+<li><strong>Handle race conditions</strong>: Use proper locking</li>
+<li><strong>Clean up resources</strong>: On errors and removal</li>
+</ol>
+<h3 id="performance"><a class="header" href="#performance">Performance</a></h3>
+<ol>
+<li><strong>Enable hardware offloads</strong>: Encryption, aggregation</li>
+<li><strong>Use DMA efficiently</strong>: Minimize CPU involvement</li>
+<li><strong>Implement rate control</strong>: Or use mac80211's minstrel</li>
+<li><strong>Support A-MPDU/A-MSDU</strong>: For high throughput</li>
+<li><strong>Optimize interrupt handling</strong>: Use NAPI if possible</li>
+<li><strong>Enable power save</strong>: For battery-powered devices</li>
+</ol>
+<h3 id="security"><a class="header" href="#security">Security</a></h3>
+<ol>
+<li><strong>Never trust user input</strong>: Validate all parameters</li>
+<li><strong>Handle untrusted frames</strong>: Check lengths, types</li>
+<li><strong>Implement hardware encryption</strong>: When available</li>
+<li><strong>Support WPA3</strong>: Modern security standards</li>
+<li><strong>Protect management frames</strong>: 802.11w (PMF)</li>
+</ol>
+<hr />
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<ul>
+<li><strong>Kernel Documentation</strong>: <code>Documentation/networking/mac80211.rst</code></li>
+<li><strong>cfg80211 header</strong>: <code>include/net/cfg80211.h</code></li>
+<li><strong>mac80211 header</strong>: <code>include/net/mac80211.h</code></li>
+<li><strong>nl80211 header</strong>: <code>include/uapi/linux/nl80211.h</code></li>
+<li><strong>Example drivers</strong>: <code>drivers/net/wireless/</code>
+<ul>
+<li><code>ath/ath9k/</code> - mac80211 driver</li>
+<li><code>broadcom/brcm80211/brcmfmac/</code> - FullMAC driver</li>
+<li><code>intel/iwlwifi/</code> - Advanced mac80211 driver</li>
+</ul>
+</li>
+<li><strong>iw tool source</strong>: <a href="https://git.kernel.org/pub/scm/linux/kernel/git/jberg/iw.git">https://git.kernel.org/pub/scm/linux/kernel/git/jberg/iw.git</a></li>
+<li><strong>Regulatory database</strong>: <a href="https://git.kernel.org/pub/scm/linux/kernel/git/sforshee/wireless-regdb.git">https://git.kernel.org/pub/scm/linux/kernel/git/sforshee/wireless-regdb.git</a></li>
+</ul>
+<hr />
+<p>cfg80211 and mac80211 provide a robust framework for wireless driver development in Linux, handling much of the complex 802.11 protocol logic so drivers can focus on hardware-specific operations.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../linux/cross_compilation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../linux/commands.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../linux/cross_compilation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../linux/commands.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

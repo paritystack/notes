@@ -1,0 +1,1489 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Kernel Development Patterns - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="linux-kernel-development-patterns"><a class="header" href="#linux-kernel-development-patterns">Linux Kernel Development Patterns</a></h1>
+<p>Common patterns, idioms, and best practices used throughout the Linux kernel codebase.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#coding-style">Coding Style</a></li>
+<li><a href="#design-patterns">Design Patterns</a></li>
+<li><a href="#memory-management-patterns">Memory Management Patterns</a></li>
+<li><a href="#locking-and-synchronization">Locking and Synchronization</a></li>
+<li><a href="#error-handling">Error Handling</a></li>
+<li><a href="#device-driver-patterns">Device Driver Patterns</a></li>
+<li><a href="#data-structures">Data Structures</a></li>
+<li><a href="#kernel-apis">Kernel APIs</a></li>
+<li><a href="#debugging-patterns">Debugging Patterns</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+</ul>
+<hr />
+<h2 id="coding-style"><a class="header" href="#coding-style">Coding Style</a></h2>
+<h3 id="basic-rules"><a class="header" href="#basic-rules">Basic Rules</a></h3>
+<p>The Linux kernel has strict coding style guidelines documented in <code>Documentation/process/coding-style.rst</code>.</p>
+<p><strong>Indentation and Formatting:</strong></p>
+<pre><code class="language-c">// Use tabs (8 characters) for indentation, not spaces
+int function_name(int arg1, int arg2)
+{
+	int local_var;
+
+	if (condition) {
+		do_something();
+	} else {
+		do_something_else();
+	}
+
+	return 0;
+}
+</code></pre>
+<p><strong>Line Length:</strong></p>
+<pre><code class="language-c">// Prefer 80 columns, maximum 100 columns
+// Break long lines sensibly
+static const struct file_operations my_fops = {
+	.owner = THIS_MODULE,
+	.open = my_open,
+	.read = my_read,
+	.write = my_write,
+	.release = my_release,
+};
+</code></pre>
+<p><strong>Naming Conventions:</strong></p>
+<pre><code class="language-c">// Use descriptive, lowercase names with underscores
+int count_active_users(struct user_struct *user);
+
+// Global functions should be prefixed with subsystem name
+int netdev_register_device(struct net_device *dev);
+
+// Static functions can be shorter
+static int validate(void);
+
+// Avoid Hungarian notation
+int nr_pages;           // Good
+int iPageCount;         // Bad
+</code></pre>
+<p><strong>Braces:</strong></p>
+<pre><code class="language-c">// Opening brace on same line for functions, structs, etc.
+struct my_struct {
+	int member;
+};
+
+// But on next line for functions
+int my_function(void)
+{
+	// function body
+}
+
+// Single statement doesn't need braces (but be careful)
+if (condition)
+	return -EINVAL;
+
+// Multiple statements always need braces
+if (condition) {
+	do_something();
+	return 0;
+}
+</code></pre>
+<h3 id="comments"><a class="header" href="#comments">Comments</a></h3>
+<pre><code class="language-c">/*
+ * Multi-line comments use this format.
+ * Each line starts with a star.
+ * The closing star-slash is on its own line.
+ */
+
+// Single-line comments can use C++ style, but prefer /* */ style
+
+/**
+ * function_name - Short description
+ * @param1: Description of param1
+ * @param2: Description of param2
+ *
+ * Longer description of what the function does.
+ * This can span multiple lines.
+ *
+ * Return: Description of return value
+ */
+int function_name(int param1, char *param2)
+{
+	/* Implementation */
+}
+</code></pre>
+<hr />
+<h2 id="design-patterns"><a class="header" href="#design-patterns">Design Patterns</a></h2>
+<h3 id="registration-pattern"><a class="header" href="#registration-pattern">Registration Pattern</a></h3>
+<p>The kernel uses registration callbacks extensively for hooking into subsystems.</p>
+<pre><code class="language-c">/* Define operations structure */
+struct my_operations {
+	int (*init)(void);
+	void (*cleanup)(void);
+	int (*process)(void *data);
+};
+
+/* Define registration structure */
+struct my_driver {
+	const char *name;
+	struct my_operations *ops;
+	struct list_head list;
+};
+
+/* Registration function */
+int register_my_driver(struct my_driver *driver)
+{
+	if (!driver || !driver-&gt;ops)
+		return -EINVAL;
+
+	/* Add to global list with locking */
+	mutex_lock(&amp;drivers_mutex);
+	list_add_tail(&amp;driver-&gt;list, &amp;drivers_list);
+	mutex_unlock(&amp;drivers_mutex);
+
+	/* Initialize if needed */
+	if (driver-&gt;ops-&gt;init)
+		return driver-&gt;ops-&gt;init();
+
+	return 0;
+}
+
+/* Unregistration */
+void unregister_my_driver(struct my_driver *driver)
+{
+	mutex_lock(&amp;drivers_mutex);
+	list_del(&amp;driver-&gt;list);
+	mutex_unlock(&amp;drivers_mutex);
+
+	if (driver-&gt;ops-&gt;cleanup)
+		driver-&gt;ops-&gt;cleanup();
+}
+</code></pre>
+<h3 id="object-oriented-patterns-in-c"><a class="header" href="#object-oriented-patterns-in-c">Object-Oriented Patterns in C</a></h3>
+<p>The kernel implements inheritance-like patterns using structure embedding.</p>
+<pre><code class="language-c">/* Base "class" */
+struct device {
+	const char *name;
+	struct device *parent;
+	void (*release)(struct device *dev);
+};
+
+/* Derived "class" */
+struct pci_device {
+	struct device dev;      /* Embedded base */
+	unsigned int vendor;
+	unsigned int device_id;
+};
+
+/* Upcast: derived to base */
+struct pci_device *pci_dev;
+struct device *dev = &amp;pci_dev-&gt;dev;
+
+/* Downcast: base to derived using container_of */
+struct device *dev;
+struct pci_device *pci_dev = container_of(dev, struct pci_device, dev);
+</code></pre>
+<h3 id="reference-counting-pattern"><a class="header" href="#reference-counting-pattern">Reference Counting Pattern</a></h3>
+<pre><code class="language-c">struct my_object {
+	atomic_t refcount;
+	/* other fields */
+};
+
+/* Initialize reference count */
+static void my_object_init(struct my_object *obj)
+{
+	atomic_set(&amp;obj-&gt;refcount, 1);
+}
+
+/* Get reference (increment) */
+static inline struct my_object *my_object_get(struct my_object *obj)
+{
+	if (obj)
+		atomic_inc(&amp;obj-&gt;refcount);
+	return obj;
+}
+
+/* Put reference (decrement and free if zero) */
+static inline void my_object_put(struct my_object *obj)
+{
+	if (obj &amp;&amp; atomic_dec_and_test(&amp;obj-&gt;refcount))
+		my_object_destroy(obj);
+}
+
+/* Usage */
+struct my_object *obj = my_object_alloc();  /* refcount = 1 */
+struct my_object *obj2 = my_object_get(obj); /* refcount = 2 */
+my_object_put(obj);   /* refcount = 1 */
+my_object_put(obj2);  /* refcount = 0, object destroyed */
+</code></pre>
+<h3 id="kernel-object-kobject-pattern"><a class="header" href="#kernel-object-kobject-pattern">Kernel Object (kobject) Pattern</a></h3>
+<pre><code class="language-c">#include &lt;linux/kobject.h&gt;
+
+struct my_object {
+	struct kobject kobj;
+	int value;
+};
+
+static struct kobj_type my_ktype = {
+	.release = my_release,
+	.sysfs_ops = &amp;my_sysfs_ops,
+	.default_attrs = my_attrs,
+};
+
+/* Create object */
+struct my_object *obj = kzalloc(sizeof(*obj), GFP_KERNEL);
+kobject_init(&amp;obj-&gt;kobj, &amp;my_ktype);
+kobject_add(&amp;obj-&gt;kobj, parent, "my_object");
+
+/* Get reference */
+kobject_get(&amp;obj-&gt;kobj);
+
+/* Release reference */
+kobject_put(&amp;obj-&gt;kobj);
+</code></pre>
+<hr />
+<h2 id="memory-management-patterns"><a class="header" href="#memory-management-patterns">Memory Management Patterns</a></h2>
+<h3 id="allocation-patterns"><a class="header" href="#allocation-patterns">Allocation Patterns</a></h3>
+<pre><code class="language-c">/* Kernel memory allocation */
+void *ptr = kmalloc(size, GFP_KERNEL);  /* Can sleep */
+void *ptr = kmalloc(size, GFP_ATOMIC);  /* Cannot sleep, use in interrupt */
+void *ptr = kzalloc(size, GFP_KERNEL);  /* Zeroed memory */
+
+/* Large allocations */
+void *ptr = vmalloc(size);  /* Virtually contiguous, physically may not be */
+
+/* Page allocation */
+struct page *page = alloc_page(GFP_KERNEL);
+struct page *pages = alloc_pages(GFP_KERNEL, order);  /* 2^order pages */
+
+/* Per-CPU variables */
+DEFINE_PER_CPU(int, my_var);
+int val = get_cpu_var(my_var);
+put_cpu_var(my_var);
+
+/* Slab/KMEM cache for frequent allocations */
+struct kmem_cache *my_cache;
+
+my_cache = kmem_cache_create("my_cache",
+                              sizeof(struct my_struct),
+                              0, SLAB_HWCACHE_ALIGN, NULL);
+
+struct my_struct *obj = kmem_cache_alloc(my_cache, GFP_KERNEL);
+kmem_cache_free(my_cache, obj);
+</code></pre>
+<h3 id="memory-barriers"><a class="header" href="#memory-barriers">Memory Barriers</a></h3>
+<pre><code class="language-c">/* Compiler barrier - prevent compiler reordering */
+barrier();
+
+/* Memory barriers - prevent CPU reordering */
+mb();    /* Full memory barrier */
+rmb();   /* Read memory barrier */
+wmb();   /* Write memory barrier */
+smp_mb(); /* SMP memory barrier */
+
+/* Example: Producer-consumer */
+/* Producer */
+data-&gt;value = 42;
+smp_wmb();  /* Ensure value is written before flag */
+data-&gt;ready = 1;
+
+/* Consumer */
+while (!data-&gt;ready)
+	cpu_relax();
+smp_rmb();  /* Ensure flag is read before value */
+value = data-&gt;value;
+</code></pre>
+<h3 id="page-flags-and-reference-counting"><a class="header" href="#page-flags-and-reference-counting">Page Flags and Reference Counting</a></h3>
+<pre><code class="language-c">/* Get a page reference */
+get_page(page);
+
+/* Release a page reference */
+put_page(page);
+
+/* Check if page is locked */
+if (PageLocked(page))
+	/* ... */
+
+/* Lock a page */
+lock_page(page);
+unlock_page(page);
+
+/* Page flags */
+SetPageDirty(page);
+ClearPageDirty(page);
+TestSetPageLocked(page);
+</code></pre>
+<hr />
+<h2 id="locking-and-synchronization"><a class="header" href="#locking-and-synchronization">Locking and Synchronization</a></h2>
+<h3 id="spinlock-pattern"><a class="header" href="#spinlock-pattern">Spinlock Pattern</a></h3>
+<pre><code class="language-c">/* Define spinlock */
+spinlock_t my_lock;
+
+/* Initialize */
+spin_lock_init(&amp;my_lock);
+
+/* Use in process context */
+spin_lock(&amp;my_lock);
+/* Critical section */
+spin_unlock(&amp;my_lock);
+
+/* Use with IRQ disabling (if accessed from interrupt) */
+unsigned long flags;
+spin_lock_irqsave(&amp;my_lock, flags);
+/* Critical section */
+spin_unlock_irqrestore(&amp;my_lock, flags);
+
+/* Bottom-half (softirq) protection */
+spin_lock_bh(&amp;my_lock);
+/* Critical section */
+spin_unlock_bh(&amp;my_lock);
+</code></pre>
+<h3 id="mutex-pattern"><a class="header" href="#mutex-pattern">Mutex Pattern</a></h3>
+<pre><code class="language-c">/* Define mutex */
+struct mutex my_mutex;
+
+/* Initialize */
+mutex_init(&amp;my_mutex);
+
+/* Use (can sleep, so only in process context) */
+mutex_lock(&amp;my_mutex);
+/* Critical section */
+mutex_unlock(&amp;my_mutex);
+
+/* Trylock */
+if (mutex_trylock(&amp;my_mutex)) {
+	/* Got the lock */
+	mutex_unlock(&amp;my_mutex);
+}
+
+/* Interruptible lock */
+if (mutex_lock_interruptible(&amp;my_mutex))
+	return -EINTR;
+/* Critical section */
+mutex_unlock(&amp;my_mutex);
+</code></pre>
+<h3 id="read-write-locks"><a class="header" href="#read-write-locks">Read-Write Locks</a></h3>
+<pre><code class="language-c">/* Spinlock version */
+rwlock_t my_rwlock;
+rwlock_init(&amp;my_rwlock);
+
+/* Readers */
+read_lock(&amp;my_rwlock);
+/* Read data */
+read_unlock(&amp;my_rwlock);
+
+/* Writer */
+write_lock(&amp;my_rwlock);
+/* Modify data */
+write_unlock(&amp;my_rwlock);
+
+/* Semaphore version (can sleep) */
+struct rw_semaphore my_rwsem;
+init_rwsem(&amp;my_rwsem);
+
+down_read(&amp;my_rwsem);
+/* Read data */
+up_read(&amp;my_rwsem);
+
+down_write(&amp;my_rwsem);
+/* Modify data */
+up_write(&amp;my_rwsem);
+</code></pre>
+<h3 id="rcu-read-copy-update-pattern"><a class="header" href="#rcu-read-copy-update-pattern">RCU (Read-Copy-Update) Pattern</a></h3>
+<pre><code class="language-c">/* RCU list */
+struct my_data {
+	int value;
+	struct list_head list;
+	struct rcu_head rcu;
+};
+
+static LIST_HEAD(my_list);
+static DEFINE_SPINLOCK(list_lock);
+
+/* Read (no lock needed!) */
+rcu_read_lock();
+list_for_each_entry_rcu(entry, &amp;my_list, list) {
+	/* Read entry-&gt;value */
+}
+rcu_read_unlock();
+
+/* Update (needs lock) */
+spin_lock(&amp;list_lock);
+new = kmalloc(sizeof(*new), GFP_KERNEL);
+new-&gt;value = 42;
+list_add_rcu(&amp;new-&gt;list, &amp;my_list);
+spin_unlock(&amp;list_lock);
+
+/* Delete */
+static void my_data_free(struct rcu_head *head)
+{
+	struct my_data *entry = container_of(head, struct my_data, rcu);
+	kfree(entry);
+}
+
+spin_lock(&amp;list_lock);
+list_del_rcu(&amp;entry-&gt;list);
+spin_unlock(&amp;list_lock);
+call_rcu(&amp;entry-&gt;rcu, my_data_free);  /* Deferred free */
+</code></pre>
+<h3 id="completion-pattern"><a class="header" href="#completion-pattern">Completion Pattern</a></h3>
+<pre><code class="language-c">/* Declare completion */
+struct completion my_completion;
+
+/* Initialize */
+init_completion(&amp;my_completion);
+
+/* Wait for completion */
+wait_for_completion(&amp;my_completion);
+
+/* Timeout version */
+if (!wait_for_completion_timeout(&amp;my_completion, msecs_to_jiffies(5000)))
+	printk(KERN_ERR "Timeout waiting for completion\n");
+
+/* Signal completion */
+complete(&amp;my_completion);
+
+/* Signal all waiters */
+complete_all(&amp;my_completion);
+</code></pre>
+<h3 id="atomic-operations"><a class="header" href="#atomic-operations">Atomic Operations</a></h3>
+<pre><code class="language-c">/* Atomic integer */
+atomic_t counter = ATOMIC_INIT(0);
+
+atomic_inc(&amp;counter);
+atomic_dec(&amp;counter);
+atomic_add(5, &amp;counter);
+atomic_sub(3, &amp;counter);
+
+/* Read */
+int val = atomic_read(&amp;counter);
+
+/* Set */
+atomic_set(&amp;counter, 10);
+
+/* Conditional operations */
+if (atomic_dec_and_test(&amp;counter))
+	/* Counter reached zero */
+
+if (atomic_inc_and_test(&amp;counter))
+	/* Counter is zero after increment */
+
+/* Compare and swap */
+int old = 5;
+int new = 10;
+atomic_cmpxchg(&amp;counter, old, new);
+
+/* Bitops */
+unsigned long flags = 0;
+set_bit(0, &amp;flags);
+clear_bit(0, &amp;flags);
+if (test_bit(0, &amp;flags))
+	/* Bit is set */
+
+/* Atomic bitops */
+test_and_set_bit(0, &amp;flags);
+test_and_clear_bit(0, &amp;flags);
+</code></pre>
+<hr />
+<h2 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h2>
+<h3 id="error-code-pattern"><a class="header" href="#error-code-pattern">Error Code Pattern</a></h3>
+<pre><code class="language-c">/* Return negative error codes, 0 for success */
+int my_function(void)
+{
+	if (error_condition)
+		return -EINVAL;  /* Invalid argument */
+
+	if (no_memory)
+		return -ENOMEM;  /* Out of memory */
+
+	if (timeout)
+		return -ETIMEDOUT;
+
+	return 0;  /* Success */
+}
+
+/* Caller checks return value */
+int ret = my_function();
+if (ret) {
+	printk(KERN_ERR "Function failed: %d\n", ret);
+	return ret;  /* Propagate error */
+}
+</code></pre>
+<h3 id="common-error-codes"><a class="header" href="#common-error-codes">Common Error Codes</a></h3>
+<pre><code class="language-c">-EINVAL    /* Invalid argument */
+-ENOMEM    /* Out of memory */
+-EFAULT    /* Bad address (copy_from/to_user failed) */
+-EBUSY     /* Device or resource busy */
+-EAGAIN    /* Try again (non-blocking operation) */
+-EINTR     /* Interrupted system call */
+-EIO       /* I/O error */
+-ENODEV    /* No such device */
+-ENOTTY    /* Inappropriate ioctl for device */
+-EPERM     /* Operation not permitted */
+-EACCES    /* Permission denied */
+-EEXIST    /* File exists */
+-ENOENT    /* No such file or directory */
+-ETIMEDOUT /* Connection timed out */
+</code></pre>
+<h3 id="cleanup-with-goto-pattern"><a class="header" href="#cleanup-with-goto-pattern">Cleanup with goto Pattern</a></h3>
+<pre><code class="language-c">int complex_function(void)
+{
+	struct resource1 *res1 = NULL;
+	struct resource2 *res2 = NULL;
+	struct resource3 *res3 = NULL;
+	int ret;
+
+	res1 = allocate_resource1();
+	if (!res1) {
+		ret = -ENOMEM;
+		goto out;
+	}
+
+	res2 = allocate_resource2();
+	if (!res2) {
+		ret = -ENOMEM;
+		goto free_res1;
+	}
+
+	res3 = allocate_resource3();
+	if (!res3) {
+		ret = -ENOMEM;
+		goto free_res2;
+	}
+
+	/* Do work */
+	ret = do_work(res1, res2, res3);
+	if (ret)
+		goto free_res3;
+
+	/* Success path */
+	return 0;
+
+free_res3:
+	free_resource3(res3);
+free_res2:
+	free_resource2(res2);
+free_res1:
+	free_resource1(res1);
+out:
+	return ret;
+}
+</code></pre>
+<h3 id="err_ptr-pattern"><a class="header" href="#err_ptr-pattern">ERR_PTR Pattern</a></h3>
+<pre><code class="language-c">/* Return pointer or error */
+struct my_struct *my_function(void)
+{
+	struct my_struct *ptr;
+
+	ptr = kmalloc(sizeof(*ptr), GFP_KERNEL);
+	if (!ptr)
+		return ERR_PTR(-ENOMEM);
+
+	if (some_error) {
+		kfree(ptr);
+		return ERR_PTR(-EINVAL);
+	}
+
+	return ptr;
+}
+
+/* Caller checks for error */
+struct my_struct *ptr = my_function();
+if (IS_ERR(ptr)) {
+	int err = PTR_ERR(ptr);
+	printk(KERN_ERR "Function failed: %d\n", err);
+	return err;
+}
+
+/* Use ptr */
+kfree(ptr);
+</code></pre>
+<hr />
+<h2 id="device-driver-patterns"><a class="header" href="#device-driver-patterns">Device Driver Patterns</a></h2>
+<h3 id="character-device-pattern"><a class="header" href="#character-device-pattern">Character Device Pattern</a></h3>
+<pre><code class="language-c">#include &lt;linux/fs.h&gt;
+#include &lt;linux/cdev.h&gt;
+
+static dev_t dev_num;
+static struct cdev my_cdev;
+static struct class *my_class;
+
+static int my_open(struct inode *inode, struct file *filp)
+{
+	/* Initialize private data */
+	return 0;
+}
+
+static int my_release(struct inode *inode, struct file *filp)
+{
+	/* Cleanup */
+	return 0;
+}
+
+static ssize_t my_read(struct file *filp, char __user *buf,
+                       size_t count, loff_t *pos)
+{
+	/* Read data and copy to user space */
+	if (copy_to_user(buf, kernel_buf, count))
+		return -EFAULT;
+
+	return count;
+}
+
+static ssize_t my_write(struct file *filp, const char __user *buf,
+                        size_t count, loff_t *pos)
+{
+	/* Copy from user space and write */
+	if (copy_from_user(kernel_buf, buf, count))
+		return -EFAULT;
+
+	return count;
+}
+
+static long my_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+	switch (cmd) {
+	case MY_IOCTL_CMD:
+		/* Handle command */
+		break;
+	default:
+		return -ENOTTY;
+	}
+	return 0;
+}
+
+static const struct file_operations my_fops = {
+	.owner = THIS_MODULE,
+	.open = my_open,
+	.release = my_release,
+	.read = my_read,
+	.write = my_write,
+	.unlocked_ioctl = my_ioctl,
+};
+
+static int __init my_init(void)
+{
+	int ret;
+
+	/* Allocate device number */
+	ret = alloc_chrdev_region(&amp;dev_num, 0, 1, "mydev");
+	if (ret &lt; 0)
+		return ret;
+
+	/* Initialize cdev */
+	cdev_init(&amp;my_cdev, &amp;my_fops);
+	my_cdev.owner = THIS_MODULE;
+
+	/* Add cdev */
+	ret = cdev_add(&amp;my_cdev, dev_num, 1);
+	if (ret &lt; 0)
+		goto unregister_chrdev;
+
+	/* Create device class */
+	my_class = class_create(THIS_MODULE, "myclass");
+	if (IS_ERR(my_class)) {
+		ret = PTR_ERR(my_class);
+		goto del_cdev;
+	}
+
+	/* Create device */
+	device_create(my_class, NULL, dev_num, NULL, "mydev");
+
+	return 0;
+
+del_cdev:
+	cdev_del(&amp;my_cdev);
+unregister_chrdev:
+	unregister_chrdev_region(dev_num, 1);
+	return ret;
+}
+
+static void __exit my_exit(void)
+{
+	device_destroy(my_class, dev_num);
+	class_destroy(my_class);
+	cdev_del(&amp;my_cdev);
+	unregister_chrdev_region(dev_num, 1);
+}
+
+module_init(my_init);
+module_exit(my_exit);
+MODULE_LICENSE("GPL");
+</code></pre>
+<h3 id="platform-device-pattern"><a class="header" href="#platform-device-pattern">Platform Device Pattern</a></h3>
+<pre><code class="language-c">#include &lt;linux/platform_device.h&gt;
+
+static int my_probe(struct platform_device *pdev)
+{
+	struct resource *res;
+	void __iomem *base;
+
+	/* Get resources */
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if (!res)
+		return -ENODEV;
+
+	/* Map registers */
+	base = devm_ioremap_resource(&amp;pdev-&gt;dev, res);
+	if (IS_ERR(base))
+		return PTR_ERR(base);
+
+	/* Store in device private data */
+	platform_set_drvdata(pdev, base);
+
+	return 0;
+}
+
+static int my_remove(struct platform_device *pdev)
+{
+	/* Cleanup */
+	return 0;
+}
+
+static const struct of_device_id my_of_match[] = {
+	{ .compatible = "vendor,my-device" },
+	{ }
+};
+MODULE_DEVICE_TABLE(of, my_of_match);
+
+static struct platform_driver my_driver = {
+	.probe = my_probe,
+	.remove = my_remove,
+	.driver = {
+		.name = "my-driver",
+		.of_match_table = my_of_match,
+	},
+};
+
+module_platform_driver(my_driver);
+</code></pre>
+<h3 id="interrupt-handler-pattern"><a class="header" href="#interrupt-handler-pattern">Interrupt Handler Pattern</a></h3>
+<pre><code class="language-c">#include &lt;linux/interrupt.h&gt;
+
+static irqreturn_t my_interrupt(int irq, void *dev_id)
+{
+	struct my_device *dev = dev_id;
+	u32 status;
+
+	/* Read interrupt status */
+	status = readl(dev-&gt;base + STATUS_REG);
+
+	if (!(status &amp; MY_IRQ_FLAG))
+		return IRQ_NONE;  /* Not our interrupt */
+
+	/* Clear interrupt */
+	writel(status, dev-&gt;base + STATUS_REG);
+
+	/* Handle interrupt - do minimal work */
+	/* Schedule bottom half if needed */
+	tasklet_schedule(&amp;dev-&gt;tasklet);
+
+	return IRQ_HANDLED;
+}
+
+/* Bottom half (tasklet) */
+static void my_tasklet_func(unsigned long data)
+{
+	struct my_device *dev = (struct my_device *)data;
+
+	/* Do heavy work here */
+}
+
+/* Request IRQ */
+ret = request_irq(irq, my_interrupt, IRQF_SHARED, "mydev", dev);
+
+/* Free IRQ */
+free_irq(irq, dev);
+
+/* Threaded IRQ (for handlers that can sleep) */
+ret = request_threaded_irq(irq, NULL, my_threaded_handler,
+                            IRQF_ONESHOT, "mydev", dev);
+</code></pre>
+<hr />
+<h2 id="data-structures"><a class="header" href="#data-structures">Data Structures</a></h2>
+<h3 id="linked-lists"><a class="header" href="#linked-lists">Linked Lists</a></h3>
+<pre><code class="language-c">#include &lt;linux/list.h&gt;
+
+struct my_node {
+	int data;
+	struct list_head list;
+};
+
+/* Define and initialize list head */
+static LIST_HEAD(my_list);
+
+/* Add entry */
+struct my_node *node = kmalloc(sizeof(*node), GFP_KERNEL);
+node-&gt;data = 42;
+list_add(&amp;node-&gt;list, &amp;my_list);       /* Add to head */
+list_add_tail(&amp;node-&gt;list, &amp;my_list);  /* Add to tail */
+
+/* Iterate */
+struct my_node *entry;
+list_for_each_entry(entry, &amp;my_list, list) {
+	printk(KERN_INFO "data: %d\n", entry-&gt;data);
+}
+
+/* Safe iteration (allows deletion) */
+struct my_node *tmp;
+list_for_each_entry_safe(entry, tmp, &amp;my_list, list) {
+	if (entry-&gt;data == 42) {
+		list_del(&amp;entry-&gt;list);
+		kfree(entry);
+	}
+}
+
+/* Check if empty */
+if (list_empty(&amp;my_list))
+	printk(KERN_INFO "List is empty\n");
+</code></pre>
+<h3 id="hash-tables"><a class="header" href="#hash-tables">Hash Tables</a></h3>
+<pre><code class="language-c">#include &lt;linux/hashtable.h&gt;
+
+#define HASH_BITS 8
+
+struct my_entry {
+	int key;
+	int value;
+	struct hlist_node hash;
+};
+
+/* Declare hash table */
+static DEFINE_HASHTABLE(my_hash, HASH_BITS);
+
+/* Initialize */
+hash_init(my_hash);
+
+/* Add entry */
+struct my_entry *entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+entry-&gt;key = 123;
+entry-&gt;value = 456;
+hash_add(my_hash, &amp;entry-&gt;hash, entry-&gt;key);
+
+/* Find entry */
+struct my_entry *found = NULL;
+hash_for_each_possible(my_hash, entry, hash, key) {
+	if (entry-&gt;key == key) {
+		found = entry;
+		break;
+	}
+}
+
+/* Delete entry */
+hash_del(&amp;entry-&gt;hash);
+
+/* Iterate all entries */
+int bkt;
+hash_for_each(my_hash, bkt, entry, hash) {
+	printk(KERN_INFO "key=%d value=%d\n", entry-&gt;key, entry-&gt;value);
+}
+</code></pre>
+<h3 id="radix-tree"><a class="header" href="#radix-tree">Radix Tree</a></h3>
+<pre><code class="language-c">#include &lt;linux/radix-tree.h&gt;
+
+static RADIX_TREE(my_tree, GFP_KERNEL);
+
+/* Insert */
+void *item = kmalloc(sizeof(struct my_data), GFP_KERNEL);
+radix_tree_insert(&amp;my_tree, index, item);
+
+/* Lookup */
+void *found = radix_tree_lookup(&amp;my_tree, index);
+
+/* Delete */
+void *deleted = radix_tree_delete(&amp;my_tree, index);
+kfree(deleted);
+
+/* Iterate */
+struct radix_tree_iter iter;
+void **slot;
+radix_tree_for_each_slot(slot, &amp;my_tree, &amp;iter, start) {
+	void *item = radix_tree_deref_slot(slot);
+	/* Process item */
+}
+</code></pre>
+<h3 id="red-black-tree"><a class="header" href="#red-black-tree">Red-Black Tree</a></h3>
+<pre><code class="language-c">#include &lt;linux/rbtree.h&gt;
+
+struct my_node {
+	int key;
+	struct rb_node node;
+};
+
+static struct rb_root my_tree = RB_ROOT;
+
+/* Insert */
+int my_insert(struct rb_root *root, struct my_node *data)
+{
+	struct rb_node **new = &amp;(root-&gt;rb_node), *parent = NULL;
+
+	while (*new) {
+		struct my_node *this = container_of(*new, struct my_node, node);
+
+		parent = *new;
+		if (data-&gt;key &lt; this-&gt;key)
+			new = &amp;((*new)-&gt;rb_left);
+		else if (data-&gt;key &gt; this-&gt;key)
+			new = &amp;((*new)-&gt;rb_right);
+		else
+			return -EEXIST;
+	}
+
+	rb_link_node(&amp;data-&gt;node, parent, new);
+	rb_insert_color(&amp;data-&gt;node, root);
+
+	return 0;
+}
+
+/* Search */
+struct my_node *my_search(struct rb_root *root, int key)
+{
+	struct rb_node *node = root-&gt;rb_node;
+
+	while (node) {
+		struct my_node *data = container_of(node, struct my_node, node);
+
+		if (key &lt; data-&gt;key)
+			node = node-&gt;rb_left;
+		else if (key &gt; data-&gt;key)
+			node = node-&gt;rb_right;
+		else
+			return data;
+	}
+
+	return NULL;
+}
+
+/* Erase */
+rb_erase(&amp;node-&gt;node, &amp;my_tree);
+</code></pre>
+<hr />
+<h2 id="kernel-apis"><a class="header" href="#kernel-apis">Kernel APIs</a></h2>
+<h3 id="workqueues"><a class="header" href="#workqueues">Workqueues</a></h3>
+<pre><code class="language-c">#include &lt;linux/workqueue.h&gt;
+
+struct work_struct my_work;
+
+/* Work function */
+static void my_work_func(struct work_struct *work)
+{
+	/* Do work in process context */
+}
+
+/* Initialize */
+INIT_WORK(&amp;my_work, my_work_func);
+
+/* Schedule work */
+schedule_work(&amp;my_work);
+
+/* Delayed work */
+struct delayed_work my_delayed_work;
+INIT_DELAYED_WORK(&amp;my_delayed_work, my_work_func);
+schedule_delayed_work(&amp;my_delayed_work, msecs_to_jiffies(1000));
+
+/* Cancel work */
+cancel_work_sync(&amp;my_work);
+cancel_delayed_work_sync(&amp;my_delayed_work);
+</code></pre>
+<h3 id="timers"><a class="header" href="#timers">Timers</a></h3>
+<pre><code class="language-c">#include &lt;linux/timer.h&gt;
+
+struct timer_list my_timer;
+
+/* Timer callback */
+static void my_timer_callback(struct timer_list *t)
+{
+	/* Timer expired */
+	printk(KERN_INFO "Timer expired\n");
+
+	/* Reschedule if needed */
+	mod_timer(&amp;my_timer, jiffies + msecs_to_jiffies(1000));
+}
+
+/* Initialize and start timer */
+timer_setup(&amp;my_timer, my_timer_callback, 0);
+mod_timer(&amp;my_timer, jiffies + msecs_to_jiffies(1000));
+
+/* Stop timer */
+del_timer_sync(&amp;my_timer);
+
+/* High-resolution timers */
+#include &lt;linux/hrtimer.h&gt;
+
+struct hrtimer my_hrtimer;
+
+static enum hrtimer_restart my_hrtimer_callback(struct hrtimer *timer)
+{
+	/* Timer expired */
+	return HRTIMER_NORESTART;  /* Or HRTIMER_RESTART */
+}
+
+hrtimer_init(&amp;my_hrtimer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+my_hrtimer.function = my_hrtimer_callback;
+hrtimer_start(&amp;my_hrtimer, ms_to_ktime(1000), HRTIMER_MODE_REL);
+</code></pre>
+<h3 id="wait-queues"><a class="header" href="#wait-queues">Wait Queues</a></h3>
+<pre><code class="language-c">#include &lt;linux/wait.h&gt;
+
+static DECLARE_WAIT_QUEUE_HEAD(my_wait_queue);
+static int condition = 0;
+
+/* Wait for condition */
+wait_event(my_wait_queue, condition != 0);
+
+/* Wait with timeout */
+int ret = wait_event_timeout(my_wait_queue, condition != 0,
+                              msecs_to_jiffies(5000));
+
+/* Interruptible wait */
+if (wait_event_interruptible(my_wait_queue, condition != 0))
+	return -ERESTARTSYS;
+
+/* Wake up waiters */
+condition = 1;
+wake_up(&amp;my_wait_queue);        /* Wake one */
+wake_up_all(&amp;my_wait_queue);    /* Wake all */
+wake_up_interruptible(&amp;my_wait_queue);
+</code></pre>
+<h3 id="kernel-threads"><a class="header" href="#kernel-threads">Kernel Threads</a></h3>
+<pre><code class="language-c">#include &lt;linux/kthread.h&gt;
+
+static struct task_struct *my_thread;
+
+static int my_thread_func(void *data)
+{
+	while (!kthread_should_stop()) {
+		/* Do work */
+
+		/* Sleep */
+		msleep(1000);
+
+		/* Or wait for condition */
+		wait_event_interruptible(queue, condition || kthread_should_stop());
+	}
+
+	return 0;
+}
+
+/* Create and start thread */
+my_thread = kthread_run(my_thread_func, NULL, "my_thread");
+if (IS_ERR(my_thread))
+	return PTR_ERR(my_thread);
+
+/* Stop thread */
+kthread_stop(my_thread);
+</code></pre>
+<hr />
+<h2 id="debugging-patterns"><a class="header" href="#debugging-patterns">Debugging Patterns</a></h2>
+<h3 id="print-debugging"><a class="header" href="#print-debugging">Print Debugging</a></h3>
+<pre><code class="language-c">/* Use appropriate log level */
+printk(KERN_EMERG   "Emergency\n");    /* System unusable */
+printk(KERN_ALERT   "Alert\n");        /* Action must be taken */
+printk(KERN_CRIT    "Critical\n");     /* Critical conditions */
+printk(KERN_ERR     "Error\n");        /* Error conditions */
+printk(KERN_WARNING "Warning\n");      /* Warning conditions */
+printk(KERN_NOTICE  "Notice\n");       /* Normal but significant */
+printk(KERN_INFO    "Info\n");         /* Informational */
+printk(KERN_DEBUG   "Debug\n");        /* Debug messages */
+
+/* Modern API */
+pr_emerg("Emergency\n");
+pr_err("Error\n");
+pr_info("Info\n");
+pr_debug("Debug\n");  /* Only if DEBUG is defined */
+
+/* Device-specific logging */
+dev_err(&amp;pdev-&gt;dev, "Device error\n");
+dev_info(&amp;pdev-&gt;dev, "Device info\n");
+</code></pre>
+<h3 id="dynamic-debug"><a class="header" href="#dynamic-debug">Dynamic Debug</a></h3>
+<pre><code class="language-c">/* Compile with CONFIG_DYNAMIC_DEBUG */
+
+/* Use pr_debug or dev_dbg */
+pr_debug("Debug message: value=%d\n", value);
+dev_dbg(&amp;dev-&gt;dev, "Device debug: %s\n", msg);
+
+/* Enable at runtime */
+/* echo 'file mydriver.c +p' &gt; /sys/kernel/debug/dynamic_debug/control */
+</code></pre>
+<h3 id="assertions"><a class="header" href="#assertions">Assertions</a></h3>
+<pre><code class="language-c">/* BUG and WARN macros */
+BUG_ON(bad_condition);        /* Panic if true */
+WARN_ON(warning_condition);   /* Warning if true */
+
+if (WARN_ON_ONCE(ptr == NULL))
+	return -EINVAL;
+
+/* Better: return error instead of crashing */
+if (WARN(bad_condition, "Something went wrong: %d\n", value))
+	return -EINVAL;
+</code></pre>
+<h3 id="tracing"><a class="header" href="#tracing">Tracing</a></h3>
+<pre><code class="language-c">#include &lt;linux/trace_events.h&gt;
+
+/* Use ftrace */
+trace_printk("Fast trace message: %d\n", value);
+
+/* Define tracepoints */
+#include &lt;trace/events/mydriver.h&gt;
+
+TRACE_EVENT(my_event,
+	TP_PROTO(int value),
+	TP_ARGS(value),
+	TP_STRUCT__entry(
+		__field(int, value)
+	),
+	TP_fast_assign(
+		__entry-&gt;value = value;
+	),
+	TP_printk("value=%d", __entry-&gt;value)
+);
+
+/* Use tracepoint */
+trace_my_event(42);
+</code></pre>
+<hr />
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="resource-management"><a class="header" href="#resource-management">Resource Management</a></h3>
+<pre><code class="language-c">/* Use devm_* functions for automatic cleanup on error/remove */
+void __iomem *base = devm_ioremap_resource(&amp;pdev-&gt;dev, res);
+int *ptr = devm_kmalloc(&amp;pdev-&gt;dev, size, GFP_KERNEL);
+int irq = devm_request_irq(&amp;pdev-&gt;dev, irq_num, handler, flags, name, dev);
+
+/* These are automatically freed when device is removed */
+</code></pre>
+<h3 id="copy-tofrom-user-space"><a class="header" href="#copy-tofrom-user-space">Copy to/from User Space</a></h3>
+<pre><code class="language-c">/* Always use copy_to_user/copy_from_user */
+if (copy_to_user(user_buf, kernel_buf, count))
+	return -EFAULT;
+
+if (copy_from_user(kernel_buf, user_buf, count))
+	return -EFAULT;
+
+/* For single values */
+int value;
+if (get_user(value, (int __user *)arg))
+	return -EFAULT;
+
+if (put_user(value, (int __user *)arg))
+	return -EFAULT;
+
+/* Check access */
+if (!access_ok(user_buf, count))
+	return -EFAULT;
+</code></pre>
+<h3 id="module-parameters"><a class="header" href="#module-parameters">Module Parameters</a></h3>
+<pre><code class="language-c">/* Define module parameters */
+static int debug = 0;
+module_param(debug, int, 0644);
+MODULE_PARM_DESC(debug, "Enable debug mode");
+
+static char *name = "default";
+module_param(name, charp, 0644);
+MODULE_PARM_DESC(name, "Device name");
+
+/* Load module with parameters */
+/* insmod mymodule.ko debug=1 name="custom" */
+</code></pre>
+<h3 id="smp-safety"><a class="header" href="#smp-safety">SMP Safety</a></h3>
+<pre><code class="language-c">/* Always consider SMP (multiprocessor) safety */
+
+/* Use per-CPU variables for lock-free data */
+DEFINE_PER_CPU(int, my_counter);
+
+int val = get_cpu_var(my_counter);
+val++;
+put_cpu_var(my_counter);
+
+/* Use proper locking */
+/* Identify data that needs protection */
+/* Choose appropriate lock type (spinlock vs mutex) */
+/* Keep critical sections short */
+/* Avoid nested locks (lock ordering) */
+</code></pre>
+<h3 id="power-management"><a class="header" href="#power-management">Power Management</a></h3>
+<pre><code class="language-c">/* Implement PM operations */
+static int my_suspend(struct device *dev)
+{
+	/* Save state, disable device */
+	return 0;
+}
+
+static int my_resume(struct device *dev)
+{
+	/* Restore state, enable device */
+	return 0;
+}
+
+static const struct dev_pm_ops my_pm_ops = {
+	.suspend = my_suspend,
+	.resume = my_resume,
+};
+
+static struct platform_driver my_driver = {
+	.driver = {
+		.name = "my-driver",
+		.pm = &amp;my_pm_ops,
+	},
+};
+</code></pre>
+<hr />
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<h3 id="dont-do-this"><a class="header" href="#dont-do-this">Don't Do This</a></h3>
+<pre><code class="language-c">/* DON'T use floating point in kernel */
+// float x = 3.14;  /* Wrong! */
+
+/* DON'T use large stack allocations */
+// char buffer[8192];  /* Too big for stack */
+/* Use kmalloc instead */
+
+/* DON'T sleep in atomic context */
+spin_lock(&amp;lock);
+// msleep(100);  /* Wrong! */
+spin_unlock(&amp;lock);
+
+/* DON'T access user space directly */
+// int *user_ptr;
+// *user_ptr = 5;  /* Wrong! Use copy_to_user */
+
+/* DON'T ignore return values */
+// kmalloc(size, GFP_KERNEL);  /* Check for NULL! */
+
+/* DON'T use unbounded loops */
+// while (1) { }  /* Use kthread_should_stop() */
+</code></pre>
+<hr />
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<ul>
+<li><strong>Kernel Documentation</strong>: <code>Documentation/</code> in kernel source</li>
+<li><strong>Coding Style</strong>: <code>Documentation/process/coding-style.rst</code></li>
+<li><strong>API Documentation</strong>: <code>Documentation/core-api/</code></li>
+<li><strong>Linux Kernel Development</strong> by Robert Love</li>
+<li><strong>Linux Device Drivers</strong> by Corbet, Rubini, and Kroah-Hartman</li>
+<li><strong>Understanding the Linux Kernel</strong> by Bovet and Cesati</li>
+</ul>
+<hr />
+<p>Linux kernel development follows well-established patterns that promote consistency, safety, and performance. Understanding these patterns is essential for writing quality kernel code that integrates well with the rest of the kernel.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../linux/kernel.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../linux/driver_development.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../linux/kernel.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../linux/driver_development.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

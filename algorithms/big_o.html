@@ -189,28 +189,329 @@
 </li>
 </ul>
 <h2 id="common-big-o-notations"><a class="header" href="#common-big-o-notations">Common Big O Notations</a></h2>
+<h3 id="o1---constant-time"><a class="header" href="#o1---constant-time">O(1) - Constant Time</a></h3>
+<p>The execution time does not change regardless of the input size.</p>
+<pre><code class="language-python">def get_first_element(arr):
+    return arr[0]  # Always one operation
+
+def hash_lookup(dictionary, key):
+    return dictionary[key]  # Constant time hash table lookup
+
+# Example
+arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print(get_first_element(arr))  # O(1)
+</code></pre>
+<p><strong>Examples</strong>: Array access, hash table operations, simple arithmetic</p>
+<h3 id="olog-n---logarithmic-time"><a class="header" href="#olog-n---logarithmic-time">O(log n) - Logarithmic Time</a></h3>
+<p>The execution time grows logarithmically as the input size increases.</p>
+<pre><code class="language-python">def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    
+    while left &lt;= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
+
+# Example: With 1000 elements, only ~10 comparisons needed
+arr = list(range(1000))
+print(binary_search(arr, 742))  # O(log n)
+</code></pre>
+<p><strong>Examples</strong>: Binary search, balanced binary tree operations</p>
+<h3 id="on---linear-time"><a class="header" href="#on---linear-time">O(n) - Linear Time</a></h3>
+<p>The execution time grows linearly with the input size.</p>
+<pre><code class="language-python">def linear_search(arr, target):
+    for i, element in enumerate(arr):
+        if element == target:
+            return i
+    return -1
+
+def find_max(arr):
+    max_val = arr[0]
+    for num in arr:
+        if num &gt; max_val:
+            max_val = num
+    return max_val
+
+# Example
+arr = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3]
+print(linear_search(arr, 9))  # O(n)
+print(find_max(arr))          # O(n)
+</code></pre>
+<p><strong>Examples</strong>: Linear search, array traversal, finding min/max</p>
+<h3 id="on-log-n---linearithmic-time"><a class="header" href="#on-log-n---linearithmic-time">O(n log n) - Linearithmic Time</a></h3>
+<p>Common in efficient sorting algorithms.</p>
+<pre><code class="language-python">def merge_sort(arr):
+    if len(arr) &lt;= 1:
+        return arr
+    
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    
+    return merge(left, right)
+
+def merge(left, right):
+    result = []
+    i = j = 0
+    
+    while i &lt; len(left) and j &lt; len(right):
+        if left[i] &lt;= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+    
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result
+
+# Example
+arr = [38, 27, 43, 3, 9, 82, 10]
+print(merge_sort(arr))  # O(n log n)
+</code></pre>
+<p><strong>Examples</strong>: Merge sort, heap sort, quick sort (average case)</p>
+<h3 id="on²---quadratic-time"><a class="header" href="#on²---quadratic-time">O(n²) - Quadratic Time</a></h3>
+<p>The execution time grows quadratically with the input size.</p>
+<pre><code class="language-python">def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if arr[j] &gt; arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    return arr
+
+def find_duplicates_naive(arr):
+    duplicates = []
+    for i in range(len(arr)):
+        for j in range(i + 1, len(arr)):
+            if arr[i] == arr[j]:
+                duplicates.append(arr[i])
+    return duplicates
+
+# Example
+arr = [64, 34, 25, 12, 22, 11, 90]
+print(bubble_sort(arr.copy()))  # O(n²)
+</code></pre>
+<p><strong>Examples</strong>: Bubble sort, selection sort, insertion sort, nested loops</p>
+<h3 id="o2n---exponential-time"><a class="header" href="#o2n---exponential-time">O(2^n) - Exponential Time</a></h3>
+<p>The execution time doubles with each additional element.</p>
+<pre><code class="language-python">def fibonacci_recursive(n):
+    if n &lt;= 1:
+        return n
+    return fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2)
+
+def power_set(s):
+    if not s:
+        return [[]]
+    
+    subsets = power_set(s[1:])
+    return subsets + [[s[0]] + subset for subset in subsets]
+
+# Example (slow for large n!)
+print(fibonacci_recursive(10))  # O(2^n)
+print(power_set([1, 2, 3]))     # O(2^n)
+</code></pre>
+<p><strong>Examples</strong>: Recursive Fibonacci, generating all subsets</p>
+<h3 id="on---factorial-time"><a class="header" href="#on---factorial-time">O(n!) - Factorial Time</a></h3>
+<p>The execution time grows factorially with the input size.</p>
+<pre><code class="language-python">def permutations(arr):
+    if len(arr) &lt;= 1:
+        return [arr]
+    
+    result = []
+    for i in range(len(arr)):
+        rest = arr[:i] + arr[i+1:]
+        for p in permutations(rest):
+            result.append([arr[i]] + p)
+    return result
+
+# Example (very slow!)
+print(permutations([1, 2, 3]))  # O(n!)
+# For n=10, this would generate 3,628,800 permutations!
+</code></pre>
+<p><strong>Examples</strong>: Generating all permutations, traveling salesman (brute force)</p>
+<h2 id="complexity-comparison"><a class="header" href="#complexity-comparison">Complexity Comparison</a></h2>
+<pre><code class="language-python">import time
+import random
+
+def compare_complexities(n):
+    # O(1)
+    start = time.time()
+    _ = n
+    o1_time = time.time() - start
+    
+    # O(log n)
+    start = time.time()
+    _ = n.bit_length()
+    olog_time = time.time() - start
+    
+    # O(n)
+    start = time.time()
+    _ = sum(range(n))
+    on_time = time.time() - start
+    
+    # O(n log n)
+    start = time.time()
+    arr = list(range(n))
+    random.shuffle(arr)
+    _ = sorted(arr)
+    onlogn_time = time.time() - start
+    
+    # O(n²)
+    start = time.time()
+    for i in range(min(n, 1000)):  # Limited to avoid long wait
+        for j in range(min(n, 1000)):
+            pass
+    on2_time = time.time() - start
+    
+    print(f"n = {n}:")
+    print(f"  O(1):      {o1_time:.6f}s")
+    print(f"  O(log n):  {olog_time:.6f}s")
+    print(f"  O(n):      {on_time:.6f}s")
+    print(f"  O(n log n):{onlogn_time:.6f}s")
+    print(f"  O(n²):     {on2_time:.6f}s (limited)")
+
+# Example
+compare_complexities(10000)
+</code></pre>
+<h2 id="space-complexity-examples"><a class="header" href="#space-complexity-examples">Space Complexity Examples</a></h2>
+<pre><code class="language-python"># O(1) space - In-place
+def reverse_array_inplace(arr):
+    left, right = 0, len(arr) - 1
+    while left &lt; right:
+        arr[left], arr[right] = arr[right], arr[left]
+        left += 1
+        right -= 1
+
+# O(n) space - Additional array
+def reverse_array_new(arr):
+    return arr[::-1]
+
+# O(n) space - Recursion stack
+def factorial_recursive(n):
+    if n &lt;= 1:
+        return 1
+    return n * factorial_recursive(n - 1)
+
+# O(n²) space - 2D array
+def create_matrix(n):
+    return [[0 for _ in range(n)] for _ in range(n)]
+</code></pre>
+<h2 id="best-average-and-worst-case"><a class="header" href="#best-average-and-worst-case">Best, Average, and Worst Case</a></h2>
+<p>Different scenarios can have different complexities:</p>
+<pre><code class="language-python">def quick_sort(arr):
+    if len(arr) &lt;= 1:
+        return arr
+    
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x &lt; pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x &gt; pivot]
+    
+    return quick_sort(left) + middle + quick_sort(right)
+
+# Quick Sort:
+# Best case:    O(n log n) - balanced partitions
+# Average case: O(n log n)
+# Worst case:   O(n²) - already sorted array
+</code></pre>
+<h2 id="analyzing-algorithm-complexity"><a class="header" href="#analyzing-algorithm-complexity">Analyzing Algorithm Complexity</a></h2>
+<pre><code class="language-python">def example_algorithm(arr):
+    n = len(arr)
+    
+    # O(1) - constant operations
+    first = arr[0]
+    last = arr[-1]
+    
+    # O(n) - single loop
+    total = sum(arr)
+    
+    # O(n²) - nested loops
+    for i in range(n):
+        for j in range(n):
+            pass
+    
+    # O(n log n) - sorting
+    sorted_arr = sorted(arr)
+    
+    # Overall: O(1) + O(n) + O(n²) + O(n log n) = O(n²)
+    # (Dominant term is n²)
+</code></pre>
+<h2 id="big-o-rules"><a class="header" href="#big-o-rules">Big O Rules</a></h2>
 <ol>
-<li>
-<p><strong>O(1)</strong>: Constant time complexity. The execution time does not change regardless of the input size. Example: Accessing an element in an array by index.</p>
-</li>
-<li>
-<p><strong>O(log n)</strong>: Logarithmic time complexity. The execution time grows logarithmically as the input size increases. Example: Binary search in a sorted array.</p>
-</li>
-<li>
-<p><strong>O(n)</strong>: Linear time complexity. The execution time grows linearly with the input size. Example: Iterating through an array.</p>
-</li>
-<li>
-<p><strong>O(n log n)</strong>: Linearithmic time complexity. Common in efficient sorting algorithms like mergesort and heapsort.</p>
-</li>
-<li>
-<p><strong>O(n^2)</strong>: Quadratic time complexity. The execution time grows quadratically with the input size. Example: Bubble sort or selection sort.</p>
-</li>
-<li>
-<p><strong>O(2^n)</strong>: Exponential time complexity. The execution time doubles with each additional element in the input. Example: Solving the Fibonacci sequence using a naive recursive approach.</p>
-</li>
-<li>
-<p><strong>O(n!)</strong>: Factorial time complexity. The execution time grows factorially with the input size. Example: Generating all permutations of a set.</p>
-</li>
+<li><strong>Drop constants</strong>: O(2n) → O(n)</li>
+<li><strong>Drop non-dominant terms</strong>: O(n² + n) → O(n²)</li>
+<li><strong>Different inputs use different variables</strong>: O(a + b) for two arrays</li>
+<li><strong>Multiplication for nested</strong>: O(a * b) for nested loops over different arrays</li>
+</ol>
+<pre><code class="language-python"># Rule 1: Drop constants
+def example1(arr):
+    for item in arr:        # O(n)
+        print(item)
+    for item in arr:        # O(n)
+        print(item)
+    # Total: O(2n) = O(n)
+
+# Rule 2: Drop non-dominant terms
+def example2(arr):
+    for i in range(len(arr)):           # O(n)
+        for j in range(len(arr)):       # O(n²)
+            print(i, j)
+    for item in arr:                    # O(n)
+        print(item)
+    # Total: O(n² + n) = O(n²)
+
+# Rule 3: Different inputs
+def example3(arr1, arr2):
+    for item in arr1:       # O(a)
+        print(item)
+    for item in arr2:       # O(b)
+        print(item)
+    # Total: O(a + b)
+
+# Rule 4: Multiplication for nested
+def example4(arr1, arr2):
+    for item1 in arr1:              # O(a)
+        for item2 in arr2:          # O(b)
+            print(item1, item2)
+    # Total: O(a * b)
+</code></pre>
+<h2 id="complexity-cheat-sheet"><a class="header" href="#complexity-cheat-sheet">Complexity Cheat Sheet</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Complexity</th><th>Name</th><th>Example Operations</th></tr></thead><tbody>
+<tr><td>O(1)</td><td>Constant</td><td>Array access, hash lookup</td></tr>
+<tr><td>O(log n)</td><td>Logarithmic</td><td>Binary search</td></tr>
+<tr><td>O(n)</td><td>Linear</td><td>Loop through array</td></tr>
+<tr><td>O(n log n)</td><td>Linearithmic</td><td>Efficient sorting</td></tr>
+<tr><td>O(n²)</td><td>Quadratic</td><td>Nested loops</td></tr>
+<tr><td>O(n³)</td><td>Cubic</td><td>Triple nested loops</td></tr>
+<tr><td>O(2^n)</td><td>Exponential</td><td>Recursive Fibonacci</td></tr>
+<tr><td>O(n!)</td><td>Factorial</td><td>All permutations</td></tr>
+</tbody></table>
+</div>
+<h2 id="growth-rates-visualization"><a class="header" href="#growth-rates-visualization">Growth Rates Visualization</a></h2>
+<pre><code>For n = 100:
+O(1):      1 operation
+O(log n):  7 operations
+O(n):      100 operations
+O(n log n):700 operations
+O(n²):     10,000 operations
+O(n³):     1,000,000 operations
+O(2^n):    1.27 × 10³⁰ operations (intractable!)
+O(n!):     9.33 × 10¹⁵⁷ operations (impossible!)
+</code></pre>
+<h2 id="practical-tips"><a class="header" href="#practical-tips">Practical Tips</a></h2>
+<ol>
+<li><strong>Optimize bottlenecks</strong>: Focus on the most time-consuming parts</li>
+<li><strong>Trade-offs</strong>: Sometimes O(n) space can give O(1) time (caching)</li>
+<li><strong>Real-world considerations</strong>: Constants matter for small n</li>
+<li><strong>Amortized analysis</strong>: Some operations are cheaper on average</li>
+<li><strong>Choose appropriately</strong>: Don't over-optimize; O(n²) is fine for small n</li>
 </ol>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
 <p>Big O notation provides a high-level understanding of the efficiency of algorithms, allowing developers to compare and choose the most suitable algorithm for their needs. By analyzing both time and space complexity, one can make informed decisions that lead to better performance in software applications.</p>

@@ -1,0 +1,856 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>SQLite - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="sqlite"><a class="header" href="#sqlite">SQLite</a></h1>
+<p>SQLite is a C-language library that implements a small, fast, self-contained, high-reliability, full-featured SQL database engine. It's the most widely deployed database in the world.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>SQLite is embedded into the application, requiring no separate server process. The entire database is stored in a single cross-platform file.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Serverless, zero-configuration</li>
+<li>Self-contained (single file database)</li>
+<li>Cross-platform</li>
+<li>ACID compliant</li>
+<li>Supports most SQL standards</li>
+<li>Public domain (no license required)</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt update
+sudo apt install sqlite3
+
+# macOS (pre-installed, or use Homebrew)
+brew install sqlite
+
+# CentOS/RHEL
+sudo yum install sqlite
+
+# Verify
+sqlite3 --version
+</code></pre>
+<h2 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h2>
+<pre><code class="language-bash"># Create/open database
+sqlite3 mydb.db
+
+# Open existing database
+sqlite3 existing.db
+
+# Execute command from shell
+sqlite3 mydb.db "SELECT * FROM users;"
+
+# Execute SQL file
+sqlite3 mydb.db &lt; script.sql
+
+# Dump database
+sqlite3 mydb.db .dump &gt; backup.sql
+
+# Exit
+.quit
+.exit
+</code></pre>
+<h2 id="database-operations"><a class="header" href="#database-operations">Database Operations</a></h2>
+<pre><code class="language-sql">-- Attach database
+ATTACH DATABASE 'other.db' AS other;
+
+-- List databases
+.databases
+
+-- Detach
+DETACH DATABASE other;
+
+-- Backup database
+.backup backup.db
+
+-- Restore from backup
+.restore backup.db
+</code></pre>
+<h2 id="table-operations"><a class="header" href="#table-operations">Table Operations</a></h2>
+<pre><code class="language-sql">-- Create table
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- List tables
+.tables
+.schema
+
+-- Show table schema
+.schema users
+PRAGMA table_info(users);
+
+-- Drop table
+DROP TABLE users;
+DROP TABLE IF EXISTS users;
+
+-- Rename table
+ALTER TABLE users RENAME TO customers;
+
+-- Add column
+ALTER TABLE users ADD COLUMN age INTEGER;
+
+-- Rename column (SQLite 3.25.0+)
+ALTER TABLE users RENAME COLUMN username TO user_name;
+
+-- Drop column (SQLite 3.35.0+)
+ALTER TABLE users DROP COLUMN age;
+</code></pre>
+<h2 id="data-types"><a class="header" href="#data-types">Data Types</a></h2>
+<pre><code class="language-sql">-- SQLite has 5 storage classes
+-- INTEGER, REAL, TEXT, BLOB, NULL
+
+CREATE TABLE examples (
+    int_col INTEGER,
+    real_col REAL,
+    text_col TEXT,
+    blob_col BLOB,
+
+    -- Type affinity examples
+    bool_col BOOLEAN,         -- Stored as INTEGER (0 or 1)
+    date_col DATE,            -- Stored as TEXT, INTEGER, or REAL
+    datetime_col DATETIME,
+    varchar_col VARCHAR(100), -- Stored as TEXT
+    decimal_col DECIMAL(10,2) -- Stored as REAL or TEXT
+);
+</code></pre>
+<h2 id="crud-operations"><a class="header" href="#crud-operations">CRUD Operations</a></h2>
+<pre><code class="language-sql">-- Insert
+INSERT INTO users (username, email)
+VALUES ('john', 'john@example.com');
+
+-- Insert multiple
+INSERT INTO users (username, email) VALUES
+    ('alice', 'alice@example.com'),
+    ('bob', 'bob@example.com');
+
+-- Insert or replace
+INSERT OR REPLACE INTO users (id, username, email)
+VALUES (1, 'john', 'newemail@example.com');
+
+-- Insert or ignore
+INSERT OR IGNORE INTO users (username, email)
+VALUES ('john', 'john@example.com');
+
+-- Select
+SELECT * FROM users;
+SELECT username, email FROM users WHERE id = 1;
+SELECT * FROM users WHERE username LIKE 'jo%';
+SELECT * FROM users ORDER BY created_at DESC LIMIT 10;
+SELECT * FROM users LIMIT 10 OFFSET 20;
+
+-- Update
+UPDATE users SET email = 'newemail@example.com' WHERE id = 1;
+
+-- Delete
+DELETE FROM users WHERE id = 1;
+DELETE FROM users WHERE created_at &lt; '2023-01-01';
+</code></pre>
+<h2 id="indexes"><a class="header" href="#indexes">Indexes</a></h2>
+<pre><code class="language-sql">-- Create index
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_email ON users(email);
+
+-- Unique index
+CREATE UNIQUE INDEX idx_users_username_unique ON users(username);
+
+-- Composite index
+CREATE INDEX idx_users_name_email ON users(username, email);
+
+-- Partial index
+CREATE INDEX idx_active_users ON users(username) WHERE active = 1;
+
+-- Expression index
+CREATE INDEX idx_users_lower_username ON users(LOWER(username));
+
+-- List indexes
+.indexes
+.indexes users
+PRAGMA index_list(users);
+
+-- Show index info
+PRAGMA index_info(idx_users_username);
+
+-- Drop index
+DROP INDEX idx_users_username;
+</code></pre>
+<h2 id="constraints"><a class="header" href="#constraints">Constraints</a></h2>
+<pre><code class="language-sql">-- Primary key
+CREATE TABLE products (
+    id INTEGER PRIMARY KEY,  -- Alias for rowid
+    name TEXT NOT NULL
+);
+
+-- Composite primary key
+CREATE TABLE order_items (
+    order_id INTEGER,
+    product_id INTEGER,
+    quantity INTEGER,
+    PRIMARY KEY (order_id, product_id)
+);
+
+-- Foreign key (must enable)
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE orders (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Unique constraint
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    email TEXT UNIQUE
+);
+
+-- Check constraint
+CREATE TABLE products (
+    id INTEGER PRIMARY KEY,
+    price REAL CHECK(price &gt; 0),
+    quantity INTEGER CHECK(quantity &gt;= 0)
+);
+
+-- Not null
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL
+);
+
+-- Default value
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    active INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+</code></pre>
+<h2 id="joins"><a class="header" href="#joins">Joins</a></h2>
+<pre><code class="language-sql">-- Inner join
+SELECT u.username, o.id AS order_id
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id;
+
+-- Left join
+SELECT u.username, o.id AS order_id
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id;
+
+-- Cross join
+SELECT u.username, p.name
+FROM users u
+CROSS JOIN products p;
+
+-- Natural join (not recommended)
+SELECT * FROM users NATURAL JOIN orders;
+</code></pre>
+<h2 id="aggregations"><a class="header" href="#aggregations">Aggregations</a></h2>
+<pre><code class="language-sql">-- Count
+SELECT COUNT(*) FROM users;
+SELECT COUNT(DISTINCT email) FROM users;
+
+-- Sum, Avg, Min, Max
+SELECT
+    COUNT(*) AS total_orders,
+    SUM(amount) AS total_amount,
+    AVG(amount) AS avg_amount,
+    MIN(amount) AS min_amount,
+    MAX(amount) AS max_amount
+FROM orders;
+
+-- Group by
+SELECT user_id, COUNT(*) AS order_count
+FROM orders
+GROUP BY user_id;
+
+-- Having
+SELECT user_id, COUNT(*) AS order_count
+FROM orders
+GROUP BY user_id
+HAVING COUNT(*) &gt; 5;
+
+-- Group concat
+SELECT user_id, GROUP_CONCAT(product_name, ', ') AS products
+FROM order_items
+GROUP BY user_id;
+</code></pre>
+<h2 id="transactions"><a class="header" href="#transactions">Transactions</a></h2>
+<pre><code class="language-sql">-- Begin transaction
+BEGIN TRANSACTION;
+
+INSERT INTO users (username, email) VALUES ('test', 'test@example.com');
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+
+-- Commit
+COMMIT;
+
+-- Rollback
+ROLLBACK;
+
+-- Transaction modes
+BEGIN DEFERRED TRANSACTION;   -- Default
+BEGIN IMMEDIATE TRANSACTION;  -- Acquire write lock
+BEGIN EXCLUSIVE TRANSACTION;  -- Exclusive access
+
+-- Savepoint
+BEGIN;
+INSERT INTO users (username, email) VALUES ('test', 'test@example.com');
+SAVEPOINT sp1;
+UPDATE users SET email = 'new@example.com' WHERE username = 'test';
+ROLLBACK TO sp1;
+COMMIT;
+</code></pre>
+<h2 id="views"><a class="header" href="#views">Views</a></h2>
+<pre><code class="language-sql">-- Create view
+CREATE VIEW active_users AS
+SELECT id, username, email
+FROM users
+WHERE active = 1;
+
+-- Use view
+SELECT * FROM active_users;
+
+-- Temporary view
+CREATE TEMP VIEW temp_users AS
+SELECT * FROM users WHERE created_at &gt; date('now', '-7 days');
+
+-- Drop view
+DROP VIEW active_users;
+</code></pre>
+<h2 id="triggers"><a class="header" href="#triggers">Triggers</a></h2>
+<pre><code class="language-sql">-- Before insert trigger
+CREATE TRIGGER validate_email
+BEFORE INSERT ON users
+BEGIN
+    SELECT CASE
+        WHEN NEW.email NOT LIKE '%@%' THEN
+            RAISE(ABORT, 'Invalid email format')
+    END;
+END;
+
+-- After insert trigger
+CREATE TRIGGER log_user_creation
+AFTER INSERT ON users
+BEGIN
+    INSERT INTO audit_log (table_name, action, timestamp)
+    VALUES ('users', 'INSERT', datetime('now'));
+END;
+
+-- Update trigger
+CREATE TRIGGER update_modified_time
+AFTER UPDATE ON users
+BEGIN
+    UPDATE users SET updated_at = datetime('now')
+    WHERE id = NEW.id;
+END;
+
+-- Instead of trigger (for views)
+CREATE TRIGGER update_active_users
+INSTEAD OF UPDATE ON active_users
+BEGIN
+    UPDATE users SET email = NEW.email WHERE id = NEW.id;
+END;
+
+-- List triggers
+.schema users
+SELECT * FROM sqlite_master WHERE type = 'trigger';
+
+-- Drop trigger
+DROP TRIGGER validate_email;
+</code></pre>
+<h2 id="date-and-time"><a class="header" href="#date-and-time">Date and Time</a></h2>
+<pre><code class="language-sql">-- Current date/time
+SELECT date('now');               -- 2024-01-15
+SELECT time('now');               -- 14:30:45
+SELECT datetime('now');           -- 2024-01-15 14:30:45
+SELECT strftime('%Y-%m-%d %H:%M', 'now');
+
+-- Date arithmetic
+SELECT date('now', '+7 days');
+SELECT date('now', '-1 month');
+SELECT datetime('now', '+5 hours');
+SELECT date('now', 'start of month');
+SELECT date('now', 'start of year');
+
+-- Extract parts
+SELECT strftime('%Y', 'now') AS year;
+SELECT strftime('%m', 'now') AS month;
+SELECT strftime('%d', 'now') AS day;
+SELECT strftime('%H', 'now') AS hour;
+
+-- Julian day
+SELECT julianday('now');
+SELECT julianday('now') - julianday('2024-01-01');
+
+-- Unix timestamp
+SELECT strftime('%s', 'now');  -- Unix timestamp
+SELECT datetime(1234567890, 'unixepoch');  -- From timestamp
+</code></pre>
+<h2 id="json-operations-sqlite-3380"><a class="header" href="#json-operations-sqlite-3380">JSON Operations (SQLite 3.38.0+)</a></h2>
+<pre><code class="language-sql">-- JSON functions
+SELECT json('{"name":"John","age":30}');
+
+-- Extract value
+SELECT json_extract('{"name":"John","age":30}', '$.name');
+SELECT '{"name":"John","age":30}' -&gt; 'name';  -- Shorthand
+
+-- Array operations
+SELECT json_each.value
+FROM json_each('[1,2,3,4,5]');
+
+-- Store JSON
+CREATE TABLE events (
+    id INTEGER PRIMARY KEY,
+    data TEXT
+);
+
+INSERT INTO events (data) VALUES ('{"type":"click","count":1}');
+
+-- Query JSON
+SELECT * FROM events
+WHERE json_extract(data, '$.type') = 'click';
+
+-- Update JSON
+UPDATE events
+SET data = json_set(data, '$.count', json_extract(data, '$.count') + 1)
+WHERE id = 1;
+</code></pre>
+<h2 id="full-text-search"><a class="header" href="#full-text-search">Full-Text Search</a></h2>
+<pre><code class="language-sql">-- Create FTS5 table
+CREATE VIRTUAL TABLE articles_fts USING fts5(
+    title,
+    body,
+    content=articles,
+    content_rowid=id
+);
+
+-- Populate FTS table
+INSERT INTO articles_fts(rowid, title, body)
+SELECT id, title, body FROM articles;
+
+-- Search
+SELECT * FROM articles_fts WHERE articles_fts MATCH 'sqlite performance';
+
+-- Ranking
+SELECT *, rank FROM articles_fts
+WHERE articles_fts MATCH 'sqlite'
+ORDER BY rank;
+
+-- Phrase search
+SELECT * FROM articles_fts WHERE articles_fts MATCH '"sqlite database"';
+
+-- Column-specific search
+SELECT * FROM articles_fts WHERE title MATCH 'tutorial';
+</code></pre>
+<h2 id="pragma-statements"><a class="header" href="#pragma-statements">Pragma Statements</a></h2>
+<pre><code class="language-sql">-- Database info
+PRAGMA database_list;
+PRAGMA table_info(users);
+PRAGMA index_list(users);
+PRAGMA foreign_key_list(orders);
+
+-- Performance
+PRAGMA cache_size = 10000;        -- Pages in cache
+PRAGMA page_size = 4096;          -- Page size in bytes
+PRAGMA journal_mode = WAL;        -- Write-Ahead Logging
+PRAGMA synchronous = NORMAL;      -- Sync mode
+PRAGMA temp_store = MEMORY;       -- Temp tables in memory
+
+-- Foreign keys
+PRAGMA foreign_keys = ON;
+PRAGMA foreign_keys;              -- Check status
+
+-- Integrity check
+PRAGMA integrity_check;
+PRAGMA quick_check;
+
+-- Database size
+PRAGMA page_count;
+PRAGMA page_size;
+-- Total size = page_count * page_size
+
+-- Optimization
+PRAGMA optimize;
+VACUUM;
+</code></pre>
+<h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
+<pre><code class="language-sql">-- Enable WAL mode (Write-Ahead Logging)
+PRAGMA journal_mode = WAL;
+
+-- Increase cache size
+PRAGMA cache_size = -64000;  -- 64MB
+
+-- Disable synchronous (faster but less safe)
+PRAGMA synchronous = OFF;
+PRAGMA synchronous = NORMAL;  -- Balanced
+
+-- Analyze tables
+ANALYZE;
+ANALYZE users;
+
+-- Vacuum database
+VACUUM;
+
+-- Batch inserts
+BEGIN TRANSACTION;
+-- Multiple INSERT statements
+COMMIT;
+
+-- Use prepared statements (in code)
+-- Better performance and security
+
+-- Indexes for frequently queried columns
+CREATE INDEX idx_users_email ON users(email);
+</code></pre>
+<h2 id="backup-and-recovery"><a class="header" href="#backup-and-recovery">Backup and Recovery</a></h2>
+<pre><code class="language-bash"># Backup database
+sqlite3 mydb.db ".backup backup.db"
+sqlite3 mydb.db .dump &gt; backup.sql
+cp mydb.db mydb_backup.db  # Simple copy
+
+# Restore from backup
+sqlite3 newdb.db ".restore backup.db"
+sqlite3 newdb.db &lt; backup.sql
+
+# Export to CSV
+.mode csv
+.output users.csv
+SELECT * FROM users;
+.output stdout
+
+# Import from CSV
+.mode csv
+.import users.csv users
+</code></pre>
+<h2 id="sqlite-cli-commands"><a class="header" href="#sqlite-cli-commands">SQLite CLI Commands</a></h2>
+<pre><code class="language-bash"># Meta-commands
+.help               # Show help
+.databases          # List databases
+.tables             # List tables
+.schema             # Show all schemas
+.schema users       # Show table schema
+.indexes users      # Show indexes
+.mode column        # Column output mode
+.mode csv           # CSV output mode
+.mode json          # JSON output mode
+.headers on         # Show column headers
+.width 10 20 30     # Set column widths
+.output file.txt    # Output to file
+.output stdout      # Output to screen
+.read file.sql      # Execute SQL file
+.timer on           # Show execution time
+.quit               # Exit
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<pre><code class="language-sql">-- Upsert (Insert or Update)
+INSERT INTO users (id, username, email)
+VALUES (1, 'john', 'john@example.com')
+ON CONFLICT(id) DO UPDATE SET
+    username = excluded.username,
+    email = excluded.email;
+
+-- Conditional insert
+INSERT INTO users (username, email)
+SELECT 'john', 'john@example.com'
+WHERE NOT EXISTS (
+    SELECT 1 FROM users WHERE username = 'john'
+);
+
+-- Auto-increment
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT
+);
+
+-- Get last insert rowid
+SELECT last_insert_rowid();
+
+-- Pagination
+SELECT * FROM users
+ORDER BY id
+LIMIT 10 OFFSET 20;
+
+-- Random row
+SELECT * FROM users ORDER BY RANDOM() LIMIT 1;
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<pre><code class="language-sql">-- 1. Enable foreign keys
+PRAGMA foreign_keys = ON;
+
+-- 2. Use WAL mode for better concurrency
+PRAGMA journal_mode = WAL;
+
+-- 3. Use transactions for bulk operations
+BEGIN TRANSACTION;
+-- Multiple operations
+COMMIT;
+
+-- 4. Create indexes for frequently queried columns
+CREATE INDEX idx_users_email ON users(email);
+
+-- 5. Use INTEGER PRIMARY KEY for auto-increment
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    username TEXT
+);
+
+-- 6. Analyze database periodically
+ANALYZE;
+
+-- 7. Use prepared statements in code
+-- Prevents SQL injection and improves performance
+
+-- 8. Vacuum database periodically
+VACUUM;
+
+-- 9. Use appropriate data types
+-- SQLite is flexible but using correct types helps
+
+-- 10. Regular backups
+-- Use .backup command or copy the database file
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>.tables</code></td><td>List tables</td></tr>
+<tr><td><code>.schema TABLE</code></td><td>Show table structure</td></tr>
+<tr><td><code>.mode column</code></td><td>Set output format</td></tr>
+<tr><td><code>.headers on</code></td><td>Show column headers</td></tr>
+<tr><td><code>.backup FILE</code></td><td>Backup database</td></tr>
+<tr><td><code>.import FILE TABLE</code></td><td>Import CSV</td></tr>
+<tr><td><code>PRAGMA foreign_keys=ON</code></td><td>Enable foreign keys</td></tr>
+<tr><td><code>PRAGMA journal_mode=WAL</code></td><td>Enable WAL mode</td></tr>
+<tr><td><code>VACUUM</code></td><td>Optimize database</td></tr>
+<tr><td><code>ANALYZE</code></td><td>Update statistics</td></tr>
+</tbody></table>
+</div>
+<p>SQLite is ideal for embedded systems, mobile apps, desktop applications, and scenarios where a simple, reliable, serverless database is needed.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../databases/postgres.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../databases/duckdb.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../databases/postgres.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../databases/duckdb.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

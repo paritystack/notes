@@ -1,0 +1,1230 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cross Compilation - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="cross-compilation"><a class="header" href="#cross-compilation">Cross Compilation</a></h1>
+<p>A comprehensive guide to cross compilation for Linux - building software on one platform (host) to run on a different platform (target).</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#why-cross-compilation">Why Cross Compilation?</a></li>
+<li><a href="#terminology">Terminology</a></li>
+<li><a href="#toolchain-setup">Toolchain Setup</a></li>
+<li><a href="#cross-compiling-the-linux-kernel">Cross Compiling the Linux Kernel</a></li>
+<li><a href="#cross-compiling-user-space-applications">Cross Compiling User Space Applications</a></li>
+<li><a href="#build-system-support">Build System Support</a></li>
+<li><a href="#root-filesystem-creation">Root Filesystem Creation</a></li>
+<li><a href="#debugging-cross-compiled-code">Debugging Cross-Compiled Code</a></li>
+<li><a href="#common-architectures">Common Architectures</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+</ul>
+<hr />
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p><strong>Cross Compilation</strong> is the process of building executable code on one system (the <strong>host</strong>) that will run on a different system (the <strong>target</strong>). This is essential for embedded systems development where the target device may have limited resources or a different architecture.</p>
+<h3 id="typical-scenario"><a class="header" href="#typical-scenario">Typical Scenario</a></h3>
+<pre><code>┌─────────────────────┐         ┌─────────────────────┐
+│   Host System       │         │   Target System     │
+│   x86_64 Linux      │         │   ARM Cortex-A8     │
+│   Development PC    │  ────&gt;  │   Embedded Board    │
+│                     │         │                     │
+│ - Fast CPU          │         │ - Slow CPU          │
+│ - Lots of RAM       │         │ - Limited RAM       │
+│ - Large Storage     │         │ - Small Storage     │
+└─────────────────────┘         └─────────────────────┘
+</code></pre>
+<p><strong>Build on host → Deploy to target</strong></p>
+<hr />
+<h2 id="why-cross-compilation"><a class="header" href="#why-cross-compilation">Why Cross Compilation?</a></h2>
+<h3 id="reasons-for-cross-compilation"><a class="header" href="#reasons-for-cross-compilation">Reasons for Cross Compilation</a></h3>
+<ol>
+<li>
+<p><strong>Limited Target Resources</strong></p>
+<ul>
+<li>Embedded devices lack CPU power, RAM, or storage for compilation</li>
+<li>Building natively would take hours or fail due to memory constraints</li>
+</ul>
+</li>
+<li>
+<p><strong>Architecture Differences</strong></p>
+<ul>
+<li>Development machine (x86_64) differs from target (ARM, MIPS, etc.)</li>
+<li>Cannot run x86 binaries on ARM without emulation</li>
+</ul>
+</li>
+<li>
+<p><strong>Speed</strong></p>
+<ul>
+<li>Powerful development machine compiles much faster than embedded target</li>
+<li>Native compilation on Raspberry Pi: 2 hours → Cross compilation: 10 minutes</li>
+</ul>
+</li>
+<li>
+<p><strong>Tooling</strong></p>
+<ul>
+<li>Better development tools available on host</li>
+<li>Easier debugging and profiling setup</li>
+</ul>
+</li>
+<li>
+<p><strong>Consistency</strong></p>
+<ul>
+<li>Reproducible builds across team</li>
+<li>Controlled toolchain versions</li>
+</ul>
+</li>
+</ol>
+<h3 id="example-raspberry-pi"><a class="header" href="#example-raspberry-pi">Example: Raspberry Pi</a></h3>
+<p><strong>Native compilation on Pi 3:</strong></p>
+<pre><code class="language-bash"># Building Linux kernel natively
+$ time make -j4
+real    120m0.000s   # 2 hours!
+</code></pre>
+<p><strong>Cross compilation on x86_64 PC:</strong></p>
+<pre><code class="language-bash"># Cross compiling same kernel
+$ time make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j8
+real    10m0.000s    # 10 minutes!
+</code></pre>
+<hr />
+<h2 id="terminology"><a class="header" href="#terminology">Terminology</a></h2>
+<h3 id="key-terms"><a class="header" href="#key-terms">Key Terms</a></h3>
+<ul>
+<li>
+<p><strong>Host</strong>: System where compilation happens (your development PC)</p>
+</li>
+<li>
+<p><strong>Build</strong>: System where build tools run (usually same as host)</p>
+</li>
+<li>
+<p><strong>Target</strong>: System where compiled code will run (embedded device)</p>
+</li>
+<li>
+<p><strong>Toolchain</strong>: Collection of tools for cross compilation</p>
+<ul>
+<li>Compiler (gcc, clang)</li>
+<li>Linker (ld)</li>
+<li>Assembler (as)</li>
+<li>Libraries (libc, libgcc)</li>
+<li>Utilities (objcopy, objdump, strip)</li>
+</ul>
+</li>
+<li>
+<p><strong>Triple/Tuple</strong>: Architecture specification format</p>
+<ul>
+<li>Format: <code>arch-vendor-os-abi</code></li>
+<li>Example: <code>arm-linux-gnueabihf</code>
+<ul>
+<li><code>arm</code>: Architecture (ARM)</li>
+<li><code>linux</code>: OS (Linux)</li>
+<li><code>gnueabihf</code>: ABI (GNU EABI Hard Float)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Sysroot</strong>: Target system's root filesystem on host</p>
+<ul>
+<li>Contains target's headers and libraries</li>
+<li>Located on development machine</li>
+<li>Mimics target's <code>/usr</code>, <code>/lib</code>, etc.</li>
+</ul>
+</li>
+</ul>
+<h3 id="architecture-tuples"><a class="header" href="#architecture-tuples">Architecture Tuples</a></h3>
+<pre><code class="language-bash"># Common architecture tuples
+arm-linux-gnueabi         # ARM soft-float
+arm-linux-gnueabihf       # ARM hard-float
+aarch64-linux-gnu         # ARM 64-bit
+mips-linux-gnu            # MIPS
+mipsel-linux-gnu          # MIPS little-endian
+powerpc-linux-gnu         # PowerPC
+x86_64-w64-mingw32        # Windows 64-bit
+</code></pre>
+<hr />
+<h2 id="toolchain-setup"><a class="header" href="#toolchain-setup">Toolchain Setup</a></h2>
+<h3 id="option-1-pre-built-toolchains"><a class="header" href="#option-1-pre-built-toolchains">Option 1: Pre-built Toolchains</a></h3>
+<p><strong>Install from Distribution:</strong></p>
+<pre><code class="language-bash"># Ubuntu/Debian - ARM
+sudo apt-get install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+
+# ARM64
+sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+# MIPS
+sudo apt-get install gcc-mips-linux-gnu g++-mips-linux-gnu
+
+# Verify installation
+arm-linux-gnueabihf-gcc --version
+</code></pre>
+<p><strong>Linaro Toolchains:</strong></p>
+<pre><code class="language-bash"># Download from Linaro
+wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+
+# Extract
+tar xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+
+# Add to PATH
+export PATH=$PATH:$(pwd)/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin
+
+# Test
+arm-linux-gnueabihf-gcc --version
+</code></pre>
+<h3 id="option-2-crosstool-ng"><a class="header" href="#option-2-crosstool-ng">Option 2: Crosstool-NG</a></h3>
+<p>Build custom toolchains:</p>
+<pre><code class="language-bash"># Install crosstool-NG
+git clone https://github.com/crosstool-ng/crosstool-ng
+cd crosstool-ng
+./bootstrap
+./configure --prefix=/opt/crosstool-ng
+make
+sudo make install
+
+# Add to PATH
+export PATH=/opt/crosstool-ng/bin:$PATH
+
+# Configure and build
+ct-ng list-samples
+ct-ng arm-unknown-linux-gnueabi
+ct-ng menuconfig  # Configure as needed
+ct-ng build
+
+# Toolchain installed in ~/x-tools/arm-unknown-linux-gnueabi/
+</code></pre>
+<h3 id="option-3-buildroot"><a class="header" href="#option-3-buildroot">Option 3: Buildroot</a></h3>
+<p>Creates complete embedded Linux system including toolchain:</p>
+<pre><code class="language-bash"># Download Buildroot
+wget https://buildroot.org/downloads/buildroot-2023.02.tar.gz
+tar xf buildroot-2023.02.tar.gz
+cd buildroot-2023.02
+
+# Configure
+make menuconfig
+# Target options -&gt; Target Architecture -&gt; ARM
+# Toolchain -&gt; Build toolchain
+
+# Build
+make
+
+# Toolchain in output/host/usr/bin/
+export PATH=$PATH:$(pwd)/output/host/usr/bin
+</code></pre>
+<h3 id="setting-up-environment"><a class="header" href="#setting-up-environment">Setting Up Environment</a></h3>
+<p><strong>Permanent setup:</strong></p>
+<pre><code class="language-bash"># Add to ~/.bashrc or ~/.zshrc
+export CROSS_COMPILE=arm-linux-gnueabihf-
+export ARCH=arm
+export PATH=$PATH:/path/to/toolchain/bin
+
+# Apply
+source ~/.bashrc
+</code></pre>
+<p><strong>Project-specific:</strong></p>
+<pre><code class="language-bash"># Create toolchain.env
+cat &gt; toolchain.env &lt;&lt; 'EOF'
+export CROSS_COMPILE=arm-linux-gnueabihf-
+export ARCH=arm
+export PATH=/opt/arm-toolchain/bin:$PATH
+export SYSROOT=/opt/arm-sysroot
+EOF
+
+# Source when needed
+source toolchain.env
+</code></pre>
+<h3 id="verifying-toolchain"><a class="header" href="#verifying-toolchain">Verifying Toolchain</a></h3>
+<pre><code class="language-bash"># Check compiler
+${CROSS_COMPILE}gcc --version
+${CROSS_COMPILE}gcc -v
+
+# Check target
+${CROSS_COMPILE}gcc -dumpmachine
+# Output: arm-linux-gnueabihf
+
+# List all tools
+ls -la $(dirname $(which ${CROSS_COMPILE}gcc))/${CROSS_COMPILE}*
+</code></pre>
+<hr />
+<h2 id="cross-compiling-the-linux-kernel"><a class="header" href="#cross-compiling-the-linux-kernel">Cross Compiling the Linux Kernel</a></h2>
+<h3 id="basic-kernel-cross-compilation"><a class="header" href="#basic-kernel-cross-compilation">Basic Kernel Cross Compilation</a></h3>
+<pre><code class="language-bash"># Get kernel source
+git clone https://github.com/torvalds/linux.git
+cd linux
+
+# Clean
+make mrproper
+
+# Configure for ARM (example: Versatile Express)
+make ARCH=arm vexpress_defconfig
+
+# Or use menuconfig
+make ARCH=arm menuconfig
+
+# Build
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j$(nproc)
+
+# Build specific targets
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- dtbs
+
+# Install modules to staging directory
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
+     INSTALL_MOD_PATH=/path/to/rootfs modules_install
+</code></pre>
+<h3 id="raspberry-pi-kernel"><a class="header" href="#raspberry-pi-kernel">Raspberry Pi Kernel</a></h3>
+<pre><code class="language-bash"># Clone Raspberry Pi kernel
+git clone --depth=1 https://github.com/raspberrypi/linux
+cd linux
+
+# Pi 1, Zero, Zero W (32-bit)
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcmrpi_defconfig
+
+# Pi 2, 3, 4 (32-bit)
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2709_defconfig
+
+# Pi 3, 4 (64-bit)
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
+
+# Build
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage modules dtbs -j$(nproc)
+
+# Install to SD card
+export ROOTFS=/mnt/ext4
+export BOOTFS=/mnt/fat32
+
+# Install modules
+sudo make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
+     INSTALL_MOD_PATH=$ROOTFS modules_install
+
+# Install kernel
+sudo cp arch/arm/boot/zImage $BOOTFS/kernel7.img
+sudo cp arch/arm/boot/dts/*.dtb $BOOTFS/
+sudo cp arch/arm/boot/dts/overlays/*.dtb* $BOOTFS/overlays/
+</code></pre>
+<h3 id="beaglebone-black-kernel"><a class="header" href="#beaglebone-black-kernel">BeagleBone Black Kernel</a></h3>
+<pre><code class="language-bash"># Clone kernel
+git clone https://github.com/beagleboard/linux.git
+cd linux
+
+# Checkout stable branch
+git checkout 5.10
+
+# Configure
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bb.org_defconfig
+
+# Build
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage modules dtbs -j$(nproc)
+
+# Create uImage (U-Boot format)
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- uImage \
+     LOADADDR=0x80008000
+
+# Install
+sudo cp arch/arm/boot/uImage /media/$USER/BOOT/
+sudo cp arch/arm/boot/dts/am335x-boneblack.dtb /media/$USER/BOOT/
+sudo make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
+     INSTALL_MOD_PATH=/media/$USER/rootfs modules_install
+</code></pre>
+<h3 id="kernel-configuration-tips"><a class="header" href="#kernel-configuration-tips">Kernel Configuration Tips</a></h3>
+<pre><code class="language-bash"># Use existing config from target
+scp user@target:/proc/config.gz .
+zcat config.gz &gt; .config
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- oldconfig
+
+# Save custom config
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- savedefconfig
+cp defconfig arch/arm/configs/myboard_defconfig
+
+# Enable specific features
+./scripts/config --enable CONFIG_FEATURE_NAME
+./scripts/config --disable CONFIG_FEATURE_NAME
+./scripts/config --module CONFIG_FEATURE_NAME
+</code></pre>
+<hr />
+<h2 id="cross-compiling-user-space-applications"><a class="header" href="#cross-compiling-user-space-applications">Cross Compiling User Space Applications</a></h2>
+<h3 id="simple-c-program"><a class="header" href="#simple-c-program">Simple C Program</a></h3>
+<pre><code class="language-c">/* hello.c */
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+	printf("Hello from %s!\n",
+#ifdef __arm__
+		"ARM"
+#elif __aarch64__
+		"ARM64"
+#elif __mips__
+		"MIPS"
+#else
+		"unknown"
+#endif
+	);
+	return 0;
+}
+</code></pre>
+<p><strong>Compile:</strong></p>
+<pre><code class="language-bash"># Cross compile
+arm-linux-gnueabihf-gcc hello.c -o hello
+
+# Check architecture
+file hello
+# hello: ELF 32-bit LSB executable, ARM, version 1 (SYSV)
+
+# Check dynamic libraries
+arm-linux-gnueabihf-readelf -d hello | grep NEEDED
+</code></pre>
+<h3 id="static-vs-dynamic-linking"><a class="header" href="#static-vs-dynamic-linking">Static vs Dynamic Linking</a></h3>
+<p><strong>Dynamic linking (default):</strong></p>
+<pre><code class="language-bash"># Requires target's libc at runtime
+arm-linux-gnueabihf-gcc hello.c -o hello
+
+# List dependencies
+arm-linux-gnueabihf-ldd hello
+# or
+arm-linux-gnueabihf-readelf -d hello
+</code></pre>
+<p><strong>Static linking:</strong></p>
+<pre><code class="language-bash"># Includes all libraries in binary
+arm-linux-gnueabihf-gcc hello.c -o hello -static
+
+# Check - no dependencies
+file hello
+# hello: ELF 32-bit LSB executable, ARM, statically linked
+
+# Size comparison
+ls -lh hello
+# Much larger with static linking
+</code></pre>
+<h3 id="cross-compiling-with-libraries"><a class="header" href="#cross-compiling-with-libraries">Cross Compiling with Libraries</a></h3>
+<pre><code class="language-c">/* http_client.c - requires libcurl */
+#include &lt;curl/curl.h&gt;
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+	CURL *curl = curl_easy_init();
+	if (curl) {
+		curl_easy_cleanup(curl);
+		printf("libcurl working!\n");
+	}
+	return 0;
+}
+</code></pre>
+<p><strong>Without sysroot (will fail):</strong></p>
+<pre><code class="language-bash">arm-linux-gnueabihf-gcc http_client.c -o http_client -lcurl
+# Error: curl/curl.h: No such file or directory
+</code></pre>
+<p><strong>With sysroot:</strong></p>
+<pre><code class="language-bash"># Install target libraries on host
+sudo apt-get install libcurl4-openssl-dev:armhf
+
+# Compile with sysroot
+arm-linux-gnueabihf-gcc http_client.c -o http_client \
+	--sysroot=/usr/arm-linux-gnueabihf \
+	-lcurl
+
+# Or set PKG_CONFIG
+export PKG_CONFIG_PATH=/usr/arm-linux-gnueabihf/lib/pkgconfig
+arm-linux-gnueabihf-gcc http_client.c -o http_client \
+	$(pkg-config --cflags --libs libcurl)
+</code></pre>
+<h3 id="makefile-for-cross-compilation"><a class="header" href="#makefile-for-cross-compilation">Makefile for Cross Compilation</a></h3>
+<pre><code class="language-makefile"># Makefile
+CC := $(CROSS_COMPILE)gcc
+CXX := $(CROSS_COMPILE)g++
+LD := $(CROSS_COMPILE)ld
+AR := $(CROSS_COMPILE)ar
+STRIP := $(CROSS_COMPILE)strip
+
+CFLAGS := -Wall -O2
+LDFLAGS :=
+
+# Add sysroot if set
+ifdef SYSROOT
+CFLAGS += --sysroot=$(SYSROOT)
+LDFLAGS += --sysroot=$(SYSROOT)
+endif
+
+TARGET := myapp
+SRCS := main.c utils.c
+OBJS := $(SRCS:.c=.o)
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^
+	$(STRIP) $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $&lt;
+
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+.PHONY: all clean
+</code></pre>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-bash"># Native compilation
+make
+
+# Cross compilation
+make CROSS_COMPILE=arm-linux-gnueabihf-
+
+# With sysroot
+make CROSS_COMPILE=arm-linux-gnueabihf- SYSROOT=/opt/arm-sysroot
+</code></pre>
+<hr />
+<h2 id="build-system-support"><a class="header" href="#build-system-support">Build System Support</a></h2>
+<h3 id="autotools-configure"><a class="header" href="#autotools-configure">Autotools (./configure)</a></h3>
+<pre><code class="language-bash"># Basic cross compilation
+./configure --host=arm-linux-gnueabihf --prefix=/usr
+
+# With sysroot
+./configure \
+	--host=arm-linux-gnueabihf \
+	--prefix=/usr \
+	--with-sysroot=/opt/arm-sysroot \
+	CFLAGS="--sysroot=/opt/arm-sysroot" \
+	LDFLAGS="--sysroot=/opt/arm-sysroot"
+
+# Build and install
+make
+make DESTDIR=/path/to/rootfs install
+</code></pre>
+<p><strong>config.site for consistent configuration:</strong></p>
+<pre><code class="language-bash"># Create config.site
+cat &gt; arm-config.site &lt;&lt; 'EOF'
+# Cross compilation settings
+ac_cv_func_malloc_0_nonnull=yes
+ac_cv_func_realloc_0_nonnull=yes
+EOF
+
+# Use it
+./configure --host=arm-linux-gnueabihf --prefix=/usr \
+	CONFIG_SITE=arm-config.site
+</code></pre>
+<h3 id="cmake"><a class="header" href="#cmake">CMake</a></h3>
+<p><strong>Toolchain file:</strong></p>
+<pre><code class="language-cmake"># arm-toolchain.cmake
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+# Specify the cross compiler
+set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
+
+# Where to look for libraries
+set(CMAKE_FIND_ROOT_PATH /usr/arm-linux-gnueabihf)
+
+# Search for programs in the build host directories
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+
+# Search for libraries and headers in target directories
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+</code></pre>
+<p><strong>Build:</strong></p>
+<pre><code class="language-bash">mkdir build &amp;&amp; cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../arm-toolchain.cmake
+make
+</code></pre>
+<p><strong>Or using environment variables:</strong></p>
+<pre><code class="language-bash">export CC=arm-linux-gnueabihf-gcc
+export CXX=arm-linux-gnueabihf-g++
+cmake ..
+make
+</code></pre>
+<h3 id="meson"><a class="header" href="#meson">Meson</a></h3>
+<p><strong>Cross file:</strong></p>
+<pre><code class="language-ini"># arm-cross.txt
+[binaries]
+c = 'arm-linux-gnueabihf-gcc'
+cpp = 'arm-linux-gnueabihf-g++'
+ar = 'arm-linux-gnueabihf-ar'
+strip = 'arm-linux-gnueabihf-strip'
+pkgconfig = 'arm-linux-gnueabihf-pkg-config'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'cortex-a8'
+endian = 'little'
+
+[properties]
+sys_root = '/usr/arm-linux-gnueabihf'
+</code></pre>
+<p><strong>Build:</strong></p>
+<pre><code class="language-bash">meson setup build --cross-file arm-cross.txt
+ninja -C build
+</code></pre>
+<hr />
+<h2 id="root-filesystem-creation"><a class="header" href="#root-filesystem-creation">Root Filesystem Creation</a></h2>
+<h3 id="using-buildroot"><a class="header" href="#using-buildroot">Using Buildroot</a></h3>
+<pre><code class="language-bash"># Configure
+make menuconfig
+
+# Filesystem images -&gt; ext2/3/4 root filesystem
+# System configuration -&gt; System hostname, root password
+# Target packages -&gt; Select packages
+
+# Build
+make
+
+# Output
+ls output/images/
+# rootfs.ext4  zImage  *.dtb
+</code></pre>
+<h3 id="using-yoctoopenembedded"><a class="header" href="#using-yoctoopenembedded">Using Yocto/OpenEmbedded</a></h3>
+<pre><code class="language-bash"># Clone Poky
+git clone -b kirkstone git://git.yoctoproject.org/poky
+cd poky
+
+# Initialize build
+source oe-init-build-env
+
+# Edit conf/local.conf
+# MACHINE = "beaglebone-yocto"
+
+# Build minimal image
+bitbake core-image-minimal
+
+# Output in tmp/deploy/images/beaglebone-yocto/
+</code></pre>
+<h3 id="manual-root-filesystem"><a class="header" href="#manual-root-filesystem">Manual Root Filesystem</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# create-rootfs.sh
+
+ROOTFS=/tmp/arm-rootfs
+TOOLCHAIN=arm-linux-gnueabihf
+
+# Create directory structure
+mkdir -p $ROOTFS/{bin,sbin,etc,proc,sys,dev,lib,usr/{bin,sbin,lib},tmp,var,home,root}
+
+# Copy libraries from toolchain
+SYSROOT=$(${TOOLCHAIN}-gcc -print-sysroot)
+cp -a $SYSROOT/lib/* $ROOTFS/lib/
+cp -a $SYSROOT/usr/lib/* $ROOTFS/usr/lib/
+
+# Install busybox (provides basic utilities)
+git clone https://git.busybox.net/busybox
+cd busybox
+make ARCH=arm CROSS_COMPILE=$TOOLCHAIN- defconfig
+make ARCH=arm CROSS_COMPILE=$TOOLCHAIN- -j$(nproc)
+make ARCH=arm CROSS_COMPILE=$TOOLCHAIN- \
+	CONFIG_PREFIX=$ROOTFS install
+cd ..
+
+# Create device nodes
+sudo mknod -m 666 $ROOTFS/dev/null c 1 3
+sudo mknod -m 666 $ROOTFS/dev/console c 5 1
+sudo mknod -m 666 $ROOTFS/dev/tty c 5 0
+
+# Create /etc/inittab
+cat &gt; $ROOTFS/etc/inittab &lt;&lt; 'EOF'
+::sysinit:/etc/init.d/rcS
+::respawn:/sbin/getty 115200 console
+::shutdown:/bin/umount -a -r
+::restart:/sbin/init
+EOF
+
+# Create init script
+mkdir -p $ROOTFS/etc/init.d
+cat &gt; $ROOTFS/etc/init.d/rcS &lt;&lt; 'EOF'
+#!/bin/sh
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t tmpfs none /tmp
+echo "Boot complete"
+EOF
+chmod +x $ROOTFS/etc/init.d/rcS
+
+# Create filesystem image
+dd if=/dev/zero of=rootfs.ext4 bs=1M count=512
+mkfs.ext4 rootfs.ext4
+mkdir -p /mnt/rootfs
+sudo mount rootfs.ext4 /mnt/rootfs
+sudo cp -a $ROOTFS/* /mnt/rootfs/
+sudo umount /mnt/rootfs
+
+echo "Root filesystem created: rootfs.ext4"
+</code></pre>
+<hr />
+<h2 id="debugging-cross-compiled-code"><a class="header" href="#debugging-cross-compiled-code">Debugging Cross-Compiled Code</a></h2>
+<h3 id="remote-gdb-debugging"><a class="header" href="#remote-gdb-debugging">Remote GDB Debugging</a></h3>
+<p><strong>On target (ARM device):</strong></p>
+<pre><code class="language-bash"># Install gdbserver (if not already present)
+# Run application under gdbserver
+gdbserver :1234 ./myapp arg1 arg2
+</code></pre>
+<p><strong>On host (development PC):</strong></p>
+<pre><code class="language-bash"># Use cross-gdb
+arm-linux-gnueabihf-gdb ./myapp
+
+# In GDB
+(gdb) target remote target-ip:1234
+(gdb) break main
+(gdb) continue
+(gdb) step
+(gdb) print variable
+(gdb) backtrace
+</code></pre>
+<p><strong>GDB script for convenience:</strong></p>
+<pre><code class="language-bash"># .gdbinit
+target remote 192.168.1.100:1234
+break main
+</code></pre>
+<h3 id="qemu-user-mode"><a class="header" href="#qemu-user-mode">QEMU User Mode</a></h3>
+<p>Run ARM binaries on x86 using QEMU:</p>
+<pre><code class="language-bash"># Install QEMU user mode
+sudo apt-get install qemu-user-static
+
+# Run ARM binary
+qemu-arm-static -L /usr/arm-linux-gnueabihf ./hello
+
+# With GDB
+qemu-arm-static -L /usr/arm-linux-gnueabihf -g 1234 ./hello
+
+# In another terminal
+arm-linux-gnueabihf-gdb ./hello
+(gdb) target remote :1234
+</code></pre>
+<h3 id="qemu-system-mode"><a class="header" href="#qemu-system-mode">QEMU System Mode</a></h3>
+<p>Emulate entire ARM system:</p>
+<pre><code class="language-bash"># Install QEMU system
+sudo apt-get install qemu-system-arm
+
+# Run with kernel and rootfs
+qemu-system-arm \
+	-M vexpress-a9 \
+	-kernel zImage \
+	-dtb vexpress-v2p-ca9.dtb \
+	-drive file=rootfs.ext4,if=sd,format=raw \
+	-append "console=ttyAMA0 root=/dev/mmcblk0 rootwait" \
+	-serial stdio \
+	-net nic -net user
+</code></pre>
+<h3 id="analyzing-binaries"><a class="header" href="#analyzing-binaries">Analyzing Binaries</a></h3>
+<pre><code class="language-bash"># Check architecture
+file myapp
+arm-linux-gnueabihf-readelf -h myapp
+
+# List symbols
+arm-linux-gnueabihf-nm myapp
+
+# Disassemble
+arm-linux-gnueabihf-objdump -d myapp
+
+# Check shared library dependencies
+arm-linux-gnueabihf-readelf -d myapp | grep NEEDED
+
+# Strings in binary
+arm-linux-gnueabihf-strings myapp
+
+# Size information
+arm-linux-gnueabihf-size myapp
+</code></pre>
+<hr />
+<h2 id="common-architectures"><a class="header" href="#common-architectures">Common Architectures</a></h2>
+<h3 id="arm-32-bit"><a class="header" href="#arm-32-bit">ARM (32-bit)</a></h3>
+<pre><code class="language-bash"># Soft-float (no FPU)
+CROSS_COMPILE=arm-linux-gnueabi-
+ARCH=arm
+
+# Hard-float (with FPU)
+CROSS_COMPILE=arm-linux-gnueabihf-
+ARCH=arm
+
+# Kernel config
+make ARCH=arm multi_v7_defconfig
+</code></pre>
+<h3 id="arm64-aarch64"><a class="header" href="#arm64-aarch64">ARM64 (AArch64)</a></h3>
+<pre><code class="language-bash">CROSS_COMPILE=aarch64-linux-gnu-
+ARCH=arm64
+
+# Kernel config
+make ARCH=arm64 defconfig
+</code></pre>
+<h3 id="mips"><a class="header" href="#mips">MIPS</a></h3>
+<pre><code class="language-bash"># Big-endian
+CROSS_COMPILE=mips-linux-gnu-
+ARCH=mips
+
+# Little-endian
+CROSS_COMPILE=mipsel-linux-gnu-
+ARCH=mips
+
+# Kernel config
+make ARCH=mips malta_defconfig
+</code></pre>
+<h3 id="risc-v"><a class="header" href="#risc-v">RISC-V</a></h3>
+<pre><code class="language-bash"># 64-bit
+CROSS_COMPILE=riscv64-linux-gnu-
+ARCH=riscv
+
+# 32-bit
+CROSS_COMPILE=riscv32-linux-gnu-
+ARCH=riscv
+
+# Kernel config
+make ARCH=riscv defconfig
+</code></pre>
+<h3 id="powerpc"><a class="header" href="#powerpc">PowerPC</a></h3>
+<pre><code class="language-bash">CROSS_COMPILE=powerpc-linux-gnu-
+ARCH=powerpc
+
+# Kernel config
+make ARCH=powerpc pmac32_defconfig
+</code></pre>
+<hr />
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<p><strong>Issue: "No such file or directory" for header files</strong></p>
+<pre><code class="language-bash"># Problem: Headers not found
+arm-linux-gnueabihf-gcc test.c
+# test.c:1:10: fatal error: curl/curl.h: No such file or directory
+
+# Solution: Install cross-compiled development package
+sudo apt-get install libcurl4-openssl-dev:armhf
+
+# Or specify include path
+arm-linux-gnueabihf-gcc test.c \
+	-I/usr/arm-linux-gnueabihf/include
+</code></pre>
+<p><strong>Issue: "cannot find -lxxx" linker errors</strong></p>
+<pre><code class="language-bash"># Problem: Library not found
+# /usr/bin/ld: cannot find -lssl
+
+# Solution: Install library for target architecture
+sudo apt-get install libssl-dev:armhf
+
+# Or specify library path
+arm-linux-gnueabihf-gcc test.c -lssl \
+	-L/usr/arm-linux-gnueabihf/lib
+</code></pre>
+<p><strong>Issue: Binary runs on host but not target</strong></p>
+<pre><code class="language-bash"># Check architecture
+file myapp
+# If says x86_64 instead of ARM, CROSS_COMPILE wasn't set
+
+# Verify you're using cross compiler
+which ${CROSS_COMPILE}gcc
+
+# Check if it's stripped of debug info
+${CROSS_COMPILE}readelf -S myapp | grep debug
+</code></pre>
+<p><strong>Issue: "Exec format error" on target</strong></p>
+<pre><code class="language-bash"># Problem: Wrong architecture or ABI mismatch
+
+# Check target's actual architecture
+ssh target 'uname -m'  # armv7l, aarch64, etc.
+
+# Check binary architecture
+file myapp
+
+# For ARM: Check float ABI
+${CROSS_COMPILE}readelf -A myapp | grep ABI
+# Must match target's ABI (soft-float vs hard-float)
+</code></pre>
+<p><strong>Issue: Shared library not found on target</strong></p>
+<pre><code class="language-bash"># Error on target
+./myapp: error while loading shared libraries: libfoo.so.1
+
+# Solution 1: Copy library to target
+scp /usr/arm-linux-gnueabihf/lib/libfoo.so.* target:/lib/
+
+# Solution 2: Static linking
+arm-linux-gnueabihf-gcc test.c -o myapp -static
+
+# Solution 3: Use LD_LIBRARY_PATH on target
+export LD_LIBRARY_PATH=/path/to/libs:$LD_LIBRARY_PATH
+</code></pre>
+<h3 id="debugging-tips"><a class="header" href="#debugging-tips">Debugging Tips</a></h3>
+<pre><code class="language-bash"># Verbose compiler output
+arm-linux-gnueabihf-gcc -v test.c
+
+# Show search paths
+arm-linux-gnueabihf-gcc -print-search-dirs
+
+# Show sysroot
+arm-linux-gnueabihf-gcc -print-sysroot
+
+# Preprocessor output only
+arm-linux-gnueabihf-gcc -E test.c
+
+# Show include paths
+echo | arm-linux-gnueabihf-gcc -v -E -
+
+# Test if toolchain works
+arm-linux-gnueabihf-gcc -v
+</code></pre>
+<hr />
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-use-consistent-toolchain"><a class="header" href="#1-use-consistent-toolchain">1. Use Consistent Toolchain</a></h3>
+<pre><code class="language-bash"># Bad: Mixing toolchains
+gcc myapp.c  # Native compiler!
+arm-linux-gnueabihf-gcc mylib.c
+
+# Good: Use CROSS_COMPILE consistently
+export CROSS_COMPILE=arm-linux-gnueabihf-
+${CROSS_COMPILE}gcc myapp.c mylib.c
+</code></pre>
+<h3 id="2-separate-build-directories"><a class="header" href="#2-separate-build-directories">2. Separate Build Directories</a></h3>
+<pre><code class="language-bash"># Keep source clean
+mkdir -p build/arm build/x86
+
+# ARM build
+make O=build/arm ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
+
+# x86 build
+make O=build/x86
+
+# Clean specific build
+rm -rf build/arm
+</code></pre>
+<h3 id="3-use-build-scripts"><a class="header" href="#3-use-build-scripts">3. Use Build Scripts</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# build-cross.sh
+
+set -e  # Exit on error
+
+# Configuration
+export ARCH=arm
+export CROSS_COMPILE=arm-linux-gnueabihf-
+export INSTALL_PATH=/opt/target-root
+
+# Build
+echo "Building for $ARCH..."
+make clean
+make -j$(nproc)
+make install DESTDIR=$INSTALL_PATH
+
+echo "Build complete: $INSTALL_PATH"
+</code></pre>
+<h3 id="4-maintain-sysroot"><a class="header" href="#4-maintain-sysroot">4. Maintain Sysroot</a></h3>
+<pre><code class="language-bash"># Organized sysroot
+/opt/arm-sysroot/
+├── usr/
+│   ├── include/  # Headers
+│   └── lib/      # Libraries
+├── lib/          # System libraries
+└── etc/          # Configuration files
+
+# Set PKG_CONFIG for libraries
+export PKG_CONFIG_PATH=/opt/arm-sysroot/usr/lib/pkgconfig
+export PKG_CONFIG_SYSROOT_DIR=/opt/arm-sysroot
+</code></pre>
+<h3 id="5-version-control-binaries"><a class="header" href="#5-version-control-binaries">5. Version Control Binaries</a></h3>
+<pre><code class="language-bash"># Tag releases
+git tag -a v1.0-arm -m "ARM release v1.0"
+
+# Separate binary artifacts
+artifacts/
+├── v1.0/
+│   ├── arm/
+│   │   ├── myapp
+│   │   └── myapp.debug
+│   ├── arm64/
+│   └── x86_64/
+</code></pre>
+<h3 id="6-automate-testing"><a class="header" href="#6-automate-testing">6. Automate Testing</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# test-cross.sh
+
+# Build
+./build-cross.sh
+
+# Copy to target
+scp build/myapp target:/tmp/
+
+# Run on target
+ssh target "/tmp/myapp --test"
+
+# Check exit code
+if [ $? -eq 0 ]; then
+	echo "Tests passed"
+else
+	echo "Tests failed"
+	exit 1
+fi
+</code></pre>
+<h3 id="7-document-dependencies"><a class="header" href="#7-document-dependencies">7. Document Dependencies</a></h3>
+<pre><code class="language-bash"># dependencies.txt
+Toolchain: gcc-arm-linux-gnueabihf-9.3
+Libraries:
+  - libssl-dev:armhf (&gt;= 1.1.1)
+  - libcurl4-openssl-dev:armhf (&gt;= 7.68.0)
+  - zlib1g-dev:armhf
+
+Kernel: 5.10 or later
+Bootloader: U-Boot 2021.01
+</code></pre>
+<h3 id="8-optimize-for-target"><a class="header" href="#8-optimize-for-target">8. Optimize for Target</a></h3>
+<pre><code class="language-bash"># Compiler optimizations
+CFLAGS="-O2 -march=armv7-a -mtune=cortex-a8 -mfpu=neon"
+
+# Size optimization
+CFLAGS="-Os -ffunction-sections -fdata-sections"
+LDFLAGS="-Wl,--gc-sections"
+
+# Strip debug info for production
+${CROSS_COMPILE}strip --strip-all myapp
+</code></pre>
+<hr />
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Cross compilation is essential for embedded Linux development:</p>
+<p><strong>Key Steps:</strong></p>
+<ol>
+<li>Install or build a cross-compilation toolchain</li>
+<li>Set <code>CROSS_COMPILE</code> and <code>ARCH</code> environment variables</li>
+<li>Use <code>--sysroot</code> or install target libraries on host</li>
+<li>Build with cross compiler instead of native compiler</li>
+<li>Test on target device or QEMU emulator</li>
+</ol>
+<p><strong>Essential Variables:</strong></p>
+<ul>
+<li><code>CROSS_COMPILE</code>: Toolchain prefix (e.g., <code>arm-linux-gnueabihf-</code>)</li>
+<li><code>ARCH</code>: Target architecture (e.g., <code>arm</code>, <code>arm64</code>, <code>mips</code>)</li>
+<li><code>SYSROOT</code>: Target root filesystem path on host</li>
+</ul>
+<p><strong>Common Workflows:</strong></p>
+<ul>
+<li>Kernel: <code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-</code></li>
+<li>Autotools: <code>./configure --host=arm-linux-gnueabihf</code></li>
+<li>CMake: <code>cmake -DCMAKE_TOOLCHAIN_FILE=arm-toolchain.cmake</code></li>
+<li>Makefile: <code>make CROSS_COMPILE=arm-linux-gnueabihf-</code></li>
+</ul>
+<p><strong>Resources:</strong></p>
+<ul>
+<li><a href="https://crosstool-ng.github.io/">Crosstool-NG</a></li>
+<li><a href="https://buildroot.org/">Buildroot</a></li>
+<li><a href="https://www.yoctoproject.org/">Yocto Project</a></li>
+<li><a href="https://elinux.org/">Embedded Linux Wiki</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../linux/device_tree.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../linux/cfg80211_mac80211.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../linux/device_tree.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../linux/cfg80211_mac80211.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

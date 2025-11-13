@@ -1,0 +1,1573 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Device Tree - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="device-tree"><a class="header" href="#device-tree">Device Tree</a></h1>
+<p>A comprehensive guide to Linux Device Tree, a data structure for describing hardware configuration that can be passed to the kernel at boot time.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#why-device-tree">Why Device Tree?</a></li>
+<li><a href="#device-tree-basics">Device Tree Basics</a></li>
+<li><a href="#device-tree-syntax">Device Tree Syntax</a></li>
+<li><a href="#device-tree-structure">Device Tree Structure</a></li>
+<li><a href="#standard-properties">Standard Properties</a></li>
+<li><a href="#writing-device-tree-files">Writing Device Tree Files</a></li>
+<li><a href="#device-tree-compiler">Device Tree Compiler</a></li>
+<li><a href="#parsing-device-tree-in-drivers">Parsing Device Tree in Drivers</a></li>
+<li><a href="#common-bindings">Common Bindings</a></li>
+<li><a href="#platform-specific-details">Platform-Specific Details</a></li>
+<li><a href="#debugging-device-tree">Debugging Device Tree</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+<li><a href="#real-world-examples">Real-World Examples</a></li>
+</ul>
+<hr />
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p><strong>Device Tree</strong> is a data structure and language for describing hardware that cannot be dynamically detected by the operating system. It's used extensively in embedded systems, especially ARM-based platforms.</p>
+<h3 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h3>
+<ul>
+<li><strong>Device Tree Source (.dts)</strong>: Human-readable text file describing hardware</li>
+<li><strong>Device Tree Blob (.dtb)</strong>: Compiled binary format loaded by bootloader</li>
+<li><strong>Device Tree Overlay (.dtbo)</strong>: Runtime modifications to base device tree</li>
+<li><strong>Bindings</strong>: Documentation defining properties for specific device types</li>
+</ul>
+<h3 id="purpose"><a class="header" href="#purpose">Purpose</a></h3>
+<pre><code>+-----------------+
+|   Bootloader    |
+|   (U-Boot)      |
++-----------------+
+        |
+        | Passes DTB
+        v
++-----------------+
+|  Linux Kernel   |
++-----------------+
+        |
+        | Parses DT
+        v
++-----------------+
+| Device Drivers  |
++-----------------+
+</code></pre>
+<p>Device Tree allows:</p>
+<ul>
+<li>Hardware description separated from kernel code</li>
+<li>Single kernel binary supporting multiple boards</li>
+<li>Board-specific configuration without recompiling kernel</li>
+<li>Runtime hardware configuration via overlays</li>
+</ul>
+<hr />
+<h2 id="why-device-tree"><a class="header" href="#why-device-tree">Why Device Tree?</a></h2>
+<h3 id="problems-device-tree-solves"><a class="header" href="#problems-device-tree-solves">Problems Device Tree Solves</a></h3>
+<p><strong>Before Device Tree:</strong></p>
+<pre><code class="language-c">/* ARM board file - arch/arm/mach-vendor/board-xyz.c */
+static struct platform_device uart0 = {
+	.name = "vendor-uart",
+	.id = 0,
+	.resource = {
+		.start = 0x44e09000,
+		.end = 0x44e09fff,
+		.flags = IORESOURCE_MEM,
+	},
+	.dev = {
+		.platform_data = &amp;uart0_data,
+	},
+};
+
+platform_device_register(&amp;uart0);
+</code></pre>
+<p><strong>Problems:</strong></p>
+<ul>
+<li>Board-specific code in kernel</li>
+<li>One kernel per board variant</li>
+<li>Difficult to maintain</li>
+<li>No standardization</li>
+</ul>
+<p><strong>With Device Tree:</strong></p>
+<pre><code class="language-dts">uart0: serial@44e09000 {
+	compatible = "vendor,uart";
+	reg = &lt;0x44e09000 0x1000&gt;;
+	interrupts = &lt;72&gt;;
+	clock-frequency = &lt;48000000&gt;;
+};
+</code></pre>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li>Hardware description in separate file</li>
+<li>Single kernel for multiple boards</li>
+<li>Standardized bindings</li>
+<li>Easier to maintain</li>
+</ul>
+<hr />
+<h2 id="device-tree-basics"><a class="header" href="#device-tree-basics">Device Tree Basics</a></h2>
+<h3 id="device-tree-hierarchy"><a class="header" href="#device-tree-hierarchy">Device Tree Hierarchy</a></h3>
+<p>Device Tree represents hardware as a tree of nodes:</p>
+<pre><code class="language-dts">/ {
+	model = "Vendor Board XYZ";
+	compatible = "vendor,board-xyz";
+
+	cpus {
+		cpu@0 {
+			compatible = "arm,cortex-a8";
+			device_type = "cpu";
+			reg = &lt;0&gt;;
+		};
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = &lt;0x80000000 0x20000000&gt;;  /* 512MB */
+	};
+
+	soc {
+		compatible = "simple-bus";
+		#address-cells = &lt;1&gt;;
+		#size-cells = &lt;1&gt;;
+		ranges;
+
+		uart0: serial@44e09000 {
+			compatible = "vendor,uart";
+			reg = &lt;0x44e09000 0x1000&gt;;
+		};
+	};
+};
+</code></pre>
+<h3 id="key-terminology"><a class="header" href="#key-terminology">Key Terminology</a></h3>
+<ul>
+<li><strong>Node</strong>: Represents a device or bus (<code>uart0</code>, <code>cpus</code>)</li>
+<li><strong>Property</strong>: Key-value pair in a node (<code>compatible = "vendor,uart"</code>)</li>
+<li><strong>Label</strong>: Reference to a node (<code>uart0:</code>)</li>
+<li><strong>Phandle</strong>: Reference to another node (pointer to node)</li>
+<li><strong>Unit Address</strong>: Address part after <code>@</code> (<code>serial@44e09000</code>)</li>
+</ul>
+<hr />
+<h2 id="device-tree-syntax"><a class="header" href="#device-tree-syntax">Device Tree Syntax</a></h2>
+<h3 id="basic-syntax"><a class="header" href="#basic-syntax">Basic Syntax</a></h3>
+<pre><code class="language-dts">/* Comments use C-style syntax */
+
+/ {
+	/* Root node - always present */
+
+	node-name {
+		/* Properties */
+		property-name = "string value";
+		another-property = &lt;0x12345678&gt;;
+		multi-value = &lt;0x1 0x2 0x3&gt;;
+		boolean-property;  /* Presence indicates true */
+	};
+
+	node@unit-address {
+		/* Node with unit address */
+		reg = &lt;0x12340000 0x1000&gt;;
+	};
+};
+</code></pre>
+<h3 id="property-value-types"><a class="header" href="#property-value-types">Property Value Types</a></h3>
+<pre><code class="language-dts">/ {
+	/* String */
+	model = "Vendor Board XYZ";
+
+	/* String list */
+	compatible = "vendor,board-xyz", "vendor,board";
+
+	/* 32-bit unsigned integers (cells) */
+	reg = &lt;0x44e09000 0x1000&gt;;
+
+	/* Multiple cells */
+	interrupts = &lt;0 72 4&gt;;
+
+	/* Boolean (empty property) */
+	dma-coherent;
+
+	/* Byte sequence */
+	mac-address = [00 11 22 33 44 55];
+
+	/* Mixed */
+	property = "string", &lt;0x1234&gt;, [AB CD];
+
+	/* Phandle reference */
+	interrupt-parent = &lt;&amp;intc&gt;;
+	clocks = &lt;&amp;osc 0&gt;;
+};
+</code></pre>
+<h3 id="cell-size-specifiers"><a class="header" href="#cell-size-specifiers">Cell Size Specifiers</a></h3>
+<pre><code class="language-dts">/ {
+	#address-cells = &lt;1&gt;;  /* Address takes 1 cell (32-bit) */
+	#size-cells = &lt;1&gt;;     /* Size takes 1 cell */
+
+	soc {
+		#address-cells = &lt;1&gt;;
+		#size-cells = &lt;1&gt;;
+
+		/* reg = &lt;address size&gt; */
+		uart0: serial@44e09000 {
+			reg = &lt;0x44e09000 0x1000&gt;;
+		};
+	};
+};
+
+/ {
+	#address-cells = &lt;2&gt;;  /* 64-bit addressing */
+	#size-cells = &lt;2&gt;;
+
+	memory@0 {
+		/* reg = &lt;address-high address-low size-high size-low&gt; */
+		reg = &lt;0x00000000 0x80000000 0x00000000 0x40000000&gt;;
+	};
+};
+</code></pre>
+<h3 id="labels-and-references"><a class="header" href="#labels-and-references">Labels and References</a></h3>
+<pre><code class="language-dts">/ {
+	/* Define label */
+	intc: interrupt-controller@48200000 {
+		compatible = "arm,gic";
+		reg = &lt;0x48200000 0x1000&gt;;
+		interrupt-controller;
+		#interrupt-cells = &lt;3&gt;;
+	};
+
+	uart0: serial@44e09000 {
+		compatible = "vendor,uart";
+		/* Reference using phandle */
+		interrupt-parent = &lt;&amp;intc&gt;;
+		interrupts = &lt;0 72 4&gt;;
+		clocks = &lt;&amp;sysclk&gt;;
+	};
+};
+</code></pre>
+<h3 id="includes"><a class="header" href="#includes">Includes</a></h3>
+<pre><code class="language-dts">/* Include common definitions */
+/include/ "vendor-common.dtsi"
+
+/* Or using C preprocessor */
+#include "vendor-common.dtsi"
+#include &lt;dt-bindings/gpio/gpio.h&gt;
+
+/ {
+	compatible = "vendor,board";
+};
+</code></pre>
+<hr />
+<h2 id="device-tree-structure"><a class="header" href="#device-tree-structure">Device Tree Structure</a></h2>
+<h3 id="complete-example"><a class="header" href="#complete-example">Complete Example</a></h3>
+<pre><code class="language-dts">/dts-v1/;
+
+/ {
+	model = "Vendor Development Board";
+	compatible = "vendor,dev-board", "vendor,soc";
+
+	#address-cells = &lt;1&gt;;
+	#size-cells = &lt;1&gt;;
+
+	chosen {
+		bootargs = "console=ttyS0,115200 root=/dev/mmcblk0p2";
+		stdout-path = "/serial@44e09000:115200n8";
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = &lt;0x80000000 0x40000000&gt;;  /* 1GB */
+	};
+
+	cpus {
+		#address-cells = &lt;1&gt;;
+		#size-cells = &lt;0&gt;;
+
+		cpu0: cpu@0 {
+			compatible = "arm,cortex-a8";
+			device_type = "cpu";
+			reg = &lt;0&gt;;
+			operating-points = &lt;
+				/* kHz    uV */
+				1000000 1350000
+				800000  1300000
+				600000  1200000
+			&gt;;
+			clock-latency = &lt;300000&gt;; /* 300 us */
+		};
+	};
+
+	clocks {
+		osc: oscillator {
+			compatible = "fixed-clock";
+			#clock-cells = &lt;0&gt;;
+			clock-frequency = &lt;24000000&gt;;
+		};
+
+		sysclk: system-clock {
+			compatible = "fixed-clock";
+			#clock-cells = &lt;0&gt;;
+			clock-frequency = &lt;48000000&gt;;
+		};
+	};
+
+	soc {
+		compatible = "simple-bus";
+		#address-cells = &lt;1&gt;;
+		#size-cells = &lt;1&gt;;
+		ranges;
+
+		intc: interrupt-controller@48200000 {
+			compatible = "arm,cortex-a8-gic";
+			interrupt-controller;
+			#interrupt-cells = &lt;3&gt;;
+			reg = &lt;0x48200000 0x1000&gt;,
+			      &lt;0x48210000 0x2000&gt;;
+		};
+
+		uart0: serial@44e09000 {
+			compatible = "vendor,uart", "ns16550a";
+			reg = &lt;0x44e09000 0x1000&gt;;
+			interrupt-parent = &lt;&amp;intc&gt;;
+			interrupts = &lt;0 72 4&gt;;
+			clocks = &lt;&amp;sysclk&gt;;
+			clock-names = "uart";
+			status = "okay";
+		};
+
+		i2c0: i2c@44e0b000 {
+			compatible = "vendor,i2c";
+			reg = &lt;0x44e0b000 0x1000&gt;;
+			interrupts = &lt;0 70 4&gt;;
+			#address-cells = &lt;1&gt;;
+			#size-cells = &lt;0&gt;;
+			clocks = &lt;&amp;sysclk&gt;;
+			status = "okay";
+
+			/* I2C device */
+			eeprom@50 {
+				compatible = "atmel,24c256";
+				reg = &lt;0x50&gt;;
+				pagesize = &lt;64&gt;;
+			};
+		};
+
+		gpio0: gpio@44e07000 {
+			compatible = "vendor,gpio";
+			reg = &lt;0x44e07000 0x1000&gt;;
+			interrupts = &lt;0 96 4&gt;;
+			gpio-controller;
+			#gpio-cells = &lt;2&gt;;
+			interrupt-controller;
+			#interrupt-cells = &lt;2&gt;;
+		};
+
+		mmc0: mmc@48060000 {
+			compatible = "vendor,mmc";
+			reg = &lt;0x48060000 0x1000&gt;;
+			interrupts = &lt;0 64 4&gt;;
+			bus-width = &lt;4&gt;;
+			cd-gpios = &lt;&amp;gpio0 6 0&gt;;
+			status = "okay";
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led0 {
+			label = "board:green:user0";
+			gpios = &lt;&amp;gpio0 21 0&gt;;
+			linux,default-trigger = "heartbeat";
+		};
+
+		led1 {
+			label = "board:green:user1";
+			gpios = &lt;&amp;gpio0 22 0&gt;;
+			default-state = "off";
+		};
+	};
+
+	regulators {
+		compatible = "simple-bus";
+
+		vdd_3v3: regulator@0 {
+			compatible = "regulator-fixed";
+			regulator-name = "vdd_3v3";
+			regulator-min-microvolt = &lt;3300000&gt;;
+			regulator-max-microvolt = &lt;3300000&gt;;
+			regulator-always-on;
+		};
+	};
+};
+</code></pre>
+<hr />
+<h2 id="standard-properties"><a class="header" href="#standard-properties">Standard Properties</a></h2>
+<h3 id="compatible-property"><a class="header" href="#compatible-property">Compatible Property</a></h3>
+<p>The <code>compatible</code> property is the most important - it binds the node to a driver:</p>
+<pre><code class="language-dts">uart0: serial@44e09000 {
+	/* Most specific first, generic last */
+	compatible = "vendor,soc-uart", "vendor,uart", "ns16550a";
+	...
+};
+</code></pre>
+<p><strong>Driver matching:</strong></p>
+<pre><code class="language-c">static const struct of_device_id uart_of_match[] = {
+	{ .compatible = "vendor,soc-uart", .data = &amp;soc_uart_data },
+	{ .compatible = "vendor,uart", .data = &amp;generic_uart_data },
+	{ .compatible = "ns16550a", .data = &amp;ns16550_data },
+	{ }
+};
+MODULE_DEVICE_TABLE(of, uart_of_match);
+</code></pre>
+<h3 id="reg-property"><a class="header" href="#reg-property">Reg Property</a></h3>
+<p>Specifies address ranges (MMIO, I2C address, SPI chip select):</p>
+<pre><code class="language-dts">/* MMIO register range */
+uart0: serial@44e09000 {
+	reg = &lt;0x44e09000 0x1000&gt;;  /* Base address, size */
+};
+
+/* Multiple ranges */
+intc: interrupt-controller@48200000 {
+	reg = &lt;0x48200000 0x1000&gt;,   /* Distributor */
+	      &lt;0x48210000 0x2000&gt;;   /* CPU interface */
+};
+
+/* I2C device */
+eeprom@50 {
+	reg = &lt;0x50&gt;;  /* I2C address */
+};
+
+/* SPI device */
+flash@0 {
+	reg = &lt;0&gt;;  /* Chip select 0 */
+};
+</code></pre>
+<h3 id="status-property"><a class="header" href="#status-property">Status Property</a></h3>
+<p>Enables or disables devices:</p>
+<pre><code class="language-dts">uart0: serial@44e09000 {
+	status = "okay";     /* Enable */
+};
+
+uart1: serial@44e0a000 {
+	status = "disabled"; /* Disable */
+};
+
+uart2: serial@44e0b000 {
+	status = "fail";     /* Error detected */
+};
+</code></pre>
+<h3 id="interrupt-properties"><a class="header" href="#interrupt-properties">Interrupt Properties</a></h3>
+<pre><code class="language-dts">uart0: serial@44e09000 {
+	/* Parent interrupt controller */
+	interrupt-parent = &lt;&amp;intc&gt;;
+
+	/* Interrupt specifier (format defined by parent) */
+	/* For GIC: &lt;type number flags&gt; */
+	interrupts = &lt;0 72 4&gt;;  /* SPI, IRQ 72, level-high */
+};
+
+/* Shared interrupt */
+device@0 {
+	interrupts = &lt;0 50 4&gt;;
+	interrupt-names = "tx", "rx", "error";
+};
+</code></pre>
+<h3 id="clock-properties"><a class="header" href="#clock-properties">Clock Properties</a></h3>
+<pre><code class="language-dts">uart0: serial@44e09000 {
+	clocks = &lt;&amp;sysclk&gt;, &lt;&amp;pclk&gt;;
+	clock-names = "uart", "apb_pclk";
+};
+
+/* Clock frequency for fixed clocks */
+osc: oscillator {
+	compatible = "fixed-clock";
+	#clock-cells = &lt;0&gt;;
+	clock-frequency = &lt;24000000&gt;;
+};
+</code></pre>
+<h3 id="gpio-properties"><a class="header" href="#gpio-properties">GPIO Properties</a></h3>
+<pre><code class="language-dts">device {
+	/* GPIO specifier: &lt;&amp;controller pin flags&gt; */
+	reset-gpios = &lt;&amp;gpio0 15 GPIO_ACTIVE_LOW&gt;;
+	enable-gpios = &lt;&amp;gpio0 16 GPIO_ACTIVE_HIGH&gt;;
+};
+
+#include &lt;dt-bindings/gpio/gpio.h&gt;
+/* GPIO_ACTIVE_LOW, GPIO_ACTIVE_HIGH */
+</code></pre>
+<h3 id="dma-properties"><a class="header" href="#dma-properties">DMA Properties</a></h3>
+<pre><code class="language-dts">uart0: serial@44e09000 {
+	dmas = &lt;&amp;dma 25&gt;, &lt;&amp;dma 26&gt;;
+	dma-names = "tx", "rx";
+};
+</code></pre>
+<hr />
+<h2 id="writing-device-tree-files"><a class="header" href="#writing-device-tree-files">Writing Device Tree Files</a></h2>
+<h3 id="device-tree-source-dts"><a class="header" href="#device-tree-source-dts">Device Tree Source (.dts)</a></h3>
+<p>Board-specific file:</p>
+<pre><code class="language-dts">/dts-v1/;
+
+#include "vendor-soc.dtsi"
+
+/ {
+	model = "Vendor Board XYZ";
+	compatible = "vendor,board-xyz", "vendor,soc";
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = &lt;0x80000000 0x40000000&gt;;
+	};
+};
+
+/* Enable and configure UART0 */
+&amp;uart0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = &lt;&amp;uart0_pins&gt;;
+};
+
+/* Disable UART1 (not used on this board) */
+&amp;uart1 {
+	status = "disabled";
+};
+
+/* Add I2C devices */
+&amp;i2c0 {
+	status = "okay";
+	clock-frequency = &lt;400000&gt;;
+
+	/* Board-specific I2C device */
+	rtc@68 {
+		compatible = "dallas,ds1307";
+		reg = &lt;0x68&gt;;
+	};
+};
+</code></pre>
+<h3 id="device-tree-include-dtsi"><a class="header" href="#device-tree-include-dtsi">Device Tree Include (.dtsi)</a></h3>
+<p>SoC-level common definitions:</p>
+<pre><code class="language-dts">/* vendor-soc.dtsi */
+/ {
+	#address-cells = &lt;1&gt;;
+	#size-cells = &lt;1&gt;;
+
+	cpus {
+		#address-cells = &lt;1&gt;;
+		#size-cells = &lt;0&gt;;
+
+		cpu@0 {
+			compatible = "arm,cortex-a8";
+			device_type = "cpu";
+			reg = &lt;0&gt;;
+		};
+	};
+
+	soc {
+		compatible = "simple-bus";
+		#address-cells = &lt;1&gt;;
+		#size-cells = &lt;1&gt;;
+		ranges;
+
+		uart0: serial@44e09000 {
+			compatible = "vendor,uart";
+			reg = &lt;0x44e09000 0x1000&gt;;
+			interrupts = &lt;0 72 4&gt;;
+			clocks = &lt;&amp;sysclk&gt;;
+			status = "disabled";  /* Disabled by default */
+		};
+
+		uart1: serial@44e0a000 {
+			compatible = "vendor,uart";
+			reg = &lt;0x44e0a000 0x1000&gt;;
+			interrupts = &lt;0 73 4&gt;;
+			clocks = &lt;&amp;sysclk&gt;;
+			status = "disabled";
+		};
+
+		i2c0: i2c@44e0b000 {
+			compatible = "vendor,i2c";
+			reg = &lt;0x44e0b000 0x1000&gt;;
+			interrupts = &lt;0 70 4&gt;;
+			#address-cells = &lt;1&gt;;
+			#size-cells = &lt;0&gt;;
+			clocks = &lt;&amp;sysclk&gt;;
+			status = "disabled";
+		};
+	};
+};
+</code></pre>
+<h3 id="overriding-and-extending-nodes"><a class="header" href="#overriding-and-extending-nodes">Overriding and Extending Nodes</a></h3>
+<pre><code class="language-dts">/* Base definition in .dtsi */
+&amp;uart0 {
+	compatible = "vendor,uart";
+	reg = &lt;0x44e09000 0x1000&gt;;
+	status = "disabled";
+};
+
+/* Board-specific .dts */
+&amp;uart0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = &lt;&amp;uart0_pins&gt;;
+	/* Adds new properties while keeping existing ones */
+};
+</code></pre>
+<h3 id="deleting-nodesproperties"><a class="header" href="#deleting-nodesproperties">Deleting Nodes/Properties</a></h3>
+<pre><code class="language-dts">/* Delete property */
+&amp;uart0 {
+	/delete-property/ dmas;
+	/delete-property/ dma-names;
+};
+
+/* Delete node */
+&amp;uart1 {
+	/delete-node/ device@0;
+};
+</code></pre>
+<hr />
+<h2 id="device-tree-compiler"><a class="header" href="#device-tree-compiler">Device Tree Compiler</a></h2>
+<h3 id="compiling-device-tree"><a class="header" href="#compiling-device-tree">Compiling Device Tree</a></h3>
+<pre><code class="language-bash"># Compile .dts to .dtb
+dtc -I dts -O dtb -o board.dtb board.dts
+
+# With includes
+dtc -I dts -O dtb -o board.dtb -i include_path board.dts
+
+# Using C preprocessor
+cpp -nostdinc -I include_path -undef -x assembler-with-cpp \
+    board.dts board.preprocessed.dts
+dtc -I dts -O dtb -o board.dtb board.preprocessed.dts
+</code></pre>
+<h3 id="decompiling-device-tree"><a class="header" href="#decompiling-device-tree">Decompiling Device Tree</a></h3>
+<pre><code class="language-bash"># Decompile .dtb to .dts
+dtc -I dtb -O dts -o board.dts board.dtb
+
+# With symbols for overlays
+dtc -I dtb -O dts -o board.dts board.dtb -@
+</code></pre>
+<h3 id="building-with-kernel"><a class="header" href="#building-with-kernel">Building with Kernel</a></h3>
+<pre><code class="language-makefile"># In kernel Makefile
+dtb-$(CONFIG_BOARD_XYZ) += board-xyz.dtb
+
+# Build
+make dtbs
+
+# Output in: arch/arm/boot/dts/board-xyz.dtb
+</code></pre>
+<h3 id="validation"><a class="header" href="#validation">Validation</a></h3>
+<pre><code class="language-bash"># Check syntax
+dtc -I dts -O dtb -o /dev/null board.dts
+
+# Validate against schema (Linux 5.4+)
+make dt_binding_check
+make dtbs_check
+</code></pre>
+<hr />
+<h2 id="parsing-device-tree-in-drivers"><a class="header" href="#parsing-device-tree-in-drivers">Parsing Device Tree in Drivers</a></h2>
+<h3 id="getting-device-tree-node"><a class="header" href="#getting-device-tree-node">Getting Device Tree Node</a></h3>
+<pre><code class="language-c">#include &lt;linux/of.h&gt;
+#include &lt;linux/of_device.h&gt;
+
+static int my_probe(struct platform_device *pdev)
+{
+	struct device *dev = &amp;pdev-&gt;dev;
+	struct device_node *np = dev-&gt;of_node;
+
+	if (!np) {
+		dev_err(dev, "No device tree node\n");
+		return -ENODEV;
+	}
+
+	/* Node is available */
+	return 0;
+}
+</code></pre>
+<h3 id="reading-properties"><a class="header" href="#reading-properties">Reading Properties</a></h3>
+<pre><code class="language-c">/* Read string */
+const char *model;
+if (of_property_read_string(np, "model", &amp;model) == 0) {
+	pr_info("Model: %s\n", model);
+}
+
+/* Read u32 */
+u32 clock_freq;
+if (of_property_read_u32(np, "clock-frequency", &amp;clock_freq) == 0) {
+	pr_info("Clock: %u Hz\n", clock_freq);
+}
+
+/* Read u32 array */
+u32 values[3];
+int count = of_property_read_u32_array(np, "interrupts", values, 3);
+
+/* Read u64 */
+u64 reg_base;
+of_property_read_u64(np, "reg", &amp;reg_base);
+
+/* Check if property exists */
+if (of_property_read_bool(np, "dma-coherent")) {
+	pr_info("DMA coherent enabled\n");
+}
+</code></pre>
+<h3 id="getting-resources"><a class="header" href="#getting-resources">Getting Resources</a></h3>
+<pre><code class="language-c">/* Get memory resource */
+struct resource *res;
+res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+if (!res)
+	return -ENODEV;
+
+void __iomem *base = devm_ioremap_resource(dev, res);
+if (IS_ERR(base))
+	return PTR_ERR(base);
+
+/* Get IRQ */
+int irq = platform_get_irq(pdev, 0);
+if (irq &lt; 0)
+	return irq;
+
+/* Get register address/size directly */
+u64 addr, size;
+of_property_read_u64_index(np, "reg", 0, &amp;addr);
+of_property_read_u64_index(np, "reg", 1, &amp;size);
+</code></pre>
+<h3 id="parsing-phandles"><a class="header" href="#parsing-phandles">Parsing Phandles</a></h3>
+<pre><code class="language-c">/* Get referenced node */
+struct device_node *clk_np;
+clk_np = of_parse_phandle(np, "clocks", 0);
+if (!clk_np) {
+	dev_err(dev, "No clock specified\n");
+	return -EINVAL;
+}
+
+/* Get clock */
+struct clk *clk = of_clk_get(np, 0);
+if (IS_ERR(clk))
+	return PTR_ERR(clk);
+
+/* Or by name */
+clk = of_clk_get_by_name(np, "uart");
+</code></pre>
+<h3 id="gpio-handling"><a class="header" href="#gpio-handling">GPIO Handling</a></h3>
+<pre><code class="language-c">#include &lt;linux/of_gpio.h&gt;
+
+/* Get GPIO */
+int reset_gpio = of_get_named_gpio(np, "reset-gpios", 0);
+if (!gpio_is_valid(reset_gpio))
+	return -EINVAL;
+
+/* Request and configure */
+devm_gpio_request_one(dev, reset_gpio, GPIOF_OUT_INIT_LOW, "reset");
+
+/* Using GPIO descriptor API (preferred) */
+#include &lt;linux/gpio/consumer.h&gt;
+
+struct gpio_desc *reset_gpiod;
+reset_gpiod = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
+if (IS_ERR(reset_gpiod))
+	return PTR_ERR(reset_gpiod);
+
+gpiod_set_value(reset_gpiod, 1);
+</code></pre>
+<h3 id="iterating-child-nodes"><a class="header" href="#iterating-child-nodes">Iterating Child Nodes</a></h3>
+<pre><code class="language-c">struct device_node *child;
+
+for_each_child_of_node(np, child) {
+	const char *name;
+	u32 reg;
+
+	of_property_read_string(child, "label", &amp;name);
+	of_property_read_u32(child, "reg", &amp;reg);
+
+	pr_info("Child: %s at 0x%x\n", name, reg);
+}
+</code></pre>
+<h3 id="complete-driver-example"><a class="header" href="#complete-driver-example">Complete Driver Example</a></h3>
+<pre><code class="language-c">#include &lt;linux/module.h&gt;
+#include &lt;linux/platform_device.h&gt;
+#include &lt;linux/of.h&gt;
+#include &lt;linux/of_device.h&gt;
+#include &lt;linux/clk.h&gt;
+#include &lt;linux/gpio/consumer.h&gt;
+
+struct my_device {
+	void __iomem *base;
+	struct clk *clk;
+	int irq;
+	struct gpio_desc *reset_gpio;
+	u32 clock_freq;
+};
+
+static int my_probe(struct platform_device *pdev)
+{
+	struct device *dev = &amp;pdev-&gt;dev;
+	struct device_node *np = dev-&gt;of_node;
+	struct my_device *priv;
+	struct resource *res;
+	int ret;
+
+	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
+	if (!priv)
+		return -ENOMEM;
+
+	/* Get memory resource */
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	priv-&gt;base = devm_ioremap_resource(dev, res);
+	if (IS_ERR(priv-&gt;base))
+		return PTR_ERR(priv-&gt;base);
+
+	/* Get IRQ */
+	priv-&gt;irq = platform_get_irq(pdev, 0);
+	if (priv-&gt;irq &lt; 0)
+		return priv-&gt;irq;
+
+	/* Get clock */
+	priv-&gt;clk = devm_clk_get(dev, "uart");
+	if (IS_ERR(priv-&gt;clk)) {
+		dev_err(dev, "Failed to get clock\n");
+		return PTR_ERR(priv-&gt;clk);
+	}
+
+	/* Get GPIO */
+	priv-&gt;reset_gpio = devm_gpiod_get_optional(dev, "reset", GPIOD_OUT_LOW);
+	if (IS_ERR(priv-&gt;reset_gpio))
+		return PTR_ERR(priv-&gt;reset_gpio);
+
+	/* Read clock frequency */
+	ret = of_property_read_u32(np, "clock-frequency", &amp;priv-&gt;clock_freq);
+	if (ret) {
+		/* Use default if not specified */
+		priv-&gt;clock_freq = 48000000;
+	}
+
+	/* Enable clock */
+	ret = clk_prepare_enable(priv-&gt;clk);
+	if (ret)
+		return ret;
+
+	/* Reset device */
+	if (priv-&gt;reset_gpio) {
+		gpiod_set_value(priv-&gt;reset_gpio, 1);
+		msleep(10);
+		gpiod_set_value(priv-&gt;reset_gpio, 0);
+	}
+
+	platform_set_drvdata(pdev, priv);
+
+	dev_info(dev, "Device initialized (clock=%u Hz)\n", priv-&gt;clock_freq);
+	return 0;
+}
+
+static int my_remove(struct platform_device *pdev)
+{
+	struct my_device *priv = platform_get_drvdata(pdev);
+
+	clk_disable_unprepare(priv-&gt;clk);
+	return 0;
+}
+
+static const struct of_device_id my_of_match[] = {
+	{ .compatible = "vendor,my-device" },
+	{ }
+};
+MODULE_DEVICE_TABLE(of, my_of_match);
+
+static struct platform_driver my_driver = {
+	.probe = my_probe,
+	.remove = my_remove,
+	.driver = {
+		.name = "my-device",
+		.of_match_table = my_of_match,
+	},
+};
+module_platform_driver(my_driver);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Your Name");
+MODULE_DESCRIPTION("Device Tree Example Driver");
+</code></pre>
+<p><strong>Device Tree:</strong></p>
+<pre><code class="language-dts">my_device: device@44e09000 {
+	compatible = "vendor,my-device";
+	reg = &lt;0x44e09000 0x1000&gt;;
+	interrupts = &lt;0 72 4&gt;;
+	clocks = &lt;&amp;sysclk&gt;;
+	clock-names = "uart";
+	reset-gpios = &lt;&amp;gpio0 15 GPIO_ACTIVE_LOW&gt;;
+	clock-frequency = &lt;48000000&gt;;
+};
+</code></pre>
+<hr />
+<h2 id="common-bindings"><a class="header" href="#common-bindings">Common Bindings</a></h2>
+<h3 id="i2c-devices"><a class="header" href="#i2c-devices">I2C Devices</a></h3>
+<pre><code class="language-dts">&amp;i2c0 {
+	#address-cells = &lt;1&gt;;
+	#size-cells = &lt;0&gt;;
+
+	eeprom@50 {
+		compatible = "atmel,24c256";
+		reg = &lt;0x50&gt;;
+		pagesize = &lt;64&gt;;
+	};
+
+	rtc@68 {
+		compatible = "dallas,ds1307";
+		reg = &lt;0x68&gt;;
+		interrupts = &lt;0 75 IRQ_TYPE_EDGE_FALLING&gt;;
+	};
+};
+</code></pre>
+<h3 id="spi-devices"><a class="header" href="#spi-devices">SPI Devices</a></h3>
+<pre><code class="language-dts">&amp;spi0 {
+	#address-cells = &lt;1&gt;;
+	#size-cells = &lt;0&gt;;
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = &lt;0&gt;;  /* Chip select 0 */
+		spi-max-frequency = &lt;20000000&gt;;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = &lt;1&gt;;
+			#size-cells = &lt;1&gt;;
+
+			partition@0 {
+				label = "bootloader";
+				reg = &lt;0x000000 0x100000&gt;;
+				read-only;
+			};
+
+			partition@100000 {
+				label = "kernel";
+				reg = &lt;0x100000 0x400000&gt;;
+			};
+
+			partition@500000 {
+				label = "rootfs";
+				reg = &lt;0x500000 0xb00000&gt;;
+			};
+		};
+	};
+};
+</code></pre>
+<h3 id="regulators"><a class="header" href="#regulators">Regulators</a></h3>
+<pre><code class="language-dts">regulators {
+	compatible = "simple-bus";
+	#address-cells = &lt;1&gt;;
+	#size-cells = &lt;0&gt;;
+
+	vdd_core: regulator@0 {
+		compatible = "regulator-fixed";
+		reg = &lt;0&gt;;
+		regulator-name = "vdd_core";
+		regulator-min-microvolt = &lt;1200000&gt;;
+		regulator-max-microvolt = &lt;1200000&gt;;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	vdd_3v3: regulator@1 {
+		compatible = "regulator-gpio";
+		reg = &lt;1&gt;;
+		regulator-name = "vdd_3v3";
+		regulator-min-microvolt = &lt;3300000&gt;;
+		regulator-max-microvolt = &lt;3300000&gt;;
+		enable-gpio = &lt;&amp;gpio0 20 GPIO_ACTIVE_HIGH&gt;;
+		enable-active-high;
+	};
+};
+
+/* Usage */
+&amp;uart0 {
+	vdd-supply = &lt;&amp;vdd_3v3&gt;;
+};
+</code></pre>
+<h3 id="pinctrl-pin-multiplexing"><a class="header" href="#pinctrl-pin-multiplexing">Pinctrl (Pin Multiplexing)</a></h3>
+<pre><code class="language-dts">pinctrl: pinctrl@44e10800 {
+	compatible = "vendor,pinctrl";
+	reg = &lt;0x44e10800 0x1000&gt;;
+
+	uart0_pins: uart0_pins {
+		pinctrl-single,pins = &lt;
+			0x170 (PIN_INPUT_PULLUP | MUX_MODE0)  /* uart0_rxd */
+			0x174 (PIN_OUTPUT_PULLDOWN | MUX_MODE0) /* uart0_txd */
+		&gt;;
+	};
+
+	i2c0_pins: i2c0_pins {
+		pinctrl-single,pins = &lt;
+			0x188 (PIN_INPUT_PULLUP | MUX_MODE0)   /* i2c0_sda */
+			0x18c (PIN_INPUT_PULLUP | MUX_MODE0)   /* i2c0_scl */
+		&gt;;
+	};
+};
+
+&amp;uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = &lt;&amp;uart0_pins&gt;;
+};
+
+&amp;i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = &lt;&amp;i2c0_pins&gt;;
+};
+</code></pre>
+<hr />
+<h2 id="platform-specific-details"><a class="header" href="#platform-specific-details">Platform-Specific Details</a></h2>
+<h3 id="arm-device-tree"><a class="header" href="#arm-device-tree">ARM Device Tree</a></h3>
+<pre><code class="language-dts">/dts-v1/;
+
+/ {
+	model = "ARM Versatile Express";
+	compatible = "arm,vexpress";
+
+	#address-cells = &lt;1&gt;;
+	#size-cells = &lt;1&gt;;
+
+	cpus {
+		#address-cells = &lt;1&gt;;
+		#size-cells = &lt;0&gt;;
+
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a9";
+			reg = &lt;0&gt;;
+		};
+
+		cpu@1 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a9";
+			reg = &lt;1&gt;;
+		};
+	};
+};
+</code></pre>
+<h3 id="arm64-device-tree"><a class="header" href="#arm64-device-tree">ARM64 Device Tree</a></h3>
+<pre><code class="language-dts">/dts-v1/;
+
+/ {
+	#address-cells = &lt;2&gt;;  /* 64-bit addressing */
+	#size-cells = &lt;2&gt;;
+
+	cpus {
+		#address-cells = &lt;1&gt;;
+		#size-cells = &lt;0&gt;;
+
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a57";
+			reg = &lt;0x0&gt;;
+			enable-method = "psci";
+		};
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = &lt;0x0 0x80000000 0x0 0x80000000&gt;; /* 2GB */
+	};
+};
+</code></pre>
+<h3 id="raspberry-pi-example"><a class="header" href="#raspberry-pi-example">Raspberry Pi Example</a></h3>
+<pre><code class="language-dts">/dts-v1/;
+
+#include "bcm2835.dtsi"
+
+/ {
+	compatible = "raspberrypi,model-b", "brcm,bcm2835";
+	model = "Raspberry Pi Model B";
+
+	memory@0 {
+		device_type = "memory";
+		reg = &lt;0 0x20000000&gt;; /* 512 MB */
+	};
+};
+
+&amp;uart0 {
+	status = "okay";
+};
+
+&amp;i2c1 {
+	status = "okay";
+	clock-frequency = &lt;100000&gt;;
+};
+
+&amp;sdhci {
+	status = "okay";
+	bus-width = &lt;4&gt;;
+};
+</code></pre>
+<hr />
+<h2 id="debugging-device-tree"><a class="header" href="#debugging-device-tree">Debugging Device Tree</a></h2>
+<h3 id="viewing-loaded-device-tree"><a class="header" href="#viewing-loaded-device-tree">Viewing Loaded Device Tree</a></h3>
+<pre><code class="language-bash"># View device tree in /proc
+cat /proc/device-tree/model
+
+# Or using dtc
+dtc -I fs -O dts /proc/device-tree
+
+# Better formatting
+dtc -I fs -O dts -o /tmp/current.dts /proc/device-tree
+</code></pre>
+<h3 id="sysfs-device-tree"><a class="header" href="#sysfs-device-tree">Sysfs Device Tree</a></h3>
+<pre><code class="language-bash"># Navigate device tree in sysfs
+ls /sys/firmware/devicetree/base/
+
+# View property
+cat /sys/firmware/devicetree/base/model
+
+# View all properties of a node
+ls -la /sys/firmware/devicetree/base/soc/serial@44e09000/
+</code></pre>
+<h3 id="kernel-boot-messages"><a class="header" href="#kernel-boot-messages">Kernel Boot Messages</a></h3>
+<pre><code class="language-bash"># Check device tree loading
+dmesg | grep -i "device tree"
+dmesg | grep -i "dtb"
+
+# Check OF (Open Firmware) messages
+dmesg | grep -i "of:"
+</code></pre>
+<h3 id="driver-matching-debug"><a class="header" href="#driver-matching-debug">Driver Matching Debug</a></h3>
+<pre><code class="language-c">/* In driver code */
+static int my_probe(struct platform_device *pdev)
+{
+	struct device *dev = &amp;pdev-&gt;dev;
+	struct device_node *np = dev-&gt;of_node;
+
+	dev_info(dev, "Device tree node: %pOF\n", np);
+	dev_info(dev, "Compatible: %s\n",
+		 of_get_property(np, "compatible", NULL));
+
+	/* Print all properties */
+	struct property *prop;
+	for_each_property_of_node(np, prop) {
+		dev_info(dev, "Property: %s\n", prop-&gt;name);
+	}
+
+	return 0;
+}
+</code></pre>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<p><strong>Device not probing:</strong></p>
+<pre><code class="language-bash"># Check if device is in device tree
+ls /sys/firmware/devicetree/base/soc/
+
+# Check driver registration
+ls /sys/bus/platform/drivers/
+
+# Check devices without driver
+cat /sys/kernel/debug/devices_deferred
+</code></pre>
+<p><strong>Compatible string mismatch:</strong></p>
+<pre><code class="language-c">/* Check driver's compatible strings */
+static const struct of_device_id my_of_match[] = {
+	{ .compatible = "vendor,device-v2" },  /* Try this first */
+	{ .compatible = "vendor,device" },      /* Then this */
+	{ }
+};
+</code></pre>
+<hr />
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="dos"><a class="header" href="#dos">DO's</a></h3>
+<ol>
+<li><strong>Use specific compatible strings first:</strong></li>
+</ol>
+<pre><code class="language-dts">compatible = "vendor,soc-uart-v2", "vendor,uart", "ns16550a";
+</code></pre>
+<ol start="2">
+<li><strong>Disable devices by default in SoC .dtsi:</strong></li>
+</ol>
+<pre><code class="language-dts">/* In SoC .dtsi */
+uart0: serial@44e09000 {
+	status = "disabled";
+};
+
+/* In board .dts */
+&amp;uart0 {
+	status = "okay";
+};
+</code></pre>
+<ol start="3">
+<li><strong>Use labels for references:</strong></li>
+</ol>
+<pre><code class="language-dts">uart0: serial@44e09000 { ... };
+
+&amp;uart0 {
+	/* Override properties */
+};
+</code></pre>
+<ol start="4">
+<li><strong>Document bindings:</strong></li>
+</ol>
+<pre><code class="language-yaml"># Documentation/devicetree/bindings/serial/vendor-uart.yaml
+title: Vendor UART Controller
+
+properties:
+  compatible:
+    const: vendor,uart
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+</code></pre>
+<ol start="5">
+<li><strong>Use standard property names:</strong></li>
+</ol>
+<ul>
+<li><code>clock-frequency</code> not <code>clock-freq</code></li>
+<li><code>reset-gpios</code> not <code>reset-gpio</code></li>
+<li>Follow bindings in <code>Documentation/devicetree/bindings/</code></li>
+</ul>
+<h3 id="donts"><a class="header" href="#donts">DON'Ts</a></h3>
+<ol>
+<li><strong>Don't duplicate information:</strong></li>
+</ol>
+<pre><code class="language-dts">/* Bad - IRQ already specified in interrupts */
+uart0 {
+	interrupts = &lt;72&gt;;
+	irq-number = &lt;72&gt;;  /* Redundant */
+};
+
+/* Good */
+uart0 {
+	interrupts = &lt;72&gt;;
+};
+</code></pre>
+<ol start="2">
+<li><strong>Don't use Linux-specific information:</strong></li>
+</ol>
+<pre><code class="language-dts">/* Bad - driver name is Linux-specific */
+uart0 {
+	linux,driver-name = "vendor-uart";
+};
+
+/* Good - use compatible */
+uart0 {
+	compatible = "vendor,uart";
+};
+</code></pre>
+<ol start="3">
+<li><strong>Don't hardcode board-specific data in drivers:</strong></li>
+</ol>
+<pre><code class="language-c">/* Bad - hardcoded in driver */
+#define UART_BASE 0x44e09000
+
+/* Good - read from device tree */
+res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+</code></pre>
+<hr />
+<h2 id="real-world-examples"><a class="header" href="#real-world-examples">Real-World Examples</a></h2>
+<h3 id="beaglebone-black"><a class="header" href="#beaglebone-black">BeagleBone Black</a></h3>
+<pre><code class="language-dts">/dts-v1/;
+
+#include "am33xx.dtsi"
+
+/ {
+	model = "TI AM335x BeagleBone Black";
+	compatible = "ti,am335x-bone-black", "ti,am335x-bone", "ti,am33xx";
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = &lt;0x80000000 0x20000000&gt;; /* 512 MB */
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = &lt;&amp;user_leds_s0&gt;;
+
+		led0 {
+			label = "beaglebone:green:usr0";
+			gpios = &lt;&amp;gpio1 21 GPIO_ACTIVE_HIGH&gt;;
+			linux,default-trigger = "heartbeat";
+			default-state = "off";
+		};
+	};
+};
+
+&amp;uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = &lt;&amp;uart0_pins&gt;;
+	status = "okay";
+};
+
+&amp;mmc1 {
+	vmmc-supply = &lt;&amp;vmmcsd_fixed&gt;;
+	bus-width = &lt;4&gt;;
+	status = "okay";
+};
+</code></pre>
+<h3 id="raspberry-pi-4"><a class="header" href="#raspberry-pi-4">Raspberry Pi 4</a></h3>
+<pre><code class="language-dts">/dts-v1/;
+
+#include "bcm2711.dtsi"
+
+/ {
+	compatible = "raspberrypi,4-model-b", "brcm,bcm2711";
+	model = "Raspberry Pi 4 Model B";
+
+	memory@0 {
+		device_type = "memory";
+		reg = &lt;0x0 0x0 0x0 0x80000000&gt;; /* 2GB */
+	};
+
+	aliases {
+		serial0 = &amp;uart0;
+		serial1 = &amp;uart1;
+	};
+};
+
+&amp;uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = &lt;&amp;uart0_gpio14&gt;;
+	status = "okay";
+};
+
+&amp;i2c1 {
+	pinctrl-names = "default";
+	pinctrl-0 = &lt;&amp;i2c1_gpio2&gt;;
+	clock-frequency = &lt;100000&gt;;
+	status = "okay";
+};
+</code></pre>
+<hr />
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Device Tree provides:</p>
+<ul>
+<li>Hardware description separated from kernel code</li>
+<li>Single kernel for multiple boards</li>
+<li>Runtime configuration</li>
+<li>Standardized hardware description</li>
+</ul>
+<p><strong>Key points:</strong></p>
+<ol>
+<li>Use <code>.dts</code> for board-specific, <code>.dtsi</code> for SoC common definitions</li>
+<li><code>compatible</code> property binds nodes to drivers</li>
+<li>Use standard properties and follow bindings documentation</li>
+<li>Parse device tree in drivers using OF APIs</li>
+<li>Debug using <code>/proc/device-tree</code> and <code>/sys/firmware/devicetree</code></li>
+</ol>
+<p><strong>Resources:</strong></p>
+<ul>
+<li><a href="https://www.devicetree.org/">Device Tree Specification</a></li>
+<li><a href="https://www.kernel.org/doc/Documentation/devicetree/">Linux Device Tree Documentation</a></li>
+<li><a href="https://www.kernel.org/doc/Documentation/devicetree/bindings/">Device Tree Bindings</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../linux/driver_development.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../linux/cross_compilation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../linux/driver_development.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../linux/cross_compilation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

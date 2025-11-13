@@ -178,16 +178,403 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="git-cheatsheet"><a class="header" href="#git-cheatsheet">Git Cheatsheet</a></h1>
-<h2 id="git-commands"><a class="header" href="#git-commands">Git Commands</a></h2>
-<h3 id="basic-setup"><a class="header" href="#basic-setup">Basic setup</a></h3>
-<pre><code class="language-bash">git config --global user.name "&lt;name&gt;"
-git config --global user.email "&lt;email&gt;"
-git config --global core.editor "vi"
+<p>Quick reference for the most commonly used Git commands.</p>
+<h2 id="setup-and-configuration"><a class="header" href="#setup-and-configuration">Setup and Configuration</a></h2>
+<pre><code class="language-bash"># Initial setup
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+git config --global core.editor "vim"
+git config --global init.defaultBranch main
+
+# View configuration
+git config --list
+git config user.name
 </code></pre>
-<h3 id="create-a-new-branch-from-an-orphan-branch"><a class="header" href="#create-a-new-branch-from-an-orphan-branch">Create a new branch from an orphan branch</a></h3>
-<pre><code class="language-bash">git switch --orphan &lt;new branch&gt;
-git commit --allow-empty -m "Initial commit on orphan branch"
-git push -u origin &lt;new branch&gt;
+<h2 id="repository-creation"><a class="header" href="#repository-creation">Repository Creation</a></h2>
+<pre><code class="language-bash"># Create new repository
+git init
+
+# Clone existing repository
+git clone &lt;url&gt;
+git clone &lt;url&gt; &lt;directory&gt;
+git clone -b &lt;branch&gt; &lt;url&gt;
+</code></pre>
+<h2 id="daily-workflow"><a class="header" href="#daily-workflow">Daily Workflow</a></h2>
+<pre><code class="language-bash"># Check status
+git status
+git status -s                # Short format
+
+# Add files
+git add &lt;file&gt;
+git add .                    # Add all
+git add -p                   # Interactive staging
+
+# Commit changes
+git commit -m "Message"
+git commit -am "Message"     # Stage and commit
+git commit --amend           # Modify last commit
+
+# View history
+git log
+git log --oneline
+git log --graph --oneline --all
+
+# Push/Pull
+git pull
+git pull --rebase
+git push
+git push -u origin &lt;branch&gt;
+</code></pre>
+<h2 id="branching"><a class="header" href="#branching">Branching</a></h2>
+<pre><code class="language-bash"># List branches
+git branch                   # Local branches
+git branch -a                # All branches
+git branch -r                # Remote branches
+
+# Create branch
+git branch &lt;name&gt;
+git checkout -b &lt;name&gt;       # Create and switch
+git switch -c &lt;name&gt;         # Modern syntax
+
+# Switch branches
+git checkout &lt;name&gt;
+git switch &lt;name&gt;
+git checkout -               # Previous branch
+
+# Delete branch
+git branch -d &lt;name&gt;         # Safe delete
+git branch -D &lt;name&gt;         # Force delete
+git push origin --delete &lt;name&gt;  # Delete remote
+
+# Rename branch
+git branch -m &lt;new_name&gt;
+</code></pre>
+<h2 id="merging-and-rebasing"><a class="header" href="#merging-and-rebasing">Merging and Rebasing</a></h2>
+<pre><code class="language-bash"># Merge
+git merge &lt;branch&gt;
+git merge --no-ff &lt;branch&gt;
+git merge --squash &lt;branch&gt;
+git merge --abort
+
+# Rebase
+git rebase &lt;branch&gt;
+git rebase -i HEAD~3         # Interactive rebase
+git rebase --continue
+git rebase --abort
+
+# Resolve conflicts
+git status                   # Check conflicts
+# Edit files to resolve
+git add &lt;resolved_file&gt;
+git commit                   # or git rebase --continue
+</code></pre>
+<h2 id="remote-operations"><a class="header" href="#remote-operations">Remote Operations</a></h2>
+<pre><code class="language-bash"># List remotes
+git remote -v
+
+# Add/Remove remote
+git remote add origin &lt;url&gt;
+git remote remove &lt;name&gt;
+git remote set-url origin &lt;new_url&gt;
+
+# Fetch
+git fetch
+git fetch origin
+git fetch --all
+git fetch -p                 # Prune deleted branches
+
+# Pull
+git pull
+git pull origin &lt;branch&gt;
+git pull --rebase
+
+# Push
+git push
+git push origin &lt;branch&gt;
+git push -u origin &lt;branch&gt;
+git push --tags
+git push --force-with-lease  # Safer force push
+</code></pre>
+<h2 id="viewing-changes"><a class="header" href="#viewing-changes">Viewing Changes</a></h2>
+<pre><code class="language-bash"># Show changes
+git diff                     # Unstaged changes
+git diff --staged            # Staged changes
+git diff &lt;branch1&gt; &lt;branch2&gt;
+git diff HEAD~1
+
+# Show commits
+git log
+git log --oneline
+git log -p                   # With patches
+git log --stat               # With statistics
+git log --author="Name"
+git log --since="2 weeks ago"
+git log --grep="pattern"
+
+# Show commit details
+git show &lt;commit&gt;
+git show &lt;commit&gt;:&lt;file&gt;
+
+# Blame
+git blame &lt;file&gt;
+</code></pre>
+<h2 id="undoing-changes"><a class="header" href="#undoing-changes">Undoing Changes</a></h2>
+<pre><code class="language-bash"># Discard changes in working directory
+git restore &lt;file&gt;
+git restore .
+git checkout -- &lt;file&gt;       # Old syntax
+
+# Unstage files
+git restore --staged &lt;file&gt;
+git reset HEAD &lt;file&gt;        # Old syntax
+
+# Undo commits
+git reset --soft HEAD~1      # Keep changes staged
+git reset HEAD~1             # Keep changes unstaged
+git reset --hard HEAD~1      # Discard changes
+git revert &lt;commit&gt;          # Create reverting commit
+
+# Clean untracked files
+git clean -n                 # Dry run
+git clean -f                 # Remove files
+git clean -fd                # Remove files and directories
+</code></pre>
+<h2 id="stashing"><a class="header" href="#stashing">Stashing</a></h2>
+<pre><code class="language-bash"># Save changes temporarily
+git stash
+git stash save "Message"
+git stash -u                 # Include untracked
+
+# List stashes
+git stash list
+
+# Apply stash
+git stash apply
+git stash apply stash@{2}
+git stash pop                # Apply and remove
+
+# Manage stashes
+git stash show -p
+git stash drop stash@{0}
+git stash clear
+</code></pre>
+<h2 id="tags"><a class="header" href="#tags">Tags</a></h2>
+<pre><code class="language-bash"># List tags
+git tag
+git tag -l "v1.*"
+
+# Create tags
+git tag &lt;name&gt;               # Lightweight
+git tag -a &lt;name&gt; -m "Message"  # Annotated
+
+# Push tags
+git push origin &lt;tag&gt;
+git push --tags
+
+# Delete tags
+git tag -d &lt;name&gt;
+git push origin --delete &lt;name&gt;
+
+# Checkout tag
+git checkout &lt;tag&gt;
+</code></pre>
+<h2 id="advanced-commands"><a class="header" href="#advanced-commands">Advanced Commands</a></h2>
+<pre><code class="language-bash"># Cherry-pick
+git cherry-pick &lt;commit&gt;
+git cherry-pick &lt;commit1&gt; &lt;commit2&gt;
+
+# Bisect (find bug)
+git bisect start
+git bisect bad
+git bisect good &lt;commit&gt;
+# Test and mark good/bad
+git bisect reset
+
+# Reflog (recover lost commits)
+git reflog
+git checkout &lt;commit&gt;
+
+# Archive
+git archive --format=zip HEAD &gt; archive.zip
+
+# Search
+git grep "pattern"
+git grep -n "pattern"        # With line numbers
+git log -S "code"            # Commits with code
+</code></pre>
+<h2 id="collaboration-workflows"><a class="header" href="#collaboration-workflows">Collaboration Workflows</a></h2>
+<h3 id="feature-branch-workflow"><a class="header" href="#feature-branch-workflow">Feature Branch Workflow</a></h3>
+<pre><code class="language-bash"># Start new feature
+git checkout -b feature/&lt;name&gt;
+
+# Work on feature
+git add .
+git commit -m "Add feature"
+
+# Push feature branch
+git push -u origin feature/&lt;name&gt;
+
+# After PR is merged
+git checkout main
+git pull
+git branch -d feature/&lt;name&gt;
+</code></pre>
+<h3 id="sync-with-upstream"><a class="header" href="#sync-with-upstream">Sync with Upstream</a></h3>
+<pre><code class="language-bash"># Fork workflow
+git remote add upstream &lt;original_repo_url&gt;
+git fetch upstream
+git checkout main
+git merge upstream/main
+git push origin main
+</code></pre>
+<h3 id="hotfix-workflow"><a class="header" href="#hotfix-workflow">Hotfix Workflow</a></h3>
+<pre><code class="language-bash"># Create hotfix from main
+git checkout main
+git checkout -b hotfix/&lt;issue&gt;
+
+# Fix and commit
+git add .
+git commit -m "Fix issue"
+
+# Merge to main and develop
+git checkout main
+git merge --no-ff hotfix/&lt;issue&gt;
+git tag -a v1.0.1 -m "Version 1.0.1"
+
+git checkout develop
+git merge --no-ff hotfix/&lt;issue&gt;
+
+# Cleanup
+git branch -d hotfix/&lt;issue&gt;
+</code></pre>
+<h2 id="common-scenarios"><a class="header" href="#common-scenarios">Common Scenarios</a></h2>
+<h3 id="forgot-to-create-branch"><a class="header" href="#forgot-to-create-branch">Forgot to create branch</a></h3>
+<pre><code class="language-bash">git stash
+git checkout -b feature/&lt;name&gt;
+git stash pop
+</code></pre>
+<h3 id="undo-last-commit-but-keep-changes"><a class="header" href="#undo-last-commit-but-keep-changes">Undo last commit but keep changes</a></h3>
+<pre><code class="language-bash">git reset --soft HEAD~1
+</code></pre>
+<h3 id="amend-commit-message"><a class="header" href="#amend-commit-message">Amend commit message</a></h3>
+<pre><code class="language-bash">git commit --amend -m "New message"
+</code></pre>
+<h3 id="remove-file-from-git-but-keep-locally"><a class="header" href="#remove-file-from-git-but-keep-locally">Remove file from Git but keep locally</a></h3>
+<pre><code class="language-bash">git rm --cached &lt;file&gt;
+</code></pre>
+<h3 id="sync-fork-with-original"><a class="header" href="#sync-fork-with-original">Sync fork with original</a></h3>
+<pre><code class="language-bash">git fetch upstream
+git checkout main
+git merge upstream/main
+git push origin main
+</code></pre>
+<h3 id="squash-last-n-commits"><a class="header" href="#squash-last-n-commits">Squash last N commits</a></h3>
+<pre><code class="language-bash">git rebase -i HEAD~N
+# Change "pick" to "squash" for commits to combine
+</code></pre>
+<h3 id="change-author-of-last-commit"><a class="header" href="#change-author-of-last-commit">Change author of last commit</a></h3>
+<pre><code class="language-bash">git commit --amend --author="Name &lt;email&gt;"
+</code></pre>
+<h3 id="create-orphan-branch"><a class="header" href="#create-orphan-branch">Create orphan branch</a></h3>
+<pre><code class="language-bash">git switch --orphan &lt;branch&gt;
+git commit --allow-empty -m "Initial commit"
+git push -u origin &lt;branch&gt;
+</code></pre>
+<h2 id="configuration-aliases"><a class="header" href="#configuration-aliases">Configuration Aliases</a></h2>
+<pre><code class="language-bash"># Create useful aliases
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.ci commit
+git config --global alias.st status
+git config --global alias.unstage 'reset HEAD --'
+git config --global alias.last 'log -1 HEAD'
+git config --global alias.lg 'log --graph --oneline --all'
+git config --global alias.amend 'commit --amend --no-edit'
+</code></pre>
+<h2 id="gitignore-patterns"><a class="header" href="#gitignore-patterns">.gitignore Patterns</a></h2>
+<pre><code class="language-bash"># Ignore files
+*.log
+*.tmp
+.env
+
+# Ignore directories
+node_modules/
+dist/
+build/
+
+# Ignore with exceptions
+*.a
+!lib.a
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+</code></pre>
+<h2 id="common-options"><a class="header" href="#common-options">Common Options</a></h2>
+<pre><code class="language-bash"># Flags used with multiple commands
+-a, --all               # All
+-b, --branch            # Branch
+-d, --delete            # Delete
+-f, --force             # Force
+-m, --message           # Message
+-n, --dry-run           # Dry run
+-p, --patch             # Interactive patch mode
+-u, --set-upstream      # Set upstream
+-v, --verbose           # Verbose output
+
+# Common patterns
+HEAD                    # Current commit
+HEAD~1                  # Previous commit
+HEAD~n                  # N commits ago
+HEAD^                   # First parent of merge
+&lt;commit&gt;                # Commit hash
+&lt;branch&gt;                # Branch name
+origin                  # Default remote name
+main/master             # Default branch names
+</code></pre>
+<h2 id="emergency-commands"><a class="header" href="#emergency-commands">Emergency Commands</a></h2>
+<pre><code class="language-bash"># Abort everything
+git merge --abort
+git rebase --abort
+git cherry-pick --abort
+
+# Recover lost work
+git reflog
+git checkout &lt;lost_commit&gt;
+git branch recover-branch &lt;lost_commit&gt;
+
+# Undo force push (if possible)
+git reflog
+git reset --hard &lt;previous_commit&gt;
+git push --force-with-lease
+
+# Remove sensitive data from history
+git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch &lt;file&gt;" \
+  --prune-empty --tag-name-filter cat -- --all
+</code></pre>
+<h2 id="quick-reference-git-states"><a class="header" href="#quick-reference-git-states">Quick Reference: Git States</a></h2>
+<pre><code>Working Directory → Staging Area → Repository → Remote
+      (edit)          (add)        (commit)    (push)
+</code></pre>
+<h2 id="quick-reference-undoing"><a class="header" href="#quick-reference-undoing">Quick Reference: Undoing</a></h2>
+<pre><code>Working Directory:    git restore &lt;file&gt;
+Staging Area:         git restore --staged &lt;file&gt;
+Last Commit:          git commit --amend
+Previous Commits:     git revert &lt;commit&gt;
+Local Branch:         git reset --hard &lt;commit&gt;
+</code></pre>
+<h2 id="quick-reference-branch-management"><a class="header" href="#quick-reference-branch-management">Quick Reference: Branch Management</a></h2>
+<pre><code>Create:    git checkout -b &lt;name&gt;
+Switch:    git switch &lt;name&gt;
+Merge:     git merge &lt;name&gt;
+Delete:    git branch -d &lt;name&gt;
+Remote:    git push -u origin &lt;name&gt;
 </code></pre>
 
                     </main>

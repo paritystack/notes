@@ -1,0 +1,835 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>DuckDB - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="duckdb"><a class="header" href="#duckdb">DuckDB</a></h1>
+<p>DuckDB is an in-process SQL OLAP (Online Analytical Processing) database management system designed for analytical query workloads. It's often described as "SQLite for analytics."</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>DuckDB is optimized for analytical queries with columnar storage, vectorized execution, and minimal dependencies.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>In-process, embedded database</li>
+<li>Columnar storage for analytics</li>
+<li>ACID compliant</li>
+<li>Vectorized query execution</li>
+<li>No external dependencies</li>
+<li>SQL compatible</li>
+<li>Direct querying of CSV, Parquet, JSON</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt install duckdb
+
+# macOS
+brew install duckdb
+
+# Python
+pip install duckdb
+
+# From binary
+wget https://github.com/duckdb/duckdb/releases/download/v0.9.2/duckdb_cli-linux-amd64.zip
+unzip duckdb_cli-linux-amd64.zip
+sudo mv duckdb /usr/local/bin/
+
+# Verify
+duckdb --version
+</code></pre>
+<h2 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h2>
+<pre><code class="language-bash"># Start DuckDB CLI
+duckdb
+
+# Create/open database file
+duckdb mydb.duckdb
+
+# In-memory database
+duckdb :memory:
+
+# Execute command from shell
+duckdb mydb.duckdb "SELECT * FROM users;"
+
+# Execute SQL file
+duckdb mydb.duckdb &lt; script.sql
+
+# Exit
+.quit
+</code></pre>
+<h2 id="python-api"><a class="header" href="#python-api">Python API</a></h2>
+<pre><code class="language-python">import duckdb
+
+# Connect to database
+con = duckdb.connect('mydb.duckdb')
+
+# In-memory database
+con = duckdb.connect(':memory:')
+
+# Execute query
+result = con.execute("SELECT * FROM users").fetchall()
+
+# Fetch as DataFrame
+df = con.execute("SELECT * FROM users").df()
+
+# Direct DataFrame query
+import pandas as pd
+df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})
+result = duckdb.query("SELECT * FROM df WHERE a &gt; 1").df()
+
+# Close connection
+con.close()
+</code></pre>
+<h2 id="table-operations"><a class="header" href="#table-operations">Table Operations</a></h2>
+<pre><code class="language-sql">-- Create table
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    username VARCHAR,
+    email VARCHAR,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create table from query
+CREATE TABLE new_users AS
+SELECT * FROM users WHERE created_at &gt; '2024-01-01';
+
+-- Show tables
+SHOW TABLES;
+.tables
+
+-- Describe table
+DESCRIBE users;
+.schema users
+
+-- Drop table
+DROP TABLE users;
+</code></pre>
+<h2 id="reading-external-files"><a class="header" href="#reading-external-files">Reading External Files</a></h2>
+<pre><code class="language-sql">-- Read CSV
+SELECT * FROM read_csv_auto('data.csv');
+
+-- Read CSV with options
+SELECT * FROM read_csv('data.csv',
+    header=true,
+    delim=',',
+    quote='"',
+    types={'id': 'INTEGER', 'name': 'VARCHAR'}
+);
+
+-- Create table from CSV
+CREATE TABLE users AS
+SELECT * FROM read_csv_auto('users.csv');
+
+-- Read Parquet
+SELECT * FROM read_parquet('data.parquet');
+SELECT * FROM 'data.parquet';  -- Shorthand
+
+-- Read multiple Parquet files
+SELECT * FROM read_parquet(['file1.parquet', 'file2.parquet']);
+SELECT * FROM read_parquet('data/*.parquet');
+
+-- Read JSON
+SELECT * FROM read_json_auto('data.json');
+SELECT * FROM read_json('data.json', format='array');
+
+-- Read JSON lines
+SELECT * FROM read_json_auto('data.jsonl', format='newline_delimited');
+</code></pre>
+<h2 id="writing-to-files"><a class="header" href="#writing-to-files">Writing to Files</a></h2>
+<pre><code class="language-sql">-- Export to CSV
+COPY users TO 'users.csv' (HEADER, DELIMITER ',');
+
+-- Export to Parquet
+COPY users TO 'users.parquet' (FORMAT PARQUET);
+
+-- Export query result
+COPY (SELECT * FROM users WHERE active = true)
+TO 'active_users.parquet' (FORMAT PARQUET);
+
+-- Export to JSON
+COPY users TO 'users.json';
+</code></pre>
+<h2 id="crud-operations"><a class="header" href="#crud-operations">CRUD Operations</a></h2>
+<pre><code class="language-sql">-- Insert
+INSERT INTO users (username, email)
+VALUES ('john', 'john@example.com');
+
+-- Insert multiple
+INSERT INTO users (username, email) VALUES
+    ('alice', 'alice@example.com'),
+    ('bob', 'bob@example.com');
+
+-- Insert from SELECT
+INSERT INTO users (username, email)
+SELECT username, email FROM temp_users;
+
+-- Select
+SELECT * FROM users;
+SELECT * FROM users WHERE username LIKE 'jo%';
+SELECT * FROM users ORDER BY created_at DESC LIMIT 10;
+
+-- Update
+UPDATE users SET email = 'newemail@example.com' WHERE id = 1;
+
+-- Delete
+DELETE FROM users WHERE id = 1;
+</code></pre>
+<h2 id="analytical-queries"><a class="header" href="#analytical-queries">Analytical Queries</a></h2>
+<pre><code class="language-sql">-- Window functions
+SELECT
+    username,
+    created_at,
+    ROW_NUMBER() OVER (ORDER BY created_at) AS row_num,
+    RANK() OVER (ORDER BY created_at) AS rank,
+    DENSE_RANK() OVER (ORDER BY created_at) AS dense_rank,
+    NTILE(4) OVER (ORDER BY created_at) AS quartile
+FROM users;
+
+-- Moving average
+SELECT
+    date,
+    revenue,
+    AVG(revenue) OVER (ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS moving_avg_7d
+FROM sales;
+
+-- Cumulative sum
+SELECT
+    date,
+    amount,
+    SUM(amount) OVER (ORDER BY date) AS cumulative_total
+FROM transactions;
+
+-- Percent rank
+SELECT
+    username,
+    score,
+    PERCENT_RANK() OVER (ORDER BY score) AS percentile
+FROM scores;
+</code></pre>
+<h2 id="aggregations"><a class="header" href="#aggregations">Aggregations</a></h2>
+<pre><code class="language-sql">-- Basic aggregations
+SELECT
+    COUNT(*) AS total,
+    COUNT(DISTINCT user_id) AS unique_users,
+    SUM(amount) AS total_amount,
+    AVG(amount) AS avg_amount,
+    MIN(amount) AS min_amount,
+    MAX(amount) AS max_amount,
+    STDDEV(amount) AS std_dev,
+    MEDIAN(amount) AS median_amount
+FROM orders;
+
+-- Group by with ROLLUP
+SELECT
+    category,
+    subcategory,
+    SUM(amount) AS total
+FROM sales
+GROUP BY ROLLUP (category, subcategory);
+
+-- Group by with CUBE
+SELECT
+    region,
+    product,
+    SUM(revenue) AS total
+FROM sales
+GROUP BY CUBE (region, product);
+
+-- GROUPING SETS
+SELECT
+    region,
+    product,
+    SUM(revenue) AS total
+FROM sales
+GROUP BY GROUPING SETS ((region), (product), ());
+</code></pre>
+<h2 id="time-series"><a class="header" href="#time-series">Time Series</a></h2>
+<pre><code class="language-sql">-- Generate date series
+SELECT * FROM generate_series(
+    TIMESTAMP '2024-01-01',
+    TIMESTAMP '2024-12-31',
+    INTERVAL '1 day'
+) AS t(date);
+
+-- Time bucket
+SELECT
+    time_bucket(INTERVAL '1 hour', timestamp) AS hour,
+    COUNT(*) AS events,
+    AVG(value) AS avg_value
+FROM events
+GROUP BY hour
+ORDER BY hour;
+
+-- Date truncation
+SELECT
+    date_trunc('month', created_at) AS month,
+    COUNT(*) AS user_count
+FROM users
+GROUP BY month;
+
+-- Extract date parts
+SELECT
+    EXTRACT(year FROM created_at) AS year,
+    EXTRACT(month FROM created_at) AS month,
+    EXTRACT(day FROM created_at) AS day,
+    EXTRACT(hour FROM created_at) AS hour
+FROM events;
+</code></pre>
+<h2 id="joins"><a class="header" href="#joins">Joins</a></h2>
+<pre><code class="language-sql">-- Inner join
+SELECT u.username, o.amount
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id;
+
+-- Left join
+SELECT u.username, o.amount
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id;
+
+-- Right join
+SELECT u.username, o.amount
+FROM users u
+RIGHT JOIN orders o ON u.id = o.user_id;
+
+-- Full outer join
+SELECT u.username, o.amount
+FROM users u
+FULL OUTER JOIN orders o ON u.id = o.user_id;
+
+-- Cross join
+SELECT u.username, p.name
+FROM users u
+CROSS JOIN products p;
+
+-- Join with USING
+SELECT * FROM users u
+JOIN orders o USING (user_id);
+
+-- ASOF join (temporal join)
+SELECT * FROM trades
+ASOF JOIN quotes
+ON trades.symbol = quotes.symbol
+AND trades.timestamp &gt;= quotes.timestamp;
+</code></pre>
+<h2 id="common-table-expressions-ctes"><a class="header" href="#common-table-expressions-ctes">Common Table Expressions (CTEs)</a></h2>
+<pre><code class="language-sql">-- Basic CTE
+WITH active_users AS (
+    SELECT * FROM users WHERE active = true
+)
+SELECT * FROM active_users WHERE created_at &gt; '2024-01-01';
+
+-- Multiple CTEs
+WITH
+    active_users AS (
+        SELECT * FROM users WHERE active = true
+    ),
+    recent_orders AS (
+        SELECT * FROM orders WHERE created_at &gt; '2024-01-01'
+    )
+SELECT u.username, COUNT(o.id) AS order_count
+FROM active_users u
+LEFT JOIN recent_orders o ON u.id = o.user_id
+GROUP BY u.username;
+
+-- Recursive CTE
+WITH RECURSIVE countdown(n) AS (
+    SELECT 10 AS n
+    UNION ALL
+    SELECT n - 1 FROM countdown WHERE n &gt; 1
+)
+SELECT * FROM countdown;
+</code></pre>
+<h2 id="pivot-and-unpivot"><a class="header" href="#pivot-and-unpivot">Pivot and Unpivot</a></h2>
+<pre><code class="language-sql">-- Pivot
+PIVOT sales
+ON product_category
+USING SUM(amount)
+GROUP BY region;
+
+-- Manual pivot
+SELECT
+    region,
+    SUM(CASE WHEN category = 'Electronics' THEN amount ELSE 0 END) AS electronics,
+    SUM(CASE WHEN category = 'Clothing' THEN amount ELSE 0 END) AS clothing,
+    SUM(CASE WHEN category = 'Food' THEN amount ELSE 0 END) AS food
+FROM sales
+GROUP BY region;
+
+-- Unpivot
+UNPIVOT sales
+ON electronics, clothing, food
+INTO NAME category VALUE amount;
+</code></pre>
+<h2 id="string-functions"><a class="header" href="#string-functions">String Functions</a></h2>
+<pre><code class="language-sql">-- String operations
+SELECT
+    UPPER(username) AS upper_name,
+    LOWER(username) AS lower_name,
+    CONCAT(first_name, ' ', last_name) AS full_name,
+    SUBSTRING(email, 1, 5) AS email_prefix,
+    LENGTH(username) AS name_length,
+    REPLACE(email, '@gmail.com', '@example.com') AS new_email,
+    SPLIT_PART(email, '@', 1) AS email_user,
+    TRIM(username) AS trimmed,
+    REGEXP_MATCHES(text, '[0-9]+') AS numbers,
+    REGEXP_REPLACE(text, '[0-9]', 'X') AS masked
+FROM users;
+
+-- String aggregation
+SELECT
+    category,
+    STRING_AGG(product_name, ', ') AS products
+FROM products
+GROUP BY category;
+
+-- List functions
+SELECT
+    LIST(['a', 'b', 'c']) AS my_list,
+    LIST_VALUE('a', 'b', 'c') AS another_list,
+    [1, 2, 3] AS numeric_list;
+
+SELECT list[1] FROM (SELECT [1, 2, 3] AS list);
+</code></pre>
+<h2 id="array-and-struct-operations"><a class="header" href="#array-and-struct-operations">Array and Struct Operations</a></h2>
+<pre><code class="language-sql">-- Arrays
+SELECT [1, 2, 3, 4, 5] AS numbers;
+SELECT LIST_VALUE(1, 2, 3, 4, 5) AS numbers;
+SELECT UNNEST([1, 2, 3]) AS num;
+
+-- Array aggregation
+SELECT LIST(username) AS all_users FROM users;
+
+-- Struct
+SELECT {'name': 'John', 'age': 30} AS person;
+SELECT person.name FROM (SELECT {'name': 'John', 'age': 30} AS person);
+
+-- Nested structures
+SELECT {
+    'user': {'name': 'John', 'email': 'john@example.com'},
+    'orders': [1, 2, 3]
+} AS complex_data;
+</code></pre>
+<h2 id="constraints-and-indexes"><a class="header" href="#constraints-and-indexes">Constraints and Indexes</a></h2>
+<pre><code class="language-sql">-- Primary key
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    username VARCHAR UNIQUE NOT NULL
+);
+
+-- Check constraint
+CREATE TABLE products (
+    id INTEGER PRIMARY KEY,
+    price DECIMAL CHECK (price &gt; 0),
+    quantity INTEGER CHECK (quantity &gt;= 0)
+);
+
+-- Create index
+CREATE INDEX idx_users_email ON users(email);
+
+-- Drop index
+DROP INDEX idx_users_email;
+
+-- Show indexes
+PRAGMA show_index('users');
+</code></pre>
+<h2 id="transactions"><a class="header" href="#transactions">Transactions</a></h2>
+<pre><code class="language-sql">-- Begin transaction
+BEGIN TRANSACTION;
+
+INSERT INTO users (username, email) VALUES ('test', 'test@example.com');
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+
+-- Commit
+COMMIT;
+
+-- Rollback
+ROLLBACK;
+</code></pre>
+<h2 id="views"><a class="header" href="#views">Views</a></h2>
+<pre><code class="language-sql">-- Create view
+CREATE VIEW active_users AS
+SELECT id, username, email
+FROM users
+WHERE active = true;
+
+-- Use view
+SELECT * FROM active_users;
+
+-- Drop view
+DROP VIEW active_users;
+</code></pre>
+<h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
+<pre><code class="language-sql">-- Analyze query plan
+EXPLAIN SELECT * FROM users WHERE username = 'john';
+EXPLAIN ANALYZE SELECT * FROM users JOIN orders ON users.id = orders.user_id;
+
+-- Vacuum and analyze
+VACUUM;
+ANALYZE users;
+
+-- Parallel query execution (automatic)
+SET threads TO 4;
+
+-- Memory limit
+SET memory_limit = '4GB';
+
+-- Temp directory
+SET temp_directory = '/path/to/temp';
+</code></pre>
+<h2 id="settings-and-configuration"><a class="header" href="#settings-and-configuration">Settings and Configuration</a></h2>
+<pre><code class="language-sql">-- Show settings
+SELECT * FROM duckdb_settings();
+
+-- Set configuration
+SET memory_limit = '8GB';
+SET threads TO 8;
+SET max_memory = '16GB';
+SET temp_directory = '/tmp';
+
+-- Progress bar
+SET enable_progress_bar = true;
+
+-- Profiling
+SET enable_profiling = true;
+SET profiling_mode = 'detailed';
+</code></pre>
+<h2 id="importing-from-other-databases"><a class="header" href="#importing-from-other-databases">Importing from Other Databases</a></h2>
+<pre><code class="language-sql">-- Attach SQLite database
+ATTACH 'mydb.sqlite' AS sqlite_db (TYPE SQLITE);
+SELECT * FROM sqlite_db.users;
+
+-- Attach PostgreSQL
+ATTACH 'dbname=mydb user=postgres host=localhost' AS pg_db (TYPE POSTGRES);
+SELECT * FROM pg_db.users;
+
+-- Copy data
+CREATE TABLE local_users AS
+SELECT * FROM pg_db.users;
+
+-- Detach
+DETACH sqlite_db;
+</code></pre>
+<h2 id="python-integration"><a class="header" href="#python-integration">Python Integration</a></h2>
+<pre><code class="language-python">import duckdb
+import pandas as pd
+
+# Create connection
+con = duckdb.connect('mydb.duckdb')
+
+# Query to DataFrame
+df = con.execute("SELECT * FROM users").df()
+
+# Register DataFrame as table
+con.register('df_users', df)
+result = con.execute("SELECT * FROM df_users WHERE age &gt; 30").df()
+
+# Direct query on DataFrame
+result = duckdb.query("SELECT * FROM df WHERE column_a &gt; 10").df()
+
+# Arrow integration
+import pyarrow as pa
+arrow_table = con.execute("SELECT * FROM users").arrow()
+
+# Register Arrow table
+con.register('arrow_users', arrow_table)
+
+# Relation API
+rel = con.table('users')
+result = rel.filter('age &gt; 30').project('username, email').df()
+
+# Close
+con.close()
+</code></pre>
+<h2 id="cli-commands"><a class="header" href="#cli-commands">CLI Commands</a></h2>
+<pre><code class="language-bash"># Meta-commands
+.help              # Show help
+.tables            # List tables
+.schema            # Show all schemas
+.schema users      # Show table schema
+.mode              # Show output mode
+.mode csv          # Set CSV output
+.mode json         # Set JSON output
+.mode markdown     # Set Markdown output
+.output file.csv   # Output to file
+.timer on          # Show query timing
+.maxrows 100       # Limit output rows
+.quit              # Exit
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<pre><code class="language-sql">-- 1. Use columnar storage (Parquet) for large datasets
+COPY large_table TO 'data.parquet' (FORMAT PARQUET);
+
+-- 2. Leverage parallel execution
+SET threads TO 8;
+
+-- 3. Use appropriate data types
+CREATE TABLE optimized (
+    id INTEGER,
+    name VARCHAR,
+    value DOUBLE,
+    date DATE
+);
+
+-- 4. Create indexes for frequently filtered columns
+CREATE INDEX idx_users_email ON users(email);
+
+-- 5. Use window functions instead of self-joins
+SELECT username, LAG(score) OVER (ORDER BY date) AS prev_score
+FROM scores;
+
+-- 6. Partition large queries
+SELECT * FROM large_table
+WHERE date &gt;= '2024-01-01' AND date &lt; '2024-02-01';
+
+-- 7. Use CTEs for readability
+WITH filtered AS (SELECT * FROM users WHERE active = true)
+SELECT * FROM filtered;
+
+-- 8. Analyze queries for optimization
+EXPLAIN ANALYZE SELECT * FROM complex_query;
+
+-- 9. Read directly from files when possible
+SELECT * FROM 'data.parquet' WHERE column &gt; 100;
+
+-- 10. Use appropriate compression
+COPY data TO 'compressed.parquet' (FORMAT PARQUET, COMPRESSION ZSTD);
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>read_csv_auto('file.csv')</code></td><td>Read CSV file</td></tr>
+<tr><td><code>read_parquet('file.parquet')</code></td><td>Read Parquet file</td></tr>
+<tr><td><code>COPY table TO 'file.csv'</code></td><td>Export to CSV</td></tr>
+<tr><td><code>EXPLAIN ANALYZE</code></td><td>Show query plan</td></tr>
+<tr><td><code>SET threads TO 8</code></td><td>Set thread count</td></tr>
+<tr><td><code>DESCRIBE table</code></td><td>Show table schema</td></tr>
+<tr><td><code>.tables</code></td><td>List tables</td></tr>
+<tr><td><code>.mode csv</code></td><td>Set output format</td></tr>
+<tr><td><code>VACUUM</code></td><td>Optimize database</td></tr>
+<tr><td><code>ANALYZE</code></td><td>Update statistics</td></tr>
+</tbody></table>
+</div>
+<p>DuckDB excels at analytical queries on local data files, making it perfect for data analysis, ETL pipelines, and embedded analytics applications.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../databases/sqlite.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../databases/nosql.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../databases/sqlite.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../databases/nosql.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

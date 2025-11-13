@@ -1,0 +1,795 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>wget - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="wget"><a class="header" href="#wget">wget</a></h1>
+<p>wget is a free command-line utility for non-interactive downloading of files from the web. It supports HTTP, HTTPS, and FTP protocols, and can work through proxies, resume downloads, and handle various network conditions.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>wget is designed for robustness over slow or unstable network connections. If a download fails, it will keep retrying until the whole file has been retrieved. It's ideal for downloading files in scripts and automated tasks.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Non-interactive operation (works in background)</li>
+<li>Resume interrupted downloads</li>
+<li>Recursive downloads (entire websites)</li>
+<li>Multiple protocol support (HTTP, HTTPS, FTP)</li>
+<li>Proxy support</li>
+<li>Timestamping and mirroring</li>
+<li>Convert links for offline viewing</li>
+<li>Bandwidth limiting</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt update
+sudo apt install wget
+
+# macOS
+brew install wget
+
+# CentOS/RHEL
+sudo yum install wget
+
+# Arch Linux
+sudo pacman -S wget
+
+# Verify installation
+wget --version
+</code></pre>
+<h2 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h2>
+<h3 id="simple-downloads"><a class="header" href="#simple-downloads">Simple Downloads</a></h3>
+<pre><code class="language-bash"># Download a file
+wget https://example.com/file.zip
+
+# Download and save with different name
+wget -O myfile.zip https://example.com/file.zip
+wget --output-document=myfile.zip https://example.com/file.zip
+
+# Download to specific directory
+wget -P /path/to/directory https://example.com/file.zip
+wget --directory-prefix=/path/to/directory https://example.com/file.zip
+
+# Download in background
+wget -b https://example.com/largefile.zip
+wget --background https://example.com/largefile.zip
+
+# Continue interrupted download
+wget -c https://example.com/largefile.zip
+wget --continue https://example.com/largefile.zip
+</code></pre>
+<h3 id="multiple-files"><a class="header" href="#multiple-files">Multiple Files</a></h3>
+<pre><code class="language-bash"># Download multiple files
+wget https://example.com/file1.zip https://example.com/file2.zip
+
+# Download from file list
+cat urls.txt
+# https://example.com/file1.zip
+# https://example.com/file2.zip
+# https://example.com/file3.zip
+
+wget -i urls.txt
+wget --input-file=urls.txt
+
+# Download from URLs with wildcards
+wget https://example.com/file{1..10}.zip
+</code></pre>
+<h3 id="download-options"><a class="header" href="#download-options">Download Options</a></h3>
+<pre><code class="language-bash"># Limit download speed (K, M, G)
+wget --limit-rate=200k https://example.com/file.zip
+wget --limit-rate=1M https://example.com/file.zip
+
+# Set number of retries
+wget --tries=10 https://example.com/file.zip
+wget -t 10 https://example.com/file.zip
+
+# Infinite retries
+wget --tries=0 https://example.com/file.zip
+
+# Timeout settings
+wget --timeout=30 https://example.com/file.zip
+wget --dns-timeout=10 --connect-timeout=10 --read-timeout=30 https://example.com/file.zip
+
+# Wait between downloads
+wget --wait=5 -i urls.txt  # Wait 5 seconds
+wget --random-wait -i urls.txt  # Random wait 0.5-1.5x wait time
+</code></pre>
+<h2 id="recursive-downloads"><a class="header" href="#recursive-downloads">Recursive Downloads</a></h2>
+<h3 id="mirror-websites"><a class="header" href="#mirror-websites">Mirror Websites</a></h3>
+<pre><code class="language-bash"># Mirror entire website
+wget --mirror --convert-links --page-requisites --no-parent https://example.com
+
+# Shorter version
+wget -mkEpnp https://example.com
+
+# Flags explained:
+# -m, --mirror: mirror (recursive + timestamping + infinite depth)
+# -k, --convert-links: convert links for offline viewing
+# -E, --adjust-extension: save HTML with .html extension
+# -p, --page-requisites: get all images, CSS, etc.
+# -np, --no-parent: don't ascend to parent directory
+
+# Limit recursion depth
+wget -r -l 2 https://example.com  # 2 levels deep
+wget --recursive --level=2 https://example.com
+
+# Download specific file types only
+wget -r -A pdf,jpg,png https://example.com
+wget --recursive --accept=pdf,jpg,png https://example.com
+
+# Exclude specific file types
+wget -r -R gif,svg https://example.com
+wget --recursive --reject=gif,svg https://example.com
+</code></pre>
+<h3 id="download-directories"><a class="header" href="#download-directories">Download Directories</a></h3>
+<pre><code class="language-bash"># Download entire directory
+wget -r -np -nH --cut-dirs=2 https://example.com/files/documents/
+
+# Flags explained:
+# -r: recursive
+# -np: no parent (stay in directory)
+# -nH: no host directory
+# --cut-dirs=2: skip 2 directory levels
+
+# Example:
+# URL: https://example.com/files/documents/pdf/file.pdf
+# Without flags: example.com/files/documents/pdf/file.pdf
+# With flags: pdf/file.pdf
+</code></pre>
+<h2 id="authentication"><a class="header" href="#authentication">Authentication</a></h2>
+<h3 id="http-authentication"><a class="header" href="#http-authentication">HTTP Authentication</a></h3>
+<pre><code class="language-bash"># Basic authentication
+wget --user=username --password=password https://example.com/file.zip
+
+# Prompt for password
+wget --user=username --ask-password https://example.com/file.zip
+
+# HTTP authentication via .wgetrc
+cat &lt;&lt; EOF &gt; ~/.wgetrc
+http_user = username
+http_password = password
+EOF
+</code></pre>
+<h3 id="ftp-authentication"><a class="header" href="#ftp-authentication">FTP Authentication</a></h3>
+<pre><code class="language-bash"># FTP download with credentials
+wget ftp://username:password@ftp.example.com/file.zip
+
+# Anonymous FTP
+wget ftp://ftp.example.com/file.zip
+</code></pre>
+<h3 id="cookies"><a class="header" href="#cookies">Cookies</a></h3>
+<pre><code class="language-bash"># Send cookies
+wget --header="Cookie: session=abc123" https://example.com/file.zip
+
+# Load cookies from file
+wget --load-cookies=cookies.txt https://example.com/file.zip
+
+# Save cookies to file
+wget --save-cookies=cookies.txt --keep-session-cookies https://example.com/login
+
+# Use cookies for authenticated download
+wget --save-cookies=cookies.txt --keep-session-cookies \
+     --post-data='user=john&amp;pass=secret' \
+     https://example.com/login
+wget --load-cookies=cookies.txt https://example.com/protected/file.zip
+</code></pre>
+<h2 id="headers-and-user-agent"><a class="header" href="#headers-and-user-agent">Headers and User Agent</a></h2>
+<h3 id="custom-headers"><a class="header" href="#custom-headers">Custom Headers</a></h3>
+<pre><code class="language-bash"># Set user agent
+wget --user-agent="Mozilla/5.0" https://example.com/file.zip
+wget -U "Mozilla/5.0" https://example.com/file.zip
+
+# Custom headers
+wget --header="Accept: application/json" https://api.example.com/data
+wget --header="Authorization: Bearer token123" https://api.example.com/file.zip
+
+# Multiple headers
+wget --header="Accept: application/json" \
+     --header="X-API-Key: abc123" \
+     https://api.example.com/data
+
+# Referer header
+wget --referer=https://example.com https://example.com/file.zip
+</code></pre>
+<h3 id="post-requests"><a class="header" href="#post-requests">POST Requests</a></h3>
+<pre><code class="language-bash"># POST data
+wget --post-data='name=John&amp;email=john@example.com' https://example.com/api
+
+# POST from file
+wget --post-file=data.json https://example.com/api
+
+# POST with headers
+wget --post-data='{"name":"John"}' \
+     --header="Content-Type: application/json" \
+     https://example.com/api
+</code></pre>
+<h2 id="ssltls-options"><a class="header" href="#ssltls-options">SSL/TLS Options</a></h2>
+<pre><code class="language-bash"># Ignore SSL certificate check (unsafe)
+wget --no-check-certificate https://self-signed.example.com/file.zip
+
+# Specify CA certificate
+wget --ca-certificate=/path/to/ca-cert.pem https://example.com/file.zip
+
+# Use client certificate
+wget --certificate=/path/to/client-cert.pem \
+     --certificate-type=PEM \
+     https://example.com/file.zip
+
+# Use private key
+wget --private-key=/path/to/key.pem https://example.com/file.zip
+
+# Specify SSL protocol
+wget --secure-protocol=TLSv1_2 https://example.com/file.zip
+</code></pre>
+<h2 id="proxy-support"><a class="header" href="#proxy-support">Proxy Support</a></h2>
+<pre><code class="language-bash"># Use HTTP proxy
+wget -e use_proxy=yes -e http_proxy=http://proxy.example.com:8080 https://example.com/file.zip
+
+# Use proxy with authentication
+wget -e use_proxy=yes \
+     -e http_proxy=http://user:pass@proxy.example.com:8080 \
+     https://example.com/file.zip
+
+# HTTPS proxy
+wget -e https_proxy=http://proxy.example.com:8080 https://example.com/file.zip
+
+# FTP proxy
+wget -e ftp_proxy=http://proxy.example.com:8080 ftp://ftp.example.com/file.zip
+
+# No proxy for specific domains
+wget -e no_proxy=localhost,127.0.0.1 https://example.com/file.zip
+
+# Configure in .wgetrc
+cat &lt;&lt; EOF &gt; ~/.wgetrc
+use_proxy = on
+http_proxy = http://proxy.example.com:8080
+https_proxy = http://proxy.example.com:8080
+ftp_proxy = http://proxy.example.com:8080
+no_proxy = localhost,127.0.0.1
+EOF
+</code></pre>
+<h2 id="output-control"><a class="header" href="#output-control">Output Control</a></h2>
+<h3 id="verbosity"><a class="header" href="#verbosity">Verbosity</a></h3>
+<pre><code class="language-bash"># Quiet mode (no output)
+wget -q https://example.com/file.zip
+wget --quiet https://example.com/file.zip
+
+# Verbose output
+wget -v https://example.com/file.zip
+wget --verbose https://example.com/file.zip
+
+# Debug output
+wget -d https://example.com/file.zip
+wget --debug https://example.com/file.zip
+
+# Show progress bar only
+wget --progress=bar https://example.com/file.zip
+wget --progress=dot https://example.com/file.zip
+
+# No verbose but show errors
+wget -nv https://example.com/file.zip
+wget --no-verbose https://example.com/file.zip
+</code></pre>
+<h3 id="logging"><a class="header" href="#logging">Logging</a></h3>
+<pre><code class="language-bash"># Log to file
+wget -o download.log https://example.com/file.zip
+wget --output-file=download.log https://example.com/file.zip
+
+# Append to log
+wget -a download.log https://example.com/file.zip
+wget --append-output=download.log https://example.com/file.zip
+
+# Background download with logging
+wget -b -o wget.log https://example.com/largefile.zip
+</code></pre>
+<h2 id="advanced-features"><a class="header" href="#advanced-features">Advanced Features</a></h2>
+<h3 id="timestamping"><a class="header" href="#timestamping">Timestamping</a></h3>
+<pre><code class="language-bash"># Only download if newer than local file
+wget -N https://example.com/file.zip
+wget --timestamping https://example.com/file.zip
+
+# Check if file has been modified
+wget --spider --server-response https://example.com/file.zip
+</code></pre>
+<h3 id="spider-mode"><a class="header" href="#spider-mode">Spider Mode</a></h3>
+<pre><code class="language-bash"># Check if file exists without downloading
+wget --spider https://example.com/file.zip
+
+# Check if URL is valid
+if wget --spider https://example.com/file.zip 2&gt;&amp;1 | grep -q '200 OK'; then
+    echo "URL is valid"
+else
+    echo "URL is invalid"
+fi
+
+# Get response headers only
+wget --spider --server-response https://example.com/file.zip
+</code></pre>
+<h3 id="quota-and-limits"><a class="header" href="#quota-and-limits">Quota and Limits</a></h3>
+<pre><code class="language-bash"># Limit total download size
+wget --quota=100M -i urls.txt
+
+# Reject files larger than size
+wget --reject-size=10M https://example.com/
+
+# Accept files within size range
+wget --accept-size=1M-10M https://example.com/
+</code></pre>
+<h3 id="filtering"><a class="header" href="#filtering">Filtering</a></h3>
+<pre><code class="language-bash"># Include only specific directories
+wget -r -I /docs,/guides https://example.com
+
+# Exclude specific directories
+wget -r -X /private,/admin https://example.com
+
+# Include only specific domains
+wget -r -D example.com,cdn.example.com https://example.com
+
+# Follow only relative links
+wget -r --relative https://example.com
+</code></pre>
+<h2 id="configuration-file"><a class="header" href="#configuration-file">Configuration File</a></h2>
+<h3 id="wgetrc"><a class="header" href="#wgetrc">.wgetrc</a></h3>
+<pre><code class="language-bash"># Create ~/.wgetrc
+cat &lt;&lt; 'EOF' &gt; ~/.wgetrc
+# Retry settings
+tries = 10
+retry_connrefused = on
+
+# Timeout settings
+timeout = 30
+dns_timeout = 10
+connect_timeout = 10
+read_timeout = 30
+
+# Wait between downloads
+wait = 2
+random_wait = on
+
+# Download settings
+continue = on
+timestamping = on
+
+# User agent
+user_agent = Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+
+# Proxy settings
+# use_proxy = on
+# http_proxy = http://proxy.example.com:8080
+# https_proxy = http://proxy.example.com:8080
+
+# Directories
+dir_prefix = ~/Downloads/
+
+# Output
+verbose = off
+quiet = off
+EOF
+</code></pre>
+<h2 id="common-use-cases"><a class="header" href="#common-use-cases">Common Use Cases</a></h2>
+<h3 id="download-large-files"><a class="header" href="#download-large-files">Download Large Files</a></h3>
+<pre><code class="language-bash"># Download with resume support
+wget -c -t 0 --timeout=120 https://example.com/largefile.iso
+
+# Download in background with logging
+wget -b -c -o download.log https://example.com/largefile.iso
+
+# Monitor background download
+tail -f download.log
+</code></pre>
+<h3 id="backup-website"><a class="header" href="#backup-website">Backup Website</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# backup-website.sh
+
+SITE="https://example.com"
+BACKUP_DIR="/backup/website"
+DATE=$(date +%Y%m%d)
+
+mkdir -p "$BACKUP_DIR/$DATE"
+cd "$BACKUP_DIR/$DATE"
+
+wget --mirror \
+     --convert-links \
+     --adjust-extension \
+     --page-requisites \
+     --no-parent \
+     --no-clobber \
+     --wait=1 \
+     --random-wait \
+     "$SITE"
+
+echo "Backup completed: $BACKUP_DIR/$DATE"
+</code></pre>
+<h3 id="download-all-pdfs-from-site"><a class="header" href="#download-all-pdfs-from-site">Download All PDFs from Site</a></h3>
+<pre><code class="language-bash"># Download all PDFs
+wget -r -A pdf https://example.com
+
+# Download PDFs from specific directory
+wget -r -np -nd -A pdf https://example.com/documents/
+
+# Download PDFs with original structure
+wget -r -np -A pdf https://example.com/documents/
+</code></pre>
+<h3 id="api-file-downloads"><a class="header" href="#api-file-downloads">API File Downloads</a></h3>
+<pre><code class="language-bash"># Download with authentication token
+wget --header="Authorization: Bearer $API_TOKEN" \
+     https://api.example.com/files/report.pdf
+
+# Download with API key
+wget --header="X-API-Key: $API_KEY" \
+     https://api.example.com/download/file.zip
+</code></pre>
+<h3 id="batch-downloads"><a class="header" href="#batch-downloads">Batch Downloads</a></h3>
+<pre><code class="language-bash"># Create URL list
+for i in {1..100}; do
+    echo "https://example.com/images/img${i}.jpg"
+done &gt; urls.txt
+
+# Download with rate limiting
+wget -i urls.txt --wait=1 --random-wait --limit-rate=500k
+
+# Download with progress tracking
+wget -i urls.txt -o download.log &amp;
+tail -f download.log | grep -E "saved|failed"
+</code></pre>
+<h2 id="scripting-examples"><a class="header" href="#scripting-examples">Scripting Examples</a></h2>
+<h3 id="download-with-retry-logic"><a class="header" href="#download-with-retry-logic">Download with Retry Logic</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+URL="https://example.com/file.zip"
+OUTPUT="file.zip"
+MAX_ATTEMPTS=5
+
+for i in $(seq 1 $MAX_ATTEMPTS); do
+    echo "Attempt $i of $MAX_ATTEMPTS"
+
+    if wget -c -O "$OUTPUT" "$URL"; then
+        echo "Download successful"
+        exit 0
+    else
+        echo "Download failed, retrying..."
+        sleep 5
+    fi
+done
+
+echo "Download failed after $MAX_ATTEMPTS attempts"
+exit 1
+</code></pre>
+<h3 id="parallel-downloads"><a class="header" href="#parallel-downloads">Parallel Downloads</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# Download multiple files in parallel
+
+URLS=(
+    "https://example.com/file1.zip"
+    "https://example.com/file2.zip"
+    "https://example.com/file3.zip"
+)
+
+for url in "${URLS[@]}"; do
+    wget -c "$url" &amp;
+done
+
+# Wait for all downloads to complete
+wait
+
+echo "All downloads completed"
+</code></pre>
+<h3 id="monitor-website-changes"><a class="header" href="#monitor-website-changes">Monitor Website Changes</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# Check if website has been updated
+
+URL="https://example.com/news.html"
+OUTPUT="/tmp/news.html"
+
+if [ -f "$OUTPUT" ]; then
+    wget -N -o /tmp/wget.log "$URL"
+
+    if grep -q "not retrieving" /tmp/wget.log; then
+        echo "No changes detected"
+    else
+        echo "Website has been updated"
+        # Send notification or perform action
+    fi
+else
+    wget -O "$OUTPUT" "$URL"
+    echo "Initial download completed"
+fi
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Always use resume support</strong> for large files: <code>wget -c</code></li>
+<li><strong>Be respectful</strong> with recursive downloads: use <code>--wait</code> and <code>--random-wait</code></li>
+<li><strong>Set appropriate timeout</strong> values for unreliable connections</li>
+<li><strong>Use timestamping</strong> to avoid re-downloading unchanged files: <code>wget -N</code></li>
+<li><strong>Log downloads</strong> for troubleshooting: <code>wget -o logfile</code></li>
+<li><strong>Limit bandwidth</strong> if needed: <code>--limit-rate</code></li>
+<li><strong>Use .wgetrc</strong> for common settings</li>
+<li><strong>Check robots.txt</strong>: <code>wget --execute robots=off</code> to override (use responsibly)</li>
+</ol>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<pre><code class="language-bash"># SSL certificate verification failed
+wget --no-check-certificate https://example.com/file.zip
+# Better: Install proper CA certificates
+
+# Connection timeout
+wget --timeout=60 --tries=5 https://example.com/file.zip
+
+# 403 Forbidden error
+wget --user-agent="Mozilla/5.0" https://example.com/file.zip
+
+# Cannot write to file (permission denied)
+sudo wget -P /protected/directory https://example.com/file.zip
+
+# Resume failed download
+wget -c https://example.com/file.zip
+
+# Check download status in background
+tail -f wget-log
+
+# Verify download integrity
+wget https://example.com/file.zip
+wget https://example.com/file.zip.sha256
+sha256sum -c file.zip.sha256
+</code></pre>
+<h3 id="debug-issues"><a class="header" href="#debug-issues">Debug Issues</a></h3>
+<pre><code class="language-bash"># Enable debug output
+wget -d https://example.com/file.zip 2&gt;&amp;1 | tee debug.log
+
+# Check DNS resolution
+wget --dns-timeout=10 https://example.com/file.zip
+
+# Test connection only
+wget --spider --server-response https://example.com/file.zip
+
+# Show headers
+wget -S https://example.com/file.zip
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>-O file</code></td><td>Save as file</td></tr>
+<tr><td><code>-P dir</code></td><td>Save to directory</td></tr>
+<tr><td><code>-c</code></td><td>Continue/resume download</td></tr>
+<tr><td><code>-b</code></td><td>Background download</td></tr>
+<tr><td><code>-i file</code></td><td>Download URLs from file</td></tr>
+<tr><td><code>-r</code></td><td>Recursive download</td></tr>
+<tr><td><code>-l N</code></td><td>Recursion depth</td></tr>
+<tr><td><code>-A list</code></td><td>Accept file types</td></tr>
+<tr><td><code>-R list</code></td><td>Reject file types</td></tr>
+<tr><td><code>-np</code></td><td>No parent directory</td></tr>
+<tr><td><code>-m</code></td><td>Mirror website</td></tr>
+<tr><td><code>-k</code></td><td>Convert links</td></tr>
+<tr><td><code>-p</code></td><td>Page requisites</td></tr>
+<tr><td><code>-q</code></td><td>Quiet mode</td></tr>
+<tr><td><code>-v</code></td><td>Verbose mode</td></tr>
+<tr><td><code>-N</code></td><td>Timestamping</td></tr>
+<tr><td><code>--limit-rate=N</code></td><td>Limit speed</td></tr>
+<tr><td><code>--tries=N</code></td><td>Number of retries</td></tr>
+<tr><td><code>--timeout=N</code></td><td>Timeout seconds</td></tr>
+</tbody></table>
+</div>
+<p>wget is a versatile tool for reliable file downloads, website mirroring, and automated download tasks, essential for system administrators and developers.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../tools/curl.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../tools/grep.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../tools/curl.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../tools/grep.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,1873 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>WebSocket - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="websocket"><a class="header" href="#websocket">WebSocket</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>WebSocket is a communication protocol that provides full-duplex communication channels over a single TCP connection. It enables real-time, bidirectional communication between a client and server with low overhead, making it ideal for interactive web applications.</p>
+<h2 id="key-characteristics"><a class="header" href="#key-characteristics">Key Characteristics</a></h2>
+<pre><code>Protocol: ws:// (unencrypted) or wss:// (encrypted)
+Port: 80 (ws) or 443 (wss)
+Transport: TCP
+Connection: Long-lived, persistent
+Communication: Full-duplex (bidirectional)
+Latency: Low (no HTTP overhead after handshake)
+Overhead: 2-14 bytes per frame
+Status: RFC 6455 (2011)
+
+Benefits:
+✓ Real-time bidirectional communication
+✓ Low latency (no polling overhead)
+✓ Efficient (minimal frame overhead)
+✓ Server can push data to client
+✓ Single TCP connection
+✓ Works through proxies and firewalls
+✓ Subprotocol support
+</code></pre>
+<h2 id="websocket-vs-alternatives"><a class="header" href="#websocket-vs-alternatives">WebSocket vs Alternatives</a></h2>
+<h3 id="http-polling"><a class="header" href="#http-polling">HTTP Polling</a></h3>
+<pre><code>Traditional HTTP Request/Response:
+
+Client                           Server
+  |                                |
+  |──── HTTP GET (new data?) ─────&gt;|
+  |                                |
+  |&lt;─── HTTP Response (no) ────────|
+  |                                |
+  [wait 1 second]
+  |                                |
+  |──── HTTP GET (new data?) ─────&gt;|
+  |                                |
+  |&lt;─── HTTP Response (yes!) ──────|
+  |                                |
+
+Problems:
+- High latency (constant polling)
+- Wasted requests (most return nothing)
+- Server load (many unnecessary requests)
+- HTTP overhead on every request
+</code></pre>
+<h3 id="long-polling"><a class="header" href="#long-polling">Long Polling</a></h3>
+<pre><code>HTTP Long Polling:
+
+Client                           Server
+  |                                |
+  |──── HTTP GET (wait) ──────────&gt;|
+  |                                | [server holds request]
+  |                                | [data arrives]
+  |&lt;─── HTTP Response (data!) ─────|
+  |                                |
+  |──── HTTP GET (wait) ──────────&gt;|
+  |                                |
+
+Better, but:
+- Still HTTP overhead
+- Reconnect after each message
+- Server must handle many pending connections
+- Not truly bidirectional
+</code></pre>
+<h3 id="server-sent-events-sse"><a class="header" href="#server-sent-events-sse">Server-Sent Events (SSE)</a></h3>
+<pre><code>Server-Sent Events:
+
+Client                           Server
+  |                                |
+  |──── HTTP GET (subscribe) ─────&gt;|
+  |                                |
+  |&lt;═══ Event stream ══════════════| (one-way)
+  |&lt;═══ data: message 1 ═══════════|
+  |&lt;═══ data: message 2 ═══════════|
+  |&lt;═══ data: message 3 ═══════════|
+  |                                |
+
+Good for:
+✓ Server → Client only
+✓ Text-based data
+✓ Auto-reconnect
+✓ Simpler than WebSocket
+
+Limited:
+✗ One-way only (server to client)
+✗ HTTP/1.1 connection limit (6 per domain)
+✗ Text only (no binary)
+</code></pre>
+<h3 id="websocket-1"><a class="header" href="#websocket-1">WebSocket</a></h3>
+<pre><code>WebSocket:
+
+Client                           Server
+  |                                |
+  |──── HTTP Upgrade ─────────────&gt;|
+  |&lt;─── 101 Switching Protocols ───|
+  |                                |
+  |&lt;══════ WebSocket Open ═════════&gt;|
+  |                                |
+  |──── Message 1 ────────────────&gt;|
+  |&lt;─── Message 2 ─────────────────|
+  |──── Message 3 ────────────────&gt;|
+  |──── Message 4 ────────────────&gt;|
+  |&lt;─── Message 5 ─────────────────|
+  |                                |
+
+Best for:
+✓ Bidirectional communication
+✓ Real-time updates
+✓ Low latency required
+✓ High message frequency
+✓ Binary data support
+</code></pre>
+<h2 id="websocket-protocol"><a class="header" href="#websocket-protocol">WebSocket Protocol</a></h2>
+<h3 id="connection-handshake"><a class="header" href="#connection-handshake">Connection Handshake</a></h3>
+<p>WebSocket starts with an HTTP upgrade request:</p>
+<pre><code class="language-http">Client Request:
+GET /chat HTTP/1.1
+Host: example.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Sec-WebSocket-Version: 13
+Origin: https://example.com
+
+Server Response:
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+
+Key Fields:
+
+Upgrade: websocket
+- Request protocol upgrade from HTTP to WebSocket
+
+Connection: Upgrade
+- Indicates connection upgrade needed
+
+Sec-WebSocket-Key: &lt;base64-encoded-random&gt;
+- 16-byte random value, base64 encoded
+- Prevents caching proxies from confusing requests
+
+Sec-WebSocket-Version: 13
+- WebSocket protocol version (13 is current)
+
+Sec-WebSocket-Accept: &lt;computed-hash&gt;
+- Server proves it understands WebSocket
+- Computed as: base64(SHA-1(Key + magic-string))
+- Magic string: 258EAFA5-E914-47DA-95CA-C5AB0DC85B11
+
+Origin: https://example.com
+- Browser sends origin for CORS check
+- Server can validate allowed origins
+
+After handshake:
+- HTTP connection becomes WebSocket connection
+- Both sides can send messages anytime
+- Connection stays open until explicitly closed
+</code></pre>
+<h3 id="handshake-validation"><a class="header" href="#handshake-validation">Handshake Validation</a></h3>
+<pre><code class="language-javascript">// Server-side validation (conceptual)
+const crypto = require('crypto');
+
+function computeAcceptKey(clientKey) {
+  const MAGIC = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
+  const hash = crypto
+    .createHash('sha1')
+    .update(clientKey + MAGIC)
+    .digest('base64');
+  return hash;
+}
+
+// Example:
+const clientKey = 'dGhlIHNhbXBsZSBub25jZQ==';
+const acceptKey = computeAcceptKey(clientKey);
+console.log(acceptKey);
+// Output: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+</code></pre>
+<h3 id="frame-format"><a class="header" href="#frame-format">Frame Format</a></h3>
+<p>After handshake, data is sent in frames:</p>
+<pre><code>WebSocket Frame Structure:
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-------+-+-------------+-------------------------------+
+|F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+|I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+|N|V|V|V|       |S|             |   (if payload len==126/127)   |
+| |1|2|3|       |K|             |                               |
++-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+|     Extended payload length continued, if payload len == 127  |
++ - - - - - - - - - - - - - - - +-------------------------------+
+|                               | Masking-key, if MASK set to 1 |
++-------------------------------+-------------------------------+
+| Masking-key (continued)       |          Payload Data         |
++-------------------------------- - - - - - - - - - - - - - - - +
+:                     Payload Data continued ...                :
++ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+|                     Payload Data continued ...                |
++---------------------------------------------------------------+
+
+Fields:
+
+FIN (1 bit):
+- 1 = final fragment
+- 0 = more fragments coming
+
+RSV1, RSV2, RSV3 (3 bits):
+- Reserved for extensions
+- Must be 0 unless extension negotiated
+
+Opcode (4 bits):
+- 0x0 = Continuation frame
+- 0x1 = Text frame (UTF-8)
+- 0x2 = Binary frame
+- 0x8 = Connection close
+- 0x9 = Ping
+- 0xA = Pong
+
+MASK (1 bit):
+- 1 = payload is masked (required for client → server)
+- 0 = payload not masked (server → client)
+
+Payload Length (7 bits, or 7+16, or 7+64):
+- 0-125: actual length
+- 126: next 16 bits contain length
+- 127: next 64 bits contain length
+
+Masking Key (32 bits):
+- Present if MASK = 1
+- Random 4-byte key
+- Client must mask all frames to server
+
+Payload Data:
+- Actual message data
+- If masked, XOR with masking key
+
+Minimum Frame Size:
+- 2 bytes (no masking, payload ≤ 125 bytes)
+- 6 bytes (with masking, payload ≤ 125 bytes)
+</code></pre>
+<h3 id="message-types"><a class="header" href="#message-types">Message Types</a></h3>
+<pre><code>Text Frame (Opcode 0x1):
+- UTF-8 encoded text
+- Most common for JSON, strings
+
+Binary Frame (Opcode 0x2):
+- Raw binary data
+- Images, files, protocol buffers
+
+Ping Frame (Opcode 0x9):
+- Sent by either side
+- Keep connection alive
+- Check if peer responsive
+
+Pong Frame (Opcode 0xA):
+- Response to ping
+- Sent automatically
+- Contains same data as ping
+
+Close Frame (Opcode 0x8):
+- Initiates connection close
+- Contains optional close code and reason
+- Peer responds with close frame
+</code></pre>
+<h2 id="client-side-implementation"><a class="header" href="#client-side-implementation">Client-Side Implementation</a></h2>
+<h3 id="javascript-browser"><a class="header" href="#javascript-browser">JavaScript (Browser)</a></h3>
+<pre><code class="language-javascript">// Create WebSocket connection
+const socket = new WebSocket('ws://localhost:8080');
+
+// Alternative: secure WebSocket
+// const socket = new WebSocket('wss://example.com/socket');
+
+// Connection opened
+socket.addEventListener('open', (event) =&gt; {
+  console.log('Connected to server');
+
+  // Send message
+  socket.send('Hello Server!');
+
+  // Send JSON
+  socket.send(JSON.stringify({
+    type: 'chat',
+    message: 'Hello!',
+    timestamp: Date.now()
+  }));
+
+  // Send binary data
+  const buffer = new Uint8Array([1, 2, 3, 4]);
+  socket.send(buffer);
+});
+
+// Receive message
+socket.addEventListener('message', (event) =&gt; {
+  console.log('Message from server:', event.data);
+
+  // Handle text data
+  if (typeof event.data === 'string') {
+    try {
+      const data = JSON.parse(event.data);
+      handleMessage(data);
+    } catch (e) {
+      console.log('Text:', event.data);
+    }
+  }
+
+  // Handle binary data
+  if (event.data instanceof Blob) {
+    event.data.arrayBuffer().then(buffer =&gt; {
+      const view = new Uint8Array(buffer);
+      console.log('Binary data:', view);
+    });
+  }
+
+  // Or receive as ArrayBuffer
+  // socket.binaryType = 'arraybuffer';
+});
+
+// Connection closed
+socket.addEventListener('close', (event) =&gt; {
+  console.log('Disconnected from server');
+  console.log('Code:', event.code);
+  console.log('Reason:', event.reason);
+  console.log('Clean:', event.wasClean);
+});
+
+// Connection error
+socket.addEventListener('error', (error) =&gt; {
+  console.error('WebSocket error:', error);
+});
+
+// Send messages
+function sendMessage(text) {
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(text);
+  } else {
+    console.error('WebSocket not connected');
+  }
+}
+
+// Close connection
+function closeConnection() {
+  socket.close(1000, 'User closed connection');
+}
+
+// WebSocket states
+console.log('CONNECTING:', WebSocket.CONNECTING); // 0
+console.log('OPEN:', WebSocket.OPEN);             // 1
+console.log('CLOSING:', WebSocket.CLOSING);       // 2
+console.log('CLOSED:', WebSocket.CLOSED);         // 3
+
+// Check current state
+console.log('Current state:', socket.readyState);
+</code></pre>
+<h3 id="advanced-client-features"><a class="header" href="#advanced-client-features">Advanced Client Features</a></h3>
+<pre><code class="language-javascript">class WebSocketClient {
+  constructor(url, options = {}) {
+    this.url = url;
+    this.options = {
+      reconnect: true,
+      reconnectInterval: 1000,
+      reconnectDecay: 1.5,
+      maxReconnectInterval: 30000,
+      maxReconnectAttempts: 10,
+      ...options
+    };
+
+    this.ws = null;
+    this.reconnectAttempts = 0;
+    this.messageQueue = [];
+    this.handlers = new Map();
+
+    this.connect();
+  }
+
+  connect() {
+    this.ws = new WebSocket(this.url);
+
+    this.ws.onopen = () =&gt; {
+      console.log('Connected');
+      this.reconnectAttempts = 0;
+
+      // Send queued messages
+      while (this.messageQueue.length &gt; 0) {
+        this.send(this.messageQueue.shift());
+      }
+
+      this.emit('connect');
+    };
+
+    this.ws.onmessage = (event) =&gt; {
+      try {
+        const data = JSON.parse(event.data);
+        this.emit(data.type || 'message', data);
+      } catch (e) {
+        this.emit('message', event.data);
+      }
+    };
+
+    this.ws.onclose = (event) =&gt; {
+      console.log('Disconnected:', event.code, event.reason);
+      this.emit('disconnect', event);
+
+      if (this.options.reconnect) {
+        this.reconnect();
+      }
+    };
+
+    this.ws.onerror = (error) =&gt; {
+      console.error('WebSocket error:', error);
+      this.emit('error', error);
+    };
+  }
+
+  reconnect() {
+    if (this.reconnectAttempts &gt;= this.options.maxReconnectAttempts) {
+      console.error('Max reconnect attempts reached');
+      this.emit('reconnect_failed');
+      return;
+    }
+
+    this.reconnectAttempts++;
+    const delay = Math.min(
+      this.options.reconnectInterval *
+        Math.pow(this.options.reconnectDecay, this.reconnectAttempts - 1),
+      this.options.maxReconnectInterval
+    );
+
+    console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+
+    setTimeout(() =&gt; {
+      this.emit('reconnecting', this.reconnectAttempts);
+      this.connect();
+    }, delay);
+  }
+
+  send(data) {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      const message = typeof data === 'string'
+        ? data
+        : JSON.stringify(data);
+      this.ws.send(message);
+    } else {
+      console.log('Queueing message (not connected)');
+      this.messageQueue.push(data);
+    }
+  }
+
+  on(event, handler) {
+    if (!this.handlers.has(event)) {
+      this.handlers.set(event, []);
+    }
+    this.handlers.get(event).push(handler);
+  }
+
+  emit(event, data) {
+    if (this.handlers.has(event)) {
+      this.handlers.get(event).forEach(handler =&gt; handler(data));
+    }
+  }
+
+  close() {
+    this.options.reconnect = false;
+    if (this.ws) {
+      this.ws.close(1000, 'Client closed');
+    }
+  }
+}
+
+// Usage
+const client = new WebSocketClient('ws://localhost:8080', {
+  reconnect: true,
+  maxReconnectAttempts: 5
+});
+
+client.on('connect', () =&gt; {
+  console.log('Connected!');
+  client.send({ type: 'auth', token: 'abc123' });
+});
+
+client.on('message', (data) =&gt; {
+  console.log('Received:', data);
+});
+
+client.on('disconnect', () =&gt; {
+  console.log('Connection lost');
+});
+
+client.send({ type: 'chat', message: 'Hello' });
+</code></pre>
+<h2 id="server-side-implementation"><a class="header" href="#server-side-implementation">Server-Side Implementation</a></h2>
+<h3 id="nodejs-with-ws-library"><a class="header" href="#nodejs-with-ws-library">Node.js with 'ws' Library</a></h3>
+<pre><code class="language-javascript">const WebSocket = require('ws');
+const http = require('http');
+
+// Create HTTP server
+const server = http.createServer((req, res) =&gt; {
+  res.writeHead(200);
+  res.end('WebSocket server running');
+});
+
+// Create WebSocket server
+const wss = new WebSocket.Server({ server });
+
+// Track connected clients
+const clients = new Set();
+
+// Connection handler
+wss.on('connection', (ws, req) =&gt; {
+  console.log('Client connected from', req.socket.remoteAddress);
+
+  // Add to client set
+  clients.add(ws);
+
+  // Send welcome message
+  ws.send(JSON.stringify({
+    type: 'welcome',
+    message: 'Connected to server',
+    clients: clients.size
+  }));
+
+  // Broadcast new connection to all clients
+  broadcast({
+    type: 'user-joined',
+    clients: clients.size
+  }, ws);
+
+  // Message handler
+  ws.on('message', (data) =&gt; {
+    console.log('Received:', data.toString());
+
+    try {
+      const message = JSON.parse(data);
+
+      // Handle different message types
+      switch (message.type) {
+        case 'chat':
+          // Broadcast chat message
+          broadcast({
+            type: 'chat',
+            message: message.message,
+            timestamp: Date.now()
+          });
+          break;
+
+        case 'ping':
+          // Respond to ping
+          ws.send(JSON.stringify({
+            type: 'pong',
+            timestamp: Date.now()
+          }));
+          break;
+
+        default:
+          console.log('Unknown message type:', message.type);
+      }
+    } catch (e) {
+      console.error('Invalid JSON:', e);
+    }
+  });
+
+  // Pong handler (heartbeat)
+  ws.on('pong', () =&gt; {
+    ws.isAlive = true;
+  });
+
+  // Close handler
+  ws.on('close', (code, reason) =&gt; {
+    console.log('Client disconnected:', code, reason.toString());
+    clients.delete(ws);
+
+    // Notify others
+    broadcast({
+      type: 'user-left',
+      clients: clients.size
+    });
+  });
+
+  // Error handler
+  ws.on('error', (error) =&gt; {
+    console.error('WebSocket error:', error);
+  });
+
+  // Mark as alive for heartbeat
+  ws.isAlive = true;
+});
+
+// Broadcast to all clients
+function broadcast(data, exclude = null) {
+  const message = JSON.stringify(data);
+
+  clients.forEach(client =&gt; {
+    if (client !== exclude &amp;&amp; client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
+
+// Heartbeat (detect dead connections)
+const heartbeatInterval = setInterval(() =&gt; {
+  clients.forEach(ws =&gt; {
+    if (!ws.isAlive) {
+      console.log('Terminating dead connection');
+      ws.terminate();
+      clients.delete(ws);
+      return;
+    }
+
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000); // Every 30 seconds
+
+// Cleanup on server close
+wss.on('close', () =&gt; {
+  clearInterval(heartbeatInterval);
+});
+
+// Start server
+const PORT = 8080;
+server.listen(PORT, () =&gt; {
+  console.log(`WebSocket server listening on port ${PORT}`);
+});
+</code></pre>
+<h3 id="advanced-server-features"><a class="header" href="#advanced-server-features">Advanced Server Features</a></h3>
+<pre><code class="language-javascript">const WebSocket = require('ws');
+const http = require('http');
+const url = require('url');
+
+class WebSocketServer {
+  constructor(options = {}) {
+    this.options = {
+      port: 8080,
+      pingInterval: 30000,
+      maxClients: 1000,
+      ...options
+    };
+
+    this.server = http.createServer();
+    this.wss = new WebSocket.Server({ server: this.server });
+
+    this.rooms = new Map(); // roomId -&gt; Set of clients
+    this.clients = new Map(); // ws -&gt; client info
+
+    this.setupHandlers();
+    this.startHeartbeat();
+  }
+
+  setupHandlers() {
+    this.wss.on('connection', (ws, req) =&gt; {
+      // Check max clients
+      if (this.clients.size &gt;= this.options.maxClients) {
+        ws.close(1008, 'Server full');
+        return;
+      }
+
+      // Parse URL parameters
+      const params = url.parse(req.url, true).query;
+
+      // Create client info
+      const clientInfo = {
+        id: this.generateId(),
+        ip: req.socket.remoteAddress,
+        rooms: new Set(),
+        authenticated: false,
+        metadata: {}
+      };
+
+      this.clients.set(ws, clientInfo);
+      ws.isAlive = true;
+
+      console.log(`Client ${clientInfo.id} connected`);
+
+      // Send client ID
+      this.send(ws, {
+        type: 'connected',
+        clientId: clientInfo.id
+      });
+
+      // Message handler
+      ws.on('message', (data) =&gt; {
+        this.handleMessage(ws, data);
+      });
+
+      // Pong handler
+      ws.on('pong', () =&gt; {
+        ws.isAlive = true;
+      });
+
+      // Close handler
+      ws.on('close', () =&gt; {
+        this.handleDisconnect(ws);
+      });
+
+      // Error handler
+      ws.on('error', (error) =&gt; {
+        console.error('Error:', error);
+      });
+    });
+  }
+
+  handleMessage(ws, data) {
+    const client = this.clients.get(ws);
+    if (!client) return;
+
+    try {
+      const message = JSON.parse(data);
+
+      switch (message.type) {
+        case 'auth':
+          this.handleAuth(ws, message);
+          break;
+
+        case 'join-room':
+          this.joinRoom(ws, message.room);
+          break;
+
+        case 'leave-room':
+          this.leaveRoom(ws, message.room);
+          break;
+
+        case 'message':
+          this.handleRoomMessage(ws, message);
+          break;
+
+        default:
+          console.log('Unknown message type:', message.type);
+      }
+    } catch (e) {
+      console.error('Invalid message:', e);
+      this.send(ws, {
+        type: 'error',
+        message: 'Invalid message format'
+      });
+    }
+  }
+
+  handleAuth(ws, message) {
+    const client = this.clients.get(ws);
+
+    // Validate token (simplified)
+    if (message.token === 'valid-token') {
+      client.authenticated = true;
+      client.metadata.username = message.username;
+
+      this.send(ws, {
+        type: 'auth-success',
+        username: message.username
+      });
+    } else {
+      this.send(ws, {
+        type: 'auth-failed',
+        message: 'Invalid token'
+      });
+
+      ws.close(1008, 'Authentication failed');
+    }
+  }
+
+  joinRoom(ws, roomId) {
+    const client = this.clients.get(ws);
+    if (!client?.authenticated) return;
+
+    // Create room if doesn't exist
+    if (!this.rooms.has(roomId)) {
+      this.rooms.set(roomId, new Set());
+    }
+
+    // Add client to room
+    this.rooms.get(roomId).add(ws);
+    client.rooms.add(roomId);
+
+    console.log(`Client ${client.id} joined room ${roomId}`);
+
+    // Notify client
+    this.send(ws, {
+      type: 'joined-room',
+      room: roomId,
+      members: this.rooms.get(roomId).size
+    });
+
+    // Notify room members
+    this.broadcastToRoom(roomId, {
+      type: 'user-joined',
+      userId: client.id,
+      username: client.metadata.username,
+      members: this.rooms.get(roomId).size
+    }, ws);
+  }
+
+  leaveRoom(ws, roomId) {
+    const client = this.clients.get(ws);
+    if (!client) return;
+
+    if (this.rooms.has(roomId)) {
+      this.rooms.get(roomId).delete(ws);
+      client.rooms.delete(roomId);
+
+      // Notify others
+      this.broadcastToRoom(roomId, {
+        type: 'user-left',
+        userId: client.id,
+        members: this.rooms.get(roomId).size
+      });
+
+      // Clean up empty rooms
+      if (this.rooms.get(roomId).size === 0) {
+        this.rooms.delete(roomId);
+      }
+    }
+  }
+
+  handleRoomMessage(ws, message) {
+    const client = this.clients.get(ws);
+    if (!client?.authenticated) return;
+
+    if (message.room &amp;&amp; this.rooms.has(message.room)) {
+      this.broadcastToRoom(message.room, {
+        type: 'message',
+        userId: client.id,
+        username: client.metadata.username,
+        message: message.content,
+        timestamp: Date.now()
+      });
+    }
+  }
+
+  handleDisconnect(ws) {
+    const client = this.clients.get(ws);
+    if (!client) return;
+
+    console.log(`Client ${client.id} disconnected`);
+
+    // Remove from all rooms
+    client.rooms.forEach(roomId =&gt; {
+      this.leaveRoom(ws, roomId);
+    });
+
+    // Remove from clients
+    this.clients.delete(ws);
+  }
+
+  send(ws, data) {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(data));
+    }
+  }
+
+  broadcastToRoom(roomId, data, exclude = null) {
+    if (!this.rooms.has(roomId)) return;
+
+    const message = JSON.stringify(data);
+    this.rooms.get(roomId).forEach(client =&gt; {
+      if (client !== exclude &amp;&amp; client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
+
+  broadcastToAll(data, exclude = null) {
+    const message = JSON.stringify(data);
+    this.clients.forEach((clientInfo, ws) =&gt; {
+      if (ws !== exclude &amp;&amp; ws.readyState === WebSocket.OPEN) {
+        ws.send(message);
+      }
+    });
+  }
+
+  startHeartbeat() {
+    this.heartbeatInterval = setInterval(() =&gt; {
+      this.clients.forEach((clientInfo, ws) =&gt; {
+        if (!ws.isAlive) {
+          console.log(`Terminating dead connection: ${clientInfo.id}`);
+          ws.terminate();
+          return;
+        }
+
+        ws.isAlive = false;
+        ws.ping();
+      });
+    }, this.options.pingInterval);
+  }
+
+  generateId() {
+    return Math.random().toString(36).substring(2, 15);
+  }
+
+  start() {
+    this.server.listen(this.options.port, () =&gt; {
+      console.log(`WebSocket server listening on port ${this.options.port}`);
+    });
+  }
+
+  stop() {
+    clearInterval(this.heartbeatInterval);
+    this.wss.close();
+    this.server.close();
+  }
+}
+
+// Usage
+const server = new WebSocketServer({
+  port: 8080,
+  pingInterval: 30000,
+  maxClients: 1000
+});
+
+server.start();
+</code></pre>
+<h2 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h2>
+<h3 id="1-chat-application"><a class="header" href="#1-chat-application">1. Chat Application</a></h3>
+<pre><code class="language-javascript">// Client
+class ChatClient {
+  constructor(url) {
+    this.socket = new WebSocket(url);
+    this.setupHandlers();
+  }
+
+  setupHandlers() {
+    this.socket.onopen = () =&gt; {
+      console.log('Connected to chat');
+      this.authenticate();
+    };
+
+    this.socket.onmessage = (event) =&gt; {
+      const data = JSON.parse(event.data);
+
+      switch (data.type) {
+        case 'message':
+          this.displayMessage(data);
+          break;
+        case 'user-joined':
+          this.showNotification(`${data.username} joined`);
+          break;
+        case 'user-left':
+          this.showNotification(`${data.username} left`);
+          break;
+      }
+    };
+  }
+
+  authenticate() {
+    this.socket.send(JSON.stringify({
+      type: 'auth',
+      token: localStorage.getItem('token'),
+      username: localStorage.getItem('username')
+    }));
+  }
+
+  joinRoom(roomId) {
+    this.socket.send(JSON.stringify({
+      type: 'join-room',
+      room: roomId
+    }));
+  }
+
+  sendMessage(roomId, message) {
+    this.socket.send(JSON.stringify({
+      type: 'message',
+      room: roomId,
+      content: message
+    }));
+  }
+
+  displayMessage(data) {
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message';
+    messageElement.innerHTML = `
+      &lt;span class="username"&gt;${data.username}:&lt;/span&gt;
+      &lt;span class="content"&gt;${data.message}&lt;/span&gt;
+      &lt;span class="timestamp"&gt;${new Date(data.timestamp).toLocaleTimeString()}&lt;/span&gt;
+    `;
+    document.getElementById('messages').appendChild(messageElement);
+  }
+
+  showNotification(text) {
+    console.log(text);
+  }
+}
+
+const chat = new ChatClient('ws://localhost:8080');
+chat.joinRoom('general');
+</code></pre>
+<h3 id="2-real-time-dashboard"><a class="header" href="#2-real-time-dashboard">2. Real-Time Dashboard</a></h3>
+<pre><code class="language-javascript">// Server: Push updates to dashboard
+function broadcastMetrics() {
+  const metrics = {
+    type: 'metrics',
+    cpu: getCpuUsage(),
+    memory: getMemoryUsage(),
+    activeUsers: clients.size,
+    requestsPerSecond: getRequestRate(),
+    timestamp: Date.now()
+  };
+
+  broadcastToAll(metrics);
+}
+
+setInterval(broadcastMetrics, 1000);
+
+// Client: Display real-time metrics
+socket.onmessage = (event) =&gt; {
+  const data = JSON.parse(event.data);
+
+  if (data.type === 'metrics') {
+    updateChart('cpu', data.cpu);
+    updateChart('memory', data.memory);
+    updateCounter('users', data.activeUsers);
+    updateCounter('rps', data.requestsPerSecond);
+  }
+};
+</code></pre>
+<h3 id="3-live-notifications"><a class="header" href="#3-live-notifications">3. Live Notifications</a></h3>
+<pre><code class="language-javascript">// Server: Send notifications
+function notifyUser(userId, notification) {
+  const client = getUserWebSocket(userId);
+
+  if (client &amp;&amp; client.readyState === WebSocket.OPEN) {
+    client.send(JSON.stringify({
+      type: 'notification',
+      title: notification.title,
+      message: notification.message,
+      priority: notification.priority,
+      timestamp: Date.now()
+    }));
+  }
+}
+
+// Client: Display notifications
+socket.onmessage = (event) =&gt; {
+  const data = JSON.parse(event.data);
+
+  if (data.type === 'notification') {
+    showNotification(data.title, data.message);
+
+    // Play sound for high priority
+    if (data.priority === 'high') {
+      playNotificationSound();
+    }
+
+    // Desktop notification
+    if (Notification.permission === 'granted') {
+      new Notification(data.title, {
+        body: data.message,
+        icon: '/icon.png'
+      });
+    }
+  }
+};
+</code></pre>
+<h3 id="4-collaborative-editing"><a class="header" href="#4-collaborative-editing">4. Collaborative Editing</a></h3>
+<pre><code class="language-javascript">// Server: Broadcast document changes
+wss.on('connection', (ws) =&gt; {
+  ws.on('message', (data) =&gt; {
+    const change = JSON.parse(data);
+
+    if (change.type === 'edit') {
+      // Apply change to document
+      applyChange(change.documentId, change.operation);
+
+      // Broadcast to others in same document
+      broadcastToDocument(change.documentId, {
+        type: 'edit',
+        operation: change.operation,
+        userId: ws.userId
+      }, ws);
+    }
+  });
+});
+
+// Client: Send and receive edits
+let editor = document.getElementById('editor');
+
+editor.addEventListener('input', debounce((e) =&gt; {
+  socket.send(JSON.stringify({
+    type: 'edit',
+    documentId: currentDocId,
+    operation: {
+      type: 'insert',
+      position: e.target.selectionStart,
+      text: e.data
+    }
+  }));
+}, 100));
+
+socket.onmessage = (event) =&gt; {
+  const data = JSON.parse(event.data);
+
+  if (data.type === 'edit' &amp;&amp; data.userId !== myUserId) {
+    applyRemoteEdit(data.operation);
+  }
+};
+</code></pre>
+<h3 id="5-gamingmultiplayer"><a class="header" href="#5-gamingmultiplayer">5. Gaming/Multiplayer</a></h3>
+<pre><code class="language-javascript">// Server: Game state synchronization
+const gameState = {
+  players: new Map(),
+  entities: []
+};
+
+function updateGameState() {
+  broadcastToAll({
+    type: 'state',
+    players: Array.from(gameState.players.values()),
+    entities: gameState.entities,
+    timestamp: Date.now()
+  });
+}
+
+// 60 updates per second
+setInterval(updateGameState, 1000 / 60);
+
+// Client: Send player input
+const input = {
+  keys: {},
+  mouse: { x: 0, y: 0 }
+};
+
+document.addEventListener('keydown', (e) =&gt; {
+  input.keys[e.key] = true;
+
+  socket.send(JSON.stringify({
+    type: 'input',
+    keys: input.keys,
+    timestamp: Date.now()
+  }));
+});
+
+// Receive game state
+socket.onmessage = (event) =&gt; {
+  const data = JSON.parse(event.data);
+
+  if (data.type === 'state') {
+    renderGameState(data.players, data.entities);
+  }
+};
+</code></pre>
+<h2 id="security"><a class="header" href="#security">Security</a></h2>
+<h3 id="authentication"><a class="header" href="#authentication">Authentication</a></h3>
+<pre><code class="language-javascript">// Server: Verify token on connection
+wss.on('connection', (ws, req) =&gt; {
+  // Extract token from query string
+  const params = new URLSearchParams(req.url.split('?')[1]);
+  const token = params.get('token');
+
+  // Verify token
+  if (!verifyToken(token)) {
+    ws.close(1008, 'Invalid authentication');
+    return;
+  }
+
+  ws.userId = decodeToken(token).userId;
+});
+
+// Or: Authenticate after connection
+ws.on('message', (data) =&gt; {
+  const message = JSON.parse(data);
+
+  if (message.type === 'auth') {
+    if (verifyToken(message.token)) {
+      ws.authenticated = true;
+      ws.userId = decodeToken(message.token).userId;
+      ws.send(JSON.stringify({ type: 'auth-success' }));
+    } else {
+      ws.close(1008, 'Authentication failed');
+    }
+  } else if (!ws.authenticated) {
+    ws.send(JSON.stringify({
+      type: 'error',
+      message: 'Not authenticated'
+    }));
+  }
+});
+</code></pre>
+<h3 id="origin-validation"><a class="header" href="#origin-validation">Origin Validation</a></h3>
+<pre><code class="language-javascript">// Server: Validate origin
+wss.on('connection', (ws, req) =&gt; {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'https://example.com',
+    'https://app.example.com'
+  ];
+
+  if (!allowedOrigins.includes(origin)) {
+    console.log('Rejected connection from:', origin);
+    ws.close(1008, 'Origin not allowed');
+    return;
+  }
+
+  // Accept connection
+});
+</code></pre>
+<h3 id="rate-limiting"><a class="header" href="#rate-limiting">Rate Limiting</a></h3>
+<pre><code class="language-javascript">// Server: Rate limit messages
+const rateLimits = new Map(); // clientId -&gt; message count
+
+ws.on('message', (data) =&gt; {
+  const clientId = ws.userId || ws.ip;
+
+  if (!rateLimits.has(clientId)) {
+    rateLimits.set(clientId, { count: 0, resetAt: Date.now() + 60000 });
+  }
+
+  const limit = rateLimits.get(clientId);
+
+  // Reset if window expired
+  if (Date.now() &gt; limit.resetAt) {
+    limit.count = 0;
+    limit.resetAt = Date.now() + 60000;
+  }
+
+  // Check limit (100 messages per minute)
+  if (limit.count &gt;= 100) {
+    ws.send(JSON.stringify({
+      type: 'error',
+      message: 'Rate limit exceeded'
+    }));
+    return;
+  }
+
+  limit.count++;
+
+  // Process message
+  handleMessage(ws, data);
+});
+</code></pre>
+<h3 id="input-validation"><a class="header" href="#input-validation">Input Validation</a></h3>
+<pre><code class="language-javascript">// Server: Validate and sanitize input
+function handleMessage(ws, data) {
+  let message;
+
+  try {
+    message = JSON.parse(data);
+  } catch (e) {
+    ws.send(JSON.stringify({
+      type: 'error',
+      message: 'Invalid JSON'
+    }));
+    return;
+  }
+
+  // Validate message structure
+  if (!message.type || typeof message.type !== 'string') {
+    ws.send(JSON.stringify({
+      type: 'error',
+      message: 'Invalid message format'
+    }));
+    return;
+  }
+
+  // Validate message size
+  if (data.length &gt; 10000) {
+    ws.send(JSON.stringify({
+      type: 'error',
+      message: 'Message too large'
+    }));
+    return;
+  }
+
+  // Sanitize text content
+  if (message.content) {
+    message.content = sanitizeHtml(message.content);
+  }
+
+  // Process validated message
+  processMessage(ws, message);
+}
+</code></pre>
+<h3 id="secure-websocket-wss"><a class="header" href="#secure-websocket-wss">Secure WebSocket (wss://)</a></h3>
+<pre><code class="language-javascript">// Server: Use HTTPS/WSS
+const https = require('https');
+const fs = require('fs');
+
+const server = https.createServer({
+  cert: fs.readFileSync('cert.pem'),
+  key: fs.readFileSync('key.pem')
+});
+
+const wss = new WebSocket.Server({ server });
+
+server.listen(443);
+
+// Client: Connect with wss://
+const socket = new WebSocket('wss://example.com/socket');
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-heartbeatping-pong"><a class="header" href="#1-heartbeatping-pong">1. Heartbeat/Ping-Pong</a></h3>
+<pre><code class="language-javascript">// Server: Detect dead connections
+const heartbeatInterval = setInterval(() =&gt; {
+  wss.clients.forEach((ws) =&gt; {
+    if (ws.isAlive === false) {
+      return ws.terminate();
+    }
+
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000);
+
+wss.on('connection', (ws) =&gt; {
+  ws.isAlive = true;
+
+  ws.on('pong', () =&gt; {
+    ws.isAlive = true;
+  });
+});
+
+// Client: Respond to pings (automatic in browsers)
+// Or implement custom heartbeat:
+setInterval(() =&gt; {
+  socket.send(JSON.stringify({ type: 'ping' }));
+}, 30000);
+</code></pre>
+<h3 id="2-reconnection-strategy"><a class="header" href="#2-reconnection-strategy">2. Reconnection Strategy</a></h3>
+<pre><code class="language-javascript">// Client: Exponential backoff
+class ReconnectingWebSocket {
+  constructor(url) {
+    this.url = url;
+    this.reconnectDelay = 1000;
+    this.maxReconnectDelay = 30000;
+    this.reconnectAttempts = 0;
+    this.connect();
+  }
+
+  connect() {
+    this.ws = new WebSocket(this.url);
+
+    this.ws.onopen = () =&gt; {
+      console.log('Connected');
+      this.reconnectDelay = 1000;
+      this.reconnectAttempts = 0;
+    };
+
+    this.ws.onclose = () =&gt; {
+      console.log('Disconnected');
+      this.scheduleReconnect();
+    };
+  }
+
+  scheduleReconnect() {
+    const delay = Math.min(
+      this.reconnectDelay * Math.pow(2, this.reconnectAttempts),
+      this.maxReconnectDelay
+    );
+
+    console.log(`Reconnecting in ${delay}ms`);
+
+    setTimeout(() =&gt; {
+      this.reconnectAttempts++;
+      this.connect();
+    }, delay);
+  }
+}
+</code></pre>
+<h3 id="3-message-queuing"><a class="header" href="#3-message-queuing">3. Message Queuing</a></h3>
+<pre><code class="language-javascript">// Client: Queue messages when disconnected
+class QueuedWebSocket {
+  constructor(url) {
+    this.url = url;
+    this.queue = [];
+    this.connect();
+  }
+
+  connect() {
+    this.ws = new WebSocket(this.url);
+
+    this.ws.onopen = () =&gt; {
+      // Send queued messages
+      while (this.queue.length &gt; 0) {
+        this.ws.send(this.queue.shift());
+      }
+    };
+  }
+
+  send(data) {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(data);
+    } else {
+      this.queue.push(data);
+    }
+  }
+}
+</code></pre>
+<h3 id="4-binary-data"><a class="header" href="#4-binary-data">4. Binary Data</a></h3>
+<pre><code class="language-javascript">// Send binary efficiently
+const buffer = new ArrayBuffer(8);
+const view = new DataView(buffer);
+
+view.setUint32(0, 12345);
+view.setFloat32(4, 3.14);
+
+socket.send(buffer);
+
+// Receive binary
+socket.binaryType = 'arraybuffer';
+
+socket.onmessage = (event) =&gt; {
+  if (event.data instanceof ArrayBuffer) {
+    const view = new DataView(event.data);
+    const num = view.getUint32(0);
+    const float = view.getFloat32(4);
+  }
+};
+</code></pre>
+<h3 id="5-compression"><a class="header" href="#5-compression">5. Compression</a></h3>
+<pre><code class="language-javascript">// Server: Enable per-message deflate
+const wss = new WebSocket.Server({
+  server,
+  perMessageDeflate: {
+    zlibDeflateOptions: {
+      chunkSize: 1024,
+      memLevel: 7,
+      level: 3
+    },
+    zlibInflateOptions: {
+      chunkSize: 10 * 1024
+    },
+    clientNoContextTakeover: true,
+    serverNoContextTakeover: true,
+    serverMaxWindowBits: 10,
+    concurrencyLimit: 10,
+    threshold: 1024 // Compress only messages &gt; 1KB
+  }
+});
+</code></pre>
+<h2 id="debugging"><a class="header" href="#debugging">Debugging</a></h2>
+<h3 id="browser-devtools"><a class="header" href="#browser-devtools">Browser DevTools</a></h3>
+<pre><code class="language-javascript">// Chrome/Firefox DevTools
+// Network tab → WS/Messages
+
+// View frames
+// - Sent (green arrow)
+// - Received (red arrow)
+// - Click to view content
+
+// Console logging
+const socket = new WebSocket('ws://localhost:8080');
+
+socket.addEventListener('message', (event) =&gt; {
+  console.log('%c⬇ Received', 'color: blue', event.data);
+});
+
+socket.send = new Proxy(socket.send, {
+  apply(target, thisArg, args) {
+    console.log('%c⬆ Sent', 'color: green', args[0]);
+    return target.apply(thisArg, args);
+  }
+});
+</code></pre>
+<h3 id="command-line-tools"><a class="header" href="#command-line-tools">Command-Line Tools</a></h3>
+<pre><code class="language-bash"># wscat - WebSocket client
+npm install -g wscat
+
+# Connect to server
+wscat -c ws://localhost:8080
+
+# Send message
+&gt; {"type": "chat", "message": "Hello"}
+
+# Listen for messages
+&lt; {"type": "message", "content": "Hi there"}
+
+# WebSocket with headers
+wscat -c ws://localhost:8080 -H "Authorization: Bearer token"
+
+# Test wss:// with self-signed cert
+wscat -c wss://localhost:443 -n
+
+# websocat - More features
+cargo install websocat
+
+# Connect
+websocat ws://localhost:8080
+
+# Binary mode
+websocat --binary ws://localhost:8080
+
+# tcpdump - Capture WebSocket traffic
+sudo tcpdump -i any -A 'tcp port 8080'
+
+# Wireshark
+# Filter: websocket
+# Analyze → Decode As → WebSocket
+</code></pre>
+<h2 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h2>
+<pre><code>Issue: Connection fails immediately
+Causes:
+- Wrong URL (ws:// vs wss://)
+- Server not running
+- Firewall blocking port
+- CORS/Origin mismatch
+
+Solution:
+- Check server logs
+- Verify URL and port
+- Check browser console for errors
+- Validate origin on server
+
+Issue: Connection drops frequently
+Causes:
+- No heartbeat/ping
+- Idle timeout
+- Network issues
+- Proxy timeout
+
+Solution:
+- Implement ping/pong
+- Send periodic messages
+- Reduce ping interval
+- Use wss:// for better stability
+
+Issue: Messages not received
+Causes:
+- Wrong readyState
+- Connection closed
+- Message too large
+- Server not broadcasting
+
+Solution:
+- Check socket.readyState === OPEN
+- Add message queuing
+- Split large messages
+- Verify server broadcast logic
+
+Issue: High memory usage
+Causes:
+- Not closing connections
+- Large message buffers
+- Too many connections
+- Memory leaks
+
+Solution:
+- Close unused connections
+- Limit message size
+- Set max connections
+- Use heartbeat to detect dead connections
+</code></pre>
+<h2 id="eli10-websocket-explained-simply"><a class="header" href="#eli10-websocket-explained-simply">ELI10: WebSocket Explained Simply</a></h2>
+<p>WebSocket is like having a phone call instead of sending letters:</p>
+<h3 id="traditional-http-letters"><a class="header" href="#traditional-http-letters">Traditional HTTP (Letters)</a></h3>
+<pre><code>You: "Any new messages?" [wait for response]
+Server: "No"
+
+[1 second later]
+You: "Any new messages?" [wait for response]
+Server: "No"
+
+[1 second later]
+You: "Any new messages?" [wait for response]
+Server: "Yes! Here's one"
+
+Problem: Lots of wasted "letters" (requests)
+</code></pre>
+<h3 id="websocket-phone-call"><a class="header" href="#websocket-phone-call">WebSocket (Phone Call)</a></h3>
+<pre><code>You: "Hello!" [open connection]
+Server: "Hi!" [connection open]
+
+[Connection stays open]
+
+Server: "New message for you!"
+You: "Thanks! Here's my reply"
+Server: "Got it!"
+You: "Question?"
+Server: "Answer!"
+
+Connection stays open until you hang up
+</code></pre>
+<h3 id="key-differences"><a class="header" href="#key-differences">Key Differences</a></h3>
+<pre><code>HTTP:
+- Ask → Wait → Answer → Close
+- Repeat every time
+- Like knocking on door for each question
+
+WebSocket:
+- Open door once
+- Walk in and stay
+- Talk back and forth
+- Like having a conversation
+</code></pre>
+<h3 id="real-examples"><a class="header" href="#real-examples">Real Examples</a></h3>
+<pre><code>HTTP: Checking email every minute
+WebSocket: Email app shows new mail instantly
+
+HTTP: Refreshing page to see chat messages
+WebSocket: Messages appear as sent
+
+HTTP: Reloading dashboard for new data
+WebSocket: Dashboard updates in real-time
+</code></pre>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<h3 id="specifications"><a class="header" href="#specifications">Specifications</a></h3>
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc6455">RFC 6455 - WebSocket Protocol</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSocket">WebSocket API - MDN</a></li>
+<li><a href="https://www.iana.org/assignments/websocket/websocket.xml">WebSocket Extensions</a></li>
+</ul>
+<h3 id="libraries"><a class="header" href="#libraries">Libraries</a></h3>
+<p><strong>JavaScript (Client)</strong></p>
+<ul>
+<li>Native WebSocket API (built-in)</li>
+<li><a href="https://socket.io/">Socket.IO</a> - High-level library with fallbacks</li>
+<li><a href="https://github.com/sockjs/sockjs-client">SockJS</a> - WebSocket emulation</li>
+</ul>
+<p><strong>Node.js (Server)</strong></p>
+<ul>
+<li><a href="https://github.com/websockets/ws">ws</a> - Fast, standards-compliant</li>
+<li><a href="https://socket.io/">Socket.IO</a> - Client + server library</li>
+<li><a href="https://github.com/uNetworking/uWebSockets.js">uWebSockets.js</a> - Ultra fast</li>
+</ul>
+<p><strong>Python</strong></p>
+<ul>
+<li><a href="https://websockets.readthedocs.io/">websockets</a> - asyncio library</li>
+<li><a href="https://docs.aiohttp.org/">aiohttp</a> - WebSocket support</li>
+<li><a href="https://flask-socketio.readthedocs.io/">Flask-SocketIO</a> - Flask integration</li>
+</ul>
+<p><strong>Go</strong></p>
+<ul>
+<li><a href="https://github.com/gorilla/websocket">gorilla/websocket</a></li>
+<li><a href="https://github.com/nhooyr/websocket">nhooyr/websocket</a></li>
+</ul>
+<p><strong>Rust</strong></p>
+<ul>
+<li><a href="https://github.com/snapview/tokio-tungstenite">tokio-tungstenite</a></li>
+<li><a href="https://actix.rs/">actix-web</a> - WebSocket support</li>
+</ul>
+<h3 id="tools"><a class="header" href="#tools">Tools</a></h3>
+<ul>
+<li><a href="https://github.com/websockets/wscat">wscat</a> - WebSocket CLI</li>
+<li><a href="https://github.com/vi/websocat">websocat</a> - netcat for WebSockets</li>
+<li><a href="https://www.postman.com/">Postman</a> - WebSocket testing</li>
+</ul>
+<h3 id="testing"><a class="header" href="#testing">Testing</a></h3>
+<ul>
+<li><a href="https://websocketking.com/">WebSocket King</a> - Online tester</li>
+<li><a href="https://www.piesocket.com/websocket-tester">PieSocket</a> - Testing tool</li>
+</ul>
+<h3 id="books--tutorials"><a class="header" href="#books--tutorials">Books &amp; Tutorials</a></h3>
+<ul>
+<li><a href="https://www.apress.com/gp/book/9781430247401">The Definitive Guide to HTML5 WebSocket</a></li>
+<li><a href="https://www.oreilly.com/library/view/real-time-web-application/9781484232705/">Real-Time Web Application Development</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../networking/upnp.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../networking/webrtc.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../networking/upnp.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../networking/webrtc.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

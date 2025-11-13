@@ -177,8 +177,97 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="fine-tuning"><a class="header" href="#fine-tuning">Fine Tuning</a></h1>
-<p>https://github.com/ostris/ai-toolkit</p>
+                        <h1 id="fine-tuning"><a class="header" href="#fine-tuning">Fine-Tuning</a></h1>
+<p>Fine-tuning is the process of taking a pre-trained model and further training it on a specific task or dataset.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Fine-tuning adapts a general-purpose model to a specific domain or task with much less data and compute than training from scratch.</p>
+<p><strong>Approaches:</strong></p>
+<ul>
+<li>Full fine-tuning: Update all parameters</li>
+<li>Parameter-efficient: Update subset (LoRA, adapters)</li>
+<li>Few-shot prompting: No parameter updates</li>
+</ul>
+<h2 id="when-to-fine-tune"><a class="header" href="#when-to-fine-tune">When to Fine-Tune</a></h2>
+<p>✅ <strong>Good use cases:</strong></p>
+<ul>
+<li>Domain-specific language (medical, legal)</li>
+<li>Specific output format requirements</li>
+<li>Improved performance on narrow tasks</li>
+<li>Style adaptation</li>
+</ul>
+<p>❌ <strong>Bad use cases:</strong></p>
+<ul>
+<li>General knowledge (use prompting)</li>
+<li>Limited data (&lt; 100 examples)</li>
+<li>When prompting works well enough</li>
+</ul>
+<h2 id="fine-tuning-process"><a class="header" href="#fine-tuning-process">Fine-Tuning Process</a></h2>
+<pre><code class="language-python"># Example with Hugging Face
+from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer
+
+# 1. Load pre-trained model
+model = AutoModelForCausalLM.from_pretrained("gpt2")
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
+# 2. Prepare dataset
+train_dataset = load_dataset("your_dataset")
+
+# 3. Configure training
+training_args = TrainingArguments(
+    output_dir="./results",
+    num_train_epochs=3,
+    per_device_train_batch_size=4,
+    learning_rate=2e-5,
+)
+
+# 4. Train
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+)
+
+trainer.train()
+</code></pre>
+<h2 id="lora-low-rank-adaptation"><a class="header" href="#lora-low-rank-adaptation">LoRA (Low-Rank Adaptation)</a></h2>
+<pre><code class="language-python">from peft import LoraConfig, get_peft_model
+
+# Configure LoRA
+config = LoraConfig(
+    r=8,                    # Rank
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.1,
+)
+
+# Apply LoRA to model
+model = get_peft_model(model, config)
+model.print_trainable_parameters()
+# trainable params: 0.1% (vs 100% for full fine-tuning)
+</code></pre>
+<h2 id="data-preparation"><a class="header" href="#data-preparation">Data Preparation</a></h2>
+<pre><code class="language-jsonl">{"prompt": "Translate to French: Hello", "completion": "Bonjour"}
+{"prompt": "Translate to French: Goodbye", "completion": "Au revoir"}
+{"prompt": "Translate to French: Thank you", "completion": "Merci"}
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Start with quality data</strong>: 100-1000 high-quality examples</li>
+<li><strong>Use parameter-efficient methods</strong>: LoRA for large models</li>
+<li><strong>Monitor overfitting</strong>: Validate on held-out data</li>
+<li><strong>Experiment with hyperparameters</strong>: Learning rate, batch size</li>
+<li><strong>Evaluate systematically</strong>: Don't just rely on loss</li>
+<li><strong>Consider data augmentation</strong>: Increase training data</li>
+<li><strong>Version control</strong>: Track model versions and data</li>
+</ol>
+<h2 id="evaluation"><a class="header" href="#evaluation">Evaluation</a></h2>
+<pre><code class="language-python">from sklearn.metrics import accuracy_score
+
+predictions = model.generate(test_inputs)
+accuracy = accuracy_score(test_labels, predictions)
+print(f"Accuracy: {accuracy}")
+</code></pre>
+<p>Fine-tuning enables customization of powerful pre-trained models for specific applications with minimal resources.</p>
 
                     </main>
 

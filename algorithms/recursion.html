@@ -188,33 +188,307 @@
 <p><strong>Recursive Case</strong>: The part of the function where the recursion occurs, typically involving a call to the same function with modified arguments.</p>
 </li>
 </ul>
-<h2 id="common-recursive-algorithms"><a class="header" href="#common-recursive-algorithms">Common Recursive Algorithms</a></h2>
+<h2 id="factorial"><a class="header" href="#factorial">Factorial</a></h2>
+<p>The factorial of a non-negative integer n is the product of all positive integers less than or equal to n.</p>
+<pre><code class="language-python">def factorial(n):
+    # Base case
+    if n == 0 or n == 1:
+        return 1
+    # Recursive case
+    return n * factorial(n - 1)
+
+# Example usage
+print(factorial(5))  # Output: 120
+</code></pre>
+<h2 id="fibonacci-sequence"><a class="header" href="#fibonacci-sequence">Fibonacci Sequence</a></h2>
+<p>The Fibonacci sequence where each number is the sum of the two preceding ones.</p>
+<pre><code class="language-python"># Simple recursion (exponential time)
+def fibonacci(n):
+    if n &lt;= 1:
+        return n
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+# With memoization (linear time)
+def fibonacci_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n &lt;= 1:
+        return n
+    memo[n] = fibonacci_memo(n - 1, memo) + fibonacci_memo(n - 2, memo)
+    return memo[n]
+
+# Example usage
+print(fibonacci(10))       # Output: 55
+print(fibonacci_memo(100)) # Much faster for large n
+</code></pre>
+<h2 id="binary-search"><a class="header" href="#binary-search">Binary Search</a></h2>
+<p>Recursive implementation of binary search.</p>
+<pre><code class="language-python">def binary_search(arr, target, left, right):
+    # Base case: element not found
+    if left &gt; right:
+        return -1
+    
+    mid = left + (right - left) // 2
+    
+    # Base case: element found
+    if arr[mid] == target:
+        return mid
+    
+    # Recursive cases
+    if arr[mid] &gt; target:
+        return binary_search(arr, target, left, mid - 1)
+    else:
+        return binary_search(arr, target, mid + 1, right)
+
+# Example usage
+arr = [1, 3, 5, 7, 9, 11, 13]
+result = binary_search(arr, 7, 0, len(arr) - 1)
+print(f"Element found at index: {result}")  # Output: 3
+</code></pre>
+<h2 id="sum-of-array"><a class="header" href="#sum-of-array">Sum of Array</a></h2>
+<p>Calculate the sum of all elements in an array recursively.</p>
+<pre><code class="language-python">def array_sum(arr):
+    # Base case: empty array
+    if not arr:
+        return 0
+    # Recursive case: first element + sum of rest
+    return arr[0] + array_sum(arr[1:])
+
+# Optimized with index
+def array_sum_optimized(arr, index=0):
+    if index == len(arr):
+        return 0
+    return arr[index] + array_sum_optimized(arr, index + 1)
+
+# Example usage
+numbers = [1, 2, 3, 4, 5]
+print(array_sum(numbers))  # Output: 15
+</code></pre>
+<h2 id="power-function"><a class="header" href="#power-function">Power Function</a></h2>
+<p>Calculate x raised to the power n.</p>
+<pre><code class="language-python"># Simple recursion
+def power(x, n):
+    if n == 0:
+        return 1
+    return x * power(x, n - 1)
+
+# Optimized (divide and conquer)
+def power_optimized(x, n):
+    if n == 0:
+        return 1
+    
+    half = power_optimized(x, n // 2)
+    
+    if n % 2 == 0:
+        return half * half
+    else:
+        return x * half * half
+
+# Example usage
+print(power(2, 10))           # Output: 1024
+print(power_optimized(2, 10)) # Faster for large n
+</code></pre>
+<h2 id="string-reversal"><a class="header" href="#string-reversal">String Reversal</a></h2>
+<p>Reverse a string using recursion.</p>
+<pre><code class="language-python">def reverse_string(s):
+    # Base case: empty or single character
+    if len(s) &lt;= 1:
+        return s
+    # Recursive case: last char + reverse of rest
+    return s[-1] + reverse_string(s[:-1])
+
+# Alternative implementation
+def reverse_string_alt(s):
+    if len(s) == 0:
+        return s
+    return reverse_string_alt(s[1:]) + s[0]
+
+# Example usage
+print(reverse_string("hello"))  # Output: "olleh"
+</code></pre>
+<h2 id="palindrome-check"><a class="header" href="#palindrome-check">Palindrome Check</a></h2>
+<p>Check if a string is a palindrome recursively.</p>
+<pre><code class="language-python">def is_palindrome(s, left=0, right=None):
+    if right is None:
+        right = len(s) - 1
+    
+    # Base cases
+    if left &gt;= right:
+        return True
+    
+    if s[left] != s[right]:
+        return False
+    
+    # Recursive case
+    return is_palindrome(s, left + 1, right - 1)
+
+# Example usage
+print(is_palindrome("racecar"))  # Output: True
+print(is_palindrome("hello"))    # Output: False
+</code></pre>
+<h2 id="tree-traversals"><a class="header" href="#tree-traversals">Tree Traversals</a></h2>
+<p>Recursive tree traversal algorithms.</p>
+<pre><code class="language-python">class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+# Inorder traversal (left, root, right)
+def inorder(root):
+    if root is None:
+        return []
+    return inorder(root.left) + [root.val] + inorder(root.right)
+
+# Preorder traversal (root, left, right)
+def preorder(root):
+    if root is None:
+        return []
+    return [root.val] + preorder(root.left) + preorder(root.right)
+
+# Postorder traversal (left, right, root)
+def postorder(root):
+    if root is None:
+        return []
+    return postorder(root.left) + postorder(root.right) + [root.val]
+
+# Tree height
+def tree_height(root):
+    if root is None:
+        return 0
+    return 1 + max(tree_height(root.left), tree_height(root.right))
+
+# Example usage
+#       1
+#      / \
+#     2   3
+#    / \
+#   4   5
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.right = TreeNode(3)
+root.left.left = TreeNode(4)
+root.left.right = TreeNode(5)
+
+print("Inorder:", inorder(root))    # [4, 2, 5, 1, 3]
+print("Preorder:", preorder(root))  # [1, 2, 4, 5, 3]
+print("Postorder:", postorder(root))# [4, 5, 2, 3, 1]
+print("Height:", tree_height(root)) # 3
+</code></pre>
+<h2 id="greatest-common-divisor-gcd"><a class="header" href="#greatest-common-divisor-gcd">Greatest Common Divisor (GCD)</a></h2>
+<p>Find GCD using Euclidean algorithm.</p>
+<pre><code class="language-python">def gcd(a, b):
+    # Base case
+    if b == 0:
+        return a
+    # Recursive case
+    return gcd(b, a % b)
+
+# Example usage
+print(gcd(48, 18))  # Output: 6
+</code></pre>
+<h2 id="tower-of-hanoi"><a class="header" href="#tower-of-hanoi">Tower of Hanoi</a></h2>
+<p>Classic puzzle solved recursively.</p>
+<pre><code class="language-python">def tower_of_hanoi(n, source, destination, auxiliary):
+    if n == 1:
+        print(f"Move disk 1 from {source} to {destination}")
+        return
+    
+    # Move n-1 disks from source to auxiliary
+    tower_of_hanoi(n - 1, source, auxiliary, destination)
+    
+    # Move nth disk from source to destination
+    print(f"Move disk {n} from {source} to {destination}")
+    
+    # Move n-1 disks from auxiliary to destination
+    tower_of_hanoi(n - 1, auxiliary, destination, source)
+
+# Example usage
+tower_of_hanoi(3, 'A', 'C', 'B')
+</code></pre>
+<h2 id="flatten-nested-list"><a class="header" href="#flatten-nested-list">Flatten Nested List</a></h2>
+<p>Flatten a nested list structure.</p>
+<pre><code class="language-python">def flatten(nested_list):
+    result = []
+    for item in nested_list:
+        if isinstance(item, list):
+            result.extend(flatten(item))
+        else:
+            result.append(item)
+    return result
+
+# Example usage
+nested = [1, [2, [3, 4], 5], 6, [7, 8]]
+print(flatten(nested))  # Output: [1, 2, 3, 4, 5, 6, 7, 8]
+</code></pre>
+<h2 id="recursive-patterns"><a class="header" href="#recursive-patterns">Recursive Patterns</a></h2>
+<p>Common recursive patterns to recognize:</p>
+<h3 id="1-linear-recursion"><a class="header" href="#1-linear-recursion">1. Linear Recursion</a></h3>
+<pre><code class="language-python">def linear_recursion(n):
+    if n == 0:
+        return 0
+    return n + linear_recursion(n - 1)
+</code></pre>
+<h3 id="2-binary-recursion"><a class="header" href="#2-binary-recursion">2. Binary Recursion</a></h3>
+<pre><code class="language-python">def binary_recursion(n):
+    if n &lt;= 1:
+        return n
+    return binary_recursion(n - 1) + binary_recursion(n - 2)
+</code></pre>
+<h3 id="3-tail-recursion"><a class="header" href="#3-tail-recursion">3. Tail Recursion</a></h3>
+<pre><code class="language-python">def tail_recursion(n, accumulator=0):
+    if n == 0:
+        return accumulator
+    return tail_recursion(n - 1, accumulator + n)
+</code></pre>
+<h2 id="recursion-vs-iteration"><a class="header" href="#recursion-vs-iteration">Recursion vs Iteration</a></h2>
+<pre><code class="language-python"># Recursive factorial
+def factorial_recursive(n):
+    if n &lt;= 1:
+        return 1
+    return n * factorial_recursive(n - 1)
+
+# Iterative factorial
+def factorial_iterative(n):
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
+</code></pre>
+<h2 id="tips-for-recursion"><a class="header" href="#tips-for-recursion">Tips for Recursion</a></h2>
 <ol>
-<li>
-<p><strong>Factorial Calculation</strong>: The factorial of a non-negative integer n is the product of all positive integers less than or equal to n. It can be defined recursively as:</p>
-<ul>
-<li><code>factorial(n) = n * factorial(n - 1)</code> with the base case <code>factorial(0) = 1</code>.</li>
-</ul>
-</li>
-<li>
-<p><strong>Fibonacci Sequence</strong>: The Fibonacci sequence is a series of numbers where each number is the sum of the two preceding ones. It can be defined recursively as:</p>
-<ul>
-<li><code>fibonacci(n) = fibonacci(n - 1) + fibonacci(n - 2)</code> with base cases <code>fibonacci(0) = 0</code> and <code>fibonacci(1) = 1</code>.</li>
-</ul>
-</li>
-<li>
-<p><strong>Binary Search</strong>: A search algorithm that finds the position of a target value within a sorted array. It can be implemented recursively by dividing the array in half:</p>
-<ul>
-<li>If the target is less than the middle element, search the left half; if greater, search the right half.</li>
-</ul>
-</li>
+<li><strong>Always define a base case</strong>: Prevents infinite recursion</li>
+<li><strong>Make progress toward base case</strong>: Each recursive call should move closer to the base case</li>
+<li><strong>Trust the recursion</strong>: Assume the recursive call works correctly for smaller inputs</li>
+<li><strong>Consider stack depth</strong>: Deep recursion can cause stack overflow</li>
+<li><strong>Use memoization</strong>: Cache results to avoid redundant calculations</li>
+<li><strong>Know when to use iteration</strong>: Sometimes iteration is clearer and more efficient</li>
 </ol>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<pre><code class="language-python"># BAD: No base case (infinite recursion)
+def bad_recursion(n):
+    return 1 + bad_recursion(n - 1)  # Never stops!
+
+# BAD: Doesn't make progress
+def bad_recursion2(n):
+    if n == 0:
+        return 0
+    return bad_recursion2(n)  # n never changes!
+
+# GOOD: Proper base case and progress
+def good_recursion(n):
+    if n == 0:
+        return 0
+    return 1 + good_recursion(n - 1)  # n decreases
+</code></pre>
 <h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
 <p>Recursion is widely used in various applications, including:</p>
 <ul>
-<li><strong>Tree Traversals</strong>: Navigating through tree data structures using recursive methods.</li>
-<li><strong>Backtracking Algorithms</strong>: Solving problems incrementally by trying partial solutions and then abandoning them if they fail to satisfy the conditions.</li>
-<li><strong>Dynamic Programming</strong>: Many dynamic programming problems can be solved using recursive approaches with memoization to optimize performance.</li>
+<li><strong>Tree Traversals</strong>: Navigating through tree data structures using recursive methods</li>
+<li><strong>Backtracking Algorithms</strong>: Solving problems incrementally by trying partial solutions</li>
+<li><strong>Dynamic Programming</strong>: Many DP problems can be solved using recursive approaches with memoization</li>
+<li><strong>Divide and Conquer</strong>: Breaking problems into smaller subproblems</li>
+<li><strong>Mathematical Computations</strong>: Factorials, Fibonacci, GCD, etc.</li>
 </ul>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
 <p>Recursion is a powerful tool in programming that allows for elegant solutions to complex problems. Understanding how to effectively use recursion is essential for developing efficient algorithms in computer science and software engineering.</p>

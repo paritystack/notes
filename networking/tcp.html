@@ -177,47 +177,651 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="tcp"><a class="header" href="#tcp">TCP</a></h1>
-<h2 id="tcp-packet-format"><a class="header" href="#tcp-packet-format">TCP Packet Format</a></h2>
-<p>0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-------------------------------------------------------------------------------------+
-|     Source Port (16 bits)    |  Destination Port (16 bits)                      |
-+-------------------------------------------------------------------------------------+
-|                Sequence Number (32 bits)                                          |
-+-------------------------------------------------------------------------------------+
-|            Acknowledgment Number (32 bits)                                        |
-+-------------------------------------------------------------------------------------+
-| Data  |Rese-|  Control Flags  |   Window Size (16 bits)   |   Checksum (16 bits)   |
-|Offset |rved |  (6 bits)       |                           |                       |
-+-------------------------------------------------------------------------------------+
-|           Urgent Pointer (16 bits)                                                 |
-+-------------------------------------------------------------------------------------+
-|                Options (variable length)                                           |
-+-------------------------------------------------------------------------------------+
-|                               Data (variable length)                                |
-+-------------------------------------------------------------------------------------+</p>
-<p>Note: Each field is represented in bits, and the total length of a TCP packet can vary.
-Start with a minimum of 20 bytes (without options).</p>
-<p>The control flags include:</p>
+                        <h1 id="tcp-transmission-control-protocol"><a class="header" href="#tcp-transmission-control-protocol">TCP (Transmission Control Protocol)</a></h1>
+<p>TCP is a connection-oriented, reliable transport layer protocol that provides ordered delivery of data between applications running on hosts in an IP network. It is one of the core protocols of the Internet Protocol Suite.</p>
+<h2 id="key-features"><a class="header" href="#key-features">Key Features</a></h2>
 <ul>
-<li>URG: Urgent Pointer field significant</li>
-<li>ACK: Acknowledgment field significant</li>
-<li>PSH: Push Function</li>
-<li>RST: Reset the connection</li>
-<li>SYN: Synchronize sequence numbers</li>
-<li>FIN: No more data from the sender</li>
+<li><strong>Connection-Oriented</strong>: Establishes connection before data transfer</li>
+<li><strong>Reliable</strong>: Guarantees delivery of data in order</li>
+<li><strong>Error Checking</strong>: Detects corrupted data with checksums</li>
+<li><strong>Flow Control</strong>: Manages data transmission rate</li>
+<li><strong>Congestion Control</strong>: Adjusts to network conditions</li>
+<li><strong>Full-Duplex</strong>: Bidirectional communication</li>
 </ul>
-<p>The window size indicates the size of the sender's receive window (or buffer).</p>
-<p>The checksum is used for error-checking the header and data.</p>
-<p>The options field can include various TCP options, such as Maximum Segment Size (MSS).</p>
-<p>The data field contains the actual data being transmitted.</p>
-<p>This ASCII art representation provides a visual understanding of the TCP packet structure.</p>
+<h2 id="tcp-packet-format"><a class="header" href="#tcp-packet-format">TCP Packet Format</a></h2>
+<pre><code>  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |          Source Port          |       Destination Port        |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                        Sequence Number                        |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                    Acknowledgment Number                      |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Data |       |C|E|U|A|P|R|S|F|                               |
+ | Offset| Rsrvd |W|C|R|C|S|S|Y|I|            Window             |
+ |       |       |R|E|G|K|H|T|N|N|                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |           Checksum            |         Urgent Pointer        |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                    Options                    |    Padding    |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                             Data                              |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+<h3 id="header-fields"><a class="header" href="#header-fields">Header Fields</a></h3>
+<ul>
+<li><strong>Source Port</strong> (16 bits): Sending application port number</li>
+<li><strong>Destination Port</strong> (16 bits): Receiving application port number</li>
+<li><strong>Sequence Number</strong> (32 bits): Position of first data byte in segment</li>
+<li><strong>Acknowledgment Number</strong> (32 bits): Next expected sequence number</li>
+<li><strong>Data Offset</strong> (4 bits): Size of TCP header in 32-bit words</li>
+<li><strong>Reserved</strong> (3 bits): Reserved for future use</li>
+<li><strong>Control Flags</strong> (9 bits): Connection control flags</li>
+<li><strong>Window Size</strong> (16 bits): Receive window size</li>
+<li><strong>Checksum</strong> (16 bits): Error detection</li>
+<li><strong>Urgent Pointer</strong> (16 bits): Offset of urgent data</li>
+<li><strong>Options</strong> (variable): Optional header extensions</li>
+<li><strong>Padding</strong>: Ensures header is multiple of 32 bits</li>
+</ul>
+<h3 id="control-flags"><a class="header" href="#control-flags">Control Flags</a></h3>
+<ul>
+<li><strong>CWR</strong> (Congestion Window Reduced): ECN-Echo flag received</li>
+<li><strong>ECE</strong> (ECN-Echo): Congestion experienced</li>
+<li><strong>URG</strong> (Urgent): Urgent pointer field is valid</li>
+<li><strong>ACK</strong> (Acknowledgment): Acknowledgment number is valid</li>
+<li><strong>PSH</strong> (Push): Push buffered data to application</li>
+<li><strong>RST</strong> (Reset): Reset the connection</li>
+<li><strong>SYN</strong> (Synchronize): Synchronize sequence numbers (connection setup)</li>
+<li><strong>FIN</strong> (Finish): No more data from sender (connection termination)</li>
+</ul>
+<h2 id="three-way-handshake"><a class="header" href="#three-way-handshake">Three-Way Handshake</a></h2>
+<p>TCP uses a three-way handshake to establish a connection:</p>
+<pre><code>Client                                  Server
+  |                                       |
+  |  SYN (seq=x)                         |
+  |--------------------------------------&gt;|
+  |                                       |
+  |         SYN-ACK (seq=y, ack=x+1)    |
+  |&lt;--------------------------------------|
+  |                                       |
+  |  ACK (seq=x+1, ack=y+1)             |
+  |--------------------------------------&gt;|
+  |                                       |
+  |     Connection Established            |
+  |                                       |
+</code></pre>
+<ol>
+<li><strong>SYN</strong>: Client sends SYN packet with initial sequence number</li>
+<li><strong>SYN-ACK</strong>: Server responds with SYN-ACK, includes its own sequence number</li>
+<li><strong>ACK</strong>: Client sends ACK to confirm, connection established</li>
+</ol>
+<h3 id="python-example-tcp-client"><a class="header" href="#python-example-tcp-client">Python Example: TCP Client</a></h3>
+<pre><code class="language-python">import socket
+
+# Create TCP socket
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Connect to server (three-way handshake happens here)
+server_address = ('localhost', 8080)
+client_socket.connect(server_address)
+print(f"Connected to {server_address}")
+
+# Send data
+message = "Hello, Server!"
+client_socket.sendall(message.encode())
+
+# Receive response
+response = client_socket.recv(1024)
+print(f"Received: {response.decode()}")
+
+# Close connection
+client_socket.close()
+</code></pre>
+<h3 id="python-example-tcp-server"><a class="header" href="#python-example-tcp-server">Python Example: TCP Server</a></h3>
+<pre><code class="language-python">import socket
+
+# Create TCP socket
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Bind to address and port
+server_address = ('localhost', 8080)
+server_socket.bind(server_address)
+
+# Listen for connections
+server_socket.listen(5)
+print(f"Server listening on {server_address}")
+
+while True:
+    # Accept connection (completes three-way handshake)
+    client_socket, client_address = server_socket.accept()
+    print(f"Connection from {client_address}")
+
+    try:
+        # Receive data
+        data = client_socket.recv(1024)
+        print(f"Received: {data.decode()}")
+
+        # Send response
+        response = "Hello, Client!"
+        client_socket.sendall(response.encode())
+    finally:
+        # Close connection
+        client_socket.close()
+</code></pre>
+<h2 id="connection-termination"><a class="header" href="#connection-termination">Connection Termination</a></h2>
+<p>TCP uses a four-way handshake to close a connection gracefully:</p>
+<pre><code>Client                                  Server
+  |                                       |
+  |  FIN (seq=x)                         |
+  |--------------------------------------&gt;|
+  |                                       |
+  |         ACK (ack=x+1)                |
+  |&lt;--------------------------------------|
+  |                                       |
+  |         FIN (seq=y)                  |
+  |&lt;--------------------------------------|
+  |                                       |
+  |  ACK (ack=y+1)                       |
+  |--------------------------------------&gt;|
+  |                                       |
+  |     Connection Closed                 |
+</code></pre>
+<ol>
+<li><strong>FIN</strong>: Active closer sends FIN</li>
+<li><strong>ACK</strong>: Passive closer acknowledges FIN</li>
+<li><strong>FIN</strong>: Passive closer sends its FIN</li>
+<li><strong>ACK</strong>: Active closer acknowledges FIN</li>
+</ol>
+<h2 id="tcp-state-machine"><a class="header" href="#tcp-state-machine">TCP State Machine</a></h2>
+<pre><code>         CLOSED
+           |
+           | (active open/SYN)
+           v
+       SYN-SENT
+           |
+           | (SYN received/SYN-ACK sent)
+           v
+    SYN-RECEIVED
+           |
+           | (ACK received)
+           v
+      ESTABLISHED
+           |
+           | (close/FIN sent)
+           v
+       FIN-WAIT-1
+           |
+           | (ACK received)
+           v
+       FIN-WAIT-2
+           |
+           | (FIN received/ACK sent)
+           v
+       TIME-WAIT
+           |
+           | (2*MSL timeout)
+           v
+         CLOSED
+</code></pre>
+<h3 id="tcp-states"><a class="header" href="#tcp-states">TCP States</a></h3>
+<ul>
+<li><strong>CLOSED</strong>: No connection</li>
+<li><strong>LISTEN</strong>: Server waiting for connection request</li>
+<li><strong>SYN-SENT</strong>: Client sent SYN, waiting for SYN-ACK</li>
+<li><strong>SYN-RECEIVED</strong>: Server received SYN, sent SYN-ACK</li>
+<li><strong>ESTABLISHED</strong>: Connection established, data transfer</li>
+<li><strong>FIN-WAIT-1</strong>: Sent FIN, waiting for ACK</li>
+<li><strong>FIN-WAIT-2</strong>: Received ACK of FIN, waiting for peer FIN</li>
+<li><strong>CLOSE-WAIT</strong>: Received FIN, waiting for close</li>
+<li><strong>CLOSING</strong>: Both sides sent FIN simultaneously</li>
+<li><strong>LAST-ACK</strong>: Waiting for final ACK</li>
+<li><strong>TIME-WAIT</strong>: Waiting to ensure remote received ACK</li>
+<li><strong>CLOSED</strong>: Connection fully terminated</li>
+</ul>
+<h3 id="check-connection-states"><a class="header" href="#check-connection-states">Check Connection States</a></h3>
+<pre><code class="language-bash"># Linux - Show all TCP connections
+netstat -tan
+
+# Show listening ports
+netstat -tln
+
+# Show established connections
+netstat -tan | grep ESTABLISHED
+
+# Alternative: ss command (faster)
+ss -tan
+ss -tln
+ss -tan state established
+
+# Show connection state for specific port
+ss -tan '( dport = :80 or sport = :80 )'
+</code></pre>
+<h2 id="flow-control"><a class="header" href="#flow-control">Flow Control</a></h2>
+<p>TCP uses a sliding window protocol for flow control:</p>
+<pre><code class="language-python">import socket
+import time
+
+def tcp_receiver_with_flow_control():
+    """
+    Receiver controls flow using window size
+    """
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(('localhost', 8080))
+    server.listen(1)
+
+    conn, addr = server.accept()
+
+    # Set receive buffer size (affects window size)
+    conn.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4096)
+
+    total_received = 0
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            break
+
+        total_received += len(data)
+        print(f"Received {len(data)} bytes, total: {total_received}")
+
+        # Simulate slow processing
+        time.sleep(0.1)
+
+    conn.close()
+    server.close()
+
+def tcp_sender():
+    """
+    Sender adapts to receiver's window size
+    """
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect(('localhost', 8080))
+
+    # Set send buffer size
+    client.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 8192)
+
+    # Send large amount of data
+    data = b'X' * 100000
+    sent = 0
+
+    while sent &lt; len(data):
+        chunk = data[sent:sent+1024]
+        try:
+            bytes_sent = client.send(chunk)
+            sent += bytes_sent
+            print(f"Sent {bytes_sent} bytes, total: {sent}")
+        except socket.error as e:
+            print(f"Send error: {e}")
+            break
+
+    client.close()
+</code></pre>
+<h2 id="congestion-control"><a class="header" href="#congestion-control">Congestion Control</a></h2>
+<p>TCP implements congestion control algorithms:</p>
+<h3 id="algorithms"><a class="header" href="#algorithms">Algorithms</a></h3>
+<ol>
+<li><strong>Slow Start</strong>: Exponentially increase congestion window</li>
+<li><strong>Congestion Avoidance</strong>: Linearly increase window</li>
+<li><strong>Fast Retransmit</strong>: Retransmit on 3 duplicate ACKs</li>
+<li><strong>Fast Recovery</strong>: Reduce window, avoid slow start</li>
+</ol>
+<pre><code>Window Size
+    ^
+    |     Slow Start  | Congestion Avoidance
+    |                /|
+    |              /  |
+    |            /    |_______________
+    |          /      |               \
+    |        /        |                \
+    |      /          |                 \ Fast Recovery
+    |    /            |                  \_______________
+    |  /              |
+    |/________________|________________________&gt; Time
+         Threshold
+</code></pre>
+<h3 id="check-tcp-congestion-control"><a class="header" href="#check-tcp-congestion-control">Check TCP Congestion Control</a></h3>
+<pre><code class="language-bash"># Linux - Check current algorithm
+sysctl net.ipv4.tcp_congestion_control
+
+# Available algorithms
+sysctl net.ipv4.tcp_available_congestion_control
+
+# Set congestion control algorithm
+sudo sysctl -w net.ipv4.tcp_congestion_control=cubic
+
+# Common algorithms:
+# - cubic (default on most Linux)
+# - reno (traditional)
+# - bbr (Google's BBR)
+# - vegas
+</code></pre>
+<h2 id="retransmission"><a class="header" href="#retransmission">Retransmission</a></h2>
+<p>TCP retransmits lost or corrupted packets:</p>
+<pre><code class="language-python">import socket
+import time
+
+def tcp_with_timeout():
+    """
+    TCP automatically handles retransmission
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Set timeout for operations
+    sock.settimeout(5.0)
+
+    try:
+        sock.connect(('example.com', 80))
+
+        # Send HTTP request
+        request = b"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"
+        sock.sendall(request)
+
+        # Receive response
+        response = sock.recv(4096)
+        print(f"Received {len(response)} bytes")
+
+    except socket.timeout:
+        print("Operation timed out - TCP retransmission may be occurring")
+    except socket.error as e:
+        print(f"Socket error: {e}")
+    finally:
+        sock.close()
+</code></pre>
+<h3 id="retransmission-timeout-rto"><a class="header" href="#retransmission-timeout-rto">Retransmission Timeout (RTO)</a></h3>
+<pre><code class="language-bash"># Linux - View TCP retransmission statistics
+netstat -s | grep -i retrans
+
+# Check retransmission timer settings
+sysctl net.ipv4.tcp_retries1  # Threshold for alerting
+sysctl net.ipv4.tcp_retries2  # Maximum retries before giving up
+
+# Typical values:
+# tcp_retries1 = 3  (alert after 3-6 seconds)
+# tcp_retries2 = 15 (give up after ~13-30 minutes)
+</code></pre>
+<h2 id="tcp-options"><a class="header" href="#tcp-options">TCP Options</a></h2>
+<p>Common TCP options in the header:</p>
+<h3 id="maximum-segment-size-mss"><a class="header" href="#maximum-segment-size-mss">Maximum Segment Size (MSS)</a></h3>
+<pre><code class="language-python">import socket
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Set TCP_MAXSEG option (MSS)
+sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG, 1400)
+
+# Get current MSS
+mss = sock.getsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG)
+print(f"TCP MSS: {mss}")
+</code></pre>
+<h3 id="window-scaling"><a class="header" href="#window-scaling">Window Scaling</a></h3>
+<pre><code class="language-bash"># Enable TCP window scaling (Linux)
+sudo sysctl -w net.ipv4.tcp_window_scaling=1
+
+# Check current setting
+sysctl net.ipv4.tcp_window_scaling
+</code></pre>
+<h3 id="selective-acknowledgment-sack"><a class="header" href="#selective-acknowledgment-sack">Selective Acknowledgment (SACK)</a></h3>
+<pre><code class="language-bash"># Enable SACK (Linux)
+sudo sysctl -w net.ipv4.tcp_sack=1
+
+# Check current setting
+sysctl net.ipv4.tcp_sack
+</code></pre>
+<h3 id="timestamps"><a class="header" href="#timestamps">Timestamps</a></h3>
+<pre><code class="language-bash"># Enable TCP timestamps
+sudo sysctl -w net.ipv4.tcp_timestamps=1
+
+# Check current setting
+sysctl net.ipv4.tcp_timestamps
+</code></pre>
+<h2 id="tcp-vs-udp"><a class="header" href="#tcp-vs-udp">TCP vs UDP</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>TCP</th><th>UDP</th></tr></thead><tbody>
+<tr><td>Connection</td><td>Connection-oriented</td><td>Connectionless</td></tr>
+<tr><td>Reliability</td><td>Guaranteed delivery</td><td>No guarantee</td></tr>
+<tr><td>Ordering</td><td>In-order delivery</td><td>No ordering</td></tr>
+<tr><td>Speed</td><td>Slower (overhead)</td><td>Faster (minimal overhead)</td></tr>
+<tr><td>Header Size</td><td>20-60 bytes</td><td>8 bytes</td></tr>
+<tr><td>Error Checking</td><td>Yes (checksum)</td><td>Yes (checksum)</td></tr>
+<tr><td>Flow Control</td><td>Yes</td><td>No</td></tr>
+<tr><td>Congestion Control</td><td>Yes</td><td>No</td></tr>
+<tr><td>Use Cases</td><td>HTTP, FTP, SSH, Email</td><td>DNS, VoIP, Streaming, Gaming</td></tr>
+</tbody></table>
+</div>
+<h3 id="when-to-use-tcp"><a class="header" href="#when-to-use-tcp">When to Use TCP</a></h3>
+<ul>
+<li>File transfers</li>
+<li>Email</li>
+<li>Web browsing</li>
+<li>Remote shell (SSH)</li>
+<li>Any application requiring reliability</li>
+</ul>
+<h3 id="when-to-use-udp"><a class="header" href="#when-to-use-udp">When to Use UDP</a></h3>
+<ul>
+<li>Real-time applications (VoIP, video streaming)</li>
+<li>DNS queries</li>
+<li>Online gaming</li>
+<li>IoT devices with small data</li>
+<li>Broadcasting/multicasting</li>
+</ul>
+<h2 id="performance-tuning"><a class="header" href="#performance-tuning">Performance Tuning</a></h2>
+<h3 id="socket-buffer-sizes"><a class="header" href="#socket-buffer-sizes">Socket Buffer Sizes</a></h3>
+<pre><code class="language-python">import socket
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Increase buffer sizes for high-throughput applications
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1024 * 1024)  # 1MB receive
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1024 * 1024)  # 1MB send
+
+# Get buffer sizes
+rcvbuf = sock.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
+sndbuf = sock.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
+print(f"Receive buffer: {rcvbuf}, Send buffer: {sndbuf}")
+</code></pre>
+<h3 id="tcp-keepalive"><a class="header" href="#tcp-keepalive">TCP Keepalive</a></h3>
+<pre><code class="language-python">import socket
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Enable keepalive
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+
+# Set keepalive parameters (Linux)
+sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 60)    # Start after 60s
+sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 10)   # Interval 10s
+sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)      # Retry 3 times
+</code></pre>
+<h3 id="nagles-algorithm"><a class="header" href="#nagles-algorithm">Nagle's Algorithm</a></h3>
+<pre><code class="language-python">import socket
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Disable Nagle's algorithm for low-latency applications
+sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+# Check status
+nodelay = sock.getsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY)
+print(f"TCP_NODELAY: {nodelay}")
+</code></pre>
+<h3 id="linux-kernel-tuning"><a class="header" href="#linux-kernel-tuning">Linux Kernel Tuning</a></h3>
+<pre><code class="language-bash"># Increase maximum buffer sizes
+sudo sysctl -w net.core.rmem_max=16777216
+sudo sysctl -w net.core.wmem_max=16777216
+
+# Set TCP buffer sizes (min, default, max)
+sudo sysctl -w net.ipv4.tcp_rmem="4096 87380 16777216"
+sudo sysctl -w net.ipv4.tcp_wmem="4096 65536 16777216"
+
+# Increase backlog queue
+sudo sysctl -w net.core.somaxconn=1024
+sudo sysctl -w net.ipv4.tcp_max_syn_backlog=2048
+
+# Enable TCP Fast Open
+sudo sysctl -w net.ipv4.tcp_fastopen=3
+
+# Reuse TIME_WAIT sockets
+sudo sysctl -w net.ipv4.tcp_tw_reuse=1
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="analyze-tcp-with-tcpdump"><a class="header" href="#analyze-tcp-with-tcpdump">Analyze TCP with tcpdump</a></h3>
+<pre><code class="language-bash"># Capture TCP traffic on port 80
+sudo tcpdump -i any tcp port 80 -n
+
+# Capture SYN packets
+sudo tcpdump 'tcp[tcpflags] &amp; (tcp-syn) != 0' -n
+
+# Capture RST packets
+sudo tcpdump 'tcp[tcpflags] &amp; (tcp-rst) != 0' -n
+
+# Save to file for analysis
+sudo tcpdump -i any tcp port 80 -w capture.pcap
+
+# Read from file
+tcpdump -r capture.pcap -n
+</code></pre>
+<h3 id="analyze-with-wireshark"><a class="header" href="#analyze-with-wireshark">Analyze with Wireshark</a></h3>
+<pre><code class="language-bash"># Start Wireshark
+wireshark
+
+# Useful display filters:
+# tcp.port == 80
+# tcp.flags.syn == 1
+# tcp.flags.reset == 1
+# tcp.analysis.retransmission
+# tcp.analysis.duplicate_ack
+# tcp.window_size_value &lt; 1000
+</code></pre>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<p><strong>Connection Refused</strong></p>
+<pre><code class="language-bash"># Check if port is listening
+netstat -tln | grep :80
+
+# Check firewall
+sudo iptables -L -n | grep 80
+</code></pre>
+<p><strong>Connection Timeout</strong></p>
+<pre><code class="language-bash"># Test connectivity
+telnet example.com 80
+
+# Check routing
+traceroute example.com
+
+# Test with timeout
+timeout 5 telnet example.com 80
+</code></pre>
+<p><strong>Slow Connection</strong></p>
+<pre><code class="language-python">import socket
+import time
+
+def measure_tcp_performance():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Measure connection time
+    start = time.time()
+    sock.connect(('example.com', 80))
+    connect_time = time.time() - start
+    print(f"Connection time: {connect_time:.3f}s")
+
+    # Send request
+    request = b"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"
+    start = time.time()
+    sock.sendall(request)
+    send_time = time.time() - start
+    print(f"Send time: {send_time:.3f}s")
+
+    # Receive response
+    start = time.time()
+    data = sock.recv(4096)
+    recv_time = time.time() - start
+    print(f"Receive time: {recv_time:.3f}s")
+    print(f"Received {len(data)} bytes")
+
+    sock.close()
+
+measure_tcp_performance()
+</code></pre>
+<h3 id="monitoring-tcp-connections"><a class="header" href="#monitoring-tcp-connections">Monitoring TCP Connections</a></h3>
+<pre><code class="language-bash"># Real-time connection monitoring
+watch -n 1 'netstat -tan | grep ESTABLISHED | wc -l'
+
+# Connection state distribution
+netstat -tan | awk '{print $6}' | sort | uniq -c
+
+# Show connections with process info
+sudo netstat -tanp
+
+# Alternative with ss
+ss -tanp state established
+</code></pre>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="tcp-fast-open-tfo"><a class="header" href="#tcp-fast-open-tfo">TCP Fast Open (TFO)</a></h3>
+<p>Reduces latency by sending data in SYN packet:</p>
+<pre><code class="language-python">import socket
+
+# Client with TFO
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Enable TFO (requires kernel support)
+sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_FASTOPEN, 1)
+
+# Send data during connection (SYN packet)
+data = b"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"
+sock.sendto(data, socket.MSG_FASTOPEN, ('example.com', 80))
+</code></pre>
+<h3 id="tcp-multipath-mptcp"><a class="header" href="#tcp-multipath-mptcp">TCP Multipath (MPTCP)</a></h3>
+<p>Allows connection over multiple paths:</p>
+<pre><code class="language-bash"># Check if MPTCP is available (Linux)
+sysctl net.mptcp.enabled
+
+# Enable MPTCP
+sudo sysctl -w net.mptcp.enabled=1
+</code></pre>
+<h3 id="zero-copy"><a class="header" href="#zero-copy">Zero Copy</a></h3>
+<p>Improve performance with zero-copy operations:</p>
+<pre><code class="language-python">import socket
+import os
+
+def sendfile_example(sock, filename):
+    """
+    Send file using zero-copy sendfile
+    """
+    with open(filename, 'rb') as f:
+        # Get file size
+        file_size = os.fstat(f.fileno()).st_size
+
+        # Send file using sendfile (zero-copy)
+        offset = 0
+        while offset &lt; file_size:
+            sent = os.sendfile(sock.fileno(), f.fileno(), offset, file_size - offset)
+            offset += sent
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Always close sockets</strong>: Use try-finally or context managers</li>
+<li><strong>Set appropriate timeouts</strong>: Avoid hanging indefinitely</li>
+<li><strong>Handle errors gracefully</strong>: Network can fail at any time</li>
+<li><strong>Use connection pooling</strong>: Reuse connections for better performance</li>
+<li><strong>Enable keepalive for long connections</strong>: Detect dead connections</li>
+<li><strong>Tune buffer sizes for workload</strong>: Larger for throughput, smaller for latency</li>
+<li><strong>Monitor connection states</strong>: Watch for TIME_WAIT buildup</li>
+<li><strong>Use TCP_NODELAY for interactive apps</strong>: Reduce latency</li>
+<li><strong>Enable window scaling for high-bandwidth</strong>: Support larger windows</li>
+<li><strong>Test under load</strong>: Verify behavior under stress</li>
+</ol>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc793">RFC 793</a> - TCP Specification</li>
+<li><a href="https://tools.ietf.org/html/rfc1323">RFC 1323</a> - TCP Extensions (Window Scaling, Timestamps)</li>
+<li><a href="https://tools.ietf.org/html/rfc2018">RFC 2018</a> - TCP Selective Acknowledgment</li>
+<li><a href="https://tools.ietf.org/html/rfc7413">RFC 7413</a> - TCP Fast Open</li>
+<li><a href="https://tools.ietf.org/html/rfc8684">RFC 8684</a> - Multipath TCP</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../networking/ip.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../networking/ipv6.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -231,7 +835,7 @@ Start with a minimum of 20 bytes (without options).</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../networking/ip.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../networking/ipv6.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

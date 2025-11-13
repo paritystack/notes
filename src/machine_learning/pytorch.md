@@ -123,6 +123,312 @@ total_params = sum(p.numel() for p in model.parameters())
 print(f"Total parameters: {total_params}")
 ```
 
+## Datasets and DataLoaders
+
+### Custom Dataset
+
+Create custom datasets by inheriting from `torch.utils.data.Dataset`:
+
+```python
+from torch.utils.data import Dataset, DataLoader
+import torch
+
+class CustomDataset(Dataset):
+    def __init__(self, data, labels, transform=None):
+        """
+        Args:
+            data: List or array of inputs
+            labels: List or array of labels
+            transform: Optional transformations to apply
+        """
+        self.data = data
+        self.labels = labels
+        self.transform = transform
+
+    def __len__(self):
+        """Return total number of samples"""
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        """Return sample at index idx"""
+        sample = self.data[idx]
+        label = self.labels[idx]
+
+        if self.transform:
+            sample = self.transform(sample)
+
+        return sample, label
+
+
+# Usage
+X = torch.randn(1000, 28, 28)  # 1000 images of 28x28
+y = torch.randint(0, 10, (1000,))  # 1000 labels (10 classes)
+
+dataset = CustomDataset(X, y)
+print(f"Dataset size: {len(dataset)}")
+sample, label = dataset[0]
+print(f"Sample shape: {sample.shape}, Label: {label}")
+```
+
+### Image Dataset with Transforms
+
+```python
+from torchvision import transforms
+from PIL import Image
+
+class ImageDataset(Dataset):
+    def __init__(self, image_paths, labels, transform=None):
+        self.image_paths = image_paths
+        self.labels = labels
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        # Load image
+        image = Image.open(self.image_paths[idx]).convert('RGB')
+
+        # Apply transforms
+        if self.transform:
+            image = self.transform(image)
+
+        label = self.labels[idx]
+        return image, label
+
+
+# Define transforms
+train_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomRotation(10),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
+])
+
+test_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
+])
+
+# Create datasets
+train_dataset = ImageDataset(train_paths, train_labels, transform=train_transform)
+test_dataset = ImageDataset(test_paths, test_labels, transform=test_transform)
+```
+
+### Built-in Datasets
+
+PyTorch provides common datasets in `torchvision.datasets`:
+
+```python
+from torchvision import datasets, transforms
+
+# MNIST
+mnist_train = datasets.MNIST(
+    root='./data',
+    train=True,
+    download=True,
+    transform=transforms.ToTensor()
+)
+
+mnist_test = datasets.MNIST(
+    root='./data',
+    train=False,
+    download=True,
+    transform=transforms.ToTensor()
+)
+
+# CIFAR-10
+cifar10 = datasets.CIFAR10(
+    root='./data',
+    train=True,
+    download=True,
+    transform=transforms.ToTensor()
+)
+
+# ImageNet (large, requires manual download)
+imagenet = datasets.ImageNet(
+    root='./data',
+    split='train',
+    transform=transforms.ToTensor()
+)
+
+# Print dataset info
+print(f"Dataset size: {len(mnist_train)}")
+sample, label = mnist_train[0]
+print(f"Sample shape: {sample.shape}, Label: {label}")
+```
+
+### DataLoader
+
+DataLoader handles batching, shuffling, and parallel loading:
+
+```python
+from torch.utils.data import DataLoader
+
+# Create DataLoader
+train_loader = DataLoader(
+    dataset=train_dataset,
+    batch_size=32,              # Samples per batch
+    shuffle=True,               # Shuffle order every epoch
+    num_workers=4,              # Parallel workers for data loading
+    pin_memory=True,            # Pin memory for faster GPU transfer
+    drop_last=True              # Drop last incomplete batch
+)
+
+test_loader = DataLoader(
+    dataset=test_dataset,
+    batch_size=32,
+    shuffle=False,              # Don't shuffle test data
+    num_workers=4,
+    pin_memory=True,
+    drop_last=False
+)
+
+# Iterate through batches
+for batch_idx, (batch_x, batch_y) in enumerate(train_loader):
+    print(f"Batch {batch_idx}")
+    print(f"  Input shape: {batch_x.shape}")  # (32, 1, 28, 28)
+    print(f"  Labels shape: {batch_y.shape}")  # (32,)
+
+    if batch_idx == 0:
+        break
+```
+
+### Data Splits
+
+```python
+from torch.utils.data import random_split
+
+# Original dataset
+dataset = CustomDataset(X, y)
+
+# Split into train (70%), val (15%), test (15%)
+total_size = len(dataset)
+train_size = int(0.7 * total_size)
+val_size = int(0.15 * total_size)
+test_size = total_size - train_size - val_size
+
+train_set, val_set, test_set = random_split(
+    dataset,
+    [train_size, val_size, test_size]
+)
+
+# Create loaders
+train_loader = DataLoader(train_set, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_set, batch_size=32, shuffle=False)
+test_loader = DataLoader(test_set, batch_size=32, shuffle=False)
+```
+
+### Data Augmentation Strategies
+
+```python
+from torchvision import transforms
+
+# For images
+augmentation = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomVerticalFlip(p=0.2),
+    transforms.RandomRotation(15),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+    transforms.GaussianBlur(kernel_size=3),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5], std=[0.5])
+])
+
+# For text (custom)
+class TextAugmentation:
+    def __init__(self, vocab_size=10000):
+        self.vocab_size = vocab_size
+
+    def __call__(self, tokens):
+        # Random dropout of tokens
+        if torch.rand(1) > 0.5:
+            mask = torch.rand(len(tokens)) > 0.1
+            tokens = tokens[mask]
+        return tokens
+
+# Custom augmentation
+class MixupAugmentation:
+    def __init__(self, alpha=1.0):
+        self.alpha = alpha
+
+    def __call__(self, batch_x, batch_y):
+        """Mixup data augmentation"""
+        lam = torch.distributions.Beta(self.alpha, self.alpha).sample()
+        batch_size = batch_x.size(0)
+
+        index = torch.randperm(batch_size)
+        mixed_x = lam * batch_x + (1 - lam) * batch_x[index]
+        mixed_y = lam * batch_y.float() + (1 - lam) * batch_y[index].float()
+
+        return mixed_x, mixed_y
+```
+
+### DataLoader Performance Tips
+
+```python
+# Good configuration
+loader = DataLoader(
+    dataset,
+    batch_size=64,              # Larger batches for efficiency
+    shuffle=True,
+    num_workers=4,              # Use multiple workers (2-4 per GPU)
+    pin_memory=True,            # Pin to CPU memory for GPU transfer
+    persistent_workers=True,    # Keep workers alive between epochs
+    prefetch_factor=2           # Prefetch batches (2-4 recommended)
+)
+
+# Monitor data loading performance
+import time
+
+start = time.time()
+for batch in loader:
+    pass
+elapsed = time.time() - start
+print(f"Time to load {len(loader)} batches: {elapsed:.2f}s")
+
+# If loading is slow:
+# - Increase num_workers
+# - Check disk speed (SSD vs HDD)
+# - Use pin_memory=True
+# - Reduce image resolution if possible
+# - Use data compression
+```
+
+### Combining Datasets
+
+```python
+from torch.utils.data import ConcatDataset, Subset
+
+# Concatenate multiple datasets
+combined_dataset = ConcatDataset([dataset1, dataset2, dataset3])
+
+# Subset of dataset
+indices = list(range(0, 100))  # First 100 samples
+subset = Subset(dataset, indices)
+
+# Weighted sampling (e.g., for imbalanced data)
+from torch.utils.data import WeightedRandomSampler
+
+weights = [1.0 if label == 0 else 10.0 for label in dataset.labels]
+sampler = WeightedRandomSampler(weights, len(dataset), replacement=True)
+
+loader = DataLoader(
+    dataset,
+    batch_size=32,
+    sampler=sampler  # Use sampler instead of shuffle
+)
+```
+
 ## Training Loop
 
 ```python

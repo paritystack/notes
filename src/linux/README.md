@@ -10,6 +10,9 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 4. [Netfilter](./netfilter.md) - Packet filtering framework
 5. [iptables](./iptables.md) - Firewall configuration
 6. [Traffic Control (tc)](./tc.md) - Network traffic management
+7. [systemd](./systemd.md) - Service management and init system
+8. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
+9. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
 
 ## Overview
 

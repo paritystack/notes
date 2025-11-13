@@ -554,3 +554,4 @@ Global Reach        High       ★★★★★  ★★★★★   ★★★★
 - [AWS Documentation](./aws.md)
 - [Azure Documentation](./azure.md)
 - [Google Cloud Documentation](./google_cloud.md)
+- [Cloud Setup Guide](./setup.md) - Getting started with cloud environments

@@ -498,6 +498,7 @@ Explore detailed guides for specific algorithm types:
 10. [Recursion](recursion.md) - Recursive problem solving
 11. [Heaps](heaps.md) - Heap data structure and algorithms
 12. [Tries](tries.md) - Trie data structure and applications
+13. [Raft Consensus](raft.md) - Distributed consensus algorithm for replicated logs
 
 ## Quick Reference
 

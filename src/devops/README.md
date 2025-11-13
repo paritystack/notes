@@ -4,9 +4,9 @@ DevOps practices, tools, and methodologies for continuous integration, delivery,
 
 ## Topics Covered
 
-- **CI/CD Fundamentals**: Pipelines, automation, workflows
-- **Docker**: Containerization, images, containers
-- **Kubernetes**: Orchestration, deployments, services
+- **[CI/CD](cicd.md)**: Continuous integration and deployment pipelines, automation, workflows
+- **[Docker](docker.md)**: Containerization, images, containers, Docker Compose
+- **[Kubernetes](kubernetes.md)**: Container orchestration, deployments, services, scaling
 - **Terraform**: Infrastructure as code, cloud provisioning
 - **GitHub Actions**: CI/CD workflows, automation
 - **Monitoring**: Logging, metrics, observability

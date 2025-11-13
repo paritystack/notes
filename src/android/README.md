@@ -498,6 +498,7 @@ dependencies {
 - [Android Internals](internals.md) - Understanding Android architecture
 - [ADB Commands](adb.md) - Android Debug Bridge reference
 - [Development Guide](development.md) - Detailed development workflow
+- [Android Binder](binder.md) - Inter-process communication mechanism
 
 ## Common Issues
 

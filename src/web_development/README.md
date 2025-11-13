@@ -4,11 +4,23 @@ Modern web development covering frontend, backend, APIs, and full-stack technolo
 
 ## Topics Covered
 
+### Frontend Frameworks
+
+- **[React](react.md)**: Components, hooks, state management
+- **[Vue.js](vuejs.md)**: Progressive framework with Composition API
+- **[Svelte](svelte.md)**: Compiled framework with reactive programming
+- **[Tailwind CSS](tailwind.md)**: Utility-first CSS framework
+
+### API & Communication
+
+- **[REST APIs](rest_apis.md)**: RESTful API design and best practices
+- **[GraphQL](graphql.md)**: Query language, schema design
+- **[gRPC](grpc.md)**: High-performance RPC framework with Protocol Buffers
+
+### Other Topics
+
 - **Frontend**: HTML, CSS, JavaScript fundamentals
-- **React**: Components, hooks, state management
-- **Backend**: REST APIs, Express.js, Node.js
-- **GraphQL**: Query language, schema design
-- **Frontend Frameworks**: Vue.js, Angular basics
+- **Backend**: Express.js, Node.js
 - **Authentication**: JWT, OAuth, sessions
 - **Databases**: Integration with web apps
 - **Deployment**: Hosting, CI/CD for web

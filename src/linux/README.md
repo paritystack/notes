@@ -6,10 +6,18 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 
 1. [Essential Commands](./commands.md) - Command reference and examples
 2. [Kernel Architecture](./kernel.md) - Linux kernel internals and development
-3. [Networking](./networking.md) - Network configuration and troubleshooting
-4. [Netfilter](./netfilter.md) - Packet filtering framework
-5. [iptables](./iptables.md) - Firewall configuration
-6. [Traffic Control (tc)](./tc.md) - Network traffic management
+3. [Kernel Development Patterns](./kernel_patterns.md) - Common patterns and best practices for kernel development
+4. [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless subsystem frameworks for WiFi drivers
+5. [Driver Development](./driver_development.md) - Linux driver model and device driver development
+6. [Device Tree](./device_tree.md) - Hardware description using Device Tree
+7. [Cross Compilation](./cross_compilation.md) - Building for different architectures
+8. [Networking](./networking.md) - Network configuration and troubleshooting
+9. [Netfilter](./netfilter.md) - Packet filtering framework
+10. [iptables](./iptables.md) - Firewall configuration
+11. [Traffic Control (tc)](./tc.md) - Network traffic management
+12. [systemd](./systemd.md) - Service management and init system
+13. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
+14. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
 
 ## Overview
 
@@ -27,10 +35,16 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 
 ### For Developers
 - [Kernel Architecture](./kernel.md) - Understand Linux internals
+- [Kernel Development Patterns](./kernel_patterns.md) - Coding patterns and best practices
+- [Driver Development](./driver_development.md) - Linux driver model and device drivers
+- [Device Tree](./device_tree.md) - Hardware description and parsing
+- [Cross Compilation](./cross_compilation.md) - Building for embedded systems
+- [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless driver development
 - [Essential Commands](./commands.md) - Development and debugging tools
 
 ### For Network Engineers
 - [Networking](./networking.md) - Network stack and protocols
+- [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless networking subsystem
 - [Netfilter](./netfilter.md) - Packet filtering framework
 - [Traffic Control](./tc.md) - QoS and traffic shaping
 

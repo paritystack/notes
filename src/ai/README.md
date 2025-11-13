@@ -47,6 +47,30 @@ Complete guide to Meta's Llama family of models:
 - Inference optimization
 - Deployment strategies
 
+### 6. [Large Language Models (LLMs)](./llms.md)
+Comprehensive overview of Large Language Models:
+- LLM fundamentals and architecture
+- Transformer models and attention mechanisms
+- Training and inference
+- Prompt engineering techniques
+- API usage and best practices
+
+### 7. [ComfyUI](./comfyui.md)
+Node-based interface for Stable Diffusion workflows:
+- Installation and setup
+- Workflow creation
+- Custom nodes and extensions
+- Advanced generation techniques
+- Integration with other tools
+
+### 8. [Fine-Tuning](./fine_tuning.md)
+Model adaptation and customization:
+- Fine-tuning strategies and approaches
+- Parameter-efficient methods (LoRA, QLoRA)
+- Dataset preparation and quality
+- Training configuration and optimization
+- Evaluation and deployment
+
 ## Key AI Concepts
 
 ### Large Language Models (LLMs)

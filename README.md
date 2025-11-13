@@ -8,7 +8,7 @@ A comprehensive, continuously updated collection of technical tutorials and refe
 
 ## 📋 What's Inside
 
-This knowledge base contains **50+ topics** across **20 categories** with **5,000+ lines** of tutorial-style content, practical code examples, and best practices.
+This knowledge base contains **75+ topics** across **21 categories** with **25,000+ lines** of tutorial-style content, practical code examples, and best practices.
 
 ### Core Computer Science (8 topics)
 - **Data Structures**: Arrays, Linked Lists, Stacks, Queues, Hash Tables, Trees, Tries, Heaps
@@ -22,19 +22,22 @@ This knowledge base contains **50+ topics** across **20 categories** with **5,00
 - **Microcontrollers**: Arduino, ESP32, STM32, ARM
 - **Platforms**: Arduino, Raspberry Pi, STM32, AVR
 
-### Backend & Infrastructure (10 topics)
+### Backend & Infrastructure (12 topics)
 - **APIs**: REST API Design, HTTP/HTTPS, Status Codes, Authentication
-- **Databases**: SQL (queries, joins, indexes, transactions), NoSQL (MongoDB, Redis, Cassandra, Neo4j)
+- **Databases**: SQL (PostgreSQL, SQLite, DuckDB), NoSQL (MongoDB, Redis, Cassandra), Event Streaming (Apache Kafka)
 - **DevOps**: Docker, Kubernetes, CI/CD Pipelines, GitHub Actions, GitLab CI
-- **Networking**: TCP/IP, UDP, DNS, IP Routing, Firewalls, mDNS
-- **Security**: Encryption (symmetric/asymmetric), SSL/TLS, Certificates, Hashing, HMAC, Digital Signatures
+- **Networking**: TCP/IP, UDP, DNS, IP Routing (IPv4, IPv6), Firewalls, Real-time (WebSocket, WebRTC), NAT Traversal (STUN, TURN, ICE, PCP, NAT-PMP)
+- **Security**: Encryption (symmetric/asymmetric), SSL/TLS, Certificates, Hashing, HMAC, Digital Signatures, OAuth 2.0, JWT
 - **Cloud**: AWS, Google Cloud, Azure
 - **Linux**: Kernel, Networking Stack, iptables, Netfilter, Commands
 
-### Frontend & Web Development (4 topics)
-- **React**: Components, Hooks, State Management, Best Practices
-- **GraphQL**: Schema Design, Queries, Mutations vs REST
-- **Web Fundamentals**: HTML, CSS, JavaScript
+### Frontend & Web Development (14 topics)
+- **Frontend Frameworks**: React, Next.js (SSR/SSG), Vue.js, Svelte (components, hooks, state management)
+- **Backend Frameworks**: Express.js, NestJS (TypeScript), Django, Flask, FastAPI (Python async)
+- **CSS**: Tailwind CSS (utility-first framework)
+- **APIs**: REST, GraphQL, gRPC (schema design, queries, mutations)
+- **Browser APIs**: Storage (localStorage, IndexedDB), Workers (Web Workers, Service Workers), Notifications, Geolocation, File API, Observers (Intersection, Mutation, Resize)
+- **Web Fundamentals**: HTML, CSS, JavaScript, TypeScript
 - **Tools & Build**: Webpack, Vite, npm, yarn
 
 ### Machine Learning & AI (9 topics)
@@ -45,10 +48,15 @@ This knowledge base contains **50+ topics** across **20 categories** with **5,00
 - **Learning Approaches**: Supervised, Unsupervised, Reinforcement Learning
 - **Frameworks**: TensorFlow, PyTorch, Hugging Face
 
-### System Design (3 topics)
+### System Design (4 topics)
 - **Scalability**: Vertical/Horizontal Scaling, Load Balancing, Sharding, Replication
 - **Caching**: Cache-Aside, Write-Through, Write-Behind, Invalidation Strategies, Redis
-- **Distributed Systems**: CAP Theorem, Consensus, Message Queues, Microservices
+- **Microservices**: Service decomposition, communication patterns, resilience, service discovery
+- **Distributed Systems**: CAP Theorem, Consensus, Message Queues, RPC
+
+### Mobile Development (2 topics)
+- **React Native**: Cross-platform mobile development with React, navigation, native modules
+- **Flutter**: Google's UI toolkit with Dart, widgets, state management, platform channels
 
 ### Testing & Quality (3 topics)
 - **Unit Testing**: pytest, Jest, JUnit with practical examples
@@ -62,8 +70,8 @@ This knowledge base contains **50+ topics** across **20 categories** with **5,00
 - **Crypto**: Blockchain basics, trading
 - **Fundamental Analysis**: Financial metrics, valuation
 
-### Other Topics (8 topics)
-- **Programming Languages**: Python, C++, Rust, Java, JavaScript, SQL, Bash
+### Other Topics (9 topics)
+- **Programming Languages**: Python, C, C++, TypeScript, JavaScript, Rust, Java, Go, Lua, SQL, Bash
 - **Version Control**: Git commands, workflows, GitHub
 - **Tools**: Vim, Tmux, Grep, Find, Docker, Git
 - **Android**: Development, ADB, Internals
@@ -73,7 +81,7 @@ This knowledge base contains **50+ topics** across **20 categories** with **5,00
 ## 🎯 Key Features
 
 ✅ **Tutorial-Style Learning**: Clear explanations with theory and practice
-✅ **Multi-Language Examples**: Python, JavaScript, C++, Java, SQL, Bash, Go, Rust
+✅ **Multi-Language Examples**: Python, TypeScript, JavaScript, C/C++, Java, Rust, Go, Lua, SQL, Bash, Dart
 ✅ **Real-World Applications**: Practical use cases for every concept
 ✅ **Best Practices**: Do's and don'ts, common pitfalls
 ✅ **Visual Diagrams**: Architecture, flowcharts, algorithm visualizations
@@ -163,24 +171,25 @@ vim src/category/topic.md
 | **Data Structures** | 6 | Arrays, lists, trees, graphs | ✅ Complete |
 | **Algorithms** | 13 | Sorting, searching, DP, graphs | ✅ Complete |
 | **Machine Learning** | 13 | Neural nets, deep learning, LLMs | ✅ Complete |
-| **Web Development** | 4 | React, GraphQL, REST, HTML/CSS | ✅ Complete |
+| **Web Development** | 14 | React, Next.js, Vue, Svelte, Express, NestJS, Django, Flask, FastAPI | ✅ Complete |
+| **Mobile Development** | 2 | React Native, Flutter | ✅ Complete |
 | **DevOps & CI/CD** | 4 | Docker, Kubernetes, pipelines | ✅ Complete |
-| **Databases** | 3 | SQL, NoSQL, data modeling | ✅ Complete |
-| **System Design** | 3 | Scalability, caching, distributed systems | ✅ Complete |
+| **Databases** | 8 | SQL, PostgreSQL, SQLite, DuckDB, NoSQL, MongoDB, Redis, Kafka | ✅ Complete |
+| **System Design** | 4 | Scalability, caching, microservices, RPC | ✅ Complete |
 | **Testing** | 3 | Unit testing, TDD, best practices | ✅ Complete |
-| **Networking** | 13 | TCP/IP, DNS, HTTP, protocols | ✅ Complete |
-| **Security** | 7 | Encryption, SSL/TLS, certificates | ✅ Complete |
-| **Linux** | 7 | Kernel, commands, networking | ✅ Complete |
-| **Programming** | 11 | Python, C++, Rust, JavaScript, Java | ✅ Complete |
+| **Networking** | 20 | TCP/IP, IPv4/IPv6, WebSocket, WebRTC, NAT traversal | ✅ Complete |
+| **Security** | 9 | Encryption, SSL/TLS, certificates, OAuth 2.0, JWT | ✅ Complete |
+| **Linux** | 14 | Kernel, driver development, device tree, cross compilation, cfg80211/mac80211, networking, iptables, systemd | ✅ Complete |
+| **Programming** | 12 | Python, C/C++, TypeScript, JavaScript, Rust, Java, Go, Lua | ✅ Complete |
 | **Cloud** | 5 | AWS, GCP, Azure services | ✅ Complete |
 | **Finance** | 8 | Markets, analysis, crypto | ✅ Complete |
-| **Tools** | 16 | Vim, tmux, grep, git, docker | ✅ Complete |
+| **Tools** | 18 | Vim, tmux, grep, git, docker, wpa_supplicant, hostapd | ✅ Complete |
 | **WiFi** | 7 | Standards, security, roaming | ✅ Complete |
 | **Android** | 4 | Development, ADB, internals | ✅ Complete |
 | **Git** | 4 | Commands, workflows, GitHub | ✅ Complete |
 | **AI** | 9 | LLMs, prompt engineering, tools | ✅ Complete |
 
-**Total**: 20 categories, 150+ files, 5,000+ lines of content
+**Total**: 21 categories, 175+ files, 25,000+ lines of content
 
 ---
 
@@ -216,11 +225,11 @@ touch src/category/new_topic.md
 
 ## 📊 Statistics
 
-- **Total Categories**: 20
-- **Total Files**: 150+
-- **Total Content**: 5,000+ lines
-- **Code Examples**: 100+
-- **Languages Covered**: 8+
+- **Total Categories**: 21
+- **Total Files**: 175+
+- **Total Content**: 25,000+ lines
+- **Code Examples**: 300+
+- **Languages Covered**: 11+
 - **Last Updated**: 2024
 - **Automated Deployment**: Yes ✅
 

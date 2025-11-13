@@ -23,12 +23,21 @@ The practical 4-layer model used in modern networks:
 
 ## Core Protocols
 
-### [IP (Internet Protocol)](ip.md)
-- IPv4 and IPv6 addressing
+### [IPv4 (Internet Protocol version 4)](ipv4.md)
+- 32-bit addressing and packet format
+- Address classes and private IP ranges
 - Subnetting and CIDR notation
 - Routing and fragmentation
 - NAT (Network Address Translation)
-- ICMP diagnostics
+- ICMP diagnostics and tools
+
+### [IPv6 (Internet Protocol version 6)](ipv6.md)
+- 128-bit addressing and packet format
+- Address types (unicast, multicast, anycast)
+- SLAAC and auto-configuration
+- Neighbor Discovery Protocol (NDP)
+- Extension headers
+- ICMPv6 and transition mechanisms
 
 ### [TCP (Transmission Control Protocol)](tcp.md)
 - Reliable, connection-oriented communication
@@ -87,6 +96,50 @@ The practical 4-layer model used in modern networks:
 - Used with ICE in WebRTC
 - Server setup with coturn
 - Cost considerations
+
+### [ICE (Interactive Connectivity Establishment)](ice.md)
+- Framework for establishing peer-to-peer connections
+- Combines STUN and TURN for NAT traversal
+- Candidate gathering and connectivity checks
+- Priority-based path selection
+- Handles symmetric NAT and firewalls
+- Used by WebRTC and VoIP
+
+### [PCP (Port Control Protocol)](pcp.md)
+- Automatic port mapping and firewall control
+- Successor to NAT-PMP with IPv6 support
+- MAP and PEER opcodes for different use cases
+- Works with multiple NATs in path
+- Third-party mappings and explicit lifetimes
+- Used by modern applications and IoT
+
+### [NAT-PMP (NAT Port Mapping Protocol)](nat_pmp.md)
+- Simple automatic port forwarding protocol
+- Lightweight UDP-based (12-16 byte packets)
+- IPv4 support with time-limited mappings
+- Developed by Apple, widely deployed
+- Gateway discovery and external IP detection
+- Used by BitTorrent, VoIP, and gaming
+
+## Real-Time Communication
+
+### [WebSocket](websocket.md)
+- Full-duplex bidirectional communication
+- Low-latency persistent connections
+- WebSocket handshake and frame format
+- Client and server implementations
+- Use cases: chat, live updates, gaming
+- Authentication and security
+- Heartbeat and reconnection strategies
+
+### [WebRTC (Web Real-Time Communication)](webrtc.md)
+- Browser-based peer-to-peer communication
+- Video, audio, and data channels
+- getUserMedia API and RTCPeerConnection
+- Signaling and SDP offer/answer
+- Media codecs and quality adaptation
+- Security with mandatory encryption
+- Simulcast and bandwidth management
 
 ## Network Discovery
 

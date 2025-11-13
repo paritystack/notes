@@ -8,12 +8,15 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 2. [Unsupervised Learning](./unsupervised_learning.md) - Clustering and dimensionality reduction
 3. [Reinforcement Learning](./reinforcement_learning.md) - RL concepts, Q-learning, and policy gradients
 4. [Deep Learning](./deep_learning.md) - Neural networks, CNNs, RNNs, and training techniques
-5. [Deep Reinforcement Learning](./deep_reinforcement_learning.md) - DQN, A3C, PPO, and advanced RL
-6. [Generative Models](./generative_models.md) - GANs, VAEs, and flow-based models
-7. [Deep Generative Models](./deep_generative_models.md) - Advanced generative architectures
-8. [Transfer Learning](./transfer_learning.md) - Pre-training, fine-tuning, and domain adaptation
-9. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
-10. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+5. [Neural Networks](./neural_networks.md) - Architecture, backpropagation, activation functions
+6. [Deep Reinforcement Learning](./deep_reinforcement_learning.md) - DQN, A3C, PPO, and advanced RL
+7. [Generative Models](./generative_models.md) - GANs, VAEs, and flow-based models
+8. [Deep Generative Models](./deep_generative_models.md) - Advanced generative architectures
+9. [Transfer Learning](./transfer_learning.md) - Pre-training, fine-tuning, and domain adaptation
+10. [PyTorch](./pytorch.md) - Deep learning framework, tensors, autograd, training
+11. [Transformers](./transformers.md) - Attention mechanisms, BERT, GPT architectures
+12. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
+13. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

@@ -22,7 +22,23 @@ Comprehensive security reference covering cryptography, authentication, and secu
 - HMAC construction and usage
 - Applications in APIs and tokens
 
-## Authentication & Signatures
+## Authentication & Authorization
+
+### [OAuth 2.0](oauth2.md)
+- Authorization framework and grant types
+- Authorization Code, Client Credentials, PKCE
+- Access tokens and refresh tokens
+- OpenID Connect for authentication
+- Implementation best practices
+
+### [JWT (JSON Web Tokens)](jwt.md)
+- Token structure (header, payload, signature)
+- Signing algorithms (HS256, RS256, ES256)
+- Token validation and verification
+- Use cases and security considerations
+- Best practices for token management
+
+## Digital Signatures
 
 ### [Digital Signatures](digital_signatures.md)
 - RSA signatures

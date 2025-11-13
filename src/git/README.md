@@ -615,6 +615,372 @@ git merge --no-ff hotfix/fix-bug
 git branch -d hotfix/fix-bug
 ```
 
+### Fork and Pull Request Workflow
+
+```bash
+# 1. Fork repository on GitHub
+
+# 2. Clone your fork
+git clone https://github.com/your-username/repo.git
+cd repo
+
+# 3. Add upstream remote
+git remote add upstream https://github.com/original-owner/repo.git
+git remote -v
+
+# 4. Create feature branch
+git checkout -b feature/my-feature
+
+# 5. Make changes and commit
+git add .
+git commit -m "Add new feature"
+
+# 6. Keep your fork updated
+git fetch upstream
+git checkout main
+git merge upstream/main
+git push origin main
+
+# 7. Rebase your feature branch (optional but recommended)
+git checkout feature/my-feature
+git rebase main
+
+# 8. Push to your fork
+git push origin feature/my-feature
+
+# 9. Create Pull Request on GitHub
+#    - Navigate to original repository
+#    - Click "New Pull Request"
+#    - Select your fork and branch
+
+# 10. After PR is merged, update and cleanup
+git checkout main
+git pull upstream main
+git push origin main
+git branch -d feature/my-feature
+git push origin --delete feature/my-feature
+```
+
+### Trunk-Based Development
+
+```bash
+# Work directly on main branch with short-lived feature branches
+
+# 1. Create short-lived feature branch
+git checkout -b feature/quick-fix
+
+# 2. Make small, incremental changes
+git add .
+git commit -m "Implement part 1 of feature"
+
+# 3. Keep branch up to date with main (multiple times per day)
+git checkout main
+git pull origin main
+git checkout feature/quick-fix
+git rebase main
+
+# 4. Merge back to main quickly (within hours or 1-2 days)
+git checkout main
+git merge --no-ff feature/quick-fix
+git push origin main
+
+# 5. Delete feature branch
+git branch -d feature/quick-fix
+
+# Alternative: Direct commits to main (for very small changes)
+git checkout main
+git pull origin main
+# Make small change
+git add .
+git commit -m "Fix typo"
+git push origin main
+```
+
+### Release Branch Workflow
+
+```bash
+# Create release branch from main
+git checkout -b release/v2.0.0 main
+
+# Make release-specific changes (version bumps, changelog, etc.)
+git add .
+git commit -m "Prepare release v2.0.0"
+
+# Test the release branch thoroughly
+# Fix any bugs found
+git add .
+git commit -m "Fix release bug"
+
+# Merge to main and tag
+git checkout main
+git merge --no-ff release/v2.0.0
+git tag -a v2.0.0 -m "Release version 2.0.0"
+git push origin main
+git push origin v2.0.0
+
+# Merge release changes back to develop (if using Gitflow)
+git checkout develop
+git merge --no-ff release/v2.0.0
+
+# Delete release branch
+git branch -d release/v2.0.0
+```
+
+## Daily Workflow Patterns
+
+### Start of Day
+
+```bash
+# Update your local repository
+git checkout main
+git pull origin main
+
+# Check what you were working on
+git status
+git log --oneline -5
+
+# Resume work on feature branch
+git checkout feature/my-feature
+git rebase main
+```
+
+### During Development
+
+```bash
+# Check status frequently
+git status
+
+# View changes before staging
+git diff
+
+# Stage changes selectively
+git add -p  # Interactive staging
+
+# Commit with meaningful message
+git commit -m "feat: Add user authentication
+
+Implement JWT-based authentication system with:
+- Login endpoint
+- Token validation middleware
+- Logout functionality
+
+Refs #123"
+
+# Push to remote frequently
+git push origin feature/my-feature
+
+# Save work in progress without committing
+git stash save "WIP: working on login form"
+```
+
+### Before Creating Pull Request
+
+```bash
+# Make sure branch is up to date
+git checkout main
+git pull origin main
+git checkout feature/my-feature
+git rebase main
+
+# Clean up commit history (if needed)
+git rebase -i HEAD~5
+# Squash, reword, or reorder commits
+
+# Run tests
+npm test  # or your test command
+
+# Push updated branch
+git push --force-with-lease origin feature/my-feature
+
+# Create Pull Request on GitHub
+```
+
+### After Pull Request Review
+
+```bash
+# Address review comments
+git add .
+git commit -m "Address PR feedback"
+
+# Or amend last commit
+git add .
+git commit --amend --no-edit
+
+# Force push (your PR branch)
+git push --force-with-lease origin feature/my-feature
+```
+
+### End of Day
+
+```bash
+# Commit work in progress
+git add .
+git commit -m "WIP: partial implementation"
+
+# Or stash if not ready to commit
+git stash save "WIP: end of day $(date)"
+
+# Push to remote as backup
+git push origin feature/my-feature
+```
+
+### Working with Multiple Features
+
+```bash
+# Save current work
+git stash
+
+# Switch to different feature
+git checkout feature/other-feature
+
+# Work on it...
+git add .
+git commit -m "Update feature"
+
+# Switch back to original feature
+git checkout feature/my-feature
+git stash pop
+```
+
+## Common Workflow Scenarios
+
+### Fixing a Bug in Production
+
+```bash
+# 1. Create hotfix branch from main
+git checkout main
+git pull origin main
+git checkout -b hotfix/critical-bug
+
+# 2. Fix the bug
+git add .
+git commit -m "fix: Resolve critical authentication bug
+
+Fix issue where users couldn't login after password reset.
+
+Fixes #456"
+
+# 3. Test thoroughly
+npm test
+
+# 4. Merge to main
+git checkout main
+git merge --no-ff hotfix/critical-bug
+git tag -a v1.0.1 -m "Hotfix release 1.0.1"
+
+# 5. Push to production
+git push origin main
+git push origin v1.0.1
+
+# 6. Merge back to develop
+git checkout develop
+git merge --no-ff hotfix/critical-bug
+
+# 7. Cleanup
+git branch -d hotfix/critical-bug
+```
+
+### Syncing Fork with Upstream
+
+```bash
+# Add upstream if not already added
+git remote add upstream https://github.com/original/repo.git
+
+# Fetch upstream changes
+git fetch upstream
+
+# Merge upstream changes to main
+git checkout main
+git merge upstream/main
+
+# Push to your fork
+git push origin main
+
+# Update your feature branch
+git checkout feature/my-feature
+git rebase main
+```
+
+### Collaborating on a Branch
+
+```bash
+# Person A creates branch and pushes
+git checkout -b feature/shared-feature
+git add .
+git commit -m "Initial implementation"
+git push -u origin feature/shared-feature
+
+# Person B clones and contributes
+git fetch origin
+git checkout feature/shared-feature
+git add .
+git commit -m "Add tests"
+git push origin feature/shared-feature
+
+# Person A pulls updates
+git checkout feature/shared-feature
+git pull origin feature/shared-feature
+```
+
+### Recovering from Mistakes
+
+```bash
+# Undo last commit but keep changes
+git reset --soft HEAD~1
+
+# Discard all local changes
+git reset --hard HEAD
+
+# Recover deleted branch
+git reflog
+git checkout -b recovered-branch <commit-hash>
+
+# Undo force push (if reflog available)
+git reflog
+git reset --hard HEAD@{n}
+git push --force-with-lease
+
+# Revert a merged PR
+git revert -m 1 <merge-commit-hash>
+git push origin main
+```
+
+### Working with Large Files
+
+```bash
+# Install Git LFS
+git lfs install
+
+# Track large files
+git lfs track "*.psd"
+git lfs track "*.mp4"
+git lfs track "datasets/*"
+
+# Add .gitattributes
+git add .gitattributes
+
+# Add and commit large files
+git add large-file.psd
+git commit -m "Add design file"
+git push origin main
+```
+
+### Maintaining Clean History
+
+```bash
+# Squash commits before merging
+git checkout feature/my-feature
+git rebase -i main
+
+# In editor, change "pick" to "squash" for commits to combine
+
+# Rewrite commit message
+git commit --amend
+
+# Force push (only on feature branches!)
+git push --force-with-lease origin feature/my-feature
+```
+
 ## Best Practices
 
 ### Commit Messages

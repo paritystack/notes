@@ -177,7 +177,602 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="upnp-universal-plug-and-play"><a class="header" href="#upnp-universal-plug-and-play">UPnP (Universal Plug and Play)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>UPnP is a set of networking protocols that enables devices on a network to seamlessly discover each other and establish functional network services for data sharing, communications, and entertainment. It allows devices to automatically configure themselves and announce their presence to other devices.</p>
+<h2 id="upnp-components"><a class="header" href="#upnp-components">UPnP Components</a></h2>
+<pre><code>1. Discovery (SSDP)
+   - Find devices on network
+   - Announce presence
+
+2. Description
+   - Device capabilities
+   - Services offered
+
+3. Control
+   - Invoke actions
+   - Query state
+
+4. Eventing
+   - Subscribe to state changes
+   - Receive notifications
+
+5. Presentation
+   - Web-based UI
+   - Human interaction
+</code></pre>
+<h2 id="upnp-architecture"><a class="header" href="#upnp-architecture">UPnP Architecture</a></h2>
+<pre><code>Control Point (Client)         Device (Server)
+       |                            |
+       | 1. Discovery (SSDP)        |
+       |&lt;--------------------------&gt;|
+       |                            |
+       | 2. Description (XML)       |
+       |---------------------------&gt;|
+       |&lt;---------------------------|
+       |                            |
+       | 3. Control (SOAP)          |
+       |---------------------------&gt;|
+       |&lt;---------------------------|
+       |                            |
+       | 4. Eventing (GENA)         |
+       |---------------------------&gt;|
+       | (Subscribe)                |
+       |&lt;---------------------------|
+       | (Events)                   |
+</code></pre>
+<h2 id="ssdp-simple-service-discovery-protocol"><a class="header" href="#ssdp-simple-service-discovery-protocol">SSDP (Simple Service Discovery Protocol)</a></h2>
+<h3 id="discovery-process"><a class="header" href="#discovery-process">Discovery Process</a></h3>
+<p><strong>Device Announcement:</strong></p>
+<pre><code>Device joins network:
+
+NOTIFY * HTTP/1.1
+Host: 239.255.255.250:1900
+Cache-Control: max-age=1800
+Location: http://192.168.1.100:8080/description.xml
+NT: upnp:rootdevice
+NTS: ssdp:alive
+Server: Linux/5.4 UPnP/1.0 MyDevice/1.0
+USN: uuid:12345678-1234-1234-1234-123456789abc::upnp:rootdevice
+
+Sent to multicast address 239.255.255.250:1900
+Announces device presence
+</code></pre>
+<p><strong>Device Search (M-SEARCH):</strong></p>
+<pre><code>Control point searches for devices:
+
+M-SEARCH * HTTP/1.1
+Host: 239.255.255.250:1900
+Man: "ssdp:discover"
+ST: ssdp:all
+MX: 3
+(Search for all devices, wait up to 3 seconds)
+
+Multicast to 239.255.255.250:1900
+</code></pre>
+<p><strong>Device Response:</strong></p>
+<pre><code>HTTP/1.1 200 OK
+Cache-Control: max-age=1800
+Location: http://192.168.1.100:8080/description.xml
+Server: Linux/5.4 UPnP/1.0 MyDevice/1.0
+ST: upnp:rootdevice
+USN: uuid:12345678-1234-1234-1234-123456789abc::upnp:rootdevice
+
+Unicast response back to control point
+</code></pre>
+<h3 id="ssdp-multicast"><a class="header" href="#ssdp-multicast">SSDP Multicast</a></h3>
+<pre><code>IPv4 Address: 239.255.255.250
+Port: 1900 (UDP)
+
+All UPnP devices listen on this address
+Used for discovery announcements
+</code></pre>
+<h3 id="search-targets-st"><a class="header" href="#search-targets-st">Search Targets (ST)</a></h3>
+<pre><code>ssdp:all                    - All devices and services
+upnp:rootdevice             - Root devices only
+uuid:&lt;device-uuid&gt;          - Specific device
+urn:schemas-upnp-org:device:&lt;deviceType&gt;:&lt;version&gt;
+urn:schemas-upnp-org:service:&lt;serviceType&gt;:&lt;version&gt;
+
+Examples:
+  ST: urn:schemas-upnp-org:device:MediaRenderer:1
+  ST: urn:schemas-upnp-org:service:ContentDirectory:1
+</code></pre>
+<h2 id="device-description"><a class="header" href="#device-description">Device Description</a></h2>
+<h3 id="description-xml"><a class="header" href="#description-xml">Description XML</a></h3>
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;root xmlns="urn:schemas-upnp-org:device-1-0"&gt;
+  &lt;specVersion&gt;
+    &lt;major&gt;1&lt;/major&gt;
+    &lt;minor&gt;0&lt;/minor&gt;
+  &lt;/specVersion&gt;
+  &lt;device&gt;
+    &lt;deviceType&gt;urn:schemas-upnp-org:device:MediaRenderer:1&lt;/deviceType&gt;
+    &lt;friendlyName&gt;Living Room TV&lt;/friendlyName&gt;
+    &lt;manufacturer&gt;Samsung&lt;/manufacturer&gt;
+    &lt;manufacturerURL&gt;http://www.samsung.com&lt;/manufacturerURL&gt;
+    &lt;modelDescription&gt;Smart TV&lt;/modelDescription&gt;
+    &lt;modelName&gt;UN55TU8000&lt;/modelName&gt;
+    &lt;modelNumber&gt;8000&lt;/modelNumber&gt;
+    &lt;serialNumber&gt;123456789&lt;/serialNumber&gt;
+    &lt;UDN&gt;uuid:12345678-1234-1234-1234-123456789abc&lt;/UDN&gt;
+    &lt;presentationURL&gt;http://192.168.1.100:8080/&lt;/presentationURL&gt;
+
+    &lt;serviceList&gt;
+      &lt;service&gt;
+        &lt;serviceType&gt;urn:schemas-upnp-org:service:AVTransport:1&lt;/serviceType&gt;
+        &lt;serviceId&gt;urn:upnp-org:serviceId:AVTransport&lt;/serviceId&gt;
+        &lt;SCPDURL&gt;/service/AVTransport/scpd.xml&lt;/SCPDURL&gt;
+        &lt;controlURL&gt;/service/AVTransport/control&lt;/controlURL&gt;
+        &lt;eventSubURL&gt;/service/AVTransport/event&lt;/eventSubURL&gt;
+      &lt;/service&gt;
+    &lt;/serviceList&gt;
+  &lt;/device&gt;
+&lt;/root&gt;
+</code></pre>
+<h3 id="service-description-scpd"><a class="header" href="#service-description-scpd">Service Description (SCPD)</a></h3>
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;scpd xmlns="urn:schemas-upnp-org:service-1-0"&gt;
+  &lt;specVersion&gt;
+    &lt;major&gt;1&lt;/major&gt;
+    &lt;minor&gt;0&lt;/minor&gt;
+  &lt;/specVersion&gt;
+
+  &lt;actionList&gt;
+    &lt;action&gt;
+      &lt;name&gt;Play&lt;/name&gt;
+      &lt;argumentList&gt;
+        &lt;argument&gt;
+          &lt;name&gt;Speed&lt;/name&gt;
+          &lt;direction&gt;in&lt;/direction&gt;
+          &lt;relatedStateVariable&gt;TransportPlaySpeed&lt;/relatedStateVariable&gt;
+        &lt;/argument&gt;
+      &lt;/argumentList&gt;
+    &lt;/action&gt;
+
+    &lt;action&gt;
+      &lt;name&gt;Stop&lt;/name&gt;
+    &lt;/action&gt;
+  &lt;/actionList&gt;
+
+  &lt;serviceStateTable&gt;
+    &lt;stateVariable sendEvents="yes"&gt;
+      &lt;name&gt;TransportState&lt;/name&gt;
+      &lt;dataType&gt;string&lt;/dataType&gt;
+      &lt;allowedValueList&gt;
+        &lt;allowedValue&gt;PLAYING&lt;/allowedValue&gt;
+        &lt;allowedValue&gt;STOPPED&lt;/allowedValue&gt;
+        &lt;allowedValue&gt;PAUSED_PLAYBACK&lt;/allowedValue&gt;
+      &lt;/allowedValueList&gt;
+    &lt;/stateVariable&gt;
+
+    &lt;stateVariable sendEvents="no"&gt;
+      &lt;name&gt;TransportPlaySpeed&lt;/name&gt;
+      &lt;dataType&gt;string&lt;/dataType&gt;
+      &lt;defaultValue&gt;1&lt;/defaultValue&gt;
+    &lt;/stateVariable&gt;
+  &lt;/serviceStateTable&gt;
+&lt;/scpd&gt;
+</code></pre>
+<h2 id="upnp-control-soap"><a class="header" href="#upnp-control-soap">UPnP Control (SOAP)</a></h2>
+<h3 id="action-invocation"><a class="header" href="#action-invocation">Action Invocation</a></h3>
+<p><strong>Request:</strong></p>
+<pre><code class="language-xml">POST /service/AVTransport/control HTTP/1.1
+Host: 192.168.1.100:8080
+Content-Type: text/xml; charset="utf-8"
+SOAPAction: "urn:schemas-upnp-org:service:AVTransport:1#Play"
+Content-Length: 299
+
+&lt;?xml version="1.0"?&gt;
+&lt;s:Envelope
+  xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+  s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"&gt;
+  &lt;s:Body&gt;
+    &lt;u:Play xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"&gt;
+      &lt;InstanceID&gt;0&lt;/InstanceID&gt;
+      &lt;Speed&gt;1&lt;/Speed&gt;
+    &lt;/u:Play&gt;
+  &lt;/s:Body&gt;
+&lt;/s:Envelope&gt;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-xml">HTTP/1.1 200 OK
+Content-Type: text/xml; charset="utf-8"
+Content-Length: 250
+
+&lt;?xml version="1.0"?&gt;
+&lt;s:Envelope
+  xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+  s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"&gt;
+  &lt;s:Body&gt;
+    &lt;u:PlayResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"&gt;
+    &lt;/u:PlayResponse&gt;
+  &lt;/s:Body&gt;
+&lt;/s:Envelope&gt;
+</code></pre>
+<h3 id="error-response"><a class="header" href="#error-response">Error Response</a></h3>
+<pre><code class="language-xml">HTTP/1.1 500 Internal Server Error
+Content-Type: text/xml; charset="utf-8"
+
+&lt;?xml version="1.0"?&gt;
+&lt;s:Envelope
+  xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+  s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"&gt;
+  &lt;s:Body&gt;
+    &lt;s:Fault&gt;
+      &lt;faultcode&gt;s:Client&lt;/faultcode&gt;
+      &lt;faultstring&gt;UPnPError&lt;/faultstring&gt;
+      &lt;detail&gt;
+        &lt;UPnPError xmlns="urn:schemas-upnp-org:control-1-0"&gt;
+          &lt;errorCode&gt;701&lt;/errorCode&gt;
+          &lt;errorDescription&gt;Transition not available&lt;/errorDescription&gt;
+        &lt;/UPnPError&gt;
+      &lt;/detail&gt;
+    &lt;/s:Fault&gt;
+  &lt;/s:Body&gt;
+&lt;/s:Envelope&gt;
+</code></pre>
+<h2 id="upnp-eventing-gena"><a class="header" href="#upnp-eventing-gena">UPnP Eventing (GENA)</a></h2>
+<h3 id="subscribe-to-events"><a class="header" href="#subscribe-to-events">Subscribe to Events</a></h3>
+<p><strong>Request:</strong></p>
+<pre><code>SUBSCRIBE /service/AVTransport/event HTTP/1.1
+Host: 192.168.1.100:8080
+Callback: &lt;http://192.168.1.50:8888/notify&gt;
+NT: upnp:event
+Timeout: Second-1800
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code>HTTP/1.1 200 OK
+SID: uuid:subscription-12345
+Timeout: Second-1800
+</code></pre>
+<h3 id="initial-event-state-snapshot"><a class="header" href="#initial-event-state-snapshot">Initial Event (State Snapshot)</a></h3>
+<pre><code class="language-xml">NOTIFY /notify HTTP/1.1
+Host: 192.168.1.50:8888
+Content-Type: text/xml
+NT: upnp:event
+NTS: upnp:propchange
+SID: uuid:subscription-12345
+SEQ: 0
+
+&lt;?xml version="1.0"?&gt;
+&lt;e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"&gt;
+  &lt;e:property&gt;
+    &lt;TransportState&gt;STOPPED&lt;/TransportState&gt;
+  &lt;/e:property&gt;
+  &lt;e:property&gt;
+    &lt;CurrentTrack&gt;1&lt;/CurrentTrack&gt;
+  &lt;/e:property&gt;
+&lt;/e:propertyset&gt;
+</code></pre>
+<h3 id="subsequent-events"><a class="header" href="#subsequent-events">Subsequent Events</a></h3>
+<pre><code class="language-xml">NOTIFY /notify HTTP/1.1
+Host: 192.168.1.50:8888
+Content-Type: text/xml
+NT: upnp:event
+NTS: upnp:propchange
+SID: uuid:subscription-12345
+SEQ: 1
+
+&lt;?xml version="1.0"?&gt;
+&lt;e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"&gt;
+  &lt;e:property&gt;
+    &lt;TransportState&gt;PLAYING&lt;/TransportState&gt;
+  &lt;/e:property&gt;
+&lt;/e:propertyset&gt;
+</code></pre>
+<h3 id="unsubscribe"><a class="header" href="#unsubscribe">Unsubscribe</a></h3>
+<pre><code>UNSUBSCRIBE /service/AVTransport/event HTTP/1.1
+Host: 192.168.1.100:8080
+SID: uuid:subscription-12345
+</code></pre>
+<h2 id="upnp-igd-internet-gateway-device"><a class="header" href="#upnp-igd-internet-gateway-device">UPnP IGD (Internet Gateway Device)</a></h2>
+<h3 id="port-mapping"><a class="header" href="#port-mapping">Port Mapping</a></h3>
+<p>One of the most common UPnP uses:</p>
+<p><strong>Add Port Mapping Request:</strong></p>
+<pre><code class="language-xml">POST /control/WANIPConnection HTTP/1.1
+Host: 192.168.1.1:5000
+Content-Type: text/xml; charset="utf-8"
+SOAPAction: "urn:schemas-upnp-org:service:WANIPConnection:1#AddPortMapping"
+
+&lt;?xml version="1.0"?&gt;
+&lt;s:Envelope ...&gt;
+  &lt;s:Body&gt;
+    &lt;u:AddPortMapping xmlns:u="urn:schemas-upnp-org:service:WANIPConnection:1"&gt;
+      &lt;NewRemoteHost&gt;&lt;/NewRemoteHost&gt;
+      &lt;NewExternalPort&gt;8080&lt;/NewExternalPort&gt;
+      &lt;NewProtocol&gt;TCP&lt;/NewProtocol&gt;
+      &lt;NewInternalPort&gt;8080&lt;/NewInternalPort&gt;
+      &lt;NewInternalClient&gt;192.168.1.50&lt;/NewInternalClient&gt;
+      &lt;NewEnabled&gt;1&lt;/NewEnabled&gt;
+      &lt;NewPortMappingDescription&gt;My Web Server&lt;/NewPortMappingDescription&gt;
+      &lt;NewLeaseDuration&gt;0&lt;/NewLeaseDuration&gt;
+    &lt;/u:AddPortMapping&gt;
+  &lt;/s:Body&gt;
+&lt;/s:Envelope&gt;
+</code></pre>
+<p><strong>Result:</strong></p>
+<pre><code>External: &lt;public-ip&gt;:8080
+    ↓
+Internal: 192.168.1.50:8080
+
+Automatic NAT traversal!
+</code></pre>
+<h3 id="get-external-ip"><a class="header" href="#get-external-ip">Get External IP</a></h3>
+<pre><code class="language-xml">POST /control/WANIPConnection HTTP/1.1
+SOAPAction: "urn:schemas-upnp-org:service:WANIPConnection:1#GetExternalIPAddress"
+
+&lt;u:GetExternalIPAddress xmlns:u="urn:schemas-upnp-org:service:WANIPConnection:1"&gt;
+&lt;/u:GetExternalIPAddress&gt;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-xml">&lt;u:GetExternalIPAddressResponse&gt;
+  &lt;NewExternalIPAddress&gt;203.0.113.5&lt;/NewExternalIPAddress&gt;
+&lt;/u:GetExternalIPAddressResponse&gt;
+</code></pre>
+<h2 id="common-upnp-device-types"><a class="header" href="#common-upnp-device-types">Common UPnP Device Types</a></h2>
+<pre><code>MediaServer              - Content provider (NAS, PC)
+MediaRenderer            - Content consumer (TV, speaker)
+InternetGatewayDevice    - Router/NAT
+WANConnectionDevice      - WAN connection management
+PrinterBasic             - Network printer
+Scanner                  - Network scanner
+HVAC                     - Heating/cooling control
+Lighting                 - Smart lights
+SecurityDevice           - Cameras, sensors
+</code></pre>
+<h2 id="upnp-client-implementation"><a class="header" href="#upnp-client-implementation">UPnP Client Implementation</a></h2>
+<h3 id="python-example-discovery"><a class="header" href="#python-example-discovery">Python Example (Discovery)</a></h3>
+<pre><code class="language-python">import socket
+
+SSDP_ADDR = '239.255.255.250'
+SSDP_PORT = 1900
+
+def discover_devices():
+    # M-SEARCH message
+    message = '\r\n'.join([
+        'M-SEARCH * HTTP/1.1',
+        f'Host: {SSDP_ADDR}:{SSDP_PORT}',
+        'Man: "ssdp:discover"',
+        'ST: ssdp:all',
+        'MX: 3',
+        '',
+        ''
+    ])
+
+    # Create socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.settimeout(5)
+
+    # Send M-SEARCH
+    sock.sendto(message.encode(), (SSDP_ADDR, SSDP_PORT))
+
+    # Receive responses
+    devices = []
+    try:
+        while True:
+            data, addr = sock.recvfrom(1024)
+            response = data.decode()
+
+            # Parse location
+            for line in response.split('\r\n'):
+                if line.startswith('Location:'):
+                    location = line.split(':', 1)[1].strip()
+                    devices.append(location)
+                    break
+    except socket.timeout:
+        pass
+
+    sock.close()
+    return devices
+
+# Usage
+devices = discover_devices()
+for device in devices:
+    print(f"Found device: {device}")
+</code></pre>
+<h3 id="python-example-control"><a class="header" href="#python-example-control">Python Example (Control)</a></h3>
+<pre><code class="language-python">import requests
+import xml.etree.ElementTree as ET
+
+def control_device(control_url, service_type, action, args):
+    # Build SOAP envelope
+    soap_body = f'''&lt;?xml version="1.0"?&gt;
+    &lt;s:Envelope
+      xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+      s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"&gt;
+      &lt;s:Body&gt;
+        &lt;u:{action} xmlns:u="{service_type}"&gt;
+          {''.join(f'&lt;{k}&gt;{v}&lt;/{k}&gt;' for k, v in args.items())}
+        &lt;/u:{action}&gt;
+      &lt;/s:Body&gt;
+    &lt;/s:Envelope&gt;'''
+
+    headers = {
+        'Content-Type': 'text/xml; charset="utf-8"',
+        'SOAPAction': f'"{service_type}#{action}"'
+    }
+
+    response = requests.post(control_url, data=soap_body, headers=headers)
+    return response.text
+
+# Usage
+control_url = 'http://192.168.1.100:8080/service/AVTransport/control'
+service_type = 'urn:schemas-upnp-org:service:AVTransport:1'
+action = 'Play'
+args = {'InstanceID': '0', 'Speed': '1'}
+
+result = control_device(control_url, service_type, action, args)
+print(result)
+</code></pre>
+<h2 id="upnp-tools"><a class="header" href="#upnp-tools">UPnP Tools</a></h2>
+<h3 id="command-line-tools"><a class="header" href="#command-line-tools">Command Line Tools</a></h3>
+<pre><code class="language-bash"># upnpc (miniupnpc)
+# Install: apt-get install miniupnpc
+
+# Discover IGD devices
+upnpc -l
+
+# Get external IP
+upnpc -s
+
+# Add port mapping
+upnpc -a 192.168.1.50 8080 8080 TCP
+
+# List port mappings
+upnpc -L
+
+# Delete port mapping
+upnpc -d 8080 TCP
+</code></pre>
+<h3 id="gui-tools"><a class="header" href="#gui-tools">GUI Tools</a></h3>
+<pre><code>- UPnP Inspector (Linux)
+- UPnP Test Tool (Windows)
+- Device Spy (UPnP Forum)
+</code></pre>
+<h2 id="upnp-security-issues"><a class="header" href="#upnp-security-issues">UPnP Security Issues</a></h2>
+<h3 id="major-vulnerabilities"><a class="header" href="#major-vulnerabilities">Major Vulnerabilities</a></h3>
+<h4 id="1-no-authentication"><a class="header" href="#1-no-authentication">1. No Authentication</a></h4>
+<pre><code>Any device can control any other device
+No password required
+No encryption
+
+Attack: Malicious app opens ports in router
+</code></pre>
+<h4 id="2-port-forwarding-abuse"><a class="header" href="#2-port-forwarding-abuse">2. Port Forwarding Abuse</a></h4>
+<pre><code>Malware can:
+  - Open ports in router
+  - Expose internal services
+  - Create backdoors
+
+Example:
+  Malware opens port 3389 (RDP)
+  Attacker can remotely access PC
+</code></pre>
+<h4 id="3-ssdp-amplification-ddos"><a class="header" href="#3-ssdp-amplification-ddos">3. SSDP Amplification DDoS</a></h4>
+<pre><code>Attacker spoofs source IP as victim
+Sends M-SEARCH to many UPnP devices
+Devices respond to victim
+Victim overwhelmed with traffic
+
+Amplification factor: 30x-50x
+</code></pre>
+<h4 id="4-xml-external-entity-xxe"><a class="header" href="#4-xml-external-entity-xxe">4. XML External Entity (XXE)</a></h4>
+<pre><code>Malicious device description:
+&lt;!DOCTYPE foo [
+  &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;root&gt;&amp;xxe;&lt;/root&gt;
+
+Can read local files
+Server-side request forgery
+</code></pre>
+<h3 id="security-best-practices"><a class="header" href="#security-best-practices">Security Best Practices</a></h3>
+<pre><code>1. Disable UPnP on router
+   - If not needed, turn it off
+   - Most secure option
+
+2. Use UPnP-UP (UPnP with User Profile)
+   - Authentication layer
+   - Access control
+
+3. Firewall rules
+   - Block SSDP multicast from WAN
+   - Limit UPnP to trusted VLANs
+
+4. Whitelist devices
+   - Only allow known devices
+   - MAC address filtering
+
+5. Monitor port mappings
+   - Regular audits
+   - Alert on unexpected changes
+
+6. Update firmware
+   - Patch vulnerabilities
+   - Keep devices current
+</code></pre>
+<h2 id="upnp-vs-alternatives"><a class="header" href="#upnp-vs-alternatives">UPnP vs Alternatives</a></h2>
+<h3 id="vs-manual-port-forwarding"><a class="header" href="#vs-manual-port-forwarding">vs Manual Port Forwarding</a></h3>
+<pre><code>UPnP:
+  Pros: Automatic, easy
+  Cons: Security risk, no control
+
+Manual:
+  Pros: Secure, controlled
+  Cons: Technical knowledge required
+</code></pre>
+<h3 id="vs-nat-pmp--pcp"><a class="header" href="#vs-nat-pmp--pcp">vs NAT-PMP / PCP</a></h3>
+<pre><code>NAT-PMP (Apple):
+  - Similar to UPnP
+  - Simpler protocol
+  - Better security
+
+PCP (Port Control Protocol):
+  - Successor to NAT-PMP
+  - IETF standard
+  - IPv6 support
+</code></pre>
+<h3 id="vs-stunturn"><a class="header" href="#vs-stunturn">vs STUN/TURN</a></h3>
+<pre><code>UPnP: Local network discovery and control
+STUN/TURN: NAT traversal for P2P connections
+
+Different use cases, can complement each other
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>UPnP is like devices introducing themselves and asking for help:</p>
+<p><strong>Discovery (Meeting New Friends):</strong></p>
+<pre><code>New TV joins network:
+  TV: "Hi everyone! I'm a TV and can play videos!"
+  All devices hear the announcement
+  Your phone: "Cool, I found a TV!"
+</code></pre>
+<p><strong>Control (Asking for Favors):</strong></p>
+<pre><code>Phone to TV: "Can you play this video?"
+TV: "Sure! Playing now."
+
+Gaming console to router: "Can you open port 3478?"
+Router: "Done! Port is open."
+</code></pre>
+<p><strong>Problems (Security Issues):</strong></p>
+<pre><code>Bad actor: "Hey router, open all ports!"
+Router: "OK!" (No questions asked)
+  → This is dangerous!
+
+Better approach:
+  Router: "Who are you? Do you have permission?"
+  Bad actor: "Uh... never mind."
+</code></pre>
+<p><strong>When to Use:</strong></p>
+<ul>
+<li>Home media streaming</li>
+<li>Gaming (automatic port opening)</li>
+<li>Smart home devices</li>
+<li>Printing</li>
+</ul>
+<p><strong>When to Disable:</strong></p>
+<ul>
+<li>Public networks</li>
+<li>When security is critical</li>
+<li>Enterprise environments</li>
+<li>If you don't need it</li>
+</ul>
+<p><strong>Rule of Thumb:</strong></p>
+<ul>
+<li>Home network: Convenient (but understand risks)</li>
+<li>Business network: Usually disable</li>
+<li>Gaming: Helpful for matchmaking</li>
+<li>Important: Monitor what ports get opened!</li>
+</ul>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://openconnectivity.org/developer/specifications/upnp-resources">UPnP Forum</a></li>
+<li><a href="https://tools.ietf.org/html/rfc6970">RFC 6970 - UPnP IGD-PCP Interworking</a></li>
+<li><a href="http://upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v2.0.pdf">UPnP Device Architecture</a></li>
+<li><a href="https://miniupnp.tuxfamily.org/">miniupnpc Library</a></li>
+<li><a href="https://www.upnp-hacks.org/">Security Concerns</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

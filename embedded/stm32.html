@@ -177,7 +177,784 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="stm32-microcontrollers"><a class="header" href="#stm32-microcontrollers">STM32 Microcontrollers</a></h1>
+<p>Comprehensive guide to STM32 development using HAL, CubeMX, and bare-metal programming.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#stm32-families">STM32 Families</a></li>
+<li><a href="#development-setup">Development Setup</a></li>
+<li><a href="#stm32cubemx">STM32CubeMX</a></li>
+<li><a href="#hal-programming">HAL Programming</a></li>
+<li><a href="#bare-metal-programming">Bare Metal Programming</a></li>
+<li><a href="#common-peripherals">Common Peripherals</a></li>
+<li><a href="#advanced-topics">Advanced Topics</a></li>
+</ol>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>STM32 is a family of 32-bit microcontrollers from STMicroelectronics based on ARM Cortex-M cores. They offer excellent performance, rich peripherals, and are widely used in professional and industrial applications.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>ARM Cortex-M Cores</strong>: M0, M0+, M3, M4, M7, M33</li>
+<li><strong>Clock Speed</strong>: 48 MHz to 550 MHz</li>
+<li><strong>Memory</strong>: 16 KB to 2 MB Flash, 4 KB to 1 MB RAM</li>
+<li><strong>Peripherals</strong>: GPIO, UART, SPI, I2C, ADC, DAC, Timers, USB, CAN, Ethernet</li>
+<li><strong>Development Tools</strong>: Free official IDE and HAL libraries</li>
+<li><strong>Price</strong>: $1 to $20 depending on series</li>
+</ul>
+<h3 id="advantages"><a class="header" href="#advantages">Advantages</a></h3>
+<ul>
+<li>Professional-grade reliability</li>
+<li>Extensive peripheral set</li>
+<li>Low power consumption</li>
+<li>Strong ecosystem and support</li>
+<li>Pin-compatible families</li>
+<li>Real-time performance</li>
+</ul>
+<h2 id="stm32-families"><a class="header" href="#stm32-families">STM32 Families</a></h2>
+<h3 id="overview"><a class="header" href="#overview">Overview</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Family</th><th>Core</th><th>Speed</th><th>Flash</th><th>Use Case</th><th>Examples</th></tr></thead><tbody>
+<tr><td><strong>F0</strong></td><td>M0</td><td>48 MHz</td><td>16-256 KB</td><td>Entry-level, cost-sensitive</td><td>STM32F030</td></tr>
+<tr><td><strong>F1</strong></td><td>M3</td><td>72 MHz</td><td>16-512 KB</td><td>General purpose, classic</td><td>STM32F103 (Blue Pill)</td></tr>
+<tr><td><strong>F4</strong></td><td>M4</td><td>180 MHz</td><td>256 KB-2 MB</td><td>High performance, DSP, FPU</td><td>STM32F407, F429</td></tr>
+<tr><td><strong>F7</strong></td><td>M7</td><td>216 MHz</td><td>512 KB-2 MB</td><td>Very high performance</td><td>STM32F746</td></tr>
+<tr><td><strong>H7</strong></td><td>M7</td><td>480 MHz</td><td>1-2 MB</td><td>Extreme performance</td><td>STM32H743</td></tr>
+<tr><td><strong>L0/L4</strong></td><td>M0+/M4</td><td>32-80 MHz</td><td>16-512 KB</td><td>Ultra-low power</td><td>STM32L476</td></tr>
+<tr><td><strong>G0/G4</strong></td><td>M0+/M4</td><td>64-170 MHz</td><td>32-512 KB</td><td>Mainstream, motor control</td><td>STM32G474</td></tr>
+</tbody></table>
+</div>
+<h3 id="popular-development-boards"><a class="header" href="#popular-development-boards">Popular Development Boards</a></h3>
+<h4 id="stm32-nucleo-boards"><a class="header" href="#stm32-nucleo-boards">STM32 Nucleo Boards</a></h4>
+<pre><code>┌────────────────────────────────┐
+│  STM32 Nucleo-64               │
+│                                 │
+│  ┌─────────────────┐           │
+│  │   STM32 MCU     │           │
+│  │   (QFP64)       │           │
+│  └─────────────────┘           │
+│                                 │
+│  [CN7] ═══════════════ [CN10]  │  Arduino Headers
+│  [CN8] ═══════════════ [CN9]   │
+│                                 │
+│  [CN1] ST-LINK V2-1            │
+│  [USB]                         │
+└────────────────────────────────┘
+
+Features:
+- Integrated ST-LINK debugger/programmer
+- Arduino Uno R3 compatible headers
+- Morpho extension headers (full pin access)
+- Virtual COM port
+- Price: ~$15
+</code></pre>
+<h4 id="blue-pill-stm32f103c8t6"><a class="header" href="#blue-pill-stm32f103c8t6">Blue Pill (STM32F103C8T6)</a></h4>
+<pre><code>┌──────────────────────────┐
+│     STM32F103C8T6        │
+│     "Blue Pill"          │
+│                          │
+│  [USB] ═══════════ [SWD] │
+│                          │
+│  ╔════════════════════╗  │
+│  ║  Header Pins       ║  │
+│  ║  (40 pins total)   ║  │
+│  ╚════════════════════╝  │
+│                          │
+│  [3.3V] [5V] [GND]       │
+└──────────────────────────┘
+
+Specs:
+- 72 MHz ARM Cortex-M3
+- 64 KB Flash, 20 KB RAM
+- 37 GPIO pins
+- 2x SPI, 2x I2C, 3x USART
+- 12-bit ADC, 2x DAC
+- Price: ~$2
+</code></pre>
+<h2 id="development-setup"><a class="header" href="#development-setup">Development Setup</a></h2>
+<h3 id="stm32cubeide-recommended"><a class="header" href="#stm32cubeide-recommended">STM32CubeIDE (Recommended)</a></h3>
+<pre><code class="language-bash"># Download from ST website:
+# https://www.st.com/en/development-tools/stm32cubeide.html
+
+# Linux installation:
+sudo chmod +x st-stm32cubeide_*.sh
+sudo ./st-stm32cubeide_*.sh
+
+# Install udev rules for ST-LINK
+sudo cp ~/STMicroelectronics/STM32Cube/STM32CubeIDE/Drivers/rules/*.* /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+</code></pre>
+<h3 id="alternative-command-line-setup"><a class="header" href="#alternative-command-line-setup">Alternative: Command Line Setup</a></h3>
+<pre><code class="language-bash"># Install ARM toolchain
+sudo apt install gcc-arm-none-eabi gdb-multiarch
+
+# Install OpenOCD (programming/debugging)
+sudo apt install openocd
+
+# Install st-link utilities
+sudo apt install stlink-tools
+
+# Verify installation
+arm-none-eabi-gcc --version
+openocd --version
+st-info --version
+</code></pre>
+<h3 id="platformio-setup"><a class="header" href="#platformio-setup">PlatformIO Setup</a></h3>
+<pre><code class="language-bash">pip install platformio
+
+# Create project
+pio init --board nucleo_f401re
+
+# platformio.ini
+[env:nucleo_f401re]
+platform = ststm32
+board = nucleo_f401re
+framework = arduino
+# or framework = stm32cube
+</code></pre>
+<h2 id="stm32cubemx"><a class="header" href="#stm32cubemx">STM32CubeMX</a></h2>
+<p>STM32CubeMX is a graphical configuration tool that generates initialization code for STM32 microcontrollers.</p>
+<h3 id="creating-a-project"><a class="header" href="#creating-a-project">Creating a Project</a></h3>
+<ol>
+<li>
+<p><strong>Start New Project</strong></p>
+<ul>
+<li>File &gt; New Project</li>
+<li>Select your MCU or board</li>
+<li>Click "Start Project"</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure Clock</strong></p>
+<ul>
+<li>Clock Configuration tab</li>
+<li>Set HSE/HSI source</li>
+<li>Configure PLL multipliers</li>
+<li>Set system clock (HCLK)</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure Peripherals</strong></p>
+<ul>
+<li>Pinout &amp; Configuration tab</li>
+<li>Click on pins to assign functions</li>
+<li>Configure peripheral parameters</li>
+</ul>
+</li>
+<li>
+<p><strong>Generate Code</strong></p>
+<ul>
+<li>Project Manager tab</li>
+<li>Set project name and location</li>
+<li>Select toolchain (STM32CubeIDE, Makefile, etc.)</li>
+<li>Click "Generate Code"</li>
+</ul>
+</li>
+</ol>
+<h3 id="example-blink-led-configuration"><a class="header" href="#example-blink-led-configuration">Example: Blink LED Configuration</a></h3>
+<pre><code>1. Pinout Configuration:
+   - Find LED pin (e.g., PC13 on Blue Pill)
+   - Set as GPIO_Output
+   - Label it "LED"
+
+2. GPIO Configuration:
+   - Mode: Output Push Pull
+   - Pull-up/Pull-down: No pull-up and no pull-down
+   - Maximum output speed: Low
+   - User Label: LED
+
+3. Clock Configuration:
+   - HSE: 8 MHz (external crystal)
+   - PLL: ×9 (72 MHz system clock)
+
+4. Generate Code
+</code></pre>
+<h3 id="project-structure"><a class="header" href="#project-structure">Project Structure</a></h3>
+<pre><code>project/
+├── Core/
+│   ├── Inc/
+│   │   ├── main.h
+│   │   ├── stm32f1xx_it.h
+│   │   └── stm32f1xx_hal_conf.h
+│   └── Src/
+│       ├── main.c
+│       ├── stm32f1xx_it.c
+│       └── system_stm32f1xx.c
+├── Drivers/
+│   ├── STM32F1xx_HAL_Driver/
+│   └── CMSIS/
+└── Makefile
+</code></pre>
+<h2 id="hal-programming"><a class="header" href="#hal-programming">HAL Programming</a></h2>
+<h3 id="basic-hal-blink"><a class="header" href="#basic-hal-blink">Basic HAL Blink</a></h3>
+<pre><code class="language-c">/* main.c - Generated by CubeMX */
+#include "main.h"
+
+GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+
+int main(void) {
+    /* Initialize HAL Library */
+    HAL_Init();
+    
+    /* Configure system clock */
+    SystemClock_Config();
+    
+    /* Initialize GPIO */
+    MX_GPIO_Init();
+    
+    /* Infinite loop */
+    while (1) {
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        HAL_Delay(1000);
+    }
+}
+
+static void MX_GPIO_Init(void) {
+    /* Enable GPIO Clock */
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    
+    /* Configure GPIO pin */
+    GPIO_InitStruct.Pin = GPIO_PIN_13;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOC, &amp;GPIO_InitStruct);
+}
+
+void SystemClock_Config(void) {
+    /* Generated by CubeMX - configures clocks */
+}
+</code></pre>
+<h3 id="gpio-functions"><a class="header" href="#gpio-functions">GPIO Functions</a></h3>
+<pre><code class="language-c">/* Write pin */
+HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);    // High
+HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);  // Low
+
+/* Toggle pin */
+HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+
+/* Read pin */
+GPIO_PinState state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+
+/* External interrupt */
+HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);  // Call in ISR
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);  // Override this
+</code></pre>
+<h3 id="button-with-interrupt"><a class="header" href="#button-with-interrupt">Button with Interrupt</a></h3>
+<pre><code class="language-c">/* Configure button with external interrupt in CubeMX:
+   PA0 -&gt; GPIO_EXTI0
+   Mode: External Interrupt Mode with Rising edge trigger detection
+   Pull-up: Pull-up
+   
+   In NVIC tab: Enable EXTI line0 interrupt
+*/
+
+/* main.c */
+volatile uint8_t button_pressed = 0;
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    
+    while (1) {
+        if (button_pressed) {
+            button_pressed = 0;
+            HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        }
+    }
+}
+
+/* Interrupt callback - implement this */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == GPIO_PIN_0) {
+        button_pressed = 1;
+    }
+}
+
+/* stm32f1xx_it.c - Generated by CubeMX */
+void EXTI0_IRQHandler(void) {
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+}
+</code></pre>
+<h3 id="uart-communication"><a class="header" href="#uart-communication">UART Communication</a></h3>
+<pre><code class="language-c">/* Configure UART in CubeMX:
+   USART1: PA9 (TX), PA10 (RX)
+   Baud Rate: 115200
+   Word Length: 8 Bits
+   Stop Bits: 1
+   Parity: None
+*/
+
+UART_HandleTypeDef huart1;
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_USART1_UART_Init();
+    
+    uint8_t msg[] = "Hello, STM32!\r\n";
+    HAL_UART_Transmit(&amp;huart1, msg, sizeof(msg)-1, HAL_MAX_DELAY);
+    
+    uint8_t rx_buffer[10];
+    while (1) {
+        /* Blocking receive */
+        HAL_UART_Receive(&amp;huart1, rx_buffer, 1, HAL_MAX_DELAY);
+        
+        /* Echo back */
+        HAL_UART_Transmit(&amp;huart1, rx_buffer, 1, HAL_MAX_DELAY);
+    }
+}
+
+/* printf redirect */
+int _write(int file, char *ptr, int len) {
+    HAL_UART_Transmit(&amp;huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    return len;
+}
+</code></pre>
+<h3 id="adc-reading"><a class="header" href="#adc-reading">ADC Reading</a></h3>
+<pre><code class="language-c">/* Configure ADC in CubeMX:
+   ADC1, Channel 0 (PA0)
+   Resolution: 12 bits
+   Continuous Conversion: Disabled
+*/
+
+ADC_HandleTypeDef hadc1;
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_ADC1_Init();
+    
+    while (1) {
+        HAL_ADC_Start(&amp;hadc1);
+        HAL_ADC_PollForConversion(&amp;hadc1, HAL_MAX_DELAY);
+        uint32_t adc_value = HAL_ADC_GetValue(&amp;hadc1);
+        
+        /* Convert to voltage (3.3V reference, 12-bit) */
+        float voltage = (adc_value * 3.3f) / 4096.0f;
+        
+        printf("ADC: %lu, Voltage: %.2f V\r\n", adc_value, voltage);
+        
+        HAL_Delay(1000);
+    }
+}
+</code></pre>
+<h3 id="pwm-output"><a class="header" href="#pwm-output">PWM Output</a></h3>
+<pre><code class="language-c">/* Configure Timer in CubeMX:
+   TIM2, Channel 1 (PA0)
+   Mode: PWM Generation CH1
+   Prescaler: 72-1 (1 MHz timer clock)
+   Counter Period: 1000-1 (1 kHz PWM)
+*/
+
+TIM_HandleTypeDef htim2;
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_TIM2_Init();
+    
+    /* Start PWM */
+    HAL_TIM_PWM_Start(&amp;htim2, TIM_CHANNEL_1);
+    
+    while (1) {
+        /* Fade in */
+        for (uint16_t duty = 0; duty &lt;= 1000; duty += 10) {
+            __HAL_TIM_SET_COMPARE(&amp;htim2, TIM_CHANNEL_1, duty);
+            HAL_Delay(10);
+        }
+        
+        /* Fade out */
+        for (uint16_t duty = 1000; duty &gt; 0; duty -= 10) {
+            __HAL_TIM_SET_COMPARE(&amp;htim2, TIM_CHANNEL_1, duty);
+            HAL_Delay(10);
+        }
+    }
+}
+</code></pre>
+<h3 id="i2c-communication"><a class="header" href="#i2c-communication">I2C Communication</a></h3>
+<pre><code class="language-c">/* Configure I2C in CubeMX:
+   I2C1: PB6 (SCL), PB7 (SDA)
+   Speed: 100 kHz (Standard Mode)
+*/
+
+I2C_HandleTypeDef hi2c1;
+
+#define DEVICE_ADDR 0x68 &lt;&lt; 1  // 7-bit address shifted
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_I2C1_Init();
+    
+    uint8_t tx_data = 0x00;
+    uint8_t rx_data[2];
+    
+    while (1) {
+        /* Write register address */
+        HAL_I2C_Master_Transmit(&amp;hi2c1, DEVICE_ADDR, &amp;tx_data, 1, HAL_MAX_DELAY);
+        
+        /* Read data */
+        HAL_I2C_Master_Receive(&amp;hi2c1, DEVICE_ADDR, rx_data, 2, HAL_MAX_DELAY);
+        
+        HAL_Delay(1000);
+    }
+}
+</code></pre>
+<h3 id="spi-communication"><a class="header" href="#spi-communication">SPI Communication</a></h3>
+<pre><code class="language-c">/* Configure SPI in CubeMX:
+   SPI1: PA5 (SCK), PA6 (MISO), PA7 (MOSI)
+   Mode: Master
+   Baud Rate Prescaler: 32
+   Data Size: 8 Bits
+*/
+
+SPI_HandleTypeDef hspi1;
+
+#define CS_PIN GPIO_PIN_4
+#define CS_PORT GPIOA
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_SPI1_Init();
+    MX_GPIO_Init();  // CS pin
+    
+    uint8_t tx_data[] = {0x01, 0x02, 0x03};
+    uint8_t rx_data[3];
+    
+    while (1) {
+        /* Select device */
+        HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET);
+        
+        /* Transfer data */
+        HAL_SPI_TransmitReceive(&amp;hspi1, tx_data, rx_data, 3, HAL_MAX_DELAY);
+        
+        /* Deselect device */
+        HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_SET);
+        
+        HAL_Delay(1000);
+    }
+}
+</code></pre>
+<h2 id="bare-metal-programming"><a class="header" href="#bare-metal-programming">Bare Metal Programming</a></h2>
+<h3 id="direct-register-access"><a class="header" href="#direct-register-access">Direct Register Access</a></h3>
+<pre><code class="language-c">/* Blink LED without HAL - STM32F103 */
+#include "stm32f1xx.h"
+
+int main(void) {
+    /* Enable GPIOC clock */
+    RCC-&gt;APB2ENR |= RCC_APB2ENR_IOPCEN;
+    
+    /* Configure PC13 as output push-pull, max speed 2 MHz */
+    GPIOC-&gt;CRH &amp;= ~(GPIO_CRH_MODE13 | GPIO_CRH_CNF13);
+    GPIOC-&gt;CRH |= GPIO_CRH_MODE13_1;  // Output mode, 2 MHz
+    
+    while (1) {
+        /* Toggle LED */
+        GPIOC-&gt;ODR ^= GPIO_ODR_ODR13;
+        
+        /* Delay */
+        for (volatile uint32_t i = 0; i &lt; 1000000; i++);
+    }
+}
+</code></pre>
+<h3 id="gpio-register-operations"><a class="header" href="#gpio-register-operations">GPIO Register Operations</a></h3>
+<pre><code class="language-c">/* Set pin high */
+GPIOC-&gt;BSRR = GPIO_BSRR_BS13;    // Bit Set
+
+/* Set pin low */
+GPIOC-&gt;BSRR = GPIO_BSRR_BR13;    // Bit Reset
+
+/* Toggle pin */
+GPIOC-&gt;ODR ^= GPIO_ODR_ODR13;
+
+/* Read pin */
+uint32_t state = GPIOA-&gt;IDR &amp; GPIO_IDR_IDR0;
+</code></pre>
+<h3 id="uart-bare-metal"><a class="header" href="#uart-bare-metal">UART Bare Metal</a></h3>
+<pre><code class="language-c">/* Initialize UART1 - 115200 baud, 72 MHz clock */
+void UART1_Init(void) {
+    /* Enable clocks */
+    RCC-&gt;APB2ENR |= RCC_APB2ENR_USART1EN | RCC_APB2ENR_IOPAEN;
+    
+    /* Configure PA9 (TX) as alternate function push-pull */
+    GPIOA-&gt;CRH &amp;= ~(GPIO_CRH_MODE9 | GPIO_CRH_CNF9);
+    GPIOA-&gt;CRH |= GPIO_CRH_MODE9_1 | GPIO_CRH_CNF9_1;
+    
+    /* Configure PA10 (RX) as input floating */
+    GPIOA-&gt;CRH &amp;= ~(GPIO_CRH_MODE10 | GPIO_CRH_CNF10);
+    GPIOA-&gt;CRH |= GPIO_CRH_CNF10_0;
+    
+    /* Configure UART */
+    USART1-&gt;BRR = 0x271;  // 115200 baud at 72 MHz
+    USART1-&gt;CR1 = USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
+}
+
+void UART1_SendChar(char c) {
+    while (!(USART1-&gt;SR &amp; USART_SR_TXE));
+    USART1-&gt;DR = c;
+}
+
+char UART1_ReceiveChar(void) {
+    while (!(USART1-&gt;SR &amp; USART_SR_RXNE));
+    return USART1-&gt;DR;
+}
+</code></pre>
+<h3 id="timer-interrupt"><a class="header" href="#timer-interrupt">Timer Interrupt</a></h3>
+<pre><code class="language-c">/* Configure TIM2 for 1 second interrupt */
+void TIM2_Init(void) {
+    /* Enable TIM2 clock */
+    RCC-&gt;APB1ENR |= RCC_APB1ENR_TIM2EN;
+    
+    /* Configure timer:
+       72 MHz / 7200 = 10 kHz
+       10 kHz / 10000 = 1 Hz (1 second)
+    */
+    TIM2-&gt;PSC = 7200 - 1;      // Prescaler
+    TIM2-&gt;ARR = 10000 - 1;     // Auto-reload
+    TIM2-&gt;DIER |= TIM_DIER_UIE;  // Update interrupt enable
+    TIM2-&gt;CR1 |= TIM_CR1_CEN;    // Enable timer
+    
+    /* Enable interrupt in NVIC */
+    NVIC_EnableIRQ(TIM2_IRQn);
+}
+
+/* Interrupt handler */
+void TIM2_IRQHandler(void) {
+    if (TIM2-&gt;SR &amp; TIM_SR_UIF) {
+        TIM2-&gt;SR &amp;= ~TIM_SR_UIF;  // Clear interrupt flag
+        
+        /* Toggle LED */
+        GPIOC-&gt;ODR ^= GPIO_ODR_ODR13;
+    }
+}
+</code></pre>
+<h2 id="common-peripherals"><a class="header" href="#common-peripherals">Common Peripherals</a></h2>
+<h3 id="dma-transfer"><a class="header" href="#dma-transfer">DMA Transfer</a></h3>
+<pre><code class="language-c">/* Configure DMA for UART TX in CubeMX:
+   DMA1, Channel 4
+   Direction: Memory to Peripheral
+   Mode: Normal
+*/
+
+uint8_t tx_buffer[] = "Hello from DMA!\r\n";
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_USART1_UART_Init();
+    MX_DMA_Init();
+    
+    while (1) {
+        HAL_UART_Transmit_DMA(&amp;huart1, tx_buffer, sizeof(tx_buffer)-1);
+        HAL_Delay(1000);
+    }
+}
+
+/* DMA transfer complete callback */
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+    /* Transfer complete - can start next */
+}
+</code></pre>
+<h3 id="rtc-real-time-clock"><a class="header" href="#rtc-real-time-clock">RTC (Real-Time Clock)</a></h3>
+<pre><code class="language-c">/* Configure RTC in CubeMX:
+   RTC Activated
+   Clock Source: LSE (32.768 kHz)
+*/
+
+RTC_TimeTypeDef sTime;
+RTC_DateTypeDef sDate;
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_RTC_Init();
+    
+    /* Set time */
+    sTime.Hours = 12;
+    sTime.Minutes = 0;
+    sTime.Seconds = 0;
+    HAL_RTC_SetTime(&amp;hrtc, &amp;sTime, RTC_FORMAT_BIN);
+    
+    /* Set date */
+    sDate.Year = 24;
+    sDate.Month = 1;
+    sDate.Date = 15;
+    HAL_RTC_SetDate(&amp;hrtc, &amp;sDate, RTC_FORMAT_BIN);
+    
+    while (1) {
+        HAL_RTC_GetTime(&amp;hrtc, &amp;sTime, RTC_FORMAT_BIN);
+        HAL_RTC_GetDate(&amp;hrtc, &amp;sDate, RTC_FORMAT_BIN);
+        
+        printf("%02d:%02d:%02d\r\n", 
+               sTime.Hours, sTime.Minutes, sTime.Seconds);
+        
+        HAL_Delay(1000);
+    }
+}
+</code></pre>
+<h3 id="watchdog-timer"><a class="header" href="#watchdog-timer">Watchdog Timer</a></h3>
+<pre><code class="language-c">/* Configure IWDG in CubeMX:
+   Independent Watchdog
+   Prescaler: 32
+   Counter Reload Value: 4095 (max ~4 seconds)
+*/
+
+IWDG_HandleTypeDef hiwdg;
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_IWDG_Init();
+    
+    while (1) {
+        /* Main program tasks */
+        
+        /* Refresh watchdog */
+        HAL_IWDG_Refresh(&amp;hiwdg);
+        
+        HAL_Delay(100);
+    }
+}
+</code></pre>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="freertos-integration"><a class="header" href="#freertos-integration">FreeRTOS Integration</a></h3>
+<pre><code class="language-c">/* Enable FreeRTOS in CubeMX */
+#include "FreeRTOS.h"
+#include "task.h"
+
+void Task1(void *argument);
+void Task2(void *argument);
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    
+    /* Create tasks */
+    xTaskCreate(Task1, "Task1", 128, NULL, 1, NULL);
+    xTaskCreate(Task2, "Task2", 128, NULL, 1, NULL);
+    
+    /* Start scheduler */
+    vTaskStartScheduler();
+    
+    /* Never reached */
+    while (1);
+}
+
+void Task1(void *argument) {
+    while (1) {
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+}
+
+void Task2(void *argument) {
+    while (1) {
+        /* Other task */
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+</code></pre>
+<h3 id="low-power-modes"><a class="header" href="#low-power-modes">Low Power Modes</a></h3>
+<pre><code class="language-c">/* Enter Stop mode */
+HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+/* Enter Standby mode */
+HAL_PWR_EnterSTANDBYMode();
+
+/* Enter Sleep mode */
+HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+</code></pre>
+<h3 id="bootloader"><a class="header" href="#bootloader">Bootloader</a></h3>
+<pre><code class="language-c">/* Jump to bootloader (system memory) */
+void JumpToBootloader(void) {
+    void (*SysMemBootJump)(void);
+    
+    /* Set bootloader address (STM32F1: 0x1FFFF000) */
+    volatile uint32_t addr = 0x1FFFF000;
+    
+    /* Disable interrupts */
+    __disable_irq();
+    
+    /* Remap system memory to 0x00000000 */
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
+    __HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();
+    
+    /* Set jump address */
+    SysMemBootJump = (void (*)(void)) (*((uint32_t *)(addr + 4)));
+    
+    /* Set main stack pointer */
+    __set_MSP(*(uint32_t *)addr);
+    
+    /* Jump */
+    SysMemBootJump();
+    
+    while (1);
+}
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Use CubeMX</strong>: Generate initialization code automatically</li>
+<li><strong>HAL vs LL</strong>: HAL for ease, LL for performance</li>
+<li><strong>Interrupts</strong>: Keep ISRs short, use callbacks</li>
+<li><strong>DMA</strong>: Use for high-speed data transfers</li>
+<li><strong>Power</strong>: Disable unused peripherals</li>
+<li><strong>Debugging</strong>: Use SWD with ST-LINK</li>
+<li><strong>Version Control</strong>: Track CubeMX .ioc files</li>
+</ol>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<p><strong>Debugger Not Connecting:</strong></p>
+<pre><code class="language-bash"># Check ST-LINK connection
+st-info --probe
+
+# Reset ST-LINK
+st-flash reset
+
+# Update ST-LINK firmware
+# Use STM32 ST-LINK Utility
+</code></pre>
+<p><strong>Clock Configuration:</strong></p>
+<ul>
+<li>Verify HSE frequency matches hardware</li>
+<li>Check PLL multipliers for target frequency</li>
+<li>Enable required peripheral clocks</li>
+</ul>
+<p><strong>GPIO Not Working:</strong></p>
+<ul>
+<li>Enable GPIO clock first</li>
+<li>Check pin alternate functions</li>
+<li>Verify pin configuration (mode, speed, pull)</li>
+</ul>
+<p><strong>Printf Not Working:</strong></p>
+<pre><code class="language-c">// Enable semi-hosting or retarget _write()
+int _write(int file, char *ptr, int len) {
+    HAL_UART_Transmit(&amp;huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    return len;
+}
+</code></pre>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<ul>
+<li><strong>STM32 Website</strong>: https://www.st.com/stm32</li>
+<li><strong>CubeMX</strong>: https://www.st.com/en/development-tools/stm32cubemx.html</li>
+<li><strong>HAL Documentation</strong>: STM32 HAL user manual per family</li>
+<li><strong>Reference Manuals</strong>: Detailed peripheral descriptions</li>
+<li><strong>Community</strong>: https://community.st.com/</li>
+</ul>
+<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
+<ul>
+<li><a href="arm.html">ARM Cortex-M Architecture</a></li>
+<li><a href="gpio.html">GPIO Programming</a></li>
+<li><a href="uart.html">UART Communication</a></li>
+<li><a href="spi.html">SPI Protocol</a></li>
+<li><a href="i2c.html">I2C Protocol</a></li>
+<li><a href="../rtos/freertos.html">FreeRTOS</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

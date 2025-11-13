@@ -177,7 +177,494 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="udp-user-datagram-protocol"><a class="header" href="#udp-user-datagram-protocol">UDP (User Datagram Protocol)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>UDP is a connectionless transport layer protocol that provides fast, unreliable data transmission. Unlike TCP, UDP doesn't guarantee delivery, ordering, or error checking, making it ideal for time-sensitive applications where speed matters more than reliability.</p>
+<h2 id="udp-vs-tcp"><a class="header" href="#udp-vs-tcp">UDP vs TCP</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>UDP</th><th>TCP</th></tr></thead><tbody>
+<tr><td><strong>Connection</strong></td><td>Connectionless</td><td>Connection-oriented</td></tr>
+<tr><td><strong>Reliability</strong></td><td>Unreliable (no guarantee)</td><td>Reliable (guaranteed delivery)</td></tr>
+<tr><td><strong>Ordering</strong></td><td>No ordering</td><td>Ordered delivery</td></tr>
+<tr><td><strong>Speed</strong></td><td>Fast (low overhead)</td><td>Slower (more overhead)</td></tr>
+<tr><td><strong>Header Size</strong></td><td>8 bytes</td><td>20-60 bytes</td></tr>
+<tr><td><strong>Error Checking</strong></td><td>Optional checksum</td><td>Mandatory checksum + retransmission</td></tr>
+<tr><td><strong>Flow Control</strong></td><td>None</td><td>Yes (window-based)</td></tr>
+<tr><td><strong>Congestion Control</strong></td><td>None</td><td>Yes</td></tr>
+<tr><td><strong>Use Cases</strong></td><td>Streaming, gaming, DNS, VoIP</td><td>File transfer, web, email</td></tr>
+</tbody></table>
+</div>
+<h2 id="udp-packet-format"><a class="header" href="#udp-packet-format">UDP Packet Format</a></h2>
+<pre><code> 0      7 8     15 16    23 24    31
++--------+--------+--------+--------+
+|     Source      |   Destination   |
+|      Port       |      Port       |
++--------+--------+--------+--------+
+|                 |                 |
+|     Length      |    Checksum     |
++--------+--------+--------+--------+
+|                                   |
+|          Data octets ...          |
++-----------------------------------+
+</code></pre>
+<h3 id="header-fields-8-bytes-total"><a class="header" href="#header-fields-8-bytes-total">Header Fields (8 bytes total)</a></h3>
+<ol>
+<li><strong>Source Port</strong> (16 bits): Port number of sender (optional, can be 0)</li>
+<li><strong>Destination Port</strong> (16 bits): Port number of receiver</li>
+<li><strong>Length</strong> (16 bits): Length of UDP header + data (minimum 8 bytes)</li>
+<li><strong>Checksum</strong> (16 bits): Error checking (optional in IPv4, mandatory in IPv6)</li>
+</ol>
+<h3 id="example-udp-header"><a class="header" href="#example-udp-header">Example UDP Header</a></h3>
+<pre><code>Source Port: 53210 (0xCFCA)
+Destination Port: 53 (0x0035) - DNS
+Length: 512 bytes
+Checksum: 0x1A2B
+</code></pre>
+<p><strong>Hexadecimal representation:</strong></p>
+<pre><code>CF CA 00 35 02 00 1A 2B
+[... 504 bytes of data ...]
+</code></pre>
+<h2 id="how-udp-works"><a class="header" href="#how-udp-works">How UDP Works</a></h2>
+<h3 id="sending-data"><a class="header" href="#sending-data">Sending Data</a></h3>
+<pre><code>Application → Socket → UDP Layer → IP Layer → Network
+
+1. Application writes data to UDP socket
+2. UDP adds 8-byte header
+3. UDP passes datagram to IP layer
+4. IP sends packet to destination
+5. No acknowledgment expected
+</code></pre>
+<h3 id="receiving-data"><a class="header" href="#receiving-data">Receiving Data</a></h3>
+<pre><code>Network → IP Layer → UDP Layer → Socket → Application
+
+1. IP receives packet
+2. IP passes to UDP based on protocol number (17)
+3. UDP validates checksum (if present)
+4. UDP delivers to application based on port
+5. If port not listening, send ICMP "Port Unreachable"
+</code></pre>
+<h2 id="udp-communication-flow"><a class="header" href="#udp-communication-flow">UDP Communication Flow</a></h2>
+<h3 id="one-way-communication-fire-and-forget"><a class="header" href="#one-way-communication-fire-and-forget">One-Way Communication (Fire and Forget)</a></h3>
+<pre><code>Client                          Server (port 9000)
+  |                                |
+  |  UDP Packet (Hello)            |
+  |-------------------------------&gt;|
+  |                                |
+  |  UDP Packet (World)            |
+  |-------------------------------&gt;|
+  |                                |
+
+No handshake, no acknowledgment
+</code></pre>
+<h3 id="two-way-communication-request-response"><a class="header" href="#two-way-communication-request-response">Two-Way Communication (Request-Response)</a></h3>
+<pre><code>Client                          Server
+  |                                |
+  |  DNS Query (Port 53)           |
+  |-------------------------------&gt;|
+  |                                |
+  |  DNS Response                  |
+  |&lt;-------------------------------|
+  |                                |
+
+Application must handle timeouts and retries
+</code></pre>
+<h2 id="udp-checksum-calculation"><a class="header" href="#udp-checksum-calculation">UDP Checksum Calculation</a></h2>
+<h3 id="pseudo-header-for-checksum-calculation"><a class="header" href="#pseudo-header-for-checksum-calculation">Pseudo Header (for checksum calculation)</a></h3>
+<pre><code>+--------+--------+--------+--------+
+|          Source IP Address        |
++--------+--------+--------+--------+
+|       Destination IP Address      |
++--------+--------+--------+--------+
+|  zero  |Protocol| UDP Length      |
++--------+--------+--------+--------+
+</code></pre>
+<h3 id="checksum-process"><a class="header" href="#checksum-process">Checksum Process</a></h3>
+<ol>
+<li>Create pseudo header from IP information</li>
+<li>Concatenate: Pseudo header + UDP header + data</li>
+<li>Divide into 16-bit words</li>
+<li>Sum all 16-bit words</li>
+<li>Add carry bits to result</li>
+<li>Take one's complement</li>
+</ol>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python">def calculate_checksum(data):
+    # Sum all 16-bit words
+    total = sum(struct.unpack("!%dH" % (len(data)//2), data))
+
+    # Add carry
+    total = (total &gt;&gt; 16) + (total &amp; 0xffff)
+    total += (total &gt;&gt; 16)
+
+    # One's complement
+    return ~total &amp; 0xffff
+</code></pre>
+<h2 id="common-udp-ports"><a class="header" href="#common-udp-ports">Common UDP Ports</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Port</th><th>Service</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><strong>53</strong></td><td>DNS</td><td>Domain name resolution</td></tr>
+<tr><td><strong>67/68</strong></td><td>DHCP</td><td>Dynamic IP configuration</td></tr>
+<tr><td><strong>69</strong></td><td>TFTP</td><td>Trivial File Transfer</td></tr>
+<tr><td><strong>123</strong></td><td>NTP</td><td>Network Time Protocol</td></tr>
+<tr><td><strong>161/162</strong></td><td>SNMP</td><td>Network management</td></tr>
+<tr><td><strong>514</strong></td><td>Syslog</td><td>System logging</td></tr>
+<tr><td><strong>520</strong></td><td>RIP</td><td>Routing protocol</td></tr>
+<tr><td><strong>1900</strong></td><td>SSDP</td><td>Service discovery (UPnP)</td></tr>
+<tr><td><strong>3478</strong></td><td>STUN</td><td>NAT traversal</td></tr>
+<tr><td><strong>5353</strong></td><td>mDNS</td><td>Multicast DNS</td></tr>
+</tbody></table>
+</div>
+<h2 id="udp-use-cases"><a class="header" href="#udp-use-cases">UDP Use Cases</a></h2>
+<h3 id="1-dns-domain-name-system"><a class="header" href="#1-dns-domain-name-system">1. DNS (Domain Name System)</a></h3>
+<pre><code>Client sends UDP query to port 53:
++----------------+
+| DNS Query      |
+| example.com?   |
++----------------+
+
+Server responds:
++----------------+
+| DNS Response   |
+| 93.184.216.34  |
++----------------+
+
+Fast lookup, retry if no response
+</code></pre>
+<h3 id="2-video-streaming"><a class="header" href="#2-video-streaming">2. Video Streaming</a></h3>
+<pre><code>Server sends video frames continuously:
+Frame 1 → Frame 2 → Frame 3 → Frame 4 → Frame 5
+
+If Frame 3 is lost, continue with Frame 4
+(Old frame is useless for live streaming)
+</code></pre>
+<h3 id="3-online-gaming"><a class="header" href="#3-online-gaming">3. Online Gaming</a></h3>
+<pre><code>Game Client → Server: Player position updates (60 FPS)
+Update 1: Player at (100, 200)
+Update 2: Player at (101, 201)
+Update 3: [LOST]
+Update 4: Player at (103, 203)
+
+Lost packet is okay - next update corrects position
+</code></pre>
+<h3 id="4-voip-voice-over-ip"><a class="header" href="#4-voip-voice-over-ip">4. VoIP (Voice over IP)</a></h3>
+<pre><code>Continuous audio stream:
+Packet 1: Audio 0-20ms
+Packet 2: Audio 20-40ms
+Packet 3: Audio 40-60ms [LOST]
+Packet 4: Audio 60-80ms
+
+Lost packet = brief audio glitch
+Retransmission would cause worse delay
+</code></pre>
+<h3 id="5-dhcp-ip-address-assignment"><a class="header" href="#5-dhcp-ip-address-assignment">5. DHCP (IP Address Assignment)</a></h3>
+<pre><code>Client                          Server
+  |                                |
+  | DHCP Discover (broadcast)      |
+  |-------------------------------&gt;|
+  |                                |
+  | DHCP Offer                     |
+  |&lt;-------------------------------|
+  |                                |
+  | DHCP Request                   |
+  |-------------------------------&gt;|
+  |                                |
+  | DHCP ACK                       |
+  |&lt;-------------------------------|
+</code></pre>
+<h2 id="udp-socket-programming"><a class="header" href="#udp-socket-programming">UDP Socket Programming</a></h2>
+<h3 id="python-udp-server"><a class="header" href="#python-udp-server">Python UDP Server</a></h3>
+<pre><code class="language-python">import socket
+
+# Create UDP socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+# Bind to address and port
+server_address = ('localhost', 9000)
+sock.bind(server_address)
+
+print(f"UDP server listening on {server_address}")
+
+while True:
+    # Receive data (up to 1024 bytes)
+    data, client_address = sock.recvfrom(1024)
+    print(f"Received {len(data)} bytes from {client_address}")
+    print(f"Data: {data.decode()}")
+
+    # Send response
+    sock.sendto(b"Message received", client_address)
+</code></pre>
+<h3 id="python-udp-client"><a class="header" href="#python-udp-client">Python UDP Client</a></h3>
+<pre><code class="language-python">import socket
+
+# Create UDP socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+server_address = ('localhost', 9000)
+
+try:
+    # Send data
+    message = b"Hello, UDP Server!"
+    sock.sendto(message, server_address)
+
+    # Receive response (with timeout)
+    sock.settimeout(5.0)
+    data, server = sock.recvfrom(1024)
+    print(f"Received: {data.decode()}")
+
+except socket.timeout:
+    print("No response from server")
+finally:
+    sock.close()
+</code></pre>
+<h3 id="c-udp-server"><a class="header" href="#c-udp-server">C UDP Server</a></h3>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+#define PORT 9000
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sockfd;
+    char buffer[BUFFER_SIZE];
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+
+    // Create UDP socket
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+    // Setup server address
+    memset(&amp;server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    // Bind socket
+    bind(sockfd, (struct sockaddr*)&amp;server_addr, sizeof(server_addr));
+
+    printf("UDP server listening on port %d\n", PORT);
+
+    while(1) {
+        // Receive data
+        int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0,
+                        (struct sockaddr*)&amp;client_addr, &amp;addr_len);
+        buffer[n] = '\0';
+
+        printf("Received: %s\n", buffer);
+
+        // Send response
+        sendto(sockfd, "ACK", 3, 0,
+               (struct sockaddr*)&amp;client_addr, addr_len);
+    }
+
+    return 0;
+}
+</code></pre>
+<h2 id="udp-broadcast-and-multicast"><a class="header" href="#udp-broadcast-and-multicast">UDP Broadcast and Multicast</a></h2>
+<h3 id="broadcast-one-to-all-in-subnet"><a class="header" href="#broadcast-one-to-all-in-subnet">Broadcast (One-to-All in subnet)</a></h3>
+<pre><code class="language-python">import socket
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+# Send to broadcast address
+broadcast_address = ('255.255.255.255', 9000)
+sock.sendto(b"Broadcast message", broadcast_address)
+</code></pre>
+<h3 id="multicast-one-to-many-selected"><a class="header" href="#multicast-one-to-many-selected">Multicast (One-to-Many selected)</a></h3>
+<pre><code class="language-python">import socket
+import struct
+
+MCAST_GRP = '224.1.1.1'
+MCAST_PORT = 5007
+
+# Sender
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.sendto(b"Multicast message", (MCAST_GRP, MCAST_PORT))
+
+# Receiver
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(('', MCAST_PORT))
+
+# Join multicast group
+mreq = struct.pack("4sl", socket.inet_aton(MCAST_GRP),
+                   socket.INADDR_ANY)
+sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+
+data, address = sock.recvfrom(1024)
+</code></pre>
+<h2 id="udp-maximum-packet-size"><a class="header" href="#udp-maximum-packet-size">UDP Maximum Packet Size</a></h2>
+<h3 id="theoretical-limits"><a class="header" href="#theoretical-limits">Theoretical Limits</a></h3>
+<pre><code>IPv4:
+- Max IP packet: 65,535 bytes
+- IP header: 20 bytes (minimum)
+- UDP header: 8 bytes
+- Max UDP data: 65,507 bytes
+
+IPv6:
+- Max payload (jumbogram): 4,294,967,295 bytes
+</code></pre>
+<h3 id="practical-limits-mtu"><a class="header" href="#practical-limits-mtu">Practical Limits (MTU)</a></h3>
+<pre><code>Ethernet MTU: 1500 bytes
+- IP header: 20 bytes
+- UDP header: 8 bytes
+- Safe UDP data: 1472 bytes
+
+To avoid fragmentation:
+- Stay under 1472 bytes for IPv4
+- Stay under 1452 bytes for IPv6
+</code></pre>
+<h2 id="udp-reliability-techniques"><a class="header" href="#udp-reliability-techniques">UDP Reliability Techniques</a></h2>
+<p>Since UDP doesn't provide reliability, applications must implement it:</p>
+<h3 id="1-acknowledgments"><a class="header" href="#1-acknowledgments">1. Acknowledgments</a></h3>
+<pre><code>Sender                          Receiver
+  |                                |
+  | Packet 1                       |
+  |-------------------------------&gt;|
+  |                                |
+  | ACK 1                          |
+  |&lt;-------------------------------|
+  |                                |
+  | Packet 2                       |
+  |-------------------------------&gt;|
+  |                                |
+  [timeout - no ACK received]
+  |                                |
+  | Packet 2 (resend)              |
+  |-------------------------------&gt;|
+  |                                |
+  | ACK 2                          |
+  |&lt;-------------------------------|
+</code></pre>
+<h3 id="2-sequence-numbers"><a class="header" href="#2-sequence-numbers">2. Sequence Numbers</a></h3>
+<pre><code>Application adds sequence numbers:
+Packet 1: [Seq=1][Data]
+Packet 2: [Seq=2][Data]
+Packet 3: [Seq=3][Data]
+
+Receiver detects missing packets
+Requests retransmission if needed
+</code></pre>
+<h3 id="3-timeouts-and-retries"><a class="header" href="#3-timeouts-and-retries">3. Timeouts and Retries</a></h3>
+<pre><code class="language-python">import socket
+import time
+
+def send_with_retry(sock, data, address, max_retries=3):
+    for attempt in range(max_retries):
+        sock.sendto(data, address)
+        sock.settimeout(1.0)
+
+        try:
+            response, _ = sock.recvfrom(1024)
+            return response
+        except socket.timeout:
+            print(f"Retry {attempt + 1}/{max_retries}")
+            continue
+
+    raise Exception("Max retries exceeded")
+</code></pre>
+<h2 id="udp-advantages"><a class="header" href="#udp-advantages">UDP Advantages</a></h2>
+<ol>
+<li><strong>Low Latency</strong>: No connection setup, immediate transmission</li>
+<li><strong>Low Overhead</strong>: 8-byte header vs TCP's 20+ bytes</li>
+<li><strong>No Connection State</strong>: Simpler, uses less memory</li>
+<li><strong>Broadcast/Multicast</strong>: Can send to multiple receivers</li>
+<li><strong>Fast</strong>: No waiting for acknowledgments</li>
+<li><strong>Transaction-Oriented</strong>: Good for request-response</li>
+</ol>
+<h2 id="udp-disadvantages"><a class="header" href="#udp-disadvantages">UDP Disadvantages</a></h2>
+<ol>
+<li><strong>Unreliable</strong>: Packets may be lost, duplicated, or reordered</li>
+<li><strong>No Flow Control</strong>: Can overwhelm receiver</li>
+<li><strong>No Congestion Control</strong>: Can worsen network congestion</li>
+<li><strong>No Security</strong>: No encryption (use DTLS for secure UDP)</li>
+<li><strong>Application Complexity</strong>: Must implement reliability if needed</li>
+</ol>
+<h2 id="udp-security-considerations"><a class="header" href="#udp-security-considerations">UDP Security Considerations</a></h2>
+<h3 id="vulnerabilities"><a class="header" href="#vulnerabilities">Vulnerabilities</a></h3>
+<ol>
+<li><strong>UDP Flood Attack</strong>: Overwhelm server with UDP packets</li>
+<li><strong>UDP Amplification</strong>: Small request → large response (DNS, NTP)</li>
+<li><strong>Spoofing</strong>: Easy to fake source IP (no handshake)</li>
+</ol>
+<h3 id="mitigation"><a class="header" href="#mitigation">Mitigation</a></h3>
+<pre><code>1. Rate limiting: Limit packets per second per source
+2. Firewall rules: Block unnecessary UDP ports
+3. Authentication: Verify sender identity
+4. DTLS: Encrypted UDP (Datagram TLS)
+</code></pre>
+<h3 id="dtls-datagram-tls"><a class="header" href="#dtls-datagram-tls">DTLS (Datagram TLS)</a></h3>
+<p>Secure UDP communication:</p>
+<pre><code>UDP + TLS-style encryption = DTLS
+
+Used in:
+- WebRTC
+- VPN protocols
+- IoT devices
+</code></pre>
+<h2 id="monitoring-udp-traffic"><a class="header" href="#monitoring-udp-traffic">Monitoring UDP Traffic</a></h2>
+<h3 id="using-tcpdump"><a class="header" href="#using-tcpdump">Using tcpdump</a></h3>
+<pre><code class="language-bash"># Capture UDP traffic on port 53 (DNS)
+tcpdump -i any udp port 53
+
+# Capture all UDP traffic
+tcpdump -i any udp
+
+# Save to file
+tcpdump -i any udp -w udp_capture.pcap
+
+# View UDP packet details
+tcpdump -i any udp -vv -X
+</code></pre>
+<h3 id="using-netstat"><a class="header" href="#using-netstat">Using netstat</a></h3>
+<pre><code class="language-bash"># Show UDP listening ports
+netstat -un
+
+# Show UDP statistics
+netstat -su
+
+# Show processes using UDP
+netstat -unp
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>UDP is like sending postcards:</p>
+<p><strong>TCP is like certified mail:</strong></p>
+<ul>
+<li>You get confirmation it arrived</li>
+<li>Items arrive in order</li>
+<li>Lost mail is resent</li>
+<li>But takes longer</li>
+</ul>
+<p><strong>UDP is like postcards:</strong></p>
+<ul>
+<li>Just drop it in the mailbox and go</li>
+<li>Super fast - no waiting</li>
+<li>But might get lost</li>
+<li>Might arrive out of order</li>
+<li>No way to know if it arrived</li>
+</ul>
+<p><strong>When to use UDP (postcards):</strong></p>
+<ul>
+<li>Quick questions (DNS: "What's this address?")</li>
+<li>Live streaming (watching a game - who cares about 1 missed frame?)</li>
+<li>Online games (your position updates 60 times per second)</li>
+<li>Video calls (slight glitch is better than delay)</li>
+</ul>
+<p><strong>When to use TCP (certified mail):</strong></p>
+<ul>
+<li>Important files</li>
+<li>Web pages</li>
+<li>Emails</li>
+<li>Banking transactions</li>
+</ul>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc768">RFC 768 - UDP Specification</a></li>
+<li><a href="https://www.cloudflare.com/learning/ddos/glossary/user-datagram-protocol-udp/">UDP vs TCP Explained</a></li>
+<li><a href="https://beej.us/guide/bgnet/html/">UDP Programming Guide</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

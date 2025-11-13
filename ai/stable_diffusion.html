@@ -177,7 +177,792 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="stable-diffusion"><a class="header" href="#stable-diffusion">Stable Diffusion</a></h1>
+<p>Complete guide to Stable Diffusion for image generation, from setup to advanced techniques.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation--setup">Installation &amp; Setup</a></li>
+<li><a href="#model-versions">Model Versions</a></li>
+<li><a href="#prompt-engineering">Prompt Engineering</a></li>
+<li><a href="#parameters">Parameters</a></li>
+<li><a href="#advanced-techniques">Advanced Techniques</a></li>
+<li><a href="#extensions--tools">Extensions &amp; Tools</a></li>
+<li><a href="#optimization">Optimization</a></li>
+<li><a href="#common-issues">Common Issues</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Stable Diffusion is an open-source text-to-image diffusion model capable of generating high-quality images from text descriptions. Unlike proprietary alternatives, it can run locally on consumer hardware.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Open Source</strong>: Free to use and modify</li>
+<li><strong>Local Execution</strong>: Run on your own hardware</li>
+<li><strong>Extensible</strong>: ControlNet, LoRA, extensions</li>
+<li><strong>Fast</strong>: Optimized inference with various schedulers</li>
+<li><strong>Flexible</strong>: Text-to-image, image-to-image, inpainting</li>
+</ul>
+<h2 id="installation--setup"><a class="header" href="#installation--setup">Installation &amp; Setup</a></h2>
+<h3 id="option-1-automatic1111-webui-most-popular"><a class="header" href="#option-1-automatic1111-webui-most-popular">Option 1: AUTOMATIC1111 WebUI (Most Popular)</a></h3>
+<pre><code class="language-bash"># Clone repository
+git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
+cd stable-diffusion-webui
+
+# Install (Linux/Mac)
+./webui.sh
+
+# Install (Windows)
+# Double-click webui-user.bat
+
+# With custom arguments
+# Edit webui-user.sh or webui-user.bat:
+export COMMANDLINE_ARGS="--xformers --medvram --api"
+</code></pre>
+<p><strong>System Requirements:</strong></p>
+<ul>
+<li>GPU: NVIDIA (8GB+ VRAM recommended)</li>
+<li>RAM: 16GB+ system RAM</li>
+<li>Storage: 10GB+ for models</li>
+</ul>
+<h3 id="option-2-comfyui-node-based"><a class="header" href="#option-2-comfyui-node-based">Option 2: ComfyUI (Node-Based)</a></h3>
+<pre><code class="language-bash"># Clone repository
+git clone https://github.com/comfyanonymous/ComfyUI.git
+cd ComfyUI
+
+# Install dependencies
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install -r requirements.txt
+
+# Run
+python main.py
+
+# With arguments
+python main.py --listen --port 8188
+</code></pre>
+<h3 id="option-3-python-library-diffusers"><a class="header" href="#option-3-python-library-diffusers">Option 3: Python Library (Diffusers)</a></h3>
+<pre><code class="language-bash">pip install diffusers transformers accelerate torch torchvision
+</code></pre>
+<pre><code class="language-python">from diffusers import StableDiffusionPipeline
+import torch
+
+# Load model
+model_id = "stabilityai/stable-diffusion-2-1"
+pipe = StableDiffusionPipeline.from_pretrained(
+    model_id,
+    torch_dtype=torch.float16
+)
+pipe = pipe.to("cuda")
+
+# Enable optimizations
+pipe.enable_attention_slicing()
+pipe.enable_vae_slicing()
+
+# Generate
+prompt = "a beautiful landscape"
+image = pipe(prompt).images[0]
+image.save("output.png")
+</code></pre>
+<h3 id="option-4-invoke-ai"><a class="header" href="#option-4-invoke-ai">Option 4: Invoke AI</a></h3>
+<pre><code class="language-bash">pip install invokeai
+invokeai-configure
+invokeai --web
+</code></pre>
+<h2 id="model-versions"><a class="header" href="#model-versions">Model Versions</a></h2>
+<h3 id="stable-diffusion-1x"><a class="header" href="#stable-diffusion-1x">Stable Diffusion 1.x</a></h3>
+<p><strong>SD 1.4</strong></p>
+<pre><code class="language-bash"># Download location
+models/Stable-diffusion/sd-v1-4.ckpt
+</code></pre>
+<ul>
+<li>Resolution: 512x512</li>
+<li>Training: LAION-2B subset</li>
+<li>Good for: General use</li>
+</ul>
+<p><strong>SD 1.5</strong></p>
+<pre><code class="language-bash"># Most popular 1.x version
+wget https://huggingface.co/runwayml/stable-diffusion-v1-5
+</code></pre>
+<ul>
+<li>Improved over 1.4</li>
+<li>Massive ecosystem of fine-tunes</li>
+<li>Best model support</li>
+</ul>
+<h3 id="stable-diffusion-2x"><a class="header" href="#stable-diffusion-2x">Stable Diffusion 2.x</a></h3>
+<p><strong>SD 2.0</strong></p>
+<ul>
+<li>Resolution: 768x768</li>
+<li>New text encoder (OpenCLIP)</li>
+<li>Better quality but different style</li>
+</ul>
+<p><strong>SD 2.1</strong></p>
+<pre><code class="language-python">from diffusers import StableDiffusionPipeline
+
+pipe = StableDiffusionPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-2-1",
+    torch_dtype=torch.float16
+)
+</code></pre>
+<ul>
+<li>Improvements over 2.0</li>
+<li>Recommended 2.x version</li>
+</ul>
+<h3 id="stable-diffusion-xl-sdxl"><a class="header" href="#stable-diffusion-xl-sdxl">Stable Diffusion XL (SDXL)</a></h3>
+<pre><code class="language-python">from diffusers import StableDiffusionXLPipeline
+
+# Base model
+base = StableDiffusionXLPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-xl-base-1.0",
+    torch_dtype=torch.float16,
+    variant="fp16"
+)
+base.to("cuda")
+
+# Refiner (optional, improves quality)
+refiner = StableDiffusionXLImg2ImgPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-xl-refiner-1.0",
+    torch_dtype=torch.float16,
+    variant="fp16"
+)
+refiner.to("cuda")
+
+# Generate
+image = base(prompt="a futuristic city").images[0]
+image = refiner(prompt="a futuristic city", image=image).images[0]
+</code></pre>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Resolution: 1024x1024</li>
+<li>Higher quality</li>
+<li>Better text rendering</li>
+<li>Dual text encoders</li>
+<li>Requires more VRAM (8GB+)</li>
+</ul>
+<h3 id="stable-diffusion-3"><a class="header" href="#stable-diffusion-3">Stable Diffusion 3</a></h3>
+<p>Latest version with improved architecture:</p>
+<ul>
+<li>Multimodal diffusion transformer</li>
+<li>Better prompt understanding</li>
+<li>Improved composition</li>
+</ul>
+<h2 id="prompt-engineering"><a class="header" href="#prompt-engineering">Prompt Engineering</a></h2>
+<h3 id="basic-structure"><a class="header" href="#basic-structure">Basic Structure</a></h3>
+<pre><code>[Subject] [Action/Scene] [Environment] [Lighting] [Style] [Quality]
+</code></pre>
+<h3 id="effective-prompts"><a class="header" href="#effective-prompts">Effective Prompts</a></h3>
+<pre><code>Basic:
+"a cat"
+
+Better:
+"a fluffy orange cat sitting on a windowsill"
+
+Best:
+"a fluffy orange tabby cat sitting on a wooden windowsill, looking outside at falling snow, soft natural lighting, cozy atmosphere, detailed fur texture, photorealistic, 4k, highly detailed"
+</code></pre>
+<h3 id="prompt-components"><a class="header" href="#prompt-components">Prompt Components</a></h3>
+<h4 id="1-subject"><a class="header" href="#1-subject">1. Subject</a></h4>
+<pre><code>"portrait of a young woman"
+"a medieval castle"
+"a steampunk airship"
+"cyberpunk street scene"
+</code></pre>
+<h4 id="2-actionpose"><a class="header" href="#2-actionpose">2. Action/Pose</a></h4>
+<pre><code>"running through a field"
+"sitting in contemplation"
+"dancing under moonlight"
+"reading a book by firelight"
+</code></pre>
+<h4 id="3-environment"><a class="header" href="#3-environment">3. Environment</a></h4>
+<pre><code>"in a mystical forest"
+"on a alien planet"
+"in a Victorian library"
+"at a bustling marketplace"
+</code></pre>
+<h4 id="4-lighting"><a class="header" href="#4-lighting">4. Lighting</a></h4>
+<pre><code>"golden hour lighting"
+"dramatic rim lighting"
+"soft diffused light"
+"neon lights reflecting on wet streets"
+"volumetric fog with god rays"
+</code></pre>
+<h4 id="5-style"><a class="header" href="#5-style">5. Style</a></h4>
+<pre><code>"oil painting style"
+"anime art style"
+"photorealistic"
+"watercolor painting"
+"digital art, trending on artstation"
+"in the style of Greg Rutkowski"
+</code></pre>
+<h4 id="6-quality-boosters"><a class="header" href="#6-quality-boosters">6. Quality Boosters</a></h4>
+<pre><code>"highly detailed"
+"8k resolution"
+"masterpiece"
+"professional photography"
+"award-winning"
+"intricate details"
+"sharp focus"
+</code></pre>
+<h3 id="negative-prompts"><a class="header" href="#negative-prompts">Negative Prompts</a></h3>
+<p>What to avoid in generation:</p>
+<pre><code>Negative Prompt:
+"ugly, blurry, low quality, distorted, deformed, bad anatomy, poorly drawn, low resolution, watermark, signature, text, cropped, worst quality, jpeg artifacts"
+</code></pre>
+<p><strong>Common Negative Terms:</strong></p>
+<ul>
+<li>Quality: <code>blurry, low quality, pixelated, grainy</code></li>
+<li>Anatomy: <code>bad anatomy, extra limbs, malformed hands</code></li>
+<li>Artifacts: <code>watermark, text, signature, logo</code></li>
+<li>Style: <code>cartoon (for photorealistic), realistic (for artistic)</code></li>
+</ul>
+<h3 id="prompt-weighting"><a class="header" href="#prompt-weighting">Prompt Weighting</a></h3>
+<p>Emphasize or de-emphasize parts:</p>
+<pre><code># AUTOMATIC1111 syntax
+(keyword)       # 1.1x weight
+((keyword))     # 1.21x weight
+(keyword:1.5)   # 1.5x weight
+[keyword]       # 0.9x weight
+
+Example:
+"a (beautiful:1.3) landscape with (mountains:1.2) and [trees:0.8]"
+</code></pre>
+<h3 id="prompt-editing"><a class="header" href="#prompt-editing">Prompt Editing</a></h3>
+<p>Change prompts during generation:</p>
+<pre><code># AUTOMATIC1111 syntax
+[keyword1:keyword2:step]
+
+Example:
+"a [dog:cat:0.5]"
+# Generates dog for first 50% of steps, then cat
+
+"photo of a woman [smiling:serious:10]"
+# Smiling for first 10 steps, then serious
+</code></pre>
+<h3 id="artist-styles"><a class="header" href="#artist-styles">Artist Styles</a></h3>
+<p>Reference famous artists:</p>
+<pre><code>"in the style of Van Gogh"
+"by Greg Rutkowski"
+"by Alphonse Mucha"
+"by Simon Stalenhag"
+"by Artgerm"
+"by Ilya Kuvshinov"
+</code></pre>
+<h2 id="parameters"><a class="header" href="#parameters">Parameters</a></h2>
+<h3 id="core-parameters"><a class="header" href="#core-parameters">Core Parameters</a></h3>
+<h4 id="steps-num_inference_steps"><a class="header" href="#steps-num_inference_steps">Steps (num_inference_steps)</a></h4>
+<pre><code class="language-python"># Fewer steps = faster, less refined
+image = pipe(prompt, num_inference_steps=20)
+
+# More steps = slower, more refined
+image = pipe(prompt, num_inference_steps=50)
+</code></pre>
+<p><strong>Recommendations:</strong></p>
+<ul>
+<li>Quick preview: 15-20 steps</li>
+<li>Standard quality: 25-35 steps</li>
+<li>High quality: 40-60 steps</li>
+<li>Diminishing returns after 60</li>
+</ul>
+<h4 id="cfg-scale-guidance_scale"><a class="header" href="#cfg-scale-guidance_scale">CFG Scale (guidance_scale)</a></h4>
+<p>How closely to follow the prompt:</p>
+<pre><code class="language-python"># Low CFG = creative, less adherence
+image = pipe(prompt, guidance_scale=3.5)
+
+# Medium CFG = balanced
+image = pipe(prompt, guidance_scale=7.5)
+
+# High CFG = strict adherence, may oversaturate
+image = pipe(prompt, guidance_scale=15)
+</code></pre>
+<p><strong>Recommendations:</strong></p>
+<ul>
+<li>Creative/artistic: 5-7</li>
+<li>Balanced: 7-10</li>
+<li>Strict/detailed: 10-15</li>
+<li>Avoid: &gt;20 (over-saturated)</li>
+</ul>
+<h4 id="seed"><a class="header" href="#seed">Seed</a></h4>
+<p>Reproducible results:</p>
+<pre><code class="language-python"># Random seed
+image = pipe(prompt)
+
+# Fixed seed for reproducibility
+generator = torch.Generator("cuda").manual_seed(42)
+image = pipe(prompt, generator=generator)
+</code></pre>
+<h4 id="samplerscheduler"><a class="header" href="#samplerscheduler">Sampler/Scheduler</a></h4>
+<p>Different algorithms for denoising:</p>
+<pre><code class="language-python">from diffusers import (
+    DPMSolverMultistepScheduler,
+    EulerAncestralDiscreteScheduler,
+    DDIMScheduler
+)
+
+# Fast and high quality (recommended)
+pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+    pipe.scheduler.config
+)
+
+# More creative, varied
+pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(
+    pipe.scheduler.config
+)
+
+# Stable, predictable
+pipe.scheduler = DDIMScheduler.from_config(
+    pipe.scheduler.config
+)
+</code></pre>
+<p><strong>Popular Samplers:</strong></p>
+<ul>
+<li><strong>DPM++ 2M Karras</strong>: Fast, high quality (recommended)</li>
+<li><strong>Euler a</strong>: Creative, varied results</li>
+<li><strong>DDIM</strong>: Stable, reproducible</li>
+<li><strong>UniPC</strong>: Very fast, good quality</li>
+<li><strong>DPM++ SDE Karras</strong>: High quality, slower</li>
+</ul>
+<h4 id="resolution"><a class="header" href="#resolution">Resolution</a></h4>
+<pre><code class="language-python"># SD 1.5 native: 512x512
+image = pipe(prompt, width=512, height=512)
+
+# SD 2.1 native: 768x768
+image = pipe(prompt, width=768, height=768)
+
+# SDXL native: 1024x1024
+image = pipe(prompt, width=1024, height=1024)
+
+# Portrait
+image = pipe(prompt, width=512, height=768)
+
+# Landscape
+image = pipe(prompt, width=768, height=512)
+</code></pre>
+<p><strong>Tips:</strong></p>
+<ul>
+<li>Stick to multiples of 8 or 64</li>
+<li>Native resolution gives best results</li>
+<li>Higher resolution needs more VRAM</li>
+<li>Use upscaling for ultra-high resolution</li>
+</ul>
+<h3 id="batch-settings"><a class="header" href="#batch-settings">Batch Settings</a></h3>
+<pre><code class="language-python"># Generate multiple images
+images = pipe(
+    prompt,
+    num_images_per_prompt=4,
+    guidance_scale=7.5
+).images
+
+# Save all
+for i, img in enumerate(images):
+    img.save(f"output_{i}.png")
+</code></pre>
+<h2 id="advanced-techniques"><a class="header" href="#advanced-techniques">Advanced Techniques</a></h2>
+<h3 id="image-to-image"><a class="header" href="#image-to-image">Image-to-Image</a></h3>
+<p>Transform existing images:</p>
+<pre><code class="language-python">from diffusers import StableDiffusionImg2ImgPipeline
+from PIL import Image
+
+pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-2-1",
+    torch_dtype=torch.float16
+).to("cuda")
+
+# Load image
+init_image = Image.open("input.jpg").convert("RGB")
+init_image = init_image.resize((768, 768))
+
+# Transform
+prompt = "a fantasy castle, magical, highly detailed"
+images = pipe(
+    prompt=prompt,
+    image=init_image,
+    strength=0.75,  # 0=no change, 1=complete regeneration
+    guidance_scale=7.5,
+    num_inference_steps=50
+).images[0]
+
+images.save("transformed.png")
+</code></pre>
+<p><strong>Strength Parameter:</strong></p>
+<ul>
+<li>0.1-0.3: Minor adjustments, preserve structure</li>
+<li>0.4-0.6: Moderate changes, guided by original</li>
+<li>0.7-0.9: Major changes, loose interpretation</li>
+<li>1.0: Complete regeneration</li>
+</ul>
+<h3 id="inpainting"><a class="header" href="#inpainting">Inpainting</a></h3>
+<p>Edit specific parts of images:</p>
+<pre><code class="language-python">from diffusers import StableDiffusionInpaintPipeline
+
+pipe = StableDiffusionInpaintPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-2-inpainting",
+    torch_dtype=torch.float16
+).to("cuda")
+
+# Load image and mask
+image = Image.open("photo.png")
+mask = Image.open("mask.png")  # White = inpaint, Black = keep
+
+prompt = "a red vintage car"
+result = pipe(
+    prompt=prompt,
+    image=image,
+    mask_image=mask,
+    num_inference_steps=50,
+    guidance_scale=7.5
+).images[0]
+
+result.save("inpainted.png")
+</code></pre>
+<h3 id="controlnet"><a class="header" href="#controlnet">ControlNet</a></h3>
+<p>Precise control over generation:</p>
+<pre><code class="language-python">from diffusers import StableDiffusionControlNetPipeline, ControlNetModel
+from PIL import Image
+import cv2
+import numpy as np
+
+# Load ControlNet model
+controlnet = ControlNetModel.from_pretrained(
+    "lllyasviel/sd-controlnet-canny",
+    torch_dtype=torch.float16
+)
+
+pipe = StableDiffusionControlNetPipeline.from_pretrained(
+    "runwayml/stable-diffusion-v1-5",
+    controlnet=controlnet,
+    torch_dtype=torch.float16
+).to("cuda")
+
+# Load image and create canny edge map
+image = Image.open("input.jpg")
+image = np.array(image)
+canny_edges = cv2.Canny(image, 100, 200)
+canny_edges = Image.fromarray(canny_edges)
+
+# Generate with control
+prompt = "a professional architectural photograph"
+output = pipe(
+    prompt=prompt,
+    image=canny_edges,
+    num_inference_steps=30
+).images[0]
+</code></pre>
+<p><strong>ControlNet Models:</strong></p>
+<ul>
+<li><strong>Canny</strong>: Edge detection</li>
+<li><strong>Depth</strong>: Depth map</li>
+<li><strong>OpenPose</strong>: Human pose</li>
+<li><strong>Scribble</strong>: Hand-drawn sketches</li>
+<li><strong>Normal</strong>: Normal maps</li>
+<li><strong>Segmentation</strong>: Semantic segmentation</li>
+<li><strong>MLSD</strong>: Line detection (architecture)</li>
+</ul>
+<h3 id="lora-low-rank-adaptation"><a class="header" href="#lora-low-rank-adaptation">LoRA (Low-Rank Adaptation)</a></h3>
+<p>Fine-tuned models with small file size:</p>
+<pre><code class="language-python">from diffusers import StableDiffusionPipeline
+
+pipe = StableDiffusionPipeline.from_pretrained(
+    "runwayml/stable-diffusion-v1-5",
+    torch_dtype=torch.float16
+).to("cuda")
+
+# Load LoRA
+pipe.load_lora_weights("path/to/lora.safetensors")
+
+# Generate with LoRA style
+prompt = "a portrait in the style of &lt;lora-trigger-word&gt;"
+image = pipe(prompt).images[0]
+
+# Unload LoRA
+pipe.unload_lora_weights()
+</code></pre>
+<p><strong>Popular LoRA Types:</strong></p>
+<ul>
+<li>Character/celebrity faces</li>
+<li>Art styles</li>
+<li>Concepts</li>
+<li>Objects/clothing</li>
+</ul>
+<h3 id="textual-inversion"><a class="header" href="#textual-inversion">Textual Inversion</a></h3>
+<p>Custom concepts/embeddings:</p>
+<pre><code class="language-python"># Load embedding
+pipe.load_textual_inversion("path/to/embedding.pt", token="&lt;special-token&gt;")
+
+# Use in prompt
+prompt = "a photo of &lt;special-token&gt; in a forest"
+image = pipe(prompt).images[0]
+</code></pre>
+<h3 id="upscaling"><a class="header" href="#upscaling">Upscaling</a></h3>
+<p>Increase resolution with detail:</p>
+<pre><code class="language-python">from diffusers import StableDiffusionUpscalePipeline
+
+# Load upscaler
+upscaler = StableDiffusionUpscalePipeline.from_pretrained(
+    "stabilityai/stable-diffusion-x4-upscaler",
+    torch_dtype=torch.float16
+).to("cuda")
+
+# Load low-res image
+low_res = Image.open("output_512.png")
+
+# Upscale
+prompt = "highly detailed, sharp, professional"
+upscaled = upscaler(
+    prompt=prompt,
+    image=low_res,
+    num_inference_steps=50
+).images[0]
+
+upscaled.save("output_2048.png")
+</code></pre>
+<p><strong>Upscaling Options:</strong></p>
+<ol>
+<li><strong>SD Upscale</strong>: Built-in SD upscaler</li>
+<li><strong>Real-ESRGAN</strong>: Traditional upscaler</li>
+<li><strong>Ultimate SD Upscale</strong>: Tiled upscaling</li>
+<li><strong>ControlNet Tile</strong>: Detail-preserving upscale</li>
+</ol>
+<h2 id="extensions--tools"><a class="header" href="#extensions--tools">Extensions &amp; Tools</a></h2>
+<h3 id="automatic1111-extensions"><a class="header" href="#automatic1111-extensions">AUTOMATIC1111 Extensions</a></h3>
+<p>Install via Extensions tab or:</p>
+<pre><code class="language-bash">cd extensions
+git clone [extension-repo-url]
+</code></pre>
+<h4 id="essential-extensions"><a class="header" href="#essential-extensions">Essential Extensions</a></h4>
+<p><strong>ControlNet</strong></p>
+<pre><code class="language-bash">git clone https://github.com/Mikubill/sd-webui-controlnet.git
+</code></pre>
+<p><strong>Dynamic Prompts</strong></p>
+<pre><code class="language-bash">git clone https://github.com/adieyal/sd-dynamic-prompts.git
+</code></pre>
+<ul>
+<li>Wildcard support: <code>{red|blue|green} car</code></li>
+<li>Combinatorial generation</li>
+</ul>
+<p><strong>Image Browser</strong></p>
+<pre><code class="language-bash">git clone https://github.com/AlUlkesh/stable-diffusion-webui-images-browser.git
+</code></pre>
+<ul>
+<li>Browse generated images</li>
+<li>Search by metadata</li>
+</ul>
+<p><strong>Cutoff</strong></p>
+<pre><code class="language-bash">git clone https://github.com/hnmr293/sd-webui-cutoff.git
+</code></pre>
+<ul>
+<li>Prevent color bleeding between subjects</li>
+</ul>
+<p><strong>Regional Prompter</strong></p>
+<pre><code class="language-bash">git clone https://github.com/hako-mikan/sd-webui-regional-prompter.git
+</code></pre>
+<ul>
+<li>Different prompts for image regions</li>
+</ul>
+<h3 id="checkpoint-merging"><a class="header" href="#checkpoint-merging">Checkpoint Merging</a></h3>
+<p>Combine models:</p>
+<pre><code class="language-python">from diffusers import StableDiffusionPipeline
+import torch
+
+# Load two models
+pipe1 = StableDiffusionPipeline.from_pretrained("model1")
+pipe2 = StableDiffusionPipeline.from_pretrained("model2")
+
+# Merge (0.5 = 50/50 blend)
+alpha = 0.5
+for key in pipe1.unet.state_dict():
+    pipe1.unet.state_dict()[key] = (
+        alpha * pipe1.unet.state_dict()[key] +
+        (1 - alpha) * pipe2.unet.state_dict()[key]
+    )
+
+# Save merged model
+pipe1.save_pretrained("merged_model")
+</code></pre>
+<h3 id="prompt-matrix"><a class="header" href="#prompt-matrix">Prompt Matrix</a></h3>
+<p>Test multiple prompts:</p>
+<pre><code># In AUTOMATIC1111
+Prompt: a |red, blue, green| |car, house| in a forest
+
+Generates:
+- a red car in a forest
+- a red house in a forest
+- a blue car in a forest
+- a blue house in a forest
+- a green car in a forest
+- a green house in a forest
+</code></pre>
+<h2 id="optimization"><a class="header" href="#optimization">Optimization</a></h2>
+<h3 id="memory-optimization"><a class="header" href="#memory-optimization">Memory Optimization</a></h3>
+<pre><code class="language-python">from diffusers import StableDiffusionPipeline
+import torch
+
+pipe = StableDiffusionPipeline.from_pretrained(
+    "runwayml/stable-diffusion-v1-5",
+    torch_dtype=torch.float16  # Half precision
+).to("cuda")
+
+# Enable memory optimizations
+pipe.enable_attention_slicing()  # Reduce memory
+pipe.enable_vae_slicing()  # Reduce VAE memory
+pipe.enable_xformers_memory_efficient_attention()  # Faster attention
+
+# For very low VRAM (4GB)
+pipe.enable_sequential_cpu_offload()
+</code></pre>
+<h3 id="speed-optimization"><a class="header" href="#speed-optimization">Speed Optimization</a></h3>
+<pre><code class="language-python"># Use faster scheduler
+from diffusers import DPMSolverMultistepScheduler
+
+pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+    pipe.scheduler.config
+)
+
+# Compile model (PyTorch 2.0+)
+pipe.unet = torch.compile(pipe.unet, mode="reduce-overhead")
+
+# Reduce steps with quality scheduler
+image = pipe(prompt, num_inference_steps=20)  # vs 50 with others
+</code></pre>
+<h3 id="vram-requirements"><a class="header" href="#vram-requirements">VRAM Requirements</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Configuration</th><th>Minimum VRAM</th></tr></thead><tbody>
+<tr><td>SD 1.5 (512x512)</td><td>4GB</td></tr>
+<tr><td>SD 1.5 (512x512, optimized)</td><td>2GB</td></tr>
+<tr><td>SD 2.1 (768x768)</td><td>6GB</td></tr>
+<tr><td>SDXL (1024x1024)</td><td>8GB</td></tr>
+<tr><td>SDXL (1024x1024, optimized)</td><td>6GB</td></tr>
+<tr><td>ControlNet + SD</td><td>+2GB</td></tr>
+<tr><td>Batch size 2</td><td>+2GB per image</td></tr>
+</tbody></table>
+</div>
+<h3 id="launch-arguments-automatic1111"><a class="header" href="#launch-arguments-automatic1111">Launch Arguments (AUTOMATIC1111)</a></h3>
+<pre><code class="language-bash"># Basic optimization
+--xformers              # Memory-efficient attention
+--medvram               # Medium VRAM optimization
+--lowvram               # Low VRAM optimization
+--no-half-vae           # Fix black images on some GPUs
+
+# API
+--api                   # Enable API
+--listen                # Allow network connections
+
+# Performance
+--opt-sdp-attention     # Scaled dot product attention
+--no-gradio-queue       # Disable queue
+
+# Example combination
+./webui.sh --xformers --medvram --api --no-half-vae
+</code></pre>
+<h2 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h2>
+<h3 id="black-images"><a class="header" href="#black-images">Black Images</a></h3>
+<pre><code class="language-bash"># Solution: Disable half precision for VAE
+--no-half-vae
+</code></pre>
+<p>Or in Python:</p>
+<pre><code class="language-python">pipe.vae.to(torch.float32)
+</code></pre>
+<h3 id="out-of-memory-oom"><a class="header" href="#out-of-memory-oom">Out of Memory (OOM)</a></h3>
+<pre><code class="language-python"># Enable all optimizations
+pipe.enable_attention_slicing()
+pipe.enable_vae_slicing()
+pipe.enable_sequential_cpu_offload()
+
+# Reduce resolution
+image = pipe(prompt, width=512, height=512)
+
+# Reduce batch size
+image = pipe(prompt, num_images_per_prompt=1)
+</code></pre>
+<h3 id="bad-handsanatomy"><a class="header" href="#bad-handsanatomy">Bad Hands/Anatomy</a></h3>
+<pre><code>Negative prompt: "bad hands, bad anatomy, extra fingers, missing fingers, deformed hands, poorly drawn hands"
+
+# Or use inpainting to fix
+# Or use ControlNet OpenPose for guidance
+</code></pre>
+<h3 id="inconsistent-results"><a class="header" href="#inconsistent-results">Inconsistent Results</a></h3>
+<pre><code class="language-python"># Use fixed seed
+generator = torch.Generator("cuda").manual_seed(42)
+image = pipe(prompt, generator=generator)
+
+# Use lower temperature sampler (DDIM instead of Euler a)
+</code></pre>
+<h3 id="prompt-not-working"><a class="header" href="#prompt-not-working">Prompt Not Working</a></h3>
+<ol>
+<li>Check prompt weighting: <code>(keyword:1.3)</code></li>
+<li>Use negative prompt to exclude unwanted elements</li>
+<li>Increase CFG scale</li>
+<li>Try different sampler</li>
+<li>Add quality boosters: "highly detailed, 8k"</li>
+</ol>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-prompt-structure"><a class="header" href="#1-prompt-structure">1. Prompt Structure</a></h3>
+<pre><code>[Quality] [Style] [Subject] [Action] [Environment] [Lighting] [Details]
+
+Example:
+"masterpiece, best quality, photorealistic, portrait of a young woman, smiling, in a sunlit garden, golden hour lighting, detailed facial features, professional photography, 8k uhd"
+</code></pre>
+<h3 id="2-iterative-refinement"><a class="header" href="#2-iterative-refinement">2. Iterative Refinement</a></h3>
+<pre><code class="language-python"># Start with low steps for preview
+preview = pipe(prompt, num_inference_steps=15).images[0]
+
+# Refine with more steps
+final = pipe(prompt, num_inference_steps=50).images[0]
+
+# Upscale for details
+upscaled = upscale(final)
+</code></pre>
+<h3 id="3-seed-management"><a class="header" href="#3-seed-management">3. Seed Management</a></h3>
+<pre><code class="language-python"># Save seeds for good results
+good_seeds = []
+
+for seed in range(100):
+    gen = torch.Generator("cuda").manual_seed(seed)
+    image = pipe(prompt, generator=gen).images[0]
+    
+    if is_good(image):
+        good_seeds.append(seed)
+        image.save(f"good_{seed}.png")
+</code></pre>
+<h3 id="4-negative-prompts-library"><a class="header" href="#4-negative-prompts-library">4. Negative Prompts Library</a></h3>
+<pre><code class="language-python">negative_prompts = {
+    'photorealistic': "anime, cartoon, drawing, painting, low quality",
+    'artistic': "photorealistic, photo, realistic, low quality",
+    'quality': "ugly, blurry, low quality, low resolution, pixelated",
+    'anatomy': "bad anatomy, extra limbs, poorly drawn, deformed",
+    'artifacts': "watermark, signature, text, logo, copyright"
+}
+
+# Combine as needed
+negative = ", ".join([
+    negative_prompts['quality'],
+    negative_prompts['anatomy'],
+    negative_prompts['artifacts']
+])
+</code></pre>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<h3 id="models"><a class="header" href="#models">Models</a></h3>
+<ul>
+<li><a href="https://huggingface.co/models?pipeline_tag=text-to-image">Hugging Face</a></li>
+<li><a href="https://civitai.com/">Civitai</a> - Community models, LoRAs</li>
+<li><a href="https://huggingface.co/stabilityai">Stability AI</a></li>
+</ul>
+<h3 id="tools"><a class="header" href="#tools">Tools</a></h3>
+<ul>
+<li><a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">AUTOMATIC1111 WebUI</a></li>
+<li><a href="https://github.com/comfyanonymous/ComfyUI">ComfyUI</a></li>
+<li><a href="https://github.com/invoke-ai/InvokeAI">InvokeAI</a></li>
+</ul>
+<h3 id="learning"><a class="header" href="#learning">Learning</a></h3>
+<ul>
+<li><a href="https://stable-diffusion-art.com/">Stable Diffusion Art</a></li>
+<li><a href="https://www.reddit.com/r/StableDiffusion/">r/StableDiffusion</a></li>
+<li><a href="https://openart.ai/promptbook">OpenArt Prompt Book</a></li>
+</ul>
+<h3 id="communities"><a class="header" href="#communities">Communities</a></h3>
+<ul>
+<li>Discord: Stable Diffusion</li>
+<li>Reddit: r/StableDiffusion</li>
+<li>Twitter/X: #StableDiffusion</li>
+</ul>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Stable Diffusion offers incredible flexibility and power for image generation. Success comes from understanding the fundamentals, experimenting with parameters, and iterating on prompts. Start simple, learn the basics, then explore advanced techniques like ControlNet and LoRA for professional results.</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

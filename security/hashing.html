@@ -177,7 +177,651 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="cryptographic-hash-functions"><a class="header" href="#cryptographic-hash-functions">Cryptographic Hash Functions</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A cryptographic hash function is a mathematical algorithm that takes an input (message) of any size and produces a fixed-size output (hash digest). Hash functions are one-way functions designed to be computationally infeasible to reverse.</p>
+<h2 id="key-properties"><a class="header" href="#key-properties">Key Properties</a></h2>
+<h3 id="1-deterministic"><a class="header" href="#1-deterministic">1. Deterministic</a></h3>
+<p>Same input always produces the same output:</p>
+<pre><code>hash("hello") = 2cf24dba5fb0a30e...
+hash("hello") = 2cf24dba5fb0a30e...  (always the same)
+</code></pre>
+<h3 id="2-fast-computation"><a class="header" href="#2-fast-computation">2. Fast Computation</a></h3>
+<p>Quick to compute hash for any input</p>
+<h3 id="3-pre-image-resistance-one-way"><a class="header" href="#3-pre-image-resistance-one-way">3. Pre-image Resistance (One-way)</a></h3>
+<p>Given hash <code>h</code>, computationally infeasible to find message <code>m</code> where <code>hash(m) = h</code></p>
+<h3 id="4-collision-resistance"><a class="header" href="#4-collision-resistance">4. Collision Resistance</a></h3>
+<p>Computationally infeasible to find two different messages <code>m1</code> and <code>m2</code> where:</p>
+<pre><code>hash(m1) = hash(m2)
+</code></pre>
+<h3 id="5-avalanche-effect"><a class="header" href="#5-avalanche-effect">5. Avalanche Effect</a></h3>
+<p>Small change in input drastically changes output:</p>
+<pre><code>hash("hello")  = 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+hash("helloX") = 9c70933a77f8d8d1eb5ba43c8f8c8b2e6f4c8e8a5b9e1b161e5c1fa7425e7304
+</code></pre>
+<h2 id="common-hash-functions"><a class="header" href="#common-hash-functions">Common Hash Functions</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Algorithm</th><th>Output Size</th><th>Status</th><th>Use Cases</th></tr></thead><tbody>
+<tr><td><strong>MD5</strong></td><td>128 bits (16 bytes)</td><td>Broken</td><td>Checksums only</td></tr>
+<tr><td><strong>SHA-1</strong></td><td>160 bits (20 bytes)</td><td>Deprecated</td><td>Legacy systems</td></tr>
+<tr><td><strong>SHA-256</strong></td><td>256 bits (32 bytes)</td><td>Secure</td><td>General purpose</td></tr>
+<tr><td><strong>SHA-512</strong></td><td>512 bits (64 bytes)</td><td>Secure</td><td>High security</td></tr>
+<tr><td><strong>SHA-3</strong></td><td>Variable</td><td>Secure</td><td>Modern alternative</td></tr>
+<tr><td><strong>BLAKE2</strong></td><td>Variable</td><td>Secure</td><td>Fast, modern</td></tr>
+<tr><td><strong>BLAKE3</strong></td><td>256 bits</td><td>Secure</td><td>Fastest, modern</td></tr>
+</tbody></table>
+</div>
+<h2 id="sha-256-secure-hash-algorithm-256"><a class="header" href="#sha-256-secure-hash-algorithm-256">SHA-256 (Secure Hash Algorithm 256)</a></h2>
+<h3 id="algorithm-overview"><a class="header" href="#algorithm-overview">Algorithm Overview</a></h3>
+<p>SHA-256 is part of the SHA-2 family, designed by the NSA and published in 2001.</p>
+<p><strong>Process:</strong></p>
+<ol>
+<li>Pad message to multiple of 512 bits</li>
+<li>Initialize hash values (8 x 32-bit words)</li>
+<li>Process message in 512-bit chunks</li>
+<li>Each chunk goes through 64 rounds of operations</li>
+<li>Produce final 256-bit hash</li>
+</ol>
+<h3 id="using-sha-256"><a class="header" href="#using-sha-256">Using SHA-256</a></h3>
+<h4 id="python-example"><a class="header" href="#python-example">Python Example</a></h4>
+<pre><code class="language-python">import hashlib
+
+# Hash a string
+message = "Hello, World!"
+hash_object = hashlib.sha256(message.encode())
+hash_hex = hash_object.hexdigest()
+print(f"SHA-256: {hash_hex}")
+# Output: SHA-256: dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f
+
+# Hash a file
+def hash_file(filename):
+    sha256_hash = hashlib.sha256()
+    with open(filename, "rb") as f:
+        # Read file in chunks to handle large files
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
+file_hash = hash_file("document.pdf")
+print(f"File hash: {file_hash}")
+
+# Incremental hashing
+hasher = hashlib.sha256()
+hasher.update(b"Hello, ")
+hasher.update(b"World!")
+print(hasher.hexdigest())
+# Same as hashing "Hello, World!" at once
+</code></pre>
+<h4 id="bashopenssl-example"><a class="header" href="#bashopenssl-example">Bash/OpenSSL Example</a></h4>
+<pre><code class="language-bash"># Hash a string
+echo -n "Hello, World!" | sha256sum
+echo -n "Hello, World!" | openssl dgst -sha256
+
+# Hash a file
+sha256sum document.pdf
+openssl dgst -sha256 document.pdf
+
+# Verify file integrity
+sha256sum document.pdf &gt; checksum.txt
+sha256sum -c checksum.txt
+
+# Hash multiple files
+sha256sum *.pdf &gt; all_checksums.txt
+</code></pre>
+<h3 id="sha-256-output-format"><a class="header" href="#sha-256-output-format">SHA-256 Output Format</a></h3>
+<pre><code>Input: "Hello, World!"
+
+Binary (256 bits):
+11011111111111010110000000100001...
+
+Hexadecimal (64 characters):
+dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f
+
+Base64 (44 characters):
+3/1gIbsr1bCvZ2KQgJ7DpTGR3YHH9wpLKGiKNiGCmG8=
+</code></pre>
+<h2 id="sha-3-keccak"><a class="header" href="#sha-3-keccak">SHA-3 (Keccak)</a></h2>
+<p>SHA-3 is based on a different construction (sponge function) than SHA-2, providing an alternative if SHA-2 is compromised.</p>
+<h3 id="using-sha-3"><a class="header" href="#using-sha-3">Using SHA-3</a></h3>
+<pre><code class="language-python">import hashlib
+
+message = "Hello, World!"
+
+# SHA-3 variants
+sha3_256 = hashlib.sha3_256(message.encode()).hexdigest()
+sha3_512 = hashlib.sha3_512(message.encode()).hexdigest()
+
+print(f"SHA3-256: {sha3_256}")
+print(f"SHA3-512: {sha3_512}")
+
+# SHAKE (extendable output)
+shake = hashlib.shake_256(message.encode())
+# Get 32 bytes of output
+print(f"SHAKE256: {shake.hexdigest(32)}")
+</code></pre>
+<h2 id="blake2"><a class="header" href="#blake2">BLAKE2</a></h2>
+<p>Faster than SHA-2 and SHA-3, with built-in keyed hashing and salting support.</p>
+<h3 id="using-blake2"><a class="header" href="#using-blake2">Using BLAKE2</a></h3>
+<pre><code class="language-python">import hashlib
+
+message = b"Hello, World!"
+
+# BLAKE2b (optimized for 64-bit platforms)
+blake2b = hashlib.blake2b(message).hexdigest()
+print(f"BLAKE2b: {blake2b}")
+
+# BLAKE2s (optimized for 8-32 bit platforms)
+blake2s = hashlib.blake2s(message).hexdigest()
+print(f"BLAKE2s: {blake2s}")
+
+# Keyed hashing (MAC)
+key = b"secret-key-123"
+mac = hashlib.blake2b(message, key=key).hexdigest()
+print(f"BLAKE2b MAC: {mac}")
+
+# Custom digest size
+digest = hashlib.blake2b(message, digest_size=16).hexdigest()
+print(f"BLAKE2b-128: {digest}")
+
+# With salt (for password hashing)
+salt = b"random-salt-16bytes!"
+h = hashlib.blake2b(message, salt=salt, digest_size=32)
+print(f"BLAKE2b with salt: {h.hexdigest()}")
+</code></pre>
+<h2 id="password-hashing"><a class="header" href="#password-hashing">Password Hashing</a></h2>
+<p><strong>WARNING</strong>: Never use fast hashes (SHA-256, MD5) for passwords! Use specialized password hashing functions.</p>
+<h3 id="why-not-sha-256-for-passwords"><a class="header" href="#why-not-sha-256-for-passwords">Why Not SHA-256 for Passwords?</a></h3>
+<pre><code class="language-python"># BAD - vulnerable to brute force
+import hashlib
+password = "password123"
+hash = hashlib.sha256(password.encode()).hexdigest()
+# Attacker can compute billions of SHA-256 hashes per second!
+</code></pre>
+<h3 id="password-hashing-requirements"><a class="header" href="#password-hashing-requirements">Password Hashing Requirements</a></h3>
+<ol>
+<li><strong>Slow</strong>: Intentionally slow to prevent brute force</li>
+<li><strong>Salted</strong>: Random salt prevents rainbow tables</li>
+<li><strong>Adaptive</strong>: Can increase work factor over time</li>
+<li><strong>Memory-hard</strong>: Requires significant memory (for some algorithms)</li>
+</ol>
+<h2 id="bcrypt"><a class="header" href="#bcrypt">bcrypt</a></h2>
+<h3 id="overview-1"><a class="header" href="#overview-1">Overview</a></h3>
+<ul>
+<li>Based on Blowfish cipher</li>
+<li>Adaptive (configurable work factor)</li>
+<li>Automatic salt generation</li>
+<li>Maximum password length: 72 bytes</li>
+</ul>
+<h3 id="using-bcrypt"><a class="header" href="#using-bcrypt">Using bcrypt</a></h3>
+<pre><code class="language-python">import bcrypt
+
+# Hash a password
+password = b"my_secure_password"
+salt = bcrypt.gensalt(rounds=12)  # 2^12 iterations
+hashed = bcrypt.hashpw(password, salt)
+print(f"Hashed: {hashed}")
+# Output: b'$2b$12$KIXx8Z9...'
+
+# Verify password
+if bcrypt.checkpw(password, hashed):
+    print("Password matches!")
+else:
+    print("Invalid password")
+
+# Increase work factor over time
+def needs_rehash(hashed_password, min_rounds=12):
+    # Extract current rounds from hash
+    parts = hashed_password.decode().split('$')
+    current_rounds = int(parts[2])
+    return current_rounds &lt; min_rounds
+
+# Complete example
+def hash_password(password):
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))
+
+def verify_password(password, hashed):
+    return bcrypt.checkpw(password.encode(), hashed)
+
+# Usage
+user_password = "SuperSecret123!"
+stored_hash = hash_password(user_password)
+
+# Later, during login
+login_password = "SuperSecret123!"
+if verify_password(login_password, stored_hash):
+    print("Login successful!")
+</code></pre>
+<h3 id="bcrypt-hash-format"><a class="header" href="#bcrypt-hash-format">bcrypt Hash Format</a></h3>
+<pre><code>$2b$12$KIXx8Z9ByF7LHfG8z.yNH.Q5GF8Z9ByF7LHfG8z.yNH.Q5GF8Z9ByF7
+ |  |  |                                                    |
+ |  |  |                                                    |
+ |  |  Salt (22 characters)                                Hash (31 chars)
+ |  |
+ |  Cost factor (2^12 iterations)
+ |
+ Algorithm identifier (2b = bcrypt)
+</code></pre>
+<h2 id="argon2"><a class="header" href="#argon2">Argon2</a></h2>
+<h3 id="overview-2"><a class="header" href="#overview-2">Overview</a></h3>
+<p>Winner of the Password Hashing Competition (2015). Memory-hard algorithm resistant to GPU/ASIC attacks.</p>
+<p><strong>Variants:</strong></p>
+<ul>
+<li><strong>Argon2d</strong>: Resistant to GPU attacks (not side-channel resistant)</li>
+<li><strong>Argon2i</strong>: Resistant to side-channel attacks</li>
+<li><strong>Argon2id</strong>: Hybrid (recommended)</li>
+</ul>
+<h3 id="using-argon2"><a class="header" href="#using-argon2">Using Argon2</a></h3>
+<pre><code class="language-python">from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
+# Create hasher with default parameters
+ph = PasswordHasher()
+
+# Hash password
+password = "my_secure_password"
+hashed = ph.hash(password)
+print(f"Hashed: {hashed}")
+# Output: $argon2id$v=19$m=65536,t=3,p=4$...
+
+# Verify password
+try:
+    ph.verify(hashed, password)
+    print("Password matches!")
+except VerifyMismatchError:
+    print("Invalid password")
+
+# Check if hash needs rehashing (parameters changed)
+if ph.check_needs_rehash(hashed):
+    new_hash = ph.hash(password)
+    # Update in database
+
+# Custom parameters
+from argon2 import PasswordHasher
+custom_ph = PasswordHasher(
+    time_cost=3,        # Number of iterations
+    memory_cost=65536,  # Memory usage in KiB (64 MB)
+    parallelism=4,      # Number of parallel threads
+    hash_len=32,        # Hash length in bytes
+    salt_len=16         # Salt length in bytes
+)
+
+hashed = custom_ph.hash(password)
+</code></pre>
+<h3 id="argon2-hash-format"><a class="header" href="#argon2-hash-format">Argon2 Hash Format</a></h3>
+<pre><code>$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHQ$hash_output_here
+ |        |    |             |              |
+ |        |    |             |              Hash output
+ |        |    |             Salt (base64)
+ |        |    Parameters (memory, time, parallelism)
+ |        Version
+ Variant (id, i, or d)
+</code></pre>
+<h3 id="argon2-parameters-guide"><a class="header" href="#argon2-parameters-guide">Argon2 Parameters Guide</a></h3>
+<pre><code class="language-python"># Low security (fast, for testing)
+time_cost=1, memory_cost=8192, parallelism=1
+
+# Medium security (default)
+time_cost=3, memory_cost=65536, parallelism=4
+
+# High security
+time_cost=5, memory_cost=262144, parallelism=8
+
+# Extreme security
+time_cost=10, memory_cost=1048576, parallelism=16
+</code></pre>
+<h2 id="salting"><a class="header" href="#salting">Salting</a></h2>
+<p>A salt is random data added to passwords before hashing to prevent rainbow table attacks.</p>
+<h3 id="without-salt-vulnerable"><a class="header" href="#without-salt-vulnerable">Without Salt (Vulnerable)</a></h3>
+<pre><code class="language-python"># BAD - Same password = Same hash
+hash("password123") = "abc123..."
+hash("password123") = "abc123..."  # Attacker can precompute!
+</code></pre>
+<h3 id="with-salt-secure"><a class="header" href="#with-salt-secure">With Salt (Secure)</a></h3>
+<pre><code class="language-python"># GOOD - Same password = Different hashes
+hash("password123" + "random_salt_1") = "xyz789..."
+hash("password123" + "random_salt_2") = "def456..."
+</code></pre>
+<h3 id="implementing-salt"><a class="header" href="#implementing-salt">Implementing Salt</a></h3>
+<pre><code class="language-python">import hashlib
+import os
+
+def hash_password_with_salt(password):
+    # Generate random salt (16 bytes = 128 bits)
+    salt = os.urandom(16)
+    
+    # Combine password and salt
+    pwdhash = hashlib.pbkdf2_hmac('sha256', 
+                                  password.encode(), 
+                                  salt, 
+                                  100000)  # iterations
+    
+    # Store both salt and hash
+    return salt + pwdhash
+
+def verify_password(stored_password, provided_password):
+    # Extract salt (first 16 bytes)
+    salt = stored_password[:16]
+    
+    # Extract hash (remaining bytes)
+    stored_hash = stored_password[16:]
+    
+    # Hash provided password with same salt
+    pwdhash = hashlib.pbkdf2_hmac('sha256',
+                                  provided_password.encode(),
+                                  salt,
+                                  100000)
+    
+    return pwdhash == stored_hash
+
+# Usage
+password = "my_password"
+stored = hash_password_with_salt(password)
+
+# Verify
+if verify_password(stored, "my_password"):
+    print("Correct password")
+</code></pre>
+<h2 id="pbkdf2-password-based-key-derivation-function-2"><a class="header" href="#pbkdf2-password-based-key-derivation-function-2">PBKDF2 (Password-Based Key Derivation Function 2)</a></h2>
+<p>Standard algorithm for deriving cryptographic keys from passwords.</p>
+<pre><code class="language-python">import hashlib
+
+password = b"my_password"
+salt = b"random_salt_123"
+
+# Derive key
+key = hashlib.pbkdf2_hmac(
+    'sha256',           # Hash algorithm
+    password,           # Password
+    salt,               # Salt
+    100000,             # Iterations
+    dklen=32            # Desired key length in bytes
+)
+
+print(f"Derived key: {key.hex()}")
+
+# For password storage
+def store_password(password):
+    salt = os.urandom(16)
+    hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+    # Store: salt + hash
+    return salt.hex() + '$' + hash.hex()
+
+def check_password(password, stored):
+    salt_hex, hash_hex = stored.split('$')
+    salt = bytes.fromhex(salt_hex)
+    hash = bytes.fromhex(hash_hex)
+    
+    new_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+    return new_hash == hash
+</code></pre>
+<h2 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h2>
+<h3 id="1-file-integrity-verification"><a class="header" href="#1-file-integrity-verification">1. File Integrity Verification</a></h3>
+<pre><code class="language-bash"># Create checksum
+sha256sum important_file.pdf &gt; checksum.txt
+
+# Later, verify file hasn't changed
+sha256sum -c checksum.txt
+</code></pre>
+<h3 id="2-git-commits"><a class="header" href="#2-git-commits">2. Git Commits</a></h3>
+<p>Git uses SHA-1 (moving to SHA-256) to identify commits:</p>
+<pre><code class="language-bash">git log --oneline
+# a1b2c3d Fix bug in authentication
+</code></pre>
+<h3 id="3-digital-signatures"><a class="header" href="#3-digital-signatures">3. Digital Signatures</a></h3>
+<p>Hash the message first, then sign the hash:</p>
+<pre><code>message -&gt; hash -&gt; encrypt with private key -&gt; signature
+</code></pre>
+<h3 id="4-proof-of-work-blockchain"><a class="header" href="#4-proof-of-work-blockchain">4. Proof of Work (Blockchain)</a></h3>
+<pre><code class="language-python">import hashlib
+import time
+
+def mine_block(data, difficulty=4):
+    nonce = 0
+    target = "0" * difficulty
+    
+    while True:
+        message = f"{data}{nonce}"
+        hash = hashlib.sha256(message.encode()).hexdigest()
+        
+        if hash.startswith(target):
+            return nonce, hash
+        
+        nonce += 1
+
+# Mine a block (find hash starting with 0000)
+data = "Block data here"
+nonce, hash = mine_block(data, difficulty=4)
+print(f"Nonce: {nonce}, Hash: {hash}")
+</code></pre>
+<h3 id="5-message-deduplication"><a class="header" href="#5-message-deduplication">5. Message Deduplication</a></h3>
+<pre><code class="language-python">import hashlib
+
+def deduplicate_messages(messages):
+    seen_hashes = set()
+    unique_messages = []
+    
+    for msg in messages:
+        msg_hash = hashlib.sha256(msg.encode()).hexdigest()
+        if msg_hash not in seen_hashes:
+            seen_hashes.add(msg_hash)
+            unique_messages.append(msg)
+    
+    return unique_messages
+</code></pre>
+<h3 id="6-content-addressable-storage"><a class="header" href="#6-content-addressable-storage">6. Content-Addressable Storage</a></h3>
+<pre><code class="language-python">import hashlib
+import os
+
+class ContentAddressableStorage:
+    def __init__(self, storage_dir):
+        self.storage_dir = storage_dir
+        os.makedirs(storage_dir, exist_ok=True)
+    
+    def store(self, data):
+        # Hash determines storage location
+        hash = hashlib.sha256(data).hexdigest()
+        path = os.path.join(self.storage_dir, hash)
+        
+        with open(path, 'wb') as f:
+            f.write(data)
+        
+        return hash
+    
+    def retrieve(self, hash):
+        path = os.path.join(self.storage_dir, hash)
+        with open(path, 'rb') as f:
+            return f.read()
+
+# Usage
+cas = ContentAddressableStorage('/tmp/cas')
+content = b"Important document content"
+hash = cas.store(content)
+retrieved = cas.retrieve(hash)
+</code></pre>
+<h2 id="hash-comparison"><a class="header" href="#hash-comparison">Hash Comparison</a></h2>
+<h3 id="performance-benchmark-python"><a class="header" href="#performance-benchmark-python">Performance Benchmark (Python)</a></h3>
+<pre><code class="language-python">import hashlib
+import time
+
+data = b"x" * 1000000  # 1 MB of data
+
+algorithms = ['md5', 'sha1', 'sha256', 'sha512', 'sha3_256', 'blake2b']
+
+for algo in algorithms:
+    start = time.time()
+    for _ in range(100):
+        hashlib.new(algo, data).digest()
+    elapsed = time.time() - start
+    print(f"{algo:12} {elapsed:.3f}s")
+
+# Typical results:
+# md5          0.125s  (fastest, but insecure)
+# sha1         0.156s  (fast, but deprecated)
+# blake2b      0.187s  (fast and secure)
+# sha256       0.234s  (standard, secure)
+# sha512       0.187s  (fast on 64-bit, secure)
+# sha3_256     0.876s  (slower, secure)
+</code></pre>
+<h2 id="security-considerations"><a class="header" href="#security-considerations">Security Considerations</a></h2>
+<h3 id="1-never-use-md5-or-sha-1-for-security"><a class="header" href="#1-never-use-md5-or-sha-1-for-security">1. Never Use MD5 or SHA-1 for Security</a></h3>
+<pre><code class="language-python"># VULNERABLE - collision attacks exist
+md5_hash = hashlib.md5(data).hexdigest()
+sha1_hash = hashlib.sha1(data).hexdigest()
+
+# USE INSTEAD
+sha256_hash = hashlib.sha256(data).hexdigest()
+</code></pre>
+<h3 id="2-always-salt-passwords"><a class="header" href="#2-always-salt-passwords">2. Always Salt Passwords</a></h3>
+<pre><code class="language-python"># BAD
+password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+# GOOD
+import bcrypt
+password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+</code></pre>
+<h3 id="3-use-appropriate-hash-for-use-case"><a class="header" href="#3-use-appropriate-hash-for-use-case">3. Use Appropriate Hash for Use Case</a></h3>
+<pre><code>File integrity:     SHA-256, BLAKE2
+Password storage:   bcrypt, Argon2, PBKDF2
+General purpose:    SHA-256, SHA-3, BLAKE2
+High performance:   BLAKE2, BLAKE3
+Cryptographic:      SHA-256, SHA-3
+</code></pre>
+<h3 id="4-timing-attacks"><a class="header" href="#4-timing-attacks">4. Timing Attacks</a></h3>
+<pre><code class="language-python"># VULNERABLE - timing attack
+if hash1 == hash2:
+    return True
+
+# SAFE - constant time comparison
+import hmac
+if hmac.compare_digest(hash1, hash2):
+    return True
+</code></pre>
+<h3 id="5-hash-length-extension-attacks"><a class="header" href="#5-hash-length-extension-attacks">5. Hash Length Extension Attacks</a></h3>
+<p>SHA-256 is vulnerable to length extension attacks. Use HMAC instead for authentication:</p>
+<pre><code class="language-python"># VULNERABLE
+auth_tag = sha256(secret + message)
+
+# SAFE
+import hmac
+auth_tag = hmac.new(secret, message, hashlib.sha256).digest()
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-password-hashing-checklist"><a class="header" href="#1-password-hashing-checklist">1. Password Hashing Checklist</a></h3>
+<pre><code class="language-python"># ✓ Use specialized password hash (bcrypt, Argon2)
+# ✓ Use random salt (automatic in bcrypt/Argon2)
+# ✓ Use sufficient work factor
+# ✓ Use constant-time comparison
+# ✓ Plan for rehashing when parameters change
+
+from argon2 import PasswordHasher
+import hmac
+
+ph = PasswordHasher()
+
+def hash_password(password):
+    return ph.hash(password)
+
+def verify_password(password, hash):
+    try:
+        ph.verify(hash, password)
+        return True
+    except:
+        return False
+</code></pre>
+<h3 id="2-file-integrity"><a class="header" href="#2-file-integrity">2. File Integrity</a></h3>
+<pre><code class="language-bash"># Generate checksums for all files
+find . -type f -exec sha256sum {} \; &gt; checksums.txt
+
+# Verify later
+sha256sum -c checksums.txt
+</code></pre>
+<h3 id="3-secure-random-salt-generation"><a class="header" href="#3-secure-random-salt-generation">3. Secure Random Salt Generation</a></h3>
+<pre><code class="language-python">import os
+
+# Use cryptographically secure random
+salt = os.urandom(16)  # 128 bits
+
+# DON'T use regular random module
+import random
+salt = random.randbytes(16)  # NOT SECURE!
+</code></pre>
+<h3 id="4-database-schema-for-passwords"><a class="header" href="#4-database-schema-for-passwords">4. Database Schema for Passwords</a></h3>
+<pre><code class="language-sql">CREATE TABLE users (
+    id INT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,  -- Store full hash string
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    password_updated_at TIMESTAMP
+);
+
+-- bcrypt example:
+-- password_hash: $2b$12$KIXx8Z9ByF7LHfG8z.yNH.Q5GF8Z9ByF7...
+
+-- Argon2 example:
+-- password_hash: $argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHQ$...
+</code></pre>
+<h2 id="common-mistakes"><a class="header" href="#common-mistakes">Common Mistakes</a></h2>
+<h3 id="1-double-hashing"><a class="header" href="#1-double-hashing">1. Double Hashing</a></h3>
+<pre><code class="language-python"># BAD - doesn't increase security
+hash1 = sha256(password)
+hash2 = sha256(hash1)  # No benefit!
+
+# GOOD - use proper password hashing
+hash = bcrypt.hashpw(password, bcrypt.gensalt())
+</code></pre>
+<h3 id="2-homemade-crypto"><a class="header" href="#2-homemade-crypto">2. Homemade Crypto</a></h3>
+<pre><code class="language-python"># BAD - creating your own hash function
+def my_hash(data):
+    result = 0
+    for byte in data:
+        result = (result * 31 + byte) % 1000000007
+    return result
+
+# GOOD - use standard algorithms
+import hashlib
+hash = hashlib.sha256(data).hexdigest()
+</code></pre>
+<h3 id="3-insufficient-work-factor"><a class="header" href="#3-insufficient-work-factor">3. Insufficient Work Factor</a></h3>
+<pre><code class="language-python"># BAD - too fast, vulnerable to brute force
+hash = bcrypt.hashpw(password, bcrypt.gensalt(rounds=4))  # 2^4 = 16 iterations
+
+# GOOD - sufficient work factor
+hash = bcrypt.hashpw(password, bcrypt.gensalt(rounds=12))  # 2^12 = 4096 iterations
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>A hash function is like a magic blender for data:</p>
+<ol>
+<li><strong>You put something in</strong>: "Hello, World!"</li>
+<li><strong>It blends it up</strong>: The blender scrambles everything</li>
+<li><strong>You get a unique smoothie</strong>: "dffd6021bb2b..."</li>
+</ol>
+<p>Special properties:</p>
+<ul>
+<li><strong>Always the same</strong>: Same ingredients = Same smoothie</li>
+<li><strong>One-way</strong>: Can't un-blend the smoothie to get ingredients back</li>
+<li><strong>Tiny changes matter</strong>: "Hello, World!" vs "Hello, World?" = Completely different smoothies</li>
+<li><strong>Same size</strong>: Whether you blend a strawberry or a watermelon, you always get the same size cup</li>
+</ul>
+<p><strong>For passwords</strong>, we use special slow blenders (bcrypt, Argon2):</p>
+<ul>
+<li>Regular blender: Makes 1 million smoothies per second (easy to guess passwords!)</li>
+<li>Password blender: Makes 10 smoothies per second (hard to guess passwords!)</li>
+</ul>
+<p><strong>Salt</strong> is like adding random spices:</p>
+<ul>
+<li>Without salt: Everyone who uses "password123" gets the same smoothie</li>
+<li>With salt: Everyone gets different random spices, so same password = different smoothies</li>
+</ul>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">SHA-256 Specification (NIST)</a></li>
+<li><a href="https://password-hashing.net/">Password Hashing Competition</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9106.html">Argon2 RFC 9106</a></li>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">OWASP Password Storage Cheat Sheet</a></li>
+<li><a href="https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks">Hash Length Extension Attacks</a></li>
+<li><a href="https://github.com/pyca/bcrypt/">bcrypt Documentation</a></li>
+<li><a href="https://argon2-cffi.readthedocs.io/">Argon2 Documentation</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

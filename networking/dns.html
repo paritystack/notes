@@ -177,7 +177,397 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="dns-domain-name-system"><a class="header" href="#dns-domain-name-system">DNS (Domain Name System)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>DNS is the internet's phonebook that translates human-readable domain names (like <code>example.com</code>) into IP addresses (like <code>93.184.216.34</code>) that computers use to identify each other on the network.</p>
+<h2 id="dns-hierarchy"><a class="header" href="#dns-hierarchy">DNS Hierarchy</a></h2>
+<pre><code>                    Root (.)
+                       |
+         +-------------+-------------+
+         |             |             |
+       .com          .org          .net
+         |             |             |
+    example.com   wikipedia.org  archive.net
+         |
+    www.example.com
+</code></pre>
+<h2 id="dns-record-types"><a class="header" href="#dns-record-types">DNS Record Types</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Record Type</th><th>Purpose</th><th>Example</th></tr></thead><tbody>
+<tr><td><strong>A</strong></td><td>IPv4 address</td><td><code>example.com -&gt; 93.184.216.34</code></td></tr>
+<tr><td><strong>AAAA</strong></td><td>IPv6 address</td><td><code>example.com -&gt; 2606:2800:220:1:...</code></td></tr>
+<tr><td><strong>CNAME</strong></td><td>Canonical name (alias)</td><td><code>www.example.com -&gt; example.com</code></td></tr>
+<tr><td><strong>MX</strong></td><td>Mail exchange server</td><td><code>example.com -&gt; mail.example.com</code></td></tr>
+<tr><td><strong>NS</strong></td><td>Name server</td><td><code>example.com -&gt; ns1.example.com</code></td></tr>
+<tr><td><strong>TXT</strong></td><td>Text information</td><td>SPF, DKIM records</td></tr>
+<tr><td><strong>PTR</strong></td><td>Reverse DNS lookup</td><td><code>34.216.184.93 -&gt; example.com</code></td></tr>
+<tr><td><strong>SOA</strong></td><td>Start of authority</td><td>Zone information</td></tr>
+<tr><td><strong>SRV</strong></td><td>Service location</td><td><code>_service._proto.name</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="dns-query-process"><a class="header" href="#dns-query-process">DNS Query Process</a></h2>
+<pre><code>1. User types "example.com" in browser
+
+2. Browser checks local cache
+
+3. If not cached, query DNS resolver (ISP or 8.8.8.8)
+
+4. Resolver checks its cache
+
+5. If not cached, recursive query:
+
+   Resolver → Root DNS Server
+   Root → "Ask .com server"
+
+   Resolver → .com TLD Server
+   TLD → "Ask example.com's nameserver"
+
+   Resolver → example.com's Nameserver
+   Nameserver → "IP is 93.184.216.34"
+
+6. Resolver caches result and returns to browser
+
+7. Browser connects to IP address
+</code></pre>
+<h2 id="dns-message-format"><a class="header" href="#dns-message-format">DNS Message Format</a></h2>
+<pre><code>+---------------------------+
+|        Header             |  12 bytes
++---------------------------+
+|        Question           |  Variable
++---------------------------+
+|        Answer             |  Variable
++---------------------------+
+|        Authority          |  Variable
++---------------------------+
+|        Additional         |  Variable
++---------------------------+
+</code></pre>
+<h3 id="header-format-12-bytes"><a class="header" href="#header-format-12-bytes">Header Format (12 bytes)</a></h3>
+<pre><code> 0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|                      ID                       |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|                    QDCOUNT                    |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|                    ANCOUNT                    |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|                    NSCOUNT                    |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|                    ARCOUNT                    |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+</code></pre>
+<p><strong>Fields:</strong></p>
+<ul>
+<li><strong>ID</strong>: 16-bit identifier for matching requests/responses</li>
+<li><strong>QR</strong>: Query (0) or Response (1)</li>
+<li><strong>Opcode</strong>: Query type (0=standard, 1=inverse, 2=status)</li>
+<li><strong>AA</strong>: Authoritative Answer</li>
+<li><strong>TC</strong>: Truncated (message too long for UDP)</li>
+<li><strong>RD</strong>: Recursion Desired</li>
+<li><strong>RA</strong>: Recursion Available</li>
+<li><strong>RCODE</strong>: Response code (0=no error, 3=name error)</li>
+<li><strong>QDCOUNT</strong>: Number of questions</li>
+<li><strong>ANCOUNT</strong>: Number of answers</li>
+<li><strong>NSCOUNT</strong>: Number of authority records</li>
+<li><strong>ARCOUNT</strong>: Number of additional records</li>
+</ul>
+<h2 id="dns-query-example"><a class="header" href="#dns-query-example">DNS Query Example</a></h2>
+<h3 id="query-request"><a class="header" href="#query-request">Query (Request)</a></h3>
+<pre><code>; DNS Query for example.com A record
+; Header
+ID: 0x1234
+Flags: 0x0100 (standard query, recursion desired)
+Questions: 1
+Answer RRs: 0
+Authority RRs: 0
+Additional RRs: 0
+
+; Question Section
+example.com.    IN    A
+</code></pre>
+<p><strong>Hexadecimal representation:</strong></p>
+<pre><code>12 34  01 00  00 01  00 00  00 00  00 00
+07 65 78 61 6d 70 6c 65 03 63 6f 6d 00
+00 01  00 01
+</code></pre>
+<h3 id="response"><a class="header" href="#response">Response</a></h3>
+<pre><code>; DNS Response for example.com A record
+; Header
+ID: 0x1234
+Flags: 0x8180 (response, recursion available)
+Questions: 1
+Answer RRs: 1
+Authority RRs: 0
+Additional RRs: 0
+
+; Question Section
+example.com.    IN    A
+
+; Answer Section
+example.com.    86400    IN    A    93.184.216.34
+</code></pre>
+<h2 id="dns-query-types"><a class="header" href="#dns-query-types">DNS Query Types</a></h2>
+<h3 id="recursive-query"><a class="header" href="#recursive-query">Recursive Query</a></h3>
+<p>Client asks DNS server to provide the final answer:</p>
+<pre><code>Client → Resolver: "What's example.com?"
+Resolver → Root/TLD/Auth servers (multiple queries)
+Resolver → Client: "It's 93.184.216.34"
+</code></pre>
+<h3 id="iterative-query"><a class="header" href="#iterative-query">Iterative Query</a></h3>
+<p>DNS server returns best answer it knows:</p>
+<pre><code>Client → Root: "What's example.com?"
+Root → Client: "Ask .com server at 192.5.6.30"
+
+Client → TLD: "What's example.com?"
+TLD → Client: "Ask ns1.example.com at 192.0.2.1"
+
+Client → Auth: "What's example.com?"
+Auth → Client: "It's 93.184.216.34"
+</code></pre>
+<h2 id="dns-resource-record-format"><a class="header" href="#dns-resource-record-format">DNS Resource Record Format</a></h2>
+<pre><code>Name: example.com
+Type: A (1)
+Class: IN (1) - Internet
+TTL: 86400 (24 hours)
+Data Length: 4
+Data: 93.184.216.34
+</code></pre>
+<h2 id="common-dns-operations"><a class="header" href="#common-dns-operations">Common DNS Operations</a></h2>
+<h3 id="using-dig-dns-lookup-tool"><a class="header" href="#using-dig-dns-lookup-tool">Using dig (DNS lookup tool)</a></h3>
+<pre><code class="language-bash"># Basic A record lookup
+dig example.com
+
+# Query specific record type
+dig example.com MX
+dig example.com AAAA
+
+# Query specific DNS server
+dig @8.8.8.8 example.com
+
+# Reverse DNS lookup
+dig -x 93.184.216.34
+
+# Trace DNS resolution path
+dig +trace example.com
+
+# Short answer only
+dig +short example.com
+</code></pre>
+<h3 id="using-nslookup"><a class="header" href="#using-nslookup">Using nslookup</a></h3>
+<pre><code class="language-bash"># Basic lookup
+nslookup example.com
+
+# Query specific server
+nslookup example.com 8.8.8.8
+
+# Query specific record type
+nslookup -type=MX example.com
+</code></pre>
+<h3 id="using-host"><a class="header" href="#using-host">Using host</a></h3>
+<pre><code class="language-bash"># Simple lookup
+host example.com
+
+# Verbose output
+host -v example.com
+
+# Query MX records
+host -t MX example.com
+</code></pre>
+<h2 id="dns-caching"><a class="header" href="#dns-caching">DNS Caching</a></h2>
+<h3 id="cache-levels"><a class="header" href="#cache-levels">Cache Levels</a></h3>
+<ol>
+<li><strong>Browser Cache</strong>: Short-lived (seconds to minutes)</li>
+<li><strong>OS Cache</strong>: System-level DNS cache</li>
+<li><strong>Router Cache</strong>: Local network cache</li>
+<li><strong>ISP Resolver Cache</strong>: Hours to days</li>
+<li><strong>Authoritative Server</strong>: The source of truth</li>
+</ol>
+<h3 id="ttl-time-to-live"><a class="header" href="#ttl-time-to-live">TTL (Time To Live)</a></h3>
+<p>Controls how long records are cached:</p>
+<pre><code>example.com.  3600  IN  A  93.184.216.34
+              ^^^^
+              1 hour TTL
+</code></pre>
+<h3 id="flushing-dns-cache"><a class="header" href="#flushing-dns-cache">Flushing DNS Cache</a></h3>
+<pre><code class="language-bash"># Windows
+ipconfig /flushdns
+
+# macOS
+sudo dscacheutil -flushcache
+
+# Linux (systemd-resolved)
+sudo systemd-resolve --flush-caches
+
+# Linux (nscd)
+sudo /etc/init.d/nscd restart
+</code></pre>
+<h2 id="dns-security"><a class="header" href="#dns-security">DNS Security</a></h2>
+<h3 id="dns-spoofingcache-poisoning"><a class="header" href="#dns-spoofingcache-poisoning">DNS Spoofing/Cache Poisoning</a></h3>
+<p>Attack where fake DNS responses are injected:</p>
+<pre><code>Attacker intercepts DNS query
+Attacker sends fake response: "bank.com -&gt; evil.com"
+Victim connects to attacker's server
+</code></pre>
+<p><strong>Prevention</strong>: DNSSEC</p>
+<h3 id="dnssec-dns-security-extensions"><a class="header" href="#dnssec-dns-security-extensions">DNSSEC (DNS Security Extensions)</a></h3>
+<p>Adds cryptographic signatures to DNS records:</p>
+<pre><code>1. Zone owner signs DNS records with private key
+2. Public key published in DNS
+3. Resolver verifies signature
+4. Chain of trust from root to domain
+</code></pre>
+<p><strong>Record Types:</strong></p>
+<ul>
+<li><strong>RRSIG</strong>: Contains signature</li>
+<li><strong>DNSKEY</strong>: Public key</li>
+<li><strong>DS</strong>: Delegation Signer (links parent to child)</li>
+</ul>
+<h3 id="dns-over-https-doh"><a class="header" href="#dns-over-https-doh">DNS over HTTPS (DoH)</a></h3>
+<p>Encrypts DNS queries using HTTPS:</p>
+<pre><code>Client → DoH Server (port 443)
+Encrypted: "What's example.com?"
+Encrypted: "It's 93.184.216.34"
+</code></pre>
+<p><strong>Providers:</strong></p>
+<ul>
+<li>Cloudflare: <code>https://1.1.1.1/dns-query</code></li>
+<li>Google: <code>https://dns.google/dns-query</code></li>
+</ul>
+<h3 id="dns-over-tls-dot"><a class="header" href="#dns-over-tls-dot">DNS over TLS (DoT)</a></h3>
+<p>Encrypts DNS queries using TLS:</p>
+<pre><code>Client → DoT Server (port 853)
+TLS encrypted DNS query/response
+</code></pre>
+<h2 id="public-dns-servers"><a class="header" href="#public-dns-servers">Public DNS Servers</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Provider</th><th>IPv4</th><th>IPv6</th><th>Features</th></tr></thead><tbody>
+<tr><td><strong>Google</strong></td><td>8.8.8.8, 8.8.4.4</td><td>2001:4860:4860::8888</td><td>Fast, reliable</td></tr>
+<tr><td><strong>Cloudflare</strong></td><td>1.1.1.1, 1.0.0.1</td><td>2606:4700:4700::1111</td><td>Privacy-focused</td></tr>
+<tr><td><strong>Quad9</strong></td><td>9.9.9.9</td><td>2620:fe::fe</td><td>Malware blocking</td></tr>
+<tr><td><strong>OpenDNS</strong></td><td>208.67.222.222</td><td>2620:119:35::35</td><td>Content filtering</td></tr>
+</tbody></table>
+</div>
+<h2 id="dns-load-balancing"><a class="header" href="#dns-load-balancing">DNS Load Balancing</a></h2>
+<p>Multiple A records for load distribution:</p>
+<pre><code>example.com.  300  IN  A  192.0.2.1
+example.com.  300  IN  A  192.0.2.2
+example.com.  300  IN  A  192.0.2.3
+</code></pre>
+<p>Round-robin or geographic distribution of requests.</p>
+<h2 id="common-dns-response-codes"><a class="header" href="#common-dns-response-codes">Common DNS Response Codes</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Code</th><th>Name</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><strong>0</strong></td><td>NOERROR</td><td>Query successful</td></tr>
+<tr><td><strong>1</strong></td><td>FORMERR</td><td>Format error</td></tr>
+<tr><td><strong>2</strong></td><td>SERVFAIL</td><td>Server failure</td></tr>
+<tr><td><strong>3</strong></td><td>NXDOMAIN</td><td>Domain doesn't exist</td></tr>
+<tr><td><strong>4</strong></td><td>NOTIMP</td><td>Not implemented</td></tr>
+<tr><td><strong>5</strong></td><td>REFUSED</td><td>Query refused</td></tr>
+</tbody></table>
+</div>
+<h2 id="dns-best-practices"><a class="header" href="#dns-best-practices">DNS Best Practices</a></h2>
+<h3 id="1-use-multiple-nameservers"><a class="header" href="#1-use-multiple-nameservers">1. Use Multiple Nameservers</a></h3>
+<pre><code>NS  ns1.example.com  (Primary)
+NS  ns2.example.com  (Secondary)
+</code></pre>
+<h3 id="2-appropriate-ttl-values"><a class="header" href="#2-appropriate-ttl-values">2. Appropriate TTL Values</a></h3>
+<pre><code># Stable records (rarely change)
+example.com.  86400  IN  A  93.184.216.34
+
+# Dynamic records (may change soon)
+staging.example.com.  300  IN  A  192.0.2.1
+</code></pre>
+<h3 id="3-spf-records-for-email"><a class="header" href="#3-spf-records-for-email">3. SPF Records for Email</a></h3>
+<pre><code>example.com.  IN  TXT  "v=spf1 mx include:_spf.google.com ~all"
+</code></pre>
+<h3 id="4-dkim-for-email-authentication"><a class="header" href="#4-dkim-for-email-authentication">4. DKIM for Email Authentication</a></h3>
+<pre><code>default._domainkey.example.com.  IN  TXT  "v=DKIM1; k=rsa; p=MIGfMA0..."
+</code></pre>
+<h2 id="dns-troubleshooting"><a class="header" href="#dns-troubleshooting">DNS Troubleshooting</a></h2>
+<h3 id="issue-domain-not-resolving"><a class="header" href="#issue-domain-not-resolving">Issue: Domain not resolving</a></h3>
+<pre><code class="language-bash"># Check if domain exists
+dig example.com
+
+# Check all nameservers
+dig example.com NS
+dig @ns1.example.com example.com
+
+# Check propagation
+dig @8.8.8.8 example.com
+dig @1.1.1.1 example.com
+</code></pre>
+<h3 id="issue-slow-dns-resolution"><a class="header" href="#issue-slow-dns-resolution">Issue: Slow DNS resolution</a></h3>
+<pre><code class="language-bash"># Test query time
+dig example.com | grep "Query time"
+
+# Compare different DNS servers
+dig @8.8.8.8 example.com | grep "Query time"
+dig @1.1.1.1 example.com | grep "Query time"
+</code></pre>
+<h3 id="issue-nxdomain-domain-not-found"><a class="header" href="#issue-nxdomain-domain-not-found">Issue: NXDOMAIN (domain not found)</a></h3>
+<ol>
+<li>Check domain registration</li>
+<li>Verify nameserver configuration</li>
+<li>Check DNS propagation time (up to 48 hours)</li>
+</ol>
+<h2 id="zone-file-example"><a class="header" href="#zone-file-example">Zone File Example</a></h2>
+<pre><code>$TTL 86400
+@   IN  SOA  ns1.example.com. admin.example.com. (
+            2024011301  ; Serial
+            3600        ; Refresh
+            1800        ; Retry
+            604800      ; Expire
+            86400 )     ; Minimum TTL
+
+; Name servers
+    IN  NS   ns1.example.com.
+    IN  NS   ns2.example.com.
+
+; Mail servers
+    IN  MX   10 mail1.example.com.
+    IN  MX   20 mail2.example.com.
+
+; A records
+@           IN  A    93.184.216.34
+www         IN  A    93.184.216.34
+mail1       IN  A    192.0.2.1
+mail2       IN  A    192.0.2.2
+ns1         IN  A    192.0.2.10
+ns2         IN  A    192.0.2.11
+
+; AAAA records (IPv6)
+@           IN  AAAA 2606:2800:220:1:248:1893:25c8:1946
+
+; CNAME records
+ftp         IN  CNAME www.example.com.
+webmail     IN  CNAME mail1.example.com.
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>DNS is like a phone book for the internet:</p>
+<ul>
+<li><strong>Without DNS</strong>: "Visit 93.184.216.34" (hard to remember!)</li>
+<li><strong>With DNS</strong>: "Visit example.com" (easy!)</li>
+</ul>
+<p>When you type a website name:</p>
+<ol>
+<li>Your computer asks "Where is example.com?"</li>
+<li>DNS looks it up in its huge phone book</li>
+<li>DNS says "It's at 93.184.216.34"</li>
+<li>Your computer connects to that address</li>
+</ol>
+<p>DNS servers are like helpers who:</p>
+<ul>
+<li>Remember answers (caching) so they can answer faster next time</li>
+<li>Ask other DNS servers if they don't know the answer</li>
+<li>Make sure everyone gets the same answer for the same website</li>
+</ul>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc1035">RFC 1035 - DNS Specification</a></li>
+<li><a href="https://howdns.works/">How DNS Works (Comic)</a></li>
+<li><a href="https://mxtoolbox.com/DNSLookup.aspx">DNS Lookup Tool</a></li>
+<li><a href="https://dnssec-analyzer.verisignlabs.com/">DNSSEC Explained</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

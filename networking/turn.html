@@ -177,7 +177,582 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="turn-traversal-using-relays-around-nat"><a class="header" href="#turn-traversal-using-relays-around-nat">TURN (Traversal Using Relays around NAT)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>TURN is a protocol that helps establish connections between peers when direct peer-to-peer communication fails. Unlike STUN which only discovers addresses, TURN acts as a relay server that forwards traffic between peers when NAT or firewall restrictions prevent direct connections.</p>
+<h2 id="why-turn-is-needed"><a class="header" href="#why-turn-is-needed">Why TURN is Needed</a></h2>
+<h3 id="when-stun-fails"><a class="header" href="#when-stun-fails">When STUN Fails</a></h3>
+<pre><code>Scenario 1: Symmetric NAT
+  Peer A behind Symmetric NAT
+  Different public port for each destination
+  STUN can't provide usable address
+  → Need TURN relay
+
+Scenario 2: Restrictive Firewall
+  Corporate firewall blocks incoming P2P
+  Even with correct address from STUN
+  → Need TURN relay
+
+Scenario 3: UDP Blocked
+  Network blocks UDP traffic
+  Can't use STUN or direct P2P
+  → Need TURN over TCP
+</code></pre>
+<h2 id="turn-vs-stun"><a class="header" href="#turn-vs-stun">TURN vs STUN</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>STUN</th><th>TURN</th></tr></thead><tbody>
+<tr><td><strong>Purpose</strong></td><td>Discover public address</td><td>Relay traffic</td></tr>
+<tr><td><strong>Bandwidth</strong></td><td>Minimal (discovery only)</td><td>High (relays all data)</td></tr>
+<tr><td><strong>Success Rate</strong></td><td>~80%</td><td>~100%</td></tr>
+<tr><td><strong>Cost</strong></td><td>Free (public servers)</td><td>Expensive (bandwidth)</td></tr>
+<tr><td><strong>Latency</strong></td><td>Low (direct connection)</td><td>Higher (via relay)</td></tr>
+<tr><td><strong>When to Use</strong></td><td>First attempt</td><td>Fallback</td></tr>
+</tbody></table>
+</div>
+<h2 id="turn-architecture"><a class="header" href="#turn-architecture">TURN Architecture</a></h2>
+<h3 id="basic-relay"><a class="header" href="#basic-relay">Basic Relay</a></h3>
+<pre><code>Peer A                    TURN Server                Peer B
+(Behind NAT)              (Public IP)                (Behind NAT)
+192.168.1.10              198.51.100.1               10.0.0.5
+  |                            |                         |
+  | Allocate Request           |                         |
+  |---------------------------&gt;|                         |
+  | Allocate Success           |                         |
+  |&lt;---------------------------|                         |
+  | (Relayed address assigned) |                         |
+  |                            |                         |
+  | Send relayed address       |                         |
+  | to Peer B via signaling    |                         |
+  |                            |                         |
+  |         Data               |          Data           |
+  |---------------------------&gt;|------------------------&gt;|
+  |                            | (TURN relays)           |
+  |         Data               |          Data           |
+  |&lt;---------------------------|&lt;------------------------|
+</code></pre>
+<h3 id="allocation"><a class="header" href="#allocation">Allocation</a></h3>
+<pre><code>Client requests allocation from TURN server:
+
+1. Client: "I need a relay address"
+2. TURN: "Here's 198.51.100.1:50000 for you"
+3. Client: "Route traffic between me and Peer X"
+4. TURN: "OK, I'll relay your traffic"
+
+Allocation lifetime: 10 minutes (default, can be refreshed)
+</code></pre>
+<h2 id="turn-message-types"><a class="header" href="#turn-message-types">TURN Message Types</a></h2>
+<h3 id="key-operations"><a class="header" href="#key-operations">Key Operations</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>Allocate</strong></td><td>Request relay address</td></tr>
+<tr><td><strong>Refresh</strong></td><td>Extend allocation lifetime</td></tr>
+<tr><td><strong>Send</strong></td><td>Send data through relay</td></tr>
+<tr><td><strong>Data</strong></td><td>Receive data from relay</td></tr>
+<tr><td><strong>CreatePermission</strong></td><td>Allow peer to send data</td></tr>
+<tr><td><strong>ChannelBind</strong></td><td>Optimize data transfer</td></tr>
+</tbody></table>
+</div>
+<h3 id="allocate-requestresponse"><a class="header" href="#allocate-requestresponse">Allocate Request/Response</a></h3>
+<p><strong>Request:</strong></p>
+<pre><code>Client → TURN Server
+
+Method: Allocate
+Attributes:
+  REQUESTED-TRANSPORT: UDP (17)
+  LIFETIME: 600 seconds
+  USERNAME: "alice"
+  MESSAGE-INTEGRITY: HMAC
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code>TURN Server → Client
+
+Method: Allocate Success
+Attributes:
+  XOR-RELAYED-ADDRESS: 198.51.100.1:50000
+  LIFETIME: 600 seconds
+  XOR-MAPPED-ADDRESS: 203.0.113.5:54321 (client's public IP)
+  MESSAGE-INTEGRITY: HMAC
+</code></pre>
+<h2 id="turn-workflow"><a class="header" href="#turn-workflow">TURN Workflow</a></h2>
+<h3 id="1-allocation"><a class="header" href="#1-allocation">1. Allocation</a></h3>
+<pre><code>Client                          TURN Server
+  |                                |
+  | Allocate Request               |
+  | (credentials, transport)       |
+  |-------------------------------&gt;|
+  |                                |
+  | Allocate Success               |
+  | (relayed address)              |
+  |&lt;-------------------------------|
+  |                                |
+
+Allocation created:
+  Client: 203.0.113.5:54321
+  Relay: 198.51.100.1:50000
+  Lifetime: 600 seconds
+</code></pre>
+<h3 id="2-permission"><a class="header" href="#2-permission">2. Permission</a></h3>
+<pre><code>Client                          TURN Server
+  |                                |
+  | CreatePermission Request       |
+  | (peer IP: 10.0.0.5)            |
+  |-------------------------------&gt;|
+  |                                |
+  | CreatePermission Success       |
+  |&lt;-------------------------------|
+  |                                |
+
+TURN server now accepts traffic from 10.0.0.5
+Permission lifetime: 300 seconds
+</code></pre>
+<h3 id="3-sending-data"><a class="header" href="#3-sending-data">3. Sending Data</a></h3>
+<h4 id="method-a-send-indication"><a class="header" href="#method-a-send-indication">Method A: Send Indication</a></h4>
+<pre><code>Client                    TURN Server               Peer
+  |                            |                      |
+  | Send Indication            |                      |
+  | To: 10.0.0.5:6000          |                      |
+  | Data: "Hello"              |                      |
+  |---------------------------&gt;|                      |
+  |                            | UDP: "Hello"         |
+  |                            |---------------------&gt;|
+  |                            |                      |
+</code></pre>
+<h4 id="method-b-channel-binding-optimized"><a class="header" href="#method-b-channel-binding-optimized">Method B: Channel Binding (Optimized)</a></h4>
+<pre><code>Client                    TURN Server               Peer
+  |                            |                      |
+  | ChannelBind Request        |                      |
+  | Channel: 0x4000            |                      |
+  | Peer: 10.0.0.5:6000        |                      |
+  |---------------------------&gt;|                      |
+  |                            |                      |
+  | ChannelBind Success        |                      |
+  |&lt;---------------------------|                      |
+  |                            |                      |
+  | ChannelData (0x4000)       |                      |
+  | Data: "Hello"              |                      |
+  |---------------------------&gt;|                      |
+  |                            | UDP: "Hello"         |
+  |                            |---------------------&gt;|
+
+ChannelData has only 4-byte overhead (vs 36 bytes for Send)
+More efficient for continuous data flow
+</code></pre>
+<h3 id="4-receiving-data"><a class="header" href="#4-receiving-data">4. Receiving Data</a></h3>
+<pre><code>Peer                      TURN Server              Client
+  |                            |                      |
+  | UDP: "Reply"               |                      |
+  |---------------------------&gt;|                      |
+  |                            | Data Indication      |
+  |                            | From: 10.0.0.5:6000  |
+  |                            | Data: "Reply"        |
+  |                            |---------------------&gt;|
+  |                            |                      |
+</code></pre>
+<h2 id="turn-message-format"><a class="header" href="#turn-message-format">TURN Message Format</a></h2>
+<h3 id="send-indication"><a class="header" href="#send-indication">Send Indication</a></h3>
+<pre><code> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|0 0|     STUN Message Type     |         Message Length        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                         Magic Cookie                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Transaction ID (96 bits)                  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                   XOR-PEER-ADDRESS                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        DATA                                   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+<h3 id="channeldata-message"><a class="header" href="#channeldata-message">ChannelData Message</a></h3>
+<pre><code> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Channel Number        |            Length             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                       Application Data                        |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Channel Number: 0x4000 - 0x7FFF
+Length: Length of application data
+</code></pre>
+<h2 id="turn-attributes"><a class="header" href="#turn-attributes">TURN Attributes</a></h2>
+<h3 id="common-attributes"><a class="header" href="#common-attributes">Common Attributes</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>XOR-RELAYED-ADDRESS</strong></td><td>0x0016</td><td>Relay transport address</td></tr>
+<tr><td><strong>XOR-PEER-ADDRESS</strong></td><td>0x0012</td><td>Peer transport address</td></tr>
+<tr><td><strong>DATA</strong></td><td>0x0013</td><td>Data to relay</td></tr>
+<tr><td><strong>LIFETIME</strong></td><td>0x000D</td><td>Allocation lifetime (seconds)</td></tr>
+<tr><td><strong>REQUESTED-TRANSPORT</strong></td><td>0x0019</td><td>Desired transport (UDP=17)</td></tr>
+<tr><td><strong>CHANNEL-NUMBER</strong></td><td>0x000C</td><td>Channel number (0x4000-0x7FFF)</td></tr>
+<tr><td><strong>EVEN-PORT</strong></td><td>0x0018</td><td>Request even port (RTP/RTCP)</td></tr>
+<tr><td><strong>DONT-FRAGMENT</strong></td><td>0x001A</td><td>Don't fragment</td></tr>
+<tr><td><strong>RESERVATION-TOKEN</strong></td><td>0x0022</td><td>Token for port reservation</td></tr>
+</tbody></table>
+</div>
+<h2 id="turn-authentication"><a class="header" href="#turn-authentication">TURN Authentication</a></h2>
+<h3 id="long-term-credentials"><a class="header" href="#long-term-credentials">Long-Term Credentials</a></h3>
+<pre><code>Request 1 (no credentials):
+  Allocate Request
+
+Response 1:
+  Error 401 Unauthorized
+  REALM: "example.com"
+  NONCE: "abcd1234"
+
+Request 2 (with credentials):
+  USERNAME: "alice"
+  REALM: "example.com"
+  NONCE: "abcd1234"
+  MESSAGE-INTEGRITY: HMAC-SHA1(message, key)
+
+Key = MD5(username:realm:password)
+
+Response 2:
+  Allocate Success Response
+  XOR-RELAYED-ADDRESS: ...
+  LIFETIME: 600
+</code></pre>
+<h3 id="short-term-credentials"><a class="header" href="#short-term-credentials">Short-Term Credentials</a></h3>
+<pre><code>Used within ICE (WebRTC):
+  USERNAME: &lt;random&gt;:&lt;random&gt;
+  PASSWORD: &lt;shared secret&gt;
+
+Simpler, time-limited authentication
+</code></pre>
+<h2 id="turn-allocation-lifecycle"><a class="header" href="#turn-allocation-lifecycle">TURN Allocation Lifecycle</a></h2>
+<pre><code>1. Allocate (request relay)
+   ↓
+2. Success (relay assigned)
+   ↓
+3. CreatePermission (allow peers)
+   ↓
+4. ChannelBind (optimize transfer)
+   ↓
+5. Send/Receive Data
+   ↓
+6. Refresh (extend lifetime)
+   ↓
+7. Delete or Expire
+
+Timeline:
+  0s: Allocate
+  300s: Refresh (extend to 900s)
+  600s: Refresh (extend to 1200s)
+  900s: Refresh (extend to 1500s)
+  ...
+  Stop refreshing: Allocation expires
+</code></pre>
+<h2 id="turn-over-different-transports"><a class="header" href="#turn-over-different-transports">TURN Over Different Transports</a></h2>
+<h3 id="turn-over-udp"><a class="header" href="#turn-over-udp">TURN over UDP</a></h3>
+<pre><code>Default mode
+Client → TURN Server: UDP
+TURN Server → Peer: UDP
+
+Fast, but UDP might be blocked
+</code></pre>
+<h3 id="turn-over-tcp"><a class="header" href="#turn-over-tcp">TURN over TCP</a></h3>
+<pre><code>Client → TURN Server: TCP
+TURN Server → Peer: UDP
+
+Works when UDP blocked
+More overhead (TCP vs UDP)
+</code></pre>
+<h3 id="turn-over-tls"><a class="header" href="#turn-over-tls">TURN over TLS</a></h3>
+<pre><code>Client → TURN Server: TLS over TCP
+TURN Server → Peer: UDP
+
+Encrypted control channel
+Works in restrictive environments
+Port 443 (looks like HTTPS)
+</code></pre>
+<h2 id="ice-with-turn"><a class="header" href="#ice-with-turn">ICE with TURN</a></h2>
+<h3 id="candidate-priority"><a class="header" href="#candidate-priority">Candidate Priority</a></h3>
+<pre><code>ICE tries candidates in order:
+
+1. Host Candidate (local IP)
+   Type: host
+   Priority: Highest
+   Example: 192.168.1.10:5000
+
+2. Server Reflexive (STUN)
+   Type: srflx
+   Priority: High
+   Example: 203.0.113.5:6000
+
+3. Relayed (TURN)
+   Type: relay
+   Priority: Lowest (fallback)
+   Example: 198.51.100.1:50000
+
+Connection attempt:
+  Try host → Try srflx → Try relay
+  Use first successful connection
+</code></pre>
+<h3 id="webrtc-with-turn"><a class="header" href="#webrtc-with-turn">WebRTC with TURN</a></h3>
+<pre><code class="language-javascript">const configuration = {
+  iceServers: [
+    // STUN server (free)
+    { urls: 'stun:stun.l.google.com:19302' },
+
+    // TURN server (requires auth)
+    {
+      urls: 'turn:turn.example.com:3478',
+      username: 'alice',
+      credential: 'password123'
+    },
+
+    // TURN over TLS
+    {
+      urls: 'turns:turn.example.com:5349',
+      username: 'alice',
+      credential: 'password123'
+    }
+  ]
+};
+
+const pc = new RTCPeerConnection(configuration);
+</code></pre>
+<h2 id="turn-server-setup"><a class="header" href="#turn-server-setup">TURN Server Setup</a></h2>
+<h3 id="using-coturn"><a class="header" href="#using-coturn">Using coturn</a></h3>
+<p><strong>Install:</strong></p>
+<pre><code class="language-bash">sudo apt-get install coturn
+</code></pre>
+<p><strong>Configure <code>/etc/turnserver.conf</code>:</strong></p>
+<pre><code class="language-bash"># Listening ports
+listening-port=3478
+tls-listening-port=5349
+
+# Relay ports
+min-port=49152
+max-port=65535
+
+# Authentication
+lt-cred-mech
+user=alice:password123
+realm=example.com
+
+# Or use shared secret
+use-auth-secret
+static-auth-secret=my-secret-key
+
+# Certificates (for TLS)
+cert=/etc/ssl/turn.crt
+pkey=/etc/ssl/turn.key
+
+# Logging
+log-file=/var/log/turnserver.log
+verbose
+
+# External IP (if behind NAT)
+external-ip=203.0.113.5/192.168.1.10
+
+# Limit resources
+max-bps=1000000
+total-quota=100
+</code></pre>
+<p><strong>Run:</strong></p>
+<pre><code class="language-bash">sudo turnserver -v
+</code></pre>
+<p><strong>Test:</strong></p>
+<pre><code class="language-bash"># Using turnutils
+turnutils_uclient -v -u alice -w password123 turn.example.com
+</code></pre>
+<h2 id="turn-bandwidth-considerations"><a class="header" href="#turn-bandwidth-considerations">TURN Bandwidth Considerations</a></h2>
+<h3 id="bandwidth-usage"><a class="header" href="#bandwidth-usage">Bandwidth Usage</a></h3>
+<pre><code>Video call: 2 Mbps per direction
+
+Direct P2P (no TURN):
+  Client A →→ Client B
+  Total bandwidth: 4 Mbps (2 up + 2 down each)
+
+Through TURN relay:
+  Client A → TURN → Client B
+  TURN bandwidth: 4 Mbps (2 in + 2 out)
+  Each client: 4 Mbps (2 up + 2 down)
+
+TURN server needs 2x the bandwidth!
+</code></pre>
+<h3 id="cost-implications"><a class="header" href="#cost-implications">Cost Implications</a></h3>
+<pre><code>Example: 1000 concurrent video calls through TURN
+  Each call: 2 Mbps × 2 directions = 4 Mbps
+  Total: 1000 × 4 Mbps = 4 Gbps
+
+At $0.10/GB:
+  4 Gbps = 0.5 GB/second
+  Per hour: 1,800 GB = $180/hour
+  Per day: 43,200 GB = $4,320/day
+
+Why ICE tries direct connection first!
+</code></pre>
+<h3 id="optimization-strategies"><a class="header" href="#optimization-strategies">Optimization Strategies</a></h3>
+<pre><code>1. Prefer direct connections (STUN)
+   - ~80% of connections succeed
+   - Zero relay bandwidth
+
+2. Short allocation lifetimes
+   - Free up resources quickly
+   - Prevent unused allocations
+
+3. Connection quality monitoring
+   - Switch from relay to direct if possible
+   - ICE restart
+
+4. Rate limiting
+   - Prevent abuse
+   - Fair resource sharing
+
+5. Geographic distribution
+   - Regional TURN servers
+   - Reduce latency
+</code></pre>
+<h2 id="turn-security"><a class="header" href="#turn-security">TURN Security</a></h2>
+<h3 id="authentication-required"><a class="header" href="#authentication-required">Authentication Required</a></h3>
+<pre><code>Public TURN servers = expensive bandwidth
+Must authenticate:
+  - Username/password
+  - Time-limited credentials
+  - Shared secrets
+</code></pre>
+<h3 id="quota-management"><a class="header" href="#quota-management">Quota Management</a></h3>
+<pre><code>Limit per user:
+  - Bandwidth (bytes/sec)
+  - Total data (GB)
+  - Concurrent allocations
+  - Allocation lifetime
+</code></pre>
+<h3 id="access-control"><a class="header" href="#access-control">Access Control</a></h3>
+<pre><code>Restrict by:
+  - IP ranges (corporate network)
+  - Time windows
+  - User groups
+</code></pre>
+<h2 id="monitoring-turn-server"><a class="header" href="#monitoring-turn-server">Monitoring TURN Server</a></h2>
+<h3 id="key-metrics"><a class="header" href="#key-metrics">Key Metrics</a></h3>
+<pre><code>1. Active allocations
+   - Current number
+   - Peak usage
+
+2. Bandwidth
+   - Total throughput
+   - Per-client usage
+   - Inbound/outbound ratio
+
+3. Connections
+   - Success rate
+   - Allocation duration
+   - Peak concurrent
+
+4. Authentication
+   - Failed attempts
+   - Expired credentials
+
+5. Resources
+   - CPU usage
+   - Memory
+   - Network interfaces
+   - Port exhaustion
+</code></pre>
+<h3 id="coturn-statistics"><a class="header" href="#coturn-statistics">coturn Statistics</a></h3>
+<pre><code class="language-bash"># Real-time stats
+telnet localhost 5766
+
+# Commands:
+ps    # Print sessions
+pid   # Show process info
+pc    # Print configuration
+</code></pre>
+<h2 id="turn-alternatives"><a class="header" href="#turn-alternatives">TURN Alternatives</a></h2>
+<h3 id="1-direct-p2p-preferred"><a class="header" href="#1-direct-p2p-preferred">1. Direct P2P (preferred)</a></h3>
+<pre><code>Pros: Free, low latency
+Cons: Doesn't always work
+Success rate: ~80%
+</code></pre>
+<h3 id="2-sipvoip-gateways"><a class="header" href="#2-sipvoip-gateways">2. SIP/VoIP Gateways</a></h3>
+<pre><code>Traditional VoIP infrastructure
+Built-in media relays
+More expensive
+</code></pre>
+<h3 id="3-media-servers"><a class="header" href="#3-media-servers">3. Media Servers</a></h3>
+<pre><code>Janus, Jitsi, Kurento
+Selective Forwarding Unit (SFU)
+Different model than TURN
+</code></pre>
+<h2 id="troubleshooting-turn"><a class="header" href="#troubleshooting-turn">Troubleshooting TURN</a></h2>
+<h3 id="cant-allocate"><a class="header" href="#cant-allocate">Can't allocate</a></h3>
+<pre><code class="language-bash"># Check TURN server is running
+sudo systemctl status coturn
+
+# Check listening ports
+netstat -tuln | grep 3478
+
+# Test with turnutils
+turnutils_uclient -v turn.example.com
+</code></pre>
+<h3 id="authentication-fails"><a class="header" href="#authentication-fails">Authentication fails</a></h3>
+<pre><code class="language-bash"># Verify credentials
+turnutils_uclient -u alice -w password123 turn.example.com
+
+# Check realm configuration
+grep realm /etc/turnserver.conf
+
+# Check logs
+tail -f /var/log/turnserver.log
+</code></pre>
+<h3 id="high-latency"><a class="header" href="#high-latency">High latency</a></h3>
+<pre><code>- Use geographically closer TURN server
+- Check server load (CPU, bandwidth)
+- Try TURN over TCP (sometimes faster)
+- Monitor network path (traceroute)
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>TURN is like using a friend to pass notes in class:</p>
+<p><strong>Without TURN (Direct):</strong></p>
+<ul>
+<li>You throw note directly to friend</li>
+<li>Fast and easy</li>
+<li>But teacher might catch it!</li>
+</ul>
+<p><strong>With TURN (Through Relay):</strong></p>
+<ul>
+<li>You give note to trusted student</li>
+<li>They walk it over to your friend</li>
+<li>Slower, but always works</li>
+<li>Even if teacher is watching</li>
+</ul>
+<p><strong>Why TURN?</strong></p>
+<p>Imagine you're in Building A, friend in Building B:</p>
+<ul>
+<li>Can't throw note that far (NAT/firewall blocking)</li>
+<li>Need someone in the middle to help</li>
+<li>TURN server is that helpful person</li>
+</ul>
+<p><strong>Costs:</strong></p>
+<ul>
+<li>Direct (free): Just toss the note</li>
+<li>TURN (expensive): Someone must carry every note back and forth
+<ul>
+<li>Video call = thousands of notes per second!</li>
+<li>TURN server gets tired (bandwidth costs)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Smart Strategy (ICE):</strong></p>
+<ol>
+<li>Try throwing directly (host candidate)</li>
+<li>Try from outside (STUN)</li>
+<li>Last resort: Use TURN relay</li>
+</ol>
+<p>Use TURN only when absolutely needed!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc5766">RFC 5766 - TURN Specification</a></li>
+<li><a href="https://tools.ietf.org/html/rfc8656">RFC 8656 - TURN Update</a></li>
+<li><a href="https://github.com/coturn/coturn">coturn Server</a></li>
+<li><a href="https://webrtc.org/">WebRTC ICE</a></li>
+<li><a href="https://www.twilio.com/stun-turn">TURN Server Providers</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

@@ -177,7 +177,577 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="mdns-multicast-dns"><a class="header" href="#mdns-multicast-dns">mDNS (Multicast DNS)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>mDNS (Multicast DNS) is a protocol that resolves hostnames to IP addresses within small networks without requiring a conventional DNS server. It's part of Zero Configuration Networking (Zeroconf) and enables devices to discover each other on local networks using the <code>.local</code> domain.</p>
+<h2 id="why-mdns"><a class="header" href="#why-mdns">Why mDNS?</a></h2>
+<h3 id="traditional-dns-limitations"><a class="header" href="#traditional-dns-limitations">Traditional DNS Limitations</a></h3>
+<pre><code>Problem: Home networks lack DNS servers
+
+Traditional setup requires:
+1. DNS server
+2. Manual configuration
+3. Static IP or DHCP integration
+4. Administrative overhead
+
+mDNS solution:
+- No DNS server needed
+- Automatic hostname resolution
+- Zero configuration
+- Works out of the box
+</code></pre>
+<h3 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h3>
+<pre><code>1. Printer discovery
+   - printer.local → 192.168.1.100
+
+2. File sharing
+   - macbook.local → 192.168.1.50
+
+3. IoT devices
+   - raspberry-pi.local → 192.168.1.75
+
+4. Local development
+   - webserver.local → 127.0.0.1
+
+5. Service discovery
+   - Find all printers on network
+   - Find all file servers
+</code></pre>
+<h2 id="how-mdns-works"><a class="header" href="#how-mdns-works">How mDNS Works</a></h2>
+<h3 id="query-process"><a class="header" href="#query-process">Query Process</a></h3>
+<pre><code>Device wants to find "printer.local"
+
+1. Send multicast query to 224.0.0.251:5353
+   "Who has printer.local?"
+
+2. All devices receive query
+
+3. Device with hostname "printer" responds
+   "I'm printer.local at 192.168.1.100"
+
+4. Querying device caches response
+
+5. Direct communication established
+</code></pre>
+<h3 id="multicast-address"><a class="header" href="#multicast-address">Multicast Address</a></h3>
+<pre><code>IPv4: 224.0.0.251
+IPv6: ff02::fb
+Port: 5353 (UDP)
+
+All devices on local network listen to this address
+</code></pre>
+<h2 id="mdns-message-format"><a class="header" href="#mdns-message-format">mDNS Message Format</a></h2>
+<h3 id="dns-compatible-format"><a class="header" href="#dns-compatible-format">DNS-Compatible Format</a></h3>
+<p>mDNS uses standard DNS message format:</p>
+<pre><code>+---------------------------+
+|        Header             |
++---------------------------+
+|        Question           |
++---------------------------+
+|        Answer             |
++---------------------------+
+|        Authority          |
++---------------------------+
+|        Additional         |
++---------------------------+
+</code></pre>
+<h3 id="header-fields"><a class="header" href="#header-fields">Header Fields</a></h3>
+<pre><code>ID: Usually 0 (multicast)
+QR: Query (0) or Response (1)
+OPCODE: 0 (standard query)
+AA: Authoritative Answer (1 for responses)
+TC: Truncated
+RD: Recursion Desired (0 for mDNS)
+RA: Recursion Available (0 for mDNS)
+RCODE: Response code
+
+Questions: Number of questions
+Answers: Number of answer RRs
+Authority: Number of authority RRs
+Additional: Number of additional RRs
+</code></pre>
+<h2 id="mdns-query-example"><a class="header" href="#mdns-query-example">mDNS Query Example</a></h2>
+<h3 id="query-message"><a class="header" href="#query-message">Query Message</a></h3>
+<pre><code>Multicast to 224.0.0.251:5353
+
+Question:
+  Name: printer.local
+  Type: A (IPv4 address)
+  Class: IN (Internet)
+  QU bit: 0 (multicast query)
+
+Header:
+  ID: 0
+  Flags: 0x0000 (standard query)
+  Questions: 1
+  Answers: 0
+</code></pre>
+<h3 id="response-message"><a class="header" href="#response-message">Response Message</a></h3>
+<pre><code>Multicast from 192.168.1.100:5353
+
+Answer:
+  Name: printer.local
+  Type: A
+  Class: IN | Cache-Flush bit
+  TTL: 120 seconds
+  Data: 192.168.1.100
+
+Header:
+  ID: 0
+  Flags: 0x8400 (authoritative answer)
+  Questions: 0
+  Answers: 1
+</code></pre>
+<h2 id="mdns-record-types"><a class="header" href="#mdns-record-types">mDNS Record Types</a></h2>
+<h3 id="common-record-types"><a class="header" href="#common-record-types">Common Record Types</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Type</th><th>Purpose</th><th>Example</th></tr></thead><tbody>
+<tr><td><strong>A</strong></td><td>IPv4 address</td><td><code>device.local → 192.168.1.10</code></td></tr>
+<tr><td><strong>AAAA</strong></td><td>IPv6 address</td><td><code>device.local → fe80::1</code></td></tr>
+<tr><td><strong>PTR</strong></td><td>Pointer (service discovery)</td><td><code>_http._tcp.local → webserver</code></td></tr>
+<tr><td><strong>SRV</strong></td><td>Service location</td><td><code>webserver._http._tcp.local → device.local:80</code></td></tr>
+<tr><td><strong>TXT</strong></td><td>Text information</td><td>Service metadata</td></tr>
+</tbody></table>
+</div>
+<h3 id="service-discovery-dns-sd"><a class="header" href="#service-discovery-dns-sd">Service Discovery (DNS-SD)</a></h3>
+<pre><code>PTR Record: Browse services
+  _http._tcp.local → webserver._http._tcp.local
+
+SRV Record: Service location
+  webserver._http._tcp.local
+    Target: myserver.local
+    Port: 8080
+    Priority: 0
+    Weight: 0
+
+TXT Record: Service metadata
+  webserver._http._tcp.local
+    "path=/admin"
+    "version=1.0"
+
+A Record: IP address
+  myserver.local → 192.168.1.50
+</code></pre>
+<h2 id="mdns-features"><a class="header" href="#mdns-features">mDNS Features</a></h2>
+<h3 id="1-multicast-queries"><a class="header" href="#1-multicast-queries">1. Multicast Queries</a></h3>
+<pre><code>Traditional DNS (unicast):
+  Client → DNS Server: "What's example.com?"
+  DNS Server → Client: "93.184.216.34"
+
+mDNS (multicast):
+  Client → All devices: "Who has printer.local?"
+  Printer → All devices: "I'm 192.168.1.100"
+
+Benefits:
+  - No dedicated server
+  - All devices hear query
+  - Multiple responses possible
+</code></pre>
+<h3 id="2-known-answer-suppression"><a class="header" href="#2-known-answer-suppression">2. Known-Answer Suppression</a></h3>
+<pre><code>Query includes known answers to avoid redundant responses
+
+Client has cached: printer.local → 192.168.1.100
+
+Query:
+  Question: printer.local?
+  Known Answer: 192.168.1.100 (TTL &gt; 50% remaining)
+
+Printer sees cached answer is still valid
+  → Doesn't respond (saves bandwidth)
+</code></pre>
+<h3 id="3-cache-flush-bit"><a class="header" href="#3-cache-flush-bit">3. Cache-Flush Bit</a></h3>
+<pre><code>Purpose: Invalidate old cache entries
+
+Response with cache-flush:
+  printer.local → 192.168.1.100
+  Class: IN | 0x8000 (cache-flush bit set)
+
+Receivers:
+  - Flush old records for printer.local
+  - Cache new record
+  - Prevents stale data
+</code></pre>
+<h3 id="4-continuous-verification"><a class="header" href="#4-continuous-verification">4. Continuous Verification</a></h3>
+<pre><code>Querier sends query even if cached
+  - Verify host still exists
+  - Detect IP changes
+  - Maintain fresh cache
+
+If no response → remove from cache
+</code></pre>
+<h3 id="5-graceful-shutdown"><a class="header" href="#5-graceful-shutdown">5. Graceful Shutdown</a></h3>
+<pre><code>Device going offline:
+
+Send goodbye message:
+  printer.local → 192.168.1.100
+  TTL: 0 (indicates removal)
+
+Other devices:
+  - Remove from cache immediately
+  - Don't wait for timeout
+</code></pre>
+<h2 id="service-discovery-with-dns-sd"><a class="header" href="#service-discovery-with-dns-sd">Service Discovery with DNS-SD</a></h2>
+<h3 id="browsing-services"><a class="header" href="#browsing-services">Browsing Services</a></h3>
+<pre><code>Query:
+  _services._dns-sd._udp.local PTR?
+
+Response (all available service types):
+  _http._tcp.local
+  _printer._tcp.local
+  _ssh._tcp.local
+  _sftp-ssh._tcp.local
+</code></pre>
+<h3 id="finding-specific-service"><a class="header" href="#finding-specific-service">Finding Specific Service</a></h3>
+<pre><code>Query:
+  _http._tcp.local PTR?
+
+Response (all HTTP services):
+  webserver._http._tcp.local
+  api._http._tcp.local
+  admin._http._tcp.local
+</code></pre>
+<h3 id="getting-service-details"><a class="header" href="#getting-service-details">Getting Service Details</a></h3>
+<pre><code>Query:
+  webserver._http._tcp.local SRV?
+  webserver._http._tcp.local TXT?
+
+Response (SRV):
+  Target: myserver.local
+  Port: 8080
+  Priority: 0
+  Weight: 0
+
+Response (TXT):
+  path=/
+  version=2.0
+  https=true
+
+Then resolve:
+  myserver.local A? → 192.168.1.50
+</code></pre>
+<h2 id="mdns-implementation"><a class="header" href="#mdns-implementation">mDNS Implementation</a></h2>
+<h3 id="python-example-query"><a class="header" href="#python-example-query">Python Example (Query)</a></h3>
+<pre><code class="language-python">import socket
+import struct
+
+MDNS_ADDR = '224.0.0.251'
+MDNS_PORT = 5353
+
+def query_mdns(hostname):
+    # Create UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 255)
+    sock.settimeout(2)
+
+    # Build DNS query
+    # Header: ID=0, Flags=0, Questions=1
+    query = struct.pack('!HHHHHH', 0, 0, 1, 0, 0, 0)
+
+    # Question: hostname, type A, class IN
+    for part in hostname.split('.'):
+        query += bytes([len(part)]) + part.encode()
+    query += b'\x00'  # End of name
+    query += struct.pack('!HH', 1, 1)  # Type A, Class IN
+
+    # Send query
+    sock.sendto(query, (MDNS_ADDR, MDNS_PORT))
+
+    # Receive responses
+    responses = []
+    try:
+        while True:
+            data, addr = sock.recvfrom(1024)
+            responses.append((data, addr))
+    except socket.timeout:
+        pass
+
+    sock.close()
+    return responses
+
+# Usage
+responses = query_mdns('printer.local')
+for data, addr in responses:
+    print(f"Response from {addr}")
+</code></pre>
+<h3 id="python-example-responder-using-zeroconf"><a class="header" href="#python-example-responder-using-zeroconf">Python Example (Responder using zeroconf)</a></h3>
+<pre><code class="language-python">from zeroconf import ServiceInfo, Zeroconf
+import socket
+
+# Get local IP
+hostname = socket.gethostname()
+local_ip = socket.gethostbyname(hostname)
+
+# Create service info
+info = ServiceInfo(
+    "_http._tcp.local.",
+    "My Web Server._http._tcp.local.",
+    addresses=[socket.inet_aton(local_ip)],
+    port=8080,
+    properties={
+        'path': '/',
+        'version': '1.0'
+    },
+    server=f"{hostname}.local."
+)
+
+# Register service
+zeroconf = Zeroconf()
+zeroconf.register_service(info)
+
+print(f"Service registered: {hostname}.local:8080")
+
+try:
+    input("Press Enter to unregister...\n")
+finally:
+    zeroconf.unregister_service(info)
+    zeroconf.close()
+</code></pre>
+<h3 id="avahi-linux"><a class="header" href="#avahi-linux">Avahi (Linux)</a></h3>
+<pre><code class="language-bash"># Install Avahi
+sudo apt-get install avahi-daemon avahi-utils
+
+# Check hostname
+avahi-resolve -n hostname.local
+
+# Browse services
+avahi-browse -a
+
+# Browse specific service
+avahi-browse _http._tcp
+
+# Publish service
+avahi-publish -s "My Service" _http._tcp 8080 path=/
+</code></pre>
+<h3 id="bonjour-macos"><a class="header" href="#bonjour-macos">Bonjour (macOS)</a></h3>
+<pre><code class="language-bash"># Resolve hostname
+dns-sd -G v4 hostname.local
+
+# Browse services
+dns-sd -B _http._tcp
+
+# Resolve service
+dns-sd -L "My Service" _http._tcp
+
+# Register service
+dns-sd -R "My Service" _http._tcp . 8080 path=/
+</code></pre>
+<h3 id="windows"><a class="header" href="#windows">Windows</a></h3>
+<pre><code class="language-powershell"># Windows 10+ includes mDNS support
+
+# Resolve via PowerShell
+Resolve-DnsName hostname.local
+
+# Or use Bonjour SDK
+# Download from Apple Developer
+</code></pre>
+<h2 id="mdns-service-naming"><a class="header" href="#mdns-service-naming">mDNS Service Naming</a></h2>
+<h3 id="format"><a class="header" href="#format">Format</a></h3>
+<pre><code>&lt;Instance&gt;._&lt;Service&gt;._&lt;Transport&gt;.local
+
+Examples:
+  My Printer._printer._tcp.local
+  Living Room._airplay._tcp.local
+  Office Server._smb._tcp.local
+  Kitchen Speaker._raop._tcp.local
+</code></pre>
+<h3 id="common-service-types"><a class="header" href="#common-service-types">Common Service Types</a></h3>
+<pre><code>_http._tcp        Web server
+_https._tcp       Secure web server
+_ssh._tcp         SSH server
+_sftp-ssh._tcp    SFTP over SSH
+_ftp._tcp         FTP server
+_smb._tcp         Samba/Windows file sharing
+_afpovertcp._tcp  Apple File Protocol
+_printer._tcp     Printer
+_ipp._tcp         Internet Printing Protocol
+_airplay._tcp     AirPlay
+_raop._tcp        Remote Audio Output Protocol
+_spotify-connect._tcp  Spotify Connect
+</code></pre>
+<h2 id="mdns-traffic-analysis"><a class="header" href="#mdns-traffic-analysis">mDNS Traffic Analysis</a></h2>
+<h3 id="capturing-mdns"><a class="header" href="#capturing-mdns">Capturing mDNS</a></h3>
+<pre><code class="language-bash"># tcpdump
+sudo tcpdump -i any -n port 5353
+
+# Wireshark
+# Filter: udp.port == 5353
+# Follow: Right-click → Follow → UDP Stream
+</code></pre>
+<h3 id="example-capture"><a class="header" href="#example-capture">Example Capture</a></h3>
+<pre><code>Query:
+  192.168.1.10 → 224.0.0.251
+  DNS Query: printer.local A?
+
+Response:
+  192.168.1.100 → 224.0.0.251
+  DNS Answer: printer.local → 192.168.1.100 (TTL 120)
+</code></pre>
+<h2 id="mdns-security-considerations"><a class="header" href="#mdns-security-considerations">mDNS Security Considerations</a></h2>
+<h3 id="vulnerabilities"><a class="header" href="#vulnerabilities">Vulnerabilities</a></h3>
+<ol>
+<li><strong>No Authentication</strong></li>
+</ol>
+<pre><code>Anyone can claim to be "printer.local"
+No verification of identity
+Potential for spoofing
+</code></pre>
+<ol start="2">
+<li><strong>Local Network Only</strong></li>
+</ol>
+<pre><code>mDNS doesn't cross routers
+Limited to link-local multicast
+Good for security (confined to LAN)
+</code></pre>
+<ol start="3">
+<li><strong>Information Disclosure</strong></li>
+</ol>
+<pre><code>Services broadcast their presence
+Attackers can enumerate:
+  - Device names
+  - Service types
+  - IP addresses
+  - Software versions
+</code></pre>
+<ol start="4">
+<li><strong>Name Conflicts</strong></li>
+</ol>
+<pre><code>Two devices with same hostname
+Both respond to queries
+Can cause confusion
+</code></pre>
+<h3 id="mitigation"><a class="header" href="#mitigation">Mitigation</a></h3>
+<pre><code>1. Firewall rules
+   - Block port 5353 on external interfaces
+   - Allow only on trusted LANs
+
+2. VLANs
+   - Separate guest network
+   - Prevent mDNS between VLANs
+
+3. Unique hostnames
+   - Avoid generic names
+   - Include random identifier
+
+4. Service filtering
+   - Only advertise necessary services
+   - Remove unused service announcements
+</code></pre>
+<h2 id="mdns-performance"><a class="header" href="#mdns-performance">mDNS Performance</a></h2>
+<h3 id="bandwidth-usage"><a class="header" href="#bandwidth-usage">Bandwidth Usage</a></h3>
+<pre><code>Typical traffic:
+  - Query: ~50 bytes
+  - Response: ~100 bytes
+  - Continuous verification: ~1-2 queries/minute
+
+Low bandwidth impact
+Efficient for local networks
+</code></pre>
+<h3 id="cache-timing"><a class="header" href="#cache-timing">Cache Timing</a></h3>
+<pre><code>TTL values:
+  - Typical: 120 seconds (2 minutes)
+  - High priority: 10 seconds
+  - Low priority: 4500 seconds (75 minutes)
+
+Refresh at 80% of TTL
+Query again at 90% of TTL
+Remove at 100% of TTL
+</code></pre>
+<h2 id="troubleshooting-mdns"><a class="header" href="#troubleshooting-mdns">Troubleshooting mDNS</a></h2>
+<h3 id="device-not-responding"><a class="header" href="#device-not-responding">Device not responding</a></h3>
+<pre><code class="language-bash"># 1. Check mDNS daemon
+sudo systemctl status avahi-daemon  # Linux
+sudo launchctl list | grep mDNS     # macOS
+
+# 2. Test multicast
+ping -c 3 224.0.0.251
+
+# 3. Check firewall
+sudo iptables -L | grep 5353
+sudo ufw status
+
+# 4. Capture traffic
+sudo tcpdump -i any port 5353
+
+# 5. Resolve manually
+avahi-resolve -n device.local
+dns-sd -G v4 device.local
+</code></pre>
+<h3 id="name-conflicts"><a class="header" href="#name-conflicts">Name conflicts</a></h3>
+<pre><code>Error: "hostname.local already in use"
+
+Solutions:
+1. Rename device
+   - hostname.local → hostname-2.local
+   - Automatic on many systems
+
+2. Check for duplicates
+   - Ensure unique hostnames
+   - Search network for conflicts
+</code></pre>
+<h3 id="slow-resolution"><a class="header" href="#slow-resolution">Slow resolution</a></h3>
+<pre><code>Causes:
+  - Network congestion
+  - Many mDNS devices
+  - Packet loss
+
+Solutions:
+  - Reduce query frequency
+  - Use unicast if possible
+  - Cache aggressively
+</code></pre>
+<h2 id="mdns-vs-dns"><a class="header" href="#mdns-vs-dns">mDNS vs DNS</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Traditional DNS</th><th>mDNS</th></tr></thead><tbody>
+<tr><td><strong>Server</strong></td><td>Centralized server</td><td>Distributed (all devices)</td></tr>
+<tr><td><strong>Configuration</strong></td><td>Manual setup</td><td>Zero configuration</td></tr>
+<tr><td><strong>Scope</strong></td><td>Internet-wide</td><td>Local network only</td></tr>
+<tr><td><strong>Domain</strong></td><td>Any TLD</td><td><code>.local</code> only</td></tr>
+<tr><td><strong>Protocol</strong></td><td>Unicast</td><td>Multicast</td></tr>
+<tr><td><strong>Port</strong></td><td>53</td><td>5353</td></tr>
+<tr><td><strong>Security</strong></td><td>DNSSEC available</td><td>No authentication</td></tr>
+</tbody></table>
+</div>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>mDNS is like asking a question to everyone in a classroom:</p>
+<p><strong>Traditional DNS:</strong></p>
+<ul>
+<li>Raise your hand and ask the teacher</li>
+<li>Teacher has a list of everyone's desks</li>
+<li>Teacher tells you where Alice sits</li>
+</ul>
+<p><strong>mDNS (Multicast DNS):</strong></p>
+<ul>
+<li>Stand up and ask: "Where's Alice?"</li>
+<li>Alice hears you and responds: "I'm here at desk 5!"</li>
+<li>Everyone hears both question and answer</li>
+<li>Next time someone asks, they already know</li>
+</ul>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li>No need for a teacher (DNS server)</li>
+<li>Works immediately</li>
+<li>Everyone learns everyone else's location</li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>Only works in one classroom (local network)</li>
+<li>Can't ask about people in other classrooms</li>
+<li>Everyone hears everything (less private)</li>
+</ul>
+<p><strong>Real Examples:</strong></p>
+<ul>
+<li>"Where's the printer?" → "printer.local is at 192.168.1.100"</li>
+<li>"Where's my MacBook?" → "macbook.local is at 192.168.1.50"</li>
+<li>"Any web servers?" → "myserver.local has HTTP on port 8080"</li>
+</ul>
+<p>It's perfect for homes and small offices where you just want things to work!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc6762">RFC 6762 - mDNS Specification</a></li>
+<li><a href="https://tools.ietf.org/html/rfc6763">RFC 6763 - DNS-SD</a></li>
+<li><a href="https://www.avahi.org/">Avahi</a></li>
+<li><a href="https://developer.apple.com/bonjour/">Apple Bonjour</a></li>
+<li><a href="https://github.com/jstasiak/python-zeroconf">zeroconf Python Library</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

@@ -177,7 +177,639 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="firewalls"><a class="header" href="#firewalls">Firewalls</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A firewall is a network security system that monitors and controls incoming and outgoing network traffic based on predetermined security rules. It acts as a barrier between trusted internal networks and untrusted external networks (like the internet).</p>
+<h2 id="firewall-types"><a class="header" href="#firewall-types">Firewall Types</a></h2>
+<h3 id="1-packet-filtering-firewall"><a class="header" href="#1-packet-filtering-firewall">1. Packet Filtering Firewall</a></h3>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>Inspects individual packets</li>
+<li>Makes decisions based on header information</li>
+<li>Stateless (doesn't track connections)</li>
+</ul>
+<p><strong>Checks:</strong></p>
+<ul>
+<li>Source IP address</li>
+<li>Destination IP address</li>
+<li>Source port</li>
+<li>Destination port</li>
+<li>Protocol (TCP, UDP, ICMP)</li>
+</ul>
+<p><strong>Example Rule:</strong></p>
+<pre><code>ALLOW TCP from 192.168.1.0/24 to any port 80
+DENY TCP from any to any port 23
+</code></pre>
+<p><strong>Decision Process:</strong></p>
+<pre><code>Incoming packet:
+  Src: 192.168.1.10:54321
+  Dst: 10.0.0.5:80
+  Protocol: TCP
+
+Check rules top-to-bottom:
+  Rule 1: Allow 192.168.1.0/24 to port 80 → MATCH
+  Action: ALLOW
+
+Packet forwarded
+</code></pre>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Fast (minimal inspection)</li>
+<li>Low resource usage</li>
+<li>Simple configuration</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>No state tracking</li>
+<li>Can't detect complex attacks</li>
+<li>Vulnerable to IP spoofing</li>
+</ul>
+<h3 id="2-stateful-inspection-firewall"><a class="header" href="#2-stateful-inspection-firewall">2. Stateful Inspection Firewall</a></h3>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>Tracks connection state</li>
+<li>Maintains state table</li>
+<li>Understands context of traffic</li>
+</ul>
+<p><strong>State Table Example:</strong></p>
+<pre><code>Src IP        Src Port  Dst IP        Dst Port  State      Protocol
+192.168.1.10  54321     93.184.216.34 80        ESTABLISHED TCP
+192.168.1.11  54322     8.8.8.8       53        NEW         UDP
+192.168.1.10  54323     10.0.0.5      22        SYN_SENT    TCP
+</code></pre>
+<p><strong>TCP Connection Tracking:</strong></p>
+<pre><code>Client → Server: SYN
+  State: NEW
+
+Server → Client: SYN-ACK
+  State: ESTABLISHED
+
+Client → Server: ACK
+  State: ESTABLISHED
+
+... data transfer ...
+
+Client → Server: FIN
+  State: CLOSING
+
+Server → Client: FIN-ACK
+  State: CLOSED
+</code></pre>
+<p><strong>Example Rule:</strong></p>
+<pre><code># Outbound rule
+ALLOW TCP from 192.168.1.0/24 to any port 80 STATE NEW,ESTABLISHED
+
+# Return traffic automatically allowed
+# (tracked in state table)
+</code></pre>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Understands connection context</li>
+<li>Better security than packet filtering</li>
+<li>Prevents spoofing attacks</li>
+<li>Allows related traffic</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>More resource intensive</li>
+<li>State table can be exhausted</li>
+<li>Performance impact at scale</li>
+</ul>
+<h3 id="3-application-layer-firewall-proxy-firewall"><a class="header" href="#3-application-layer-firewall-proxy-firewall">3. Application Layer Firewall (Proxy Firewall)</a></h3>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>Operates at Layer 7 (Application)</li>
+<li>Acts as intermediary (proxy)</li>
+<li>Deep packet inspection</li>
+<li>Understands application protocols</li>
+</ul>
+<p><strong>Proxy Flow:</strong></p>
+<pre><code>Client → Proxy → Server
+
+Client connects to proxy
+Proxy inspects full request
+Proxy makes decision
+Proxy connects to server (if allowed)
+Proxy relays response to client
+</code></pre>
+<p><strong>Inspection Capabilities:</strong></p>
+<pre><code>HTTP/HTTPS:
+  - URL filtering
+  - Content scanning
+  - Malware detection
+  - Data loss prevention
+
+FTP:
+  - Command filtering
+  - File type restrictions
+
+SMTP:
+  - Spam filtering
+  - Attachment scanning
+</code></pre>
+<p><strong>Example:</strong></p>
+<pre><code>HTTP Request:
+  GET /admin.php HTTP/1.1
+  Host: example.com
+
+Proxy checks:
+  1. Is /admin.php allowed? → NO
+  2. Block request
+  3. Return 403 Forbidden
+</code></pre>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Deep inspection</li>
+<li>Understands application protocols</li>
+<li>Can filter content</li>
+<li>Hides internal network</li>
+<li>Logging and auditing</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Significant performance impact</li>
+<li>Complex configuration</li>
+<li>May break some applications</li>
+<li>Single point of failure</li>
+</ul>
+<h3 id="4-next-generation-firewall-ngfw"><a class="header" href="#4-next-generation-firewall-ngfw">4. Next-Generation Firewall (NGFW)</a></h3>
+<p><strong>Combines:</strong></p>
+<ul>
+<li>Traditional firewall functions</li>
+<li>Intrusion Prevention System (IPS)</li>
+<li>Application awareness</li>
+<li>SSL/TLS inspection</li>
+<li>Advanced threat protection</li>
+</ul>
+<p><strong>Features:</strong></p>
+<pre><code>1. Deep Packet Inspection (DPI)
+   - Full packet content analysis
+
+2. Application Control
+   - Block Facebook but allow LinkedIn
+   - Control by application, not just port
+
+3. User Identity
+   - Rules based on user/group
+   - Active Directory integration
+
+4. Threat Intelligence
+   - Malware detection
+   - Botnet protection
+   - Zero-day protection
+
+5. SSL Inspection
+   - Decrypt HTTPS traffic
+   - Inspect encrypted content
+   - Re-encrypt and forward
+</code></pre>
+<p><strong>Example NGFW Rule:</strong></p>
+<pre><code>DENY application "BitTorrent" for group "Employees"
+ALLOW application "Salesforce" for group "Sales"
+BLOCK malware signature "Trojan.Generic.123"
+</code></pre>
+<h2 id="firewall-architectures"><a class="header" href="#firewall-architectures">Firewall Architectures</a></h2>
+<h3 id="1-packet-filtering-router"><a class="header" href="#1-packet-filtering-router">1. Packet Filtering Router</a></h3>
+<pre><code>Internet → → [Router with ACL] → → Internal Network
+
+Simple, single layer of protection
+</code></pre>
+<h3 id="2-dual-homed-host"><a class="header" href="#2-dual-homed-host">2. Dual-Homed Host</a></h3>
+<pre><code>Internet → → [Firewall with 2 NICs] → → Internal Network
+             (All traffic through firewall)
+
+Complete traffic control
+</code></pre>
+<h3 id="3-screened-host"><a class="header" href="#3-screened-host">3. Screened Host</a></h3>
+<pre><code>Internet → → [Router] → → [Firewall Host] → → Internal Network
+
+Router filters basic traffic
+Firewall provides additional protection
+</code></pre>
+<h3 id="4-screened-subnet-dmz"><a class="header" href="#4-screened-subnet-dmz">4. Screened Subnet (DMZ)</a></h3>
+<pre><code>Internet → → [External FW] → → [DMZ] → → [Internal FW] → → Internal Network
+                               (Web, Mail)
+
+Public services in DMZ
+Internal network isolated
+</code></pre>
+<p><strong>DMZ Example:</strong></p>
+<pre><code>External Firewall Rules:
+  - Allow HTTP/HTTPS to web server (DMZ)
+  - Allow SMTP to mail server (DMZ)
+  - Deny all to internal network
+
+Internal Firewall Rules:
+  - Allow web server to database (specific port)
+  - Allow mail server to internal mail (specific port)
+  - Deny all other DMZ traffic to internal
+</code></pre>
+<h2 id="firewall-rules"><a class="header" href="#firewall-rules">Firewall Rules</a></h2>
+<h3 id="rule-components"><a class="header" href="#rule-components">Rule Components</a></h3>
+<pre><code>1. Source: Where traffic originates
+2. Destination: Where traffic is going
+3. Service/Port: What service (HTTP, SSH, etc.)
+4. Action: Allow, Deny, Reject
+5. Direction: Inbound, Outbound
+6. State: NEW, ESTABLISHED, RELATED
+</code></pre>
+<h3 id="rule-example-iptables"><a class="header" href="#rule-example-iptables">Rule Example (iptables)</a></h3>
+<pre><code class="language-bash"># Allow SSH from specific network
+iptables -A INPUT -s 192.168.1.0/24 -p tcp --dport 22 -j ACCEPT
+
+# Allow established connections
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Allow HTTP and HTTPS
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# Drop everything else
+iptables -A INPUT -j DROP
+</code></pre>
+<h3 id="rule-ordering"><a class="header" href="#rule-ordering">Rule Ordering</a></h3>
+<p><strong>Important:</strong> Rules processed top-to-bottom, first match wins</p>
+<pre><code class="language-bash"># WRONG ORDER:
+1. DENY all
+2. ALLOW HTTP port 80  → Never reached!
+
+# CORRECT ORDER:
+1. ALLOW HTTP port 80
+2. DENY all
+</code></pre>
+<h3 id="default-policy"><a class="header" href="#default-policy">Default Policy</a></h3>
+<pre><code class="language-bash"># Default DENY (whitelist approach - more secure)
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# Then explicitly allow needed services
+
+# Default ALLOW (blacklist approach - less secure)
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+
+# Then explicitly block dangerous services
+</code></pre>
+<h2 id="common-firewall-configurations"><a class="header" href="#common-firewall-configurations">Common Firewall Configurations</a></h2>
+<h3 id="1-linux-iptables"><a class="header" href="#1-linux-iptables">1. Linux iptables</a></h3>
+<p><strong>View rules:</strong></p>
+<pre><code class="language-bash">iptables -L -v -n
+</code></pre>
+<p><strong>Basic web server protection:</strong></p>
+<pre><code class="language-bash"># Flush existing rules
+iptables -F
+
+# Default policies
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# Allow loopback
+iptables -A INPUT -i lo -j ACCEPT
+
+# Allow established connections
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Allow SSH (from specific network)
+iptables -A INPUT -s 192.168.1.0/24 -p tcp --dport 22 -j ACCEPT
+
+# Allow HTTP/HTTPS
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# Allow ping
+iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+
+# Log dropped packets
+iptables -A INPUT -j LOG --log-prefix "DROPPED: "
+iptables -A INPUT -j DROP
+
+# Save rules
+iptables-save &gt; /etc/iptables/rules.v4
+</code></pre>
+<h3 id="2-linux-ufw-uncomplicated-firewall"><a class="header" href="#2-linux-ufw-uncomplicated-firewall">2. Linux ufw (Uncomplicated Firewall)</a></h3>
+<pre><code class="language-bash"># Enable firewall
+ufw enable
+
+# Default policies
+ufw default deny incoming
+ufw default allow outgoing
+
+# Allow SSH
+ufw allow 22/tcp
+
+# Allow HTTP/HTTPS
+ufw allow 80/tcp
+ufw allow 443/tcp
+
+# Allow from specific IP
+ufw allow from 192.168.1.100
+
+# Allow specific port from specific IP
+ufw allow from 192.168.1.100 to any port 3306
+
+# View rules
+ufw status numbered
+
+# Delete rule
+ufw delete 5
+</code></pre>
+<h3 id="3-linux-firewalld"><a class="header" href="#3-linux-firewalld">3. Linux firewalld</a></h3>
+<pre><code class="language-bash"># View zones
+firewall-cmd --get-active-zones
+
+# Add service to zone
+firewall-cmd --zone=public --add-service=http
+firewall-cmd --zone=public --add-service=https
+
+# Add port
+firewall-cmd --zone=public --add-port=8080/tcp
+
+# Add rich rule
+firewall-cmd --zone=public --add-rich-rule='rule family="ipv4" source address="192.168.1.0/24" service name="ssh" accept'
+
+# Make permanent
+firewall-cmd --runtime-to-permanent
+
+# Reload
+firewall-cmd --reload
+</code></pre>
+<h3 id="4-windows-firewall"><a class="header" href="#4-windows-firewall">4. Windows Firewall</a></h3>
+<pre><code class="language-powershell"># View rules
+Get-NetFirewallRule
+
+# Enable firewall
+Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
+
+# Allow inbound port
+New-NetFirewallRule -DisplayName "Allow HTTP" -Direction Inbound -LocalPort 80 -Protocol TCP -Action Allow
+
+# Allow program
+New-NetFirewallRule -DisplayName "My App" -Direction Inbound -Program "C:\App\myapp.exe" -Action Allow
+
+# Block IP address
+New-NetFirewallRule -DisplayName "Block IP" -Direction Inbound -RemoteAddress 10.0.0.5 -Action Block
+</code></pre>
+<h2 id="port-knocking"><a class="header" href="#port-knocking">Port Knocking</a></h2>
+<p><strong>Concept:</strong> Hidden service that opens after specific sequence</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-bash"># Ports closed by default
+
+# Client knocks sequence: 1234, 5678, 9012
+nc -z server.com 1234
+nc -z server.com 5678
+nc -z server.com 9012
+
+# Server detects sequence, opens SSH port 22 for client IP
+# Client can now SSH
+
+# After timeout, port closes again
+</code></pre>
+<p><strong>Configuration (knockd):</strong></p>
+<pre><code>[openSSH]
+sequence = 1234,5678,9012
+seq_timeout = 10
+command = /sbin/iptables -I INPUT -s %IP% -p tcp --dport 22 -j ACCEPT
+tcpflags = syn
+
+[closeSSH]
+sequence = 9012,5678,1234
+seq_timeout = 10
+command = /sbin/iptables -D INPUT -s %IP% -p tcp --dport 22 -j ACCEPT
+tcpflags = syn
+</code></pre>
+<h2 id="nat-network-address-translation"><a class="header" href="#nat-network-address-translation">NAT (Network Address Translation)</a></h2>
+<h3 id="source-nat-snat--masquerading"><a class="header" href="#source-nat-snat--masquerading">Source NAT (SNAT) / Masquerading</a></h3>
+<p><strong>Purpose:</strong> Hide internal IPs behind single public IP</p>
+<pre><code class="language-bash"># iptables NAT
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+# Or specific IP
+iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source 203.0.113.5
+</code></pre>
+<p><strong>Traffic Flow:</strong></p>
+<pre><code>Internal: 192.168.1.10:5000 → Internet
+External: 203.0.113.5:6000 → Internet
+
+Firewall tracks connection:
+  192.168.1.10:5000 ↔ 203.0.113.5:6000
+
+Return traffic:
+  Internet → 203.0.113.5:6000
+  Firewall translates back to: 192.168.1.10:5000
+</code></pre>
+<h3 id="destination-nat-dnat--port-forwarding"><a class="header" href="#destination-nat-dnat--port-forwarding">Destination NAT (DNAT) / Port Forwarding</a></h3>
+<p><strong>Purpose:</strong> Expose internal service on public IP</p>
+<pre><code class="language-bash"># Forward public port 80 to internal web server
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 192.168.1.20:80
+
+# Forward public port 2222 to internal SSH
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 2222 -j DNAT --to-destination 192.168.1.10:22
+</code></pre>
+<p><strong>Traffic Flow:</strong></p>
+<pre><code>Internet → 203.0.113.5:80
+Firewall translates to: 192.168.1.20:80
+Web server processes request
+Response: 192.168.1.20:80 → Internet
+Firewall translates from: 203.0.113.5:80 → Internet
+</code></pre>
+<h2 id="firewall-evasion-techniques-for-awareness"><a class="header" href="#firewall-evasion-techniques-for-awareness">Firewall Evasion Techniques (for awareness)</a></h2>
+<h3 id="1-fragmentation"><a class="header" href="#1-fragmentation">1. Fragmentation</a></h3>
+<pre><code>Split malicious payload across fragments
+Some firewalls don't reassemble
+</code></pre>
+<h3 id="2-ip-spoofing"><a class="header" href="#2-ip-spoofing">2. IP Spoofing</a></h3>
+<pre><code>Fake source IP address
+Bypass source-based rules
+</code></pre>
+<h3 id="3-tunneling"><a class="header" href="#3-tunneling">3. Tunneling</a></h3>
+<pre><code>Encapsulate forbidden traffic in allowed protocol
+Example: SSH tunnel, DNS tunnel, ICMP tunnel
+</code></pre>
+<h3 id="4-encryption"><a class="header" href="#4-encryption">4. Encryption</a></h3>
+<pre><code>Encrypt malicious traffic
+Firewall can't inspect without SSL inspection
+</code></pre>
+<p><strong>Defense:</strong></p>
+<ul>
+<li>Fragment reassembly</li>
+<li>Anti-spoofing rules</li>
+<li>Protocol validation</li>
+<li>SSL/TLS inspection</li>
+<li>Deep packet inspection</li>
+</ul>
+<h2 id="firewall-logging"><a class="header" href="#firewall-logging">Firewall Logging</a></h2>
+<h3 id="what-to-log"><a class="header" href="#what-to-log">What to Log</a></h3>
+<pre><code>1. Blocked connections
+2. Allowed critical connections
+3. Rule changes
+4. Authentication events
+5. Anomalies (port scans, floods)
+</code></pre>
+<h3 id="iptables-logging"><a class="header" href="#iptables-logging">iptables Logging</a></h3>
+<pre><code class="language-bash"># Log dropped packets
+iptables -A INPUT -j LOG --log-prefix "DROPPED INPUT: " --log-level 4
+iptables -A INPUT -j DROP
+
+# Log accepted SSH
+iptables -A INPUT -p tcp --dport 22 -j LOG --log-prefix "SSH ACCEPT: "
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+</code></pre>
+<h3 id="log-analysis"><a class="header" href="#log-analysis">Log Analysis</a></h3>
+<pre><code class="language-bash"># View firewall logs (typical locations)
+tail -f /var/log/syslog
+tail -f /var/log/messages
+tail -f /var/log/kern.log
+
+# Search for dropped packets
+grep "DROPPED" /var/log/syslog
+
+# Count connections by source IP
+grep "DROPPED" /var/log/syslog | awk '{print $NF}' | sort | uniq -c | sort -n
+</code></pre>
+<h2 id="firewall-best-practices"><a class="header" href="#firewall-best-practices">Firewall Best Practices</a></h2>
+<h3 id="1-default-deny"><a class="header" href="#1-default-deny">1. Default Deny</a></h3>
+<pre><code>Block everything by default
+Explicitly allow only needed services
+</code></pre>
+<h3 id="2-principle-of-least-privilege"><a class="header" href="#2-principle-of-least-privilege">2. Principle of Least Privilege</a></h3>
+<pre><code>Open only necessary ports
+Restrict to specific sources when possible
+Time-based rules when appropriate
+</code></pre>
+<h3 id="3-defense-in-depth"><a class="header" href="#3-defense-in-depth">3. Defense in Depth</a></h3>
+<pre><code>Multiple layers:
+  - Perimeter firewall
+  - Host-based firewalls
+  - Network segmentation
+  - Application firewalls
+</code></pre>
+<h3 id="4-regular-updates"><a class="header" href="#4-regular-updates">4. Regular Updates</a></h3>
+<pre><code>- Keep firewall software updated
+- Review rules periodically
+- Remove unused rules
+- Update threat signatures (NGFW)
+</code></pre>
+<h3 id="5-monitoring-and-alerts"><a class="header" href="#5-monitoring-and-alerts">5. Monitoring and Alerts</a></h3>
+<pre><code>- Enable logging
+- Set up alerts for anomalies
+- Regular log reviews
+- Incident response plan
+</code></pre>
+<h3 id="6-testing"><a class="header" href="#6-testing">6. Testing</a></h3>
+<pre><code>- Test rules before production
+- Verify deny rules work
+- Check for unintended access
+- Regular security audits
+</code></pre>
+<h2 id="troubleshooting-firewall-issues"><a class="header" href="#troubleshooting-firewall-issues">Troubleshooting Firewall Issues</a></h2>
+<h3 id="cant-connect-to-service"><a class="header" href="#cant-connect-to-service">Can't connect to service</a></h3>
+<pre><code class="language-bash"># 1. Check if service is running
+systemctl status nginx
+
+# 2. Check if service is listening
+netstat -tuln | grep :80
+ss -tuln | grep :80
+
+# 3. Check firewall rules
+iptables -L -n -v
+ufw status
+firewall-cmd --list-all
+
+# 4. Check logs
+tail -f /var/log/syslog | grep UFW
+journalctl -f -u firewalld
+
+# 5. Test from different source
+curl http://server-ip
+telnet server-ip 80
+</code></pre>
+<h3 id="connection-works-locally-but-not-remotely"><a class="header" href="#connection-works-locally-but-not-remotely">Connection works locally but not remotely</a></h3>
+<pre><code class="language-bash"># Likely firewall blocking external access
+
+# Check INPUT chain
+iptables -L INPUT -n -v
+
+# Temporarily allow (testing only!)
+iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+
+# If works, add permanent rule
+</code></pre>
+<h3 id="rule-not-working"><a class="header" href="#rule-not-working">Rule not working</a></h3>
+<pre><code class="language-bash"># Check rule order
+iptables -L -n -v --line-numbers
+
+# Rules processed top-to-bottom
+# Earlier DENY rule might catch traffic before ALLOW
+
+# Reorder rules
+iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>A firewall is like a security guard at a building entrance:</p>
+<p><strong>Security Guard (Firewall):</strong></p>
+<ul>
+<li>Checks everyone coming in and out</li>
+<li>Has a list of rules (who's allowed, who's not)</li>
+<li>Blocks suspicious people</li>
+<li>Keeps a log of who enters</li>
+</ul>
+<p><strong>Types of Security:</strong></p>
+<ol>
+<li>
+<p><strong>Basic Guard (Packet Filter):</strong></p>
+<ul>
+<li>Checks ID cards only</li>
+<li>Fast but simple</li>
+</ul>
+</li>
+<li>
+<p><strong>Smart Guard (Stateful):</strong></p>
+<ul>
+<li>Remembers who entered</li>
+<li>Allows them to leave</li>
+<li>Tracks conversations</li>
+</ul>
+</li>
+<li>
+<p><strong>Super Guard (Application Layer):</strong></p>
+<ul>
+<li>Opens bags</li>
+<li>Checks what you're carrying</li>
+<li>Very thorough but slower</li>
+</ul>
+</li>
+<li>
+<p><strong>AI Guard (NGFW):</strong></p>
+<ul>
+<li>Facial recognition</li>
+<li>Detects threats automatically</li>
+<li>Learns from experience</li>
+</ul>
+</li>
+</ol>
+<p><strong>Rules Example:</strong></p>
+<ul>
+<li>"Allow employees" (like allowing HTTP port 80)</li>
+<li>"Block suspicious visitors" (like blocking unknown IPs)</li>
+<li>"Only executives can enter executive floor" (like restricting SSH to specific IPs)</li>
+</ul>
+<p><strong>DMZ is like a reception area:</strong></p>
+<ul>
+<li>Visitors wait here</li>
+<li>Can't go into main office</li>
+<li>Receptionists (DMZ servers) handle requests</li>
+</ul>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://www.frozentux.net/iptables-tutorial/iptables-tutorial.html">iptables Tutorial</a></li>
+<li><a href="https://csrc.nist.gov/publications/detail/sp/800-41/rev-1/final">NIST Firewall Guide</a></li>
+<li><a href="https://www.cisecurity.org/controls/">Firewall Best Practices</a></li>
+<li><a href="https://www.openbsd.org/faq/pf/">pf (OpenBSD Firewall)</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

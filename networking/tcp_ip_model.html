@@ -177,7 +177,591 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="tcpip-model"><a class="header" href="#tcpip-model">TCP/IP Model</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>The TCP/IP Model (also called Internet Protocol Suite) is a practical, 4-layer networking model that describes how data is transmitted over the internet. Unlike the OSI Model, which is theoretical, TCP/IP is the actual model used in modern networks.</p>
+<h2 id="tcpip-vs-osi-model"><a class="header" href="#tcpip-vs-osi-model">TCP/IP vs OSI Model</a></h2>
+<pre><code>OSI Model (7 Layers)           TCP/IP Model (4 Layers)
+---------------------------------------------------
+7. Application           
+6. Presentation              →  4. Application
+5. Session               
+4. Transport                  →  3. Transport
+3. Network                    →  2. Internet
+2. Data Link             
+1. Physical                  →  1. Network Access
+</code></pre>
+<h2 id="the-4-layers"><a class="header" href="#the-4-layers">The 4 Layers</a></h2>
+<h3 id="layer-1-network-access-link-layer"><a class="header" href="#layer-1-network-access-link-layer">Layer 1: Network Access (Link Layer)</a></h3>
+<p><strong>Purpose:</strong> Physical transmission of data on a network</p>
+<p><strong>Combines:</strong></p>
+<ul>
+<li>OSI Physical Layer (Layer 1)</li>
+<li>OSI Data Link Layer (Layer 2)</li>
+</ul>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Physical addressing (MAC)</li>
+<li>Media access control</li>
+<li>Frame formatting</li>
+<li>Error detection</li>
+<li>Physical transmission</li>
+</ul>
+<p><strong>Protocols/Technologies:</strong></p>
+<ul>
+<li>Ethernet (IEEE 802.3)</li>
+<li>WiFi (IEEE 802.11)</li>
+<li>PPP (Point-to-Point Protocol)</li>
+<li>ARP (Address Resolution Protocol)</li>
+<li>RARP (Reverse ARP)</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>Data from Internet Layer
+
+      ↓
+
+Add Ethernet Header:
+  [Dest MAC: AA:BB:CC:DD:EE:FF]
+  [Src MAC: 11:22:33:44:55:66]
+  [Type: 0x0800 (IPv4)]
+  [Data]
+  [CRC Checksum]
+
+      ↓
+
+Convert to bits and transmit
+</code></pre>
+<h3 id="layer-2-internet-layer"><a class="header" href="#layer-2-internet-layer">Layer 2: Internet Layer</a></h3>
+<p><strong>Purpose:</strong> Routes packets across networks</p>
+<p><strong>Equivalent to:</strong> OSI Network Layer (Layer 3)</p>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Logical addressing (IP)</li>
+<li>Routing between networks</li>
+<li>Packet forwarding</li>
+<li>Fragmentation and reassembly</li>
+<li>Error reporting</li>
+</ul>
+<p><strong>Key Protocols:</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Protocol</th><th>Purpose</th><th>RFC</th></tr></thead><tbody>
+<tr><td><strong>IP</strong></td><td>Internet Protocol (IPv4, IPv6)</td><td>RFC 791, 8200</td></tr>
+<tr><td><strong>ICMP</strong></td><td>Error reporting, diagnostics</td><td>RFC 792</td></tr>
+<tr><td><strong>IGMP</strong></td><td>Multicast group management</td><td>RFC 1112</td></tr>
+<tr><td><strong>IPsec</strong></td><td>Security (encryption, authentication)</td><td>RFC 4301</td></tr>
+</tbody></table>
+</div>
+<p><strong>Example: Packet Routing</strong></p>
+<pre><code>Source: 192.168.1.10 → Destination: 10.0.0.5
+
+IP Layer adds header:
+  [Version: 4]
+  [TTL: 64]
+  [Protocol: 6 (TCP)]
+  [Source IP: 192.168.1.10]
+  [Dest IP: 10.0.0.5]
+  [Data]
+
+Router at each hop:
+1. Decrements TTL
+2. Checks routing table
+3. Forwards to next hop
+4. Recalculates checksum
+</code></pre>
+<h3 id="layer-3-transport-layer"><a class="header" href="#layer-3-transport-layer">Layer 3: Transport Layer</a></h3>
+<p><strong>Purpose:</strong> End-to-end communication between applications</p>
+<p><strong>Equivalent to:</strong> OSI Transport Layer (Layer 4)</p>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Port-based multiplexing</li>
+<li>Connection management</li>
+<li>Reliability (for TCP)</li>
+<li>Flow control</li>
+<li>Error recovery</li>
+</ul>
+<p><strong>Key Protocols:</strong></p>
+<h4 id="tcp-transmission-control-protocol"><a class="header" href="#tcp-transmission-control-protocol">TCP (Transmission Control Protocol)</a></h4>
+<p><strong>Characteristics:</strong></p>
+<ul>
+<li>Connection-oriented</li>
+<li>Reliable delivery</li>
+<li>Ordered delivery</li>
+<li>Flow control</li>
+<li>Congestion control</li>
+</ul>
+<p><strong>TCP Segment:</strong></p>
+<pre><code>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Source Port          |       Destination Port        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Sequence Number                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Acknowledgment Number                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Offset|  Res  |     Flags     |            Window             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Checksum            |         Urgent Pointer        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                            Data                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+<p><strong>TCP Connection (3-Way Handshake):</strong></p>
+<pre><code>Client                          Server
+  |                                |
+  | SYN (seq=100)                  |
+  |-------------------------------&gt;|
+  |                                |
+  | SYN-ACK (seq=200, ack=101)     |
+  |&lt;-------------------------------|
+  |                                |
+  | ACK (seq=101, ack=201)         |
+  |-------------------------------&gt;|
+  |                                |
+  | Connection Established         |
+</code></pre>
+<h4 id="udp-user-datagram-protocol"><a class="header" href="#udp-user-datagram-protocol">UDP (User Datagram Protocol)</a></h4>
+<p><strong>Characteristics:</strong></p>
+<ul>
+<li>Connectionless</li>
+<li>Unreliable</li>
+<li>No ordering guarantee</li>
+<li>Low overhead</li>
+<li>Fast</li>
+</ul>
+<p><strong>UDP Datagram:</strong></p>
+<pre><code>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Source Port          |       Destination Port        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            Length             |           Checksum            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                            Data                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+<p><strong>UDP Communication:</strong></p>
+<pre><code>Client                          Server
+  |                                |
+  | UDP Datagram                   |
+  |-------------------------------&gt;|
+  |                                |
+  | No acknowledgment              |
+
+Fire and forget!
+</code></pre>
+<h3 id="layer-4-application-layer"><a class="header" href="#layer-4-application-layer">Layer 4: Application Layer</a></h3>
+<p><strong>Purpose:</strong> Provides network services to applications</p>
+<p><strong>Combines:</strong></p>
+<ul>
+<li>OSI Application Layer (Layer 7)</li>
+<li>OSI Presentation Layer (Layer 6)</li>
+<li>OSI Session Layer (Layer 5)</li>
+</ul>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Application-specific protocols</li>
+<li>Data formatting</li>
+<li>Session management</li>
+<li>User authentication</li>
+</ul>
+<p><strong>Common Protocols:</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Protocol</th><th>Port</th><th>Transport</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><strong>HTTP</strong></td><td>80</td><td>TCP</td><td>Web pages</td></tr>
+<tr><td><strong>HTTPS</strong></td><td>443</td><td>TCP</td><td>Secure web</td></tr>
+<tr><td><strong>FTP</strong></td><td>20/21</td><td>TCP</td><td>File transfer</td></tr>
+<tr><td><strong>SFTP</strong></td><td>22</td><td>TCP</td><td>Secure file transfer</td></tr>
+<tr><td><strong>SSH</strong></td><td>22</td><td>TCP</td><td>Secure shell</td></tr>
+<tr><td><strong>Telnet</strong></td><td>23</td><td>TCP</td><td>Remote terminal</td></tr>
+<tr><td><strong>SMTP</strong></td><td>25</td><td>TCP</td><td>Send email</td></tr>
+<tr><td><strong>DNS</strong></td><td>53</td><td>UDP/TCP</td><td>Name resolution</td></tr>
+<tr><td><strong>DHCP</strong></td><td>67/68</td><td>UDP</td><td>IP configuration</td></tr>
+<tr><td><strong>TFTP</strong></td><td>69</td><td>UDP</td><td>Simple file transfer</td></tr>
+<tr><td><strong>HTTP/3</strong></td><td>443</td><td>UDP (QUIC)</td><td>Modern web</td></tr>
+<tr><td><strong>NTP</strong></td><td>123</td><td>UDP</td><td>Time sync</td></tr>
+<tr><td><strong>SNMP</strong></td><td>161/162</td><td>UDP</td><td>Network management</td></tr>
+<tr><td><strong>POP3</strong></td><td>110</td><td>TCP</td><td>Email retrieval</td></tr>
+<tr><td><strong>IMAP</strong></td><td>143</td><td>TCP</td><td>Email access</td></tr>
+<tr><td><strong>RDP</strong></td><td>3389</td><td>TCP</td><td>Remote desktop</td></tr>
+</tbody></table>
+</div>
+<p><strong>Example: HTTP Request</strong></p>
+<pre><code>Application Layer creates:
+
+GET /index.html HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0
+Accept: text/html
+
+      ↓
+
+Transport Layer (TCP):
+  - Add TCP header
+  - Source port: 54321
+  - Dest port: 80
+  - Establish connection
+
+      ↓
+
+Internet Layer (IP):
+  - Add IP header
+  - Resolve www.example.com to IP
+  - Source: 192.168.1.10
+  - Dest: 93.184.216.34
+
+      ↓
+
+Network Access Layer:
+  - ARP for next hop MAC
+  - Add Ethernet frame
+  - Transmit bits
+</code></pre>
+<h2 id="data-encapsulation-in-tcpip"><a class="header" href="#data-encapsulation-in-tcpip">Data Encapsulation in TCP/IP</a></h2>
+<h3 id="sending-data"><a class="header" href="#sending-data">Sending Data</a></h3>
+<pre><code>Step 1: Application creates data
+  "GET /index.html HTTP/1.1\r\n..."
+
+Step 2: Transport Layer adds header
+  [TCP Header][HTTP Request] → TCP Segment
+
+Step 3: Internet Layer adds header
+  [IP Header][TCP Header][HTTP Request] → IP Packet
+
+Step 4: Network Access adds header/trailer
+  [Eth Header][IP][TCP][HTTP][Eth Trailer] → Ethernet Frame
+
+Step 5: Convert to bits
+  01001000110101... → Bits on wire
+</code></pre>
+<h3 id="receiving-data"><a class="header" href="#receiving-data">Receiving Data</a></h3>
+<pre><code>Step 1: Receive bits, extract frame
+  [Eth Header][IP][TCP][HTTP][Eth Trailer]
+
+Step 2: Check Ethernet checksum, remove header
+  [IP Header][TCP Header][HTTP Request]
+
+Step 3: Check IP checksum, route to TCP
+  [TCP Header][HTTP Request]
+
+Step 4: Process TCP segment, reassemble
+  "GET /index.html HTTP/1.1\r\n..."
+
+Step 5: Deliver to HTTP server application
+</code></pre>
+<h2 id="complete-communication-example"><a class="header" href="#complete-communication-example">Complete Communication Example</a></h2>
+<h3 id="browsing-a-website"><a class="header" href="#browsing-a-website">Browsing a Website</a></h3>
+<pre><code>User types: http://www.example.com
+
+=== Application Layer ===
+1. Browser resolves domain name
+   DNS Query: "What's the IP of www.example.com?"
+   DNS Response: "93.184.216.34"
+
+2. Browser creates HTTP request
+   GET / HTTP/1.1
+   Host: www.example.com
+
+=== Transport Layer ===
+3. TCP connection to port 80
+   - 3-way handshake
+   - Establish connection
+   - Segment data if needed
+
+=== Internet Layer ===
+4. Create IP packet
+   - Source: 192.168.1.10
+   - Dest: 93.184.216.34
+   - Protocol: TCP (6)
+   - Add to routing queue
+
+5. Routing
+   - Check routing table
+   - Forward to default gateway
+   - Each router forwards packet
+
+=== Network Access Layer ===
+6. Resolve next hop MAC (ARP)
+   - "Who has 192.168.1.1?"
+   - "192.168.1.1 is at AA:BB:CC:DD:EE:FF"
+
+7. Create Ethernet frame
+   - Dest MAC: Gateway's MAC
+   - Src MAC: PC's MAC
+   - Add checksum
+
+8. Transmit on physical medium
+   - Convert to electrical signals
+   - Send on Ethernet cable
+
+=== Server Processes Request ===
+9. Server receives, decapsulates
+10. HTTP server processes request
+11. Sends response back
+
+=== Browser Receives Response ===
+12. Decapsulate all layers
+13. Browser renders HTML
+</code></pre>
+<h2 id="protocol-interactions"><a class="header" href="#protocol-interactions">Protocol Interactions</a></h2>
+<h3 id="dns-resolution"><a class="header" href="#dns-resolution">DNS Resolution</a></h3>
+<pre><code>Application: DNS client
+Transport: UDP port 53
+Internet: IP packet to DNS server
+Network Access: Ethernet to gateway
+
+Query: www.example.com → 93.184.216.34
+</code></pre>
+<h3 id="email-sending-smtp"><a class="header" href="#email-sending-smtp">Email Sending (SMTP)</a></h3>
+<pre><code>Application: SMTP client (port 25)
+Transport: TCP connection
+Internet: Route to mail server IP
+Network Access: Frame to gateway
+
+MAIL FROM: alice@example.com
+RCPT TO: bob@example.com
+DATA
+Subject: Hello
+...
+</code></pre>
+<h3 id="file-transfer-ftp"><a class="header" href="#file-transfer-ftp">File Transfer (FTP)</a></h3>
+<pre><code>Application: FTP client
+Transport:
+  - Control: TCP port 21
+  - Data: TCP port 20
+Internet: IP to FTP server
+Network Access: Ethernet frames
+
+Commands on port 21:
+  USER alice
+  PASS secret123
+  RETR file.txt
+
+Data transfer on port 20
+</code></pre>
+<h2 id="port-numbers"><a class="header" href="#port-numbers">Port Numbers</a></h2>
+<h3 id="well-known-ports-0-1023"><a class="header" href="#well-known-ports-0-1023">Well-Known Ports (0-1023)</a></h3>
+<p>Require root/admin privileges:</p>
+<pre><code>20/21   FTP
+22      SSH
+23      Telnet
+25      SMTP
+53      DNS
+67/68   DHCP
+80      HTTP
+110     POP3
+143     IMAP
+443     HTTPS
+</code></pre>
+<h3 id="registered-ports-1024-49151"><a class="header" href="#registered-ports-1024-49151">Registered Ports (1024-49151)</a></h3>
+<p>For specific services:</p>
+<pre><code>3306    MySQL
+5432    PostgreSQL
+6379    Redis
+8080    HTTP alternate
+8443    HTTPS alternate
+27017   MongoDB
+</code></pre>
+<h3 id="dynamicprivate-ports-49152-65535"><a class="header" href="#dynamicprivate-ports-49152-65535">Dynamic/Private Ports (49152-65535)</a></h3>
+<p>Used by clients for outgoing connections:</p>
+<pre><code>Client opens connection:
+  Source: 192.168.1.10:54321 (dynamic)
+  Dest: 93.184.216.34:80 (well-known)
+</code></pre>
+<h2 id="tcpip-configuration"><a class="header" href="#tcpip-configuration">TCP/IP Configuration</a></h2>
+<h3 id="manual-configuration"><a class="header" href="#manual-configuration">Manual Configuration</a></h3>
+<pre><code class="language-bash"># Set IP address
+sudo ip addr add 192.168.1.100/24 dev eth0
+
+# Set default gateway
+sudo ip route add default via 192.168.1.1
+
+# Set DNS server
+echo "nameserver 8.8.8.8" &gt;&gt; /etc/resolv.conf
+</code></pre>
+<h3 id="dhcp-dynamic-host-configuration-protocol"><a class="header" href="#dhcp-dynamic-host-configuration-protocol">DHCP (Dynamic Host Configuration Protocol)</a></h3>
+<pre><code>Client                          DHCP Server
+  |                                |
+  | DHCP Discover (broadcast)      |
+  |-------------------------------&gt;|
+  |                                |
+  | DHCP Offer                     |
+  |&lt;-------------------------------|
+  |   IP: 192.168.1.100            |
+  |   Netmask: 255.255.255.0       |
+  |   Gateway: 192.168.1.1         |
+  |   DNS: 8.8.8.8                 |
+  |                                |
+  | DHCP Request                   |
+  |-------------------------------&gt;|
+  |                                |
+  | DHCP ACK                       |
+  |&lt;-------------------------------|
+  |                                |
+
+Client now configured with:
+  IP Address: 192.168.1.100
+  Subnet Mask: 255.255.255.0
+  Default Gateway: 192.168.1.1
+  DNS Server: 8.8.8.8
+  Lease Time: 24 hours
+</code></pre>
+<h2 id="tcpip-troubleshooting"><a class="header" href="#tcpip-troubleshooting">TCP/IP Troubleshooting</a></h2>
+<h3 id="layer-1-network-access"><a class="header" href="#layer-1-network-access">Layer 1: Network Access</a></h3>
+<pre><code class="language-bash"># Check physical connection
+ip link show
+ethtool eth0
+
+# Check link status
+cat /sys/class/net/eth0/carrier
+
+Symptoms: No link light, cable unplugged
+</code></pre>
+<h3 id="layer-2-network-access-data-link"><a class="header" href="#layer-2-network-access-data-link">Layer 2: Network Access (Data Link)</a></h3>
+<pre><code class="language-bash"># Check ARP table
+arp -a
+ip neigh show
+
+# Check switch port
+show mac address-table
+
+Symptoms: Can't reach local devices
+</code></pre>
+<h3 id="layer-3-internet"><a class="header" href="#layer-3-internet">Layer 3: Internet</a></h3>
+<pre><code class="language-bash"># Check IP configuration
+ip addr show
+ifconfig
+
+# Test gateway reachability
+ping 192.168.1.1
+
+# Check routing
+ip route show
+traceroute 8.8.8.8
+
+Symptoms: No internet, can't reach remote hosts
+</code></pre>
+<h3 id="layer-4-transport"><a class="header" href="#layer-4-transport">Layer 4: Transport</a></h3>
+<pre><code class="language-bash"># Check listening ports
+netstat -tuln
+ss -tuln
+
+# Test port connectivity
+telnet example.com 80
+nc -zv example.com 80
+
+# Check firewall
+iptables -L
+ufw status
+
+Symptoms: Connection refused, timeout
+</code></pre>
+<h3 id="layer-5-application"><a class="header" href="#layer-5-application">Layer 5: Application</a></h3>
+<pre><code class="language-bash"># Test HTTP
+curl -v http://example.com
+
+# Test DNS
+dig example.com
+nslookup example.com
+
+# Test SMTP
+telnet mail.example.com 25
+
+Symptoms: Service not responding correctly
+</code></pre>
+<h2 id="tcpip-security"><a class="header" href="#tcpip-security">TCP/IP Security</a></h2>
+<h3 id="common-vulnerabilities"><a class="header" href="#common-vulnerabilities">Common Vulnerabilities</a></h3>
+<p><strong>1. IP Spoofing</strong></p>
+<pre><code>Attacker sends packets with fake source IP
+Victim: 10.0.0.5
+Attacker pretends to be: 10.0.0.5
+</code></pre>
+<p><strong>2. TCP SYN Flood</strong></p>
+<pre><code>Attacker sends many SYN packets
+Server waits for ACK (never comes)
+Server resources exhausted
+</code></pre>
+<p><strong>3. Man-in-the-Middle</strong></p>
+<pre><code>Attacker intercepts traffic between client and server
+Can read or modify data
+</code></pre>
+<h3 id="security-protocols"><a class="header" href="#security-protocols">Security Protocols</a></h3>
+<p><strong>IPsec (Internet Protocol Security)</strong></p>
+<pre><code>Provides:
+  - Authentication Header (AH)
+  - Encapsulating Security Payload (ESP)
+  - Encryption and authentication
+
+Used for VPNs
+</code></pre>
+<p><strong>TLS/SSL (Transport Layer Security)</strong></p>
+<pre><code>Encrypts application data
+Provides:
+  - Confidentiality (encryption)
+  - Integrity (tampering detection)
+  - Authentication (certificates)
+
+Used for HTTPS, SMTPS, etc.
+</code></pre>
+<h2 id="tcpip-performance-tuning"><a class="header" href="#tcpip-performance-tuning">TCP/IP Performance Tuning</a></h2>
+<h3 id="tcp-window-scaling"><a class="header" href="#tcp-window-scaling">TCP Window Scaling</a></h3>
+<pre><code>Default window: 65,535 bytes
+With scaling: Up to 1 GB
+
+Improves throughput on high-latency links
+</code></pre>
+<h3 id="tcp-congestion-control-algorithms"><a class="header" href="#tcp-congestion-control-algorithms">TCP Congestion Control Algorithms</a></h3>
+<pre><code>- Tahoe: Original algorithm
+- Reno: Fast recovery
+- CUBIC: Default in Linux (good for high-speed)
+- BBR: Google's algorithm (optimal bandwidth)
+</code></pre>
+<h3 id="monitoring-tcp-performance"><a class="header" href="#monitoring-tcp-performance">Monitoring TCP Performance</a></h3>
+<pre><code class="language-bash"># TCP statistics
+netstat -s
+ss -s
+
+# Per-connection statistics
+ss -ti
+
+# Packet captures
+tcpdump -i any -w capture.pcap
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>TCP/IP is how computers talk to each other on the internet:</p>
+<p><strong>Layer 1: Network Access (The Road)</strong></p>
+<ul>
+<li>Physical cables and WiFi</li>
+<li>Like the road system for mail delivery</li>
+</ul>
+<p><strong>Layer 2: Internet (The Address)</strong></p>
+<ul>
+<li>IP addresses (like street addresses)</li>
+<li>Routers (like post offices) send packets the right way</li>
+</ul>
+<p><strong>Layer 3: Transport (The Envelope)</strong></p>
+<ul>
+<li>TCP: Certified mail (guaranteed delivery, in order)</li>
+<li>UDP: Postcard (fast, but might get lost)</li>
+</ul>
+<p><strong>Layer 4: Application (The Message)</strong></p>
+<ul>
+<li>The actual letter you're sending</li>
+<li>HTTP for websites, SMTP for email, etc.</li>
+</ul>
+<p><strong>Example: Loading a website</strong></p>
+<ol>
+<li>You type www.google.com</li>
+<li>DNS finds Google's address (142.250.185.78)</li>
+<li>TCP opens a connection (handshake)</li>
+<li>HTTP sends "Give me the homepage"</li>
+<li>Routers deliver packets to Google</li>
+<li>Google sends back the HTML</li>
+<li>Your browser shows the page</li>
+</ol>
+<p>Each layer does its job without worrying about the others!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc1122">RFC 1122 - Requirements for Internet Hosts</a></li>
+<li><a href="https://tools.ietf.org/html/rfc1123">RFC 1123 - Application and Support</a></li>
+<li><a href="https://en.wikipedia.org/wiki/TCP/IP_Illustrated">TCP/IP Illustrated by W. Richard Stevens</a></li>
+<li><a href="http://www.tcpipguide.com/">TCP/IP Guide</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

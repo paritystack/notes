@@ -177,7 +177,487 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="ip-internet-protocol"><a class="header" href="#ip-internet-protocol">IP (Internet Protocol)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>IP (Internet Protocol) is the network layer protocol responsible for addressing and routing packets across networks. It provides the addressing scheme that allows devices to find each other on the internet.</p>
+<h2 id="ip-versions"><a class="header" href="#ip-versions">IP Versions</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>IPv4</th><th>IPv6</th></tr></thead><tbody>
+<tr><td><strong>Address Size</strong></td><td>32 bits</td><td>128 bits</td></tr>
+<tr><td><strong>Address Format</strong></td><td>Decimal (192.168.1.1)</td><td>Hexadecimal (2001:db8::1)</td></tr>
+<tr><td><strong>Total Addresses</strong></td><td>~4.3 billion</td><td>340 undecillion</td></tr>
+<tr><td><strong>Header Size</strong></td><td>20-60 bytes</td><td>40 bytes (fixed)</td></tr>
+<tr><td><strong>Checksum</strong></td><td>Yes</td><td>No (delegated to link layer)</td></tr>
+<tr><td><strong>Fragmentation</strong></td><td>By routers</td><td>Source only</td></tr>
+<tr><td><strong>Broadcast</strong></td><td>Yes</td><td>No (uses multicast)</td></tr>
+<tr><td><strong>Configuration</strong></td><td>Manual or DHCP</td><td>SLAAC or DHCPv6</td></tr>
+<tr><td><strong>IPSec</strong></td><td>Optional</td><td>Mandatory</td></tr>
+</tbody></table>
+</div>
+<h2 id="ipv4-packet-format"><a class="header" href="#ipv4-packet-format">IPv4 Packet Format</a></h2>
+<pre><code> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  IHL  |Type of Service|          Total Length         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Identification        |Flags|      Fragment Offset    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Time to Live |    Protocol   |         Header Checksum       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Source Address                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Destination Address                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Options (if IHL &gt; 5)                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                            Data                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+<h3 id="ipv4-header-fields"><a class="header" href="#ipv4-header-fields">IPv4 Header Fields</a></h3>
+<ol>
+<li><strong>Version</strong> (4 bits): IP version (4 for IPv4)</li>
+<li><strong>IHL</strong> (4 bits): Internet Header Length (5-15, in 32-bit words)</li>
+<li><strong>Type of Service</strong> (8 bits): QoS, priority</li>
+<li><strong>Total Length</strong> (16 bits): Entire packet size (max 65,535 bytes)</li>
+<li><strong>Identification</strong> (16 bits): Fragment identification</li>
+<li><strong>Flags</strong> (3 bits):
+<ul>
+<li>Bit 0: Reserved (must be 0)</li>
+<li>Bit 1: Don't Fragment (DF)</li>
+<li>Bit 2: More Fragments (MF)</li>
+</ul>
+</li>
+<li><strong>Fragment Offset</strong> (13 bits): Position of fragment</li>
+<li><strong>Time to Live (TTL)</strong> (8 bits): Max hops (decremented at each router)</li>
+<li><strong>Protocol</strong> (8 bits): Upper layer protocol (6=TCP, 17=UDP, 1=ICMP)</li>
+<li><strong>Header Checksum</strong> (16 bits): Error detection for header</li>
+<li><strong>Source Address</strong> (32 bits): Sender IP address</li>
+<li><strong>Destination Address</strong> (32 bits): Receiver IP address</li>
+<li><strong>Options</strong> (variable): Rarely used (security, timestamp, etc.)</li>
+</ol>
+<h2 id="ipv4-address-classes"><a class="header" href="#ipv4-address-classes">IPv4 Address Classes</a></h2>
+<h3 id="traditional-class-system-obsolete-replaced-by-cidr"><a class="header" href="#traditional-class-system-obsolete-replaced-by-cidr">Traditional Class System (Obsolete, replaced by CIDR)</a></h3>
+<pre><code>Class A: 0.0.0.0     to 127.255.255.255   /8   (16 million hosts)
+         Network: 8 bits, Host: 24 bits
+
+Class B: 128.0.0.0   to 191.255.255.255   /16  (65,536 hosts)
+         Network: 16 bits, Host: 16 bits
+
+Class C: 192.0.0.0   to 223.255.255.255   /24  (254 hosts)
+         Network: 24 bits, Host: 8 bits
+
+Class D: 224.0.0.0   to 239.255.255.255   (Multicast)
+
+Class E: 240.0.0.0   to 255.255.255.255   (Reserved)
+</code></pre>
+<h2 id="private-ip-address-ranges"><a class="header" href="#private-ip-address-ranges">Private IP Address Ranges</a></h2>
+<pre><code>10.0.0.0        - 10.255.255.255     (10/8 prefix)
+172.16.0.0      - 172.31.255.255     (172.16/12 prefix)
+192.168.0.0     - 192.168.255.255    (192.168/16 prefix)
+
+Used in LANs, not routed on internet (NAT required)
+</code></pre>
+<h2 id="special-ipv4-addresses"><a class="header" href="#special-ipv4-addresses">Special IPv4 Addresses</a></h2>
+<pre><code>0.0.0.0/8         - Current network (only valid as source)
+127.0.0.0/8       - Loopback (127.0.0.1 = localhost)
+169.254.0.0/16    - Link-local (APIPA, auto-config failed)
+192.0.2.0/24      - Documentation/examples (TEST-NET-1)
+198.18.0.0/15     - Benchmark testing
+224.0.0.0/4       - Multicast
+255.255.255.255   - Limited broadcast
+</code></pre>
+<h2 id="cidr-classless-inter-domain-routing"><a class="header" href="#cidr-classless-inter-domain-routing">CIDR (Classless Inter-Domain Routing)</a></h2>
+<h3 id="cidr-notation"><a class="header" href="#cidr-notation">CIDR Notation</a></h3>
+<pre><code>192.168.1.0/24
+            ^^
+            Number of network bits
+
+/24 = 255.255.255.0 netmask
+24 bits for network, 8 bits for hosts
+2^8 - 2 = 254 usable host addresses
+</code></pre>
+<h3 id="common-subnet-masks"><a class="header" href="#common-subnet-masks">Common Subnet Masks</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>CIDR</th><th>Netmask</th><th>Hosts</th><th>Use Case</th></tr></thead><tbody>
+<tr><td><strong>/8</strong></td><td>255.0.0.0</td><td>16,777,214</td><td>Huge networks</td></tr>
+<tr><td><strong>/16</strong></td><td>255.255.0.0</td><td>65,534</td><td>Large networks</td></tr>
+<tr><td><strong>/24</strong></td><td>255.255.255.0</td><td>254</td><td>Small networks</td></tr>
+<tr><td><strong>/25</strong></td><td>255.255.255.128</td><td>126</td><td>Subnet split</td></tr>
+<tr><td><strong>/26</strong></td><td>255.255.255.192</td><td>62</td><td>Small subnet</td></tr>
+<tr><td><strong>/27</strong></td><td>255.255.255.224</td><td>30</td><td>Very small</td></tr>
+<tr><td><strong>/30</strong></td><td>255.255.255.252</td><td>2</td><td>Point-to-point</td></tr>
+<tr><td><strong>/32</strong></td><td>255.255.255.255</td><td>1</td><td>Single host</td></tr>
+</tbody></table>
+</div>
+<h3 id="subnet-calculation-example"><a class="header" href="#subnet-calculation-example">Subnet Calculation Example</a></h3>
+<pre><code>Network: 192.168.1.0/24
+
+Network Address:    192.168.1.0
+First Usable:       192.168.1.1
+Last Usable:        192.168.1.254
+Broadcast Address:  192.168.1.255
+Total Hosts:        256
+Usable Hosts:       254
+</code></pre>
+<h3 id="subnetting-example"><a class="header" href="#subnetting-example">Subnetting Example</a></h3>
+<pre><code>Original: 192.168.1.0/24 (254 hosts)
+
+Split into 4 subnets (/26 each):
+Subnet 1: 192.168.1.0/26    (192.168.1.1 - 192.168.1.62)
+Subnet 2: 192.168.1.64/26   (192.168.1.65 - 192.168.1.126)
+Subnet 3: 192.168.1.128/26  (192.168.1.129 - 192.168.1.190)
+Subnet 4: 192.168.1.192/26  (192.168.1.193 - 192.168.1.254)
+
+Each subnet: 62 usable hosts
+</code></pre>
+<h2 id="ipv6-packet-format"><a class="header" href="#ipv6-packet-format">IPv6 Packet Format</a></h2>
+<pre><code>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version| Traffic Class |           Flow Label                  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Payload Length        |  Next Header  |   Hop Limit   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                         Source Address                        +
+|                          (128 bits)                           |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                      Destination Address                      +
+|                          (128 bits)                           |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+<h3 id="ipv6-header-fields-40-bytes-fixed"><a class="header" href="#ipv6-header-fields-40-bytes-fixed">IPv6 Header Fields (40 bytes fixed)</a></h3>
+<ol>
+<li><strong>Version</strong> (4 bits): IP version (6)</li>
+<li><strong>Traffic Class</strong> (8 bits): QoS, similar to ToS in IPv4</li>
+<li><strong>Flow Label</strong> (20 bits): QoS flow identification</li>
+<li><strong>Payload Length</strong> (16 bits): Data length (excluding header)</li>
+<li><strong>Next Header</strong> (8 bits): Protocol type (like IPv4 Protocol field)</li>
+<li><strong>Hop Limit</strong> (8 bits): Like IPv4 TTL</li>
+<li><strong>Source Address</strong> (128 bits)</li>
+<li><strong>Destination Address</strong> (128 bits)</li>
+</ol>
+<h2 id="ipv6-address-format"><a class="header" href="#ipv6-address-format">IPv6 Address Format</a></h2>
+<h3 id="full-representation"><a class="header" href="#full-representation">Full Representation</a></h3>
+<pre><code>2001:0db8:0000:0042:0000:8a2e:0370:7334
+</code></pre>
+<h3 id="compressed-representation"><a class="header" href="#compressed-representation">Compressed Representation</a></h3>
+<pre><code># Remove leading zeros
+2001:db8:0:42:0:8a2e:370:7334
+
+# Replace consecutive zeros with ::
+2001:db8:0:42::8a2e:370:7334
+
+# Loopback
+::1  (equivalent to 0:0:0:0:0:0:0:1)
+
+# Unspecified
+::  (equivalent to 0:0:0:0:0:0:0:0)
+</code></pre>
+<h3 id="ipv6-address-types"><a class="header" href="#ipv6-address-types">IPv6 Address Types</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Type</th><th>Prefix</th><th>Example</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><strong>Global Unicast</strong></td><td>2000::/3</td><td>2001:db8::1</td><td>Internet routing</td></tr>
+<tr><td><strong>Link-Local</strong></td><td>fe80::/10</td><td>fe80::1</td><td>Local network only</td></tr>
+<tr><td><strong>Unique Local</strong></td><td>fc00::/7</td><td>fd00::1</td><td>Private (like RFC 1918)</td></tr>
+<tr><td><strong>Multicast</strong></td><td>ff00::/8</td><td>ff02::1</td><td>One-to-many</td></tr>
+<tr><td><strong>Loopback</strong></td><td>::1/128</td><td>::1</td><td>Localhost</td></tr>
+<tr><td><strong>Unspecified</strong></td><td>::/128</td><td>::</td><td>No address</td></tr>
+</tbody></table>
+</div>
+<h3 id="common-ipv6-multicast-addresses"><a class="header" href="#common-ipv6-multicast-addresses">Common IPv6 Multicast Addresses</a></h3>
+<pre><code>ff02::1    All nodes on link
+ff02::2    All routers on link
+ff02::1:2  All DHCP servers
+</code></pre>
+<h2 id="ip-fragmentation"><a class="header" href="#ip-fragmentation">IP Fragmentation</a></h2>
+<h3 id="why-fragmentation"><a class="header" href="#why-fragmentation">Why Fragmentation?</a></h3>
+<pre><code>MTU (Maximum Transmission Unit) varies by network:
+- Ethernet: 1500 bytes
+- WiFi: 2304 bytes
+- PPPoE: 1492 bytes
+
+Larger packets must be fragmented to fit MTU
+</code></pre>
+<h3 id="ipv4-fragmentation-process"><a class="header" href="#ipv4-fragmentation-process">IPv4 Fragmentation Process</a></h3>
+<pre><code>Original packet: 3000 bytes (1500 MTU)
+
+Fragment 1:
+  Identification: 12345
+  Flags: More Fragments (MF) = 1
+  Offset: 0
+  Data: 1480 bytes
+
+Fragment 2:
+  Identification: 12345
+  Flags: MF = 1
+  Offset: 185 (1480/8)
+  Data: 1480 bytes
+
+Fragment 3:
+  Identification: 12345
+  Flags: MF = 0 (last fragment)
+  Offset: 370 (2960/8)
+  Data: 40 bytes
+
+Receiver reassembles using Identification and Offset
+</code></pre>
+<h3 id="dont-fragment-df-flag"><a class="header" href="#dont-fragment-df-flag">Don't Fragment (DF) Flag</a></h3>
+<pre><code>DF = 1: Don't fragment, drop if too large
+       Send ICMP "Fragmentation Needed" back
+
+Used for Path MTU Discovery
+</code></pre>
+<h2 id="ip-routing"><a class="header" href="#ip-routing">IP Routing</a></h2>
+<h3 id="routing-decision-process"><a class="header" href="#routing-decision-process">Routing Decision Process</a></h3>
+<pre><code>1. Check if destination is local (same subnet)
+   → Send directly via ARP
+
+2. If not local, find matching route:
+   - Check routing table for most specific match
+   - Use default gateway if no match
+
+3. Send to next hop router
+
+4. Repeat at each router until destination reached
+</code></pre>
+<h3 id="example-routing-table"><a class="header" href="#example-routing-table">Example Routing Table</a></h3>
+<pre><code>Destination     Gateway         Netmask         Interface
+0.0.0.0         192.168.1.1     0.0.0.0         eth0      (Default)
+192.168.1.0     0.0.0.0         255.255.255.0   eth0      (Local)
+10.0.0.0        192.168.1.254   255.0.0.0       eth0      (Route)
+</code></pre>
+<h3 id="longest-prefix-match"><a class="header" href="#longest-prefix-match">Longest Prefix Match</a></h3>
+<pre><code>Routing table:
+  10.0.0.0/8      → Gateway A
+  10.1.0.0/16     → Gateway B
+  10.1.2.0/24     → Gateway C
+
+Packet to 10.1.2.5:
+  Matches all three routes
+  Most specific: /24
+  → Use Gateway C
+</code></pre>
+<h2 id="ttl-time-to-live"><a class="header" href="#ttl-time-to-live">TTL (Time to Live)</a></h2>
+<h3 id="purpose"><a class="header" href="#purpose">Purpose</a></h3>
+<p>Prevents routing loops by limiting packet lifetime:</p>
+<pre><code>Source sets TTL = 64
+
+Router 1: TTL = 63
+Router 2: TTL = 62
+Router 3: TTL = 61
+...
+Router N: TTL = 0 → Drop packet, send ICMP "Time Exceeded"
+</code></pre>
+<h3 id="common-ttl-values"><a class="header" href="#common-ttl-values">Common TTL Values</a></h3>
+<pre><code>Linux:    64
+Windows:  128
+Cisco:    255
+
+Can identify OS based on initial TTL
+</code></pre>
+<h3 id="traceroute-uses-ttl"><a class="header" href="#traceroute-uses-ttl">Traceroute Uses TTL</a></h3>
+<pre><code>Send packet with TTL=1  → Router 1 responds
+Send packet with TTL=2  → Router 2 responds
+Send packet with TTL=3  → Router 3 responds
+...
+Maps the path to destination
+</code></pre>
+<h2 id="ip-commands-and-tools"><a class="header" href="#ip-commands-and-tools">IP Commands and Tools</a></h2>
+<h3 id="ifconfig--ip-linux"><a class="header" href="#ifconfig--ip-linux">ifconfig / ip (Linux)</a></h3>
+<pre><code class="language-bash"># View IP configuration
+ifconfig
+ip addr show
+
+# Assign IP address
+sudo ifconfig eth0 192.168.1.100 netmask 255.255.255.0
+sudo ip addr add 192.168.1.100/24 dev eth0
+
+# Enable/disable interface
+sudo ifconfig eth0 up
+sudo ip link set eth0 up
+</code></pre>
+<h3 id="ipconfig-windows"><a class="header" href="#ipconfig-windows">ipconfig (Windows)</a></h3>
+<pre><code class="language-cmd"># View IP configuration
+ipconfig
+ipconfig /all
+
+# Renew DHCP lease
+ipconfig /renew
+
+# Release DHCP lease
+ipconfig /release
+</code></pre>
+<h3 id="ping"><a class="header" href="#ping">ping</a></h3>
+<pre><code class="language-bash"># Test connectivity (ICMP Echo Request/Reply)
+ping 192.168.1.1
+ping -c 4 192.168.1.1  # Send 4 packets
+
+# Test with specific packet size
+ping -s 1400 192.168.1.1
+
+# Set TTL
+ping -t 10 192.168.1.1
+</code></pre>
+<h3 id="traceroute--tracert"><a class="header" href="#traceroute--tracert">traceroute / tracert</a></h3>
+<pre><code class="language-bash"># Linux
+traceroute google.com
+
+# Windows
+tracert google.com
+
+# UDP traceroute (Linux)
+traceroute -U google.com
+
+# ICMP traceroute
+traceroute -I google.com
+</code></pre>
+<h3 id="netstat"><a class="header" href="#netstat">netstat</a></h3>
+<pre><code class="language-bash"># Show routing table
+netstat -r
+route -n
+
+# Show all connections
+netstat -an
+
+# Show listening ports
+netstat -ln
+</code></pre>
+<h3 id="ip-route"><a class="header" href="#ip-route">ip route</a></h3>
+<pre><code class="language-bash"># Show routing table
+ip route show
+
+# Add static route
+sudo ip route add 10.0.0.0/8 via 192.168.1.254
+
+# Delete route
+sudo ip route del 10.0.0.0/8
+
+# Add default gateway
+sudo ip route add default via 192.168.1.1
+</code></pre>
+<h2 id="nat-network-address-translation"><a class="header" href="#nat-network-address-translation">NAT (Network Address Translation)</a></h2>
+<h3 id="why-nat"><a class="header" href="#why-nat">Why NAT?</a></h3>
+<pre><code>Problem: IPv4 address exhaustion
+Solution: Multiple private IPs share one public IP
+
+Private Network (192.168.1.0/24)
+  PC1: 192.168.1.10
+  PC2: 192.168.1.11      →  NAT Router  →  Public IP: 203.0.113.5
+  PC3: 192.168.1.12              ↓
+                          Tracks connections
+</code></pre>
+<h3 id="nat-types"><a class="header" href="#nat-types">NAT Types</a></h3>
+<h4 id="1-source-nat-snat"><a class="header" href="#1-source-nat-snat">1. Source NAT (SNAT)</a></h4>
+<pre><code>Outbound translation:
+PC (192.168.1.10:5000) → NAT → Internet (203.0.113.5:6000)
+
+Return traffic:
+Internet (203.0.113.5:6000) → NAT → PC (192.168.1.10:5000)
+</code></pre>
+<h4 id="2-destination-nat-dnat--port-forwarding"><a class="header" href="#2-destination-nat-dnat--port-forwarding">2. Destination NAT (DNAT) / Port Forwarding</a></h4>
+<pre><code>Internet → Public IP:80 → NAT → Web Server (192.168.1.20:80)
+
+External: 203.0.113.5:80
+Internal: 192.168.1.20:80
+</code></pre>
+<h4 id="3-pat-port-address-translation--nat-overload"><a class="header" href="#3-pat-port-address-translation--nat-overload">3. PAT (Port Address Translation) / NAT Overload</a></h4>
+<pre><code>PC1: 192.168.1.10:5000  →  203.0.113.5:6000
+PC2: 192.168.1.11:5001  →  203.0.113.5:6001
+PC3: 192.168.1.12:5002  →  203.0.113.5:6002
+
+NAT tracks: Internal IP:Port ↔ Public Port
+</code></pre>
+<h3 id="nat-table-example"><a class="header" href="#nat-table-example">NAT Table Example</a></h3>
+<pre><code>Internal IP:Port     External IP:Port    Destination
+192.168.1.10:5000    203.0.113.5:6000    8.8.8.8:53
+192.168.1.11:5001    203.0.113.5:6001    1.1.1.1:443
+192.168.1.10:5002    203.0.113.5:6002    93.184.216.34:80
+</code></pre>
+<h2 id="icmp-internet-control-message-protocol"><a class="header" href="#icmp-internet-control-message-protocol">ICMP (Internet Control Message Protocol)</a></h2>
+<p>Part of IP suite, used for diagnostics and errors:</p>
+<h3 id="common-icmp-message-types"><a class="header" href="#common-icmp-message-types">Common ICMP Message Types</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Type</th><th>Code</th><th>Message</th><th>Use</th></tr></thead><tbody>
+<tr><td><strong>0</strong></td><td>0</td><td>Echo Reply</td><td>ping response</td></tr>
+<tr><td><strong>3</strong></td><td>0</td><td>Dest Network Unreachable</td><td>Routing error</td></tr>
+<tr><td><strong>3</strong></td><td>1</td><td>Dest Host Unreachable</td><td>Host down</td></tr>
+<tr><td><strong>3</strong></td><td>3</td><td>Dest Port Unreachable</td><td>Port closed</td></tr>
+<tr><td><strong>3</strong></td><td>4</td><td>Fragmentation Needed</td><td>MTU discovery</td></tr>
+<tr><td><strong>8</strong></td><td>0</td><td>Echo Request</td><td>ping</td></tr>
+<tr><td><strong>11</strong></td><td>0</td><td>Time Exceeded</td><td>TTL = 0</td></tr>
+<tr><td><strong>30</strong></td><td>0</td><td>Traceroute</td><td>Traceroute packet</td></tr>
+</tbody></table>
+</div>
+<h3 id="ping-icmp-echo-requestreply"><a class="header" href="#ping-icmp-echo-requestreply">Ping (ICMP Echo Request/Reply)</a></h3>
+<pre><code>Client                          Server
+  |                                |
+  | ICMP Echo Request (Type 8)     |
+  |-------------------------------&gt;|
+  |                                |
+  | ICMP Echo Reply (Type 0)       |
+  |&lt;-------------------------------|
+  |                                |
+
+Measures round-trip time (RTT)
+</code></pre>
+<h2 id="ip-best-practices"><a class="header" href="#ip-best-practices">IP Best Practices</a></h2>
+<h3 id="1-subnet-properly"><a class="header" href="#1-subnet-properly">1. Subnet Properly</a></h3>
+<pre><code>Don't use /24 for everything
+- Small office: /26 (62 hosts)
+- Department: /24 (254 hosts)
+- Campus: /16 (65,534 hosts)
+</code></pre>
+<h3 id="2-reserve-ip-ranges"><a class="header" href="#2-reserve-ip-ranges">2. Reserve IP Ranges</a></h3>
+<pre><code>192.168.1.1    - 192.168.1.10    Static (gateway, servers)
+192.168.1.11   - 192.168.1.99    Static (printers, APs)
+192.168.1.100  - 192.168.1.254   DHCP pool
+</code></pre>
+<h3 id="3-document-network"><a class="header" href="#3-document-network">3. Document Network</a></h3>
+<pre><code>Maintain IP address management (IPAM)
+- Which IPs are assigned
+- What devices use them
+- DHCP ranges
+- Static assignments
+</code></pre>
+<h3 id="4-use-private-ips-internally"><a class="header" href="#4-use-private-ips-internally">4. Use Private IPs Internally</a></h3>
+<pre><code>Never use public IPs internally
+Use 10.x.x.x, 172.16-31.x.x, or 192.168.x.x
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>IP addresses are like street addresses for computers:</p>
+<p><strong>IPv4 Address (192.168.1.100):</strong></p>
+<ul>
+<li>Like a home address with 4 numbers</li>
+<li>Each number is 0-255</li>
+<li>Almost ran out of addresses (like running out of street addresses in a city)</li>
+</ul>
+<p><strong>IPv6 Address (2001:db8::1):</strong></p>
+<ul>
+<li>New address system with way more numbers</li>
+<li>Like adding ZIP+4 codes, apartment numbers, floor numbers</li>
+<li>So many addresses we'll never run out</li>
+</ul>
+<p><strong>Routing:</strong></p>
+<ul>
+<li>Routers are like mail sorting facilities</li>
+<li>They look at the address and send the packet closer to its destination</li>
+<li>Each router knows which direction to send packets</li>
+</ul>
+<p><strong>Private IPs:</strong></p>
+<ul>
+<li>Like apartment numbers (Apt 101, 102, 103)</li>
+<li>Work inside the building (local network)</li>
+<li>NAT is like the building's street address (everyone shares it for mail)</li>
+</ul>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc791">RFC 791 - IPv4 Specification</a></li>
+<li><a href="https://tools.ietf.org/html/rfc8200">RFC 8200 - IPv6 Specification</a></li>
+<li><a href="https://tools.ietf.org/html/rfc1918">RFC 1918 - Private Address Space</a></li>
+<li><a href="https://www.subnet-calculator.com/">Subnet Calculator</a></li>
+<li><a href="https://www.ipaddressguide.com/cidr">CIDR to IPv4 Conversion</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

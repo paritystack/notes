@@ -177,7 +177,815 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="flux1---black-forest-labs"><a class="header" href="#flux1---black-forest-labs">Flux.1 - Black Forest Labs</a></h1>
+<p>Complete guide to Flux.1, the next-generation image generation model from the creators of Stable Diffusion.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#model-variants">Model Variants</a></li>
+<li><a href="#installation--setup">Installation &amp; Setup</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#prompt-engineering">Prompt Engineering</a></li>
+<li><a href="#parameters">Parameters</a></li>
+<li><a href="#comparison-with-other-models">Comparison with Other Models</a></li>
+<li><a href="#advanced-techniques">Advanced Techniques</a></li>
+<li><a href="#optimization">Optimization</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Flux.1 is a state-of-the-art image generation model developed by Black Forest Labs, the team behind the original Stable Diffusion. Released in 2024, it represents a significant advancement in image quality, prompt adherence, and detail preservation.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Superior Image Quality</strong>: Enhanced detail and realism</li>
+<li><strong>Better Prompt Understanding</strong>: More accurate interpretation</li>
+<li><strong>Improved Text Rendering</strong>: Readable text in images</li>
+<li><strong>Flexible Architecture</strong>: Multiple variants for different needs</li>
+<li><strong>Advanced Control</strong>: Fine-grained control over generation</li>
+<li><strong>Fast Inference</strong>: Optimized for speed</li>
+</ul>
+<h3 id="model-architecture"><a class="header" href="#model-architecture">Model Architecture</a></h3>
+<ul>
+<li><strong>Flow Matching</strong>: Advanced diffusion technique</li>
+<li><strong>Hybrid Architecture</strong>: Combines transformer and diffusion</li>
+<li><strong>12B Parameters</strong>: Larger than SD models</li>
+<li><strong>Parallel Attention</strong>: Efficient processing</li>
+<li><strong>Rotation Position Embeddings (RoPE)</strong>: Better spatial understanding</li>
+</ul>
+<h2 id="model-variants"><a class="header" href="#model-variants">Model Variants</a></h2>
+<h3 id="flux1-pro"><a class="header" href="#flux1-pro">Flux.1 [pro]</a></h3>
+<p><strong>Commercial, API-only</strong></p>
+<pre><code class="language-python">import requests
+
+API_URL = "https://api.bfl.ml/v1/flux-pro"
+API_KEY = "your-api-key"
+
+def generate_flux_pro(prompt):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "prompt": prompt,
+        "width": 1024,
+        "height": 1024,
+        "steps": 30
+    }
+    
+    response = requests.post(API_URL, json=payload, headers=headers)
+    return response.json()
+
+# Generate
+result = generate_flux_pro(
+    "a professional photograph of a modern office, natural lighting, detailed"
+)
+</code></pre>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Highest quality</li>
+<li>Best prompt adherence</li>
+<li>Commercial use allowed</li>
+<li>API access only</li>
+<li>Pay per generation</li>
+</ul>
+<p><strong>Best for:</strong></p>
+<ul>
+<li>Professional work</li>
+<li>Commercial projects</li>
+<li>Maximum quality needs</li>
+</ul>
+<h3 id="flux1-dev"><a class="header" href="#flux1-dev">Flux.1 [dev]</a></h3>
+<p><strong>Non-commercial, open-weight</strong></p>
+<pre><code class="language-python">import torch
+from diffusers import FluxPipeline
+
+# Load model
+pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-dev",
+    torch_dtype=torch.bfloat16
+)
+pipe.to("cuda")
+
+# Generate
+prompt = "a majestic lion in the savanna at sunset, highly detailed"
+image = pipe(
+    prompt,
+    guidance_scale=3.5,
+    num_inference_steps=30,
+    height=1024,
+    width=1024,
+).images[0]
+
+image.save("flux_output.png")
+</code></pre>
+<p><strong>Features:</strong></p>
+<ul>
+<li>High quality</li>
+<li>Open weights</li>
+<li>Non-commercial license</li>
+<li>Requires Hugging Face auth</li>
+<li>Can run locally</li>
+</ul>
+<p><strong>Requirements:</strong></p>
+<ul>
+<li>GPU: 24GB+ VRAM (recommended)</li>
+<li>RAM: 32GB+ system RAM</li>
+<li>Storage: ~30GB for model</li>
+</ul>
+<p><strong>Best for:</strong></p>
+<ul>
+<li>Research and development</li>
+<li>Personal projects</li>
+<li>Learning and experimentation</li>
+</ul>
+<h3 id="flux1-schnell"><a class="header" href="#flux1-schnell">Flux.1 [schnell]</a></h3>
+<p><strong>Apache 2.0 license, fastest</strong></p>
+<pre><code class="language-python">from diffusers import FluxPipeline
+import torch
+
+# Load schnell variant
+pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-schnell",
+    torch_dtype=torch.bfloat16
+)
+pipe.to("cuda")
+
+# Fast generation (1-4 steps)
+prompt = "a portrait of a person, professional photography"
+image = pipe(
+    prompt,
+    num_inference_steps=4,  # Very few steps needed
+    guidance_scale=0.0,  # No guidance needed
+    height=1024,
+    width=1024,
+).images[0]
+
+image.save("schnell_output.png")
+</code></pre>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Very fast (1-4 steps)</li>
+<li>Good quality</li>
+<li>Apache 2.0 license</li>
+<li>Commercial use allowed</li>
+<li>Lower VRAM requirements</li>
+</ul>
+<p><strong>Best for:</strong></p>
+<ul>
+<li>Real-time applications</li>
+<li>High-volume generation</li>
+<li>Commercial projects</li>
+<li>Resource-constrained environments</li>
+</ul>
+<h2 id="installation--setup"><a class="header" href="#installation--setup">Installation &amp; Setup</a></h2>
+<h3 id="option-1-diffusers-recommended"><a class="header" href="#option-1-diffusers-recommended">Option 1: Diffusers (Recommended)</a></h3>
+<pre><code class="language-bash"># Install dependencies
+pip install diffusers transformers accelerate torch
+
+# Install from latest
+pip install git+https://github.com/huggingface/diffusers.git
+</code></pre>
+<pre><code class="language-python">from diffusers import FluxPipeline
+import torch
+
+# Authenticate with Hugging Face
+from huggingface_hub import login
+login(token="your_hf_token")
+
+# Load model
+pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-dev",
+    torch_dtype=torch.bfloat16
+)
+pipe.enable_model_cpu_offload()  # Save VRAM
+
+# Generate
+image = pipe("a beautiful landscape").images[0]
+</code></pre>
+<h3 id="option-2-comfyui"><a class="header" href="#option-2-comfyui">Option 2: ComfyUI</a></h3>
+<pre><code class="language-bash"># Update ComfyUI
+cd ComfyUI
+git pull
+
+# Download Flux models to:
+# models/unet/flux1-dev.safetensors
+# models/unet/flux1-schnell.safetensors
+
+# Download CLIP and T5 encoders to:
+# models/clip/clip_l.safetensors
+# models/clip/t5xxl_fp16.safetensors
+
+# Download VAE to:
+# models/vae/ae.safetensors
+</code></pre>
+<h3 id="option-3-automatic1111-via-extension"><a class="header" href="#option-3-automatic1111-via-extension">Option 3: AUTOMATIC1111 (via extension)</a></h3>
+<pre><code class="language-bash">cd extensions
+git clone https://github.com/XLabs-AI/x-flux-comfyui.git
+# Restart WebUI
+</code></pre>
+<h3 id="hardware-requirements"><a class="header" href="#hardware-requirements">Hardware Requirements</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Variant</th><th>Minimum VRAM</th><th>Recommended VRAM</th><th>Storage</th></tr></thead><tbody>
+<tr><td>Schnell</td><td>12GB</td><td>16GB</td><td>30GB</td></tr>
+<tr><td>Dev</td><td>16GB</td><td>24GB</td><td>30GB</td></tr>
+<tr><td>Pro</td><td>N/A (API)</td><td>N/A (API)</td><td>N/A</td></tr>
+</tbody></table>
+</div>
+<p><strong>Optimizations:</strong></p>
+<ul>
+<li>bfloat16: Reduces VRAM by ~50%</li>
+<li>CPU offload: Reduces VRAM usage further</li>
+<li>Quantization: 8-bit or 4-bit for lower VRAM</li>
+</ul>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<h3 id="basic-generation"><a class="header" href="#basic-generation">Basic Generation</a></h3>
+<pre><code class="language-python">from diffusers import FluxPipeline
+import torch
+
+pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-dev",
+    torch_dtype=torch.bfloat16
+)
+pipe.to("cuda")
+
+# Simple generation
+prompt = "a serene mountain lake at sunrise"
+image = pipe(prompt).images[0]
+image.save("output.png")
+</code></pre>
+<h3 id="with-parameters"><a class="header" href="#with-parameters">With Parameters</a></h3>
+<pre><code class="language-python">image = pipe(
+    prompt="a futuristic city with flying cars, neon lights, cyberpunk",
+    height=1024,
+    width=1024,
+    num_inference_steps=30,
+    guidance_scale=3.5,
+    max_sequence_length=256,
+).images[0]
+</code></pre>
+<h3 id="batch-generation"><a class="header" href="#batch-generation">Batch Generation</a></h3>
+<pre><code class="language-python"># Multiple images from one prompt
+images = pipe(
+    prompt="a cute cat",
+    num_images_per_prompt=4,
+    num_inference_steps=30,
+).images
+
+for i, img in enumerate(images):
+    img.save(f"cat_{i}.png")
+</code></pre>
+<h3 id="seed-control"><a class="header" href="#seed-control">Seed Control</a></h3>
+<pre><code class="language-python"># Fixed seed for reproducibility
+generator = torch.Generator("cuda").manual_seed(42)
+
+image = pipe(
+    prompt="a magical forest",
+    generator=generator,
+    num_inference_steps=30,
+).images[0]
+</code></pre>
+<h3 id="memory-efficient-generation"><a class="header" href="#memory-efficient-generation">Memory-Efficient Generation</a></h3>
+<pre><code class="language-python"># For lower VRAM
+pipe.enable_model_cpu_offload()
+pipe.enable_sequential_cpu_offload()
+pipe.vae.enable_slicing()
+pipe.vae.enable_tiling()
+
+# Generate
+image = pipe(
+    prompt="a detailed landscape",
+    height=1024,
+    width=1024,
+).images[0]
+</code></pre>
+<h2 id="prompt-engineering"><a class="header" href="#prompt-engineering">Prompt Engineering</a></h2>
+<h3 id="prompt-structure"><a class="header" href="#prompt-structure">Prompt Structure</a></h3>
+<p>Flux.1 has excellent prompt understanding. Use natural language:</p>
+<pre><code class="language-python"># Simple and effective
+prompt = "a portrait of a woman with red hair, wearing a blue dress, in a garden"
+
+# Detailed
+prompt = """
+a professional photograph of a young woman with flowing red hair, 
+wearing an elegant blue silk dress, standing in a lush garden 
+with blooming roses, soft natural lighting, golden hour, 
+depth of field, bokeh background, shot on Canon EOS R5
+"""
+
+# With style
+prompt = """
+oil painting of a medieval knight in full armor, 
+standing on a cliff overlooking the ocean at sunset,
+dramatic lighting, renaissance art style, 
+highly detailed, masterpiece
+"""
+</code></pre>
+<h3 id="natural-language"><a class="header" href="#natural-language">Natural Language</a></h3>
+<p>Flux excels with conversational prompts:</p>
+<pre><code class="language-python">prompts = [
+    "Show me a cat wearing sunglasses at the beach",
+    "Create an image of a steampunk airship flying over Victorian London",
+    "Paint a serene Japanese garden in autumn with falling maple leaves",
+    "Design a futuristic sports car that looks fast even when standing still"
+]
+</code></pre>
+<h3 id="text-in-images"><a class="header" href="#text-in-images">Text in Images</a></h3>
+<p>Flux.1 can render text (unlike most other models):</p>
+<pre><code class="language-python"># Text rendering
+prompt = '''
+a modern cafe storefront with a neon sign that says "COFFEE SHOP",
+rainy evening, reflections on wet pavement, cinematic lighting
+'''
+
+# Book cover
+prompt = '''
+a fantasy book cover with the title "The Dragon's Tale" 
+written in elegant golden letters at the top,
+featuring a majestic dragon flying over mountains
+'''
+
+# Product mockup
+prompt = '''
+a white t-shirt with the text "FLUX.1" printed in bold black letters,
+product photography, plain white background, professional lighting
+'''
+</code></pre>
+<h3 id="aspect-ratios"><a class="header" href="#aspect-ratios">Aspect Ratios</a></h3>
+<pre><code class="language-python"># Portrait
+image = pipe(prompt, height=1344, width=768).images[0]
+
+# Landscape
+image = pipe(prompt, height=768, width=1344).images[0]
+
+# Square
+image = pipe(prompt, height=1024, width=1024).images[0]
+
+# Cinematic
+image = pipe(prompt, height=576, width=1024).images[0]
+
+# Ultra-wide
+image = pipe(prompt, height=512, width=1536).images[0]
+</code></pre>
+<h3 id="prompt-tips"><a class="header" href="#prompt-tips">Prompt Tips</a></h3>
+<ol>
+<li><strong>Be Specific</strong>: More detail = better results</li>
+<li><strong>Natural Language</strong>: Write as you would describe to a person</li>
+<li><strong>Quality Terms</strong>: "professional", "detailed", "high quality"</li>
+<li><strong>Style References</strong>: "photograph", "oil painting", "digital art"</li>
+<li><strong>Lighting</strong>: "golden hour", "dramatic lighting", "soft light"</li>
+<li><strong>Camera/Lens</strong>: "50mm lens", "wide angle", "macro"</li>
+</ol>
+<h3 id="example-prompts"><a class="header" href="#example-prompts">Example Prompts</a></h3>
+<pre><code class="language-python"># Photorealistic
+prompt = """
+a cinematic photograph of a lone astronaut standing on mars, 
+red desert landscape, distant sun on horizon, 
+dust particles in air, dramatic lighting, 
+shot on ARRI Alexa, anamorphic lens
+"""
+
+# Artistic
+prompt = """
+watercolor painting of a coastal village, 
+Mediterranean architecture, boats in harbor, 
+soft pastel colors, impressionist style, 
+painted by Claude Monet
+"""
+
+# Product
+prompt = """
+professional product photography of a luxury watch, 
+silver metal band, blue dial face, 
+on marble surface with dramatic side lighting, 
+reflections, 8k resolution, advertising quality
+"""
+
+# Character
+prompt = """
+character design of a cyberpunk hacker, 
+purple mohawk, neon goggles, leather jacket with patches, 
+detailed facial features, full body illustration, 
+concept art style, trending on artstation
+"""
+
+# Architecture
+prompt = """
+modern minimalist house in forest setting, 
+large glass windows, wooden exterior, 
+surrounded by tall pine trees, morning mist, 
+architectural photography, professional real estate photo
+"""
+</code></pre>
+<h2 id="parameters"><a class="header" href="#parameters">Parameters</a></h2>
+<h3 id="num_inference_steps"><a class="header" href="#num_inference_steps">num_inference_steps</a></h3>
+<p>Number of denoising steps:</p>
+<pre><code class="language-python"># Schnell: 1-4 steps (optimized for speed)
+image = pipe(prompt, num_inference_steps=4).images[0]
+
+# Dev: 20-50 steps (balance)
+image = pipe(prompt, num_inference_steps=30).images[0]
+
+# Pro: API manages automatically
+</code></pre>
+<p><strong>Recommendations:</strong></p>
+<ul>
+<li>Schnell: 1-4 (4 recommended)</li>
+<li>Dev: 20-30 (30 recommended)</li>
+<li>More steps = better quality but slower</li>
+</ul>
+<h3 id="guidance_scale"><a class="header" href="#guidance_scale">guidance_scale</a></h3>
+<p>How closely to follow the prompt:</p>
+<pre><code class="language-python"># Schnell: 0.0 (no guidance needed)
+image = pipe(prompt, guidance_scale=0.0).images[0]
+
+# Dev: 3.0-5.0 (3.5 recommended)
+image = pipe(prompt, guidance_scale=3.5).images[0]
+</code></pre>
+<p><strong>Flux uses lower guidance than SD:</strong></p>
+<ul>
+<li>SD typical: 7-10</li>
+<li>Flux typical: 3-5</li>
+</ul>
+<h3 id="max_sequence_length"><a class="header" href="#max_sequence_length">max_sequence_length</a></h3>
+<p>Token limit for prompt:</p>
+<pre><code class="language-python"># Standard
+image = pipe(prompt, max_sequence_length=256).images[0]
+
+# Long prompts
+image = pipe(prompt, max_sequence_length=512).images[0]
+</code></pre>
+<h3 id="resolution"><a class="header" href="#resolution">Resolution</a></h3>
+<pre><code class="language-python"># Standard resolutions (in pixels)
+resolutions = {
+    "square": (1024, 1024),
+    "portrait": (768, 1344),
+    "landscape": (1344, 768),
+    "wide": (1536, 640),
+    "tall": (640, 1536),
+}
+
+# Use
+image = pipe(
+    prompt,
+    height=resolutions["landscape"][0],
+    width=resolutions["landscape"][1]
+).images[0]
+</code></pre>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Keep dimensions divisible by 16</li>
+<li>Total pixels should be ~1MP for best results</li>
+<li>Higher resolutions need more VRAM</li>
+</ul>
+<h2 id="comparison-with-other-models"><a class="header" href="#comparison-with-other-models">Comparison with Other Models</a></h2>
+<h3 id="flux1-vs-stable-diffusion"><a class="header" href="#flux1-vs-stable-diffusion">Flux.1 vs Stable Diffusion</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Flux.1</th><th>SD 1.5</th><th>SDXL</th></tr></thead><tbody>
+<tr><td>Image Quality</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td></tr>
+<tr><td>Prompt Adherence</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td></tr>
+<tr><td>Text Rendering</td><td>⭐⭐⭐⭐⭐</td><td>⭐</td><td>⭐⭐</td></tr>
+<tr><td>Speed (Dev)</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+<tr><td>Speed (Schnell)</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+<tr><td>VRAM Usage</td><td>⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+<tr><td>Ecosystem</td><td>⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td></tr>
+<tr><td>License</td><td>Varies</td><td>Open</td><td>Open</td></tr>
+</tbody></table>
+</div>
+<h3 id="quality-comparison"><a class="header" href="#quality-comparison">Quality Comparison</a></h3>
+<pre><code class="language-python"># Same prompt across models
+prompt = "a detailed portrait of a person with glasses"
+
+# Flux.1 Dev
+flux_image = flux_pipe(prompt, num_inference_steps=30).images[0]
+# Result: High detail, accurate glasses, natural lighting
+
+# SDXL
+sdxl_image = sdxl_pipe(prompt, num_inference_steps=30).images[0]
+# Result: Good quality, some artifacts
+
+# SD 1.5
+sd15_image = sd15_pipe(prompt, num_inference_steps=30).images[0]
+# Result: Lower quality, potential distortions
+</code></pre>
+<h3 id="strengths-of-flux1"><a class="header" href="#strengths-of-flux1">Strengths of Flux.1</a></h3>
+<ol>
+<li><strong>Superior Detail</strong>: Finer details in textures, faces, objects</li>
+<li><strong>Better Composition</strong>: More coherent scene layouts</li>
+<li><strong>Text Rendering</strong>: Can actually render readable text</li>
+<li><strong>Prompt Understanding</strong>: Better interpretation of complex prompts</li>
+<li><strong>Natural Images</strong>: More photorealistic when requested</li>
+</ol>
+<h3 id="strengths-of-stable-diffusion"><a class="header" href="#strengths-of-stable-diffusion">Strengths of Stable Diffusion</a></h3>
+<ol>
+<li><strong>Ecosystem</strong>: Vast library of models, LoRAs, tools</li>
+<li><strong>VRAM Efficiency</strong>: Runs on lower-end hardware</li>
+<li><strong>Community</strong>: Large community, extensive documentation</li>
+<li><strong>Extensions</strong>: ControlNet, regional prompting, etc.</li>
+<li><strong>Customization</strong>: Easy to fine-tune and merge</li>
+</ol>
+<h3 id="when-to-use-each"><a class="header" href="#when-to-use-each">When to Use Each</a></h3>
+<p><strong>Use Flux.1 when:</strong></p>
+<ul>
+<li>Maximum quality is priority</li>
+<li>Need text in images</li>
+<li>Want natural, detailed results</li>
+<li>Have adequate hardware</li>
+<li>Creating professional content</li>
+</ul>
+<p><strong>Use Stable Diffusion when:</strong></p>
+<ul>
+<li>Need specific styles (anime, etc.)</li>
+<li>Want to use LoRAs/embeddings</li>
+<li>Limited VRAM (&lt;12GB)</li>
+<li>Need extensive control (ControlNet)</li>
+<li>Large existing workflow</li>
+</ul>
+<h2 id="advanced-techniques"><a class="header" href="#advanced-techniques">Advanced Techniques</a></h2>
+<h3 id="image-to-image-via-diffusers"><a class="header" href="#image-to-image-via-diffusers">Image-to-Image (via Diffusers)</a></h3>
+<pre><code class="language-python">from diffusers import FluxImg2ImgPipeline
+from PIL import Image
+
+# Load pipeline
+pipe = FluxImg2ImgPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-dev",
+    torch_dtype=torch.bfloat16
+)
+pipe.to("cuda")
+
+# Load input image
+init_image = Image.open("input.jpg").convert("RGB")
+
+# Transform
+prompt = "transform into an oil painting, artistic style"
+image = pipe(
+    prompt=prompt,
+    image=init_image,
+    strength=0.75,
+    num_inference_steps=30,
+    guidance_scale=3.5
+).images[0]
+</code></pre>
+<h3 id="controlnet-via-third-party"><a class="header" href="#controlnet-via-third-party">ControlNet (via third-party)</a></h3>
+<pre><code class="language-python"># Note: Official ControlNet not yet released
+# Community implementations available
+
+# Example with X-Labs implementation
+from flux_control import FluxControlNetPipeline
+
+pipe = FluxControlNetPipeline.from_pretrained(
+    "XLabs-AI/flux-controlnet-canny",
+    torch_dtype=torch.bfloat16
+)
+
+# Use canny edge detection
+control_image = generate_canny(input_image)
+output = pipe(prompt, control_image=control_image).images[0]
+</code></pre>
+<h3 id="lora-fine-tuning"><a class="header" href="#lora-fine-tuning">LoRA Fine-tuning</a></h3>
+<pre><code class="language-python">from diffusers import FluxPipeline
+
+pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-dev",
+    torch_dtype=torch.bfloat16
+)
+
+# Load LoRA (when available)
+pipe.load_lora_weights("path/to/flux-lora.safetensors")
+
+# Generate with LoRA style
+prompt = "a portrait in the custom style"
+image = pipe(prompt).images[0]
+</code></pre>
+<h3 id="batching-for-efficiency"><a class="header" href="#batching-for-efficiency">Batching for Efficiency</a></h3>
+<pre><code class="language-python"># Generate multiple variations
+prompts = [
+    "a red car",
+    "a blue car",
+    "a green car",
+    "a yellow car"
+]
+
+images = []
+for prompt in prompts:
+    image = pipe(prompt, num_inference_steps=30).images[0]
+    images.append(image)
+    
+# Or use batch processing if memory allows
+</code></pre>
+<h2 id="optimization"><a class="header" href="#optimization">Optimization</a></h2>
+<h3 id="memory-optimization"><a class="header" href="#memory-optimization">Memory Optimization</a></h3>
+<pre><code class="language-python">from diffusers import FluxPipeline
+import torch
+
+pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-schnell",
+    torch_dtype=torch.bfloat16
+)
+
+# Enable CPU offloading
+pipe.enable_model_cpu_offload()
+
+# Enable VAE optimizations
+pipe.vae.enable_slicing()
+pipe.vae.enable_tiling()
+
+# For extreme memory savings
+pipe.enable_sequential_cpu_offload()
+</code></pre>
+<h3 id="speed-optimization"><a class="header" href="#speed-optimization">Speed Optimization</a></h3>
+<pre><code class="language-python"># Use Schnell for speed
+pipe_schnell = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-schnell",
+    torch_dtype=torch.bfloat16
+)
+
+# Compile for faster inference (PyTorch 2.0+)
+pipe.unet = torch.compile(pipe.unet, mode="reduce-overhead")
+
+# Use fewer steps
+image = pipe_schnell(prompt, num_inference_steps=4).images[0]
+</code></pre>
+<h3 id="quantization"><a class="header" href="#quantization">Quantization</a></h3>
+<pre><code class="language-python"># 8-bit quantization
+from transformers import BitsAndBytesConfig
+
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,
+    bnb_4bit_compute_dtype=torch.bfloat16
+)
+
+pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-dev",
+    quantization_config=quantization_config,
+    torch_dtype=torch.bfloat16
+)
+</code></pre>
+<h3 id="multi-gpu"><a class="header" href="#multi-gpu">Multi-GPU</a></h3>
+<pre><code class="language-python"># Distribute across GPUs
+from accelerate import PartialState
+
+pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-dev",
+    torch_dtype=torch.bfloat16
+)
+
+distributed_state = PartialState()
+pipe.to(distributed_state.device)
+</code></pre>
+<h2 id="api-usage-flux-pro"><a class="header" href="#api-usage-flux-pro">API Usage (Flux Pro)</a></h2>
+<h3 id="rest-api"><a class="header" href="#rest-api">REST API</a></h3>
+<pre><code class="language-python">import requests
+import base64
+from io import BytesIO
+from PIL import Image
+
+API_URL = "https://api.bfl.ml/v1/flux-pro"
+API_KEY = "your-api-key"
+
+def generate_flux_pro(
+    prompt,
+    width=1024,
+    height=1024,
+    steps=30,
+    guidance=3.5
+):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "prompt": prompt,
+        "width": width,
+        "height": height,
+        "steps": steps,
+        "guidance": guidance
+    }
+    
+    response = requests.post(API_URL, json=payload, headers=headers)
+    
+    if response.status_code == 200:
+        image_data = response.json()["image"]
+        image = Image.open(BytesIO(base64.b64decode(image_data)))
+        return image
+    else:
+        raise Exception(f"API Error: {response.text}")
+
+# Generate
+image = generate_flux_pro(
+    "a beautiful sunset over mountains",
+    width=1344,
+    height=768
+)
+image.save("pro_output.png")
+</code></pre>
+<h3 id="async-api"><a class="header" href="#async-api">Async API</a></h3>
+<pre><code class="language-python">import asyncio
+import aiohttp
+
+async def generate_async(prompt):
+    async with aiohttp.ClientSession() as session:
+        headers = {"Authorization": f"Bearer {API_KEY}"}
+        payload = {"prompt": prompt}
+        
+        async with session.post(API_URL, json=payload, headers=headers) as resp:
+            return await resp.json()
+
+# Use
+image_data = asyncio.run(generate_async("a futuristic city"))
+</code></pre>
+<h2 id="tips--best-practices"><a class="header" href="#tips--best-practices">Tips &amp; Best Practices</a></h2>
+<h3 id="1-prompt-quality"><a class="header" href="#1-prompt-quality">1. Prompt Quality</a></h3>
+<pre><code class="language-python"># Good prompts for Flux
+good_prompts = [
+    "a cinematic photograph of [subject], [details], [lighting], [camera]",
+    "an oil painting of [scene], [style], by [artist]",
+    "product photography of [item], [background], professional lighting",
+    "character design of [character], [details], concept art"
+]
+</code></pre>
+<h3 id="2-iteration-strategy"><a class="header" href="#2-iteration-strategy">2. Iteration Strategy</a></h3>
+<pre><code class="language-python"># Start with Schnell for quick iterations
+quick_pipe = FluxPipeline.from_pretrained(
+    "black-forest-labs/FLUX.1-schnell",
+    torch_dtype=torch.bfloat16
+)
+
+# Iterate quickly
+for variation in range(5):
+    gen = torch.Generator("cuda").manual_seed(variation)
+    preview = quick_pipe(
+        prompt,
+        num_inference_steps=4,
+        generator=gen
+    ).images[0]
+    preview.save(f"preview_{variation}.png")
+
+# Refine winner with Dev
+final = dev_pipe(
+    final_prompt,
+    num_inference_steps=30,
+    generator=torch.Generator("cuda").manual_seed(winning_seed)
+).images[0]
+</code></pre>
+<h3 id="3-vram-management"><a class="header" href="#3-vram-management">3. VRAM Management</a></h3>
+<pre><code class="language-python"># Monitor VRAM
+import torch
+
+print(f"Allocated: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
+print(f"Reserved: {torch.cuda.memory_reserved() / 1e9:.2f} GB")
+
+# Clear cache between generations
+torch.cuda.empty_cache()
+</code></pre>
+<h3 id="4-prompt-templates"><a class="header" href="#4-prompt-templates">4. Prompt Templates</a></h3>
+<pre><code class="language-python">templates = {
+    "portrait": "{subject}, {expression}, {clothing}, {background}, portrait photography, {lighting}",
+    "landscape": "{location}, {time_of_day}, {weather}, {style}, landscape photography",
+    "product": "product photography of {product}, {surface}, {lighting}, professional, commercial",
+    "artistic": "{style} of {subject}, {details}, by {artist}, masterpiece"
+}
+
+# Use
+prompt = templates["portrait"].format(
+    subject="a young woman",
+    expression="slight smile",
+    clothing="elegant dress",
+    background="bokeh lights",
+    lighting="soft natural light"
+)
+</code></pre>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<h3 id="official"><a class="header" href="#official">Official</a></h3>
+<ul>
+<li><a href="https://blackforestlabs.ai/">Black Forest Labs Website</a></li>
+<li><a href="https://huggingface.co/black-forest-labs">Hugging Face Models</a></li>
+<li><a href="https://docs.bfl.ml/">API Documentation</a></li>
+</ul>
+<h3 id="community"><a class="header" href="#community">Community</a></h3>
+<ul>
+<li>r/FluxAI</li>
+<li>Hugging Face Discussions</li>
+<li>Discord communities</li>
+</ul>
+<h3 id="tools"><a class="header" href="#tools">Tools</a></h3>
+<ul>
+<li><a href="https://github.com/XLabs-AI/x-flux-comfyui">ComfyUI Flux Nodes</a></li>
+<li><a href="https://github.com/huggingface/diffusers">Diffusers Integration</a></li>
+</ul>
+<h3 id="learning"><a class="header" href="#learning">Learning</a></h3>
+<ul>
+<li><a href="https://blackforestlabs.ai/announcing-flux-1/">Flux.1 Paper</a></li>
+<li>Comparison benchmarks</li>
+<li>Community prompts</li>
+</ul>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Flux.1 represents a significant leap in image generation quality. While it requires more resources than Stable Diffusion, the results are often worth it for professional applications. The Schnell variant offers excellent speed-to-quality ratio, while Dev provides maximum quality for local generation.</p>
+<p>Key takeaways:</p>
+<ul>
+<li><strong>Schnell</strong>: Fast, commercial-friendly, good quality</li>
+<li><strong>Dev</strong>: Best local quality, non-commercial</li>
+<li><strong>Pro</strong>: Highest quality, API-only, commercial</li>
+</ul>
+<p>Choose based on your needs, hardware, and use case. Experiment with natural language prompts and leverage Flux's superior understanding for best results.</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

@@ -177,7 +177,553 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="prompt-engineering"><a class="header" href="#prompt-engineering">Prompt Engineering</a></h1>
+<p>A comprehensive guide to crafting effective prompts for Large Language Models (LLMs).</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#core-principles">Core Principles</a></li>
+<li><a href="#fundamental-techniques">Fundamental Techniques</a></li>
+<li><a href="#advanced-techniques">Advanced Techniques</a></li>
+<li><a href="#prompt-patterns">Prompt Patterns</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#examples-by-task">Examples by Task</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Prompt engineering is the practice of designing inputs to get desired outputs from LLMs. It's both an art and a science, requiring understanding of:</p>
+<ul>
+<li>How models process and interpret text</li>
+<li>What patterns yield consistent results</li>
+<li>How to balance specificity with flexibility</li>
+</ul>
+<h2 id="core-principles"><a class="header" href="#core-principles">Core Principles</a></h2>
+<h3 id="1-clarity-and-specificity"><a class="header" href="#1-clarity-and-specificity">1. Clarity and Specificity</a></h3>
+<p>Be explicit about what you want:</p>
+<pre><code>❌ Bad: "Write about dogs"
+✅ Good: "Write a 300-word informative article about the benefits of adopting rescue dogs, including health, cost, and emotional aspects."
+</code></pre>
+<h3 id="2-context-provision"><a class="header" href="#2-context-provision">2. Context Provision</a></h3>
+<p>Give the model necessary background:</p>
+<pre><code>❌ Bad: "What should I do?"
+✅ Good: "I'm a Python developer with 3 years of experience. I want to transition into machine learning. What skills should I prioritize learning first?"
+</code></pre>
+<h3 id="3-format-specification"><a class="header" href="#3-format-specification">3. Format Specification</a></h3>
+<p>Define the desired output structure:</p>
+<pre><code>❌ Bad: "Tell me about the solar system"
+✅ Good: "List the planets in our solar system in a markdown table with columns: Name, Distance from Sun (AU), and One Interesting Fact."
+</code></pre>
+<h3 id="4-role-assignment"><a class="header" href="#4-role-assignment">4. Role Assignment</a></h3>
+<p>Set the model's perspective:</p>
+<pre><code>"You are an experienced DevOps engineer. Explain Kubernetes deployments to a junior developer who has only worked with traditional hosting."
+</code></pre>
+<h2 id="fundamental-techniques"><a class="header" href="#fundamental-techniques">Fundamental Techniques</a></h2>
+<h3 id="zero-shot-prompting"><a class="header" href="#zero-shot-prompting">Zero-Shot Prompting</a></h3>
+<p>Direct instruction without examples:</p>
+<pre><code>Prompt: "Classify the sentiment of this review: 'The product arrived damaged but customer service was helpful.' Choose: positive, negative, or mixed."
+
+Output: "mixed"
+</code></pre>
+<h3 id="few-shot-prompting"><a class="header" href="#few-shot-prompting">Few-Shot Prompting</a></h3>
+<p>Provide examples to guide the model:</p>
+<pre><code>Classify movie reviews as positive or negative:
+
+Review: "A masterpiece of cinema!"
+Sentiment: positive
+
+Review: "Boring and predictable plot."
+Sentiment: negative
+
+Review: "Waste of time and money."
+Sentiment: negative
+
+Review: "Incredible performances by the cast."
+Sentiment: positive
+
+Review: "The special effects were amazing but the story was weak."
+Sentiment: 
+</code></pre>
+<h3 id="chain-of-thought-cot"><a class="header" href="#chain-of-thought-cot">Chain-of-Thought (CoT)</a></h3>
+<p>Encourage step-by-step reasoning:</p>
+<pre><code>Prompt: "A cafeteria has 23 apples. If they used 20 to make lunch and bought 6 more, how many apples do they have? Let's think step by step."
+
+Output:
+"Let's solve this step by step:
+1. Starting apples: 23
+2. Used for lunch: 23 - 20 = 3 apples remaining
+3. Bought more: 3 + 6 = 9 apples
+Answer: The cafeteria has 9 apples."
+</code></pre>
+<h3 id="zero-shot-chain-of-thought"><a class="header" href="#zero-shot-chain-of-thought">Zero-Shot Chain-of-Thought</a></h3>
+<p>Add "Let's think step by step" to enable reasoning:</p>
+<pre><code>Prompt: "If a train travels 120 miles in 2 hours, then speeds up and travels 180 miles in the next 2 hours, what's the average speed for the entire journey? Let's think step by step."
+</code></pre>
+<h3 id="self-consistency"><a class="header" href="#self-consistency">Self-Consistency</a></h3>
+<p>Generate multiple reasoning paths and choose the most consistent:</p>
+<pre><code class="language-python"># Ask the same question with slight variations
+prompts = [
+    "Calculate 15% tip on $47.50. Show your work.",
+    "What's a 15% tip on a $47.50 bill? Explain your calculation.",
+    "If my bill is $47.50 and I want to leave 15%, how much is the tip?"
+]
+
+# The most common answer is likely correct
+</code></pre>
+<h2 id="advanced-techniques"><a class="header" href="#advanced-techniques">Advanced Techniques</a></h2>
+<h3 id="tree-of-thoughts-tot"><a class="header" href="#tree-of-thoughts-tot">Tree of Thoughts (ToT)</a></h3>
+<p>Explore multiple reasoning branches:</p>
+<pre><code>Problem: Design a marketing campaign for a new eco-friendly water bottle.
+
+Let's explore three different approaches:
+
+Approach 1: Sustainability Focus
+- Highlight environmental impact
+- Partner with conservation organizations
+- Target eco-conscious millennials
+[Evaluate pros/cons]
+
+Approach 2: Innovation Focus
+- Emphasize unique design features
+- Tech-forward marketing
+- Target early adopters
+[Evaluate pros/cons]
+
+Approach 3: Health &amp; Wellness Focus
+- Connect to healthy lifestyle
+- Partner with fitness influencers
+- Target health-conscious consumers
+[Evaluate pros/cons]
+
+Now, let's combine the best elements...
+</code></pre>
+<h3 id="react-reasoning--acting"><a class="header" href="#react-reasoning--acting">ReAct (Reasoning + Acting)</a></h3>
+<p>Interleave reasoning with actions:</p>
+<pre><code>Task: Find information about the latest Python version
+
+Thought: I need to find current Python version information
+Action: Search for "latest Python version 2025"
+Observation: Python 3.13 was released in October 2024
+Thought: I should verify this is the most recent stable version
+Action: Check Python.org official releases
+Observation: Confirmed, Python 3.13 is the latest stable version
+Answer: The latest Python version is 3.13, released in October 2024
+</code></pre>
+<h3 id="prompt-chaining"><a class="header" href="#prompt-chaining">Prompt Chaining</a></h3>
+<p>Break complex tasks into steps:</p>
+<pre><code class="language-python"># Step 1: Research
+prompt1 = "List 5 key features of electric vehicles vs gasoline cars"
+
+# Step 2: Analyze (using output from step 1)
+prompt2 = f"Given these EV features: {output1}, which three are most important for urban commuters?"
+
+# Step 3: Synthesize
+prompt3 = f"Based on these priority features: {output2}, write a 100-word recommendation"
+</code></pre>
+<h3 id="automatic-prompt-engineering-ape"><a class="header" href="#automatic-prompt-engineering-ape">Automatic Prompt Engineering (APE)</a></h3>
+<p>Let the model optimize its own prompts:</p>
+<pre><code>Meta-prompt: "I want to classify customer support tickets into categories: billing, technical, general inquiry. Generate 5 different prompts that would work well for this classification task."
+</code></pre>
+<h2 id="prompt-patterns"><a class="header" href="#prompt-patterns">Prompt Patterns</a></h2>
+<h3 id="the-persona-pattern"><a class="header" href="#the-persona-pattern">The Persona Pattern</a></h3>
+<pre><code>"Act as [role] with [characteristics]. Your task is to [objective]."
+
+Example:
+"Act as a senior software architect with 15 years of experience in microservices. Review this code design and suggest improvements for scalability."
+</code></pre>
+<h3 id="the-template-pattern"><a class="header" href="#the-template-pattern">The Template Pattern</a></h3>
+<pre><code>"[Action] about [topic] in [format] with [constraints]."
+
+Example:
+"Write about artificial intelligence in a blog post format with a friendly tone, 500 words max, aimed at non-technical readers."
+</code></pre>
+<h3 id="the-constraint-pattern"><a class="header" href="#the-constraint-pattern">The Constraint Pattern</a></h3>
+<pre><code>"[Task]. You must [requirement 1]. You must [requirement 2]. You cannot [restriction]."
+
+Example:
+"Write a product description. You must include benefits, not just features. You must use active voice. You cannot use technical jargon."
+</code></pre>
+<h3 id="the-refinement-pattern"><a class="header" href="#the-refinement-pattern">The Refinement Pattern</a></h3>
+<pre><code>Initial prompt → Generate → Critique → Revise
+
+Example:
+"Write a haiku about coding."
+[output]
+"Now critique this haiku for syllable count and imagery."
+[critique]
+"Revise the haiku based on the critique."
+</code></pre>
+<h3 id="the-comparative-pattern"><a class="header" href="#the-comparative-pattern">The Comparative Pattern</a></h3>
+<pre><code>"Compare [A] and [B] in terms of [criteria 1], [criteria 2], and [criteria 3]. Present as [format]."
+
+Example:
+"Compare REST API and GraphQL in terms of performance, flexibility, and ease of use. Present as a comparison table."
+</code></pre>
+<h3 id="the-instruction-context-format-icf-pattern"><a class="header" href="#the-instruction-context-format-icf-pattern">The Instruction-Context-Format (ICF) Pattern</a></h3>
+<pre><code># Instruction
+[What to do]
+
+# Context
+[Background information]
+
+# Format
+[How to structure the output]
+
+Example:
+# Instruction
+Explain how photosynthesis works
+
+# Context
+The audience is 5th-grade students learning about plant biology for the first time
+
+# Format
+Use an analogy with a familiar concept, then provide 3-5 simple bullet points
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-use-delimiters"><a class="header" href="#1-use-delimiters">1. Use Delimiters</a></h3>
+<p>Clearly separate different parts of your prompt:</p>
+<pre><code>Summarize the text delimited by triple quotes.
+
+Text: """
+[long text here]
+"""
+
+Requirements:
+- 3 sentences maximum
+- Highlight main argument
+- Use neutral tone
+</code></pre>
+<h3 id="2-specify-output-format"><a class="header" href="#2-specify-output-format">2. Specify Output Format</a></h3>
+<pre><code>"Provide your answer as a JSON object with the following structure:
+{
+  "summary": "brief overview",
+  "key_points": ["point1", "point2", "point3"],
+  "recommendation": "actionable advice"
+}"
+</code></pre>
+<h3 id="3-request-step-by-step-thinking"><a class="header" href="#3-request-step-by-step-thinking">3. Request Step-by-Step Thinking</a></h3>
+<pre><code>"Before answering, explain your reasoning process. Then provide the final answer clearly labeled."
+</code></pre>
+<h3 id="4-use-examples-strategically"><a class="header" href="#4-use-examples-strategically">4. Use Examples Strategically</a></h3>
+<pre><code># For few-shot learning, provide diverse examples:
+Input: "The cat sat on the mat" → Simple sentence
+Input: "Although tired, she completed the marathon" → Complex sentence
+Input: "Run!" → Imperative sentence
+Input: "Is it raining?" → Interrogative sentence
+Input: "What a beautiful day!" → 
+</code></pre>
+<h3 id="5-iterate-and-refine"><a class="header" href="#5-iterate-and-refine">5. Iterate and Refine</a></h3>
+<pre><code class="language-python"># Version 1: Too vague
+"Write code for a web scraper"
+
+# Version 2: More specific
+"Write Python code for a web scraper using BeautifulSoup"
+
+# Version 3: Complete specification
+"Write Python code using BeautifulSoup to scrape product names and prices from an e-commerce site. Include error handling for missing elements and rate limiting to respect the server."
+</code></pre>
+<h3 id="6-control-length"><a class="header" href="#6-control-length">6. Control Length</a></h3>
+<pre><code>"Explain quantum entanglement in [50/100/200] words"
+"Provide a [brief/moderate/detailed] explanation"
+"Summarize in [2-3 sentences/one paragraph/300 words]"
+</code></pre>
+<h3 id="7-set-the-temperature"><a class="header" href="#7-set-the-temperature">7. Set the Temperature</a></h3>
+<p>Understand model parameters:</p>
+<pre><code class="language-python"># Creative tasks (high temperature: 0.7-1.0)
+{"temperature": 0.9}
+# "Write a creative story about a time-traveling cat"
+
+# Factual tasks (low temperature: 0.0-0.3)
+{"temperature": 0.1}
+# "What is the capital of France?"
+
+# Balanced tasks (medium temperature: 0.4-0.6)
+{"temperature": 0.5}
+# "Explain the pros and cons of remote work"
+</code></pre>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<h3 id="1-ambiguity"><a class="header" href="#1-ambiguity">1. Ambiguity</a></h3>
+<pre><code>❌ "Tell me about Python"
+✅ "Explain Python's list comprehension syntax with 3 examples"
+</code></pre>
+<h3 id="2-conflicting-instructions"><a class="header" href="#2-conflicting-instructions">2. Conflicting Instructions</a></h3>
+<pre><code>❌ "Write a detailed brief summary"
+✅ "Write a summary in 2-3 sentences covering the main points"
+</code></pre>
+<h3 id="3-assuming-knowledge"><a class="header" href="#3-assuming-knowledge">3. Assuming Knowledge</a></h3>
+<pre><code>❌ "Debug this code" [without context]
+✅ "This Python function should sort a list but returns an error. Debug it: [code]. The error message is: [error]"
+</code></pre>
+<h3 id="4-overcomplicating"><a class="header" href="#4-overcomplicating">4. Overcomplicating</a></h3>
+<pre><code>❌ [500-word prompt with 20 constraints]
+✅ [Clear, focused prompt with 3-5 key requirements]
+</code></pre>
+<h3 id="5-not-testing-variations"><a class="header" href="#5-not-testing-variations">5. Not Testing Variations</a></h3>
+<p>Always try multiple phrasings:</p>
+<ul>
+<li>"List the benefits"</li>
+<li>"What are the advantages"</li>
+<li>"Explain why this is useful"</li>
+</ul>
+<h2 id="examples-by-task"><a class="header" href="#examples-by-task">Examples by Task</a></h2>
+<h3 id="code-generation"><a class="header" href="#code-generation">Code Generation</a></h3>
+<pre><code>Task: Create a Python function
+
+Prompt:
+"Write a Python function named 'calculate_statistics' that:
+- Takes a list of numbers as input
+- Returns a dictionary with: mean, median, mode, and standard deviation
+- Handles edge cases (empty list, single value)
+- Includes docstring with examples
+- Uses only standard library modules"
+</code></pre>
+<h3 id="data-analysis"><a class="header" href="#data-analysis">Data Analysis</a></h3>
+<pre><code>Task: Analyze sales data
+
+Prompt:
+"Given this sales data in CSV format:
+[data]
+
+Perform the following analysis:
+1. Calculate total revenue by product category
+2. Identify the top 3 performing products
+3. Calculate month-over-month growth rate
+4. Provide 3 actionable insights
+
+Present findings in a structured format with clear headers."
+</code></pre>
+<h3 id="content-writing"><a class="header" href="#content-writing">Content Writing</a></h3>
+<pre><code>Task: Write a blog post
+
+Prompt:
+"Write a 600-word blog post about 'The Future of Remote Work'
+
+Structure:
+- Engaging headline
+- Hook in first paragraph
+- 3 main sections with subheadings
+- Include statistics or examples
+- Conclude with actionable takeaway
+
+Tone: Professional yet conversational
+Audience: Mid-level professionals and managers
+SEO keywords: remote work, hybrid model, workplace flexibility"
+</code></pre>
+<h3 id="summarization"><a class="header" href="#summarization">Summarization</a></h3>
+<pre><code>Task: Summarize a technical document
+
+Prompt:
+"Summarize the following technical documentation:
+
+[document]
+
+Create two versions:
+1. Executive Summary (100 words): High-level overview for non-technical stakeholders
+2. Technical Summary (300 words): Key technical details for engineering team
+
+Highlight any critical warnings or breaking changes."
+</code></pre>
+<h3 id="translation-with-context"><a class="header" href="#translation-with-context">Translation with Context</a></h3>
+<pre><code>Task: Contextual translation
+
+Prompt:
+"Translate the following English text to Spanish:
+
+'The system is down'
+
+Context: This is an IT status message displayed to users during an outage.
+Requirements:
+- Use appropriate technical terminology
+- Maintain professional tone
+- Ensure clarity for non-technical users"
+</code></pre>
+<h3 id="code-review"><a class="header" href="#code-review">Code Review</a></h3>
+<pre><code>Task: Review code quality
+
+Prompt:
+"Review this Python code for:
+
+[code]
+
+Evaluate:
+1. Code quality and readability
+2. Performance considerations
+3. Potential bugs or edge cases
+4. Security issues
+5. Best practices adherence
+
+Provide specific suggestions with code examples where applicable.
+Rate each category from 1-5 and explain your ratings."
+</code></pre>
+<h3 id="question-answering"><a class="header" href="#question-answering">Question Answering</a></h3>
+<pre><code>Task: Answer with citations
+
+Prompt:
+"Answer the following question using only information from the provided text. Quote relevant passages to support your answer.
+
+Text: [document]
+
+Question: [question]
+
+Format:
+- Direct answer (1-2 sentences)
+- Supporting evidence (2-3 quoted passages)
+- Confidence level (high/medium/low)"
+</code></pre>
+<h3 id="creative-writing"><a class="header" href="#creative-writing">Creative Writing</a></h3>
+<pre><code>Task: Story generation
+
+Prompt:
+"Write a short story (500 words) with these elements:
+
+Setting: Cyberpunk city in 2150
+Protagonist: AI rights activist
+Conflict: Choice between following the law or doing what's right
+Theme: Question of consciousness and personhood
+Tone: Noir detective style
+
+Include:
+- Vivid sensory details
+- Internal monologue
+- Unexpected twist ending"
+</code></pre>
+<h2 id="advanced-prompt-engineering"><a class="header" href="#advanced-prompt-engineering">Advanced Prompt Engineering</a></h2>
+<h3 id="meta-prompting"><a class="header" href="#meta-prompting">Meta-Prompting</a></h3>
+<pre><code>"I need to create prompts for classifying customer emails. First, analyze what makes a good classification prompt, then generate 3 examples of effective prompts for this task."
+</code></pre>
+<h3 id="prompt-optimization-loop"><a class="header" href="#prompt-optimization-loop">Prompt Optimization Loop</a></h3>
+<pre><code class="language-python">initial_prompt = "Explain machine learning"
+
+optimization_prompt = f"""
+Original prompt: "{initial_prompt}"
+
+This prompt is too vague. Improve it by:
+1. Adding specific focus area
+2. Defining target audience
+3. Specifying depth of explanation
+4. Setting output format
+
+Provide an optimized version.
+"""
+</code></pre>
+<h3 id="system-prompts-api-usage"><a class="header" href="#system-prompts-api-usage">System Prompts (API Usage)</a></h3>
+<pre><code class="language-python"># For chat-based models
+system_prompt = """You are a Python expert specializing in data science.
+Your responses should:
+- Include working code examples
+- Explain complex concepts simply
+- Suggest best practices
+- Warn about common pitfalls
+- Use type hints and documentation"""
+
+user_prompt = "How do I handle missing data in pandas?"
+
+# API call structure
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+)
+</code></pre>
+<h3 id="constitutional-ai-prompting"><a class="header" href="#constitutional-ai-prompting">Constitutional AI Prompting</a></h3>
+<p>Build in safety and ethical guidelines:</p>
+<pre><code>"[Task description]
+
+Guidelines:
+- Provide factual, unbiased information
+- Acknowledge uncertainty when appropriate
+- Avoid harmful or discriminatory content
+- Cite sources when making factual claims
+- Respect privacy and confidentiality"
+</code></pre>
+<h2 id="prompt-engineering-tools"><a class="header" href="#prompt-engineering-tools">Prompt Engineering Tools</a></h2>
+<h3 id="langchain-prompt-templates"><a class="header" href="#langchain-prompt-templates">LangChain Prompt Templates</a></h3>
+<pre><code class="language-python">from langchain import PromptTemplate
+
+template = """
+You are a {role} with expertise in {domain}.
+
+Task: {task}
+
+Context: {context}
+
+Provide your response in {format} format.
+"""
+
+prompt = PromptTemplate(
+    input_variables=["role", "domain", "task", "context", "format"],
+    template=template
+)
+
+final_prompt = prompt.format(
+    role="data scientist",
+    domain="machine learning",
+    task="explain overfitting",
+    context="teaching beginners",
+    format="simple terms with examples"
+)
+</code></pre>
+<h3 id="prompt-versioning"><a class="header" href="#prompt-versioning">Prompt Versioning</a></h3>
+<pre><code class="language-python"># Track prompt iterations
+prompts = {
+    "v1.0": "Summarize this text",
+    "v1.1": "Summarize this text in 100 words",
+    "v1.2": "Summarize this text in 100 words, focusing on key insights",
+    "v2.0": "Provide a 100-word summary highlighting: 1) main argument, 2) supporting evidence, 3) conclusions"
+}
+</code></pre>
+<h2 id="measuring-prompt-quality"><a class="header" href="#measuring-prompt-quality">Measuring Prompt Quality</a></h2>
+<h3 id="evaluation-criteria"><a class="header" href="#evaluation-criteria">Evaluation Criteria</a></h3>
+<ol>
+<li><strong>Consistency</strong>: Same prompt → similar outputs</li>
+<li><strong>Accuracy</strong>: Outputs match expected results</li>
+<li><strong>Efficiency</strong>: Minimal tokens for desired result</li>
+<li><strong>Robustness</strong>: Works with variations in input</li>
+<li><strong>Clarity</strong>: Unambiguous instructions</li>
+</ol>
+<h3 id="testing-framework"><a class="header" href="#testing-framework">Testing Framework</a></h3>
+<pre><code class="language-python">def test_prompt(prompt, test_cases, model):
+    results = []
+    
+    for test_input, expected_output in test_cases:
+        full_prompt = prompt.format(input=test_input)
+        actual_output = model.generate(full_prompt)
+        
+        results.append({
+            'input': test_input,
+            'expected': expected_output,
+            'actual': actual_output,
+            'match': evaluate_match(expected_output, actual_output)
+        })
+    
+    return results
+</code></pre>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<h3 id="practice-platforms"><a class="header" href="#practice-platforms">Practice Platforms</a></h3>
+<ul>
+<li><a href="https://promptperfect.jina.ai/">PromptPerfect</a></li>
+<li><a href="https://learnprompting.org/">Learn Prompting</a></li>
+<li><a href="https://platform.openai.com/playground">OpenAI Playground</a></li>
+<li><a href="https://console.anthropic.com/">Anthropic Console</a></li>
+</ul>
+<h3 id="reading"><a class="header" href="#reading">Reading</a></h3>
+<ul>
+<li><a href="https://platform.openai.com/docs/guides/prompt-engineering">OpenAI Prompt Engineering Guide</a></li>
+<li><a href="https://docs.anthropic.com/claude/prompt-library">Anthropic Prompt Library</a></li>
+<li><a href="https://www.promptingguide.ai/">Prompt Engineering Guide</a></li>
+<li>Research papers on prompting techniques</li>
+</ul>
+<h3 id="communities"><a class="header" href="#communities">Communities</a></h3>
+<ul>
+<li>r/PromptEngineering</li>
+<li>Discord servers for AI tools</li>
+<li>Twitter/X AI communities</li>
+</ul>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Prompt engineering is an iterative process. Start simple, test thoroughly, and refine based on results. The key is understanding both your task requirements and how the model interprets instructions.</p>
+<p>Remember: The best prompt is the one that consistently produces the results you need with minimal tokens and maximum clarity.</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

@@ -177,7 +177,1056 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="arduino-programming"><a class="header" href="#arduino-programming">Arduino Programming</a></h1>
+<p>Complete guide to Arduino development, from basics to advanced projects.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#arduino-language">Arduino Language</a></li>
+<li><a href="#digital-io">Digital I/O</a></li>
+<li><a href="#analog-io">Analog I/O</a></li>
+<li><a href="#serial-communication">Serial Communication</a></li>
+<li><a href="#libraries">Libraries</a></li>
+<li><a href="#common-projects">Common Projects</a></li>
+<li><a href="#advanced-topics">Advanced Topics</a></li>
+</ol>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Arduino is an open-source electronics platform based on easy-to-use hardware and software. It's designed for artists, designers, hobbyists, and anyone interested in creating interactive objects or environments.</p>
+<h3 id="arduino-boards-comparison"><a class="header" href="#arduino-boards-comparison">Arduino Boards Comparison</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Board</th><th>MCU</th><th>Clock</th><th>Flash</th><th>RAM</th><th>Digital I/O</th><th>Analog In</th><th>Price</th></tr></thead><tbody>
+<tr><td><strong>Uno</strong></td><td>ATmega328P</td><td>16 MHz</td><td>32 KB</td><td>2 KB</td><td>14 (6 PWM)</td><td>6</td><td>$</td></tr>
+<tr><td><strong>Mega 2560</strong></td><td>ATmega2560</td><td>16 MHz</td><td>256 KB</td><td>8 KB</td><td>54 (15 PWM)</td><td>16</td><td>$$</td></tr>
+<tr><td><strong>Nano</strong></td><td>ATmega328P</td><td>16 MHz</td><td>32 KB</td><td>2 KB</td><td>14 (6 PWM)</td><td>8</td><td>$</td></tr>
+<tr><td><strong>Leonardo</strong></td><td>ATmega32u4</td><td>16 MHz</td><td>32 KB</td><td>2.5 KB</td><td>20 (7 PWM)</td><td>12</td><td>$</td></tr>
+<tr><td><strong>Due</strong></td><td>AT91SAM3X8E</td><td>84 MHz</td><td>512 KB</td><td>96 KB</td><td>54 (12 PWM)</td><td>12</td><td>$$$</td></tr>
+<tr><td><strong>Nano 33 IoT</strong></td><td>SAMD21</td><td>48 MHz</td><td>256 KB</td><td>32 KB</td><td>14 (11 PWM)</td><td>8</td><td>$$</td></tr>
+</tbody></table>
+</div>
+<h3 id="arduino-uno-pinout"><a class="header" href="#arduino-uno-pinout">Arduino Uno Pinout</a></h3>
+<pre><code>                   Arduino Uno
+                ┌─────────────┐
+                │   USB       │
+                ├─────────────┤
+    RESET  [ ]──┤ RESET    A0 ├──[ ] Analog Input
+    3.3V   [ ]──┤ 3V3      A1 ├──[ ] Analog Input
+    5V     [ ]──┤ 5V       A2 ├──[ ] Analog Input
+    GND    [ ]──┤ GND      A3 ├──[ ] Analog Input
+    GND    [ ]──┤ GND      A4 ├──[ ] Analog Input (I2C SDA)
+    VIN    [ ]──┤ VIN      A5 ├──[ ] Analog Input (I2C SCL)
+                │             │
+    D0/RX  [ ]──┤ 0        13 ├──[ ] D13/SCK (LED_BUILTIN)
+    D1/TX  [ ]──┤ 1        12 ├──[ ] D12/MISO
+    D2     [ ]──┤ 2        11 ├──[ ] D11~/MOSI
+    D3~    [ ]──┤ 3        10 ├──[ ] D10~
+    D4     [ ]──┤ 4         9 ├──[ ] D9~
+    D5~    [ ]──┤ 5         8 ├──[ ] D8
+    D6~    [ ]──┤ 6         7 ├──[ ] D7
+                └─────────────┘
+    
+    ~ = PWM capable
+</code></pre>
+<h2 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h2>
+<h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
+<h4 id="arduino-ide"><a class="header" href="#arduino-ide">Arduino IDE</a></h4>
+<pre><code class="language-bash"># Download from arduino.cc
+# Or use package manager (Linux)
+sudo apt install arduino
+
+# Or use Arduino CLI
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+arduino-cli core update-index
+arduino-cli core install arduino:avr
+</code></pre>
+<h4 id="platformio-recommended-for-advanced-users"><a class="header" href="#platformio-recommended-for-advanced-users">PlatformIO (Recommended for Advanced Users)</a></h4>
+<pre><code class="language-bash">pip install platformio
+platformio init --board uno
+</code></pre>
+<h3 id="basic-program-structure"><a class="header" href="#basic-program-structure">Basic Program Structure</a></h3>
+<p>Every Arduino sketch has two required functions:</p>
+<pre><code class="language-cpp">void setup() {
+    // Runs once when the board starts
+    // Initialize pins, serial, libraries
+}
+
+void loop() {
+    // Runs continuously after setup()
+    // Main program logic goes here
+}
+</code></pre>
+<h3 id="first-program-blink-led"><a class="header" href="#first-program-blink-led">First Program: Blink LED</a></h3>
+<pre><code class="language-cpp">// Blink the built-in LED
+void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);  // Set pin 13 as output
+}
+
+void loop() {
+    digitalWrite(LED_BUILTIN, HIGH);  // Turn LED on
+    delay(1000);                       // Wait 1 second
+    digitalWrite(LED_BUILTIN, LOW);   // Turn LED off
+    delay(1000);                       // Wait 1 second
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>Arduino          Component
+   13 ───────────┐
+                 │
+               ┌─┴─┐
+               │LED│  Built-in LED
+               └─┬─┘
+                 │
+   GND ──────────┘
+</code></pre>
+<h2 id="arduino-language"><a class="header" href="#arduino-language">Arduino Language</a></h2>
+<h3 id="data-types"><a class="header" href="#data-types">Data Types</a></h3>
+<pre><code class="language-cpp">// Boolean
+bool flag = true;
+
+// Integers
+byte value = 255;           // 0-255 (8-bit unsigned)
+int temperature = -40;      // -32768 to 32767 (16-bit signed)
+unsigned int count = 65535; // 0-65535 (16-bit unsigned)
+long distance = 1000000L;   // 32-bit signed
+unsigned long time = millis();  // 32-bit unsigned
+
+// Floating Point
+float voltage = 3.3;        // 32-bit, ~7 digits precision
+double precise = 3.14159;   // Same as float on Arduino
+
+// Characters and Strings
+char letter = 'A';
+char message[] = "Hello";   // C-style string
+String text = "World";      // Arduino String class
+
+// Arrays
+int readings[10];           // Array of 10 integers
+int values[] = {1, 2, 3};  // Initialized array
+</code></pre>
+<h3 id="control-structures"><a class="header" href="#control-structures">Control Structures</a></h3>
+<pre><code class="language-cpp">// If-else
+if (temperature &gt; 30) {
+    digitalWrite(FAN_PIN, HIGH);
+} else if (temperature &gt; 20) {
+    analogWrite(FAN_PIN, 128);
+} else {
+    digitalWrite(FAN_PIN, LOW);
+}
+
+// Switch-case
+switch (state) {
+    case 0:
+        // Do something
+        break;
+    case 1:
+        // Do something else
+        break;
+    default:
+        // Default action
+        break;
+}
+
+// For loop
+for (int i = 0; i &lt; 10; i++) {
+    Serial.println(i);
+}
+
+// While loop
+while (digitalRead(BUTTON_PIN) == HIGH) {
+    // Wait for button release
+}
+
+// Do-while loop
+do {
+    value = analogRead(A0);
+} while (value &lt; 512);
+</code></pre>
+<h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
+<pre><code class="language-cpp">// Function declaration
+int addNumbers(int a, int b);
+
+void setup() {
+    Serial.begin(9600);
+    int result = addNumbers(5, 3);
+    Serial.println(result);  // Prints 8
+}
+
+// Function definition
+int addNumbers(int a, int b) {
+    return a + b;
+}
+
+// Function with default parameters
+void blinkLED(int pin, int times = 1, int delayTime = 500) {
+    for (int i = 0; i &lt; times; i++) {
+        digitalWrite(pin, HIGH);
+        delay(delayTime);
+        digitalWrite(pin, LOW);
+        delay(delayTime);
+    }
+}
+
+void loop() {
+    blinkLED(13);           // Blink once
+    blinkLED(13, 3);        // Blink 3 times
+    blinkLED(13, 5, 200);   // Blink 5 times with 200ms delay
+}
+</code></pre>
+<h2 id="digital-io"><a class="header" href="#digital-io">Digital I/O</a></h2>
+<h3 id="basic-digital-functions"><a class="header" href="#basic-digital-functions">Basic Digital Functions</a></h3>
+<pre><code class="language-cpp">pinMode(pin, mode);        // Configure pin: INPUT, OUTPUT, INPUT_PULLUP
+digitalWrite(pin, value);  // Write HIGH or LOW
+int value = digitalRead(pin);  // Read HIGH or LOW
+</code></pre>
+<h3 id="led-control"><a class="header" href="#led-control">LED Control</a></h3>
+<pre><code class="language-cpp">// Simple LED control
+const int LED_PIN = 9;
+
+void setup() {
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    digitalWrite(LED_PIN, HIGH);
+    delay(500);
+    digitalWrite(LED_PIN, LOW);
+    delay(500);
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>Arduino          Component
+    9 ───────────┬─────────┐
+                 │         │
+               ┌─┴─┐     ┌─┴─┐
+               │220│     │LED│
+               │Ω  │     │ &gt; │
+               └─┬─┘     └─┬─┘
+                 │         │
+   GND ──────────┴─────────┘
+</code></pre>
+<h3 id="button-input"><a class="header" href="#button-input">Button Input</a></h3>
+<pre><code class="language-cpp">const int BUTTON_PIN = 2;
+const int LED_PIN = 13;
+
+void setup() {
+    pinMode(BUTTON_PIN, INPUT_PULLUP);  // Internal pull-up resistor
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    int buttonState = digitalRead(BUTTON_PIN);
+    
+    if (buttonState == LOW) {  // Button pressed (active LOW)
+        digitalWrite(LED_PIN, HIGH);
+    } else {
+        digitalWrite(LED_PIN, LOW);
+    }
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>Arduino          Button
+    2 ────────┬────┬──┬──── 5V (optional if using INPUT_PULLUP)
+              │    │  │
+            ┌─┴─┐ ┌┴──┴┐
+            │10k│ │BTN │
+            │Ω  │ └────┘
+            └─┬─┘    │
+              │      │
+   GND ───────┴──────┘
+</code></pre>
+<h3 id="debouncing"><a class="header" href="#debouncing">Debouncing</a></h3>
+<pre><code class="language-cpp">const int BUTTON_PIN = 2;
+const int LED_PIN = 13;
+const int DEBOUNCE_DELAY = 50;  // milliseconds
+
+int lastButtonState = HIGH;
+int buttonState = HIGH;
+unsigned long lastDebounceTime = 0;
+bool ledState = false;
+
+void setup() {
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    int reading = digitalRead(BUTTON_PIN);
+    
+    // If the switch changed, due to noise or pressing
+    if (reading != lastButtonState) {
+        lastDebounceTime = millis();
+    }
+    
+    if ((millis() - lastDebounceTime) &gt; DEBOUNCE_DELAY) {
+        // If the button state has changed
+        if (reading != buttonState) {
+            buttonState = reading;
+            
+            // Only toggle if the new button state is LOW (pressed)
+            if (buttonState == LOW) {
+                ledState = !ledState;
+                digitalWrite(LED_PIN, ledState);
+            }
+        }
+    }
+    
+    lastButtonState = reading;
+}
+</code></pre>
+<h2 id="analog-io"><a class="header" href="#analog-io">Analog I/O</a></h2>
+<h3 id="analog-input-adc"><a class="header" href="#analog-input-adc">Analog Input (ADC)</a></h3>
+<pre><code class="language-cpp">analogRead(pin);  // Read analog value (0-1023)
+</code></pre>
+<h4 id="reading-a-potentiometer"><a class="header" href="#reading-a-potentiometer">Reading a Potentiometer</a></h4>
+<pre><code class="language-cpp">const int POT_PIN = A0;
+const int LED_PIN = 9;
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    int potValue = analogRead(POT_PIN);  // 0-1023
+    
+    // Convert to voltage (0-5V)
+    float voltage = potValue * (5.0 / 1023.0);
+    
+    // Convert to LED brightness (0-255)
+    int brightness = map(potValue, 0, 1023, 0, 255);
+    
+    Serial.print("Value: ");
+    Serial.print(potValue);
+    Serial.print(" Voltage: ");
+    Serial.print(voltage);
+    Serial.println("V");
+    
+    analogWrite(LED_PIN, brightness);
+    delay(100);
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>Potentiometer       Arduino
+     ┌────┐
+  5V─┤1  3├─GND
+     │    │
+     │ 2  ├─A0 (wiper)
+     └────┘
+</code></pre>
+<h3 id="analog-output-pwm"><a class="header" href="#analog-output-pwm">Analog Output (PWM)</a></h3>
+<pre><code class="language-cpp">analogWrite(pin, value);  // PWM output (0-255)
+</code></pre>
+<h4 id="fading-led"><a class="header" href="#fading-led">Fading LED</a></h4>
+<pre><code class="language-cpp">const int LED_PIN = 9;  // Must be PWM pin (~)
+
+void setup() {
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    // Fade in
+    for (int brightness = 0; brightness &lt;= 255; brightness++) {
+        analogWrite(LED_PIN, brightness);
+        delay(10);
+    }
+    
+    // Fade out
+    for (int brightness = 255; brightness &gt;= 0; brightness--) {
+        analogWrite(LED_PIN, brightness);
+        delay(10);
+    }
+}
+</code></pre>
+<h3 id="temperature-sensor-lm35"><a class="header" href="#temperature-sensor-lm35">Temperature Sensor (LM35)</a></h3>
+<pre><code class="language-cpp">const int TEMP_PIN = A0;
+
+void setup() {
+    Serial.begin(9600);
+}
+
+void loop() {
+    int reading = analogRead(TEMP_PIN);
+    
+    // Convert to voltage (0-5V)
+    float voltage = reading * (5.0 / 1023.0);
+    
+    // Convert to temperature (LM35: 10mV per degree C)
+    float temperatureC = voltage * 100.0;
+    float temperatureF = (temperatureC * 9.0 / 5.0) + 32.0;
+    
+    Serial.print("Temperature: ");
+    Serial.print(temperatureC);
+    Serial.print("°C / ");
+    Serial.print(temperatureF);
+    Serial.println("°F");
+    
+    delay(1000);
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>LM35 Sensor         Arduino
+    ┌────┐
+ 1 ─┤ VS ├─ 5V
+    │    │
+ 2 ─┤Vout├─ A0
+    │    │
+ 3 ─┤GND ├─ GND
+    └────┘
+</code></pre>
+<h2 id="serial-communication"><a class="header" href="#serial-communication">Serial Communication</a></h2>
+<h3 id="basic-serial-functions"><a class="header" href="#basic-serial-functions">Basic Serial Functions</a></h3>
+<pre><code class="language-cpp">Serial.begin(baudrate);        // Initialize serial (9600, 115200, etc.)
+Serial.print(data);            // Print without newline
+Serial.println(data);          // Print with newline
+Serial.write(byte);            // Send raw byte
+int available = Serial.available();  // Bytes available to read
+char c = Serial.read();        // Read one byte
+String line = Serial.readStringUntil('\n');  // Read until newline
+</code></pre>
+<h3 id="serial-monitor-output"><a class="header" href="#serial-monitor-output">Serial Monitor Output</a></h3>
+<pre><code class="language-cpp">void setup() {
+    Serial.begin(9600);
+    Serial.println("Arduino Ready!");
+}
+
+void loop() {
+    int sensorValue = analogRead(A0);
+    
+    // Different formatting options
+    Serial.print("Sensor: ");
+    Serial.println(sensorValue);
+    
+    Serial.print("Hex: 0x");
+    Serial.println(sensorValue, HEX);
+    
+    Serial.print("Binary: 0b");
+    Serial.println(sensorValue, BIN);
+    
+    Serial.print("Float: ");
+    float voltage = sensorValue * (5.0 / 1023.0);
+    Serial.println(voltage, 2);  // 2 decimal places
+    
+    delay(1000);
+}
+</code></pre>
+<h3 id="serial-input"><a class="header" href="#serial-input">Serial Input</a></h3>
+<pre><code class="language-cpp">String inputString = "";
+bool stringComplete = false;
+
+void setup() {
+    Serial.begin(9600);
+    inputString.reserve(200);  // Reserve space for efficiency
+}
+
+void loop() {
+    // Check if data is available
+    while (Serial.available()) {
+        char inChar = (char)Serial.read();
+        inputString += inChar;
+        
+        if (inChar == '\n') {
+            stringComplete = true;
+        }
+    }
+    
+    // Process complete command
+    if (stringComplete) {
+        Serial.print("Received: ");
+        Serial.println(inputString);
+        
+        // Process command
+        if (inputString.startsWith("LED ON")) {
+            digitalWrite(LED_BUILTIN, HIGH);
+            Serial.println("LED turned ON");
+        } else if (inputString.startsWith("LED OFF")) {
+            digitalWrite(LED_BUILTIN, LOW);
+            Serial.println("LED turned OFF");
+        }
+        
+        // Clear the string
+        inputString = "";
+        stringComplete = false;
+    }
+}
+</code></pre>
+<h2 id="libraries"><a class="header" href="#libraries">Libraries</a></h2>
+<h3 id="built-in-libraries"><a class="header" href="#built-in-libraries">Built-in Libraries</a></h3>
+<h4 id="wire-i2c"><a class="header" href="#wire-i2c">Wire (I2C)</a></h4>
+<pre><code class="language-cpp">#include &lt;Wire.h&gt;
+
+void setup() {
+    Wire.begin();  // Join I2C bus as master
+}
+
+void loop() {
+    // Read from I2C device at address 0x68
+    Wire.beginTransmission(0x68);
+    Wire.write(0x00);  // Register address
+    Wire.endTransmission();
+    
+    Wire.requestFrom(0x68, 1);  // Request 1 byte
+    if (Wire.available()) {
+        byte data = Wire.read();
+    }
+}
+</code></pre>
+<h4 id="spi"><a class="header" href="#spi">SPI</a></h4>
+<pre><code class="language-cpp">#include &lt;SPI.h&gt;
+
+const int CS_PIN = 10;
+
+void setup() {
+    SPI.begin();
+    pinMode(CS_PIN, OUTPUT);
+    digitalWrite(CS_PIN, HIGH);
+}
+
+void loop() {
+    digitalWrite(CS_PIN, LOW);   // Select device
+    SPI.transfer(0xAB);          // Send byte
+    byte received = SPI.transfer(0x00);  // Receive byte
+    digitalWrite(CS_PIN, HIGH);  // Deselect device
+}
+</code></pre>
+<h4 id="eeprom"><a class="header" href="#eeprom">EEPROM</a></h4>
+<pre><code class="language-cpp">#include &lt;EEPROM.h&gt;
+
+void setup() {
+    // Write byte to EEPROM
+    EEPROM.write(0, 42);
+    
+    // Read byte from EEPROM
+    byte value = EEPROM.read(0);
+    
+    // Update (only writes if different)
+    EEPROM.update(0, 42);
+    
+    // Write/read other types
+    int address = 0;
+    float f = 3.14;
+    EEPROM.put(address, f);
+    EEPROM.get(address, f);
+}
+</code></pre>
+<h3 id="popular-external-libraries"><a class="header" href="#popular-external-libraries">Popular External Libraries</a></h3>
+<h4 id="servo-control"><a class="header" href="#servo-control">Servo Control</a></h4>
+<pre><code class="language-cpp">#include &lt;Servo.h&gt;
+
+Servo myServo;
+const int SERVO_PIN = 9;
+
+void setup() {
+    myServo.attach(SERVO_PIN);
+}
+
+void loop() {
+    // Sweep from 0 to 180 degrees
+    for (int pos = 0; pos &lt;= 180; pos++) {
+        myServo.write(pos);
+        delay(15);
+    }
+    
+    // Sweep back
+    for (int pos = 180; pos &gt;= 0; pos--) {
+        myServo.write(pos);
+        delay(15);
+    }
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>Servo Motor         Arduino
+    ┌────┐
+ R ─┤Red ├─ 5V (or external)
+ B ─┤Brn ├─ GND
+ O ─┤Org ├─ Pin 9 (PWM)
+    └────┘
+</code></pre>
+<h4 id="liquidcrystal-lcd-display"><a class="header" href="#liquidcrystal-lcd-display">LiquidCrystal (LCD Display)</a></h4>
+<pre><code class="language-cpp">#include &lt;LiquidCrystal.h&gt;
+
+// RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+void setup() {
+    lcd.begin(16, 2);  // 16x2 LCD
+    lcd.print("Hello, World!");
+}
+
+void loop() {
+    lcd.setCursor(0, 1);  // Column 0, Row 1
+    lcd.print(millis() / 1000);
+    lcd.print("s");
+    delay(100);
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>LCD 16x2            Arduino
+VSS  ──────────────  GND
+VDD  ──────────────  5V
+V0   ──────────────  Potentiometer (contrast)
+RS   ──────────────  12
+RW   ──────────────  GND
+E    ──────────────  11
+D4   ──────────────  5
+D5   ──────────────  4
+D6   ──────────────  3
+D7   ──────────────  2
+A    ──────────────  5V (backlight)
+K    ──────────────  GND
+</code></pre>
+<h4 id="dht-temperaturehumidity-sensor"><a class="header" href="#dht-temperaturehumidity-sensor">DHT Temperature/Humidity Sensor</a></h4>
+<pre><code class="language-cpp">#include &lt;DHT.h&gt;
+
+#define DHTPIN 2
+#define DHTTYPE DHT11  // or DHT22
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+    Serial.begin(9600);
+    dht.begin();
+}
+
+void loop() {
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature();  // Celsius
+    float temperatureF = dht.readTemperature(true);  // Fahrenheit
+    
+    if (isnan(humidity) || isnan(temperature)) {
+        Serial.println("Failed to read from DHT sensor!");
+        return;
+    }
+    
+    Serial.print("Humidity: ");
+    Serial.print(humidity);
+    Serial.print("% Temperature: ");
+    Serial.print(temperature);
+    Serial.println("°C");
+    
+    delay(2000);  // DHT11 minimum sampling period
+}
+</code></pre>
+<h2 id="common-projects"><a class="header" href="#common-projects">Common Projects</a></h2>
+<h3 id="project-1-traffic-light"><a class="header" href="#project-1-traffic-light">Project 1: Traffic Light</a></h3>
+<pre><code class="language-cpp">const int RED_LED = 10;
+const int YELLOW_LED = 9;
+const int GREEN_LED = 8;
+
+void setup() {
+    pinMode(RED_LED, OUTPUT);
+    pinMode(YELLOW_LED, OUTPUT);
+    pinMode(GREEN_LED, OUTPUT);
+}
+
+void loop() {
+    // Green light
+    digitalWrite(GREEN_LED, HIGH);
+    delay(5000);  // 5 seconds
+    digitalWrite(GREEN_LED, LOW);
+    
+    // Yellow light
+    digitalWrite(YELLOW_LED, HIGH);
+    delay(2000);  // 2 seconds
+    digitalWrite(YELLOW_LED, LOW);
+    
+    // Red light
+    digitalWrite(RED_LED, HIGH);
+    delay(5000);  // 5 seconds
+    digitalWrite(RED_LED, LOW);
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>Arduino              LEDs
+  10 ───┬───[220Ω]───[RED LED]───GND
+        │
+   9 ───┼───[220Ω]───[YEL LED]───GND
+        │
+   8 ───┴───[220Ω]───[GRN LED]───GND
+</code></pre>
+<h3 id="project-2-ultrasonic-distance-sensor"><a class="header" href="#project-2-ultrasonic-distance-sensor">Project 2: Ultrasonic Distance Sensor</a></h3>
+<pre><code class="language-cpp">const int TRIG_PIN = 9;
+const int ECHO_PIN = 10;
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(TRIG_PIN, OUTPUT);
+    pinMode(ECHO_PIN, INPUT);
+}
+
+void loop() {
+    // Send ultrasonic pulse
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG_PIN, LOW);
+    
+    // Measure echo duration
+    long duration = pulseIn(ECHO_PIN, HIGH);
+    
+    // Calculate distance in cm
+    // Speed of sound: 343 m/s = 0.0343 cm/µs
+    // Distance = (duration / 2) * 0.0343
+    float distance = duration * 0.0343 / 2;
+    
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+    
+    delay(100);
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>HC-SR04             Arduino
+ VCC ───────────────  5V
+ Trig ──────────────  9
+ Echo ──────────────  10
+ GND ───────────────  GND
+</code></pre>
+<h3 id="project-3-light-activated-switch"><a class="header" href="#project-3-light-activated-switch">Project 3: Light-Activated Switch</a></h3>
+<pre><code class="language-cpp">const int LDR_PIN = A0;
+const int LED_PIN = 13;
+const int THRESHOLD = 500;  // Adjust based on lighting
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    int lightLevel = analogRead(LDR_PIN);
+    
+    Serial.print("Light Level: ");
+    Serial.println(lightLevel);
+    
+    if (lightLevel &lt; THRESHOLD) {
+        digitalWrite(LED_PIN, HIGH);  // Turn on LED when dark
+    } else {
+        digitalWrite(LED_PIN, LOW);   // Turn off LED when bright
+    }
+    
+    delay(100);
+}
+</code></pre>
+<p><strong>Wiring:</strong></p>
+<pre><code>         5V
+          │
+        ┌─┴─┐
+        │LDR│ (Light Dependent Resistor)
+        └─┬─┘
+          ├────── A0
+        ┌─┴─┐
+        │10k│ (Pull-down resistor)
+        │Ω  │
+        └─┬─┘
+          │
+         GND
+</code></pre>
+<h3 id="project-4-temperature-controlled-fan"><a class="header" href="#project-4-temperature-controlled-fan">Project 4: Temperature-Controlled Fan</a></h3>
+<pre><code class="language-cpp">#include &lt;DHT.h&gt;
+
+#define DHTPIN 2
+#define DHTTYPE DHT11
+#define FAN_PIN 9  // PWM pin for fan control
+
+DHT dht(DHTPIN, DHTTYPE);
+
+const float TEMP_MIN = 25.0;  // Start fan at 25°C
+const float TEMP_MAX = 35.0;  // Full speed at 35°C
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(FAN_PIN, OUTPUT);
+    dht.begin();
+}
+
+void loop() {
+    float temperature = dht.readTemperature();
+    
+    if (isnan(temperature)) {
+        Serial.println("Failed to read temperature!");
+        return;
+    }
+    
+    // Calculate fan speed (0-255)
+    int fanSpeed = 0;
+    if (temperature &lt; TEMP_MIN) {
+        fanSpeed = 0;
+    } else if (temperature &gt; TEMP_MAX) {
+        fanSpeed = 255;
+    } else {
+        fanSpeed = map(temperature * 10, TEMP_MIN * 10, TEMP_MAX * 10, 0, 255);
+    }
+    
+    analogWrite(FAN_PIN, fanSpeed);
+    
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.print("°C Fan Speed: ");
+    Serial.print((fanSpeed * 100) / 255);
+    Serial.println("%");
+    
+    delay(2000);
+}
+</code></pre>
+<h3 id="project-5-simple-data-logger"><a class="header" href="#project-5-simple-data-logger">Project 5: Simple Data Logger</a></h3>
+<pre><code class="language-cpp">#include &lt;SD.h&gt;
+#include &lt;SPI.h&gt;
+
+const int CS_PIN = 10;
+const int SENSOR_PIN = A0;
+
+File dataFile;
+
+void setup() {
+    Serial.begin(9600);
+    
+    // Initialize SD card
+    if (!SD.begin(CS_PIN)) {
+        Serial.println("SD card initialization failed!");
+        return;
+    }
+    Serial.println("SD card initialized.");
+}
+
+void loop() {
+    int sensorValue = analogRead(SENSOR_PIN);
+    float voltage = sensorValue * (5.0 / 1023.0);
+    
+    // Open file for writing
+    dataFile = SD.open("datalog.txt", FILE_WRITE);
+    
+    if (dataFile) {
+        // Write timestamp and value
+        dataFile.print(millis());
+        dataFile.print(",");
+        dataFile.println(voltage);
+        dataFile.close();
+        
+        Serial.print("Logged: ");
+        Serial.println(voltage);
+    } else {
+        Serial.println("Error opening file!");
+    }
+    
+    delay(1000);  // Log every second
+}
+</code></pre>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="interrupts"><a class="header" href="#interrupts">Interrupts</a></h3>
+<pre><code class="language-cpp">const int BUTTON_PIN = 2;  // Must be interrupt-capable pin
+const int LED_PIN = 13;
+
+volatile bool ledState = false;
+
+void setup() {
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    pinMode(LED_PIN, OUTPUT);
+    
+    // Attach interrupt: pin, ISR function, trigger mode
+    attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonISR, FALLING);
+}
+
+void loop() {
+    // Main loop can do other things
+    // LED toggle happens immediately when button pressed
+}
+
+// Interrupt Service Routine (keep it short!)
+void buttonISR() {
+    ledState = !ledState;
+    digitalWrite(LED_PIN, ledState);
+}
+</code></pre>
+<h3 id="timers"><a class="header" href="#timers">Timers</a></h3>
+<pre><code class="language-cpp">unsigned long previousMillis = 0;
+const long interval = 1000;  // 1 second
+
+void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
+}
+
+void loop() {
+    unsigned long currentMillis = millis();
+    
+    // Non-blocking timing
+    if (currentMillis - previousMillis &gt;= interval) {
+        previousMillis = currentMillis;
+        
+        // Toggle LED
+        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    }
+    
+    // Can do other things here
+}
+</code></pre>
+<h3 id="memory-optimization"><a class="header" href="#memory-optimization">Memory Optimization</a></h3>
+<pre><code class="language-cpp">// Store strings in flash memory (PROGMEM)
+const char message[] PROGMEM = "This string is stored in flash";
+
+void setup() {
+    Serial.begin(9600);
+    
+    // Read from flash memory
+    char buffer[50];
+    strcpy_P(buffer, message);
+    Serial.println(buffer);
+}
+
+// Use F() macro for Serial.print
+void loop() {
+    Serial.println(F("This uses flash memory, not RAM"));
+    delay(1000);
+}
+</code></pre>
+<h3 id="low-power-mode"><a class="header" href="#low-power-mode">Low Power Mode</a></h3>
+<pre><code class="language-cpp">#include &lt;avr/sleep.h&gt;
+#include &lt;avr/power.h&gt;
+
+void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(2, INPUT_PULLUP);
+    
+    // Enable interrupt for wake-up
+    attachInterrupt(digitalPinToInterrupt(2), wakeUp, LOW);
+}
+
+void loop() {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_BUILTIN, LOW);
+    
+    // Enter sleep mode
+    enterSleep();
+}
+
+void enterSleep() {
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
+    
+    // Disable peripherals
+    power_adc_disable();
+    power_spi_disable();
+    power_timer0_disable();
+    power_timer1_disable();
+    power_timer2_disable();
+    power_twi_disable();
+    
+    sleep_mode();  // Sleep here
+    
+    // Wake up here
+    sleep_disable();
+    power_all_enable();
+}
+
+void wakeUp() {
+    // ISR to wake up
+}
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-avoid-delay-for-responsive-code"><a class="header" href="#1-avoid-delay-for-responsive-code">1. Avoid delay() for Responsive Code</a></h3>
+<pre><code class="language-cpp">// Bad: Blocking
+void loop() {
+    digitalWrite(LED1, HIGH);
+    delay(1000);
+    digitalWrite(LED2, HIGH);
+    delay(500);
+}
+
+// Good: Non-blocking
+unsigned long led1Time = 0;
+unsigned long led2Time = 0;
+
+void loop() {
+    unsigned long now = millis();
+    
+    if (now - led1Time &gt;= 1000) {
+        digitalWrite(LED1, !digitalRead(LED1));
+        led1Time = now;
+    }
+    
+    if (now - led2Time &gt;= 500) {
+        digitalWrite(LED2, !digitalRead(LED2));
+        led2Time = now;
+    }
+}
+</code></pre>
+<h3 id="2-use-const-for-pin-definitions"><a class="header" href="#2-use-const-for-pin-definitions">2. Use const for Pin Definitions</a></h3>
+<pre><code class="language-cpp">// Good: Easy to change and read
+const int LED_PIN = 13;
+const int BUTTON_PIN = 2;
+const int SENSOR_PIN = A0;
+</code></pre>
+<h3 id="3-check-return-values"><a class="header" href="#3-check-return-values">3. Check Return Values</a></h3>
+<pre><code class="language-cpp">if (!SD.begin(CS_PIN)) {
+    Serial.println("SD card failed!");
+    while (1);  // Halt
+}
+</code></pre>
+<h3 id="4-use-meaningful-variable-names"><a class="header" href="#4-use-meaningful-variable-names">4. Use Meaningful Variable Names</a></h3>
+<pre><code class="language-cpp">// Bad
+int x = analogRead(A0);
+
+// Good
+int lightLevel = analogRead(LIGHT_SENSOR_PIN);
+</code></pre>
+<h3 id="5-comment-complex-logic"><a class="header" href="#5-comment-complex-logic">5. Comment Complex Logic</a></h3>
+<pre><code class="language-cpp">// Calculate distance from ultrasonic sensor
+// Formula: distance (cm) = duration (µs) × 0.0343 / 2
+// Division by 2 accounts for round-trip time
+float distance = duration * 0.0343 / 2;
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<ol>
+<li>
+<p><strong>Upload Failed</strong></p>
+<ul>
+<li>Check correct board and port selected</li>
+<li>Try pressing reset button before upload</li>
+<li>Close Serial Monitor during upload</li>
+</ul>
+</li>
+<li>
+<p><strong>Serial Monitor Shows Garbage</strong></p>
+<ul>
+<li>Check baud rate matches code</li>
+<li>Verify USB cable supports data (not just power)</li>
+</ul>
+</li>
+<li>
+<p><strong>Sketch Too Large</strong></p>
+<ul>
+<li>Remove unused libraries</li>
+<li>Use PROGMEM for strings</li>
+<li>Optimize code</li>
+</ul>
+</li>
+<li>
+<p><strong>Unexpected Behavior</strong></p>
+<ul>
+<li>Add Serial.println() for debugging</li>
+<li>Check wiring and connections</li>
+<li>Verify power supply adequate</li>
+</ul>
+</li>
+</ol>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<ul>
+<li><strong>Official Documentation</strong>: https://www.arduino.cc/reference/</li>
+<li><strong>Forum</strong>: https://forum.arduino.cc/</li>
+<li><strong>Project Hub</strong>: https://create.arduino.cc/projecthub</li>
+<li><strong>Libraries</strong>: https://www.arduinolibraries.info/</li>
+</ul>
+<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
+<ul>
+<li><a href="esp32.html">ESP32</a> - More powerful Arduino-compatible platform</li>
+<li><a href="avr.html">AVR Programming</a> - Low-level AVR microcontroller programming</li>
+<li><a href="gpio.html">GPIO</a> - Digital I/O concepts</li>
+<li><a href="uart.html">UART</a> - Serial communication details</li>
+<li><a href="spi.html">SPI</a> - SPI protocol</li>
+<li><a href="i2c.html">I2C</a> - I2C protocol</li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

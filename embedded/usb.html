@@ -177,7 +177,685 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="usb-protocol"><a class="header" href="#usb-protocol">USB Protocol</a></h1>
+<p>Comprehensive guide to USB protocol, device classes, and embedded implementation.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#usb-basics">USB Basics</a></li>
+<li><a href="#usb-protocol">USB Protocol</a></li>
+<li><a href="#device-classes">Device Classes</a></li>
+<li><a href="#descriptors">Descriptors</a></li>
+<li><a href="#arduino-usb">Arduino USB</a></li>
+<li><a href="#stm32-usb">STM32 USB</a></li>
+<li><a href="#usb-cdc-virtual-serial">USB CDC (Virtual Serial)</a></li>
+</ol>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>USB (Universal Serial Bus) is a standard for connecting devices to a host computer. It provides both power and data communication in a single cable.</p>
+<h3 id="usb-versions"><a class="header" href="#usb-versions">USB Versions</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Version</th><th>Name</th><th>Speed</th><th>Release</th><th>Connector</th></tr></thead><tbody>
+<tr><td><strong>USB 1.0</strong></td><td>Low Speed</td><td>1.5 Mbps</td><td>1996</td><td>Type A/B</td></tr>
+<tr><td><strong>USB 1.1</strong></td><td>Full Speed</td><td>12 Mbps</td><td>1998</td><td>Type A/B</td></tr>
+<tr><td><strong>USB 2.0</strong></td><td>High Speed</td><td>480 Mbps</td><td>2000</td><td>Type A/B, Mini, Micro</td></tr>
+<tr><td><strong>USB 3.0</strong></td><td>SuperSpeed</td><td>5 Gbps</td><td>2008</td><td>Type A/B, Micro B SS</td></tr>
+<tr><td><strong>USB 3.1</strong></td><td>SuperSpeed+</td><td>10 Gbps</td><td>2013</td><td>Type C</td></tr>
+<tr><td><strong>USB 3.2</strong></td><td>-</td><td>20 Gbps</td><td>2017</td><td>Type C</td></tr>
+<tr><td><strong>USB 4.0</strong></td><td>-</td><td>40 Gbps</td><td>2019</td><td>Type C</td></tr>
+</tbody></table>
+</div>
+<h3 id="usb-connectors"><a class="header" href="#usb-connectors">USB Connectors</a></h3>
+<pre><code>USB Type A (Host):
+┌─────────────┐
+│ ┌─┐ ┌─┐ ┌─┐ │
+│ │1│ │2│ │3│ │4│
+│ └─┘ └─┘ └─┘ │
+└─────────────┘
+1: VBUS (+5V)
+2: D- (Data -)
+3: D+ (Data +)
+4: GND
+
+USB Type B (Device):
+    ┌───┐
+  ┌─┘   └─┐
+  │ 1   2 │
+  │ 3   4 │
+  └───────┘
+
+USB Micro B (Common on embedded):
+  ┌─────────┐
+  │1 2 3 4 5│
+  └─────────┘
+1: VBUS (+5V)
+2: D-
+3: D+
+4: ID (OTG)
+5: GND
+
+USB Type C (Modern):
+  ┌───────────┐
+  │A1 A2...A12│
+  │B1 B2...B12│
+  └───────────┘
+Reversible, 24 pins
+</code></pre>
+<h3 id="usb-topology"><a class="header" href="#usb-topology">USB Topology</a></h3>
+<pre><code>Host (PC/Hub)
+    │
+    ├─── Device 1 (Address 1)
+    │
+    ├─── Hub (Address 2)
+    │     │
+    │     ├─── Device 2 (Address 3)
+    │     └─── Device 3 (Address 4)
+    │
+    └─── Device 4 (Address 5)
+
+Maximum:
+- 127 devices per host
+- 5 meter cable length per segment
+- 7 tiers (including hub)
+</code></pre>
+<h2 id="usb-basics"><a class="header" href="#usb-basics">USB Basics</a></h2>
+<h3 id="signal-levels"><a class="header" href="#signal-levels">Signal Levels</a></h3>
+<ul>
+<li><strong>Low Speed (1.5 Mbps)</strong>: D+ pulled down, D- pulled up</li>
+<li><strong>Full Speed (12 Mbps)</strong>: D+ pulled up, D- pulled down</li>
+<li><strong>High Speed (480 Mbps)</strong>: Differential signaling</li>
+</ul>
+<h3 id="power"><a class="header" href="#power">Power</a></h3>
+<pre><code>USB 2.0: 5V, 500 mA max
+USB 3.0: 5V, 900 mA max
+USB-C PD: 5V, 9V, 15V, 20V up to 100W
+</code></pre>
+<h3 id="data-encoding"><a class="header" href="#data-encoding">Data Encoding</a></h3>
+<p>USB uses <strong>NRZI</strong> (Non-Return-to-Zero Inverted) encoding with bit stuffing:</p>
+<ul>
+<li><code>0</code> bit: Transition</li>
+<li><code>1</code> bit: No transition</li>
+<li>Bit stuffing: After six consecutive <code>1</code>s, insert a <code>0</code></li>
+</ul>
+<h3 id="packet-types"><a class="header" href="#packet-types">Packet Types</a></h3>
+<pre><code>Token Packets:
+- SETUP: Initialize control transfer
+- IN: Request data from device
+- OUT: Send data to device
+- SOF: Start of Frame (every 1 ms)
+
+Data Packets:
+- DATA0: Even data packet
+- DATA1: Odd data packet
+- DATA2: High-speed data
+- MDATA: Multi-data
+
+Handshake Packets:
+- ACK: Acknowledge success
+- NAK: Not ready
+- STALL: Endpoint halted
+
+Special Packets:
+- PRE: Preamble for low-speed
+- ERR: Error detected
+- SPLIT: High-speed split transaction
+</code></pre>
+<h2 id="usb-protocol-1"><a class="header" href="#usb-protocol-1">USB Protocol</a></h2>
+<h3 id="enumeration-process"><a class="header" href="#enumeration-process">Enumeration Process</a></h3>
+<pre><code>1. Device Plugged In
+   │
+   ├─ USB Reset (SE0 for 10ms)
+   │
+2. Host Assigns Address 0 (default)
+   │
+   ├─ Get Device Descriptor
+   │  Response: VID, PID, max packet size
+   │
+3. Host Assigns Unique Address (1-127)
+   │
+   ├─ Set Address
+   │
+4. Host Requests Configuration
+   │
+   ├─ Get Configuration Descriptor
+   │  Response: Interfaces, endpoints, class info
+   │
+   ├─ Get String Descriptors (optional)
+   │  Response: Manufacturer, product, serial
+   │
+5. Host Configures Device
+   │
+   ├─ Set Configuration
+   │
+6. Device Ready for Use
+</code></pre>
+<h3 id="transfer-types"><a class="header" href="#transfer-types">Transfer Types</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Transfer Type</th><th>Speed</th><th>Error Correction</th><th>Use Case</th></tr></thead><tbody>
+<tr><td><strong>Control</strong></td><td>Any</td><td>Yes</td><td>Device enumeration, configuration</td></tr>
+<tr><td><strong>Bulk</strong></td><td>Full/High</td><td>Yes</td><td>Large data transfers (storage, printers)</td></tr>
+<tr><td><strong>Interrupt</strong></td><td>Any</td><td>Yes</td><td>Small, periodic data (HID, mice)</td></tr>
+<tr><td><strong>Isochronous</strong></td><td>Full/High</td><td>No</td><td>Real-time audio/video</td></tr>
+</tbody></table>
+</div>
+<h3 id="control-transfer-structure"><a class="header" href="#control-transfer-structure">Control Transfer Structure</a></h3>
+<pre><code>Setup Stage:
+  Host → Device: SETUP token + DATA0 packet
+
+Data Stage (optional):
+  IN:  Device → Host: DATA packets
+  OUT: Host → Device: DATA packets
+
+Status Stage:
+  IN:  Device → Host: Zero-length DATA1 + ACK
+  OUT: Host → Device: Zero-length DATA1 + ACK
+</code></pre>
+<h3 id="standard-requests"><a class="header" href="#standard-requests">Standard Requests</a></h3>
+<pre><code class="language-c">// bmRequestType: Direction | Type | Recipient
+#define USB_DIR_OUT     0x00
+#define USB_DIR_IN      0x80
+
+#define USB_TYPE_STANDARD   0x00
+#define USB_TYPE_CLASS      0x20
+#define USB_TYPE_VENDOR     0x40
+
+#define USB_RECIP_DEVICE    0x00
+#define USB_RECIP_INTERFACE 0x01
+#define USB_RECIP_ENDPOINT  0x02
+
+// bRequest codes
+#define USB_REQ_GET_STATUS        0
+#define USB_REQ_CLEAR_FEATURE     1
+#define USB_REQ_SET_FEATURE       3
+#define USB_REQ_SET_ADDRESS       5
+#define USB_REQ_GET_DESCRIPTOR    6
+#define USB_REQ_SET_DESCRIPTOR    7
+#define USB_REQ_GET_CONFIGURATION 8
+#define USB_REQ_SET_CONFIGURATION 9
+#define USB_REQ_GET_INTERFACE     10
+#define USB_REQ_SET_INTERFACE     11
+</code></pre>
+<h2 id="device-classes"><a class="header" href="#device-classes">Device Classes</a></h2>
+<h3 id="usb-class-codes"><a class="header" href="#usb-class-codes">USB Class Codes</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Class</th><th>Code</th><th>Description</th><th>Examples</th></tr></thead><tbody>
+<tr><td><strong>CDC</strong></td><td>0x02</td><td>Communications Device</td><td>Virtual COM port, modems</td></tr>
+<tr><td><strong>HID</strong></td><td>0x03</td><td>Human Interface Device</td><td>Keyboards, mice, game controllers</td></tr>
+<tr><td><strong>Mass Storage</strong></td><td>0x08</td><td>Storage Device</td><td>USB flash drives, external HDDs</td></tr>
+<tr><td><strong>Hub</strong></td><td>0x09</td><td>USB Hub</td><td>-</td></tr>
+<tr><td><strong>Audio</strong></td><td>0x01</td><td>Audio Device</td><td>Speakers, microphones</td></tr>
+<tr><td><strong>Video</strong></td><td>0x0E</td><td>Video Device</td><td>Webcams</td></tr>
+<tr><td><strong>Printer</strong></td><td>0x07</td><td>Printer</td><td>-</td></tr>
+<tr><td><strong>Vendor Specific</strong></td><td>0xFF</td><td>Custom</td><td>-</td></tr>
+</tbody></table>
+</div>
+<h3 id="hid-human-interface-device"><a class="header" href="#hid-human-interface-device">HID (Human Interface Device)</a></h3>
+<pre><code class="language-c">// HID Descriptor
+struct HID_Descriptor {
+    uint8_t  bLength;           // Size of descriptor
+    uint8_t  bDescriptorType;   // HID descriptor type (0x21)
+    uint16_t bcdHID;            // HID specification release
+    uint8_t  bCountryCode;      // Country code
+    uint8_t  bNumDescriptors;   // Number of class descriptors
+    uint8_t  bDescriptorType2;  // Report descriptor type (0x22)
+    uint16_t wDescriptorLength; // Length of report descriptor
+};
+
+// HID Report Descriptor (Mouse example)
+const uint8_t mouse_report_descriptor[] = {
+    0x05, 0x01,        // Usage Page (Generic Desktop)
+    0x09, 0x02,        // Usage (Mouse)
+    0xA1, 0x01,        // Collection (Application)
+    0x09, 0x01,        //   Usage (Pointer)
+    0xA1, 0x00,        //   Collection (Physical)
+    0x05, 0x09,        //     Usage Page (Buttons)
+    0x19, 0x01,        //     Usage Minimum (Button 1)
+    0x29, 0x03,        //     Usage Maximum (Button 3)
+    0x15, 0x00,        //     Logical Minimum (0)
+    0x25, 0x01,        //     Logical Maximum (1)
+    0x95, 0x03,        //     Report Count (3)
+    0x75, 0x01,        //     Report Size (1)
+    0x81, 0x02,        //     Input (Data, Variable, Absolute)
+    0x95, 0x01,        //     Report Count (1)
+    0x75, 0x05,        //     Report Size (5)
+    0x81, 0x01,        //     Input (Constant) - Padding
+    0x05, 0x01,        //     Usage Page (Generic Desktop)
+    0x09, 0x30,        //     Usage (X)
+    0x09, 0x31,        //     Usage (Y)
+    0x15, 0x81,        //     Logical Minimum (-127)
+    0x25, 0x7F,        //     Logical Maximum (127)
+    0x75, 0x08,        //     Report Size (8)
+    0x95, 0x02,        //     Report Count (2)
+    0x81, 0x06,        //     Input (Data, Variable, Relative)
+    0xC0,              //   End Collection
+    0xC0               // End Collection
+};
+</code></pre>
+<h3 id="cdc-communication-device-class"><a class="header" href="#cdc-communication-device-class">CDC (Communication Device Class)</a></h3>
+<p>Used for virtual serial ports (USB to UART).</p>
+<pre><code class="language-c">// CDC ACM (Abstract Control Model) Interface
+
+// CDC Header Functional Descriptor
+struct CDC_Header_Descriptor {
+    uint8_t  bLength;
+    uint8_t  bDescriptorType;
+    uint8_t  bDescriptorSubtype;  // Header (0x00)
+    uint16_t bcdCDC;
+};
+
+// CDC Call Management Descriptor
+struct CDC_CallManagement_Descriptor {
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint8_t bDescriptorSubtype;  // Call Management (0x01)
+    uint8_t bmCapabilities;
+    uint8_t bDataInterface;
+};
+
+// CDC Line Coding (115200 8N1 example)
+struct CDC_LineCoding {
+    uint32_t dwDTERate;      // Baud rate: 115200
+    uint8_t  bCharFormat;    // Stop bits: 1
+    uint8_t  bParityType;    // Parity: None (0)
+    uint8_t  bDataBits;      // Data bits: 8
+};
+</code></pre>
+<h2 id="descriptors"><a class="header" href="#descriptors">Descriptors</a></h2>
+<h3 id="device-descriptor"><a class="header" href="#device-descriptor">Device Descriptor</a></h3>
+<pre><code class="language-c">struct USB_Device_Descriptor {
+    uint8_t  bLength;            // Size: 18 bytes
+    uint8_t  bDescriptorType;    // DEVICE (0x01)
+    uint16_t bcdUSB;             // USB version (0x0200 for USB 2.0)
+    uint8_t  bDeviceClass;       // Class code
+    uint8_t  bDeviceSubClass;    // Subclass code
+    uint8_t  bDeviceProtocol;    // Protocol code
+    uint8_t  bMaxPacketSize0;    // Max packet size for EP0
+    uint16_t idVendor;           // Vendor ID (VID)
+    uint16_t idProduct;          // Product ID (PID)
+    uint16_t bcdDevice;          // Device release number
+    uint8_t  iManufacturer;      // Manufacturer string index
+    uint8_t  iProduct;           // Product string index
+    uint8_t  iSerialNumber;      // Serial number string index
+    uint8_t  bNumConfigurations; // Number of configurations
+};
+
+// Example
+const uint8_t device_descriptor[] = {
+    18,         // bLength
+    0x01,       // bDescriptorType (DEVICE)
+    0x00, 0x02, // bcdUSB (USB 2.0)
+    0x00,       // bDeviceClass (defined in interface)
+    0x00,       // bDeviceSubClass
+    0x00,       // bDeviceProtocol
+    64,         // bMaxPacketSize0
+    0x83, 0x04, // idVendor (0x0483 - STMicroelectronics)
+    0x40, 0x57, // idProduct (0x5740)
+    0x00, 0x02, // bcdDevice (2.0)
+    1,          // iManufacturer
+    2,          // iProduct
+    3,          // iSerialNumber
+    1           // bNumConfigurations
+};
+</code></pre>
+<h3 id="configuration-descriptor"><a class="header" href="#configuration-descriptor">Configuration Descriptor</a></h3>
+<pre><code class="language-c">struct USB_Configuration_Descriptor {
+    uint8_t  bLength;             // Size: 9 bytes
+    uint8_t  bDescriptorType;     // CONFIGURATION (0x02)
+    uint16_t wTotalLength;        // Total length of data
+    uint8_t  bNumInterfaces;      // Number of interfaces
+    uint8_t  bConfigurationValue; // Configuration index
+    uint8_t  iConfiguration;      // Configuration string index
+    uint8_t  bmAttributes;        // Attributes (self/bus powered)
+    uint8_t  bMaxPower;           // Max power in 2mA units
+};
+</code></pre>
+<h3 id="interface-descriptor"><a class="header" href="#interface-descriptor">Interface Descriptor</a></h3>
+<pre><code class="language-c">struct USB_Interface_Descriptor {
+    uint8_t bLength;            // Size: 9 bytes
+    uint8_t bDescriptorType;    // INTERFACE (0x04)
+    uint8_t bInterfaceNumber;   // Interface index
+    uint8_t bAlternateSetting;  // Alternate setting
+    uint8_t bNumEndpoints;      // Number of endpoints
+    uint8_t bInterfaceClass;    // Class code
+    uint8_t bInterfaceSubClass; // Subclass code
+    uint8_t bInterfaceProtocol; // Protocol code
+    uint8_t iInterface;         // Interface string index
+};
+</code></pre>
+<h3 id="endpoint-descriptor"><a class="header" href="#endpoint-descriptor">Endpoint Descriptor</a></h3>
+<pre><code class="language-c">struct USB_Endpoint_Descriptor {
+    uint8_t  bLength;          // Size: 7 bytes
+    uint8_t  bDescriptorType;  // ENDPOINT (0x05)
+    uint8_t  bEndpointAddress; // Address (bit 7: direction)
+    uint8_t  bmAttributes;     // Transfer type
+    uint16_t wMaxPacketSize;   // Max packet size
+    uint8_t  bInterval;        // Polling interval (ms)
+};
+
+// Endpoint address format:
+// Bit 7: Direction (0 = OUT, 1 = IN)
+// Bits 3-0: Endpoint number (0-15)
+#define USB_EP_IN(n)  (0x80 | (n))
+#define USB_EP_OUT(n) (n)
+
+// Transfer types
+#define USB_EP_TYPE_CONTROL     0x00
+#define USB_EP_TYPE_ISOCHRONOUS 0x01
+#define USB_EP_TYPE_BULK        0x02
+#define USB_EP_TYPE_INTERRUPT   0x03
+</code></pre>
+<h3 id="string-descriptor"><a class="header" href="#string-descriptor">String Descriptor</a></h3>
+<pre><code class="language-c">struct USB_String_Descriptor {
+    uint8_t bLength;
+    uint8_t bDescriptorType;  // STRING (0x03)
+    uint16_t wString[];       // Unicode string
+};
+
+// String 0 (Language ID)
+const uint8_t string0[] = {
+    4,      // bLength
+    0x03,   // bDescriptorType
+    0x09, 0x04  // wLANGID[0]: 0x0409 (English - US)
+};
+
+// String 1 (Manufacturer)
+const uint8_t string1[] = {
+    28,     // bLength
+    0x03,   // bDescriptorType
+    'M',0, 'a',0, 'n',0, 'u',0, 'f',0, 'a',0, 'c',0, 
+    't',0, 'u',0, 'r',0, 'e',0, 'r',0, 0,0
+};
+</code></pre>
+<h2 id="arduino-usb"><a class="header" href="#arduino-usb">Arduino USB</a></h2>
+<h3 id="arduino-leonardomicro-atmega32u4"><a class="header" href="#arduino-leonardomicro-atmega32u4">Arduino Leonardo/Micro (ATmega32u4)</a></h3>
+<p>The ATmega32u4 has native USB support.</p>
+<h4 id="usb-mouse"><a class="header" href="#usb-mouse">USB Mouse</a></h4>
+<pre><code class="language-cpp">#include &lt;Mouse.h&gt;
+
+void setup() {
+    Mouse.begin();
+}
+
+void loop() {
+    // Move mouse in a square
+    Mouse.move(10, 0);   // Right
+    delay(500);
+    Mouse.move(0, 10);   // Down
+    delay(500);
+    Mouse.move(-10, 0);  // Left
+    delay(500);
+    Mouse.move(0, -10);  // Up
+    delay(500);
+}
+</code></pre>
+<h4 id="usb-keyboard"><a class="header" href="#usb-keyboard">USB Keyboard</a></h4>
+<pre><code class="language-cpp">#include &lt;Keyboard.h&gt;
+
+const int BUTTON_PIN = 2;
+
+void setup() {
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    Keyboard.begin();
+}
+
+void loop() {
+    if (digitalRead(BUTTON_PIN) == LOW) {
+        Keyboard.print("Hello, World!");
+        delay(500);
+    }
+}
+</code></pre>
+<h4 id="usb-hid-custom"><a class="header" href="#usb-hid-custom">USB HID Custom</a></h4>
+<pre><code class="language-cpp">#include &lt;HID.h&gt;
+
+// Custom HID report descriptor
+static const uint8_t _hidReportDescriptor[] PROGMEM = {
+    0x06, 0x00, 0xFF,  // Usage Page (Vendor Defined)
+    0x09, 0x01,        // Usage (Vendor Usage 1)
+    0xA1, 0x01,        // Collection (Application)
+    0x15, 0x00,        //   Logical Minimum (0)
+    0x26, 0xFF, 0x00,  //   Logical Maximum (255)
+    0x75, 0x08,        //   Report Size (8 bits)
+    0x95, 0x40,        //   Report Count (64)
+    0x09, 0x01,        //   Usage (Vendor Usage 1)
+    0x81, 0x02,        //   Input (Data, Variable, Absolute)
+    0x09, 0x01,        //   Usage (Vendor Usage 1)
+    0x91, 0x02,        //   Output (Data, Variable, Absolute)
+    0xC0               // End Collection
+};
+
+void setup() {
+    static HIDSubDescriptor node(_hidReportDescriptor, sizeof(_hidReportDescriptor));
+    HID().AppendDescriptor(&amp;node);
+}
+
+void loop() {
+    uint8_t data[64] = {1, 2, 3, 4};
+    HID().SendReport(1, data, 64);
+    delay(100);
+}
+</code></pre>
+<h2 id="stm32-usb"><a class="header" href="#stm32-usb">STM32 USB</a></h2>
+<h3 id="usb-cdc-virtual-com-port-cubemx"><a class="header" href="#usb-cdc-virtual-com-port-cubemx">USB CDC Virtual COM Port (CubeMX)</a></h3>
+<pre><code class="language-c">/* Generated by CubeMX with USB Device middleware */
+#include "usbd_cdc_if.h"
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_USB_DEVICE_Init();
+    
+    uint8_t buffer[64];
+    sprintf((char*)buffer, "Hello from STM32!\r\n");
+    
+    while (1) {
+        CDC_Transmit_FS(buffer, strlen((char*)buffer));
+        HAL_Delay(1000);
+    }
+}
+
+/* In usbd_cdc_if.c */
+static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len) {
+    // Echo back received data
+    CDC_Transmit_FS(Buf, *Len);
+    return USBD_OK;
+}
+</code></pre>
+<h3 id="usb-hid-keyboard"><a class="header" href="#usb-hid-keyboard">USB HID Keyboard</a></h3>
+<pre><code class="language-c">/* Configure USB Device as HID in CubeMX */
+#include "usbd_hid.h"
+
+extern USBD_HandleTypeDef hUsbDeviceFS;
+
+// HID keyboard report
+typedef struct {
+    uint8_t modifiers;  // Ctrl, Shift, Alt, GUI
+    uint8_t reserved;
+    uint8_t keys[6];    // Up to 6 simultaneous keys
+} KeyboardReport;
+
+void send_key(uint8_t key) {
+    KeyboardReport report = {0};
+    
+    // Press key
+    report.keys[0] = key;
+    USBD_HID_SendReport(&amp;hUsbDeviceFS, (uint8_t*)&amp;report, sizeof(report));
+    HAL_Delay(10);
+    
+    // Release key
+    memset(&amp;report, 0, sizeof(report));
+    USBD_HID_SendReport(&amp;hUsbDeviceFS, (uint8_t*)&amp;report, sizeof(report));
+    HAL_Delay(10);
+}
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_USB_DEVICE_Init();
+    
+    HAL_Delay(1000);  // Wait for enumeration
+    
+    while (1) {
+        // Send 'A' key
+        send_key(0x04);  // HID usage code for 'A'
+        HAL_Delay(1000);
+    }
+}
+</code></pre>
+<h3 id="usb-mass-storage"><a class="header" href="#usb-mass-storage">USB Mass Storage</a></h3>
+<pre><code class="language-c">/* Configure USB Device as MSC in CubeMX */
+#include "usbd_storage_if.h"
+
+// Implement SCSI commands
+int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len) {
+    // Read from SD card or internal flash
+    for (uint16_t i = 0; i &lt; blk_len; i++) {
+        // Read block at (blk_addr + i) to (buf + i * BLOCK_SIZE)
+    }
+    return USBD_OK;
+}
+
+int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len) {
+    // Write to SD card or internal flash
+    for (uint16_t i = 0; i &lt; blk_len; i++) {
+        // Write block at (blk_addr + i) from (buf + i * BLOCK_SIZE)
+    }
+    return USBD_OK;
+}
+</code></pre>
+<h2 id="usb-cdc-virtual-serial"><a class="header" href="#usb-cdc-virtual-serial">USB CDC (Virtual Serial)</a></h2>
+<h3 id="pc-side-python"><a class="header" href="#pc-side-python">PC Side (Python)</a></h3>
+<pre><code class="language-python">import serial
+import time
+
+# Open serial port
+ser = serial.Serial('COM3', 115200, timeout=1)  # Windows
+# ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)  # Linux
+
+# Write data
+ser.write(b'Hello, Device!\n')
+
+# Read data
+while True:
+    if ser.in_waiting &gt; 0:
+        data = ser.readline()
+        print(f"Received: {data.decode()}")
+    
+    time.sleep(0.1)
+
+ser.close()
+</code></pre>
+<h3 id="pc-side-c"><a class="header" href="#pc-side-c">PC Side (C++)</a></h3>
+<pre><code class="language-cpp">// Linux example
+#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;termios.h&gt;
+
+int main() {
+    int fd = open("/dev/ttyACM0", O_RDWR);
+    
+    // Configure serial port
+    struct termios tty;
+    tcgetattr(fd, &amp;tty);
+    cfsetospeed(&amp;tty, B115200);
+    cfsetispeed(&amp;tty, B115200);
+    tty.c_cflag |= (CLOCAL | CREAD);
+    tty.c_cflag &amp;= ~PARENB;
+    tty.c_cflag &amp;= ~CSTOPB;
+    tty.c_cflag &amp;= ~CSIZE;
+    tty.c_cflag |= CS8;
+    tcsetattr(fd, TCSANOW, &amp;tty);
+    
+    // Write
+    char msg[] = "Hello, Device!\n";
+    write(fd, msg, sizeof(msg));
+    
+    // Read
+    char buffer[256];
+    int n = read(fd, buffer, sizeof(buffer));
+    buffer[n] = '\0';
+    printf("Received: %s\n", buffer);
+    
+    close(fd);
+    return 0;
+}
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>VID/PID</strong>: Use unique Vendor ID and Product ID (or get your own)</li>
+<li><strong>Descriptors</strong>: Ensure correct descriptor chain</li>
+<li><strong>Enumeration</strong>: Handle USB reset and enumeration properly</li>
+<li><strong>Power</strong>: Declare correct power consumption</li>
+<li><strong>String Descriptors</strong>: Provide manufacturer, product, serial number</li>
+<li><strong>Error Handling</strong>: Handle NAK, STALL conditions</li>
+<li><strong>Buffer Management</strong>: Use DMA for better performance</li>
+<li><strong>Compliance</strong>: Test with USB-IF tools for certification</li>
+</ol>
+<h2 id="debugging-tools"><a class="header" href="#debugging-tools">Debugging Tools</a></h2>
+<h3 id="linux"><a class="header" href="#linux">Linux</a></h3>
+<pre><code class="language-bash"># List USB devices
+lsusb
+
+# Detailed info
+lsusb -v
+
+# Monitor USB traffic
+sudo cat /sys/kernel/debug/usb/usbmon/0u
+
+# Install usbutils
+sudo apt install usbutils
+</code></pre>
+<h3 id="windows"><a class="header" href="#windows">Windows</a></h3>
+<ul>
+<li><strong>USBView</strong>: Microsoft USB device viewer</li>
+<li><strong>USBDeview</strong>: NirSoft utility</li>
+<li><strong>Wireshark</strong>: With USB capture support</li>
+</ul>
+<h3 id="hardware"><a class="header" href="#hardware">Hardware</a></h3>
+<ul>
+<li><strong>USB Protocol Analyzer</strong>: Beagle USB, Total Phase</li>
+<li><strong>Logic Analyzer</strong>: Can decode USB signals</li>
+</ul>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<p><strong>Device Not Recognized:</strong></p>
+<ul>
+<li>Check USB cable (data lines)</li>
+<li>Verify correct descriptors</li>
+<li>Check VID/PID not conflicting</li>
+<li>Ensure proper enumeration handling</li>
+</ul>
+<p><strong>Intermittent Disconnects:</strong></p>
+<ul>
+<li>Power supply insufficient</li>
+<li>Check USB cable quality</li>
+<li>Verify proper suspend/resume handling</li>
+</ul>
+<p><strong>Data Corruption:</strong></p>
+<ul>
+<li>Check buffer sizes</li>
+<li>Verify DMA configuration</li>
+<li>Ensure proper synchronization</li>
+</ul>
+<p><strong>Slow Transfer Speed:</strong></p>
+<ul>
+<li>Use bulk transfers for large data</li>
+<li>Enable DMA</li>
+<li>Optimize buffer sizes</li>
+<li>Check USB 2.0 High Speed mode</li>
+</ul>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<ul>
+<li><strong>USB Specification</strong>: USB.org</li>
+<li><strong>USB Made Simple</strong>: https://www.usbmadesimple.co.uk/</li>
+<li><strong>STM32 USB Training</strong>: ST's USB training materials</li>
+<li><strong>Jan Axelson's USB</strong>: Classic USB development book</li>
+<li><strong>Linux USB</strong>: https://www.kernel.org/doc/html/latest/driver-api/usb/</li>
+</ul>
+<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
+<ul>
+<li><a href="stm32.html">STM32 USB</a></li>
+<li><a href="arduino.html">Arduino USB HID</a></li>
+<li><a href="../protocols/">Communication Protocols</a></li>
+<li><a href="README.html">Embedded Systems Overview</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

@@ -177,7 +177,469 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="embedded-systems"><a class="header" href="#embedded-systems">Embedded Systems</a></h1>
+<p>Comprehensive guide to embedded systems development, microcontrollers, and hardware interfacing.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#development-platforms">Development Platforms</a></li>
+<li><a href="#core-concepts">Core Concepts</a></li>
+<li><a href="#communication-protocols">Communication Protocols</a></li>
+<li><a href="#peripheral-interfaces">Peripheral Interfaces</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+</ol>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Embedded systems are specialized computing systems designed to perform dedicated functions within larger mechanical or electrical systems. They combine hardware and software to control devices and interact with the physical world.</p>
+<h3 id="key-characteristics"><a class="header" href="#key-characteristics">Key Characteristics</a></h3>
+<ul>
+<li><strong>Real-time Operation</strong>: Deterministic response to events</li>
+<li><strong>Resource Constraints</strong>: Limited memory, processing power, and energy</li>
+<li><strong>Reliability</strong>: Must operate continuously for extended periods</li>
+<li><strong>Hardware Integration</strong>: Direct interaction with sensors and actuators</li>
+<li><strong>Application-Specific</strong>: Optimized for particular tasks</li>
+</ul>
+<h3 id="architecture-overview"><a class="header" href="#architecture-overview">Architecture Overview</a></h3>
+<pre><code>┌─────────────────────────────────────────┐
+│         Embedded System                  │
+├─────────────────────────────────────────┤
+│  Application Layer                       │
+│  ├─ User Code                           │
+│  └─ Libraries &amp; Frameworks              │
+├─────────────────────────────────────────┤
+│  HAL/Drivers                            │
+│  ├─ Peripheral Drivers                  │
+│  └─ Hardware Abstraction Layer          │
+├─────────────────────────────────────────┤
+│  Microcontroller/Processor              │
+│  ├─ CPU Core (ARM, AVR, RISC-V)        │
+│  ├─ Memory (Flash, RAM, EEPROM)        │
+│  ├─ Peripherals (GPIO, UART, SPI...)   │
+│  └─ Clock &amp; Power Management            │
+├─────────────────────────────────────────┤
+│  Hardware                               │
+│  ├─ Sensors                             │
+│  ├─ Actuators                           │
+│  └─ External Interfaces                 │
+└─────────────────────────────────────────┘
+</code></pre>
+<h2 id="development-platforms"><a class="header" href="#development-platforms">Development Platforms</a></h2>
+<h3 id="microcontroller-platforms"><a class="header" href="#microcontroller-platforms">Microcontroller Platforms</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Platform</th><th>Processor</th><th>Clock</th><th>Memory</th><th>Use Cases</th></tr></thead><tbody>
+<tr><td><strong><a href="arduino.html">Arduino</a></strong></td><td>AVR/ARM</td><td>16-84 MHz</td><td>2KB-256KB RAM</td><td>Prototyping, education, hobbyist projects</td></tr>
+<tr><td><strong><a href="esp32.html">ESP32</a></strong></td><td>Xtensa/RISC-V</td><td>160-240 MHz</td><td>520KB RAM</td><td>IoT, WiFi/BLE projects</td></tr>
+<tr><td><strong><a href="stm32.html">STM32</a></strong></td><td>ARM Cortex-M</td><td>48-550 MHz</td><td>32KB-2MB RAM</td><td>Professional, industrial applications</td></tr>
+<tr><td><strong><a href="avr.html">AVR</a></strong></td><td>AVR</td><td>1-20 MHz</td><td>512B-16KB RAM</td><td>Low-power, bare-metal programming</td></tr>
+<tr><td><strong><a href="raspberry_pi.html">Raspberry Pi</a></strong></td><td>ARM Cortex-A</td><td>700MHz-2.4GHz</td><td>512MB-8GB RAM</td><td>Linux-based, complex applications</td></tr>
+</tbody></table>
+</div>
+<h3 id="comparison-matrix"><a class="header" href="#comparison-matrix">Comparison Matrix</a></h3>
+<pre><code>Complexity/Capability
+    ^
+    |
+RPi |  ┌──────────┐
+    |  │          │
+STM32| │          │    ┌──────┐
+    |  │          │    │      │
+ESP32|  │          │    │      │  ┌─────┐
+    |  │          │    │      │  │     │
+ARD  |  │          │    │      │  │     │  ┌────┐
+    |  │          │    │      │  │     │  │    │
+AVR  |  │          │    │      │  │     │  │    │
+    |  └──────────┴────┴──────┴──┴─────┴──┴────┘
+    +──────────────────────────────────────────&gt; Cost
+       Low                                  High
+</code></pre>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="memory-architecture"><a class="header" href="#memory-architecture">Memory Architecture</a></h3>
+<h4 id="flash-memory-program-storage"><a class="header" href="#flash-memory-program-storage">Flash Memory (Program Storage)</a></h4>
+<ul>
+<li>Stores program code and constant data</li>
+<li>Non-volatile (persists without power)</li>
+<li>Typically 8KB to several MB</li>
+<li>Limited write cycles (10K-100K)</li>
+</ul>
+<h4 id="sram-runtime-memory"><a class="header" href="#sram-runtime-memory">SRAM (Runtime Memory)</a></h4>
+<ul>
+<li>Stores variables and stack during execution</li>
+<li>Volatile (lost when power removed)</li>
+<li>Fast access, limited size</li>
+<li>Critical resource in embedded systems</li>
+</ul>
+<h4 id="eeprom-persistent-data"><a class="header" href="#eeprom-persistent-data">EEPROM (Persistent Data)</a></h4>
+<ul>
+<li>Stores configuration and calibration data</li>
+<li>Non-volatile, byte-addressable</li>
+<li>Limited write cycles but higher than Flash</li>
+<li>Slower than SRAM</li>
+</ul>
+<pre><code>Memory Map Example (ATmega328P):
+┌────────────────┐ 0x0000
+│  Flash (32KB)  │
+│  Program Code  │
+├────────────────┤ 0x7FFF
+│  SRAM (2KB)    │
+│  Variables     │
+│  Stack         │
+├────────────────┤ 0x08FF
+│  EEPROM (1KB)  │
+│  Persistent    │
+└────────────────┘ 0x03FF
+</code></pre>
+<h3 id="power-management"><a class="header" href="#power-management">Power Management</a></h3>
+<h4 id="operating-modes"><a class="header" href="#operating-modes">Operating Modes</a></h4>
+<ol>
+<li><strong>Active Mode</strong>: Full operation, highest power consumption</li>
+<li><strong>Idle Mode</strong>: CPU stopped, peripherals running</li>
+<li><strong>Sleep Mode</strong>: Most peripherals disabled</li>
+<li><strong>Deep Sleep</strong>: Minimal power, wake on interrupt only</li>
+</ol>
+<h4 id="power-saving-techniques"><a class="header" href="#power-saving-techniques">Power Saving Techniques</a></h4>
+<pre><code class="language-c">// Example: AVR Sleep Mode
+#include &lt;avr/sleep.h&gt;
+#include &lt;avr/power.h&gt;
+
+void enterSleepMode() {
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
+    
+    // Disable unnecessary peripherals
+    power_adc_disable();
+    power_spi_disable();
+    power_timer0_disable();
+    
+    sleep_mode();  // Enter sleep
+    
+    // Wake up here after interrupt
+    sleep_disable();
+    
+    // Re-enable peripherals
+    power_all_enable();
+}
+</code></pre>
+<h3 id="interrupt-driven-programming"><a class="header" href="#interrupt-driven-programming">Interrupt-Driven Programming</a></h3>
+<p>Interrupts allow the processor to respond to events immediately without polling.</p>
+<pre><code class="language-c">// Example: External Interrupt
+volatile bool buttonPressed = false;
+
+// Interrupt Service Routine (ISR)
+void EXTI0_IRQHandler(void) {
+    if (EXTI-&gt;PR &amp; EXTI_PR_PR0) {
+        buttonPressed = true;
+        EXTI-&gt;PR |= EXTI_PR_PR0;  // Clear interrupt flag
+    }
+}
+
+int main(void) {
+    // Setup interrupt
+    RCC-&gt;APB2ENR |= RCC_APB2ENR_IOPAEN;
+    GPIOA-&gt;CRL &amp;= ~GPIO_CRL_CNF0;
+    GPIOA-&gt;CRL |= GPIO_CRL_CNF0_1;  // Input with pull-up
+    
+    AFIO-&gt;EXTICR[0] = AFIO_EXTICR1_EXTI0_PA;
+    EXTI-&gt;IMR |= EXTI_IMR_MR0;
+    EXTI-&gt;FTSR |= EXTI_FTSR_TR0;  // Falling edge
+    
+    NVIC_EnableIRQ(EXTI0_IRQn);
+    
+    while (1) {
+        if (buttonPressed) {
+            // Handle button press
+            buttonPressed = false;
+        }
+        // Main loop continues
+    }
+}
+</code></pre>
+<h2 id="communication-protocols"><a class="header" href="#communication-protocols">Communication Protocols</a></h2>
+<h3 id="serial-protocols-overview"><a class="header" href="#serial-protocols-overview">Serial Protocols Overview</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Protocol</th><th>Type</th><th>Speed</th><th>Wires</th><th>Use Case</th></tr></thead><tbody>
+<tr><td><strong><a href="uart.html">UART</a></strong></td><td>Asynchronous</td><td>Up to 1 Mbps</td><td>2 (TX/RX)</td><td>Debug, GPS, Bluetooth modules</td></tr>
+<tr><td><strong><a href="spi.html">SPI</a></strong></td><td>Synchronous</td><td>Up to 50 Mbps</td><td>4+ (MOSI/MISO/SCK/CS)</td><td>SD cards, displays, high-speed sensors</td></tr>
+<tr><td><strong><a href="i2c.html">I2C</a></strong></td><td>Synchronous</td><td>100-400 kHz</td><td>2 (SDA/SCL)</td><td>Sensors, RTCs, EEPROMs</td></tr>
+<tr><td><strong><a href="can.html">CAN</a></strong></td><td>Differential</td><td>Up to 1 Mbps</td><td>2 (CAN_H/CAN_L)</td><td>Automotive, industrial</td></tr>
+<tr><td><strong><a href="usb.html">USB</a></strong></td><td>Differential</td><td>1.5-480 Mbps</td><td>2 (D+/D-)</td><td>PC interface, peripherals</td></tr>
+</tbody></table>
+</div>
+<h3 id="protocol-comparison"><a class="header" href="#protocol-comparison">Protocol Comparison</a></h3>
+<pre><code>Speed (Mbps)
+    ^
+    |
+100 |                    ┌─── USB 2.0
+    |                    │
+ 50 |            ┌─── SPI│
+    |            │       │
+ 10 |            │       │
+    |            │       │
+  1 |  ┌─ UART  │       │
+    |  │    │   │       │
+0.1 |  │ I2C│   │       │
+    |  │    │   │       │
+    └──┴────┴───┴───────┴────────&gt; Complexity
+       Low              High
+</code></pre>
+<h2 id="peripheral-interfaces"><a class="header" href="#peripheral-interfaces">Peripheral Interfaces</a></h2>
+<h3 id="digital-io-gpio"><a class="header" href="#digital-io-gpio">Digital I/O (<a href="gpio.html">GPIO</a>)</a></h3>
+<ul>
+<li>General Purpose Input/Output pins</li>
+<li>Digital HIGH/LOW states</li>
+<li>Input modes: floating, pull-up, pull-down</li>
+<li>Output modes: push-pull, open-drain</li>
+</ul>
+<h3 id="analog-interfaces"><a class="header" href="#analog-interfaces">Analog Interfaces</a></h3>
+<ul>
+<li><strong><a href="adc.html">ADC</a></strong>: Convert analog voltages to digital values</li>
+<li><strong><a href="dac.html">DAC</a></strong>: Convert digital values to analog voltages</li>
+<li><strong><a href="pwm.html">PWM</a></strong>: Pulse Width Modulation for analog-like output</li>
+</ul>
+<h3 id="timing-and-control"><a class="header" href="#timing-and-control">Timing and Control</a></h3>
+<ul>
+<li><strong><a href="timers.html">Timers</a></strong>: Hardware timers for precise timing</li>
+<li><strong><a href="interrupts.html">Interrupts</a></strong>: Event-driven programming</li>
+<li><strong><a href="watchdog.html">Watchdog</a></strong>: System reliability and reset</li>
+</ul>
+<h3 id="specialized-interfaces"><a class="header" href="#specialized-interfaces">Specialized Interfaces</a></h3>
+<ul>
+<li><strong><a href="rtc.html">RTC</a></strong>: Real-Time Clock for timekeeping</li>
+<li><strong><a href="sdio.html">SDIO</a></strong>: SD card interface</li>
+<li><strong><a href="ethernet.html">Ethernet</a></strong>: Network connectivity</li>
+</ul>
+<h2 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h2>
+<h3 id="development-environment-setup"><a class="header" href="#development-environment-setup">Development Environment Setup</a></h3>
+<h4 id="1-choose-your-platform"><a class="header" href="#1-choose-your-platform">1. Choose Your Platform</a></h4>
+<p>Start with Arduino for beginners, or jump to STM32/ESP32 for more advanced projects.</p>
+<h4 id="2-install-tools"><a class="header" href="#2-install-tools">2. Install Tools</a></h4>
+<p><strong>For Arduino:</strong></p>
+<pre><code class="language-bash"># Download Arduino IDE from arduino.cc
+# Or use Arduino CLI
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+</code></pre>
+<p><strong>For STM32:</strong></p>
+<pre><code class="language-bash"># Install STM32CubeIDE
+# Download from st.com
+# Or use PlatformIO
+pip install platformio
+</code></pre>
+<p><strong>For ESP32:</strong></p>
+<pre><code class="language-bash"># Add ESP32 to Arduino IDE
+# Or use ESP-IDF
+git clone --recursive https://github.com/espressif/esp-idf.git
+cd esp-idf
+./install.sh
+</code></pre>
+<h4 id="3-hardware-setup"><a class="header" href="#3-hardware-setup">3. Hardware Setup</a></h4>
+<p><strong>Minimum Requirements:</strong></p>
+<ul>
+<li>Development board (Arduino Uno, ESP32, STM32 Nucleo, etc.)</li>
+<li>USB cable</li>
+<li>Computer with IDE installed</li>
+<li>Optional: Breadboard, jumper wires, components</li>
+</ul>
+<p><strong>Development Kit:</strong></p>
+<pre><code>Essential Components:
+├─ Microcontroller board
+├─ USB cable
+├─ Breadboard
+├─ Jumper wires (male-male, male-female)
+├─ LEDs and resistors (220Ω)
+├─ Push buttons
+├─ Potentiometer (10kΩ)
+└─ Multimeter
+
+Sensors (Optional):
+├─ Temperature (DHT11/22, DS18B20)
+├─ Distance (HC-SR04 ultrasonic)
+├─ Light (LDR, BH1750)
+└─ Motion (PIR, MPU6050)
+</code></pre>
+<h3 id="first-program-blink-led"><a class="header" href="#first-program-blink-led">First Program: Blink LED</a></h3>
+<h4 id="arduino-version"><a class="header" href="#arduino-version">Arduino Version</a></h4>
+<pre><code class="language-cpp">// Blink LED on pin 13
+void setup() {
+    pinMode(13, OUTPUT);
+}
+
+void loop() {
+    digitalWrite(13, HIGH);
+    delay(1000);
+    digitalWrite(13, LOW);
+    delay(1000);
+}
+</code></pre>
+<h4 id="stm32-hal-version"><a class="header" href="#stm32-hal-version">STM32 HAL Version</a></h4>
+<pre><code class="language-c">#include "stm32f4xx_hal.h"
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &amp;GPIO_InitStruct);
+    
+    while (1) {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        HAL_Delay(1000);
+    }
+}
+</code></pre>
+<h4 id="bare-metal-avr-version"><a class="header" href="#bare-metal-avr-version">Bare Metal AVR Version</a></h4>
+<pre><code class="language-c">#include &lt;avr/io.h&gt;
+#include &lt;util/delay.h&gt;
+
+int main(void) {
+    DDRB |= (1 &lt;&lt; DDB5);  // Set PB5 as output
+    
+    while (1) {
+        PORTB |= (1 &lt;&lt; PORTB5);   // LED on
+        _delay_ms(1000);
+        PORTB &amp;= ~(1 &lt;&lt; PORTB5);  // LED off
+        _delay_ms(1000);
+    }
+    
+    return 0;
+}
+</code></pre>
+<h3 id="learning-path"><a class="header" href="#learning-path">Learning Path</a></h3>
+<pre><code>┌─────────────────────────────────────────────┐
+│ Level 1: Fundamentals                       │
+├─────────────────────────────────────────────┤
+│ • Digital I/O (LED, button)                 │
+│ • Analog input (ADC, potentiometer)         │
+│ • PWM (LED brightness, motor speed)         │
+│ • Serial communication (UART debug)         │
+└─────────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────┐
+│ Level 2: Intermediate                       │
+├─────────────────────────────────────────────┤
+│ • Timers and interrupts                     │
+│ • I2C sensors (temperature, accelerometer)  │
+│ • SPI devices (SD card, display)            │
+│ • State machines                            │
+└─────────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────┐
+│ Level 3: Advanced                           │
+├─────────────────────────────────────────────┤
+│ • DMA transfers                             │
+│ • RTOS (FreeRTOS)                          │
+│ • Low-power optimization                    │
+│ • Bootloaders and OTA updates              │
+└─────────────────────────────────────────────┘
+</code></pre>
+<h3 id="common-project-ideas"><a class="header" href="#common-project-ideas">Common Project Ideas</a></h3>
+<ol>
+<li>
+<p><strong>Beginner Projects</strong></p>
+<ul>
+<li>LED blink and patterns</li>
+<li>Button-controlled LED</li>
+<li>Temperature monitor</li>
+<li>Light-sensitive nightlight</li>
+</ul>
+</li>
+<li>
+<p><strong>Intermediate Projects</strong></p>
+<ul>
+<li>Digital thermometer with display</li>
+<li>Motor speed controller</li>
+<li>Distance measurement system</li>
+<li>Data logger with SD card</li>
+</ul>
+</li>
+<li>
+<p><strong>Advanced Projects</strong></p>
+<ul>
+<li>Weather station with WiFi</li>
+<li>Robot controller</li>
+<li>Home automation system</li>
+<li>Wireless sensor network</li>
+</ul>
+</li>
+</ol>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="code-organization"><a class="header" href="#code-organization">Code Organization</a></h3>
+<pre><code class="language-c">// Good structure
+├─ src/
+│  ├─ main.c
+│  ├─ drivers/
+│  │  ├─ sensor.c
+│  │  └─ display.c
+│  └─ app/
+│     ├─ control.c
+│     └─ config.c
+├─ inc/
+│  ├─ sensor.h
+│  ├─ display.h
+│  └─ config.h
+└─ Makefile
+</code></pre>
+<h3 id="design-principles"><a class="header" href="#design-principles">Design Principles</a></h3>
+<ol>
+<li><strong>Keep ISRs Short</strong>: Minimal processing in interrupt handlers</li>
+<li><strong>Use Volatile</strong>: For variables modified by ISRs</li>
+<li><strong>Debounce Inputs</strong>: Software or hardware debouncing for buttons</li>
+<li><strong>Watchdog Timer</strong>: Implement system recovery</li>
+<li><strong>Power Efficiency</strong>: Use sleep modes when idle</li>
+<li><strong>Error Handling</strong>: Check return values and handle failures</li>
+<li><strong>Documentation</strong>: Comment complex logic and register operations</li>
+</ol>
+<h3 id="debugging-techniques"><a class="header" href="#debugging-techniques">Debugging Techniques</a></h3>
+<pre><code class="language-c">// UART debug output
+void debug_print(const char* msg) {
+    uart_send_string(msg);
+}
+
+// LED status indicators
+#define LED_ERROR   GPIO_PIN_0
+#define LED_OK      GPIO_PIN_1
+#define LED_BUSY    GPIO_PIN_2
+
+// Assert macro
+#define ASSERT(expr) \
+    if (!(expr)) { \
+        debug_print("Assert failed: " #expr); \
+        while(1);  // Halt \
+    }
+</code></pre>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<h3 id="documentation"><a class="header" href="#documentation">Documentation</a></h3>
+<ul>
+<li>Platform-specific datasheets and reference manuals</li>
+<li>Peripheral application notes</li>
+<li>HAL/LL library documentation</li>
+</ul>
+<h3 id="tools"><a class="header" href="#tools">Tools</a></h3>
+<ul>
+<li><strong>Oscilloscope</strong>: Analyze signals and timing</li>
+<li><strong>Logic Analyzer</strong>: Debug digital protocols</li>
+<li><strong>Multimeter</strong>: Measure voltages and continuity</li>
+<li><strong>Debugger</strong>: JTAG/SWD for step-through debugging</li>
+</ul>
+<h3 id="communities"><a class="header" href="#communities">Communities</a></h3>
+<ul>
+<li>Arduino Forum</li>
+<li>STM32 Community</li>
+<li>ESP32 Forum</li>
+<li>Reddit: r/embedded, r/arduino</li>
+<li>Stack Overflow: Embedded tag</li>
+</ul>
+<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
+<ul>
+<li><a href="gpio.html">GPIO Programming</a></li>
+<li><a href="uart.html">UART Communication</a></li>
+<li><a href="interrupts.html">Interrupt Handling</a></li>
+<li><a href="power_management.html">Power Management</a></li>
+<li><a href="debugging.html">Debugging Techniques</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

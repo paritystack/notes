@@ -177,7 +177,937 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="digital-signatures"><a class="header" href="#digital-signatures">Digital Signatures</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A digital signature is a cryptographic mechanism that provides:</p>
+<ul>
+<li><strong>Authentication</strong>: Proves who created the signature</li>
+<li><strong>Integrity</strong>: Detects any changes to the signed data</li>
+<li><strong>Non-repudiation</strong>: Signer cannot deny signing (unlike HMAC)</li>
+</ul>
+<p>Digital signatures use <strong>asymmetric cryptography</strong> (public/private key pairs).</p>
+<h2 id="digital-signature-vs-hmac"><a class="header" href="#digital-signature-vs-hmac">Digital Signature vs HMAC</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Digital Signature</th><th>HMAC</th></tr></thead><tbody>
+<tr><td><strong>Keys</strong></td><td>Public/Private key pair</td><td>Shared secret key</td></tr>
+<tr><td><strong>Verification</strong></td><td>Anyone with public key</td><td>Only parties with secret</td></tr>
+<tr><td><strong>Non-repudiation</strong></td><td>Yes</td><td>No</td></tr>
+<tr><td><strong>Performance</strong></td><td>Slower</td><td>Faster</td></tr>
+<tr><td><strong>Key distribution</strong></td><td>Public key can be shared</td><td>Secret must be protected</td></tr>
+<tr><td><strong>Use case</strong></td><td>Documents, software, certificates</td><td>API auth, sessions</td></tr>
+</tbody></table>
+</div>
+<h2 id="how-digital-signatures-work"><a class="header" href="#how-digital-signatures-work">How Digital Signatures Work</a></h2>
+<h3 id="signing-process"><a class="header" href="#signing-process">Signing Process</a></h3>
+<pre><code>1. Hash the message
+   Message → Hash Function → Digest
+
+2. Encrypt digest with private key
+   Digest → Private Key → Signature
+
+3. Attach signature to message
+   Message + Signature → Signed Document
+</code></pre>
+<h3 id="verification-process"><a class="header" href="#verification-process">Verification Process</a></h3>
+<pre><code>1. Hash the received message
+   Message → Hash Function → Digest₁
+
+2. Decrypt signature with public key
+   Signature → Public Key → Digest₂
+
+3. Compare digests
+   If Digest₁ == Digest₂ → Valid Signature
+</code></pre>
+<h3 id="visual-representation"><a class="header" href="#visual-representation">Visual Representation</a></h3>
+<pre><code>SIGNING:
+                    Message
+                       |
+                   Hash (SHA-256)
+                       |
+                    Digest
+                       |
+            Encrypt with Private Key
+                       |
+                   Signature
+                       |
+            Message + Signature
+
+
+VERIFICATION:
+            Message + Signature
+                |           |
+                |           |
+           Hash (SHA-256)   Decrypt with Public Key
+                |           |
+             Digest₁     Digest₂
+                |           |
+                +-----+-----+
+                      |
+                  Compare
+                      |
+                Valid/Invalid
+</code></pre>
+<h2 id="rsa-signatures"><a class="header" href="#rsa-signatures">RSA Signatures</a></h2>
+<h3 id="rsa-algorithm-overview"><a class="header" href="#rsa-algorithm-overview">RSA Algorithm Overview</a></h3>
+<p>RSA uses modular arithmetic with large prime numbers:</p>
+<ul>
+<li><strong>Key Generation</strong>: Create public (e, n) and private (d, n) keys</li>
+<li><strong>Signing</strong>: signature = (hash)^d mod n</li>
+<li><strong>Verification</strong>: hash = (signature)^e mod n</li>
+</ul>
+<h3 id="generating-rsa-keys"><a class="header" href="#generating-rsa-keys">Generating RSA Keys</a></h3>
+<h4 id="python-cryptography-library"><a class="header" href="#python-cryptography-library">Python (cryptography library)</a></h4>
+<pre><code class="language-python">from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
+# Generate private key
+private_key = rsa.generate_private_key(
+    public_exponent=65537,
+    key_size=2048,  # 2048 or 4096 bits
+)
+
+# Generate public key
+public_key = private_key.public_key()
+
+# Save private key
+pem_private = private_key.private_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption()
+)
+
+with open('private_key.pem', 'wb') as f:
+    f.write(pem_private)
+
+# Save public key
+pem_public = public_key.public_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo
+)
+
+with open('public_key.pem', 'wb') as f:
+    f.write(pem_public)
+</code></pre>
+<h4 id="openssl-bash"><a class="header" href="#openssl-bash">OpenSSL (Bash)</a></h4>
+<pre><code class="language-bash"># Generate private key (2048-bit RSA)
+openssl genrsa -out private_key.pem 2048
+
+# Generate private key with password protection
+openssl genrsa -aes256 -out private_key.pem 2048
+
+# Extract public key from private key
+openssl rsa -in private_key.pem -pubout -out public_key.pem
+
+# Generate 4096-bit key (more secure)
+openssl genrsa -out private_key.pem 4096
+
+# View key details
+openssl rsa -in private_key.pem -text -noout
+</code></pre>
+<h3 id="signing-with-rsa"><a class="header" href="#signing-with-rsa">Signing with RSA</a></h3>
+<h4 id="python-example"><a class="header" href="#python-example">Python Example</a></h4>
+<pre><code class="language-python">from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization
+
+# Load private key
+with open('private_key.pem', 'rb') as f:
+    private_key = serialization.load_pem_private_key(
+        f.read(),
+        password=None
+    )
+
+# Message to sign
+message = b"This is an important document"
+
+# Sign message (RSA-PSS with SHA-256)
+signature = private_key.sign(
+    message,
+    padding.PSS(
+        mgf=padding.MGF1(hashes.SHA256()),
+        salt_length=padding.PSS.MAX_LENGTH
+    ),
+    hashes.SHA256()
+)
+
+print(f"Signature: {signature.hex()}")
+print(f"Signature length: {len(signature)} bytes")
+
+# Save signature
+with open('signature.bin', 'wb') as f:
+    f.write(signature)
+</code></pre>
+<h4 id="openssl-example"><a class="header" href="#openssl-example">OpenSSL Example</a></h4>
+<pre><code class="language-bash"># Sign a file
+openssl dgst -sha256 -sign private_key.pem -out signature.bin document.txt
+
+# Sign with different hash algorithms
+openssl dgst -sha512 -sign private_key.pem -out signature.bin document.txt
+
+# Create detached signature
+openssl dgst -sha256 -sign private_key.pem -out document.sig document.pdf
+</code></pre>
+<h3 id="verifying-rsa-signatures"><a class="header" href="#verifying-rsa-signatures">Verifying RSA Signatures</a></h3>
+<h4 id="python-example-1"><a class="header" href="#python-example-1">Python Example</a></h4>
+<pre><code class="language-python">from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization
+from cryptography.exceptions import InvalidSignature
+
+# Load public key
+with open('public_key.pem', 'rb') as f:
+    public_key = serialization.load_pem_public_key(f.read())
+
+# Load signature
+with open('signature.bin', 'rb') as f:
+    signature = f.read()
+
+# Message to verify
+message = b"This is an important document"
+
+# Verify signature
+try:
+    public_key.verify(
+        signature,
+        message,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    print("✓ Signature is valid!")
+except InvalidSignature:
+    print("✗ Invalid signature!")
+
+# Complete example
+def verify_document(public_key_path, document, signature):
+    with open(public_key_path, 'rb') as f:
+        public_key = serialization.load_pem_public_key(f.read())
+    
+    try:
+        public_key.verify(
+            signature,
+            document,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except InvalidSignature:
+        return False
+</code></pre>
+<h4 id="openssl-example-1"><a class="header" href="#openssl-example-1">OpenSSL Example</a></h4>
+<pre><code class="language-bash"># Verify signature
+openssl dgst -sha256 -verify public_key.pem -signature signature.bin document.txt
+
+# Output:
+# Verified OK  (if valid)
+# Verification Failure  (if invalid)
+
+# Verify detached signature
+openssl dgst -sha256 -verify public_key.pem -signature document.sig document.pdf
+</code></pre>
+<h3 id="rsa-padding-schemes"><a class="header" href="#rsa-padding-schemes">RSA Padding Schemes</a></h3>
+<h4 id="pkcs1-v15-legacy"><a class="header" href="#pkcs1-v15-legacy">PKCS#1 v1.5 (Legacy)</a></h4>
+<pre><code class="language-python">from cryptography.hazmat.primitives.asymmetric import padding
+
+# Sign with PKCS#1 v1.5 (not recommended)
+signature = private_key.sign(
+    message,
+    padding.PKCS1v15(),
+    hashes.SHA256()
+)
+</code></pre>
+<h4 id="pss-recommended"><a class="header" href="#pss-recommended">PSS (Recommended)</a></h4>
+<pre><code class="language-python"># Sign with PSS (Probabilistic Signature Scheme)
+signature = private_key.sign(
+    message,
+    padding.PSS(
+        mgf=padding.MGF1(hashes.SHA256()),
+        salt_length=padding.PSS.MAX_LENGTH
+    ),
+    hashes.SHA256()
+)
+</code></pre>
+<h2 id="ecdsa-elliptic-curve-digital-signature-algorithm"><a class="header" href="#ecdsa-elliptic-curve-digital-signature-algorithm">ECDSA (Elliptic Curve Digital Signature Algorithm)</a></h2>
+<h3 id="overview-1"><a class="header" href="#overview-1">Overview</a></h3>
+<p>ECDSA provides equivalent security to RSA with much smaller keys:</p>
+<ul>
+<li><strong>RSA 2048-bit</strong> ≈ <strong>ECDSA 224-bit</strong></li>
+<li><strong>RSA 3072-bit</strong> ≈ <strong>ECDSA 256-bit</strong></li>
+<li><strong>RSA 15360-bit</strong> ≈ <strong>ECDSA 512-bit</strong></li>
+</ul>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li>Smaller keys</li>
+<li>Faster signing</li>
+<li>Less bandwidth</li>
+<li>Less storage</li>
+</ul>
+<h3 id="common-curves"><a class="header" href="#common-curves">Common Curves</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Curve</th><th>Bits</th><th>Security</th><th>Use Case</th></tr></thead><tbody>
+<tr><td><strong>P-256</strong> (secp256r1)</td><td>256</td><td>~128-bit</td><td>General purpose, TLS</td></tr>
+<tr><td><strong>P-384</strong> (secp384r1)</td><td>384</td><td>~192-bit</td><td>High security</td></tr>
+<tr><td><strong>P-521</strong> (secp521r1)</td><td>521</td><td>~256-bit</td><td>Maximum security</td></tr>
+<tr><td><strong>secp256k1</strong></td><td>256</td><td>~128-bit</td><td>Bitcoin, cryptocurrencies</td></tr>
+</tbody></table>
+</div>
+<h3 id="generating-ecdsa-keys"><a class="header" href="#generating-ecdsa-keys">Generating ECDSA Keys</a></h3>
+<h4 id="python-example-2"><a class="header" href="#python-example-2">Python Example</a></h4>
+<pre><code class="language-python">from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import serialization
+
+# Generate private key (P-256 curve)
+private_key = ec.generate_private_key(ec.SECP256R1())
+
+# Extract public key
+public_key = private_key.public_key()
+
+# Save private key
+pem_private = private_key.private_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption()
+)
+
+with open('ec_private_key.pem', 'wb') as f:
+    f.write(pem_private)
+
+# Save public key
+pem_public = public_key.public_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo
+)
+
+with open('ec_public_key.pem', 'wb') as f:
+    f.write(pem_public)
+
+# Different curves
+# P-256 (most common)
+key_p256 = ec.generate_private_key(ec.SECP256R1())
+
+# P-384 (higher security)
+key_p384 = ec.generate_private_key(ec.SECP384R1())
+
+# P-521 (maximum security)
+key_p521 = ec.generate_private_key(ec.SECP521R1())
+
+# secp256k1 (Bitcoin)
+key_secp256k1 = ec.generate_private_key(ec.SECP256K1())
+</code></pre>
+<h4 id="openssl-example-2"><a class="header" href="#openssl-example-2">OpenSSL Example</a></h4>
+<pre><code class="language-bash"># Generate EC private key (P-256)
+openssl ecparam -name prime256v1 -genkey -noout -out ec_private_key.pem
+
+# Generate with P-384
+openssl ecparam -name secp384r1 -genkey -noout -out ec_private_key.pem
+
+# Generate with P-521
+openssl ecparam -name secp521r1 -genkey -noout -out ec_private_key.pem
+
+# Extract public key
+openssl ec -in ec_private_key.pem -pubout -out ec_public_key.pem
+
+# View key details
+openssl ec -in ec_private_key.pem -text -noout
+
+# List available curves
+openssl ecparam -list_curves
+</code></pre>
+<h3 id="signing-with-ecdsa"><a class="header" href="#signing-with-ecdsa">Signing with ECDSA</a></h3>
+<h4 id="python-example-3"><a class="header" href="#python-example-3">Python Example</a></h4>
+<pre><code class="language-python">from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import serialization
+
+# Load private key
+with open('ec_private_key.pem', 'rb') as f:
+    private_key = serialization.load_pem_private_key(
+        f.read(),
+        password=None
+    )
+
+# Message to sign
+message = b"ECDSA signature example"
+
+# Sign message
+signature = private_key.sign(
+    message,
+    ec.ECDSA(hashes.SHA256())
+)
+
+print(f"ECDSA Signature: {signature.hex()}")
+print(f"Signature length: {len(signature)} bytes")
+
+# For P-256, signature is ~64 bytes (vs ~256 bytes for RSA-2048!)
+</code></pre>
+<h4 id="openssl-example-3"><a class="header" href="#openssl-example-3">OpenSSL Example</a></h4>
+<pre><code class="language-bash"># Sign with ECDSA
+openssl dgst -sha256 -sign ec_private_key.pem -out ecdsa_signature.bin document.txt
+
+# Verify ECDSA signature
+openssl dgst -sha256 -verify ec_public_key.pem -signature ecdsa_signature.bin document.txt
+</code></pre>
+<h3 id="verifying-ecdsa-signatures"><a class="header" href="#verifying-ecdsa-signatures">Verifying ECDSA Signatures</a></h3>
+<pre><code class="language-python">from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import serialization
+from cryptography.exceptions import InvalidSignature
+
+# Load public key
+with open('ec_public_key.pem', 'rb') as f:
+    public_key = serialization.load_pem_public_key(f.read())
+
+# Message and signature
+message = b"ECDSA signature example"
+
+with open('ecdsa_signature.bin', 'rb') as f:
+    signature = f.read()
+
+# Verify signature
+try:
+    public_key.verify(
+        signature,
+        message,
+        ec.ECDSA(hashes.SHA256())
+    )
+    print("✓ ECDSA signature is valid!")
+except InvalidSignature:
+    print("✗ Invalid ECDSA signature!")
+</code></pre>
+<h2 id="eddsa-edwards-curve-digital-signature-algorithm"><a class="header" href="#eddsa-edwards-curve-digital-signature-algorithm">EdDSA (Edwards-curve Digital Signature Algorithm)</a></h2>
+<h3 id="overview-2"><a class="header" href="#overview-2">Overview</a></h3>
+<p>EdDSA is a modern signature scheme designed for high performance and security.</p>
+<p><strong>Ed25519</strong> (most common):</p>
+<ul>
+<li>256-bit keys</li>
+<li>Fast signing and verification</li>
+<li>Deterministic (no random number needed)</li>
+<li>Resistant to side-channel attacks</li>
+</ul>
+<h3 id="generating-ed25519-keys"><a class="header" href="#generating-ed25519-keys">Generating Ed25519 Keys</a></h3>
+<pre><code class="language-python">from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives import serialization
+
+# Generate private key
+private_key = ed25519.Ed25519PrivateKey.generate()
+
+# Extract public key
+public_key = private_key.public_key()
+
+# Save private key
+pem_private = private_key.private_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption()
+)
+
+with open('ed25519_private_key.pem', 'wb') as f:
+    f.write(pem_private)
+
+# Save public key
+pem_public = public_key.public_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo
+)
+
+with open('ed25519_public_key.pem', 'wb') as f:
+    f.write(pem_public)
+
+# Raw bytes format (32 bytes each)
+private_bytes = private_key.private_bytes(
+    encoding=serialization.Encoding.Raw,
+    format=serialization.PrivateFormat.Raw,
+    encryption_algorithm=serialization.NoEncryption()
+)
+
+public_bytes = public_key.public_bytes(
+    encoding=serialization.Encoding.Raw,
+    format=serialization.PublicFormat.Raw
+)
+
+print(f"Private key: {private_bytes.hex()} ({len(private_bytes)} bytes)")
+print(f"Public key: {public_bytes.hex()} ({len(public_bytes)} bytes)")
+</code></pre>
+<h3 id="signing-with-ed25519"><a class="header" href="#signing-with-ed25519">Signing with Ed25519</a></h3>
+<pre><code class="language-python">from cryptography.hazmat.primitives.asymmetric import ed25519
+
+# Generate key
+private_key = ed25519.Ed25519PrivateKey.generate()
+
+# Message to sign
+message = b"Ed25519 is fast and secure!"
+
+# Sign (deterministic, no hash function needed)
+signature = private_key.sign(message)
+
+print(f"Ed25519 Signature: {signature.hex()}")
+print(f"Signature length: {len(signature)} bytes")  # Always 64 bytes
+
+# Verify
+public_key = private_key.public_key()
+
+try:
+    public_key.verify(signature, message)
+    print("✓ Signature valid!")
+except:
+    print("✗ Invalid signature!")
+</code></pre>
+<h3 id="performance-comparison"><a class="header" href="#performance-comparison">Performance Comparison</a></h3>
+<pre><code class="language-python">import time
+from cryptography.hazmat.primitives.asymmetric import rsa, ec, ed25519
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+
+message = b"Performance test message"
+
+# RSA
+rsa_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+start = time.time()
+for _ in range(1000):
+    sig = rsa_key.sign(message, padding.PSS(mgf=padding.MGF1(hashes.SHA256()), 
+                       salt_length=padding.PSS.MAX_LENGTH), hashes.SHA256())
+rsa_time = time.time() - start
+
+# ECDSA
+ec_key = ec.generate_private_key(ec.SECP256R1())
+start = time.time()
+for _ in range(1000):
+    sig = ec_key.sign(message, ec.ECDSA(hashes.SHA256()))
+ecdsa_time = time.time() - start
+
+# Ed25519
+ed_key = ed25519.Ed25519PrivateKey.generate()
+start = time.time()
+for _ in range(1000):
+    sig = ed_key.sign(message)
+ed25519_time = time.time() - start
+
+print(f"RSA-2048:  {rsa_time:.3f}s")
+print(f"ECDSA-256: {ecdsa_time:.3f}s")
+print(f"Ed25519:   {ed25519_time:.3f}s")
+
+# Typical results:
+# RSA-2048:  5.234s  (slowest)
+# ECDSA-256: 1.876s  (fast)
+# Ed25519:   0.156s  (fastest!)
+</code></pre>
+<h2 id="signature-verification"><a class="header" href="#signature-verification">Signature Verification</a></h2>
+<h3 id="complete-verification-example"><a class="header" href="#complete-verification-example">Complete Verification Example</a></h3>
+<pre><code class="language-python">from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes
+from cryptography.exceptions import InvalidSignature
+
+class DocumentSigner:
+    def __init__(self, private_key_path=None, public_key_path=None):
+        if private_key_path:
+            with open(private_key_path, 'rb') as f:
+                self.private_key = serialization.load_pem_private_key(
+                    f.read(),
+                    password=None
+                )
+        
+        if public_key_path:
+            with open(public_key_path, 'rb') as f:
+                self.public_key = serialization.load_pem_public_key(f.read())
+    
+    def sign_document(self, document):
+        signature = self.private_key.sign(
+            document,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return signature
+    
+    def verify_document(self, document, signature):
+        try:
+            self.public_key.verify(
+                signature,
+                document,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+            return True, "Signature is valid"
+        except InvalidSignature:
+            return False, "Invalid signature - document may be tampered"
+        except Exception as e:
+            return False, f"Verification error: {str(e)}"
+    
+    def sign_file(self, filepath, signature_path):
+        with open(filepath, 'rb') as f:
+            document = f.read()
+        
+        signature = self.sign_document(document)
+        
+        with open(signature_path, 'wb') as f:
+            f.write(signature)
+        
+        return signature
+    
+    def verify_file(self, filepath, signature_path):
+        with open(filepath, 'rb') as f:
+            document = f.read()
+        
+        with open(signature_path, 'rb') as f:
+            signature = f.read()
+        
+        return self.verify_document(document, signature)
+
+# Usage
+# Signing
+signer = DocumentSigner(private_key_path='private_key.pem')
+document = b"Important contract: Alice pays Bob $1000"
+signature = signer.sign_document(document)
+
+# Verification
+verifier = DocumentSigner(public_key_path='public_key.pem')
+is_valid, message = verifier.verify_document(document, signature)
+print(f"{message}")
+
+# File signing
+signer.sign_file('contract.pdf', 'contract.pdf.sig')
+is_valid, message = verifier.verify_file('contract.pdf', 'contract.pdf.sig')
+print(f"Contract verification: {message}")
+</code></pre>
+<h2 id="code-signing"><a class="header" href="#code-signing">Code Signing</a></h2>
+<h3 id="signing-softwarescripts"><a class="header" href="#signing-softwarescripts">Signing Software/Scripts</a></h3>
+<pre><code class="language-bash"># Sign a Python script
+openssl dgst -sha256 -sign private_key.pem -out script.py.sig script.py
+
+# Create a signed package
+tar -czf package.tar.gz files/
+openssl dgst -sha256 -sign private_key.pem -out package.tar.gz.sig package.tar.gz
+
+# Verification script
+#!/bin/bash
+FILE=$1
+SIG=$2
+PUBKEY=$3
+
+openssl dgst -sha256 -verify $PUBKEY -signature $SIG $FILE
+
+if [ $? -eq 0 ]; then
+    echo "✓ Signature verified - safe to run"
+else
+    echo "✗ Invalid signature - DO NOT RUN"
+    exit 1
+fi
+</code></pre>
+<h3 id="python-code-signing-example"><a class="header" href="#python-code-signing-example">Python Code Signing Example</a></h3>
+<pre><code class="language-python">import os
+import hashlib
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes
+
+class CodeSigner:
+    def __init__(self, private_key_path):
+        with open(private_key_path, 'rb') as f:
+            self.private_key = serialization.load_pem_private_key(
+                f.read(),
+                password=None
+            )
+    
+    def sign_file(self, filepath):
+        # Read file
+        with open(filepath, 'rb') as f:
+            code = f.read()
+        
+        # Generate signature
+        signature = self.private_key.sign(
+            code,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        
+        # Save signature
+        sig_path = filepath + '.sig'
+        with open(sig_path, 'wb') as f:
+            f.write(signature)
+        
+        print(f"✓ Signed: {filepath}")
+        print(f"✓ Signature: {sig_path}")
+        
+        return signature
+
+class CodeVerifier:
+    def __init__(self, public_key_path):
+        with open(public_key_path, 'rb') as f:
+            self.public_key = serialization.load_pem_public_key(f.read())
+    
+    def verify_file(self, filepath):
+        sig_path = filepath + '.sig'
+        
+        # Read file and signature
+        with open(filepath, 'rb') as f:
+            code = f.read()
+        
+        with open(sig_path, 'rb') as f:
+            signature = f.read()
+        
+        # Verify
+        try:
+            self.public_key.verify(
+                signature,
+                code,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+            print(f"✓ Signature valid for {filepath}")
+            return True
+        except:
+            print(f"✗ Invalid signature for {filepath}")
+            return False
+
+# Usage
+signer = CodeSigner('private_key.pem')
+signer.sign_file('important_script.py')
+
+verifier = CodeVerifier('public_key.pem')
+if verifier.verify_file('important_script.py'):
+    # Safe to execute
+    exec(open('important_script.py').read())
+</code></pre>
+<h3 id="macos-code-signing"><a class="header" href="#macos-code-signing">macOS Code Signing</a></h3>
+<pre><code class="language-bash"># Sign application
+codesign -s "Developer ID" MyApp.app
+
+# Verify signature
+codesign -v MyApp.app
+
+# Deep verification
+codesign -v --deep MyApp.app
+
+# Display signature info
+codesign -d -vv MyApp.app
+</code></pre>
+<h3 id="windows-code-signing"><a class="header" href="#windows-code-signing">Windows Code Signing</a></h3>
+<pre><code class="language-powershell"># Sign executable with certificate
+signtool sign /f certificate.pfx /p password /t http://timestamp.server.com app.exe
+
+# Verify signature
+signtool verify /pa app.exe
+</code></pre>
+<h2 id="security-considerations"><a class="header" href="#security-considerations">Security Considerations</a></h2>
+<h3 id="1-key-size"><a class="header" href="#1-key-size">1. Key Size</a></h3>
+<pre><code>RSA:
+- Minimum: 2048 bits
+- Recommended: 3072 bits
+- High security: 4096 bits
+
+ECDSA:
+- Minimum: 256 bits (P-256)
+- Recommended: 384 bits (P-384)
+- High security: 521 bits (P-521)
+
+Ed25519:
+- Fixed: 256 bits (equivalent to ~128-bit security)
+</code></pre>
+<h3 id="2-hash-function"><a class="header" href="#2-hash-function">2. Hash Function</a></h3>
+<pre><code class="language-python"># GOOD - SHA-256 or better
+signature = private_key.sign(message, padding.PSS(...), hashes.SHA256())
+
+# BETTER - SHA-512
+signature = private_key.sign(message, padding.PSS(...), hashes.SHA512())
+
+# BAD - SHA-1 (broken!)
+signature = private_key.sign(message, padding.PSS(...), hashes.SHA1())
+</code></pre>
+<h3 id="3-random-number-generation"><a class="header" href="#3-random-number-generation">3. Random Number Generation</a></h3>
+<pre><code class="language-python"># ECDSA requires good randomness
+# Python's cryptography library handles this automatically
+
+# NEVER implement your own random number generator!
+# Use os.urandom() or secrets module for any manual crypto
+import secrets
+random_bytes = secrets.token_bytes(32)
+</code></pre>
+<h3 id="4-private-key-protection"><a class="header" href="#4-private-key-protection">4. Private Key Protection</a></h3>
+<pre><code class="language-python"># Encrypt private key with password
+from cryptography.hazmat.primitives import serialization
+
+encrypted_pem = private_key.private_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.BestAvailableEncryption(b'strong-password')
+)
+
+# Load encrypted key
+with open('encrypted_key.pem', 'rb') as f:
+    private_key = serialization.load_pem_private_key(
+        f.read(),
+        password=b'strong-password'
+    )
+</code></pre>
+<h3 id="5-signature-malleability"><a class="header" href="#5-signature-malleability">5. Signature Malleability</a></h3>
+<pre><code>Some signature schemes allow multiple valid signatures for the same message.
+
+Ed25519: NOT malleable (good!)
+ECDSA: Can be malleable (use canonical form)
+RSA-PSS: Probabilistic (different signatures each time, but all valid)
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-use-modern-algorithms"><a class="header" href="#1-use-modern-algorithms">1. Use Modern Algorithms</a></h3>
+<pre><code>✓ RSA-PSS (not PKCS#1 v1.5)
+✓ ECDSA with P-256 or better
+✓ Ed25519 (best choice for new systems)
+✗ DSA (obsolete)
+✗ RSA with PKCS#1 v1.5 (vulnerable)
+</code></pre>
+<h3 id="2-protect-private-keys"><a class="header" href="#2-protect-private-keys">2. Protect Private Keys</a></h3>
+<pre><code>- Never commit to version control
+- Use hardware security modules (HSM) for critical keys
+- Use key management services (AWS KMS, Azure Key Vault)
+- Encrypt keys at rest
+- Limit access with proper permissions
+</code></pre>
+<h3 id="3-include-metadata"><a class="header" href="#3-include-metadata">3. Include Metadata</a></h3>
+<pre><code class="language-python">import json
+import time
+
+def create_signed_document(content, private_key):
+    metadata = {
+        'content': content,
+        'timestamp': int(time.time()),
+        'signer': 'John Doe',
+        'version': '1.0'
+    }
+    
+    message = json.dumps(metadata, sort_keys=True).encode()
+    signature = private_key.sign(message, ...)
+    
+    return {
+        'metadata': metadata,
+        'signature': signature.hex()
+    }
+</code></pre>
+<h3 id="4-timestamp-signatures"><a class="header" href="#4-timestamp-signatures">4. Timestamp Signatures</a></h3>
+<pre><code class="language-python"># Include timestamp to prevent replay attacks
+import time
+
+def sign_with_timestamp(message, private_key):
+    timestamp = str(int(time.time()))
+    data = f"{timestamp}:{message}".encode()
+    signature = private_key.sign(data, ...)
+    
+    return {
+        'message': message,
+        'timestamp': timestamp,
+        'signature': signature.hex()
+    }
+
+def verify_with_timestamp(signed_data, public_key, max_age=3600):
+    timestamp = int(signed_data['timestamp'])
+    current = int(time.time())
+    
+    # Check if too old
+    if current - timestamp &gt; max_age:
+        return False, "Signature expired"
+    
+    # Verify signature
+    data = f"{signed_data['timestamp']}:{signed_data['message']}".encode()
+    # ... verify logic
+</code></pre>
+<h2 id="common-mistakes"><a class="header" href="#common-mistakes">Common Mistakes</a></h2>
+<h3 id="1-signing-hash-vs-message"><a class="header" href="#1-signing-hash-vs-message">1. Signing Hash vs Message</a></h3>
+<pre><code class="language-python"># WRONG - signing hash manually
+hash_digest = hashlib.sha256(message).digest()
+signature = private_key.sign(hash_digest, ...)  # May not work!
+
+# RIGHT - let library handle hashing
+signature = private_key.sign(message, ..., hashes.SHA256())
+</code></pre>
+<h3 id="2-not-validating-signatures"><a class="header" href="#2-not-validating-signatures">2. Not Validating Signatures</a></h3>
+<pre><code class="language-python"># WRONG - trusting unsigned data
+data = receive_data()
+process(data)  # Danger!
+
+# RIGHT - verify signature first
+data, signature = receive_data_and_signature()
+if verify_signature(data, signature):
+    process(data)
+else:
+    reject()
+</code></pre>
+<h3 id="3-exposing-private-keys"><a class="header" href="#3-exposing-private-keys">3. Exposing Private Keys</a></h3>
+<pre><code class="language-python"># WRONG
+private_key = "-----BEGIN PRIVATE KEY-----\n..."  # Hardcoded!
+
+# RIGHT
+import os
+key_path = os.environ.get('PRIVATE_KEY_PATH')
+with open(key_path, 'rb') as f:
+    private_key = load_key(f.read())
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>Digital signatures are like a special seal that only you can make:</p>
+<p><strong>Regular signature (on paper):</strong></p>
+<ul>
+<li>Anyone can try to copy your signature</li>
+<li>Hard to prove it's really yours</li>
+</ul>
+<p><strong>Digital signature:</strong></p>
+<ol>
+<li>You have a special "stamp" that only you own (private key)</li>
+<li>Anyone can see your "stamp pattern" (public key)</li>
+<li>When you sign a document:
+<ul>
+<li>You use your secret stamp to make a unique mark</li>
+<li>This mark is different for every document</li>
+</ul>
+</li>
+<li>Others can verify:
+<ul>
+<li>They use your public stamp pattern</li>
+<li>If it matches, they know YOU signed it</li>
+<li>Nobody else could have made that exact mark!</li>
+</ul>
+</li>
+</ol>
+<p><strong>Why it's secure:</strong></p>
+<ul>
+<li>Your secret stamp is like a lock that only you can use</li>
+<li>The public pattern lets others check your work</li>
+<li>Even if someone copies the signed document, they can't change it without your secret stamp!</li>
+</ul>
+<p><strong>Real-world example:</strong>
+When you download software, the developer signs it:</p>
+<ul>
+<li>✓ You can verify it's really from them</li>
+<li>✓ Nobody tampered with the software</li>
+<li>✓ The developer can't deny they released it</li>
+</ul>
+<p><strong>Different from HMAC:</strong></p>
+<ul>
+<li>HMAC: Shared secret (like both having the same password)</li>
+<li>Digital Signature: Private/public keys (like a lock and key everyone can see fits)</li>
+</ul>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=wXB-V_Keiu8">RSA Cryptography Explained</a></li>
+<li><a href="https://blog.cloudflare.com/ecdsa-the-digital-signature-algorithm-of-a-better-internet/">ECDSA Deep Dive</a></li>
+<li><a href="https://ed25519.cr.yp.to/">Ed25519 Specification</a></li>
+<li><a href="https://csrc.nist.gov/publications/detail/fips/186/4/final">Digital Signatures Standard (DSS)</a></li>
+<li><a href="https://www.schneier.com/books/cryptography-engineering/">Cryptography Engineering (Book)</a></li>
+<li><a href="https://cryptography.io/en/latest/">Python Cryptography Library</a></li>
+<li><a href="https://www.openssl.org/docs/man1.1.1/man1/">OpenSSL Command Reference</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

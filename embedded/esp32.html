@@ -177,7 +177,1034 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="esp32"><a class="header" href="#esp32">ESP32</a></h1>
+<p>Comprehensive guide to ESP32 microcontroller development with WiFi and Bluetooth capabilities.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#hardware-overview">Hardware Overview</a></li>
+<li><a href="#development-setup">Development Setup</a></li>
+<li><a href="#basic-programming">Basic Programming</a></li>
+<li><a href="#wifi-connectivity">WiFi Connectivity</a></li>
+<li><a href="#bluetooth">Bluetooth</a></li>
+<li><a href="#advanced-features">Advanced Features</a></li>
+<li><a href="#projects">Projects</a></li>
+</ol>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>The ESP32 is a powerful, low-cost microcontroller with integrated WiFi and Bluetooth. Developed by Espressif Systems, it's ideal for IoT projects and wireless applications.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Dual-core Xtensa LX6</strong> (or single-core RISC-V in ESP32-C3)</li>
+<li><strong>Clock Speed</strong>: 160-240 MHz</li>
+<li><strong>Memory</strong>: 520 KB SRAM, 4 MB Flash (typical)</li>
+<li><strong>WiFi</strong>: 802.11 b/g/n (2.4 GHz)</li>
+<li><strong>Bluetooth</strong>: BLE 4.2 and Classic Bluetooth</li>
+<li><strong>GPIO</strong>: Up to 34 programmable pins</li>
+<li><strong>Peripherals</strong>: ADC, DAC, SPI, I2C, UART, PWM, I2S</li>
+<li><strong>Low Power</strong>: Multiple sleep modes</li>
+<li><strong>Price</strong>: $2-$10 depending on variant</li>
+</ul>
+<h3 id="esp32-variants"><a class="header" href="#esp32-variants">ESP32 Variants</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Variant</th><th>Cores</th><th>WiFi</th><th>BLE</th><th>Classic BT</th><th>USB</th><th>Special Features</th></tr></thead><tbody>
+<tr><td><strong>ESP32</strong></td><td>2</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td><td>Original, most common</td></tr>
+<tr><td><strong>ESP32-S2</strong></td><td>1</td><td>Yes</td><td>No</td><td>No</td><td>Native</td><td>USB OTG, lower power</td></tr>
+<tr><td><strong>ESP32-S3</strong></td><td>2</td><td>Yes</td><td>Yes</td><td>No</td><td>Native</td><td>Vector instructions</td></tr>
+<tr><td><strong>ESP32-C3</strong></td><td>1 (RISC-V)</td><td>Yes</td><td>Yes</td><td>No</td><td>Native</td><td>RISC-V architecture</td></tr>
+<tr><td><strong>ESP32-C6</strong></td><td>1 (RISC-V)</td><td>Yes</td><td>Yes</td><td>No</td><td>Native</td><td>WiFi 6, Zigbee</td></tr>
+</tbody></table>
+</div>
+<h2 id="hardware-overview"><a class="header" href="#hardware-overview">Hardware Overview</a></h2>
+<h3 id="esp32-devkit-pinout"><a class="header" href="#esp32-devkit-pinout">ESP32 DevKit Pinout</a></h3>
+<pre><code>                    ESP32 DevKit
+                ┌─────────────────┐
+                │      USB        │
+                ├─────────────────┤
+    3V3    [ ]──┤3V3           D23├──[ ] MOSI
+    EN     [ ]──┤EN            D22├──[ ] SCL (I2C)
+    VP/36  [ ]──┤VP/A0         TX0├──[ ] TX
+    VN/39  [ ]──┤VN/A3         RX0├──[ ] RX
+    D34    [ ]──┤34/A6         D21├──[ ] SDA (I2C)
+    D35    [ ]──┤35/A7         GND├──[ ] GND
+    D32    [ ]──┤32/A4         D19├──[ ] MISO
+    D33    [ ]──┤33/A5         D18├──[ ] SCK
+    D25    [ ]──┤25/A18        D5 ├──[ ] SS
+    D26    [ ]──┤26/A19        D17├──[ ] TX2
+    D27    [ ]──┤27/A17        D16├──[ ] RX2
+    D14    [ ]──┤14/A16        D4 ├──[ ]
+    D12    [ ]──┤12/A15        D0 ├──[ ] (Boot)
+    GND    [ ]──┤GND           D2 ├──[ ] (LED)
+    D13    [ ]──┤13/A14        D15├──[ ]
+    D9     [ ]──┤9/SD2          D8├──[ ] SD1
+    D10    [ ]──┤10/SD3         D7├──[ ] SD0
+    D11    [ ]──┤11/CMD         D6├──[ ] SCK
+    VIN    [ ]──┤VIN            5V├──[ ] 5V
+                └─────────────────┘
+
+Note: Pins 6-11 connected to flash (avoid using)
+      Pins with boot/strapping modes: 0, 2, 5, 12, 15
+</code></pre>
+<h3 id="important-notes"><a class="header" href="#important-notes">Important Notes</a></h3>
+<ul>
+<li><strong>Input Only Pins</strong>: GPIO 34-39 (no pull-up/pull-down)</li>
+<li><strong>Strapping Pins</strong>: 0, 2, 5, 12, 15 (affect boot mode)</li>
+<li><strong>Boot Mode</strong>: GPIO 0 LOW = download mode</li>
+<li><strong>Built-in LED</strong>: Usually GPIO 2</li>
+<li><strong>ADC2</strong>: Cannot use while WiFi active (GPIO 0, 2, 4, 12-15, 25-27)</li>
+</ul>
+<h2 id="development-setup"><a class="header" href="#development-setup">Development Setup</a></h2>
+<h3 id="arduino-ide-setup"><a class="header" href="#arduino-ide-setup">Arduino IDE Setup</a></h3>
+<pre><code class="language-bash"># 1. Install Arduino IDE from arduino.cc
+
+# 2. Add ESP32 Board Manager URL:
+# File &gt; Preferences &gt; Additional Board Manager URLs
+# Add: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+
+# 3. Install ESP32 boards:
+# Tools &gt; Board &gt; Boards Manager &gt; Search "ESP32" &gt; Install
+
+# 4. Select your board:
+# Tools &gt; Board &gt; ESP32 Arduino &gt; ESP32 Dev Module
+</code></pre>
+<h3 id="esp-idf-setup-official-framework"><a class="header" href="#esp-idf-setup-official-framework">ESP-IDF Setup (Official Framework)</a></h3>
+<pre><code class="language-bash"># Clone ESP-IDF
+git clone --recursive https://github.com/espressif/esp-idf.git
+cd esp-idf
+
+# Install (Linux/Mac)
+./install.sh
+
+# Set up environment (run in each terminal session)
+. ./export.sh
+
+# Or add to ~/.bashrc:
+alias get_idf='. $HOME/esp/esp-idf/export.sh'
+
+# Create new project
+idf.py create-project myproject
+cd myproject
+
+# Configure
+idf.py menuconfig
+
+# Build
+idf.py build
+
+# Flash
+idf.py -p /dev/ttyUSB0 flash
+
+# Monitor serial output
+idf.py -p /dev/ttyUSB0 monitor
+</code></pre>
+<h3 id="platformio-setup"><a class="header" href="#platformio-setup">PlatformIO Setup</a></h3>
+<pre><code class="language-bash"># Install PlatformIO
+pip install platformio
+
+# Create ESP32 project
+pio init --board esp32dev
+
+# Build and upload
+pio run --target upload
+
+# Serial monitor
+pio device monitor
+</code></pre>
+<h2 id="basic-programming"><a class="header" href="#basic-programming">Basic Programming</a></h2>
+<h3 id="blink-led-arduino-framework"><a class="header" href="#blink-led-arduino-framework">Blink LED (Arduino Framework)</a></h3>
+<pre><code class="language-cpp">#define LED_PIN 2
+
+void setup() {
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    digitalWrite(LED_PIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_PIN, LOW);
+    delay(1000);
+}
+</code></pre>
+<h3 id="dual-core-programming"><a class="header" href="#dual-core-programming">Dual Core Programming</a></h3>
+<pre><code class="language-cpp">TaskHandle_t Task1;
+TaskHandle_t Task2;
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Create task for core 0
+    xTaskCreatePinnedToCore(
+        Task1code,   // Function
+        "Task1",     // Name
+        10000,       // Stack size
+        NULL,        // Parameters
+        1,           // Priority
+        &amp;Task1,      // Task handle
+        0            // Core ID
+    );
+    
+    // Create task for core 1
+    xTaskCreatePinnedToCore(
+        Task2code,
+        "Task2",
+        10000,
+        NULL,
+        1,
+        &amp;Task2,
+        1
+    );
+}
+
+void Task1code(void * parameter) {
+    while(1) {
+        Serial.print("Task 1 running on core ");
+        Serial.println(xPortGetCoreID());
+        delay(1000);
+    }
+}
+
+void Task2code(void * parameter) {
+    while(1) {
+        Serial.print("Task 2 running on core ");
+        Serial.println(xPortGetCoreID());
+        delay(500);
+    }
+}
+
+void loop() {
+    // Empty - tasks handle everything
+}
+</code></pre>
+<h3 id="touch-sensor"><a class="header" href="#touch-sensor">Touch Sensor</a></h3>
+<pre><code class="language-cpp">const int TOUCH_PIN = 4;  // T0
+const int THRESHOLD = 40;
+
+void setup() {
+    Serial.begin(115200);
+}
+
+void loop() {
+    int touchValue = touchRead(TOUCH_PIN);
+    Serial.println(touchValue);
+    
+    if (touchValue &lt; THRESHOLD) {
+        Serial.println("Touch detected!");
+    }
+    
+    delay(500);
+}
+</code></pre>
+<h3 id="hall-effect-sensor-built-in"><a class="header" href="#hall-effect-sensor-built-in">Hall Effect Sensor (Built-in)</a></h3>
+<pre><code class="language-cpp">void setup() {
+    Serial.begin(115200);
+}
+
+void loop() {
+    // Read built-in Hall effect sensor
+    int hallValue = hallRead();
+    Serial.print("Hall Sensor: ");
+    Serial.println(hallValue);
+    
+    delay(500);
+}
+</code></pre>
+<h2 id="wifi-connectivity"><a class="header" href="#wifi-connectivity">WiFi Connectivity</a></h2>
+<h3 id="wifi-station-mode-connect-to-router"><a class="header" href="#wifi-station-mode-connect-to-router">WiFi Station Mode (Connect to Router)</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Connect to WiFi
+    WiFi.begin(ssid, password);
+    Serial.print("Connecting to WiFi");
+    
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    
+    Serial.println("\nConnected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+    Serial.print("MAC Address: ");
+    Serial.println(WiFi.macAddress());
+    Serial.print("Signal Strength (RSSI): ");
+    Serial.print(WiFi.RSSI());
+    Serial.println(" dBm");
+}
+
+void loop() {
+    // Check connection
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("WiFi disconnected!");
+        WiFi.reconnect();
+    }
+    
+    delay(10000);
+}
+</code></pre>
+<h3 id="wifi-access-point-mode"><a class="header" href="#wifi-access-point-mode">WiFi Access Point Mode</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+
+const char* ssid = "ESP32-AP";
+const char* password = "12345678";  // Minimum 8 characters
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Start Access Point
+    WiFi.softAP(ssid, password);
+    
+    IPAddress IP = WiFi.softAPIP();
+    Serial.print("AP IP address: ");
+    Serial.println(IP);
+}
+
+void loop() {
+    // Print number of connected stations
+    Serial.print("Stations connected: ");
+    Serial.println(WiFi.softAPgetStationNum());
+    
+    delay(5000);
+}
+</code></pre>
+<h3 id="web-server"><a class="header" href="#web-server">Web Server</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+#include &lt;WebServer.h&gt;
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+
+WebServer server(80);
+
+const int LED_PIN = 2;
+bool ledState = false;
+
+void handleRoot() {
+    String html = "&lt;html&gt;&lt;body&gt;";
+    html += "&lt;h1&gt;ESP32 Web Server&lt;/h1&gt;";
+    html += "&lt;p&gt;LED is: " + String(ledState ? "ON" : "OFF") + "&lt;/p&gt;";
+    html += "&lt;p&gt;&lt;a href=\"/led/on\"&gt;&lt;button&gt;Turn ON&lt;/button&gt;&lt;/a&gt;&lt;/p&gt;";
+    html += "&lt;p&gt;&lt;a href=\"/led/off\"&gt;&lt;button&gt;Turn OFF&lt;/button&gt;&lt;/a&gt;&lt;/p&gt;";
+    html += "&lt;/body&gt;&lt;/html&gt;";
+    
+    server.send(200, "text/html", html);
+}
+
+void handleLEDOn() {
+    ledState = true;
+    digitalWrite(LED_PIN, HIGH);
+    server.sendHeader("Location", "/");
+    server.send(303);
+}
+
+void handleLEDOff() {
+    ledState = false;
+    digitalWrite(LED_PIN, LOW);
+    server.sendHeader("Location", "/");
+    server.send(303);
+}
+
+void setup() {
+    Serial.begin(115200);
+    pinMode(LED_PIN, OUTPUT);
+    
+    // Connect to WiFi
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    
+    Serial.println("\nConnected!");
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
+    
+    // Setup server routes
+    server.on("/", handleRoot);
+    server.on("/led/on", handleLEDOn);
+    server.on("/led/off", handleLEDOff);
+    
+    server.begin();
+    Serial.println("Web server started");
+}
+
+void loop() {
+    server.handleClient();
+}
+</code></pre>
+<h3 id="http-client-get-request"><a class="header" href="#http-client-get-request">HTTP Client (GET Request)</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+#include &lt;HTTPClient.h&gt;
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+
+void setup() {
+    Serial.begin(115200);
+    
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nConnected!");
+}
+
+void loop() {
+    if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        
+        http.begin("http://api.github.com/users/octocat");
+        int httpCode = http.GET();
+        
+        if (httpCode &gt; 0) {
+            Serial.printf("HTTP Code: %d\n", httpCode);
+            
+            if (httpCode == HTTP_CODE_OK) {
+                String payload = http.getString();
+                Serial.println(payload);
+            }
+        } else {
+            Serial.printf("Error: %s\n", http.errorToString(httpCode).c_str());
+        }
+        
+        http.end();
+    }
+    
+    delay(10000);
+}
+</code></pre>
+<h3 id="wifi-scan"><a class="header" href="#wifi-scan">WiFi Scan</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+
+void setup() {
+    Serial.begin(115200);
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+}
+
+void loop() {
+    Serial.println("Scanning WiFi networks...");
+    int n = WiFi.scanNetworks();
+    
+    if (n == 0) {
+        Serial.println("No networks found");
+    } else {
+        Serial.printf("%d networks found:\n", n);
+        
+        for (int i = 0; i &lt; n; i++) {
+            Serial.printf("%d: %s (%d dBm) %s\n",
+                i + 1,
+                WiFi.SSID(i).c_str(),
+                WiFi.RSSI(i),
+                WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? "Open" : "Encrypted"
+            );
+        }
+    }
+    
+    delay(5000);
+}
+</code></pre>
+<h3 id="mqtt-client"><a class="header" href="#mqtt-client">MQTT Client</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+#include &lt;PubSubClient.h&gt;
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+const char* mqtt_server = "broker.hivemq.com";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+void callback(char* topic, byte* payload, unsigned int length) {
+    Serial.print("Message arrived [");
+    Serial.print(topic);
+    Serial.print("]: ");
+    
+    for (int i = 0; i &lt; length; i++) {
+        Serial.print((char)payload[i]);
+    }
+    Serial.println();
+}
+
+void reconnect() {
+    while (!client.connected()) {
+        Serial.print("Attempting MQTT connection...");
+        
+        if (client.connect("ESP32Client")) {
+            Serial.println("connected");
+            client.subscribe("esp32/test");
+        } else {
+            Serial.print("failed, rc=");
+            Serial.print(client.state());
+            Serial.println(" retrying in 5 seconds");
+            delay(5000);
+        }
+    }
+}
+
+void setup() {
+    Serial.begin(115200);
+    
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nWiFi connected");
+    
+    client.setServer(mqtt_server, 1883);
+    client.setCallback(callback);
+}
+
+void loop() {
+    if (!client.connected()) {
+        reconnect();
+    }
+    client.loop();
+    
+    // Publish message every 10 seconds
+    static unsigned long lastMsg = 0;
+    unsigned long now = millis();
+    
+    if (now - lastMsg &gt; 10000) {
+        lastMsg = now;
+        
+        char msg[50];
+        snprintf(msg, 50, "Hello from ESP32 #%lu", millis());
+        client.publish("esp32/test", msg);
+    }
+}
+</code></pre>
+<h2 id="bluetooth"><a class="header" href="#bluetooth">Bluetooth</a></h2>
+<h3 id="bluetooth-classic---serial"><a class="header" href="#bluetooth-classic---serial">Bluetooth Classic - Serial</a></h3>
+<pre><code class="language-cpp">#include &lt;BluetoothSerial.h&gt;
+
+BluetoothSerial SerialBT;
+
+void setup() {
+    Serial.begin(115200);
+    SerialBT.begin("ESP32-BT");  // Bluetooth device name
+    Serial.println("Bluetooth Started! Pair with 'ESP32-BT'");
+}
+
+void loop() {
+    // Forward from Serial to Bluetooth
+    if (Serial.available()) {
+        SerialBT.write(Serial.read());
+    }
+    
+    // Forward from Bluetooth to Serial
+    if (SerialBT.available()) {
+        Serial.write(SerialBT.read());
+    }
+}
+</code></pre>
+<h3 id="ble-server"><a class="header" href="#ble-server">BLE Server</a></h3>
+<pre><code class="language-cpp">#include &lt;BLEDevice.h&gt;
+#include &lt;BLEServer.h&gt;
+#include &lt;BLEUtils.h&gt;
+#include &lt;BLE2902.h&gt;
+
+BLEServer* pServer = NULL;
+BLECharacteristic* pCharacteristic = NULL;
+bool deviceConnected = false;
+uint32_t value = 0;
+
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
+class MyServerCallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+        deviceConnected = true;
+        Serial.println("Device connected");
+    }
+    
+    void onDisconnect(BLEServer* pServer) {
+        deviceConnected = false;
+        Serial.println("Device disconnected");
+    }
+};
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Create BLE Device
+    BLEDevice::init("ESP32-BLE");
+    
+    // Create BLE Server
+    pServer = BLEDevice::createServer();
+    pServer-&gt;setCallbacks(new MyServerCallbacks());
+    
+    // Create BLE Service
+    BLEService *pService = pServer-&gt;createService(SERVICE_UUID);
+    
+    // Create BLE Characteristic
+    pCharacteristic = pService-&gt;createCharacteristic(
+        CHARACTERISTIC_UUID,
+        BLECharacteristic::PROPERTY_READ |
+        BLECharacteristic::PROPERTY_WRITE |
+        BLECharacteristic::PROPERTY_NOTIFY
+    );
+    
+    pCharacteristic-&gt;addDescriptor(new BLE2902());
+    
+    // Start service
+    pService-&gt;start();
+    
+    // Start advertising
+    BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+    pAdvertising-&gt;addServiceUUID(SERVICE_UUID);
+    pAdvertising-&gt;start();
+    
+    Serial.println("BLE Server started. Waiting for connections...");
+}
+
+void loop() {
+    if (deviceConnected) {
+        // Update and notify characteristic
+        pCharacteristic-&gt;setValue((uint8_t*)&amp;value, 4);
+        pCharacteristic-&gt;notify();
+        value++;
+        delay(1000);
+    }
+}
+</code></pre>
+<h3 id="ble-client-scanner"><a class="header" href="#ble-client-scanner">BLE Client (Scanner)</a></h3>
+<pre><code class="language-cpp">#include &lt;BLEDevice.h&gt;
+#include &lt;BLEUtils.h&gt;
+#include &lt;BLEScan.h&gt;
+#include &lt;BLEAdvertisedDevice.h&gt;
+
+BLEScan* pBLEScan;
+
+class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
+    void onResult(BLEAdvertisedDevice advertisedDevice) {
+        Serial.printf("Found device: %s\n", advertisedDevice.toString().c_str());
+    }
+};
+
+void setup() {
+    Serial.begin(115200);
+    Serial.println("Starting BLE scan...");
+    
+    BLEDevice::init("");
+    pBLEScan = BLEDevice::getScan();
+    pBLEScan-&gt;setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+    pBLEScan-&gt;setActiveScan(true);
+}
+
+void loop() {
+    BLEScanResults foundDevices = pBLEScan-&gt;start(5, false);
+    Serial.printf("Devices found: %d\n", foundDevices.getCount());
+    pBLEScan-&gt;clearResults();
+    delay(2000);
+}
+</code></pre>
+<h2 id="advanced-features"><a class="header" href="#advanced-features">Advanced Features</a></h2>
+<h3 id="deep-sleep-mode"><a class="header" href="#deep-sleep-mode">Deep Sleep Mode</a></h3>
+<pre><code class="language-cpp">#define uS_TO_S_FACTOR 1000000  // Conversion factor for microseconds to seconds
+#define TIME_TO_SLEEP  30       // Sleep for 30 seconds
+
+RTC_DATA_ATTR int bootCount = 0;  // Preserved in RTC memory
+
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
+    
+    bootCount++;
+    Serial.println("Boot number: " + String(bootCount));
+    
+    // Configure wake-up sources
+    esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+    
+    // GPIO wake-up
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 1);  // Wake on HIGH
+    
+    Serial.println("Going to sleep for " + String(TIME_TO_SLEEP) + " seconds");
+    Serial.flush();
+    
+    esp_deep_sleep_start();
+}
+
+void loop() {
+    // Never reached
+}
+</code></pre>
+<h3 id="touch-wake-up"><a class="header" href="#touch-wake-up">Touch Wake-up</a></h3>
+<pre><code class="language-cpp">#define THRESHOLD 40
+
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
+    
+    // Configure touch wake-up
+    touchAttachInterrupt(T0, callback, THRESHOLD);
+    
+    esp_sleep_enable_touchpad_wakeup();
+    
+    Serial.println("Going to sleep. Touch GPIO 4 to wake up.");
+    delay(1000);
+    
+    esp_deep_sleep_start();
+}
+
+void callback() {
+    // Empty
+}
+
+void loop() {
+    // Never reached
+}
+</code></pre>
+<h3 id="adc-with-calibration"><a class="header" href="#adc-with-calibration">ADC with Calibration</a></h3>
+<pre><code class="language-cpp">#include &lt;esp_adc_cal.h&gt;
+
+#define ADC_PIN 34
+#define DEFAULT_VREF 1100
+
+esp_adc_cal_characteristics_t *adc_chars;
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Configure ADC
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11);
+    
+    // Characterize ADC
+    adc_chars = (esp_adc_cal_characteristics_t*)calloc(1, sizeof(esp_adc_cal_characteristics_t));
+    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
+}
+
+void loop() {
+    uint32_t adc_reading = 0;
+    
+    // Multisampling
+    for (int i = 0; i &lt; 64; i++) {
+        adc_reading += adc1_get_raw(ADC1_CHANNEL_6);
+    }
+    adc_reading /= 64;
+    
+    // Convert to voltage
+    uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);
+    
+    Serial.printf("Raw: %d, Voltage: %d mV\n", adc_reading, voltage);
+    
+    delay(1000);
+}
+</code></pre>
+<h3 id="over-the-air-ota-updates"><a class="header" href="#over-the-air-ota-updates">Over-The-Air (OTA) Updates</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+#include &lt;ESPmDNS.h&gt;
+#include &lt;WiFiUdp.h&gt;
+#include &lt;ArduinoOTA.h&gt;
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+
+void setup() {
+    Serial.begin(115200);
+    
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    
+    Serial.println("\nWiFi connected");
+    Serial.println(WiFi.localIP());
+    
+    // Setup OTA
+    ArduinoOTA.setHostname("esp32");
+    ArduinoOTA.setPassword("admin");
+    
+    ArduinoOTA.onStart([]() {
+        String type = (ArduinoOTA.getCommand() == U_FLASH) ? "sketch" : "filesystem";
+        Serial.println("Start updating " + type);
+    });
+    
+    ArduinoOTA.onEnd([]() {
+        Serial.println("\nEnd");
+    });
+    
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    });
+    
+    ArduinoOTA.onError([](ota_error_t error) {
+        Serial.printf("Error[%u]: ", error);
+        if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+        else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+        else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+        else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+        else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+    
+    ArduinoOTA.begin();
+    Serial.println("OTA Ready");
+}
+
+void loop() {
+    ArduinoOTA.handle();
+}
+</code></pre>
+<h2 id="projects"><a class="header" href="#projects">Projects</a></h2>
+<h3 id="project-1-wifi-weather-station"><a class="header" href="#project-1-wifi-weather-station">Project 1: WiFi Weather Station</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+#include &lt;HTTPClient.h&gt;
+#include &lt;DHT.h&gt;
+
+#define DHTPIN 4
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+const char* server = "http://api.thingspeak.com/update";
+const char* apiKey = "YOUR_API_KEY";
+
+void setup() {
+    Serial.begin(115200);
+    dht.begin();
+    
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nConnected!");
+}
+
+void loop() {
+    float temp = dht.readTemperature();
+    float humidity = dht.readHumidity();
+    
+    if (isnan(temp) || isnan(humidity)) {
+        Serial.println("Failed to read sensor!");
+        delay(2000);
+        return;
+    }
+    
+    Serial.printf("Temp: %.1f°C, Humidity: %.1f%%\n", temp, humidity);
+    
+    // Send to ThingSpeak
+    if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        
+        String url = String(server) + "?api_key=" + apiKey +
+                     "&amp;field1=" + String(temp) +
+                     "&amp;field2=" + String(humidity);
+        
+        http.begin(url);
+        int httpCode = http.GET();
+        
+        if (httpCode &gt; 0) {
+            Serial.println("Data sent successfully");
+        } else {
+            Serial.println("Error sending data");
+        }
+        
+        http.end();
+    }
+    
+    delay(20000);  // ThingSpeak requires 15 second minimum
+}
+</code></pre>
+<h3 id="project-2-bluetooth-led-controller"><a class="header" href="#project-2-bluetooth-led-controller">Project 2: Bluetooth LED Controller</a></h3>
+<pre><code class="language-cpp">#include &lt;BluetoothSerial.h&gt;
+
+BluetoothSerial SerialBT;
+
+const int RED_PIN = 25;
+const int GREEN_PIN = 26;
+const int BLUE_PIN = 27;
+
+void setup() {
+    Serial.begin(115200);
+    SerialBT.begin("ESP32-RGB");
+    
+    pinMode(RED_PIN, OUTPUT);
+    pinMode(GREEN_PIN, OUTPUT);
+    pinMode(BLUE_PIN, OUTPUT);
+    
+    Serial.println("Bluetooth RGB Controller Ready");
+}
+
+void loop() {
+    if (SerialBT.available()) {
+        String command = SerialBT.readStringUntil('\n');
+        command.trim();
+        
+        if (command.startsWith("RGB")) {
+            // Format: RGB,255,128,64
+            int comma1 = command.indexOf(',');
+            int comma2 = command.indexOf(',', comma1 + 1);
+            int comma3 = command.indexOf(',', comma2 + 1);
+            
+            int r = command.substring(comma1 + 1, comma2).toInt();
+            int g = command.substring(comma2 + 1, comma3).toInt();
+            int b = command.substring(comma3 + 1).toInt();
+            
+            analogWrite(RED_PIN, r);
+            analogWrite(GREEN_PIN, g);
+            analogWrite(BLUE_PIN, b);
+            
+            SerialBT.printf("Set RGB to %d,%d,%d\n", r, g, b);
+        } else if (command == "OFF") {
+            analogWrite(RED_PIN, 0);
+            analogWrite(GREEN_PIN, 0);
+            analogWrite(BLUE_PIN, 0);
+            SerialBT.println("LEDs OFF");
+        }
+    }
+}
+</code></pre>
+<h3 id="project-3-wifi-smart-thermostat"><a class="header" href="#project-3-wifi-smart-thermostat">Project 3: WiFi Smart Thermostat</a></h3>
+<pre><code class="language-cpp">#include &lt;WiFi.h&gt;
+#include &lt;WebServer.h&gt;
+#include &lt;DHT.h&gt;
+
+#define DHTPIN 4
+#define DHTTYPE DHT11
+#define RELAY_PIN 26
+
+DHT dht(DHTPIN, DHTTYPE);
+WebServer server(80);
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+
+float targetTemp = 25.0;
+bool heatingOn = false;
+
+void handleRoot() {
+    float temp = dht.readTemperature();
+    float humidity = dht.readHumidity();
+    
+    String html = "&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;";
+    html += "&lt;meta name='viewport' content='width=device-width, initial-scale=1'&gt;";
+    html += "&lt;style&gt;body{font-family:Arial;text-align:center;margin:20px;}";
+    html += ".button{padding:15px;margin:10px;font-size:20px;}&lt;/style&gt;&lt;/head&gt;";
+    html += "&lt;body&gt;&lt;h1&gt;Smart Thermostat&lt;/h1&gt;";
+    html += "&lt;p&gt;Current: " + String(temp, 1) + "°C&lt;/p&gt;";
+    html += "&lt;p&gt;Humidity: " + String(humidity, 1) + "%&lt;/p&gt;";
+    html += "&lt;p&gt;Target: " + String(targetTemp, 1) + "°C&lt;/p&gt;";
+    html += "&lt;p&gt;Heating: " + String(heatingOn ? "ON" : "OFF") + "&lt;/p&gt;";
+    html += "&lt;a href='/increase'&gt;&lt;button class='button'&gt;+1°C&lt;/button&gt;&lt;/a&gt;";
+    html += "&lt;a href='/decrease'&gt;&lt;button class='button'&gt;-1°C&lt;/button&gt;&lt;/a&gt;";
+    html += "&lt;/body&gt;&lt;/html&gt;";
+    
+    server.send(200, "text/html", html);
+}
+
+void handleIncrease() {
+    targetTemp += 1.0;
+    server.sendHeader("Location", "/");
+    server.send(303);
+}
+
+void handleDecrease() {
+    targetTemp -= 1.0;
+    server.sendHeader("Location", "/");
+    server.send(303);
+}
+
+void setup() {
+    Serial.begin(115200);
+    dht.begin();
+    pinMode(RELAY_PIN, OUTPUT);
+    
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+    }
+    
+    Serial.println("\nConnected!");
+    Serial.println(WiFi.localIP());
+    
+    server.on("/", handleRoot);
+    server.on("/increase", handleIncrease);
+    server.on("/decrease", handleDecrease);
+    server.begin();
+}
+
+void loop() {
+    server.handleClient();
+    
+    static unsigned long lastCheck = 0;
+    if (millis() - lastCheck &gt; 5000) {
+        lastCheck = millis();
+        
+        float temp = dht.readTemperature();
+        
+        if (!isnan(temp)) {
+            if (temp &lt; targetTemp - 0.5) {
+                heatingOn = true;
+                digitalWrite(RELAY_PIN, HIGH);
+            } else if (temp &gt; targetTemp + 0.5) {
+                heatingOn = false;
+                digitalWrite(RELAY_PIN, LOW);
+            }
+        }
+    }
+}
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Power Management</strong>: Use deep sleep for battery-powered projects</li>
+<li><strong>WiFi</strong>: Disconnect when not needed to save power</li>
+<li><strong>Watchdog</strong>: Enable watchdog timer for reliability</li>
+<li><strong>OTA Updates</strong>: Implement for remote firmware updates</li>
+<li><strong>Error Handling</strong>: Always check WiFi connection status</li>
+<li><strong>Security</strong>: Use HTTPS and encrypted connections</li>
+<li><strong>Memory</strong>: Monitor heap usage with <code>ESP.getFreeHeap()</code></li>
+</ol>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<p><strong>Boot Loop:</strong></p>
+<ul>
+<li>Check strapping pins (0, 2, 5, 12, 15)</li>
+<li>Ensure stable power supply (500mA minimum)</li>
+<li>Add 10µF capacitor on EN pin</li>
+</ul>
+<p><strong>WiFi Not Connecting:</strong></p>
+<ul>
+<li>Check SSID and password</li>
+<li>Verify 2.4GHz network (ESP32 doesn't support 5GHz)</li>
+<li>Move closer to router</li>
+</ul>
+<p><strong>Upload Failed:</strong></p>
+<ul>
+<li>Hold BOOT button during upload</li>
+<li>Check correct COM port selected</li>
+<li>Try lower baud rate (115200)</li>
+</ul>
+<p><strong>Brown-out Detector:</strong></p>
+<ul>
+<li>Use external 5V power supply</li>
+<li>Add bulk capacitor (100-1000µF)</li>
+</ul>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<ul>
+<li><strong>Espressif Documentation</strong>: https://docs.espressif.com/</li>
+<li><strong>ESP32 Arduino Core</strong>: https://github.com/espressif/arduino-esp32</li>
+<li><strong>ESP-IDF Programming Guide</strong>: https://docs.espressif.com/projects/esp-idf/</li>
+<li><strong>Forum</strong>: https://www.esp32.com/</li>
+</ul>
+<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
+<ul>
+<li><a href="arduino.html">Arduino Programming</a></li>
+<li><a href="../networking/wifi.html">WiFi Projects</a></li>
+<li><a href="../protocols/mqtt.html">MQTT Protocol</a></li>
+<li><a href="bluetooth.html">BLE Communication</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

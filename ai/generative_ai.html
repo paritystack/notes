@@ -177,7 +177,788 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="generative-ai"><a class="header" href="#generative-ai">Generative AI</a></h1>
+<p>A comprehensive guide to generative AI models, applications, and practical implementations.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#core-concepts">Core Concepts</a></li>
+<li><a href="#text-generation">Text Generation</a></li>
+<li><a href="#image-generation">Image Generation</a></li>
+<li><a href="#audio-generation">Audio Generation</a></li>
+<li><a href="#video-generation">Video Generation</a></li>
+<li><a href="#multimodal-models">Multimodal Models</a></li>
+<li><a href="#applications">Applications</a></li>
+<li><a href="#implementation-examples">Implementation Examples</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Generative AI refers to artificial intelligence systems that can create new content—text, images, audio, video, code, and more. Unlike discriminative models that classify or predict, generative models learn to produce novel outputs that resemble their training data.</p>
+<h3 id="key-characteristics"><a class="header" href="#key-characteristics">Key Characteristics</a></h3>
+<ul>
+<li><strong>Content Creation</strong>: Generate new, original content</li>
+<li><strong>Pattern Learning</strong>: Understand and replicate complex patterns</li>
+<li><strong>Conditional Generation</strong>: Create outputs based on specific inputs/prompts</li>
+<li><strong>Iterative Refinement</strong>: Improve outputs through multiple passes</li>
+</ul>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="1-generative-models"><a class="header" href="#1-generative-models">1. Generative Models</a></h3>
+<h4 id="autoregressive-models"><a class="header" href="#autoregressive-models">Autoregressive Models</a></h4>
+<p>Generate sequences one token at a time, using previous tokens as context:</p>
+<pre><code>P(x₁, x₂, ..., xₙ) = P(x₁) × P(x₂|x₁) × P(x₃|x₁,x₂) × ... × P(xₙ|x₁,...,xₙ₋₁)
+</code></pre>
+<p>Examples: GPT series, LLaMA</p>
+<h4 id="diffusion-models"><a class="header" href="#diffusion-models">Diffusion Models</a></h4>
+<p>Learn to denoise data through iterative refinement:</p>
+<pre><code>Forward process: x₀ → x₁ → ... → xₜ (add noise)
+Reverse process: xₜ → xₜ₋₁ → ... → x₀ (remove noise)
+</code></pre>
+<p>Examples: Stable Diffusion, DALL-E 3, Midjourney</p>
+<h4 id="variational-autoencoders-vae"><a class="header" href="#variational-autoencoders-vae">Variational Autoencoders (VAE)</a></h4>
+<p>Learn compressed representations in latent space:</p>
+<pre><code>Encoder: x → z (data to latent space)
+Decoder: z → x' (latent space to reconstruction)
+</code></pre>
+<h4 id="generative-adversarial-networks-gan"><a class="header" href="#generative-adversarial-networks-gan">Generative Adversarial Networks (GAN)</a></h4>
+<p>Two networks compete—generator creates, discriminator evaluates:</p>
+<pre><code>Generator: z → x (noise to data)
+Discriminator: x → [0,1] (real vs fake)
+</code></pre>
+<p>Examples: StyleGAN, BigGAN</p>
+<h3 id="2-foundation-models"><a class="header" href="#2-foundation-models">2. Foundation Models</a></h3>
+<p>Large-scale models trained on vast datasets, adaptable to many tasks:</p>
+<ul>
+<li><strong>Scale</strong>: Billions to trillions of parameters</li>
+<li><strong>Transfer Learning</strong>: Fine-tune for specific tasks</li>
+<li><strong>Few-Shot Learning</strong>: Adapt with minimal examples</li>
+<li><strong>Emergent Abilities</strong>: Capabilities not explicitly trained</li>
+</ul>
+<h2 id="text-generation"><a class="header" href="#text-generation">Text Generation</a></h2>
+<h3 id="large-language-models-llms"><a class="header" href="#large-language-models-llms">Large Language Models (LLMs)</a></h3>
+<h4 id="gpt-family-openai"><a class="header" href="#gpt-family-openai">GPT Family (OpenAI)</a></h4>
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI(api_key="your-key")
+
+# GPT-4 Turbo - Most capable
+response = client.chat.completions.create(
+    model="gpt-4-turbo-preview",
+    messages=[
+        {"role": "system", "content": "You are a creative writer."},
+        {"role": "user", "content": "Write a short sci-fi story about AI."}
+    ],
+    temperature=0.8,
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+</code></pre>
+<p><strong>Models:</strong></p>
+<ul>
+<li><code>gpt-4-turbo</code>: Most capable, best for complex tasks</li>
+<li><code>gpt-4</code>: High capability, slower and more expensive</li>
+<li><code>gpt-3.5-turbo</code>: Fast, cost-effective for simple tasks</li>
+</ul>
+<h4 id="claude-anthropic"><a class="header" href="#claude-anthropic">Claude (Anthropic)</a></h4>
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic(api_key="your-key")
+
+# Claude Sonnet 4.5 - Latest model
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user", 
+            "content": "Analyze this code and suggest improvements: [code]"
+        }
+    ]
+)
+
+print(message.content[0].text)
+</code></pre>
+<p><strong>Models:</strong></p>
+<ul>
+<li><code>claude-sonnet-4-5</code>: Balanced performance and capability</li>
+<li><code>claude-opus-4</code>: Most capable, deep analysis</li>
+<li><code>claude-haiku-4</code>: Fastest, most cost-effective</li>
+</ul>
+<h4 id="llama-meta"><a class="header" href="#llama-meta">Llama (Meta)</a></h4>
+<pre><code class="language-python">from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+
+model_name = "meta-llama/Llama-3.2-3B-Instruct"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    torch_dtype=torch.float16,
+    device_map="auto"
+)
+
+# Chat format
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Explain quantum computing."}
+]
+
+input_ids = tokenizer.apply_chat_template(
+    messages,
+    return_tensors="pt"
+).to(model.device)
+
+outputs = model.generate(
+    input_ids,
+    max_new_tokens=256,
+    temperature=0.7,
+    top_p=0.9
+)
+
+print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+</code></pre>
+<h4 id="mistral"><a class="header" href="#mistral">Mistral</a></h4>
+<pre><code class="language-python">from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatMessage
+
+client = MistralClient(api_key="your-key")
+
+messages = [
+    ChatMessage(role="user", content="What is machine learning?")
+]
+
+# Mistral Large - Most capable
+response = client.chat(
+    model="mistral-large-latest",
+    messages=messages
+)
+
+print(response.choices[0].message.content)
+</code></pre>
+<h3 id="use-cases-for-text-generation"><a class="header" href="#use-cases-for-text-generation">Use Cases for Text Generation</a></h3>
+<h4 id="1-content-creation"><a class="header" href="#1-content-creation">1. Content Creation</a></h4>
+<pre><code class="language-python"># Blog post generation
+prompt = """
+Write a 500-word blog post about sustainable living.
+
+Include:
+- Engaging introduction
+- 3 practical tips
+- Statistics or facts
+- Call to action
+
+Tone: Informative but conversational
+"""
+</code></pre>
+<h4 id="2-code-generation"><a class="header" href="#2-code-generation">2. Code Generation</a></h4>
+<pre><code class="language-python"># Function generation
+prompt = """
+Create a Python function that:
+- Takes a list of dictionaries
+- Filters by a key-value pair
+- Sorts by another key
+- Returns top N results
+
+Include type hints and docstring.
+"""
+</code></pre>
+<h4 id="3-data-analysis"><a class="header" href="#3-data-analysis">3. Data Analysis</a></h4>
+<pre><code class="language-python"># Analysis prompt
+prompt = """
+Analyze this sales data and provide:
+1. Key trends
+2. Anomalies
+3. Predictions
+4. Recommendations
+
+Data: [CSV or JSON data]
+"""
+</code></pre>
+<h4 id="4-translation"><a class="header" href="#4-translation">4. Translation</a></h4>
+<pre><code class="language-python"># Contextual translation
+prompt = """
+Translate this technical documentation from English to Spanish:
+
+[text]
+
+Maintain:
+- Technical terminology accuracy
+- Professional tone
+- Code examples unchanged
+"""
+</code></pre>
+<h2 id="image-generation"><a class="header" href="#image-generation">Image Generation</a></h2>
+<h3 id="stable-diffusion"><a class="header" href="#stable-diffusion">Stable Diffusion</a></h3>
+<pre><code class="language-python">from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
+import torch
+
+# Load model
+model_id = "stabilityai/stable-diffusion-2-1"
+pipe = StableDiffusionPipeline.from_pretrained(
+    model_id,
+    torch_dtype=torch.float16
+)
+pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+    pipe.scheduler.config
+)
+pipe = pipe.to("cuda")
+
+# Generate image
+prompt = "a serene japanese garden with cherry blossoms, koi pond, stone lanterns, soft morning light, highly detailed, 4k"
+negative_prompt = "blurry, distorted, low quality, watermark"
+
+image = pipe(
+    prompt=prompt,
+    negative_prompt=negative_prompt,
+    num_inference_steps=30,
+    guidance_scale=7.5,
+    width=768,
+    height=768
+).images[0]
+
+image.save("japanese_garden.png")
+</code></pre>
+<h3 id="dall-e-3-openai"><a class="header" href="#dall-e-3-openai">DALL-E 3 (OpenAI)</a></h3>
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI()
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="A futuristic city with flying cars and neon lights, cyberpunk style, detailed, high quality",
+    size="1024x1024",
+    quality="hd",
+    n=1
+)
+
+image_url = response.data[0].url
+print(f"Generated image: {image_url}")
+</code></pre>
+<h3 id="midjourney"><a class="header" href="#midjourney">Midjourney</a></h3>
+<p>Accessed through Discord bot:</p>
+<pre><code>/imagine prompt: a mystical forest with glowing mushrooms, ethereal lighting, fantasy art style, intricate details --v 6 --ar 16:9 --q 2
+</code></pre>
+<p>Parameters:</p>
+<ul>
+<li><code>--v</code>: Version (6 is latest)</li>
+<li><code>--ar</code>: Aspect ratio</li>
+<li><code>--q</code>: Quality (0.25, 0.5, 1, 2)</li>
+<li><code>--s</code>: Stylization (0-1000)</li>
+</ul>
+<h3 id="image-to-image"><a class="header" href="#image-to-image">Image-to-Image</a></h3>
+<pre><code class="language-python">from diffusers import StableDiffusionImg2ImgPipeline
+from PIL import Image
+
+pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-2-1",
+    torch_dtype=torch.float16
+).to("cuda")
+
+# Load initial image
+init_image = Image.open("sketch.png").convert("RGB")
+init_image = init_image.resize((768, 768))
+
+# Transform image
+prompt = "a professional photograph of a modern building, architectural photography"
+images = pipe(
+    prompt=prompt,
+    image=init_image,
+    strength=0.75,  # How much to transform (0=no change, 1=complete regeneration)
+    guidance_scale=7.5,
+    num_inference_steps=50
+).images
+
+images[0].save("transformed.png")
+</code></pre>
+<h3 id="inpainting"><a class="header" href="#inpainting">Inpainting</a></h3>
+<pre><code class="language-python">from diffusers import StableDiffusionInpaintPipeline
+
+pipe = StableDiffusionInpaintPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-2-inpainting",
+    torch_dtype=torch.float16
+).to("cuda")
+
+# Load image and mask
+image = Image.open("photo.png")
+mask = Image.open("mask.png")  # White areas will be regenerated
+
+prompt = "a red sports car"
+result = pipe(
+    prompt=prompt,
+    image=image,
+    mask_image=mask,
+    num_inference_steps=50
+).images[0]
+
+result.save("inpainted.png")
+</code></pre>
+<h2 id="audio-generation"><a class="header" href="#audio-generation">Audio Generation</a></h2>
+<h3 id="text-to-speech"><a class="header" href="#text-to-speech">Text-to-Speech</a></h3>
+<h4 id="openai-tts"><a class="header" href="#openai-tts">OpenAI TTS</a></h4>
+<pre><code class="language-python">from openai import OpenAI
+from pathlib import Path
+
+client = OpenAI()
+
+speech_file_path = Path("output.mp3")
+
+response = client.audio.speech.create(
+    model="tts-1-hd",
+    voice="nova",  # alloy, echo, fable, onyx, nova, shimmer
+    input="Hello! This is a generated voice. AI can now speak naturally."
+)
+
+response.stream_to_file(speech_file_path)
+</code></pre>
+<h4 id="elevenlabs"><a class="header" href="#elevenlabs">ElevenLabs</a></h4>
+<pre><code class="language-python">from elevenlabs import generate, play, set_api_key
+
+set_api_key("your-api-key")
+
+audio = generate(
+    text="Welcome to the future of voice synthesis.",
+    voice="Bella",
+    model="eleven_monolingual_v1"
+)
+
+play(audio)
+</code></pre>
+<h3 id="music-generation"><a class="header" href="#music-generation">Music Generation</a></h3>
+<h4 id="musicgen-meta"><a class="header" href="#musicgen-meta">MusicGen (Meta)</a></h4>
+<pre><code class="language-python">from audiocraft.models import MusicGen
+import torchaudio
+
+model = MusicGen.get_pretrained('facebook/musicgen-medium')
+
+# Generate music
+descriptions = ['upbeat electronic dance music with strong bass']
+duration = 30  # seconds
+
+model.set_generation_params(duration=duration)
+wav = model.generate(descriptions)
+
+# Save
+for idx, one_wav in enumerate(wav):
+    torchaudio.save(f'generated_{idx}.wav', one_wav.cpu(), model.sample_rate)
+</code></pre>
+<h2 id="video-generation"><a class="header" href="#video-generation">Video Generation</a></h2>
+<h3 id="stable-video-diffusion"><a class="header" href="#stable-video-diffusion">Stable Video Diffusion</a></h3>
+<pre><code class="language-python">from diffusers import StableVideoDiffusionPipeline
+from PIL import Image
+
+pipe = StableVideoDiffusionPipeline.from_pretrained(
+    "stabilityai/stable-video-diffusion-img2vid-xt",
+    torch_dtype=torch.float16,
+    variant="fp16"
+)
+pipe.to("cuda")
+
+# Load initial image
+image = Image.open("first_frame.png")
+
+# Generate video frames
+frames = pipe(image, decode_chunk_size=8, num_frames=25).frames[0]
+
+# Save as video
+from diffusers.utils import export_to_video
+export_to_video(frames, "output_video.mp4", fps=7)
+</code></pre>
+<h3 id="runwayml-gen-2"><a class="header" href="#runwayml-gen-2">RunwayML Gen-2</a></h3>
+<p>API-based video generation:</p>
+<pre><code class="language-python">import runwayml
+
+client = runwayml.RunwayML(api_key="your-key")
+
+# Text to video
+task = client.image_generation.create(
+    prompt="a serene ocean at sunset with waves gently crashing",
+    model="gen2",
+    duration=4
+)
+
+# Wait for completion and download
+video_url = task.get_output_url()
+</code></pre>
+<h2 id="multimodal-models"><a class="header" href="#multimodal-models">Multimodal Models</a></h2>
+<h3 id="gpt-4-vision"><a class="header" href="#gpt-4-vision">GPT-4 Vision</a></h3>
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4-vision-preview",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "What's in this image?"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": "https://example.com/image.jpg"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=300
+)
+
+print(response.choices[0].message.content)
+</code></pre>
+<h3 id="claude-vision"><a class="header" href="#claude-vision">Claude Vision</a></h3>
+<pre><code class="language-python">import anthropic
+import base64
+
+client = anthropic.Anthropic()
+
+# Read and encode image
+with open("image.jpg", "rb") as image_file:
+    image_data = base64.standard_b64encode(image_file.read()).decode("utf-8")
+
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image_data,
+                    },
+                },
+                {
+                    "type": "text",
+                    "text": "Describe this image in detail."
+                }
+            ],
+        }
+    ],
+)
+
+print(message.content[0].text)
+</code></pre>
+<h3 id="llava-open-source"><a class="header" href="#llava-open-source">LLaVA (Open Source)</a></h3>
+<pre><code class="language-python">from llava.model.builder import load_pretrained_model
+from llava.mm_utils import get_model_name_from_path, process_images
+from PIL import Image
+
+model_path = "liuhaotian/llava-v1.5-7b"
+tokenizer, model, image_processor, context_len = load_pretrained_model(
+    model_path=model_path,
+    model_base=None,
+    model_name=get_model_name_from_path(model_path)
+)
+
+# Load and process image
+image = Image.open("photo.jpg")
+image_tensor = process_images([image], image_processor, model.config)
+
+# Generate description
+prompt = "Describe this image in detail."
+outputs = model.generate(
+    image_tensor,
+    prompt,
+    max_new_tokens=512
+)
+</code></pre>
+<h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
+<h3 id="1-content-creation-1"><a class="header" href="#1-content-creation-1">1. Content Creation</a></h3>
+<pre><code class="language-python"># Automated blog writing pipeline
+def generate_blog_post(topic):
+    # Research
+    outline_prompt = f"Create a detailed outline for a blog post about {topic}"
+    outline = llm.generate(outline_prompt)
+    
+    # Write sections
+    sections = []
+    for section in outline.sections:
+        content = llm.generate(f"Write about: {section}")
+        sections.append(content)
+    
+    # Generate image
+    image_prompt = f"blog header image for {topic}, professional, modern"
+    image = image_generator.generate(image_prompt)
+    
+    return {
+        'outline': outline,
+        'content': sections,
+        'image': image
+    }
+</code></pre>
+<h3 id="2-education--training"><a class="header" href="#2-education--training">2. Education &amp; Training</a></h3>
+<pre><code class="language-python"># Personalized tutoring
+def create_lesson(topic, student_level, learning_style):
+    prompt = f"""
+    Create a {student_level}-level lesson on {topic} for a {learning_style} learner.
+    
+    Include:
+    - Clear explanations with analogies
+    - 3 practice problems
+    - Visual aids descriptions
+    """
+    
+    lesson = llm.generate(prompt)
+    
+    # Generate visual aids
+    visuals = [
+        image_gen.generate(desc) 
+        for desc in lesson.visual_descriptions
+    ]
+    
+    return lesson, visuals
+</code></pre>
+<h3 id="3-software-development"><a class="header" href="#3-software-development">3. Software Development</a></h3>
+<pre><code class="language-python"># AI-assisted coding
+def code_assistant(task_description, language="python"):
+    # Generate code
+    code_prompt = f"Write {language} code for: {task_description}"
+    code = llm.generate(code_prompt)
+    
+    # Generate tests
+    test_prompt = f"Write unit tests for this code:\n{code}"
+    tests = llm.generate(test_prompt)
+    
+    # Generate documentation
+    doc_prompt = f"Write comprehensive documentation for:\n{code}"
+    docs = llm.generate(doc_prompt)
+    
+    return {
+        'code': code,
+        'tests': tests,
+        'docs': docs
+    }
+</code></pre>
+<h3 id="4-marketing--advertising"><a class="header" href="#4-marketing--advertising">4. Marketing &amp; Advertising</a></h3>
+<pre><code class="language-python"># Campaign generation
+def create_marketing_campaign(product, target_audience):
+    # Generate copy variations
+    copy_prompt = f"""
+    Create 5 ad copy variations for {product} targeting {target_audience}.
+    Each should be:
+    - Under 100 characters
+    - Compelling call-to-action
+    - Different emotional angle
+    """
+    copies = llm.generate(copy_prompt)
+    
+    # Generate visuals
+    for copy in copies:
+        visual_prompt = f"advertising image for: {copy}, {product}, professional photography"
+        image = image_gen.generate(visual_prompt)
+        
+    return campaign
+</code></pre>
+<h3 id="5-data-augmentation"><a class="header" href="#5-data-augmentation">5. Data Augmentation</a></h3>
+<pre><code class="language-python"># Expand training dataset
+def augment_dataset(original_data):
+    augmented = []
+    
+    for item in original_data:
+        # Text augmentation
+        variations = llm.generate(
+            f"Create 5 paraphrases of: {item.text}"
+        )
+        augmented.extend(variations)
+        
+        # Image augmentation (if applicable)
+        if item.image:
+            synthetic_images = image_gen.generate(
+                f"similar to: {item.image_description}"
+            )
+            augmented.extend(synthetic_images)
+    
+    return augmented
+</code></pre>
+<h3 id="6-accessibility"><a class="header" href="#6-accessibility">6. Accessibility</a></h3>
+<pre><code class="language-python"># Multi-modal accessibility
+def make_accessible(content):
+    if content.is_text():
+        # Text to speech
+        audio = tts.generate(content.text)
+        
+        # Generate descriptive images
+        image = image_gen.generate(f"illustration of: {content.text}")
+        
+    elif content.is_image():
+        # Image to text description
+        description = vision_model.describe(content.image)
+        
+        # Text to speech
+        audio = tts.generate(description)
+    
+    return {
+        'text': description,
+        'audio': audio,
+        'image': image
+    }
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-prompt-engineering"><a class="header" href="#1-prompt-engineering">1. Prompt Engineering</a></h3>
+<pre><code class="language-python"># Good prompt structure
+prompt = """
+Role: You are an expert {domain} specialist
+
+Task: {specific_task}
+
+Context: {relevant_background}
+
+Requirements:
+- {requirement_1}
+- {requirement_2}
+- {requirement_3}
+
+Format: {output_format}
+"""
+</code></pre>
+<h3 id="2-temperature--sampling"><a class="header" href="#2-temperature--sampling">2. Temperature &amp; Sampling</a></h3>
+<pre><code class="language-python"># Creative tasks: High temperature
+creative_config = {
+    "temperature": 0.8,
+    "top_p": 0.9,
+    "top_k": 50
+}
+
+# Factual tasks: Low temperature
+factual_config = {
+    "temperature": 0.2,
+    "top_p": 0.95,
+    "top_k": 40
+}
+</code></pre>
+<h3 id="3-error-handling"><a class="header" href="#3-error-handling">3. Error Handling</a></h3>
+<pre><code class="language-python">def generate_with_retry(prompt, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            response = llm.generate(prompt)
+            
+            # Validate response
+            if validate(response):
+                return response
+                
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise
+            continue
+    
+    return fallback_response
+</code></pre>
+<h3 id="4-cost-optimization"><a class="header" href="#4-cost-optimization">4. Cost Optimization</a></h3>
+<pre><code class="language-python"># Cache responses
+from functools import lru_cache
+
+@lru_cache(maxsize=1000)
+def generate_cached(prompt):
+    return llm.generate(prompt)
+
+# Batch requests
+def generate_batch(prompts):
+    return llm.batch_generate(prompts)
+
+# Use appropriate model
+def select_model(task_complexity):
+    if task_complexity == "simple":
+        return "gpt-3.5-turbo"  # Cheaper
+    else:
+        return "gpt-4"  # More capable
+</code></pre>
+<h2 id="ethical-considerations"><a class="header" href="#ethical-considerations">Ethical Considerations</a></h2>
+<h3 id="1-content-authenticity"><a class="header" href="#1-content-authenticity">1. Content Authenticity</a></h3>
+<pre><code class="language-python"># Add watermarks to generated content
+def generate_with_watermark(prompt):
+    content = llm.generate(prompt)
+    metadata = {
+        'generated_by': 'AI',
+        'model': 'gpt-4',
+        'timestamp': datetime.now(),
+        'watermark': True
+    }
+    return content, metadata
+</code></pre>
+<h3 id="2-bias-detection"><a class="header" href="#2-bias-detection">2. Bias Detection</a></h3>
+<pre><code class="language-python"># Check for biased outputs
+def check_bias(generated_content):
+    bias_check_prompt = f"""
+    Analyze this content for potential bias:
+    {generated_content}
+    
+    Check for:
+    - Gender bias
+    - Racial bias
+    - Cultural bias
+    - Age bias
+    """
+    
+    analysis = llm.generate(bias_check_prompt)
+    return analysis
+</code></pre>
+<h3 id="3-safety-filters"><a class="header" href="#3-safety-filters">3. Safety Filters</a></h3>
+<pre><code class="language-python"># Content filtering
+def safe_generate(prompt):
+    # Check input
+    if contains_unsafe_content(prompt):
+        return "Request rejected: unsafe content"
+    
+    # Generate
+    output = llm.generate(prompt)
+    
+    # Check output
+    if contains_unsafe_content(output):
+        return "Generation failed: unsafe output"
+    
+    return output
+</code></pre>
+<h2 id="future-trends"><a class="header" href="#future-trends">Future Trends</a></h2>
+<h3 id="1-multimodal-foundation-models"><a class="header" href="#1-multimodal-foundation-models">1. Multimodal Foundation Models</a></h3>
+<ul>
+<li>Unified models handling text, image, audio, video</li>
+<li>Seamless cross-modal generation</li>
+</ul>
+<h3 id="2-personalization"><a class="header" href="#2-personalization">2. Personalization</a></h3>
+<ul>
+<li>Models adapting to individual user preferences</li>
+<li>Context-aware generation</li>
+</ul>
+<h3 id="3-efficiency"><a class="header" href="#3-efficiency">3. Efficiency</a></h3>
+<ul>
+<li>Smaller, faster models with comparable quality</li>
+<li>Edge deployment of generative models</li>
+</ul>
+<h3 id="4-controllability"><a class="header" href="#4-controllability">4. Controllability</a></h3>
+<ul>
+<li>Fine-grained control over generation</li>
+<li>Steering models toward specific outputs</li>
+</ul>
+<h3 id="5-collaboration"><a class="header" href="#5-collaboration">5. Collaboration</a></h3>
+<ul>
+<li>Human-AI co-creation workflows</li>
+<li>Interactive refinement systems</li>
+</ul>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<h3 id="learning"><a class="header" href="#learning">Learning</a></h3>
+<ul>
+<li><a href="https://huggingface.co/docs/diffusers">Hugging Face Diffusers Course</a></li>
+<li><a href="https://www.deeplearning.ai/">DeepLearning.AI Generative AI Courses</a></li>
+<li><a href="https://platform.stability.ai/docs">Stability AI Documentation</a></li>
+</ul>
+<h3 id="tools"><a class="header" href="#tools">Tools</a></h3>
+<ul>
+<li><a href="https://huggingface.co/spaces">Hugging Face Spaces</a></li>
+<li><a href="https://replicate.com/">Replicate</a></li>
+<li><a href="https://gradio.app/">Gradio</a></li>
+</ul>
+<h3 id="communities"><a class="header" href="#communities">Communities</a></h3>
+<ul>
+<li>r/StableDiffusion</li>
+<li>r/LocalLLaMA</li>
+<li>Discord: Stable Diffusion, Midjourney</li>
+<li>Twitter/X: AI researchers and practitioners</li>
+</ul>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Generative AI is rapidly evolving, with new models and capabilities emerging constantly. Success comes from understanding the fundamentals, choosing appropriate tools, and applying ethical practices. Experiment, iterate, and stay updated with the latest developments.</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

@@ -177,7 +177,129 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="raspberry-pi"><a class="header" href="#raspberry-pi">Raspberry Pi</a></h1>
+<p>Complete guide to Raspberry Pi setup, GPIO programming, and projects.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#hardware-overview">Hardware Overview</a></li>
+<li><a href="#setup-and-installation">Setup and Installation</a></li>
+<li><a href="#gpio-programming">GPIO Programming</a></li>
+<li><a href="#python-programming">Python Programming</a></li>
+<li><a href="#cc-programming">C/C++ Programming</a></li>
+<li><a href="#interfaces">Interfaces</a></li>
+<li><a href="#projects">Projects</a></li>
+</ol>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>The Raspberry Pi is a series of small single-board computers developed by the Raspberry Pi Foundation. Unlike microcontrollers, it runs a full Linux operating system and can function as a complete desktop computer.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Full Linux Operating System</strong> (Raspberry Pi OS based on Debian)</li>
+<li><strong>High Processing Power</strong>: Multi-core ARM processors</li>
+<li><strong>Rich Connectivity</strong>: USB, Ethernet, WiFi, Bluetooth, HDMI</li>
+<li><strong>GPIO Interface</strong>: 40-pin header for hardware projects</li>
+<li><strong>Programming</strong>: Python, C/C++, JavaScript, and more</li>
+<li><strong>Price</strong>: $15-$75 depending on model</li>
+</ul>
+<h3 id="model-comparison"><a class="header" href="#model-comparison">Model Comparison</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Model</th><th>Processor</th><th>RAM</th><th>USB</th><th>Ethernet</th><th>WiFi/BT</th><th>GPIO</th><th>Price</th></tr></thead><tbody>
+<tr><td><strong>Pi Zero W</strong></td><td>Single 1GHz</td><td>512MB</td><td>1 micro</td><td>No</td><td>Yes</td><td>40</td><td>$15</td></tr>
+<tr><td><strong>Pi 3 B+</strong></td><td>Quad 1.4GHz</td><td>1GB</td><td>4</td><td>Gigabit</td><td>Yes</td><td>40</td><td>$35</td></tr>
+<tr><td><strong>Pi 4 B</strong></td><td>Quad 1.5GHz</td><td>2-8GB</td><td>4</td><td>Gigabit</td><td>Yes</td><td>40</td><td>$35-75</td></tr>
+<tr><td><strong>Pi 5</strong></td><td>Quad 2.4GHz</td><td>4-8GB</td><td>4</td><td>Gigabit</td><td>Yes</td><td>40</td><td>$60-80</td></tr>
+<tr><td><strong>Pico</strong></td><td>Dual RP2040</td><td>264KB</td><td>1 micro</td><td>No</td><td>No</td><td>26</td><td>$4</td></tr>
+</tbody></table>
+</div>
+<h2 id="hardware-overview"><a class="header" href="#hardware-overview">Hardware Overview</a></h2>
+<h3 id="raspberry-pi-4-board-layout"><a class="header" href="#raspberry-pi-4-board-layout">Raspberry Pi 4 Board Layout</a></h3>
+<pre><code>┌────────────────────────────────────────────────────────┐
+│  USB-C Power                        ┌──────────────┐  │
+│     ┌─┐                             │   Ethernet   │  │
+│     └─┘                             │   Port       │  │
+│                                     └──────────────┘  │
+│  ┌────────┐  ┌────────┐                              │
+│  │  USB   │  │  USB   │  ┌──────────────┐           │
+│  │  2.0   │  │  3.0   │  │   Dual HDMI  │           │
+│  └────────┘  └────────┘  └──────────────┘           │
+│                                                        │
+│  ┌────────────────────┐         ┌──────┐            │
+│  │   BCM2711 SoC      │         │Audio │            │
+│  │   Quad Cortex-A72  │         │Jack  │            │
+│  └────────────────────┘         └──────┘            │
+│                                                        │
+│  ┌──────────────┐  ┌────────────────────────────┐   │
+│  │   Micro SD   │  │     40-pin GPIO Header     │   │
+│  │   Card Slot  │  │                            │   │
+│  └──────────────┘  └────────────────────────────┘   │
+│                                                        │
+│  [CSI Camera]           [DSI Display]                 │
+└────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="gpio-pinout-40-pin-header"><a class="header" href="#gpio-pinout-40-pin-header">GPIO Pinout (40-pin Header)</a></h3>
+<pre><code>           3V3  (1)  (2)  5V
+     GPIO 2/SDA  (3)  (4)  5V
+     GPIO 3/SCL  (5)  (6)  GND
+         GPIO 4  (7)  (8)  GPIO 14/TXD
+            GND  (9) (10)  GPIO 15/RXD
+        GPIO 17 (11) (12)  GPIO 18/PWM
+        GPIO 27 (13) (14)  GND
+        GPIO 22 (15) (16)  GPIO 23
+           3V3 (17) (18)  GPIO 24
+  GPIO 10/MOSI (19) (20)  GND
+   GPIO 9/MISO (21) (22)  GPIO 25
+  GPIO 11/SCLK (23) (24)  GPIO 8/CE0
+            GND (25) (26)  GPIO 7/CE1
+        GPIO 0  (27) (28)  GPIO 1
+        GPIO 5  (29) (30)  GND
+        GPIO 6  (31) (32)  GPIO 12/PWM
+   GPIO 13/PWM (33) (34)  GND
+   GPIO 19/PWM (35) (36)  GPIO 16
+        GPIO 26 (37) (38)  GPIO 20
+            GND (39) (40)  GPIO 21
+
+Power Pins: 3.3V (17mA max per pin), 5V (from USB)
+PWM: GPIO 12, 13, 18, 19
+SPI0: MOSI(10), MISO(9), SCLK(11), CE0(8), CE1(7)
+I2C1: SDA(2), SCL(3)
+UART: TXD(14), RXD(15)
+</code></pre>
+<h2 id="setup-and-installation"><a class="header" href="#setup-and-installation">Setup and Installation</a></h2>
+<h3 id="initial-setup"><a class="header" href="#initial-setup">Initial Setup</a></h3>
+<h4 id="1-download-raspberry-pi-os"><a class="header" href="#1-download-raspberry-pi-os">1. Download Raspberry Pi OS</a></h4>
+<pre><code class="language-bash"># Download Raspberry Pi Imager
+# For Ubuntu/Debian:
+sudo apt install rpi-imager
+
+# For other systems, download from:
+# https://www.raspberrypi.com/software/
+</code></pre>
+<h4 id="2-flash-sd-card"><a class="header" href="#2-flash-sd-card">2. Flash SD Card</a></h4>
+<pre><code class="language-bash"># Using Raspberry Pi Imager (GUI):
+# 1. Choose OS: Raspberry Pi OS (32-bit/64-bit)
+# 2. Choose SD card
+# 3. Click "Write"
+
+# Or using command line (Linux):
+sudo dd if=2023-05-03-raspios-bullseye-armhf.img of=/dev/sdX bs=4M status=progress
+sync
+</code></pre>
+<h4 id="3-enable-ssh-headless-setup"><a class="header" href="#3-enable-ssh-headless-setup">3. Enable SSH (Headless Setup)</a></h4>
+<pre><code class="language-bash"># Create empty 'ssh' file in boot partition
+touch /media/username/boot/ssh
+
+# Configure WiFi (optional)
+cat &gt; /media/username/boot/wpa_supplicant.conf &lt;&lt; EOF
+country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+    ssid="YourNetworkName"
+    psk="YourPassword"
+    key_mgmt=WPA-PSK
+}
+</code></pre>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

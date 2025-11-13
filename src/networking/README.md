@@ -23,12 +23,21 @@ The practical 4-layer model used in modern networks:
 
 ## Core Protocols
 
-### [IP (Internet Protocol)](ip.md)
-- IPv4 and IPv6 addressing
+### [IPv4 (Internet Protocol version 4)](ipv4.md)
+- 32-bit addressing and packet format
+- Address classes and private IP ranges
 - Subnetting and CIDR notation
 - Routing and fragmentation
 - NAT (Network Address Translation)
-- ICMP diagnostics
+- ICMP diagnostics and tools
+
+### [IPv6 (Internet Protocol version 6)](ipv6.md)
+- 128-bit addressing and packet format
+- Address types (unicast, multicast, anycast)
+- SLAAC and auto-configuration
+- Neighbor Discovery Protocol (NDP)
+- Extension headers
+- ICMPv6 and transition mechanisms
 
 ### [TCP (Transmission Control Protocol)](tcp.md)
 - Reliable, connection-oriented communication

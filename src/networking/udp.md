@@ -61,7 +61,7 @@ CF CA 00 35 02 00 1A 2B
 ### Sending Data
 
 ```
-Application ’ Socket ’ UDP Layer ’ IP Layer ’ Network
+Application â†’ Socket â†’ UDP Layer â†’ IP Layer â†’ Network
 
 1. Application writes data to UDP socket
 2. UDP adds 8-byte header
@@ -73,7 +73,7 @@ Application ’ Socket ’ UDP Layer ’ IP Layer ’ Network
 ### Receiving Data
 
 ```
-Network ’ IP Layer ’ UDP Layer ’ Socket ’ Application
+Network â†’ IP Layer â†’ UDP Layer â†’ Socket â†’ Application
 
 1. IP receives packet
 2. IP passes to UDP based on protocol number (17)
@@ -190,7 +190,7 @@ Fast lookup, retry if no response
 
 ```
 Server sends video frames continuously:
-Frame 1 ’ Frame 2 ’ Frame 3 ’ Frame 4 ’ Frame 5
+Frame 1 â†’ Frame 2 â†’ Frame 3 â†’ Frame 4 â†’ Frame 5
 
 If Frame 3 is lost, continue with Frame 4
 (Old frame is useless for live streaming)
@@ -199,7 +199,7 @@ If Frame 3 is lost, continue with Frame 4
 ### 3. Online Gaming
 
 ```
-Game Client ’ Server: Player position updates (60 FPS)
+Game Client â†’ Server: Player position updates (60 FPS)
 Update 1: Player at (100, 200)
 Update 2: Player at (101, 201)
 Update 3: [LOST]
@@ -491,7 +491,7 @@ def send_with_retry(sock, data, address, max_retries=3):
 ### Vulnerabilities
 
 1. **UDP Flood Attack**: Overwhelm server with UDP packets
-2. **UDP Amplification**: Small request ’ large response (DNS, NTP)
+2. **UDP Amplification**: Small request â†’ large response (DNS, NTP)
 3. **Spoofing**: Easy to fake source IP (no handshake)
 
 ### Mitigation

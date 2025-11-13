@@ -45,14 +45,14 @@ DNS is the internet's phonebook that translates human-readable domain names (lik
 
 5. If not cached, recursive query:
 
-   Resolver ’ Root DNS Server
-   Root ’ "Ask .com server"
+   Resolver â†’ Root DNS Server
+   Root â†’ "Ask .com server"
 
-   Resolver ’ .com TLD Server
-   TLD ’ "Ask example.com's nameserver"
+   Resolver â†’ .com TLD Server
+   TLD â†’ "Ask example.com's nameserver"
 
-   Resolver ’ example.com's Nameserver
-   Nameserver ’ "IP is 93.184.216.34"
+   Resolver â†’ example.com's Nameserver
+   Nameserver â†’ "IP is 93.184.216.34"
 
 6. Resolver caches result and returns to browser
 
@@ -157,22 +157,22 @@ example.com.    86400    IN    A    93.184.216.34
 ### Recursive Query
 Client asks DNS server to provide the final answer:
 ```
-Client ’ Resolver: "What's example.com?"
-Resolver ’ Root/TLD/Auth servers (multiple queries)
-Resolver ’ Client: "It's 93.184.216.34"
+Client â†’ Resolver: "What's example.com?"
+Resolver â†’ Root/TLD/Auth servers (multiple queries)
+Resolver â†’ Client: "It's 93.184.216.34"
 ```
 
 ### Iterative Query
 DNS server returns best answer it knows:
 ```
-Client ’ Root: "What's example.com?"
-Root ’ Client: "Ask .com server at 192.5.6.30"
+Client â†’ Root: "What's example.com?"
+Root â†’ Client: "Ask .com server at 192.5.6.30"
 
-Client ’ TLD: "What's example.com?"
-TLD ’ Client: "Ask ns1.example.com at 192.0.2.1"
+Client â†’ TLD: "What's example.com?"
+TLD â†’ Client: "Ask ns1.example.com at 192.0.2.1"
 
-Client ’ Auth: "What's example.com?"
-Auth ’ Client: "It's 93.184.216.34"
+Client â†’ Auth: "What's example.com?"
+Auth â†’ Client: "It's 93.184.216.34"
 ```
 
 ## DNS Resource Record Format
@@ -308,7 +308,7 @@ Adds cryptographic signatures to DNS records:
 Encrypts DNS queries using HTTPS:
 
 ```
-Client ’ DoH Server (port 443)
+Client â†’ DoH Server (port 443)
 Encrypted: "What's example.com?"
 Encrypted: "It's 93.184.216.34"
 ```
@@ -322,7 +322,7 @@ Encrypted: "It's 93.184.216.34"
 Encrypts DNS queries using TLS:
 
 ```
-Client ’ DoT Server (port 853)
+Client â†’ DoT Server (port 853)
 TLS encrypted DNS query/response
 ```
 

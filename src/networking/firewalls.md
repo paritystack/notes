@@ -34,7 +34,7 @@ Incoming packet:
   Protocol: TCP
 
 Check rules top-to-bottom:
-  Rule 1: Allow 192.168.1.0/24 to port 80 í MATCH
+  Rule 1: Allow 192.168.1.0/24 to port 80 ‚Üí MATCH
   Action: ALLOW
 
 Packet forwarded
@@ -67,21 +67,21 @@ Src IP        Src Port  Dst IP        Dst Port  State      Protocol
 
 **TCP Connection Tracking:**
 ```
-Client í Server: SYN
+Client ‚Üí Server: SYN
   State: NEW
 
-Server í Client: SYN-ACK
+Server ‚Üí Client: SYN-ACK
   State: ESTABLISHED
 
-Client í Server: ACK
+Client ‚Üí Server: ACK
   State: ESTABLISHED
 
 ... data transfer ...
 
-Client í Server: FIN
+Client ‚Üí Server: FIN
   State: CLOSING
 
-Server í Client: FIN-ACK
+Server ‚Üí Client: FIN-ACK
   State: CLOSED
 ```
 
@@ -115,7 +115,7 @@ ALLOW TCP from 192.168.1.0/24 to any port 80 STATE NEW,ESTABLISHED
 
 **Proxy Flow:**
 ```
-Client í Proxy í Server
+Client ‚Üí Proxy ‚Üí Server
 
 Client connects to proxy
 Proxy inspects full request
@@ -148,7 +148,7 @@ HTTP Request:
   Host: example.com
 
 Proxy checks:
-  1. Is /admin.php allowed? í NO
+  1. Is /admin.php allowed? ‚Üí NO
   2. Block request
   3. Return 403 Forbidden
 ```
@@ -211,7 +211,7 @@ BLOCK malware signature "Trojan.Generic.123"
 ### 1. Packet Filtering Router
 
 ```
-Internet ê í [Router with ACL] ê í Internal Network
+Internet ‚Üí ‚Üí [Router with ACL] ‚Üí ‚Üí Internal Network
 
 Simple, single layer of protection
 ```
@@ -219,7 +219,7 @@ Simple, single layer of protection
 ### 2. Dual-Homed Host
 
 ```
-Internet ê í [Firewall with 2 NICs] ê í Internal Network
+Internet ‚Üí ‚Üí [Firewall with 2 NICs] ‚Üí ‚Üí Internal Network
              (All traffic through firewall)
 
 Complete traffic control
@@ -228,7 +228,7 @@ Complete traffic control
 ### 3. Screened Host
 
 ```
-Internet ê í [Router] ê í [Firewall Host] ê í Internal Network
+Internet ‚Üí ‚Üí [Router] ‚Üí ‚Üí [Firewall Host] ‚Üí ‚Üí Internal Network
 
 Router filters basic traffic
 Firewall provides additional protection
@@ -237,7 +237,7 @@ Firewall provides additional protection
 ### 4. Screened Subnet (DMZ)
 
 ```
-Internet ê í [External FW] ê í [DMZ] ê í [Internal FW] ê í Internal Network
+Internet ‚Üí ‚Üí [External FW] ‚Üí ‚Üí [DMZ] ‚Üí ‚Üí [Internal FW] ‚Üí ‚Üí Internal Network
                                (Web, Mail)
 
 Public services in DMZ
@@ -294,7 +294,7 @@ iptables -A INPUT -j DROP
 ```bash
 # WRONG ORDER:
 1. DENY all
-2. ALLOW HTTP port 80  ê Never reached!
+2. ALLOW HTTP port 80  ‚Üí Never reached!
 
 # CORRECT ORDER:
 1. ALLOW HTTP port 80
@@ -484,14 +484,14 @@ iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source 203.0.113.5
 
 **Traffic Flow:**
 ```
-Internal: 192.168.1.10:5000 í Internet
-External: 203.0.113.5:6000 í Internet
+Internal: 192.168.1.10:5000 ‚Üí Internet
+External: 203.0.113.5:6000 ‚Üí Internet
 
 Firewall tracks connection:
-  192.168.1.10:5000 î 203.0.113.5:6000
+  192.168.1.10:5000 ‚Üî 203.0.113.5:6000
 
 Return traffic:
-  Internet í 203.0.113.5:6000
+  Internet ‚Üí 203.0.113.5:6000
   Firewall translates back to: 192.168.1.10:5000
 ```
 
@@ -509,11 +509,11 @@ iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 2222 -j DNAT --to-destinati
 
 **Traffic Flow:**
 ```
-Internet í 203.0.113.5:80
+Internet ‚Üí 203.0.113.5:80
 Firewall translates to: 192.168.1.20:80
 Web server processes request
-Response: 192.168.1.20:80 í Internet
-Firewall translates from: 203.0.113.5:80 í Internet
+Response: 192.168.1.20:80 ‚Üí Internet
+Firewall translates from: 203.0.113.5:80 ‚Üí Internet
 ```
 
 ## Firewall Evasion Techniques (for awareness)

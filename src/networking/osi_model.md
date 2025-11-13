@@ -7,13 +7,13 @@ The OSI Model is a conceptual framework that standardizes network communication 
 ## The 7 Layers
 
 ```
-Layer 7: Application    ê User applications (HTTP, FTP, SMTP)
-Layer 6: Presentation   ê Data format, encryption (SSL/TLS)
-Layer 5: Session        ê Session management
-Layer 4: Transport      ê End-to-end delivery (TCP, UDP)
-Layer 3: Network        ê Routing, IP addressing
-Layer 2: Data Link      ê MAC addressing, switches
-Layer 1: Physical       ê Physical media, cables, signals
+Layer 7: Application    ‚Üí User applications (HTTP, FTP, SMTP)
+Layer 6: Presentation   ‚Üí Data format, encryption (SSL/TLS)
+Layer 5: Session        ‚Üí Session management
+Layer 4: Transport      ‚Üí End-to-end delivery (TCP, UDP)
+Layer 3: Network        ‚Üí Routing, IP addressing
+Layer 2: Data Link      ‚Üí MAC addressing, switches
+Layer 1: Physical       ‚Üí Physical media, cables, signals
 ```
 
 ## Memory Aids
@@ -48,7 +48,7 @@ Manchester Encoding (Ethernet):
 1: Low-to-high transition
 
    1     0     1     1     0
-  _|Ø|_ _Ø|_  _|Ø|_ _|Ø|_ _Ø|_
+  _|‚Äæ|_ _‚Äæ|_  _|‚Äæ|_ _|‚Äæ|_ _‚Äæ|_
 ```
 
 ### Physical Media Types
@@ -133,7 +133,7 @@ Port 3: CC:CC:CC:CC:CC:CC
 Frame arrives on Port 1:
   Dest MAC: BB:BB:BB:BB:BB:BB
 
-Switch looks up BB:BB:BB:BB:BB:BB í Port 2
+Switch looks up BB:BB:BB:BB:BB:BB ‚Üí Port 2
 Forwards frame only to Port 2
 ```
 
@@ -193,12 +193,12 @@ Forward to 192.168.1.2
 ### Packet Journey Example
 
 ```
-PC1 (192.168.1.10) í Server (10.0.0.5)
+PC1 (192.168.1.10) ‚Üí Server (10.0.0.5)
 
 Layer 3 decisions at each hop:
-1. PC1: Not local subnet í Send to gateway (192.168.1.1)
-2. Router1: Check route í Forward to Router2 (10.0.0.1)
-3. Router2: Destination is local í Send to 10.0.0.5
+1. PC1: Not local subnet ‚Üí Send to gateway (192.168.1.1)
+2. Router1: Check route ‚Üí Forward to Router2 (10.0.0.1)
+3. Router2: Destination is local ‚Üí Send to 10.0.0.5
 ```
 
 ## Layer 4: Transport Layer
@@ -241,7 +241,7 @@ Dynamic ports (49152-65535):
 ### Example: TCP Connection
 
 ```
-Client (192.168.1.10:5000) í Server (10.0.0.5:80)
+Client (192.168.1.10:5000) ‚Üí Server (10.0.0.5:80)
 
 Layer 4 provides:
 1. Connection establishment (3-way handshake)
@@ -256,9 +256,9 @@ Layer 4 provides:
 ```
 Web browser opens multiple connections:
 
-Tab 1: 192.168.1.10:5000 í google.com:443
-Tab 2: 192.168.1.10:5001 í github.com:443
-Tab 3: 192.168.1.10:5002 í stackoverflow.com:443
+Tab 1: 192.168.1.10:5000 ‚Üí google.com:443
+Tab 2: 192.168.1.10:5001 ‚Üí github.com:443
+Tab 3: 192.168.1.10:5002 ‚Üí stackoverflow.com:443
 
 Transport layer demultiplexes based on port
 ```
@@ -326,26 +326,26 @@ Translates data between application and network formats.
 
 **1. Data Translation:**
 ```
-ASCII î EBCDIC
-Big-endian î Little-endian
-JSON î XML î Binary
+ASCII ‚Üî EBCDIC
+Big-endian ‚Üî Little-endian
+JSON ‚Üî XML ‚Üî Binary
 ```
 
 **2. Encryption:**
 ```
 Plaintext: "Hello World"
-    ì
+    ‚Üì
 SSL/TLS Encryption
-    ì
+    ‚Üì
 Ciphertext: "3k#9$mL..."
 ```
 
 **3. Compression:**
 ```
 Original: 1000 bytes
-    ì
+    ‚Üì
 GZIP Compression
-    ì
+    ‚Üì
 Compressed: 300 bytes
 ```
 
@@ -354,9 +354,9 @@ Compressed: 300 bytes
 **SSL/TLS:**
 ```
 Application sends: "GET / HTTP/1.1"
-    ì
+    ‚Üì
 Presentation Layer: Encrypts with TLS
-    ì
+    ‚Üì
 Transport Layer: Sends encrypted data
 ```
 
@@ -432,27 +432,27 @@ Physical Layer:
 
 ```
 Layer 7: User Data
-            ì
-Layer 4: [TCP Header][Data] ê Segment
-            ì
-Layer 3: [IP Header][TCP Header][Data] ê Packet
-            ì
-Layer 2: [Eth Header][IP Header][TCP][Data][Eth Trailer] ê Frame
-            ì
-Layer 1: 010101110101... ê Bits
+            ‚Üì
+Layer 4: [TCP Header][Data] ‚Üí Segment
+            ‚Üì
+Layer 3: [IP Header][TCP Header][Data] ‚Üí Packet
+            ‚Üì
+Layer 2: [Eth Header][IP Header][TCP][Data][Eth Trailer] ‚Üí Frame
+            ‚Üì
+Layer 1: 010101110101... ‚Üí Bits
 ```
 
 ### Decapsulation Process (Receiving)
 
 ```
 Layer 1: Receive bits
-            ì
-Layer 2: Remove Ethernet header/trailer í Frame
-            ì
-Layer 3: Remove IP header í Packet
-            ì
-Layer 4: Remove TCP header í Segment
-            ì
+            ‚Üì
+Layer 2: Remove Ethernet header/trailer ‚Üí Frame
+            ‚Üì
+Layer 3: Remove IP header ‚Üí Packet
+            ‚Üì
+Layer 4: Remove TCP header ‚Üí Segment
+            ‚Üì
 Layer 7: Deliver data to application
 ```
 
@@ -589,12 +589,12 @@ OSI Layer          Protocol Examples
 OSI Model              TCP/IP Model
 -----------------------------------------
 7 - Application  
-6 - Presentation   í Application
+6 - Presentation   ‚Üí Application
 5 - Session      
-4 - Transport       í Transport
-3 - Network         í Internet
+4 - Transport       ‚Üí Transport
+3 - Network         ‚Üí Internet
 2 - Data Link    
-1 - Physical       í Network Access
+1 - Physical       ‚Üí Network Access
 ```
 
 ## Benefits of Layered Approach

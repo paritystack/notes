@@ -147,7 +147,7 @@ X-Address: IP address XORed with magic cookie (and transaction ID for IPv6)
 ### Binding Request
 
 ```
-Client ’ STUN Server (UDP port 3478)
+Client â†’ STUN Server (UDP port 3478)
 
 Message Type: Binding Request (0x0001)
 Message Length: 0
@@ -167,7 +167,7 @@ FA 87 DF AE
 ### Binding Response
 
 ```
-STUN Server ’ Client
+STUN Server â†’ Client
 
 Message Type: Binding Response (0x0101)
 Message Length: 12 (length of attributes)
@@ -185,7 +185,7 @@ Attributes:
 ```
 Your public IP address: 203.0.113.5
 Your public port: 54321
-NAT binding created: 192.168.1.10:5000 ” 203.0.113.5:54321
+NAT binding created: 192.168.1.10:5000 â†” 203.0.113.5:54321
 ```
 
 ## NAT Types Discovered by STUN
@@ -196,10 +196,10 @@ NAT binding created: 192.168.1.10:5000 ” 203.0.113.5:54321
 Internal: 192.168.1.10:5000
 
 NAT creates mapping:
-  192.168.1.10:5000 ” 203.0.113.5:6000
+  192.168.1.10:5000 â†” 203.0.113.5:6000
 
 Any external host can send to 203.0.113.5:6000
-  ’ Forwarded to 192.168.1.10:5000
+  â†’ Forwarded to 192.168.1.10:5000
 
 Best for P2P (easy to traverse)
 ```
@@ -210,7 +210,7 @@ Best for P2P (easy to traverse)
 Internal: 192.168.1.10:5000
 
 NAT creates mapping:
-  192.168.1.10:5000 ” 203.0.113.5:6000
+  192.168.1.10:5000 â†” 203.0.113.5:6000
 
 External host 1.2.3.4 can send to 203.0.113.5:6000
   ONLY IF 192.168.1.10:5000 previously sent to 1.2.3.4
@@ -224,7 +224,7 @@ Moderate difficulty to traverse
 Internal: 192.168.1.10:5000
 
 NAT creates mapping:
-  192.168.1.10:5000 ” 203.0.113.5:6000
+  192.168.1.10:5000 â†” 203.0.113.5:6000
 
 External host 1.2.3.4:7000 can send to 203.0.113.5:6000
   ONLY IF 192.168.1.10:5000 previously sent to 1.2.3.4:7000
@@ -238,9 +238,9 @@ More difficult to traverse
 Internal: 192.168.1.10:5000
 
 NAT creates different mappings per destination:
-  To host A: 192.168.1.10:5000 ” 203.0.113.5:6000
-  To host B: 192.168.1.10:5000 ” 203.0.113.5:6001
-  To host C: 192.168.1.10:5000 ” 203.0.113.5:6002
+  To host A: 192.168.1.10:5000 â†” 203.0.113.5:6000
+  To host B: 192.168.1.10:5000 â†” 203.0.113.5:6001
+  To host C: 192.168.1.10:5000 â†” 203.0.113.5:6002
 
 Difficult to traverse (may need TURN relay)
 ```
@@ -488,7 +488,7 @@ STUN tells you: 203.0.113.5:6000
 But when connecting to peer, NAT assigns: 203.0.113.5:6001
 
 Peer can't connect to you
-’ Need TURN relay
+â†’ Need TURN relay
 ```
 
 ### 2. Requires UDP
@@ -496,7 +496,7 @@ Peer can't connect to you
 ```
 Some networks block UDP
 STUN won't work
-’ Need TCP fallback or TURN over TCP
+â†’ Need TCP fallback or TURN over TCP
 ```
 
 ### 3. Firewall Issues
@@ -504,7 +504,7 @@ STUN won't work
 ```
 Restrictive firewalls may block P2P connections
 Even with correct IP:port from STUN
-’ Need TURN relay
+â†’ Need TURN relay
 ```
 
 ### 4. No Data Relay
@@ -589,7 +589,7 @@ They need your full address, not just "Apartment 5"
 **When STUN Doesn't Work:**
 - Symmetric NAT: Address changes for each recipient
 - Firewall: Building doesn't accept outside mail
-- ’ Need TURN (a forwarding service)
+- â†’ Need TURN (a forwarding service)
 
 **WebRTC Uses STUN:**
 - Video calls discover how to reach each other

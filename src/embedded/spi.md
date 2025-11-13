@@ -209,7 +209,7 @@ void writeRegister(uint8_t reg, uint8_t value) {
 - Use twisted pairs for MOSI/MISO on longer runs
 
 ### 2. Pull-up Resistors
-- MISO should have a pull-up resistor (~10k©)
+- MISO should have a pull-up resistor (~10k ohm)
 - Prevents floating when no slave is selected
 - Some slave devices have built-in pull-ups
 

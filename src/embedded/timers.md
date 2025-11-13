@@ -36,11 +36,11 @@ Timers and counters are essential hardware peripherals in microcontrollers that 
 
 ```
 System Clock (16 MHz)
-    “
-Prescaler (÷256)
-    “
+    ->
+Prescaler (/256)
+    ->
 Timer Clock (62.5 kHz)
-    “
+    ->
 Counter increments at 62.5 kHz
 ```
 
@@ -57,13 +57,13 @@ Overflow Time = (2^bits / Timer Frequency)
 ```
 Prescaler = 256
 Timer Frequency = 16,000,000 / 256 = 62,500 Hz
-Timer Period = 1 / 62,500 = 16 ¼s per tick
+Timer Period = 1 / 62,500 = 16 us per tick
 
 For 8-bit timer (0-255):
-Overflow Time = 256 × 16 ¼s = 4.096 ms
+Overflow Time = 256 * 16 us = 4.096 ms
 
 For 16-bit timer (0-65535):
-Overflow Time = 65,536 × 16 ¼s = 1.048 seconds
+Overflow Time = 65,536 * 16 us = 1.048 seconds
 ```
 
 ## Code Examples
@@ -87,8 +87,8 @@ void setup() {
   TCNT1 = 0;
 
   // Set compare match register for 1ms
-  // OCR1A = (16MHz / (prescaler × desired frequency)) - 1
-  // OCR1A = (16,000,000 / (64 × 1000)) - 1 = 249
+  // OCR1A = (16MHz / (prescaler * desired frequency)) - 1
+  // OCR1A = (16,000,000 / (64 * 1000)) - 1 = 249
   OCR1A = 249;
 
   // Turn on CTC mode (Clear Timer on Compare Match)
@@ -141,13 +141,13 @@ void setup() {
 
   // Initialize timer (timer number, prescaler, count up)
   // ESP32 clock is 80 MHz
-  // Prescaler of 80 gives 1 MHz (1 tick = 1 ¼s)
+  // Prescaler of 80 gives 1 MHz (1 tick = 1 us)
   timer = timerBegin(0, 80, true);
 
   // Attach interrupt function
   timerAttachInterrupt(timer, &onTimer, true);
 
-  // Set alarm to trigger every 1ms (1000 ¼s)
+  // Set alarm to trigger every 1ms (1000 us)
   timerAlarmWrite(timer, 1000, true);  // true = auto-reload
 
   // Enable timer alarm
@@ -196,8 +196,8 @@ void Timer_Init(void) {
 
     // TIM2 configuration
     // APB1 clock = 84 MHz (for STM32F4)
-    // Prescaler = 8400 - 1 ’ 10 kHz timer clock
-    // Period = 10 - 1 ’ 1 kHz interrupt (1ms)
+    // Prescaler = 8400 - 1 -> 10 kHz timer clock
+    // Period = 10 - 1 -> 1 kHz interrupt (1ms)
 
     htim2.Instance = TIM2;
     htim2.Init.Prescaler = 8400 - 1;      // 84 MHz / 8400 = 10 kHz
@@ -256,8 +256,8 @@ void setup() {
   TCCR1B |= (1 << CS11);
 
   // Set TOP value for desired frequency
-  // PWM Frequency = F_CPU / (Prescaler × (1 + TOP))
-  // For 50 Hz: TOP = 16,000,000 / (8 × 50) - 1 = 39999
+  // PWM Frequency = F_CPU / (Prescaler * (1 + TOP))
+  // For 50 Hz: TOP = 16,000,000 / (8 * 50) - 1 = 39999
   ICR1 = 39999;  // 50 Hz
 
   // Set duty cycle
@@ -268,9 +268,9 @@ void setup() {
 // Servo control example
 void setServoAngle(uint8_t angle) {
   // Servo expects 1ms-2ms pulse every 20ms (50 Hz)
-  // 1ms = 0° = 2000 counts
-  // 1.5ms = 90° = 3000 counts
-  // 2ms = 180° = 4000 counts
+  // 1ms = 0 degrees = 2000 counts
+  // 1.5ms = 90 degrees = 3000 counts
+  // 2ms = 180 degrees = 4000 counts
 
   uint16_t pulse = map(angle, 0, 180, 2000, 4000);
   OCR1A = pulse;
@@ -302,7 +302,7 @@ void setup() {
   TCCR1A = 0;
   TCCR1B = 0;
 
-  // Prescaler = 64 (250 kHz timer, 4¼s resolution)
+  // Prescaler = 64 (250 kHz timer, 4us resolution)
   TCCR1B |= (1 << CS11) | (1 << CS10);
 
   // Input Capture on rising edge
@@ -337,7 +337,7 @@ void loop() {
     unsigned long period = captureTime2 - captureTime1;
 
     // Calculate frequency
-    // Timer runs at 250 kHz (4¼s per tick)
+    // Timer runs at 250 kHz (4us per tick)
     float frequency = 250000.0 / period;
 
     Serial.print("Frequency: ");
@@ -556,14 +556,14 @@ void loop() {
 
 ```cpp
 // Formula for CTC mode:
-// Compare Value = (F_CPU / (Prescaler × Desired_Frequency)) - 1
+// Compare Value = (F_CPU / (Prescaler * Desired_Frequency)) - 1
 
 #define F_CPU 16000000UL
 #define PRESCALER 64
 #define DESIRED_HZ 1000  // 1 kHz
 
 uint16_t compareValue = (F_CPU / (PRESCALER * DESIRED_HZ)) - 1;
-// compareValue = (16000000 / (64 × 1000)) - 1 = 249
+// compareValue = (16000000 / (64 * 1000)) - 1 = 249
 
 OCR1A = compareValue;
 ```

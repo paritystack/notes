@@ -8,14 +8,14 @@ Large Language Models are transformer-based neural networks trained on massive t
 
 ### Transformers
 Built on **self-attention** mechanism:
-- **Query-Key-Value**: "What am I looking for?" ’ "Where's the relevant info?" ’ "Get the info"
+- **Query-Key-Value**: "What am I looking for?" -> "Where's the relevant info?" -> "Get the info"
 - **Multi-head Attention**: Multiple attention patterns in parallel
 - **Feed-forward Networks**: Non-linear transformations
 - **Layer Normalization**: Stabilizes training
 
 ### Scaling Laws
 Performance improves predictably with:
-- **Model size** (parameters): 7B ’ 70B ’ 700B
+- **Model size** (parameters): 7B -> 70B -> 700B
 - **Dataset size**: More tokens = better performance
 - **Compute**: More training = better convergence
 
@@ -63,13 +63,13 @@ Train on labeled examples (supervised)
 ### Tokenization
 Convert text to numbers:
 ```
-"Hello world" ’ [15339, 1159]
+"Hello world" -> [15339, 1159]
 ```
 
 ### Embeddings
 Represent tokens as vectors in semantic space:
 ```
-king - man + woman H queen
+king - man + woman ~= queen
 ```
 
 ### Context Window
@@ -156,8 +156,8 @@ Time: O(tokens)
 ### LoRA (Low-Rank Adaptation)
 Add small trainable matrices (efficient):
 ```python
-# Instead of: W' = W + ”W
-# Use: W' = W + A×B (where A, B << W)
+# Instead of: W' = W + delta_W
+# Use: W' = W + A*B (where A, B << W)
 ```
 
 ### QLoRA
@@ -205,8 +205,8 @@ Model Size | VRAM Needed | Speed
 
 ### 1. Prompt Engineering
 ```
-L Bad: "Write code"
- Good: "Write Python function that takes list and returns sorted list in ascending order"
+X Bad: "Write code"
+Checkmark Good: "Write Python function that takes list and returns sorted list in ascending order"
 ```
 
 ### 2. Breaking Complex Tasks

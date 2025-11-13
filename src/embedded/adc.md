@@ -9,7 +9,7 @@ An Analog-to-Digital Converter (ADC) is a hardware component that converts conti
 ### What is an Analog Signal?
 
 An analog signal is a continuous signal that can have any value within a range. Examples:
-- Temperature: 0°C to 100°C
+- Temperature: 0C to 100C
 - Light intensity: 0 to maximum brightness
 - Audio: continuous sound waves
 - Voltage: 0V to 5V
@@ -39,7 +39,7 @@ Where n = number of bits
 | 8-bit | 256 | 19.6 mV | 12.9 mV |
 | 10-bit | 1024 | 4.88 mV | 3.22 mV |
 | 12-bit | 4096 | 1.22 mV | 0.81 mV |
-| 16-bit | 65536 | 76.3 ¼V | 50.4 ¼V |
+| 16-bit | 65536 | 76.3 uV | 50.4 uV |
 
 **What this means**: A 10-bit ADC with 5V reference can distinguish voltage differences as small as ~4.88mV.
 
@@ -76,17 +76,17 @@ How many times per second the ADC can take a measurement, measured in:
 4. **Encode**: Convert to a binary number
 
 ```
-Analog Input (2.5V) ’ ADC ’ Digital Output (512 for 10-bit at 5V ref)
+Analog Input (2.5V) -> ADC -> Digital Output (512 for 10-bit at 5V ref)
 
-Calculation: 2.5V / 5V × 1023 = 511.5 H 512
+Calculation: 2.5V / 5V * 1023 = 511.5 ~ 512
 ```
 
 ### Conversion Formula
 
 ```
-Digital Value = (Analog Voltage / Reference Voltage) × (2^n - 1)
+Digital Value = (Analog Voltage / Reference Voltage) * (2^n - 1)
 
-Analog Voltage = (Digital Value / (2^n - 1)) × Reference Voltage
+Analog Voltage = (Digital Value / (2^n - 1)) * Reference Voltage
 ```
 
 ## Code Examples
@@ -276,12 +276,12 @@ void setup() {
   }
 
   // Set gain
-  // ads.setGain(GAIN_TWOTHIRDS);  // ±6.144V range
-  // ads.setGain(GAIN_ONE);        // ±4.096V range
-  ads.setGain(GAIN_TWO);           // ±2.048V range (default)
-  // ads.setGain(GAIN_FOUR);       // ±1.024V range
-  // ads.setGain(GAIN_EIGHT);      // ±0.512V range
-  // ads.setGain(GAIN_SIXTEEN);    // ±0.256V range
+  // ads.setGain(GAIN_TWOTHIRDS);  // +/-6.144V range
+  // ads.setGain(GAIN_ONE);        // +/-4.096V range
+  ads.setGain(GAIN_TWO);           // +/-2.048V range (default)
+  // ads.setGain(GAIN_FOUR);       // +/-1.024V range
+  // ads.setGain(GAIN_EIGHT);      // +/-0.512V range
+  // ads.setGain(GAIN_SIXTEEN);    // +/-0.256V range
 }
 
 void loop() {
@@ -308,8 +308,8 @@ void loop() {
 ```cpp
 const int thermistorPin = A0;
 const float BETA = 3950;  // Beta coefficient
-const float R0 = 10000;   // Resistance at 25°C
-const float T0 = 298.15;  // 25°C in Kelvin
+const float R0 = 10000;   // Resistance at 25C
+const float T0 = 298.15;  // 25C in Kelvin
 
 float readTemperature() {
   int raw = analogRead(thermistorPin);
@@ -446,14 +446,14 @@ int smoothedRead(int pin) {
 
 ```cpp
 // To measure higher voltages, use voltage divider
-// Vin     R1  ,    R2     GND
-//             
+// Vin     R1  ,    R2     GND
+//
 //          ADC Pin
 
 // Example: Measure 12V with 5V ADC
-// R1 = 10k©, R2 = 7.5k©
-// Vout = Vin × (R2 / (R1 + R2))
-// Vout = 12V × (7.5 / 17.5) = 5.14V (slightly over, use 6.8k© for R2)
+// R1 = 10k ohm, R2 = 7.5k ohm
+// Vout = Vin * (R2 / (R1 + R2))
+// Vout = 12V * (7.5 / 17.5) = 5.14V (slightly over, use 6.8k ohm for R2)
 ```
 
 ### 4. Calibration
@@ -484,7 +484,7 @@ float calibratedRead(int pin, CalibrationData cal) {
 
 ### Problem: Noisy Readings
 **Solutions**:
-- Add 0.1¼F capacitor between analog pin and ground
+- Add 0.1uF capacitor between analog pin and ground
 - Use averaging/filtering in software
 - Keep analog wires short and away from digital signals
 - Use twisted pair cables for long runs
@@ -506,10 +506,10 @@ float calibratedRead(int pin, CalibrationData cal) {
 
 ## ELI10 (Explain Like I'm 10)
 
-Imagine you have a thermometer that shows any temperature between 0°C and 100°C, but you can only report whole numbers:
+Imagine you have a thermometer that shows any temperature between 0C and 100C, but you can only report whole numbers:
 
-- If the real temperature is 23.7°C, you might say "24°C"
-- If it's 23.2°C, you might say "23°C"
+- If the real temperature is 23.7C, you might say "24C"
+- If it's 23.2C, you might say "23C"
 
 An ADC does the same thing! It takes a smooth, continuous voltage (like the temperature) and converts it to a number your microcontroller can understand.
 

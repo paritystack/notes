@@ -1,0 +1,845 @@
+# Git Version Control
+
+## Overview
+
+Git is a distributed version control system designed to handle everything from small to very large projects with speed and efficiency. Created by Linus Torvalds in 2005, Git has become the de facto standard for version control in software development.
+
+## What is Version Control?
+
+Version control is a system that records changes to files over time so that you can recall specific versions later. It allows you to:
+
+- Track changes to your code
+- Collaborate with other developers
+- Revert to previous versions
+- Create branches for experimental features
+- Merge changes from multiple sources
+- Maintain a complete history of your project
+
+## Why Git?
+
+1. **Distributed**: Every developer has a full copy of the repository
+2. **Fast**: Most operations are local
+3. **Branching**: Lightweight and powerful branching model
+4. **Data Integrity**: Cryptographic hash (SHA-1) ensures data integrity
+5. **Staging Area**: Review changes before committing
+6. **Open Source**: Free and widely supported
+
+## Git Basics
+
+### The Three States
+
+Git has three main states for your files:
+
+1. **Modified**: Changed but not committed
+2. **Staged**: Marked for next commit
+3. **Committed**: Safely stored in local database
+
+```
+Working Directory -> Staging Area -> Git Repository
+     (edit)            (stage)         (commit)
+```
+
+### Git Workflow
+
+```bash
+# 1. Make changes in working directory
+echo "Hello World" > file.txt
+
+# 2. Stage changes
+git add file.txt
+
+# 3. Commit changes
+git commit -m "Add hello world file"
+
+# 4. Push to remote repository
+git push origin main
+```
+
+## Installation and Setup
+
+### Installation
+
+```bash
+# Linux (Debian/Ubuntu)
+sudo apt-get update
+sudo apt-get install git
+
+# Linux (Fedora)
+sudo dnf install git
+
+# macOS (Homebrew)
+brew install git
+
+# Windows
+# Download from https://git-scm.com/download/win
+
+# Verify installation
+git --version
+```
+
+### Initial Configuration
+
+```bash
+# Set user name
+git config --global user.name "Your Name"
+
+# Set email
+git config --global user.email "your.email@example.com"
+
+# Set default editor
+git config --global core.editor "vim"
+
+# Set default branch name
+git config --global init.defaultBranch main
+
+# Enable color output
+git config --global color.ui auto
+
+# View all settings
+git config --list
+
+# View specific setting
+git config user.name
+
+# Edit config file directly
+git config --global --edit
+```
+
+## Basic Commands
+
+### Creating Repositories
+
+```bash
+# Initialize new repository
+git init
+
+# Clone existing repository
+git clone https://github.com/user/repo.git
+
+# Clone to specific directory
+git clone https://github.com/user/repo.git my-project
+
+# Clone specific branch
+git clone -b develop https://github.com/user/repo.git
+```
+
+### Making Changes
+
+```bash
+# Check status
+git status
+
+# Add file to staging
+git add file.txt
+
+# Add all files
+git add .
+
+# Add all files with specific extension
+git add *.js
+
+# Interactive staging
+git add -p
+
+# Commit staged changes
+git commit -m "Commit message"
+
+# Commit with detailed message
+git commit
+
+# Stage and commit in one step
+git commit -am "Message"
+
+# Amend last commit
+git commit --amend
+
+# Amend without changing message
+git commit --amend --no-edit
+```
+
+### Viewing History
+
+```bash
+# View commit history
+git log
+
+# Compact log
+git log --oneline
+
+# Graph view
+git log --graph --oneline --all
+
+# Limit number of commits
+git log -n 5
+
+# Show commits by author
+git log --author="John"
+
+# Show commits in date range
+git log --since="2 weeks ago"
+git log --until="2024-01-01"
+
+# Show file changes
+git log --stat
+
+# Show detailed changes
+git log -p
+
+# Search commit messages
+git log --grep="fix"
+
+# Show commits affecting specific file
+git log -- file.txt
+```
+
+### Viewing Changes
+
+```bash
+# Show unstaged changes
+git diff
+
+# Show staged changes
+git diff --staged
+
+# Show changes in specific file
+git diff file.txt
+
+# Compare branches
+git diff main..feature
+
+# Compare commits
+git diff commit1 commit2
+
+# Word-level diff
+git diff --word-diff
+```
+
+## Branching and Merging
+
+### Branches
+
+```bash
+# List branches
+git branch
+
+# List all branches (including remote)
+git branch -a
+
+# Create new branch
+git branch feature-name
+
+# Switch to branch
+git checkout feature-name
+
+# Create and switch in one command
+git checkout -b feature-name
+
+# Modern syntax (Git 2.23+)
+git switch feature-name
+git switch -c feature-name
+
+# Delete branch
+git branch -d feature-name
+
+# Force delete unmerged branch
+git branch -D feature-name
+
+# Rename current branch
+git branch -m new-name
+
+# Rename specific branch
+git branch -m old-name new-name
+```
+
+### Merging
+
+```bash
+# Merge branch into current branch
+git merge feature-name
+
+# Merge with commit message
+git merge feature-name -m "Merge feature"
+
+# Merge without fast-forward
+git merge --no-ff feature-name
+
+# Abort merge
+git merge --abort
+
+# Continue merge after resolving conflicts
+git merge --continue
+```
+
+### Handling Merge Conflicts
+
+```bash
+# When merge conflict occurs:
+
+# 1. Check conflicted files
+git status
+
+# 2. Open files and resolve conflicts
+#    Look for markers: <<<<<<<, =======, >>>>>>>
+
+# 3. After resolving, stage files
+git add resolved-file.txt
+
+# 4. Complete merge
+git commit
+
+# Or use merge tool
+git mergetool
+```
+
+### Rebasing
+
+```bash
+# Rebase current branch onto main
+git rebase main
+
+# Interactive rebase (last 3 commits)
+git rebase -i HEAD~3
+
+# Continue after resolving conflicts
+git rebase --continue
+
+# Skip current commit
+git rebase --skip
+
+# Abort rebase
+git rebase --abort
+
+# Rebase options in interactive mode:
+# pick   = use commit
+# reword = use commit, but edit message
+# edit   = use commit, but stop for amending
+# squash = merge with previous commit
+# drop   = remove commit
+```
+
+## Remote Repositories
+
+### Working with Remotes
+
+```bash
+# List remotes
+git remote
+
+# List remotes with URLs
+git remote -v
+
+# Add remote
+git remote add origin https://github.com/user/repo.git
+
+# Change remote URL
+git remote set-url origin https://github.com/user/new-repo.git
+
+# Remove remote
+git remote remove origin
+
+# Rename remote
+git remote rename origin upstream
+
+# Show remote info
+git remote show origin
+```
+
+### Fetching and Pulling
+
+```bash
+# Fetch from remote (doesn't merge)
+git fetch origin
+
+# Fetch all remotes
+git fetch --all
+
+# Pull (fetch + merge)
+git pull origin main
+
+# Pull with rebase
+git pull --rebase origin main
+
+# Pull specific branch
+git pull origin feature-branch
+```
+
+### Pushing
+
+```bash
+# Push to remote
+git push origin main
+
+# Push and set upstream
+git push -u origin main
+
+# Push all branches
+git push --all origin
+
+# Push tags
+git push --tags
+
+# Force push (dangerous!)
+git push --force origin main
+
+# Safer force push
+git push --force-with-lease origin main
+
+# Delete remote branch
+git push origin --delete branch-name
+```
+
+## Undoing Changes
+
+### Working Directory
+
+```bash
+# Discard changes in file
+git checkout -- file.txt
+
+# Discard all changes
+git checkout -- .
+
+# Modern syntax
+git restore file.txt
+git restore .
+
+# Remove untracked files
+git clean -f
+
+# Remove untracked files and directories
+git clean -fd
+
+# Preview what will be removed
+git clean -n
+```
+
+### Staging Area
+
+```bash
+# Unstage file
+git reset HEAD file.txt
+
+# Unstage all files
+git reset HEAD
+
+# Modern syntax
+git restore --staged file.txt
+```
+
+### Commits
+
+```bash
+# Undo last commit (keep changes)
+git reset --soft HEAD~1
+
+# Undo last commit (discard changes)
+git reset --hard HEAD~1
+
+# Undo multiple commits
+git reset --hard HEAD~3
+
+# Reset to specific commit
+git reset --hard commit-hash
+
+# Create new commit that undoes changes
+git revert commit-hash
+
+# Revert multiple commits
+git revert commit1..commit3
+```
+
+## Advanced Features
+
+### Stashing
+
+```bash
+# Stash current changes
+git stash
+
+# Stash with message
+git stash save "Work in progress"
+
+# List stashes
+git stash list
+
+# Apply last stash
+git stash apply
+
+# Apply specific stash
+git stash apply stash@{2}
+
+# Apply and remove stash
+git stash pop
+
+# Create branch from stash
+git stash branch feature-name
+
+# Drop stash
+git stash drop stash@{0}
+
+# Clear all stashes
+git stash clear
+
+# Stash including untracked files
+git stash -u
+```
+
+### Tags
+
+```bash
+# List tags
+git tag
+
+# Create lightweight tag
+git tag v1.0.0
+
+# Create annotated tag
+git tag -a v1.0.0 -m "Version 1.0.0"
+
+# Tag specific commit
+git tag v1.0.0 commit-hash
+
+# Push tag to remote
+git push origin v1.0.0
+
+# Push all tags
+git push --tags
+
+# Delete local tag
+git tag -d v1.0.0
+
+# Delete remote tag
+git push origin --delete v1.0.0
+
+# Checkout tag
+git checkout v1.0.0
+```
+
+### Cherry-Pick
+
+```bash
+# Apply specific commit to current branch
+git cherry-pick commit-hash
+
+# Cherry-pick multiple commits
+git cherry-pick commit1 commit2
+
+# Cherry-pick without committing
+git cherry-pick -n commit-hash
+
+# Abort cherry-pick
+git cherry-pick --abort
+```
+
+### Bisect
+
+```bash
+# Start bisect session
+git bisect start
+
+# Mark current commit as bad
+git bisect bad
+
+# Mark known good commit
+git bisect good commit-hash
+
+# Git will checkout middle commit
+# Test and mark as good or bad
+git bisect good  # or git bisect bad
+
+# Continue until bug is found
+
+# End bisect session
+git bisect reset
+```
+
+## Git Workflows
+
+### Feature Branch Workflow
+
+```bash
+# 1. Create feature branch
+git checkout -b feature/new-feature
+
+# 2. Make changes and commit
+git add .
+git commit -m "Implement new feature"
+
+# 3. Push to remote
+git push -u origin feature/new-feature
+
+# 4. Create pull request (on GitHub/GitLab)
+
+# 5. After review, merge via web interface
+
+# 6. Update local main branch
+git checkout main
+git pull origin main
+
+# 7. Delete feature branch
+git branch -d feature/new-feature
+git push origin --delete feature/new-feature
+```
+
+### Gitflow Workflow
+
+```bash
+# Main branches: main (production), develop (integration)
+
+# Start new feature
+git checkout -b feature/feature-name develop
+
+# Finish feature
+git checkout develop
+git merge --no-ff feature/feature-name
+git branch -d feature/feature-name
+
+# Start release
+git checkout -b release/1.0.0 develop
+
+# Finish release
+git checkout main
+git merge --no-ff release/1.0.0
+git tag -a v1.0.0
+git checkout develop
+git merge --no-ff release/1.0.0
+git branch -d release/1.0.0
+
+# Hotfix
+git checkout -b hotfix/fix-bug main
+git checkout main
+git merge --no-ff hotfix/fix-bug
+git tag -a v1.0.1
+git checkout develop
+git merge --no-ff hotfix/fix-bug
+git branch -d hotfix/fix-bug
+```
+
+## Best Practices
+
+### Commit Messages
+
+```bash
+# Good commit message structure:
+# <type>: <subject>
+# 
+# <body>
+# 
+# <footer>
+
+# Example:
+git commit -m "feat: Add user authentication
+
+Implement JWT-based authentication system with login and logout endpoints.
+Uses bcrypt for password hashing.
+
+Closes #123"
+
+# Common types:
+# feat:     New feature
+# fix:      Bug fix
+# docs:     Documentation changes
+# style:    Formatting, missing semicolons, etc.
+# refactor: Code restructuring
+# test:     Adding tests
+# chore:    Maintenance tasks
+```
+
+### General Best Practices
+
+1. **Commit Often**: Make small, logical commits
+2. **Write Clear Messages**: Explain what and why
+3. **Use Branches**: Keep main stable
+4. **Pull Before Push**: Stay synchronized
+5. **Review Before Commit**: Check what you're committing
+6. **Don't Commit Secrets**: Use .gitignore for sensitive files
+7. **Keep History Clean**: Use rebase for feature branches
+8. **Tag Releases**: Mark important versions
+9. **Backup Remote**: Always have a remote backup
+10. **Learn to Revert**: Know how to undo mistakes
+
+### .gitignore
+
+```bash
+# Create .gitignore file
+cat > .gitignore << 'EOL'
+# Dependencies
+node_modules/
+vendor/
+
+# Environment files
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compiled files
+*.pyc
+*.class
+*.o
+EOL
+
+# Global gitignore
+git config --global core.excludesfile ~/.gitignore_global
+```
+
+## Troubleshooting
+
+### Common Issues
+
+```bash
+# Undo last commit but keep changes
+git reset --soft HEAD~1
+
+# Fix wrong commit message
+git commit --amend -m "Correct message"
+
+# Recover deleted branch
+git reflog
+git checkout -b recovered-branch commit-hash
+
+# Resolve "detached HEAD"
+git checkout main
+
+# Remove file from Git but keep locally
+git rm --cached file.txt
+
+# Update .gitignore for already tracked files
+git rm -r --cached .
+git add .
+git commit -m "Update .gitignore"
+
+# Find commit that introduced bug
+git bisect start
+git bisect bad
+git bisect good commit-hash
+```
+
+### Performance
+
+```bash
+# Clean up repository
+git gc
+
+# Aggressive cleanup
+git gc --aggressive
+
+# Prune unreachable objects
+git prune
+
+# Show repository size
+git count-objects -vH
+```
+
+## Git Aliases
+
+```bash
+# Create useful aliases
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.ci commit
+git config --global alias.st status
+git config --global alias.unstage 'reset HEAD --'
+git config --global alias.last 'log -1 HEAD'
+git config --global alias.visual 'log --graph --oneline --all'
+git config --global alias.amend 'commit --amend --no-edit'
+
+# Use aliases
+git co main
+git ci -m "Message"
+git visual
+```
+
+## Integration with GitHub
+
+GitHub adds collaboration features on top of Git. See the dedicated [GitHub guide](github.md) for:
+
+- Pull requests
+- Issues
+- Actions (CI/CD)
+- Pages
+- Wikis
+- Organizations and teams
+
+## Available Resources
+
+- [Git Cheat Sheet](cheatsheet.md) - Quick reference guide
+- [Git Commands](commands.md) - Comprehensive command list
+- [GitHub Guide](github.md) - GitHub-specific features
+
+## Learning Resources
+
+### Documentation
+- [Official Git Documentation](https://git-scm.com/doc)
+- [Pro Git Book](https://git-scm.com/book/en/v2) (free online)
+- [Git Reference](https://git-scm.com/docs)
+
+### Interactive Tutorials
+- [Learn Git Branching](https://learngitbranching.js.org/)
+- [GitHub Learning Lab](https://lab.github.com/)
+- [Git Exercises](https://gitexercises.fracz.com/)
+
+### Visualizations
+- [Visualizing Git Concepts](https://git-school.github.io/visualizing-git/)
+- [Git Flow Diagram](https://nvie.com/posts/a-successful-git-branching-model/)
+
+## Quick Reference
+
+### Daily Commands
+```bash
+git status                    # Check status
+git add .                     # Stage all changes
+git commit -m "message"       # Commit changes
+git pull                      # Update from remote
+git push                      # Push to remote
+git log --oneline            # View history
+```
+
+### Branching
+```bash
+git branch                    # List branches
+git checkout -b feature       # Create and switch
+git merge feature            # Merge branch
+git branch -d feature        # Delete branch
+```
+
+### Undoing
+```bash
+git reset --soft HEAD~1      # Undo commit, keep changes
+git restore file.txt         # Discard file changes
+git revert commit-hash       # Create revert commit
+git stash                    # Save temporary changes
+```
+
+### Remote
+```bash
+git remote -v                # List remotes
+git fetch origin             # Download changes
+git pull origin main         # Fetch and merge
+git push origin main         # Upload changes
+```
+
+## Next Steps
+
+1. Practice basic commands: add, commit, push, pull
+2. Learn branching and merging
+3. Master undoing changes safely
+4. Explore advanced features: rebase, cherry-pick, bisect
+5. Set up GitHub account and create repositories
+6. Contribute to open source projects
+7. Learn Git workflows (Feature Branch, Gitflow)
+8. Configure useful aliases and tools
+
+Remember: Git has a learning curve, but it's worth the investment. Start with the basics and gradually explore advanced features as needed.

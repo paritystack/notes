@@ -97,6 +97,25 @@ The practical 4-layer model used in modern networks:
 - Server setup with coturn
 - Cost considerations
 
+### [ICE (Interactive Connectivity Establishment)](ice.md)
+- Framework for establishing peer-to-peer connections
+- Combines STUN and TURN for NAT traversal
+- Candidate gathering and connectivity checks
+- Priority-based path selection
+- Handles symmetric NAT and firewalls
+- Used by WebRTC and VoIP
+
+## Real-Time Communication
+
+### [WebRTC (Web Real-Time Communication)](webrtc.md)
+- Browser-based peer-to-peer communication
+- Video, audio, and data channels
+- getUserMedia API and RTCPeerConnection
+- Signaling and SDP offer/answer
+- Media codecs and quality adaptation
+- Security with mandatory encryption
+- Simulcast and bandwidth management
+
 ## Network Discovery
 
 ### [UPnP (Universal Plug and Play)](upnp.md)

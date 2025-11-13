@@ -374,7 +374,7 @@ SOAPAction: "urn:schemas-upnp-org:service:WANIPConnection:1#AddPortMapping"
 **Result:**
 ```
 External: <public-ip>:8080
-    “
+    â†“
 Internal: 192.168.1.50:8080
 
 Automatic NAT traversal!
@@ -675,7 +675,7 @@ Router: "Done! Port is open."
 ```
 Bad actor: "Hey router, open all ports!"
 Router: "OK!" (No questions asked)
-  ’ This is dangerous!
+  â†’ This is dangerous!
 
 Better approach:
   Router: "Who are you? Do you have permission?"

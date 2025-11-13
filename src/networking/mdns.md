@@ -28,16 +28,16 @@ mDNS solution:
 
 ```
 1. Printer discovery
-   - printer.local ’ 192.168.1.100
+   - printer.local â†’ 192.168.1.100
 
 2. File sharing
-   - macbook.local ’ 192.168.1.50
+   - macbook.local â†’ 192.168.1.50
 
 3. IoT devices
-   - raspberry-pi.local ’ 192.168.1.75
+   - raspberry-pi.local â†’ 192.168.1.75
 
 4. Local development
-   - webserver.local ’ 127.0.0.1
+   - webserver.local â†’ 127.0.0.1
 
 5. Service discovery
    - Find all printers on network
@@ -157,17 +157,17 @@ Header:
 
 | Type | Purpose | Example |
 |------|---------|---------|
-| **A** | IPv4 address | `device.local ’ 192.168.1.10` |
-| **AAAA** | IPv6 address | `device.local ’ fe80::1` |
-| **PTR** | Pointer (service discovery) | `_http._tcp.local ’ webserver` |
-| **SRV** | Service location | `webserver._http._tcp.local ’ device.local:80` |
+| **A** | IPv4 address | `device.local â†’ 192.168.1.10` |
+| **AAAA** | IPv6 address | `device.local â†’ fe80::1` |
+| **PTR** | Pointer (service discovery) | `_http._tcp.local â†’ webserver` |
+| **SRV** | Service location | `webserver._http._tcp.local â†’ device.local:80` |
 | **TXT** | Text information | Service metadata |
 
 ### Service Discovery (DNS-SD)
 
 ```
 PTR Record: Browse services
-  _http._tcp.local ’ webserver._http._tcp.local
+  _http._tcp.local â†’ webserver._http._tcp.local
 
 SRV Record: Service location
   webserver._http._tcp.local
@@ -182,7 +182,7 @@ TXT Record: Service metadata
     "version=1.0"
 
 A Record: IP address
-  myserver.local ’ 192.168.1.50
+  myserver.local â†’ 192.168.1.50
 ```
 
 ## mDNS Features
@@ -191,12 +191,12 @@ A Record: IP address
 
 ```
 Traditional DNS (unicast):
-  Client ’ DNS Server: "What's example.com?"
-  DNS Server ’ Client: "93.184.216.34"
+  Client â†’ DNS Server: "What's example.com?"
+  DNS Server â†’ Client: "93.184.216.34"
 
 mDNS (multicast):
-  Client ’ All devices: "Who has printer.local?"
-  Printer ’ All devices: "I'm 192.168.1.100"
+  Client â†’ All devices: "Who has printer.local?"
+  Printer â†’ All devices: "I'm 192.168.1.100"
 
 Benefits:
   - No dedicated server
@@ -209,14 +209,14 @@ Benefits:
 ```
 Query includes known answers to avoid redundant responses
 
-Client has cached: printer.local ’ 192.168.1.100
+Client has cached: printer.local â†’ 192.168.1.100
 
 Query:
   Question: printer.local?
   Known Answer: 192.168.1.100 (TTL > 50% remaining)
 
 Printer sees cached answer is still valid
-  ’ Doesn't respond (saves bandwidth)
+  â†’ Doesn't respond (saves bandwidth)
 ```
 
 ### 3. Cache-Flush Bit
@@ -225,7 +225,7 @@ Printer sees cached answer is still valid
 Purpose: Invalidate old cache entries
 
 Response with cache-flush:
-  printer.local ’ 192.168.1.100
+  printer.local â†’ 192.168.1.100
   Class: IN | 0x8000 (cache-flush bit set)
 
 Receivers:
@@ -242,7 +242,7 @@ Querier sends query even if cached
   - Detect IP changes
   - Maintain fresh cache
 
-If no response ’ remove from cache
+If no response â†’ remove from cache
 ```
 
 ### 5. Graceful Shutdown
@@ -251,7 +251,7 @@ If no response ’ remove from cache
 Device going offline:
 
 Send goodbye message:
-  printer.local ’ 192.168.1.100
+  printer.local â†’ 192.168.1.100
   TTL: 0 (indicates removal)
 
 Other devices:
@@ -305,7 +305,7 @@ Response (TXT):
   https=true
 
 Then resolve:
-  myserver.local A? ’ 192.168.1.50
+  myserver.local A? â†’ 192.168.1.50
 ```
 
 ## mDNS Implementation
@@ -480,19 +480,19 @@ sudo tcpdump -i any -n port 5353
 
 # Wireshark
 # Filter: udp.port == 5353
-# Follow: Right-click ’ Follow ’ UDP Stream
+# Follow: Right-click â†’ Follow â†’ UDP Stream
 ```
 
 ### Example Capture
 
 ```
 Query:
-  192.168.1.10 ’ 224.0.0.251
+  192.168.1.10 â†’ 224.0.0.251
   DNS Query: printer.local A?
 
 Response:
-  192.168.1.100 ’ 224.0.0.251
-  DNS Answer: printer.local ’ 192.168.1.100 (TTL 120)
+  192.168.1.100 â†’ 224.0.0.251
+  DNS Answer: printer.local â†’ 192.168.1.100 (TTL 120)
 ```
 
 ## mDNS Security Considerations
@@ -608,7 +608,7 @@ Error: "hostname.local already in use"
 
 Solutions:
 1. Rename device
-   - hostname.local ’ hostname-2.local
+   - hostname.local â†’ hostname-2.local
    - Automatic on many systems
 
 2. Check for duplicates
@@ -668,9 +668,9 @@ mDNS is like asking a question to everyone in a classroom:
 - Everyone hears everything (less private)
 
 **Real Examples:**
-- "Where's the printer?" ’ "printer.local is at 192.168.1.100"
-- "Where's my MacBook?" ’ "macbook.local is at 192.168.1.50"
-- "Any web servers?" ’ "myserver.local has HTTP on port 8080"
+- "Where's the printer?" â†’ "printer.local is at 192.168.1.100"
+- "Where's my MacBook?" â†’ "macbook.local is at 192.168.1.50"
+- "Any web servers?" â†’ "myserver.local has HTTP on port 8080"
 
 It's perfect for homes and small offices where you just want things to work!
 

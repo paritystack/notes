@@ -13,17 +13,17 @@ Scenario 1: Symmetric NAT
   Peer A behind Symmetric NAT
   Different public port for each destination
   STUN can't provide usable address
-  í Need TURN relay
+  ‚Üí Need TURN relay
 
 Scenario 2: Restrictive Firewall
   Corporate firewall blocks incoming P2P
   Even with correct address from STUN
-  í Need TURN relay
+  ‚Üí Need TURN relay
 
 Scenario 3: UDP Blocked
   Network blocks UDP traffic
   Can't use STUN or direct P2P
-  í Need TURN over TCP
+  ‚Üí Need TURN over TCP
 ```
 
 ## TURN vs STUN
@@ -92,7 +92,7 @@ Allocation lifetime: 10 minutes (default, can be refreshed)
 
 **Request:**
 ```
-Client í TURN Server
+Client ‚Üí TURN Server
 
 Method: Allocate
 Attributes:
@@ -104,7 +104,7 @@ Attributes:
 
 **Response:**
 ```
-TURN Server í Client
+TURN Server ‚Üí Client
 
 Method: Allocate Success
 Attributes:
@@ -300,17 +300,17 @@ Simpler, time-limited authentication
 
 ```
 1. Allocate (request relay)
-   ì
+   ‚Üì
 2. Success (relay assigned)
-   ì
+   ‚Üì
 3. CreatePermission (allow peers)
-   ì
+   ‚Üì
 4. ChannelBind (optimize transfer)
-   ì
+   ‚Üì
 5. Send/Receive Data
-   ì
+   ‚Üì
 6. Refresh (extend lifetime)
-   ì
+   ‚Üì
 7. Delete or Expire
 
 Timeline:
@@ -328,8 +328,8 @@ Timeline:
 
 ```
 Default mode
-Client í TURN Server: UDP
-TURN Server í Peer: UDP
+Client ‚Üí TURN Server: UDP
+TURN Server ‚Üí Peer: UDP
 
 Fast, but UDP might be blocked
 ```
@@ -337,8 +337,8 @@ Fast, but UDP might be blocked
 ### TURN over TCP
 
 ```
-Client í TURN Server: TCP
-TURN Server í Peer: UDP
+Client ‚Üí TURN Server: TCP
+TURN Server ‚Üí Peer: UDP
 
 Works when UDP blocked
 More overhead (TCP vs UDP)
@@ -347,8 +347,8 @@ More overhead (TCP vs UDP)
 ### TURN over TLS
 
 ```
-Client í TURN Server: TLS over TCP
-TURN Server í Peer: UDP
+Client ‚Üí TURN Server: TLS over TCP
+TURN Server ‚Üí Peer: UDP
 
 Encrypted control channel
 Works in restrictive environments
@@ -378,7 +378,7 @@ ICE tries candidates in order:
    Example: 198.51.100.1:50000
 
 Connection attempt:
-  Try host í Try srflx í Try relay
+  Try host ‚Üí Try srflx ‚Üí Try relay
   Use first successful connection
 ```
 
@@ -472,11 +472,11 @@ turnutils_uclient -v -u alice -w password123 turn.example.com
 Video call: 2 Mbps per direction
 
 Direct P2P (no TURN):
-  Client A êí Client B
+  Client A ‚Üí‚Üí Client B
   Total bandwidth: 4 Mbps (2 up + 2 down each)
 
 Through TURN relay:
-  Client A í TURN í Client B
+  Client A ‚Üí TURN ‚Üí Client B
   TURN bandwidth: 4 Mbps (2 in + 2 out)
   Each client: 4 Mbps (2 up + 2 down)
 
@@ -487,8 +487,8 @@ TURN server needs 2x the bandwidth!
 
 ```
 Example: 1000 concurrent video calls through TURN
-  Each call: 2 Mbps ◊ 2 directions = 4 Mbps
-  Total: 1000 ◊ 4 Mbps = 4 Gbps
+  Each call: 2 Mbps √ó 2 directions = 4 Mbps
+  Total: 1000 √ó 4 Mbps = 4 Gbps
 
 At $0.10/GB:
   4 Gbps = 0.5 GB/second

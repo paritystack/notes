@@ -284,7 +284,7 @@ Used for Path MTU Discovery
 
 ```
 1. Check if destination is local (same subnet)
-   ’ Send directly via ARP
+   â†’ Send directly via ARP
 
 2. If not local, find matching route:
    - Check routing table for most specific match
@@ -308,14 +308,14 @@ Destination     Gateway         Netmask         Interface
 
 ```
 Routing table:
-  10.0.0.0/8      ’ Gateway A
-  10.1.0.0/16     ’ Gateway B
-  10.1.2.0/24     ’ Gateway C
+  10.0.0.0/8      â†’ Gateway A
+  10.1.0.0/16     â†’ Gateway B
+  10.1.2.0/24     â†’ Gateway C
 
 Packet to 10.1.2.5:
   Matches all three routes
   Most specific: /24
-  ’ Use Gateway C
+  â†’ Use Gateway C
 ```
 
 ## TTL (Time to Live)
@@ -331,7 +331,7 @@ Router 1: TTL = 63
 Router 2: TTL = 62
 Router 3: TTL = 61
 ...
-Router N: TTL = 0 ’ Drop packet, send ICMP "Time Exceeded"
+Router N: TTL = 0 â†’ Drop packet, send ICMP "Time Exceeded"
 ```
 
 ### Common TTL Values
@@ -347,9 +347,9 @@ Can identify OS based on initial TTL
 ### Traceroute Uses TTL
 
 ```
-Send packet with TTL=1  ’ Router 1 responds
-Send packet with TTL=2  ’ Router 2 responds
-Send packet with TTL=3  ’ Router 3 responds
+Send packet with TTL=1  â†’ Router 1 responds
+Send packet with TTL=2  â†’ Router 2 responds
+Send packet with TTL=3  â†’ Router 3 responds
 ...
 Maps the path to destination
 ```
@@ -456,8 +456,8 @@ Solution: Multiple private IPs share one public IP
 
 Private Network (192.168.1.0/24)
   PC1: 192.168.1.10
-  PC2: 192.168.1.11      ’  NAT Router  ’  Public IP: 203.0.113.5
-  PC3: 192.168.1.12              “
+  PC2: 192.168.1.11      â†’  NAT Router  â†’  Public IP: 203.0.113.5
+  PC3: 192.168.1.12              â†“
                           Tracks connections
 ```
 
@@ -467,16 +467,16 @@ Private Network (192.168.1.0/24)
 
 ```
 Outbound translation:
-PC (192.168.1.10:5000) ’ NAT ’ Internet (203.0.113.5:6000)
+PC (192.168.1.10:5000) â†’ NAT â†’ Internet (203.0.113.5:6000)
 
 Return traffic:
-Internet (203.0.113.5:6000) ’ NAT ’ PC (192.168.1.10:5000)
+Internet (203.0.113.5:6000) â†’ NAT â†’ PC (192.168.1.10:5000)
 ```
 
 #### 2. Destination NAT (DNAT) / Port Forwarding
 
 ```
-Internet ’ Public IP:80 ’ NAT ’ Web Server (192.168.1.20:80)
+Internet â†’ Public IP:80 â†’ NAT â†’ Web Server (192.168.1.20:80)
 
 External: 203.0.113.5:80
 Internal: 192.168.1.20:80
@@ -485,11 +485,11 @@ Internal: 192.168.1.20:80
 #### 3. PAT (Port Address Translation) / NAT Overload
 
 ```
-PC1: 192.168.1.10:5000  ’  203.0.113.5:6000
-PC2: 192.168.1.11:5001  ’  203.0.113.5:6001
-PC3: 192.168.1.12:5002  ’  203.0.113.5:6002
+PC1: 192.168.1.10:5000  â†’  203.0.113.5:6000
+PC2: 192.168.1.11:5001  â†’  203.0.113.5:6001
+PC3: 192.168.1.12:5002  â†’  203.0.113.5:6002
 
-NAT tracks: Internal IP:Port ” Public Port
+NAT tracks: Internal IP:Port â†” Public Port
 ```
 
 ### NAT Table Example

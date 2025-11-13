@@ -178,7 +178,825 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ansible"><a class="header" href="#ansible">Ansible</a></h1>
-<p>Ansible is a powerful tool for automating infrastructure. It is a powerful tool that can be used to automate infrastructure, deploy applications, and more.</p>
+<p>Ansible is an open-source IT automation engine that automates provisioning, configuration management, application deployment, orchestration, and many other IT processes. It uses SSH for communication and requires no agents on managed nodes.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Ansible uses a simple, human-readable language (YAML) to describe automation jobs. It's agentless, using OpenSSH for transport, making it secure and easy to set up.</p>
+<p><strong>Key Concepts:</strong></p>
+<ul>
+<li><strong>Inventory</strong>: List of managed nodes (hosts)</li>
+<li><strong>Playbook</strong>: YAML files defining tasks to execute</li>
+<li><strong>Module</strong>: Reusable code units for specific tasks</li>
+<li><strong>Role</strong>: Organized collection of playbooks and files</li>
+<li><strong>Task</strong>: Single action to be performed</li>
+<li><strong>Handler</strong>: Tasks triggered by notifications</li>
+<li><strong>Facts</strong>: System information gathered from hosts</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt update
+sudo apt install ansible
+
+# macOS
+brew install ansible
+
+# CentOS/RHEL
+sudo yum install epel-release
+sudo yum install ansible
+
+# Using pip
+pip install ansible
+
+# Verify installation
+ansible --version
+</code></pre>
+<h2 id="basic-configuration"><a class="header" href="#basic-configuration">Basic Configuration</a></h2>
+<h3 id="ansible-config"><a class="header" href="#ansible-config">Ansible Config</a></h3>
+<pre><code class="language-bash"># Create ansible.cfg
+cat &lt;&lt; 'EOF' &gt; ansible.cfg
+[defaults]
+inventory = ./inventory
+host_key_checking = False
+remote_user = ansible
+private_key_file = ~/.ssh/id_rsa
+retry_files_enabled = False
+gathering = smart
+fact_caching = jsonfile
+fact_caching_connection = /tmp/ansible_facts
+fact_caching_timeout = 3600
+
+[privilege_escalation]
+become = True
+become_method = sudo
+become_user = root
+become_ask_pass = False
+EOF
+</code></pre>
+<h3 id="inventory-file"><a class="header" href="#inventory-file">Inventory File</a></h3>
+<pre><code class="language-ini"># inventory or hosts file
+
+# Single host
+web1.example.com
+
+# Group of hosts
+[webservers]
+web1.example.com
+web2.example.com
+192.168.1.10
+
+# Multiple groups
+[databases]
+db1.example.com
+db2.example.com
+
+[app:children]
+webservers
+databases
+
+# Host with variables
+[webservers]
+web1.example.com ansible_user=admin ansible_port=2222
+
+# Group variables
+[webservers:vars]
+ansible_user=deploy
+ansible_python_interpreter=/usr/bin/python3
+http_port=80
+</code></pre>
+<h3 id="dynamic-inventory-yaml"><a class="header" href="#dynamic-inventory-yaml">Dynamic Inventory (YAML)</a></h3>
+<pre><code class="language-yaml"># inventory.yml
+all:
+  hosts:
+    web1.example.com:
+    web2.example.com:
+  children:
+    webservers:
+      hosts:
+        web1.example.com:
+          ansible_user: deploy
+        web2.example.com:
+          ansible_user: deploy
+      vars:
+        http_port: 80
+    databases:
+      hosts:
+        db1.example.com:
+        db2.example.com:
+      vars:
+        db_port: 5432
+</code></pre>
+<h2 id="ad-hoc-commands"><a class="header" href="#ad-hoc-commands">Ad-hoc Commands</a></h2>
+<pre><code class="language-bash"># Ping all hosts
+ansible all -m ping
+
+# Ping specific group
+ansible webservers -m ping
+
+# Run shell command
+ansible all -m shell -a "uptime"
+ansible webservers -a "df -h"  # shell module is default
+
+# Copy file
+ansible all -m copy -a "src=/local/file dest=/remote/file"
+
+# Install package
+ansible webservers -m apt -a "name=nginx state=present" --become
+
+# Start service
+ansible webservers -m service -a "name=nginx state=started" --become
+
+# Gather facts
+ansible all -m setup
+
+# Specific fact
+ansible all -m setup -a "filter=ansible_distribution*"
+
+# Execute with sudo
+ansible all -a "systemctl restart nginx" --become
+
+# Execute as specific user
+ansible all -a "whoami" --become-user=www-data
+</code></pre>
+<h2 id="playbooks"><a class="header" href="#playbooks">Playbooks</a></h2>
+<h3 id="basic-playbook"><a class="header" href="#basic-playbook">Basic Playbook</a></h3>
+<pre><code class="language-yaml"># playbook.yml
+---
+- name: Configure web servers
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Start nginx service
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Copy index.html
+      copy:
+        src: files/index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+</code></pre>
+<h3 id="running-playbooks"><a class="header" href="#running-playbooks">Running Playbooks</a></h3>
+<pre><code class="language-bash"># Run playbook
+ansible-playbook playbook.yml
+
+# Dry run (check mode)
+ansible-playbook playbook.yml --check
+
+# Show differences
+ansible-playbook playbook.yml --check --diff
+
+# Limit to specific hosts
+ansible-playbook playbook.yml --limit web1.example.com
+ansible-playbook playbook.yml --limit webservers
+
+# Tags
+ansible-playbook playbook.yml --tags "install"
+ansible-playbook playbook.yml --skip-tags "config"
+
+# Start at specific task
+ansible-playbook playbook.yml --start-at-task="Install nginx"
+
+# Verbose output
+ansible-playbook playbook.yml -v    # verbose
+ansible-playbook playbook.yml -vv   # more verbose
+ansible-playbook playbook.yml -vvv  # very verbose
+</code></pre>
+<h3 id="variables-in-playbooks"><a class="header" href="#variables-in-playbooks">Variables in Playbooks</a></h3>
+<pre><code class="language-yaml">---
+- name: Configure application
+  hosts: webservers
+  vars:
+    app_name: myapp
+    app_version: "1.0"
+    app_port: 8080
+
+  tasks:
+    - name: Create app directory
+      file:
+        path: "/opt/{{ app_name }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+
+    - name: Display variables
+      debug:
+        msg: "Deploying {{ app_name }} version {{ app_version }} on port {{ app_port }}"
+</code></pre>
+<h3 id="variables-from-files"><a class="header" href="#variables-from-files">Variables from Files</a></h3>
+<pre><code class="language-yaml"># vars.yml
+---
+app_name: myapp
+app_version: "1.0"
+app_port: 8080
+database:
+  host: db.example.com
+  name: myapp_db
+  user: myapp_user
+
+# playbook.yml
+---
+- name: Configure application
+  hosts: webservers
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Display app info
+      debug:
+        msg: "App: {{ app_name }}, DB: {{ database.host }}"
+</code></pre>
+<h2 id="common-modules"><a class="header" href="#common-modules">Common Modules</a></h2>
+<h3 id="system-modules"><a class="header" href="#system-modules">System Modules</a></h3>
+<pre><code class="language-yaml"># User management
+- name: Create user
+  user:
+    name: deploy
+    state: present
+    groups: sudo
+    shell: /bin/bash
+    create_home: yes
+
+# Group management
+- name: Create group
+  group:
+    name: developers
+    state: present
+
+# File operations
+- name: Create file
+  file:
+    path: /tmp/test.txt
+    state: touch
+    mode: '0644'
+    owner: deploy
+
+- name: Create directory
+  file:
+    path: /opt/myapp
+    state: directory
+    mode: '0755'
+    recurse: yes
+
+# Copy files
+- name: Copy file
+  copy:
+    src: files/config.conf
+    dest: /etc/myapp/config.conf
+    backup: yes
+
+# Template files
+- name: Deploy template
+  template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    validate: 'nginx -t -c %s'
+  notify: restart nginx
+</code></pre>
+<h3 id="package-management"><a class="header" href="#package-management">Package Management</a></h3>
+<pre><code class="language-yaml"># APT (Debian/Ubuntu)
+- name: Install packages
+  apt:
+    name:
+      - nginx
+      - postgresql
+      - python3-pip
+    state: present
+    update_cache: yes
+
+# YUM/DNF (RedHat/CentOS)
+- name: Install packages
+  yum:
+    name:
+      - httpd
+      - mariadb-server
+    state: present
+
+# Package from URL
+- name: Install deb package
+  apt:
+    deb: https://example.com/package.deb
+
+# Remove package
+- name: Remove package
+  apt:
+    name: apache2
+    state: absent
+    purge: yes
+</code></pre>
+<h3 id="service-management"><a class="header" href="#service-management">Service Management</a></h3>
+<pre><code class="language-yaml">- name: Manage service
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Restart service
+  service:
+    name: apache2
+    state: restarted
+
+- name: Reload service
+  service:
+    name: nginx
+    state: reloaded
+</code></pre>
+<h3 id="command-execution"><a class="header" href="#command-execution">Command Execution</a></h3>
+<pre><code class="language-yaml"># Shell module
+- name: Run shell command
+  shell: echo $HOME
+  register: home_dir
+
+- name: Display output
+  debug:
+    var: home_dir.stdout
+
+# Command module (no shell features)
+- name: Run command
+  command: /usr/bin/uptime
+  register: uptime_result
+
+# Script execution
+- name: Run script
+  script: scripts/setup.sh
+
+# Execute with conditions
+- name: Check file exists
+  stat:
+    path: /etc/config.conf
+  register: config_file
+
+- name: Run if file exists
+  command: /usr/bin/process_config
+  when: config_file.stat.exists
+</code></pre>
+<h2 id="handlers"><a class="header" href="#handlers">Handlers</a></h2>
+<pre><code class="language-yaml">---
+- name: Configure nginx
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Copy nginx config
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify:
+        - restart nginx
+        - reload nginx
+
+    - name: Copy site config
+      template:
+        src: site.conf.j2
+        dest: /etc/nginx/sites-available/default
+      notify: reload nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+    - name: reload nginx
+      service:
+        name: nginx
+        state: reloaded
+</code></pre>
+<h2 id="roles"><a class="header" href="#roles">Roles</a></h2>
+<h3 id="creating-a-role"><a class="header" href="#creating-a-role">Creating a Role</a></h3>
+<pre><code class="language-bash"># Create role structure
+ansible-galaxy init myrole
+
+# Directory structure
+myrole/
+├── defaults/          # Default variables
+│   └── main.yml
+├── files/             # Static files
+├── handlers/          # Handlers
+│   └── main.yml
+├── meta/              # Role metadata
+│   └── main.yml
+├── tasks/             # Main tasks
+│   └── main.yml
+├── templates/         # Jinja2 templates
+├── tests/             # Test playbooks
+│   └── test.yml
+└── vars/              # Role variables
+    └── main.yml
+</code></pre>
+<h3 id="role-example"><a class="header" href="#role-example">Role Example</a></h3>
+<pre><code class="language-yaml"># roles/nginx/tasks/main.yml
+---
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Copy nginx config
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: Start nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+# roles/nginx/handlers/main.yml
+---
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+# roles/nginx/defaults/main.yml
+---
+nginx_port: 80
+nginx_user: www-data
+
+# Using the role
+---
+- name: Setup web server
+  hosts: webservers
+  become: yes
+  roles:
+    - nginx
+    - { role: mysql, mysql_port: 3306 }
+</code></pre>
+<h2 id="conditionals-and-loops"><a class="header" href="#conditionals-and-loops">Conditionals and Loops</a></h2>
+<h3 id="conditionals"><a class="header" href="#conditionals">Conditionals</a></h3>
+<pre><code class="language-yaml">---
+- name: Conditional tasks
+  hosts: all
+  tasks:
+    - name: Install on Ubuntu
+      apt:
+        name: nginx
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install on CentOS
+      yum:
+        name: httpd
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    - name: Multiple conditions (AND)
+      apt:
+        name: nginx
+        state: present
+      when:
+        - ansible_distribution == "Ubuntu"
+        - ansible_distribution_version == "20.04"
+
+    - name: Multiple conditions (OR)
+      apt:
+        name: nginx
+        state: present
+      when: ansible_distribution == "Ubuntu" or ansible_distribution == "Debian"
+</code></pre>
+<h3 id="loops"><a class="header" href="#loops">Loops</a></h3>
+<pre><code class="language-yaml">---
+- name: Loop examples
+  hosts: all
+  tasks:
+    # Simple loop
+    - name: Install multiple packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nginx
+        - postgresql
+        - redis-server
+
+    # Loop with dictionary
+    - name: Create users
+      user:
+        name: "{{ item.name }}"
+        groups: "{{ item.groups }}"
+        state: present
+      loop:
+        - { name: 'alice', groups: 'developers' }
+        - { name: 'bob', groups: 'admins' }
+
+    # Loop with complex data
+    - name: Create directories
+      file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - { path: '/opt/app1', owner: 'deploy', mode: '0755' }
+        - { path: '/opt/app2', owner: 'www-data', mode: '0750' }
+</code></pre>
+<h2 id="templates"><a class="header" href="#templates">Templates</a></h2>
+<pre><code class="language-jinja2">{# templates/nginx.conf.j2 #}
+user {{ nginx_user }};
+worker_processes {{ ansible_processor_vcpus }};
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    server {
+        listen {{ nginx_port }};
+        server_name {{ ansible_hostname }};
+
+        location / {
+            root /var/www/html;
+            index index.html;
+        }
+    }
+}
+
+{# Conditional content #}
+{% if enable_ssl %}
+    ssl on;
+    ssl_certificate {{ ssl_cert_path }};
+{% endif %}
+
+{# Loop in template #}
+{% for server in backend_servers %}
+    upstream backend_{{ loop.index }} {
+        server {{ server.host }}:{{ server.port }};
+    }
+{% endfor %}
+</code></pre>
+<h2 id="vault-encryption"><a class="header" href="#vault-encryption">Vault (Encryption)</a></h2>
+<pre><code class="language-bash"># Create encrypted file
+ansible-vault create secrets.yml
+
+# Edit encrypted file
+ansible-vault edit secrets.yml
+
+# Encrypt existing file
+ansible-vault encrypt vars.yml
+
+# Decrypt file
+ansible-vault decrypt vars.yml
+
+# View encrypted file
+ansible-vault view secrets.yml
+
+# Change password
+ansible-vault rekey secrets.yml
+
+# Use vault in playbook
+ansible-playbook playbook.yml --ask-vault-pass
+
+# Use password file
+ansible-playbook playbook.yml --vault-password-file ~/.vault_pass
+
+# Multiple vaults
+ansible-playbook playbook.yml --vault-id prod@prompt --vault-id dev@~/.vault_pass_dev
+</code></pre>
+<h3 id="vault-example"><a class="header" href="#vault-example">Vault Example</a></h3>
+<pre><code class="language-yaml"># secrets.yml (encrypted)
+db_password: "super_secret_password"
+api_key: "abc123xyz789"
+
+# playbook.yml
+---
+- name: Deploy with secrets
+  hosts: webservers
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Configure database
+      template:
+        src: db_config.j2
+        dest: /etc/app/db_config.conf
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="playbook-organization"><a class="header" href="#playbook-organization">Playbook Organization</a></h3>
+<pre><code class="language-bash"># Recommended directory structure
+site.yml                # Master playbook
+webservers.yml          # Webserver playbook
+dbservers.yml           # Database playbook
+
+inventory/
+├── production/
+│   ├── hosts
+│   └── group_vars/
+│       ├── all.yml
+│       ├── webservers.yml
+│       └── dbservers.yml
+└── staging/
+    ├── hosts
+    └── group_vars/
+
+roles/
+├── common/
+├── nginx/
+├── postgresql/
+└── app/
+
+group_vars/
+├── all.yml
+├── webservers.yml
+└── dbservers.yml
+
+host_vars/
+└── web1.example.com.yml
+</code></pre>
+<h3 id="best-practices-1"><a class="header" href="#best-practices-1">Best Practices</a></h3>
+<pre><code class="language-yaml"># 1. Use names for all tasks
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+
+# 2. Use become appropriately
+- name: System task
+  become: yes
+  apt:
+    name: nginx
+    state: present
+
+# 3. Validate configurations
+- name: Deploy nginx config
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    validate: 'nginx -t -c %s'
+
+# 4. Use check mode compatible tasks
+- name: Check if service exists
+  stat:
+    path: /etc/systemd/system/myapp.service
+  register: service_file
+  check_mode: no
+
+# 5. Add tags
+- name: Install packages
+  apt:
+    name: nginx
+    state: present
+  tags: ['install', 'packages']
+
+# 6. Use blocks for error handling
+- block:
+    - name: Risky operation
+      command: /usr/bin/risky_command
+  rescue:
+    - name: Handle error
+      debug:
+        msg: "Command failed, handling gracefully"
+  always:
+    - name: Cleanup
+      file:
+        path: /tmp/temp_file
+        state: absent
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="complete-web-server-setup"><a class="header" href="#complete-web-server-setup">Complete Web Server Setup</a></h3>
+<pre><code class="language-yaml">---
+- name: Configure web servers
+  hosts: webservers
+  become: yes
+  vars:
+    app_name: myapp
+    app_user: www-data
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install packages
+      apt:
+        name:
+          - nginx
+          - python3-pip
+          - git
+        state: present
+
+    - name: Create app directory
+      file:
+        path: "/var/www/{{ app_name }}"
+        state: directory
+        owner: "{{ app_user }}"
+        mode: '0755'
+
+    - name: Deploy nginx config
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/{{ app_name }}
+      notify: reload nginx
+
+    - name: Enable site
+      file:
+        src: /etc/nginx/sites-available/{{ app_name }}
+        dest: /etc/nginx/sites-enabled/{{ app_name }}
+        state: link
+      notify: reload nginx
+
+    - name: Start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: reload nginx
+      service:
+        name: nginx
+        state: reloaded
+</code></pre>
+<h3 id="multi-stage-deployment"><a class="header" href="#multi-stage-deployment">Multi-stage Deployment</a></h3>
+<pre><code class="language-yaml">---
+- name: Deploy application
+  hosts: webservers
+  serial: 1  # Rolling update
+  max_fail_percentage: 25
+
+  pre_tasks:
+    - name: Remove from load balancer
+      haproxy:
+        state: disabled
+        host: "{{ ansible_hostname }}"
+
+  tasks:
+    - name: Deploy application
+      git:
+        repo: https://github.com/user/app.git
+        dest: /opt/app
+        version: "{{ app_version }}"
+
+    - name: Install dependencies
+      pip:
+        requirements: /opt/app/requirements.txt
+
+    - name: Restart app service
+      service:
+        name: myapp
+        state: restarted
+
+    - name: Wait for app to start
+      wait_for:
+        port: 8080
+        delay: 5
+        timeout: 30
+
+  post_tasks:
+    - name: Add to load balancer
+      haproxy:
+        state: enabled
+        host: "{{ ansible_hostname }}"
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<pre><code class="language-bash"># Check syntax
+ansible-playbook playbook.yml --syntax-check
+
+# List tasks
+ansible-playbook playbook.yml --list-tasks
+
+# List hosts
+ansible-playbook playbook.yml --list-hosts
+
+# Dry run
+ansible-playbook playbook.yml --check
+
+# Debug mode
+ansible-playbook playbook.yml -vvv
+
+# Start at specific task
+ansible-playbook playbook.yml --start-at-task="Install nginx"
+
+# Step through playbook
+ansible-playbook playbook.yml --step
+
+# Gather facts only
+ansible all -m setup --tree /tmp/facts
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>ansible all -m ping</code></td><td>Ping all hosts</td></tr>
+<tr><td><code>ansible-playbook playbook.yml</code></td><td>Run playbook</td></tr>
+<tr><td><code>ansible-playbook --check</code></td><td>Dry run</td></tr>
+<tr><td><code>ansible-playbook --tags TAG</code></td><td>Run specific tags</td></tr>
+<tr><td><code>ansible-playbook --limit HOST</code></td><td>Limit to hosts</td></tr>
+<tr><td><code>ansible-vault create FILE</code></td><td>Create encrypted file</td></tr>
+<tr><td><code>ansible-galaxy init ROLE</code></td><td>Create role</td></tr>
+<tr><td><code>ansible-inventory --list</code></td><td>Show inventory</td></tr>
+</tbody></table>
+</div>
+<p>Ansible simplifies IT automation with its agentless architecture and simple YAML syntax, making infrastructure management efficient and reproducible.</p>
 
                     </main>
 

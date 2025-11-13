@@ -177,7 +177,964 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust"><a class="header" href="#rust">Rust</a></h1>
+                        <h1 id="rust-programming"><a class="header" href="#rust-programming">Rust Programming</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Rust is a systems programming language focused on safety, speed, and concurrency. It achieves memory safety without garbage collection through its ownership system.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Memory safety without garbage collection</li>
+<li>Zero-cost abstractions</li>
+<li>Ownership and borrowing system</li>
+<li>Guaranteed thread safety</li>
+<li>Pattern matching</li>
+<li>Type inference</li>
+<li>Powerful macro system</li>
+<li>Excellent tooling (cargo, rustfmt, clippy)</li>
+</ul>
+<hr />
+<h2 id="basic-syntax"><a class="header" href="#basic-syntax">Basic Syntax</a></h2>
+<h3 id="variables-and-data-types"><a class="header" href="#variables-and-data-types">Variables and Data Types</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // Immutable by default
+    let x = 5;
+    // x = 6; // Error! Cannot mutate immutable variable
+
+    // Mutable variable
+    let mut y = 5;
+    y = 6; // OK
+
+    // Constants (must have type annotation)
+    const MAX_POINTS: u32 = 100_000;
+
+    // Shadowing (redefining variable)
+    let x = 5;
+    let x = x + 1;
+    let x = x * 2; // x is now 12
+
+    // Type annotation
+    let guess: u32 = "42".parse().expect("Not a number!");
+
+    // Scalar types
+    let integer: i32 = 42;
+    let float: f64 = 3.14;
+    let boolean: bool = true;
+    let character: char = 'A';
+
+    // Integer types: i8, i16, i32, i64, i128, isize
+    // Unsigned: u8, u16, u32, u64, u128, usize
+    let signed: i8 = -127;
+    let unsigned: u8 = 255;
+
+    // Number literals
+    let decimal = 98_222;
+    let hex = 0xff;
+    let octal = 0o77;
+    let binary = 0b1111_0000;
+    let byte = b'A'; // u8 only
+}</code></pre></pre>
+<h3 id="strings"><a class="header" href="#strings">Strings</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // String slice (immutable, fixed size)
+    let s1: &amp;str = "Hello";
+
+    // String (mutable, growable)
+    let mut s2 = String::from("Hello");
+    s2.push_str(", World!");
+
+    // String operations
+    let len = s2.len();
+    let is_empty = s2.is_empty();
+    let contains = s2.contains("World");
+
+    // String concatenation
+    let s3 = String::from("Hello");
+    let s4 = String::from(" World");
+    let s5 = s3 + &amp;s4; // s3 is moved, can't use it anymore
+
+    // Format macro (doesn't take ownership)
+    let s6 = format!("{} {}", s1, s4);
+
+    // String slicing
+    let hello = &amp;s2[0..5];
+    let world = &amp;s2[7..12];
+
+    // Iterate over chars
+    for c in "Hello".chars() {
+        println!("{}", c);
+    }
+
+    // Iterate over bytes
+    for b in "Hello".bytes() {
+        println!("{}", b);
+    }
+
+    // String to number
+    let num: i32 = "42".parse().unwrap();
+}</code></pre></pre>
+<hr />
+<h2 id="ownership-and-borrowing"><a class="header" href="#ownership-and-borrowing">Ownership and Borrowing</a></h2>
+<h3 id="ownership-rules"><a class="header" href="#ownership-rules">Ownership Rules</a></h3>
+<ol>
+<li>Each value in Rust has a variable called its owner</li>
+<li>There can only be one owner at a time</li>
+<li>When the owner goes out of scope, the value is dropped</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // Move (ownership transfer)
+    let s1 = String::from("hello");
+    let s2 = s1; // s1 is no longer valid
+    // println!("{}", s1); // Error!
+    println!("{}", s2); // OK
+
+    // Clone (deep copy)
+    let s3 = String::from("hello");
+    let s4 = s3.clone();
+    println!("{} {}", s3, s4); // Both valid
+
+    // Copy trait (stack-only data)
+    let x = 5;
+    let y = x; // x is still valid (Copy trait)
+    println!("{} {}", x, y);
+}</code></pre></pre>
+<h3 id="references-and-borrowing"><a class="header" href="#references-and-borrowing">References and Borrowing</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // Immutable reference (borrowing)
+    let s1 = String::from("hello");
+    let len = calculate_length(&amp;s1); // Borrow
+    println!("{} has length {}", s1, len); // s1 still valid
+
+    // Mutable reference
+    let mut s = String::from("hello");
+    change(&amp;mut s);
+    println!("{}", s); // "hello, world"
+
+    // Rules:
+    // 1. Multiple immutable references OR one mutable reference
+    // 2. References must always be valid
+
+    let r1 = &amp;s; // OK
+    let r2 = &amp;s; // OK
+    // let r3 = &amp;mut s; // Error! Can't have mutable while immutable exists
+
+    println!("{} {}", r1, r2);
+    // r1 and r2 no longer used after this
+
+    let r3 = &amp;mut s; // OK now
+}
+
+fn calculate_length(s: &amp;String) -&gt; usize {
+    s.len()
+}
+
+fn change(s: &amp;mut String) {
+    s.push_str(", world");
+}</code></pre></pre>
+<h3 id="lifetimes"><a class="header" href="#lifetimes">Lifetimes</a></h3>
+<pre><pre class="playground"><code class="language-rust">// Lifetime annotations
+fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+// Struct with lifetime
+struct ImportantExcerpt&lt;'a&gt; {
+    part: &amp;'a str,
+}
+
+impl&lt;'a&gt; ImportantExcerpt&lt;'a&gt; {
+    fn level(&amp;self) -&gt; i32 {
+        3
+    }
+}
+
+fn main() {
+    let string1 = String::from("long string");
+    let result;
+    {
+        let string2 = String::from("short");
+        result = longest(string1.as_str(), string2.as_str());
+        println!("Longest: {}", result);
+    }
+    // result not valid here (string2 dropped)
+}</code></pre></pre>
+<hr />
+<h2 id="data-structures"><a class="header" href="#data-structures">Data Structures</a></h2>
+<h3 id="arrays-and-vectors"><a class="header" href="#arrays-and-vectors">Arrays and Vectors</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // Array (fixed size)
+    let arr: [i32; 5] = [1, 2, 3, 4, 5];
+    let arr2 = [3; 5]; // [3, 3, 3, 3, 3]
+    let first = arr[0];
+    let len = arr.len();
+
+    // Vector (dynamic array)
+    let mut vec = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+
+    // Vec macro
+    let vec2 = vec![1, 2, 3, 4, 5];
+
+    // Accessing elements
+    let third = &amp;vec2[2];
+    let third = vec2.get(2); // Returns Option&lt;&amp;T&gt;
+
+    // Iterate
+    for i in &amp;vec2 {
+        println!("{}", i);
+    }
+
+    // Mutable iteration
+    let mut vec3 = vec![1, 2, 3];
+    for i in &amp;mut vec3 {
+        *i += 50;
+    }
+
+    // Vector with enum for multiple types
+    enum SpreadsheetCell {
+        Int(i32),
+        Float(f64),
+        Text(String),
+    }
+
+    let row = vec![
+        SpreadsheetCell::Int(3),
+        SpreadsheetCell::Float(10.12),
+        SpreadsheetCell::Text(String::from("blue")),
+    ];
+}</code></pre></pre>
+<h3 id="hashmap"><a class="header" href="#hashmap">HashMap</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::collections::HashMap;
+
+fn main() {
+    // Create HashMap
+    let mut scores = HashMap::new();
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Yellow"), 50);
+
+    // From vectors
+    let teams = vec![String::from("Blue"), String::from("Yellow")];
+    let initial_scores = vec![10, 50];
+    let scores: HashMap&lt;_, _&gt; = teams.iter().zip(initial_scores.iter()).collect();
+
+    // Accessing values
+    let team_name = String::from("Blue");
+    let score = scores.get(&amp;team_name); // Returns Option&lt;&amp;V&gt;
+
+    // Iterate
+    for (key, value) in &amp;scores {
+        println!("{}: {}", key, value);
+    }
+
+    // Update values
+    scores.insert(String::from("Blue"), 25); // Overwrite
+
+    // Only insert if key doesn't exist
+    scores.entry(String::from("Blue")).or_insert(50);
+
+    // Update based on old value
+    let text = "hello world wonderful world";
+    let mut map = HashMap::new();
+
+    for word in text.split_whitespace() {
+        let count = map.entry(word).or_insert(0);
+        *count += 1;
+    }
+
+    println!("{:?}", map);
+}</code></pre></pre>
+<hr />
+<h2 id="control-flow"><a class="header" href="#control-flow">Control Flow</a></h2>
+<h3 id="if-else"><a class="header" href="#if-else">If-Else</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let number = 6;
+
+    if number % 4 == 0 {
+        println!("divisible by 4");
+    } else if number % 3 == 0 {
+        println!("divisible by 3");
+    } else {
+        println!("not divisible by 4 or 3");
+    }
+
+    // If in let statement
+    let condition = true;
+    let number = if condition { 5 } else { 6 };
+}</code></pre></pre>
+<h3 id="loops"><a class="header" href="#loops">Loops</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // Loop (infinite)
+    let mut count = 0;
+    let result = loop {
+        count += 1;
+        if count == 10 {
+            break count * 2; // Return value
+        }
+    };
+
+    // While loop
+    let mut number = 3;
+    while number != 0 {
+        println!("{}!", number);
+        number -= 1;
+    }
+
+    // For loop
+    let arr = [10, 20, 30, 40, 50];
+    for element in arr.iter() {
+        println!("{}", element);
+    }
+
+    // Range
+    for number in 1..4 {
+        println!("{}", number); // 1, 2, 3
+    }
+
+    // Reverse range
+    for number in (1..4).rev() {
+        println!("{}", number); // 3, 2, 1
+    }
+
+    // Enumerate
+    for (i, v) in arr.iter().enumerate() {
+        println!("{}: {}", i, v);
+    }
+}</code></pre></pre>
+<h3 id="match"><a class="header" href="#match">Match</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // Basic match
+    let number = 3;
+    match number {
+        1 =&gt; println!("One"),
+        2 =&gt; println!("Two"),
+        3 =&gt; println!("Three"),
+        _ =&gt; println!("Other"), // Default case
+    }
+
+    // Match with return value
+    let result = match number {
+        1 =&gt; "one",
+        2 =&gt; "two",
+        3 =&gt; "three",
+        _ =&gt; "other",
+    };
+
+    // Match ranges
+    match number {
+        1..=5 =&gt; println!("1 through 5"),
+        _ =&gt; println!("something else"),
+    }
+
+    // Match Option
+    let some_value: Option&lt;i32&gt; = Some(3);
+    match some_value {
+        Some(i) =&gt; println!("Got {}", i),
+        None =&gt; println!("Got nothing"),
+    }
+
+    // if let (concise match)
+    if let Some(i) = some_value {
+        println!("{}", i);
+    }
+
+    // Match guards
+    let num = Some(4);
+    match num {
+        Some(x) if x &lt; 5 =&gt; println!("less than five: {}", x),
+        Some(x) =&gt; println!("{}", x),
+        None =&gt; (),
+    }
+}</code></pre></pre>
+<hr />
+<h2 id="structs-and-enums"><a class="header" href="#structs-and-enums">Structs and Enums</a></h2>
+<h3 id="structs"><a class="header" href="#structs">Structs</a></h3>
+<pre><pre class="playground"><code class="language-rust">// Define struct
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+
+// Tuple struct
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+// Unit struct (no fields)
+struct AlwaysEqual;
+
+impl User {
+    // Associated function (constructor)
+    fn new(username: String, email: String) -&gt; User {
+        User {
+            username,
+            email,
+            sign_in_count: 1,
+            active: true,
+        }
+    }
+
+    // Method
+    fn is_active(&amp;self) -&gt; bool {
+        self.active
+    }
+
+    // Mutable method
+    fn deactivate(&amp;mut self) {
+        self.active = false;
+    }
+}
+
+fn main() {
+    // Create instance
+    let mut user1 = User {
+        email: String::from("user@example.com"),
+        username: String::from("user123"),
+        active: true,
+        sign_in_count: 1,
+    };
+
+    user1.email = String::from("newemail@example.com");
+
+    // Struct update syntax
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1 // Rest from user1
+    };
+
+    // Tuple struct
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+}</code></pre></pre>
+<h3 id="enums"><a class="header" href="#enums">Enums</a></h3>
+<pre><pre class="playground"><code class="language-rust">// Define enum
+enum IpAddr {
+    V4(u8, u8, u8, u8),
+    V6(String),
+}
+
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+impl Message {
+    fn call(&amp;self) {
+        match self {
+            Message::Quit =&gt; println!("Quit"),
+            Message::Move { x, y } =&gt; println!("Move to {}, {}", x, y),
+            Message::Write(text) =&gt; println!("Write: {}", text),
+            Message::ChangeColor(r, g, b) =&gt; println!("Color: {}, {}, {}", r, g, b),
+        }
+    }
+}
+
+fn main() {
+    let home = IpAddr::V4(127, 0, 0, 1);
+    let loopback = IpAddr::V6(String::from("::1"));
+
+    let msg = Message::Write(String::from("hello"));
+    msg.call();
+}</code></pre></pre>
+<h3 id="option-and-result"><a class="header" href="#option-and-result">Option and Result</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // Option&lt;T&gt; - value or nothing
+    let some_number: Option&lt;i32&gt; = Some(5);
+    let no_number: Option&lt;i32&gt; = None;
+
+    // Match on Option
+    match some_number {
+        Some(i) =&gt; println!("{}", i),
+        None =&gt; println!("nothing"),
+    }
+
+    // Unwrap (panics if None)
+    let x = Some(5);
+    let y = x.unwrap();
+
+    // Unwrap with default
+    let z = no_number.unwrap_or(0);
+
+    // Result&lt;T, E&gt; - success or error
+    use std::fs::File;
+    use std::io::ErrorKind;
+
+    let f = File::open("hello.txt");
+    let f = match f {
+        Ok(file) =&gt; file,
+        Err(error) =&gt; match error.kind() {
+            ErrorKind::NotFound =&gt; match File::create("hello.txt") {
+                Ok(fc) =&gt; fc,
+                Err(e) =&gt; panic!("Problem creating file: {:?}", e),
+            },
+            other_error =&gt; panic!("Problem opening file: {:?}", other_error),
+        },
+    };
+
+    // Propagating errors with ?
+    fn read_username() -&gt; Result&lt;String, std::io::Error&gt; {
+        let mut f = File::open("hello.txt")?;
+        let mut s = String::new();
+        use std::io::Read;
+        f.read_to_string(&amp;mut s)?;
+        Ok(s)
+    }
+}</code></pre></pre>
+<hr />
+<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<pre><pre class="playground"><code class="language-rust">// Define trait
+trait Summary {
+    fn summarize(&amp;self) -&gt; String;
+
+    // Default implementation
+    fn default_summary(&amp;self) -&gt; String {
+        String::from("(Read more...)")
+    }
+}
+
+// Implement trait
+struct NewsArticle {
+    headline: String,
+    location: String,
+    author: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+struct Tweet {
+    username: String,
+    content: String,
+}
+
+impl Summary for Tweet {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+
+// Trait as parameter
+fn notify(item: &amp;impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+
+// Trait bound syntax
+fn notify2&lt;T: Summary&gt;(item: &amp;T) {
+    println!("{}", item.summarize());
+}
+
+// Multiple traits
+fn notify3&lt;T: Summary + Display&gt;(item: &amp;T) {
+    // ...
+}
+
+// Where clause
+fn some_function&lt;T, U&gt;(t: &amp;T, u: &amp;U) -&gt; i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{
+    // ...
+    0
+}
+
+// Return trait
+fn returns_summarizable() -&gt; impl Summary {
+    Tweet {
+        username: String::from("user"),
+        content: String::from("content"),
+    }
+}
+
+use std::fmt::Display;
+use std::fmt::Debug;
+
+fn main() {
+    let tweet = Tweet {
+        username: String::from("user"),
+        content: String::from("Hello, world!"),
+    };
+
+    println!("{}", tweet.summarize());
+}</code></pre></pre>
+<hr />
+<h2 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h2>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+use std::io::{self, Read};
+
+// Propagating errors
+fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
+    let mut f = File::open("username.txt")?;
+    let mut s = String::new();
+    f.read_to_string(&amp;mut s)?;
+    Ok(s)
+}
+
+// Custom error types
+use std::fmt;
+
+#[derive(Debug)]
+enum CustomError {
+    IoError(io::Error),
+    ParseError,
+}
+
+impl fmt::Display for CustomError {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        match self {
+            CustomError::IoError(e) =&gt; write!(f, "IO error: {}", e),
+            CustomError::ParseError =&gt; write!(f, "Parse error"),
+        }
+    }
+}
+
+impl From&lt;io::Error&gt; for CustomError {
+    fn from(err: io::Error) -&gt; CustomError {
+        CustomError::IoError(err)
+    }
+}
+
+// Panic
+fn will_panic() {
+    panic!("crash and burn");
+}
+
+// Assert
+fn check_value(x: i32) {
+    assert!(x &gt; 0, "x must be positive");
+    assert_eq!(x, 5);
+    assert_ne!(x, 0);
+}
+
+fn main() {
+    // Result with match
+    match read_username_from_file() {
+        Ok(username) =&gt; println!("Username: {}", username),
+        Err(e) =&gt; println!("Error: {}", e),
+    }
+
+    // Unwrap
+    let f = File::open("hello.txt").unwrap();
+
+    // Expect (with custom message)
+    let f = File::open("hello.txt").expect("Failed to open file");
+}</code></pre></pre>
+<hr />
+<h2 id="generics"><a class="header" href="#generics">Generics</a></h2>
+<pre><pre class="playground"><code class="language-rust">// Generic function
+fn largest&lt;T: PartialOrd&gt;(list: &amp;[T]) -&gt; &amp;T {
+    let mut largest = &amp;list[0];
+    for item in list {
+        if item &gt; largest {
+            largest = item;
+        }
+    }
+    largest
+}
+
+// Generic struct
+struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+impl&lt;T&gt; Point&lt;T&gt; {
+    fn x(&amp;self) -&gt; &amp;T {
+        &amp;self.x
+    }
+}
+
+// Implement for specific type
+impl Point&lt;f32&gt; {
+    fn distance_from_origin(&amp;self) -&gt; f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+
+// Multiple generic types
+struct Point2&lt;T, U&gt; {
+    x: T,
+    y: U,
+}
+
+// Generic enum
+enum Option&lt;T&gt; {
+    Some(T),
+    None,
+}
+
+enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+
+fn main() {
+    let numbers = vec![34, 50, 25, 100, 65];
+    let result = largest(&amp;numbers);
+
+    let integer = Point { x: 5, y: 10 };
+    let float = Point { x: 1.0, y: 4.0 };
+    let mixed = Point2 { x: 5, y: 4.0 };
+}</code></pre></pre>
+<hr />
+<h2 id="concurrency"><a class="header" href="#concurrency">Concurrency</a></h2>
+<h3 id="threads"><a class="header" href="#threads">Threads</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::thread;
+use std::time::Duration;
+
+fn main() {
+    // Spawn thread
+    let handle = thread::spawn(|| {
+        for i in 1..10 {
+            println!("spawned thread: {}", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+
+    // Wait for thread
+    handle.join().unwrap();
+
+    // Move closure
+    let v = vec![1, 2, 3];
+    let handle = thread::spawn(move || {
+        println!("vector: {:?}", v);
+    });
+
+    handle.join().unwrap();
+}</code></pre></pre>
+<h3 id="channels"><a class="header" href="#channels">Channels</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    // Create channel
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        let val = String::from("hi");
+        tx.send(val).unwrap();
+    });
+
+    let received = rx.recv().unwrap();
+    println!("Got: {}", received);
+
+    // Multiple producers
+    let (tx, rx) = mpsc::channel();
+    let tx1 = tx.clone();
+
+    thread::spawn(move || {
+        tx.send(String::from("hi from thread 1")).unwrap();
+    });
+
+    thread::spawn(move || {
+        tx1.send(String::from("hi from thread 2")).unwrap();
+    });
+
+    for received in rx {
+        println!("Got: {}", received);
+    }
+}</code></pre></pre>
+<h3 id="shared-state"><a class="header" href="#shared-state">Shared State</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::{Arc, Mutex};
+use std::thread;
+
+fn main() {
+    // Mutex for mutual exclusion
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let counter = Arc::clone(&amp;counter);
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+            *num += 1;
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Result: {}", *counter.lock().unwrap());
+}</code></pre></pre>
+<hr />
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="builder-pattern"><a class="header" href="#builder-pattern">Builder Pattern</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Default)]
+struct User {
+    username: String,
+    email: String,
+    age: Option&lt;u32&gt;,
+}
+
+impl User {
+    fn builder() -&gt; UserBuilder {
+        UserBuilder::default()
+    }
+}
+
+#[derive(Default)]
+struct UserBuilder {
+    username: String,
+    email: String,
+    age: Option&lt;u32&gt;,
+}
+
+impl UserBuilder {
+    fn username(mut self, username: &amp;str) -&gt; Self {
+        self.username = username.to_string();
+        self
+    }
+
+    fn email(mut self, email: &amp;str) -&gt; Self {
+        self.email = email.to_string();
+        self
+    }
+
+    fn age(mut self, age: u32) -&gt; Self {
+        self.age = Some(age);
+        self
+    }
+
+    fn build(self) -&gt; User {
+        User {
+            username: self.username,
+            email: self.email,
+            age: self.age,
+        }
+    }
+}
+
+fn main() {
+    let user = User::builder()
+        .username("alice")
+        .email("alice@example.com")
+        .age(30)
+        .build();
+}</code></pre></pre>
+<h3 id="newtype-pattern"><a class="header" href="#newtype-pattern">Newtype Pattern</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Wrap existing type
+struct Wrapper(Vec&lt;String&gt;);
+
+impl Wrapper {
+    fn new() -&gt; Self {
+        Wrapper(Vec::new())
+    }
+
+    fn push(&amp;mut self, s: String) {
+        self.0.push(s);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<hr />
+<h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Unit tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+
+    #[test]
+    fn it_adds() {
+        assert_eq!(add(2, 2), 4);
+    }
+
+    #[test]
+    #[should_panic]
+    fn it_panics() {
+        panic!("panic!");
+    }
+
+    #[test]
+    fn it_returns_result() -&gt; Result&lt;(), String&gt; {
+        if 2 + 2 == 4 {
+            Ok(())
+        } else {
+            Err(String::from("two plus two does not equal four"))
+        }
+    }
+}
+
+fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}
+<span class="boring">}</span></code></pre></pre>
+<hr />
+<h2 id="cargo-commands"><a class="header" href="#cargo-commands">Cargo Commands</a></h2>
+<pre><code class="language-bash"># Create new project
+cargo new project_name
+cargo new --lib library_name
+
+# Build project
+cargo build
+cargo build --release
+
+# Run project
+cargo run
+
+# Check code
+cargo check
+
+# Run tests
+cargo test
+
+# Generate documentation
+cargo doc --open
+
+# Update dependencies
+cargo update
+
+# Format code
+cargo fmt
+
+# Lint code
+cargo clippy
+</code></pre>
+<hr />
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Use ownership properly</strong> - Avoid unnecessary clones</li>
+<li><strong>Handle errors with Result</strong> - Don't unwrap in production</li>
+<li><strong>Use iterators</strong> - More efficient and idiomatic</li>
+<li><strong>Prefer <code>&amp;str</code> over <code>String</code></strong> for function parameters</li>
+<li><strong>Use <code>Option</code> instead of null</strong></li>
+<li><strong>Implement <code>Debug</code> trait</strong> for custom types</li>
+<li><strong>Use pattern matching</strong> instead of if chains</li>
+<li><strong>Follow naming conventions</strong> - snake_case for variables/functions</li>
+<li><strong>Write tests</strong> - <code>cargo test</code></li>
+<li><strong>Use clippy</strong> - <code>cargo clippy</code> for linting</li>
+</ol>
+<hr />
+<h2 id="common-libraries"><a class="header" href="#common-libraries">Common Libraries</a></h2>
+<ul>
+<li><strong>serde</strong>: Serialization/deserialization</li>
+<li><strong>tokio</strong>: Async runtime</li>
+<li><strong>reqwest</strong>: HTTP client</li>
+<li><strong>actix-web</strong>: Web framework</li>
+<li><strong>diesel</strong>: ORM</li>
+<li><strong>clap</strong>: CLI argument parsing</li>
+<li><strong>log</strong>: Logging facade</li>
+<li><strong>anyhow</strong>: Error handling</li>
+<li><strong>thiserror</strong>: Custom error types</li>
+</ul>
 
                     </main>
 

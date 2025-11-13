@@ -188,6 +188,398 @@
 <li>Low-level memory manipulation</li>
 <li>High performance</li>
 </ul>
+<h2 id="object-instantiation-patterns"><a class="header" href="#object-instantiation-patterns">Object Instantiation Patterns</a></h2>
+<p>C++ provides multiple ways to create and initialize objects, each with different characteristics regarding memory management, lifetime, and performance.</p>
+<h3 id="1-stack-allocation-automatic-storage"><a class="header" href="#1-stack-allocation-automatic-storage">1. <strong>Stack Allocation (Automatic Storage)</strong></a></h3>
+<p>Objects created on the stack have automatic lifetime - they're destroyed when they go out of scope.</p>
+<pre><code class="language-cpp">class MyClass {
+public:
+    int value;
+    MyClass(int v) : value(v) {
+        std::cout &lt;&lt; "Constructor called: " &lt;&lt; value &lt;&lt; std::endl;
+    }
+    ~MyClass() {
+        std::cout &lt;&lt; "Destructor called: " &lt;&lt; value &lt;&lt; std::endl;
+    }
+};
+
+void example() {
+    MyClass obj1(10);           // Stack allocation
+    MyClass obj2 = MyClass(20); // Also stack allocation
+    MyClass obj3{30};           // C++11 uniform initialization
+
+    // All objects destroyed automatically when function exits
+}
+</code></pre>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Fast allocation/deallocation</li>
+<li>Automatic cleanup (RAII)</li>
+<li>No memory leaks</li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul>
+<li>Limited stack size</li>
+<li>Objects can't outlive their scope</li>
+</ul>
+<h3 id="2-heap-allocation-with-newdelete"><a class="header" href="#2-heap-allocation-with-newdelete">2. <strong>Heap Allocation with new/delete</strong></a></h3>
+<p>Objects created on the heap persist until explicitly deleted.</p>
+<pre><code class="language-cpp">// Single object
+MyClass* ptr1 = new MyClass(100);  // Allocate on heap
+// Use ptr1...
+delete ptr1;  // Must manually delete
+ptr1 = nullptr;  // Good practice
+
+// Array of objects
+MyClass* arr = new MyClass[5];  // Default constructor for each
+// Use arr...
+delete[] arr;  // Must use delete[] for arrays
+arr = nullptr;
+
+// With initialization (C++11)
+MyClass* ptr2 = new MyClass{200};
+delete ptr2;
+</code></pre>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Objects can outlive their scope</li>
+<li>Larger available memory</li>
+<li>Dynamic sizing</li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul>
+<li>Manual memory management</li>
+<li>Risk of memory leaks</li>
+<li>Slower than stack allocation</li>
+</ul>
+<h3 id="3-smart-pointers-modern-c"><a class="header" href="#3-smart-pointers-modern-c">3. <strong>Smart Pointers (Modern C++)</strong></a></h3>
+<p>Smart pointers provide automatic memory management for heap-allocated objects.</p>
+<pre><code class="language-cpp">#include &lt;memory&gt;
+
+// std::unique_ptr - exclusive ownership
+{
+    std::unique_ptr&lt;MyClass&gt; ptr1 = std::make_unique&lt;MyClass&gt;(10);
+    // Automatically deleted when ptr1 goes out of scope
+    // Cannot be copied, only moved
+
+    auto ptr2 = std::make_unique&lt;MyClass&gt;(20);  // Using auto
+    std::unique_ptr&lt;MyClass&gt; ptr3 = std::move(ptr2);  // Transfer ownership
+    // ptr2 is now nullptr
+}
+
+// std::shared_ptr - shared ownership
+{
+    std::shared_ptr&lt;MyClass&gt; ptr1 = std::make_shared&lt;MyClass&gt;(30);
+    {
+        std::shared_ptr&lt;MyClass&gt; ptr2 = ptr1;  // Both own the object
+        std::cout &lt;&lt; "Reference count: " &lt;&lt; ptr1.use_count() &lt;&lt; std::endl;  // 2
+    }  // ptr2 destroyed, object still exists
+    std::cout &lt;&lt; "Reference count: " &lt;&lt; ptr1.use_count() &lt;&lt; std::endl;  // 1
+}  // Object deleted when last shared_ptr is destroyed
+
+// Array with smart pointers (C++17)
+auto arr = std::make_unique&lt;MyClass[]&gt;(5);
+</code></pre>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Automatic memory management</li>
+<li>Exception-safe</li>
+<li>Clear ownership semantics</li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul>
+<li>Slight overhead (especially shared_ptr)</li>
+<li>Reference counting overhead</li>
+</ul>
+<h3 id="4-initialization-patterns"><a class="header" href="#4-initialization-patterns">4. <strong>Initialization Patterns</strong></a></h3>
+<p>C++ offers various initialization syntaxes with different behaviors.</p>
+<pre><code class="language-cpp">class Point {
+public:
+    int x, y;
+    Point() : x(0), y(0) {}
+    Point(int x, int y) : x(x), y(y) {}
+};
+
+// Default initialization
+Point p1;  // Calls default constructor: Point()
+
+// Direct initialization
+Point p2(10, 20);  // Calls Point(int, int)
+
+// Copy initialization
+Point p3 = Point(30, 40);  // May involve copy/move
+
+// List initialization (Uniform initialization - C++11)
+Point p4{50, 60};        // Direct list initialization
+Point p5 = {70, 80};     // Copy list initialization
+auto p6 = Point{90, 100}; // With auto
+
+// Value initialization
+Point p7{};     // Zero-initializes: x=0, y=0
+Point* p8 = new Point();   // Value initialization on heap
+
+// Aggregate initialization (for POD types)
+struct Data {
+    int a;
+    double b;
+    char c;
+};
+
+Data d1 = {1, 2.5, 'x'};   // C-style
+Data d2{1, 2.5, 'x'};      // C++11 style
+Data d3{.a=1, .b=2.5};     // C++20 designated initializers
+</code></pre>
+<h3 id="5-constructor-patterns"><a class="header" href="#5-constructor-patterns">5. <strong>Constructor Patterns</strong></a></h3>
+<p>Different ways to call constructors for initialization.</p>
+<pre><code class="language-cpp">class Resource {
+private:
+    int* data;
+    size_t size;
+
+public:
+    // Default constructor
+    Resource() : data(nullptr), size(0) {
+        std::cout &lt;&lt; "Default constructor" &lt;&lt; std::endl;
+    }
+
+    // Parameterized constructor
+    Resource(size_t sz) : data(new int[sz]), size(sz) {
+        std::cout &lt;&lt; "Parameterized constructor" &lt;&lt; std::endl;
+    }
+
+    // Copy constructor
+    Resource(const Resource&amp; other) : size(other.size) {
+        data = new int[size];
+        std::copy(other.data, other.data + size, data);
+        std::cout &lt;&lt; "Copy constructor" &lt;&lt; std::endl;
+    }
+
+    // Move constructor (C++11)
+    Resource(Resource&amp;&amp; other) noexcept : data(other.data), size(other.size) {
+        other.data = nullptr;
+        other.size = 0;
+        std::cout &lt;&lt; "Move constructor" &lt;&lt; std::endl;
+    }
+
+    // Destructor
+    ~Resource() {
+        delete[] data;
+        std::cout &lt;&lt; "Destructor" &lt;&lt; std::endl;
+    }
+};
+
+// Usage examples
+Resource r1;                      // Default constructor
+Resource r2(100);                 // Parameterized constructor
+Resource r3 = r2;                 // Copy constructor
+Resource r4 = std::move(r2);      // Move constructor
+Resource r5(std::move(r3));       // Move constructor (explicit)
+</code></pre>
+<h3 id="6-factory-pattern"><a class="header" href="#6-factory-pattern">6. <strong>Factory Pattern</strong></a></h3>
+<p>Using factory functions for object creation.</p>
+<pre><code class="language-cpp">class Shape {
+public:
+    virtual void draw() = 0;
+    virtual ~Shape() = default;
+};
+
+class Circle : public Shape {
+    double radius;
+public:
+    Circle(double r) : radius(r) {}
+    void draw() override { std::cout &lt;&lt; "Drawing circle" &lt;&lt; std::endl; }
+};
+
+class Rectangle : public Shape {
+    double width, height;
+public:
+    Rectangle(double w, double h) : width(w), height(h) {}
+    void draw() override { std::cout &lt;&lt; "Drawing rectangle" &lt;&lt; std::endl; }
+};
+
+// Factory function
+std::unique_ptr&lt;Shape&gt; createShape(const std::string&amp; type) {
+    if (type == "circle") {
+        return std::make_unique&lt;Circle&gt;(5.0);
+    } else if (type == "rectangle") {
+        return std::make_unique&lt;Rectangle&gt;(4.0, 6.0);
+    }
+    return nullptr;
+}
+
+// Usage
+auto shape = createShape("circle");
+if (shape) {
+    shape-&gt;draw();
+}
+</code></pre>
+<h3 id="7-placement-new"><a class="header" href="#7-placement-new">7. <strong>Placement New</strong></a></h3>
+<p>Constructing objects at a specific memory location.</p>
+<pre><code class="language-cpp">#include &lt;new&gt;
+
+// Pre-allocated buffer
+alignas(MyClass) char buffer[sizeof(MyClass)];
+
+// Construct object in buffer
+MyClass* obj = new (buffer) MyClass(42);
+
+// Use object
+obj-&gt;value = 100;
+
+// Must manually call destructor
+obj-&gt;~MyClass();
+
+// Common use case: memory pools
+class MemoryPool {
+    char buffer[1024];
+public:
+    template&lt;typename T, typename... Args&gt;
+    T* construct(Args&amp;&amp;... args) {
+        void* ptr = /* allocate from buffer */;
+        return new (ptr) T(std::forward&lt;Args&gt;(args)...);
+    }
+};
+</code></pre>
+<h3 id="8-array-initialization-patterns"><a class="header" href="#8-array-initialization-patterns">8. <strong>Array Initialization Patterns</strong></a></h3>
+<p>Different ways to create and initialize arrays of objects.</p>
+<pre><code class="language-cpp">// Stack arrays
+MyClass arr1[3];                    // Default constructor for each
+MyClass arr2[3] = {MyClass(1), MyClass(2), MyClass(3)};  // Specific initialization
+MyClass arr3[] = {MyClass(10), MyClass(20)};  // Size inferred
+
+// Uniform initialization (C++11)
+MyClass arr4[3] = {{1}, {2}, {3}};
+MyClass arr5[3]{{1}, {2}, {3}};
+
+// Heap arrays
+MyClass* heap_arr1 = new MyClass[5];      // Default constructor
+delete[] heap_arr1;
+
+// std::array (C++11)
+#include &lt;array&gt;
+std::array&lt;MyClass, 3&gt; arr6 = {MyClass(1), MyClass(2), MyClass(3)};
+std::array&lt;MyClass, 3&gt; arr7{MyClass(1), MyClass(2), MyClass(3)};
+
+// std::vector (dynamic array)
+#include &lt;vector&gt;
+std::vector&lt;MyClass&gt; vec1;                // Empty vector
+std::vector&lt;MyClass&gt; vec2(5);             // 5 default-constructed objects
+std::vector&lt;MyClass&gt; vec3(5, MyClass(42)); // 5 copies of MyClass(42)
+std::vector&lt;MyClass&gt; vec4{MyClass(1), MyClass(2), MyClass(3)};  // Initializer list
+</code></pre>
+<h3 id="9-emplace-construction"><a class="header" href="#9-emplace-construction">9. <strong>Emplace Construction</strong></a></h3>
+<p>Constructing objects in-place within containers (C++11).</p>
+<pre><code class="language-cpp">#include &lt;vector&gt;
+#include &lt;map&gt;
+
+std::vector&lt;MyClass&gt; vec;
+
+// push_back creates temporary and moves/copies it
+vec.push_back(MyClass(10));
+
+// emplace_back constructs directly in the vector (more efficient)
+vec.emplace_back(20);  // Constructs MyClass(20) in-place
+
+// Similarly for maps
+std::map&lt;int, MyClass&gt; myMap;
+myMap.emplace(1, MyClass(100));        // Creates pair in-place
+myMap.try_emplace(2, 200);             // Even better, doesn't construct if key exists
+
+// emplace with multiple arguments
+struct Person {
+    std::string name;
+    int age;
+    Person(std::string n, int a) : name(n), age(a) {}
+};
+
+std::vector&lt;Person&gt; people;
+people.emplace_back("Alice", 30);  // Constructs Person directly in vector
+</code></pre>
+<h3 id="10-raii-pattern-resource-acquisition-is-initialization"><a class="header" href="#10-raii-pattern-resource-acquisition-is-initialization">10. <strong>RAII Pattern (Resource Acquisition Is Initialization)</strong></a></h3>
+<p>Tying resource lifetime to object lifetime.</p>
+<pre><code class="language-cpp">class FileHandler {
+    FILE* file;
+public:
+    // Resource acquired in constructor
+    FileHandler(const char* filename, const char* mode) {
+        file = fopen(filename, mode);
+        if (!file) throw std::runtime_error("Failed to open file");
+    }
+
+    // Resource released in destructor
+    ~FileHandler() {
+        if (file) {
+            fclose(file);
+        }
+    }
+
+    // Prevent copying
+    FileHandler(const FileHandler&amp;) = delete;
+    FileHandler&amp; operator=(const FileHandler&amp;) = delete;
+
+    // Allow moving
+    FileHandler(FileHandler&amp;&amp; other) noexcept : file(other.file) {
+        other.file = nullptr;
+    }
+
+    FILE* get() { return file; }
+};
+
+// Usage - no need to manually close file
+void processFile() {
+    FileHandler handler("data.txt", "r");
+    // Use handler.get()...
+    // File automatically closed when handler goes out of scope
+}
+</code></pre>
+<h3 id="11-copy-elision-and-rvo-return-value-optimization"><a class="header" href="#11-copy-elision-and-rvo-return-value-optimization">11. <strong>Copy Elision and RVO (Return Value Optimization)</strong></a></h3>
+<p>The compiler can optimize away unnecessary copies.</p>
+<pre><code class="language-cpp">MyClass createObject() {
+    MyClass obj(100);
+    return obj;  // RVO: object constructed directly in caller's space
+}
+
+MyClass obj1 = createObject();  // No copy/move, direct construction (C++17 guaranteed)
+
+// Named Return Value Optimization (NRVO)
+MyClass createNamed(int value) {
+    MyClass result(value);
+    // ... operations on result
+    return result;  // May be optimized (not guaranteed)
+}
+</code></pre>
+<h3 id="best-practices-for-object-instantiation"><a class="header" href="#best-practices-for-object-instantiation">Best Practices for Object Instantiation</a></h3>
+<ol>
+<li><strong>Prefer stack allocation</strong> when possible - it's fastest and safest</li>
+<li><strong>Use smart pointers</strong> instead of raw new/delete for heap allocation</li>
+<li><strong>Use <code>std::make_unique</code> and <code>std::make_shared</code></strong> for creating smart pointers</li>
+<li><strong>Use uniform initialization <code>{}</code></strong> to avoid most vexing parse and narrowing conversions</li>
+<li><strong>Use <code>emplace</code> methods</strong> in containers for in-place construction</li>
+<li><strong>Follow RAII principles</strong> for resource management</li>
+<li><strong>Prefer <code>std::vector</code> and <code>std::array</code></strong> over raw arrays</li>
+<li><strong>Avoid naked <code>new</code></strong> - use smart pointers or containers</li>
+</ol>
+<pre><code class="language-cpp">// Good practices example
+void goodPractices() {
+    // Stack allocation when lifetime is scoped
+    MyClass local(42);
+
+    // Smart pointers for heap allocation
+    auto ptr = std::make_unique&lt;MyClass&gt;(100);
+
+    // Uniform initialization
+    MyClass obj{50};
+
+    // Containers for collections
+    std::vector&lt;MyClass&gt; vec;
+    vec.emplace_back(10);
+    vec.emplace_back(20);
+
+    // RAII for resources
+    std::ifstream file("data.txt");
+    // File automatically closed
+}
+</code></pre>
 <h2 id="c-strings-and-their-methods"><a class="header" href="#c-strings-and-their-methods">C++ Strings and Their Methods</a></h2>
 <p>In C++, the <code>std::string</code> class provides a powerful and flexible way to handle strings. It offers a variety of methods for string manipulation, making it easier to perform common operations without dealing with low-level character arrays. Below are some of the most commonly used <code>std::string</code> methods in detail:</p>
 <h3 id="1-constructors"><a class="header" href="#1-constructors">1. <strong>Constructors</strong></a></h3>

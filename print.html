@@ -5331,8 +5331,412 @@ for epoch in range(100):
 <li><strong>Translation</strong>: They can translate sentences from one language to another by understanding the meaning of the words in context.</li>
 <li><strong>Summarization</strong>: Transformers can read long articles and provide concise summaries, capturing the main points effectively.</li>
 </ol>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="large-language-models-llms"><a class="header" href="#large-language-models-llms">Large Language Models (LLMs)</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="pytorch"><a class="header" href="#pytorch">PyTorch</a></h1>
 <h2 id="overview-11"><a class="header" href="#overview-11">Overview</a></h2>
+<p>PyTorch is a deep learning framework developed by Meta (Facebook) that provides:</p>
+<ul>
+<li><strong>Dynamic computation graphs</strong>: Build networks on-the-fly (unlike static graphs in TensorFlow)</li>
+<li><strong>Pythonic API</strong>: Natural, intuitive syntax for building neural networks</li>
+<li><strong>GPU acceleration</strong>: Seamless CUDA support for fast training</li>
+<li><strong>Rich ecosystem</strong>: Tools for NLP, computer vision, reinforcement learning</li>
+<li><strong>Production ready</strong>: Deploy with TorchScript, ONNX, or mobile</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># CPU only
+pip install torch torchvision torchaudio
+
+# GPU (CUDA 11.8)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# GPU (CUDA 12.1)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Check installation
+python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+</code></pre>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="tensors"><a class="header" href="#tensors">Tensors</a></h3>
+<p>Tensors are the fundamental building blocks - N-dimensional arrays:</p>
+<pre><code class="language-python">import torch
+
+# Creating tensors
+t1 = torch.tensor([1, 2, 3])           # From list
+t2 = torch.zeros(3, 4)                 # Zeros tensor
+t3 = torch.ones(2, 3)                  # Ones tensor
+t4 = torch.randn(3, 4)                 # Random normal distribution
+t5 = torch.arange(0, 10, 2)            # Range: [0, 2, 4, 6, 8]
+
+# Tensor properties
+print(t1.shape)                         # torch.Size([3])
+print(t1.dtype)                         # torch.int64
+print(t1.device)                        # cpu
+
+# Move to GPU
+if torch.cuda.is_available():
+    t1 = t1.cuda()                      # or t1.to('cuda')
+    print(t1.device)                    # cuda:0
+
+# Tensor operations
+a = torch.tensor([1.0, 2.0, 3.0])
+b = torch.tensor([4.0, 5.0, 6.0])
+
+c = a + b                               # Element-wise addition
+d = a * b                               # Element-wise multiplication
+e = torch.dot(a, b)                     # Dot product: 32.0
+f = torch.matmul(a.view(3, 1), b.view(1, 3))  # Matrix multiplication
+
+# Reshaping
+x = torch.randn(2, 3, 4)
+y = x.view(6, 4)                        # Reshape to (6, 4)
+z = x.reshape(-1)                       # Flatten (auto-infer dimension)
+</code></pre>
+<h3 id="autograd-automatic-differentiation"><a class="header" href="#autograd-automatic-differentiation">Autograd (Automatic Differentiation)</a></h3>
+<p>PyTorch computes gradients automatically:</p>
+<pre><code class="language-python">import torch
+
+# Enable gradient tracking
+x = torch.tensor([2.0, 3.0], requires_grad=True)
+y = torch.tensor([1.0, 2.0], requires_grad=True)
+
+# Forward pass
+z = x.pow(2).sum() + (y * x).sum()      # z = x^2 + y*x
+
+# Backward pass (compute gradients)
+z.backward()
+
+print(x.grad)                           # dz/dx
+print(y.grad)                           # dz/dy
+
+# Example: dz/dx = 2*x + y = [5, 8] for x=[2,3], y=[1,2]
+</code></pre>
+<h3 id="neural-network-building"><a class="header" href="#neural-network-building">Neural Network Building</a></h3>
+<pre><code class="language-python">import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# Define a simple network
+class SimpleNet(nn.Module):
+    def __init__(self):
+        super(SimpleNet, self).__init__()
+        self.fc1 = nn.Linear(784, 128)  # Input: 28*28=784, Output: 128
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, 10)    # 10 output classes
+
+    def forward(self, x):
+        x = x.view(x.size(0), -1)       # Flatten: (batch, 784)
+        x = F.relu(self.fc1(x))         # ReLU activation
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)                 # No activation (raw logits)
+        return x
+
+# Create model and move to device
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = SimpleNet().to(device)
+
+# Check model architecture
+print(model)
+
+# Count parameters
+total_params = sum(p.numel() for p in model.parameters())
+print(f"Total parameters: {total_params}")
+</code></pre>
+<h2 id="training-loop"><a class="header" href="#training-loop">Training Loop</a></h2>
+<pre><code class="language-python">import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+
+# Dummy data
+X_train = torch.randn(1000, 784)
+y_train = torch.randint(0, 10, (1000,))
+
+# Create dataloader
+dataset = TensorDataset(X_train, y_train)
+dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+
+# Model, loss, optimizer
+model = SimpleNet().to(device)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Training loop
+num_epochs = 5
+for epoch in range(num_epochs):
+    total_loss = 0
+    for batch_x, batch_y in dataloader:
+        batch_x, batch_y = batch_x.to(device), batch_y.to(device)
+
+        # Forward pass
+        logits = model(batch_x)
+        loss = criterion(logits, batch_y)
+
+        # Backward pass
+        optimizer.zero_grad()           # Clear old gradients
+        loss.backward()                 # Compute new gradients
+        optimizer.step()                # Update parameters
+
+        total_loss += loss.item()
+
+    avg_loss = total_loss / len(dataloader)
+    print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
+</code></pre>
+<h2 id="convolutional-neural-networks"><a class="header" href="#convolutional-neural-networks">Convolutional Neural Networks</a></h2>
+<pre><code class="language-python">class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        # Input: (batch, 3, 32, 32) - 3 channels, 32x32 images
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(64 * 8 * 8, 128)
+        self.fc2 = nn.Linear(128, 10)
+        self.dropout = nn.Dropout(0.5)
+
+    def forward(self, x):
+        # Conv block 1
+        x = self.conv1(x)               # (batch, 32, 32, 32)
+        x = F.relu(x)
+        x = self.pool(x)                # (batch, 32, 16, 16)
+
+        # Conv block 2
+        x = self.conv2(x)               # (batch, 64, 16, 16)
+        x = F.relu(x)
+        x = self.pool(x)                # (batch, 64, 8, 8)
+
+        # Flatten and FC layers
+        x = x.view(x.size(0), -1)       # (batch, 64*8*8)
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        return x
+
+model = CNN().to(device)
+</code></pre>
+<h2 id="recurrent-neural-networks"><a class="header" href="#recurrent-neural-networks">Recurrent Neural Networks</a></h2>
+<pre><code class="language-python">class RNN(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, output_size):
+        super(RNN, self).__init__()
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,           # Input shape: (batch, seq_len, input_size)
+            dropout=0.5
+        )
+        self.fc = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        # x shape: (batch, seq_len, input_size)
+        lstm_out, (h_n, c_n) = self.lstm(x)
+        # lstm_out: (batch, seq_len, hidden_size)
+        # h_n: (num_layers, batch, hidden_size) - final hidden state
+
+        # Use last hidden state for classification
+        last_hidden = h_n[-1]           # (batch, hidden_size)
+        out = self.fc(last_hidden)      # (batch, output_size)
+        return out
+
+model = RNN(input_size=100, hidden_size=256, num_layers=2, output_size=10).to(device)
+</code></pre>
+<h2 id="model-evaluation"><a class="header" href="#model-evaluation">Model Evaluation</a></h2>
+<pre><code class="language-python"># Evaluation mode (disables dropout, batch norm uses running stats)
+model.eval()
+
+correct = 0
+total = 0
+
+with torch.no_grad():                   # Disable gradient computation
+    for batch_x, batch_y in test_dataloader:
+        batch_x, batch_y = batch_x.to(device), batch_y.to(device)
+
+        logits = model(batch_x)
+        predictions = torch.argmax(logits, dim=1)
+
+        correct += (predictions == batch_y).sum().item()
+        total += batch_y.size(0)
+
+accuracy = correct / total
+print(f"Accuracy: {accuracy:.4f}")
+
+# Switch back to training mode
+model.train()
+</code></pre>
+<h2 id="saving-and-loading-models"><a class="header" href="#saving-and-loading-models">Saving and Loading Models</a></h2>
+<pre><code class="language-python"># Save model
+torch.save(model.state_dict(), 'model.pth')
+
+# Load model
+model = SimpleNet().to(device)
+model.load_state_dict(torch.load('model.pth'))
+
+# Save entire checkpoint
+checkpoint = {
+    'epoch': epoch,
+    'model_state_dict': model.state_dict(),
+    'optimizer_state_dict': optimizer.state_dict(),
+    'loss': loss,
+}
+torch.save(checkpoint, 'checkpoint.pth')
+
+# Load checkpoint
+checkpoint = torch.load('checkpoint.pth')
+model.load_state_dict(checkpoint['model_state_dict'])
+optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+epoch = checkpoint['epoch']
+</code></pre>
+<h2 id="common-optimizers"><a class="header" href="#common-optimizers">Common Optimizers</a></h2>
+<pre><code class="language-python">import torch.optim as optim
+
+# SGD with momentum
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+
+# Adam (adaptive learning rate)
+optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999))
+
+# RMSprop
+optimizer = optim.RMSprop(model.parameters(), lr=0.01, alpha=0.99)
+
+# Learning rate scheduling
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+
+# In training loop:
+for epoch in range(num_epochs):
+    # ... training code ...
+    scheduler.step()                    # Decay learning rate
+</code></pre>
+<h2 id="loss-functions"><a class="header" href="#loss-functions">Loss Functions</a></h2>
+<pre><code class="language-python"># Classification
+criterion = nn.CrossEntropyLoss()       # Combines LogSoftmax + NLLLoss
+criterion = nn.BCEWithLogitsLoss()      # Binary classification
+
+# Regression
+criterion = nn.MSELoss()                # Mean Squared Error
+criterion = nn.L1Loss()                 # Mean Absolute Error
+criterion = nn.SmoothL1Loss()           # Huber loss
+
+# Custom loss
+class CustomLoss(nn.Module):
+    def forward(self, pred, target):
+        return (pred - target).pow(2).mean()
+</code></pre>
+<h2 id="advanced-techniques"><a class="header" href="#advanced-techniques">Advanced Techniques</a></h2>
+<h3 id="batch-normalization"><a class="header" href="#batch-normalization">Batch Normalization</a></h3>
+<pre><code class="language-python">class BNNetwork(nn.Module):
+    def __init__(self):
+        super(BNNetwork, self).__init__()
+        self.fc1 = nn.Linear(784, 256)
+        self.bn1 = nn.BatchNorm1d(256)  # Normalize features
+        self.fc2 = nn.Linear(256, 128)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.fc3 = nn.Linear(128, 10)
+
+    def forward(self, x):
+        x = x.view(x.size(0), -1)
+        x = self.fc1(x)
+        x = self.bn1(x)                 # Normalize after linear layer
+        x = F.relu(x)
+
+        x = self.fc2(x)
+        x = self.bn2(x)
+        x = F.relu(x)
+
+        x = self.fc3(x)
+        return x
+</code></pre>
+<h3 id="gradient-clipping"><a class="header" href="#gradient-clipping">Gradient Clipping</a></h3>
+<pre><code class="language-python"># Prevent exploding gradients
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+torch.nn.utils.clip_grad_value_(model.parameters(), clip_value=0.1)
+</code></pre>
+<h3 id="mixed-precision-training"><a class="header" href="#mixed-precision-training">Mixed Precision Training</a></h3>
+<pre><code class="language-python">from torch.cuda.amp import autocast, GradScaler
+
+scaler = GradScaler()
+
+for batch_x, batch_y in dataloader:
+    optimizer.zero_grad()
+
+    with autocast():                    # Automatically cast to float16 where safe
+        logits = model(batch_x)
+        loss = criterion(logits, batch_y)
+
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+</code></pre>
+<h2 id="time-complexity-1"><a class="header" href="#time-complexity-1">Time Complexity</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Time Complexity</th></tr></thead><tbody>
+<tr><td><strong>Forward pass</strong></td><td>O(n * hidden_size) for dense layers</td></tr>
+<tr><td><strong>Backward pass</strong></td><td>O(n * hidden_size) (2-3x forward)</td></tr>
+<tr><td><strong>Conv2D</strong></td><td>O(H * W * C_in * K^2) per sample</td></tr>
+<tr><td><strong>LSTM</strong></td><td>O(seq_len * hidden_size^2) per sample</td></tr>
+</tbody></table>
+</div>
+<h2 id="best-practices-5"><a class="header" href="#best-practices-5">Best Practices</a></h2>
+<ol>
+<li><strong>Use DataLoader</strong> for batching and shuffling</li>
+<li><strong>Track metrics</strong> with tensorboard or wandb</li>
+<li><strong>Use gradient clipping</strong> for unstable training</li>
+<li><strong>Normalize inputs</strong> (mean=0, std=1)</li>
+<li><strong>Monitor learning</strong> - plot loss and metrics</li>
+<li><strong>Save checkpoints</strong> periodically during training</li>
+<li><strong>Use model.eval()</strong> during validation/testing</li>
+<li><strong>Pin memory</strong> for faster data loading: <code>DataLoader(..., pin_memory=True)</code></li>
+</ol>
+<h2 id="common-issues-1"><a class="header" href="#common-issues-1">Common Issues</a></h2>
+<h3 id="out-of-memory"><a class="header" href="#out-of-memory">Out of Memory</a></h3>
+<pre><code class="language-python"># Solution 1: Reduce batch size
+batch_size = 16  # Instead of 32
+
+# Solution 2: Gradient accumulation
+accumulation_steps = 4
+for i, (batch_x, batch_y) in enumerate(dataloader):
+    logits = model(batch_x)
+    loss = criterion(logits, batch_y) / accumulation_steps
+    loss.backward()
+
+    if (i + 1) % accumulation_steps == 0:
+        optimizer.step()
+        optimizer.zero_grad()
+</code></pre>
+<h3 id="nan-loss"><a class="header" href="#nan-loss">NaN Loss</a></h3>
+<ul>
+<li>Learning rate too high</li>
+<li>Batch normalization issues</li>
+<li>Unstable loss function</li>
+<li>Check for gradient clipping</li>
+</ul>
+<h3 id="slow-training"><a class="header" href="#slow-training">Slow Training</a></h3>
+<ul>
+<li>Use GPU (move model and data to CUDA)</li>
+<li>Increase batch size</li>
+<li>Use mixed precision training</li>
+<li>Profile with <code>torch.profiler</code></li>
+</ul>
+<h2 id="eli10-9"><a class="header" href="#eli10-9">ELI10</a></h2>
+<p>PyTorch is like a smart building assistant:</p>
+<ol>
+<li><strong>You design the blueprint</strong> (define the network architecture)</li>
+<li><strong>PyTorch remembers every step</strong> (autograd tracks all operations)</li>
+<li><strong>You show examples</strong> (training data)</li>
+<li><strong>PyTorch automatically learns</strong> (backpropagation adjusts weights)</li>
+<li><strong>It gets better each time</strong> (more epochs = better performance)</li>
+</ol>
+<p>It's like learning to cook - you follow the recipe, taste the result, adjust ingredients, and get better over time!</p>
+<h2 id="further-resources-9"><a class="header" href="#further-resources-9">Further Resources</a></h2>
+<ul>
+<li><a href="https://pytorch.org/docs/stable/index.html">PyTorch Official Documentation</a></li>
+<li><a href="https://pytorch.org/tutorials/">PyTorch Tutorials</a></li>
+<li><a href="https://www.coursera.org/learn/neural-networks-deep-learning">Deep Learning Specialization with PyTorch</a></li>
+<li><a href="https://lightning.ai/">PyTorch Lightning</a> - High-level wrapper</li>
+<li><a href="https://huggingface.co/transformers/">Hugging Face Transformers</a> - NLP with PyTorch</li>
+<li><a href="https://course.fast.ai/">Fast.ai</a> - Practical deep learning course</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="large-language-models-llms"><a class="header" href="#large-language-models-llms">Large Language Models (LLMs)</a></h1>
+<h2 id="overview-12"><a class="header" href="#overview-12">Overview</a></h2>
 <p>Large Language Models are transformer-based neural networks trained on massive text corpora to predict and generate human language. They've revolutionized AI with capabilities in translation, summarization, question-answering, and reasoning.</p>
 <h2 id="architecture-basics"><a class="header" href="#architecture-basics">Architecture Basics</a></h2>
 <h3 id="transformers-2"><a class="header" href="#transformers-2">Transformers</a></h3>
@@ -5494,7 +5898,7 @@ Claude: $8 input, $24 output
 <tr><td><strong>Human Eval</strong></td><td>Actual user satisfaction</td></tr>
 </tbody></table>
 </div>
-<h2 id="best-practices-5"><a class="header" href="#best-practices-5">Best Practices</a></h2>
+<h2 id="best-practices-6"><a class="header" href="#best-practices-6">Best Practices</a></h2>
 <h3 id="1-prompt-engineering"><a class="header" href="#1-prompt-engineering">1. Prompt Engineering</a></h3>
 <pre><code>X Bad: "Write code"
 Checkmark Good: "Write Python function that takes list and returns sorted list in ascending order"
@@ -5509,7 +5913,7 @@ Try:
 </code></pre>
 <h3 id="3-verification"><a class="header" href="#3-verification">3. Verification</a></h3>
 <p>Always verify facts from authoritative sources</p>
-<h2 id="eli10-9"><a class="header" href="#eli10-9">ELI10</a></h2>
+<h2 id="eli10-10"><a class="header" href="#eli10-10">ELI10</a></h2>
 <p>Imagine teaching a child language by:</p>
 <ol>
 <li>Reading millions of books</li>
@@ -5527,7 +5931,7 @@ Try:
 <li><strong>Efficiency</strong>: Running on phones/devices</li>
 <li><strong>Robotics</strong>: Language guiding physical actions</li>
 </ul>
-<h2 id="further-resources-9"><a class="header" href="#further-resources-9">Further Resources</a></h2>
+<h2 id="further-resources-10"><a class="header" href="#further-resources-10">Further Resources</a></h2>
 <ul>
 <li><a href="https://arxiv.org/abs/1706.03762">Transformer Paper</a></li>
 <li><a href="https://openai.com/research/">OpenAI GPT Blog</a></li>
@@ -5602,7 +6006,7 @@ sudo swapon /swapfile
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ansible"><a class="header" href="#ansible">Ansible</a></h1>
 <p>Ansible is a powerful tool for automating infrastructure. It is a powerful tool that can be used to automate infrastructure, deploy applications, and more.</p>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="spi-serial-peripheral-interface"><a class="header" href="#spi-serial-peripheral-interface">SPI (Serial Peripheral Interface)</a></h1>
-<h2 id="overview-12"><a class="header" href="#overview-12">Overview</a></h2>
+<h2 id="overview-13"><a class="header" href="#overview-13">Overview</a></h2>
 <p>SPI (Serial Peripheral Interface) is a synchronous serial communication protocol used for short-distance communication between microcontrollers and peripheral devices like sensors, displays, SD cards, and flash memory. Developed by Motorola in the 1980s, SPI is known for its high-speed, full-duplex communication capabilities.</p>
 <h2 id="key-features-1"><a class="header" href="#key-features-1">Key Features</a></h2>
 <ul>
@@ -5797,7 +6201,7 @@ void writeRegister(uint8_t reg, uint8_t value) {
 <tr><td><strong>Pins required</strong></td><td>Increases with slaves</td><td>Constant</td></tr>
 </tbody></table>
 </div>
-<h2 id="best-practices-6"><a class="header" href="#best-practices-6">Best Practices</a></h2>
+<h2 id="best-practices-7"><a class="header" href="#best-practices-7">Best Practices</a></h2>
 <h3 id="1-wire-length-and-speed"><a class="header" href="#1-wire-length-and-speed">1. Wire Length and Speed</a></h3>
 <ul>
 <li>Keep wires short (&lt; 30cm) for high speeds</li>
@@ -5874,7 +6278,7 @@ digitalWrite(CS_SLAVE1, HIGH);
 <li><strong>Clock</strong> is like a metronome that keeps everyone in sync - you both write and read at the same time</li>
 </ul>
 <p>The cool part? You can both write notes to each other at the exact same time! That's why SPI is called "full-duplex" - it's like talking and listening simultaneously.</p>
-<h2 id="further-resources-10"><a class="header" href="#further-resources-10">Further Resources</a></h2>
+<h2 id="further-resources-11"><a class="header" href="#further-resources-11">Further Resources</a></h2>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Serial_Peripheral_Interface">SPI Wikipedia</a> - Detailed technical overview</li>
 <li><a href="https://www.analog.com/en/analog-dialogue/articles/introduction-to-spi-interface.html">Analog Devices SPI Tutorial</a></li>
@@ -5883,7 +6287,7 @@ digitalWrite(CS_SLAVE1, HIGH);
 <li>Application notes from your microcontroller manufacturer</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="i2c"><a class="header" href="#i2c">I2C</a></h1>
-<h2 id="overview-13"><a class="header" href="#overview-13">Overview</a></h2>
+<h2 id="overview-14"><a class="header" href="#overview-14">Overview</a></h2>
 <p>I2C (Inter-Integrated Circuit) is a synchronous, multi-master, multi-slave, packet-switched, single-ended, serial communication bus. It was developed by Philips Semiconductor (now NXP Semiconductors) in the 1980s to facilitate communication between integrated circuits on a single board.</p>
 <h2 id="key-features-2"><a class="header" href="#key-features-2">Key Features</a></h2>
 <ul>
@@ -5925,7 +6329,7 @@ digitalWrite(CS_SLAVE1, HIGH);
 <h2 id="conclusion-15"><a class="header" href="#conclusion-15">Conclusion</a></h2>
 <p>I2C is a versatile and efficient communication protocol that is essential in embedded systems and electronic devices. Its simplicity and flexibility make it a popular choice for connecting various components in a wide range of applications.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="uart-universal-asynchronous-receiver-transmitter"><a class="header" href="#uart-universal-asynchronous-receiver-transmitter">UART (Universal Asynchronous Receiver-Transmitter)</a></h1>
-<h2 id="overview-14"><a class="header" href="#overview-14">Overview</a></h2>
+<h2 id="overview-15"><a class="header" href="#overview-15">Overview</a></h2>
 <p>UART is one of the most commonly used serial communication protocols in embedded systems. Unlike SPI and I2C, UART is asynchronous - meaning it doesn't require a shared clock signal between devices. This makes it simple, robust, and perfect for point-to-point communication between two devices.</p>
 <h2 id="key-features-3"><a class="header" href="#key-features-3">Key Features</a></h2>
 <ul>
@@ -6211,7 +6615,7 @@ void loop() {
 <tr><td><strong>Error Detection</strong></td><td>Parity bit</td><td>ACK/NACK</td><td>None</td></tr>
 </tbody></table>
 </div>
-<h2 id="best-practices-7"><a class="header" href="#best-practices-7">Best Practices</a></h2>
+<h2 id="best-practices-8"><a class="header" href="#best-practices-8">Best Practices</a></h2>
 <h3 id="1-proper-baud-rate-calculation"><a class="header" href="#1-proper-baud-rate-calculation">1. Proper Baud Rate Calculation</a></h3>
 <pre><code class="language-cpp">// Ensure both devices use exact same baud rate
 // Check oscillator tolerance - should be &lt; 2%
@@ -6335,7 +6739,7 @@ delay(10);
 </ul>
 <p>The cool thing? Both of you can talk and listen at the same time because you have two strings (wires)!</p>
 <p>The tricky part? You MUST both agree to talk at the same speed (baud rate) before starting, because there's no way to say "slow down!" once you've begun.</p>
-<h2 id="further-resources-11"><a class="header" href="#further-resources-11">Further Resources</a></h2>
+<h2 id="further-resources-12"><a class="header" href="#further-resources-12">Further Resources</a></h2>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter">UART Wikipedia</a></li>
 <li><a href="https://learn.sparkfun.com/tutorials/serial-communication">SparkFun Serial Communication Tutorial</a></li>
@@ -6373,7 +6777,7 @@ delay(10);
 <h2 id="conclusion-16"><a class="header" href="#conclusion-16">Conclusion</a></h2>
 <p>CAN is a critical communication protocol in automotive and industrial systems, providing reliable and efficient data exchange. Understanding CAN's principles and standards is essential for engineers working in these fields.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sdio"><a class="header" href="#sdio">SDIO</a></h1>
-<h2 id="overview-15"><a class="header" href="#overview-15">Overview</a></h2>
+<h2 id="overview-16"><a class="header" href="#overview-16">Overview</a></h2>
 <p>SDIO (Secure Digital Input Output) is an extension of the SD (Secure Digital) card standard that allows for the integration of input/output devices into the SD card interface. This enables various peripherals, such as Wi-Fi, Bluetooth, GPS, and other sensors, to be connected to a host device through a standard SD card slot.</p>
 <h2 id="key-features-4"><a class="header" href="#key-features-4">Key Features</a></h2>
 <ul>
@@ -6474,7 +6878,7 @@ delay(10);
 <h2 id="conclusion-18"><a class="header" href="#conclusion-18">Conclusion</a></h2>
 <p>Ethernet remains a cornerstone of modern networking, providing reliable and high-speed communication for a wide range of applications. Understanding Ethernet's principles and standards is essential for network engineers and IT professionals.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="pwm-pulse-width-modulation"><a class="header" href="#pwm-pulse-width-modulation">PWM (Pulse Width Modulation)</a></h1>
-<h2 id="overview-16"><a class="header" href="#overview-16">Overview</a></h2>
+<h2 id="overview-17"><a class="header" href="#overview-17">Overview</a></h2>
 <p>Pulse Width Modulation (PWM) is a technique for controlling power delivery to electrical devices by rapidly switching between ON and OFF states. By varying the ratio of ON time to OFF time (duty cycle), you can control the average power delivered without actually changing the voltage level. This makes PWM highly efficient and versatile for applications ranging from LED dimming to motor control.</p>
 <h2 id="key-concepts-19"><a class="header" href="#key-concepts-19">Key Concepts</a></h2>
 <h3 id="duty-cycle"><a class="header" href="#duty-cycle">Duty Cycle</a></h3>
@@ -6937,7 +7341,7 @@ void controlFan() {
 <li>Duty cycle controls output voltage</li>
 <li>Feedback loop maintains regulation</li>
 </ul>
-<h2 id="best-practices-8"><a class="header" href="#best-practices-8">Best Practices</a></h2>
+<h2 id="best-practices-9"><a class="header" href="#best-practices-9">Best Practices</a></h2>
 <h3 id="1-choose-appropriate-frequency"><a class="header" href="#1-choose-appropriate-frequency">1. Choose Appropriate Frequency</a></h3>
 <pre><code class="language-cpp">// LED dimming: Use higher frequency to avoid flicker
 // Human eye perceives flicker below ~60 Hz
@@ -7024,7 +7428,7 @@ fc = 1 / (2π × 1000 × 0.00001) ≈ 16 Hz
 <li>0% = always off (no light)</li>
 </ul>
 <p>We use this same trick for controlling motor speeds, speakers, and lots of other things!</p>
-<h2 id="further-resources-12"><a class="header" href="#further-resources-12">Further Resources</a></h2>
+<h2 id="further-resources-13"><a class="header" href="#further-resources-13">Further Resources</a></h2>
 <ul>
 <li><a href="https://docs.arduino.cc/learn/microcontrollers/analog-output">Arduino PWM Guide</a></li>
 <li><a href="https://www.arduino.cc/en/Tutorial/SecretsOfArduinoPWM">Secrets of Arduino PWM</a></li>
@@ -7033,7 +7437,7 @@ fc = 1 / (2π × 1000 × 0.00001) ≈ 16 Hz
 <li><a href="https://www.ti.com/lit/an/slva505/slva505.pdf">Motor Control with PWM</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="adc-analog-to-digital-converter"><a class="header" href="#adc-analog-to-digital-converter">ADC (Analog-to-Digital Converter)</a></h1>
-<h2 id="overview-17"><a class="header" href="#overview-17">Overview</a></h2>
+<h2 id="overview-18"><a class="header" href="#overview-18">Overview</a></h2>
 <p>An Analog-to-Digital Converter (ADC) is a hardware component that converts continuous analog signals (like voltage, temperature, light intensity) into discrete digital values that a microcontroller can process. ADCs are essential for interfacing with the real world, enabling microcontrollers to read sensors and analog inputs.</p>
 <h2 id="key-concepts-20"><a class="header" href="#key-concepts-20">Key Concepts</a></h2>
 <h3 id="what-is-an-analog-signal"><a class="header" href="#what-is-an-analog-signal">What is an Analog Signal?</a></h3>
@@ -7394,7 +7798,7 @@ float readCurrent() {
   return current;
 }
 </code></pre>
-<h2 id="best-practices-9"><a class="header" href="#best-practices-9">Best Practices</a></h2>
+<h2 id="best-practices-10"><a class="header" href="#best-practices-10">Best Practices</a></h2>
 <h3 id="1-averaging-for-stability"><a class="header" href="#1-averaging-for-stability">1. Averaging for Stability</a></h3>
 <pre><code class="language-cpp">float readAverageAnalog(int pin, int samples = 10) {
   long sum = 0;
@@ -7495,7 +7899,7 @@ float calibratedRead(int pin, CalibrationData cal) {
 <li>12-bit ADC: Can say 4096 different numbers (0-4095)</li>
 </ul>
 <p>More bits = more precise measurements = seeing smaller differences!</p>
-<h2 id="further-resources-13"><a class="header" href="#further-resources-13">Further Resources</a></h2>
+<h2 id="further-resources-14"><a class="header" href="#further-resources-14">Further Resources</a></h2>
 <ul>
 <li><a href="https://learn.sparkfun.com/tutorials/analog-to-digital-conversion">ADC Tutorial - SparkFun</a></li>
 <li><a href="https://www.arduino.cc/reference/en/language/functions/analog-io/analogread/">Arduino analogRead() Reference</a></li>
@@ -7504,7 +7908,7 @@ float calibratedRead(int pin, CalibrationData cal) {
 <li><a href="https://www.ti.com/lit/an/slaa013/slaa013.pdf">Understanding ADC Parameters</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dac-digital-to-analog-converter"><a class="header" href="#dac-digital-to-analog-converter">DAC (Digital-to-Analog Converter)</a></h1>
-<h2 id="overview-18"><a class="header" href="#overview-18">Overview</a></h2>
+<h2 id="overview-19"><a class="header" href="#overview-19">Overview</a></h2>
 <p>A Digital-to-Analog Converter (DAC) does the opposite of an ADC - it converts discrete digital values from a microcontroller into continuous analog voltage signals. DACs are essential for generating analog outputs like audio signals, control voltages, and waveforms.</p>
 <h2 id="key-concepts-21"><a class="header" href="#key-concepts-21">Key Concepts</a></h2>
 <h3 id="what-does-a-dac-do"><a class="header" href="#what-does-a-dac-do">What Does a DAC Do?</a></h3>
@@ -7865,7 +8269,7 @@ void generateSineFromTable(int frequency) {
   }
 }
 </code></pre>
-<h2 id="best-practices-10"><a class="header" href="#best-practices-10">Best Practices</a></h2>
+<h2 id="best-practices-11"><a class="header" href="#best-practices-11">Best Practices</a></h2>
 <h3 id="1-output-filtering"><a class="header" href="#1-output-filtering">1. Output Filtering</a></h3>
 <pre><code>For cleaner output, add RC low-pass filter:
 
@@ -7965,7 +8369,7 @@ void setDACWithSettling(uint16_t value) {
 </ul>
 <p>It's like having a volume knob that you control with numbers instead of turning it by hand!</p>
 <p><strong>PWM vs DAC</strong>: PWM is like flashing a light super fast to make it look dimmer. DAC is like actually turning down the voltage - it's smoother and better for some jobs!</p>
-<h2 id="further-resources-14"><a class="header" href="#further-resources-14">Further Resources</a></h2>
+<h2 id="further-resources-15"><a class="header" href="#further-resources-15">Further Resources</a></h2>
 <ul>
 <li><a href="https://learn.sparkfun.com/tutorials/digital-to-analog-conversion">DAC Tutorial - SparkFun</a></li>
 <li><a href="https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/">Arduino Due DAC Reference</a></li>
@@ -8023,7 +8427,7 @@ void loop() {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="interrupts"><a class="header" href="#interrupts">Interrupts</a></h1>
-<h2 id="overview-19"><a class="header" href="#overview-19">Overview</a></h2>
+<h2 id="overview-20"><a class="header" href="#overview-20">Overview</a></h2>
 <p>Interrupts are signals that temporarily halt the normal execution of a program or process, allowing the system to respond to important events. They are a crucial mechanism in computer architecture, enabling efficient multitasking and real-time processing.</p>
 <h2 id="types-of-interrupts"><a class="header" href="#types-of-interrupts">Types of Interrupts</a></h2>
 <ol>
@@ -8054,7 +8458,7 @@ void loop() {
 <h2 id="conclusion-19"><a class="header" href="#conclusion-19">Conclusion</a></h2>
 <p>Understanding interrupts is vital for developers working with low-level programming, operating systems, and embedded systems. They play a key role in ensuring that systems can respond quickly and efficiently to a variety of events.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="timers-and-counters"><a class="header" href="#timers-and-counters">Timers and Counters</a></h1>
-<h2 id="overview-20"><a class="header" href="#overview-20">Overview</a></h2>
+<h2 id="overview-21"><a class="header" href="#overview-21">Overview</a></h2>
 <p>Timers and counters are essential hardware peripherals in microcontrollers that keep track of time, count events, generate precise delays, create PWM signals, and trigger interrupts at specific intervals. Unlike software delays (which block the CPU), hardware timers run independently, allowing your program to multitask efficiently.</p>
 <h2 id="key-concepts-22"><a class="header" href="#key-concepts-22">Key Concepts</a></h2>
 <h3 id="timer-vs-counter"><a class="header" href="#timer-vs-counter">Timer vs Counter</a></h3>
@@ -8510,7 +8914,7 @@ bool readButtonDebounced() {
 <tr><td>1024</td><td>1</td><td>0</td><td>1</td><td>15.625 kHz</td></tr>
 </tbody></table>
 </div>
-<h2 id="best-practices-11"><a class="header" href="#best-practices-11">Best Practices</a></h2>
+<h2 id="best-practices-12"><a class="header" href="#best-practices-12">Best Practices</a></h2>
 <h3 id="1-keep-isrs-short-and-fast"><a class="header" href="#1-keep-isrs-short-and-fast">1. Keep ISRs Short and Fast</a></h3>
 <pre><code class="language-cpp">// BAD - Don't do this in ISR!
 ISR(TIMER1_COMPA_vect) {
@@ -8612,7 +9016,7 @@ OCR1A = compareValue;
 </li>
 </ol>
 <p>The coolest part? The timer runs by itself in the background - you don't have to watch it! It's like having a helper that tells you when it's time to do something, while you focus on other tasks.</p>
-<h2 id="further-resources-15"><a class="header" href="#further-resources-15">Further Resources</a></h2>
+<h2 id="further-resources-16"><a class="header" href="#further-resources-16">Further Resources</a></h2>
 <ul>
 <li><a href="https://www.arduino.cc/reference/en/language/functions/interrupts/interrupts/">Arduino Timer Interrupts</a></li>
 <li><a href="http://www.protostack.com/blog/2011/01/comprehensive-guide-to-timers-on-avr/">AVR Timers Tutorial</a></li>
@@ -8697,7 +9101,7 @@ Start with a minimum of 20 bytes (without options).</p>
 <p>The data field contains the actual data being transmitted.</p>
 <p>This ASCII art representation provides a visual understanding of the TCP packet structure.</p>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="httphttps"><a class="header" href="#httphttps">HTTP/HTTPS</a></h1>
-<h2 id="overview-21"><a class="header" href="#overview-21">Overview</a></h2>
+<h2 id="overview-22"><a class="header" href="#overview-22">Overview</a></h2>
 <p>HTTP (HyperText Transfer Protocol) is the foundation of data communication on the web. HTTPS adds encryption for secure communication.</p>
 <h2 id="http-basics"><a class="header" href="#http-basics">HTTP Basics</a></h2>
 <h3 id="request-response-model"><a class="header" href="#request-response-model">Request-Response Model</a></h3>
@@ -8824,7 +9228,7 @@ Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, POST
 Access-Control-Allow-Headers: Content-Type
 </code></pre>
-<h2 id="common-issues-1"><a class="header" href="#common-issues-1">Common Issues</a></h2>
+<h2 id="common-issues-2"><a class="header" href="#common-issues-2">Common Issues</a></h2>
 <h3 id="404-not-found"><a class="header" href="#404-not-found">404 Not Found</a></h3>
 <p>Resource doesn't exist</p>
 <h3 id="401-unauthorized"><a class="header" href="#401-unauthorized">401 Unauthorized</a></h3>
@@ -8835,7 +9239,7 @@ Access-Control-Allow-Headers: Content-Type
 <p>Rate limit exceeded</p>
 <h3 id="503-service-unavailable"><a class="header" href="#503-service-unavailable">503 Service Unavailable</a></h3>
 <p>Server temporarily down</p>
-<h2 id="best-practices-12"><a class="header" href="#best-practices-12">Best Practices</a></h2>
+<h2 id="best-practices-13"><a class="header" href="#best-practices-13">Best Practices</a></h2>
 <h3 id="1-use-appropriate-methods"><a class="header" href="#1-use-appropriate-methods">1. Use Appropriate Methods</a></h3>
 <pre><code> GET for reading (no side effects)
  POST for creating
@@ -8860,7 +9264,7 @@ Access-Control-Allow-Headers: Content-Type
   }
 }
 </code></pre>
-<h2 id="eli10-10"><a class="header" href="#eli10-10">ELI10</a></h2>
+<h2 id="eli10-11"><a class="header" href="#eli10-11">ELI10</a></h2>
 <p>HTTP is like sending letters:</p>
 <ul>
 <li><strong>GET</strong>: "What's the address of 123 Main St?"</li>
@@ -8875,7 +9279,7 @@ Access-Control-Allow-Headers: Content-Type
 <li><strong>500</strong>: "I have a problem..."</li>
 </ul>
 <p>HTTPS adds a sealed envelope so only the right person can read it!</p>
-<h2 id="further-resources-16"><a class="header" href="#further-resources-16">Further Resources</a></h2>
+<h2 id="further-resources-17"><a class="header" href="#further-resources-17">Further Resources</a></h2>
 <ul>
 <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">MDN HTTP Guide</a></li>
 <li><a href="https://httpstat.us/">HTTP Status Codes</a></li>
@@ -9826,7 +10230,7 @@ $$</p>
 <h2 id="navigation"><a class="header" href="#navigation">Navigation</a></h2>
 <p>Use the menu to explore each topic in depth.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sql-structured-query-language"><a class="header" href="#sql-structured-query-language">SQL (Structured Query Language)</a></h1>
-<h2 id="overview-22"><a class="header" href="#overview-22">Overview</a></h2>
+<h2 id="overview-23"><a class="header" href="#overview-23">Overview</a></h2>
 <p>SQL is the standard language for querying and managing relational databases. Used by PostgreSQL, MySQL, SQL Server, Oracle, and others.</p>
 <h2 id="basic-queries"><a class="header" href="#basic-queries">Basic Queries</a></h2>
 <h3 id="select"><a class="header" href="#select">SELECT</a></h3>
@@ -9933,7 +10337,7 @@ FROM employees ORDER BY department, salary DESC;
 <li><strong>Isolation</strong>: Concurrent transactions independent</li>
 <li><strong>Durability</strong>: Committed data survives failures</li>
 </ul>
-<h2 id="eli10-11"><a class="header" href="#eli10-11">ELI10</a></h2>
+<h2 id="eli10-12"><a class="header" href="#eli10-12">ELI10</a></h2>
 <p>SQL is like a filing system for data:</p>
 <ul>
 <li><strong>SELECT</strong>: "Show me these files"</li>
@@ -9942,14 +10346,14 @@ FROM employees ORDER BY department, salary DESC;
 <li><strong>DELETE</strong>: "Remove file"</li>
 </ul>
 <p>Joins = combining data from multiple filing cabinets!</p>
-<h2 id="further-resources-17"><a class="header" href="#further-resources-17">Further Resources</a></h2>
+<h2 id="further-resources-18"><a class="header" href="#further-resources-18">Further Resources</a></h2>
 <ul>
 <li><a href="https://www.w3schools.com/sql/">SQL Tutorial</a></li>
 <li><a href="https://www.postgresql.org/docs/">PostgreSQL Docs</a></li>
 <li><a href="https://www.postgresql.org/docs/current/sql-explain.html">Explain Plans</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nosql-databases"><a class="header" href="#nosql-databases">NoSQL Databases</a></h1>
-<h2 id="overview-23"><a class="header" href="#overview-23">Overview</a></h2>
+<h2 id="overview-24"><a class="header" href="#overview-24">Overview</a></h2>
 <p>NoSQL databases store data in non-relational formats (documents, key-value, graph, etc.). Designed for scalability, flexibility, and high-performance.</p>
 <h2 id="types-1"><a class="header" href="#types-1">Types</a></h2>
 <h3 id="document-databases-mongodb"><a class="header" href="#document-databases-mongodb">Document Databases (MongoDB)</a></h3>
@@ -10058,7 +10462,7 @@ RETURN friend.name
 # vs SQL (normalization)
 # users table + orders table + JOIN
 </code></pre>
-<h2 id="eli10-12"><a class="header" href="#eli10-12">ELI10</a></h2>
+<h2 id="eli10-13"><a class="header" href="#eli10-13">ELI10</a></h2>
 <p>NoSQL is like a flexible filing system:</p>
 <ul>
 <li><strong>Document DB</strong>: Store complete documents (like PDF files)</li>
@@ -10067,7 +10471,7 @@ RETURN friend.name
 <li><strong>Column</strong>: Organize by columns not rows (like spreadsheet)</li>
 </ul>
 <p>Trade flexibility and speed for less strict structure!</p>
-<h2 id="further-resources-18"><a class="header" href="#further-resources-18">Further Resources</a></h2>
+<h2 id="further-resources-19"><a class="header" href="#further-resources-19">Further Resources</a></h2>
 <ul>
 <li><a href="https://docs.mongodb.com/">MongoDB Docs</a></li>
 <li><a href="https://redis.io/commands/">Redis Commands</a></li>
@@ -10105,7 +10509,7 @@ RETURN friend.name
 <h2 id="navigation-1"><a class="header" href="#navigation-1">Navigation</a></h2>
 <p>Explore each topic to build modern web applications.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rest-apis"><a class="header" href="#rest-apis">REST APIs</a></h1>
-<h2 id="overview-24"><a class="header" href="#overview-24">Overview</a></h2>
+<h2 id="overview-25"><a class="header" href="#overview-25">Overview</a></h2>
 <p>REST (Representational State Transfer) is an architectural style for building web services using HTTP.</p>
 <h2 id="core-principles"><a class="header" href="#core-principles">Core Principles</a></h2>
 <ol>
@@ -10177,7 +10581,7 @@ GET /users?cursor=abc123
 /api/v2/users    (new version)
 /api/beta/users  (experimental)
 </code></pre>
-<h2 id="best-practices-13"><a class="header" href="#best-practices-13">Best Practices</a></h2>
+<h2 id="best-practices-14"><a class="header" href="#best-practices-14">Best Practices</a></h2>
 <ol>
 <li><strong>Use appropriate methods</strong> for operations</li>
 <li><strong>Meaningful status codes</strong> for responses</li>
@@ -10229,7 +10633,7 @@ app.listen(3000);
 curl -X GET http://localhost:3000/users
 curl -X POST http://localhost:3000/users -H "Content-Type: application/json" -d '{"name":"John"}'
 </code></pre>
-<h2 id="eli10-13"><a class="header" href="#eli10-13">ELI10</a></h2>
+<h2 id="eli10-14"><a class="header" href="#eli10-14">ELI10</a></h2>
 <p>REST API is like a restaurant menu:</p>
 <ul>
 <li><strong>GET</strong>: View menu/food</li>
@@ -10239,14 +10643,14 @@ curl -X POST http://localhost:3000/users -H "Content-Type: application/json" -d 
 <li><strong>DELETE</strong>: Cancel order</li>
 </ul>
 <p>Standard ways to order without confusion!</p>
-<h2 id="further-resources-19"><a class="header" href="#further-resources-19">Further Resources</a></h2>
+<h2 id="further-resources-20"><a class="header" href="#further-resources-20">Further Resources</a></h2>
 <ul>
 <li><a href="https://restfulapi.net/">REST API Best Practices</a></li>
 <li><a href="https://httpstat.us/">HTTP Status Codes</a></li>
 <li><a href="https://swagger.io/">OpenAPI/Swagger</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="react"><a class="header" href="#react">React</a></h1>
-<h2 id="overview-25"><a class="header" href="#overview-25">Overview</a></h2>
+<h2 id="overview-26"><a class="header" href="#overview-26">Overview</a></h2>
 <p>React is a JavaScript library for building user interfaces with reusable components and efficient rendering.</p>
 <h2 id="components"><a class="header" href="#components">Components</a></h2>
 <h3 id="functional-components-modern"><a class="header" href="#functional-components-modern">Functional Components (Modern)</a></h3>
@@ -10402,7 +10806,7 @@ function Child() {
 componentDidUpdate() { } // After update
 componentWillUnmount() { } // Before remove
 </code></pre>
-<h2 id="best-practices-14"><a class="header" href="#best-practices-14">Best Practices</a></h2>
+<h2 id="best-practices-15"><a class="header" href="#best-practices-15">Best Practices</a></h2>
 <ol>
 <li><strong>Functional components</strong> (with hooks)</li>
 <li><strong>Keep components small</strong></li>
@@ -10411,7 +10815,7 @@ componentWillUnmount() { } // Before remove
 <li><strong>Memoize</strong> expensive computations</li>
 <li><strong>Lazy load</strong> components</li>
 </ol>
-<h2 id="eli10-14"><a class="header" href="#eli10-14">ELI10</a></h2>
+<h2 id="eli10-15"><a class="header" href="#eli10-15">ELI10</a></h2>
 <p>React is like LEGO blocks:</p>
 <ul>
 <li>Build reusable pieces (components)</li>
@@ -10419,13 +10823,13 @@ componentWillUnmount() { } // Before remove
 <li>Reuse same piece many times</li>
 <li>Efficient updates when data changes!</li>
 </ul>
-<h2 id="further-resources-20"><a class="header" href="#further-resources-20">Further Resources</a></h2>
+<h2 id="further-resources-21"><a class="header" href="#further-resources-21">Further Resources</a></h2>
 <ul>
 <li><a href="https://react.dev/">React Documentation</a></li>
 <li><a href="https://react.dev/reference/react">React Hooks</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="graphql"><a class="header" href="#graphql">GraphQL</a></h1>
-<h2 id="overview-26"><a class="header" href="#overview-26">Overview</a></h2>
+<h2 id="overview-27"><a class="header" href="#overview-27">Overview</a></h2>
 <p>GraphQL is a query language for APIs. Request exactly what data you need, no more, no less.</p>
 <h2 id="key-differences-from-rest"><a class="header" href="#key-differences-from-rest">Key Differences from REST</a></h2>
 <div class="table-wrapper"><table><thead><tr><th>Aspect</th><th>REST</th><th>GraphQL</th></tr></thead><tbody>
@@ -10592,7 +10996,7 @@ server.listen();
 ❌ Caching is harder
 ❌ Monitoring harder
 ❌ Learning curve</p>
-<h2 id="best-practices-15"><a class="header" href="#best-practices-15">Best Practices</a></h2>
+<h2 id="best-practices-16"><a class="header" href="#best-practices-16">Best Practices</a></h2>
 <ol>
 <li><strong>Limit query depth</strong> (prevent abuse)</li>
 <li><strong>Implement timeout</strong> on queries</li>
@@ -10617,14 +11021,14 @@ server.listen();
   }
 }
 </code></pre>
-<h2 id="eli10-15"><a class="header" href="#eli10-15">ELI10</a></h2>
+<h2 id="eli10-16"><a class="header" href="#eli10-16">ELI10</a></h2>
 <p>GraphQL is like ordering food:</p>
 <ul>
 <li><strong>REST</strong>: Get whole menu as-is</li>
 <li><strong>GraphQL</strong>: Ask for exactly what you want</li>
 </ul>
 <p>"I'll take pasta with sauce on the side, hold the onions"</p>
-<h2 id="further-resources-21"><a class="header" href="#further-resources-21">Further Resources</a></h2>
+<h2 id="further-resources-22"><a class="header" href="#further-resources-22">Further Resources</a></h2>
 <ul>
 <li><a href="https://graphql.org/">GraphQL Official</a></li>
 <li><a href="https://www.howtographql.com/">How to GraphQL</a></li>
@@ -10661,9 +11065,9 @@ server.listen();
 <h2 id="navigation-2"><a class="header" href="#navigation-2">Navigation</a></h2>
 <p>Explore each tool and practice to master DevOps.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="docker"><a class="header" href="#docker">Docker</a></h1>
-<h2 id="overview-27"><a class="header" href="#overview-27">Overview</a></h2>
+<h2 id="overview-28"><a class="header" href="#overview-28">Overview</a></h2>
 <p>Docker packages applications into containers - lightweight, isolated environments with all dependencies. Build once, run anywhere.</p>
-<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h2 id="core-concepts-1"><a class="header" href="#core-concepts-1">Core Concepts</a></h2>
 <h3 id="images-vs-containers"><a class="header" href="#images-vs-containers">Images vs Containers</a></h3>
 <ul>
 <li><strong>Image</strong>: Blueprint (read-only template)</li>
@@ -10750,7 +11154,7 @@ volumes:
 docker-compose down       # Stop all services
 docker-compose logs -f    # Follow logs
 </code></pre>
-<h2 id="best-practices-16"><a class="header" href="#best-practices-16">Best Practices</a></h2>
+<h2 id="best-practices-17"><a class="header" href="#best-practices-17">Best Practices</a></h2>
 <ol>
 <li><strong>Small images</strong>: Use minimal base images (alpine)</li>
 <li><strong>Layer caching</strong>: Order commands by change frequency</li>
@@ -10774,7 +11178,7 @@ docker run -v myvolume:/data myapp
 # View volumes
 docker volume ls
 </code></pre>
-<h2 id="eli10-16"><a class="header" href="#eli10-16">ELI10</a></h2>
+<h2 id="eli10-17"><a class="header" href="#eli10-17">ELI10</a></h2>
 <p>Docker is like shipping containers for code:</p>
 <ul>
 <li>Package everything needed (dependencies, code, config)</li>
@@ -10782,16 +11186,16 @@ docker volume ls
 <li>Runs the same everywhere!</li>
 </ul>
 <p>No more "it works on my machine" problems!</p>
-<h2 id="further-resources-22"><a class="header" href="#further-resources-22">Further Resources</a></h2>
+<h2 id="further-resources-23"><a class="header" href="#further-resources-23">Further Resources</a></h2>
 <ul>
 <li><a href="https://docs.docker.com/">Docker Documentation</a></li>
 <li><a href="https://hub.docker.com/">Docker Hub Images</a></li>
 <li><a href="https://docs.docker.com/develop/dev-best-practices/">Docker Best Practices</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="kubernetes"><a class="header" href="#kubernetes">Kubernetes</a></h1>
-<h2 id="overview-28"><a class="header" href="#overview-28">Overview</a></h2>
+<h2 id="overview-29"><a class="header" href="#overview-29">Overview</a></h2>
 <p>Kubernetes (K8s) orchestrates containerized applications at scale, handling deployment, scaling, and networking.</p>
-<h2 id="core-concepts-1"><a class="header" href="#core-concepts-1">Core Concepts</a></h2>
+<h2 id="core-concepts-2"><a class="header" href="#core-concepts-2">Core Concepts</a></h2>
 <h3 id="pods"><a class="header" href="#pods">Pods</a></h3>
 <p>Smallest deployable unit (usually one container):</p>
 <pre><code class="language-yaml">apiVersion: v1
@@ -10933,7 +11337,7 @@ kubectl rollout undo deployment/myapp  # Revert
         memory: "128Mi"
         cpu: "500m"
 </code></pre>
-<h2 id="eli10-17"><a class="header" href="#eli10-17">ELI10</a></h2>
+<h2 id="eli10-18"><a class="header" href="#eli10-18">ELI10</a></h2>
 <p>Kubernetes is like a smart warehouse manager:</p>
 <ul>
 <li>Receives orders (deployments)</li>
@@ -10943,14 +11347,14 @@ kubectl rollout undo deployment/myapp  # Revert
 <li>Spreads load across workers</li>
 </ul>
 <p>Imagine managing 1000 containers automatically!</p>
-<h2 id="further-resources-23"><a class="header" href="#further-resources-23">Further Resources</a></h2>
+<h2 id="further-resources-24"><a class="header" href="#further-resources-24">Further Resources</a></h2>
 <ul>
 <li><a href="https://kubernetes.io/docs/">Kubernetes Docs</a></li>
 <li><a href="https://kubernetes.io/docs/tutorials/kubernetes-basics/">Interactive Tutorial</a></li>
 <li><a href="https://kubernetes.io/docs/reference/kubectl/cheatsheet/">kubectl Cheatsheet</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cicd-fundamentals"><a class="header" href="#cicd-fundamentals">CI/CD Fundamentals</a></h1>
-<h2 id="overview-29"><a class="header" href="#overview-29">Overview</a></h2>
+<h2 id="overview-30"><a class="header" href="#overview-30">Overview</a></h2>
 <p><strong>CI (Continuous Integration)</strong>: Automatically test code on every commit
 <strong>CD (Continuous Deployment)</strong>: Automatically deploy to production</p>
 <h2 id="pipeline-stages"><a class="header" href="#pipeline-stages">Pipeline Stages</a></h2>
@@ -11029,7 +11433,7 @@ deploy:
   only:
     - main
 </code></pre>
-<h2 id="best-practices-17"><a class="header" href="#best-practices-17">Best Practices</a></h2>
+<h2 id="best-practices-18"><a class="header" href="#best-practices-18">Best Practices</a></h2>
 <ol>
 <li><strong>Automated Testing</strong>: Every commit</li>
 <li><strong>Fast Feedback</strong>: Minutes, not hours</li>
@@ -11084,7 +11488,7 @@ Zero downtime
       exit 1
     fi
 </code></pre>
-<h2 id="common-issues-2"><a class="header" href="#common-issues-2">Common Issues</a></h2>
+<h2 id="common-issues-3"><a class="header" href="#common-issues-3">Common Issues</a></h2>
 <h3 id="flaky-tests"><a class="header" href="#flaky-tests">Flaky Tests</a></h3>
 <p>Tests that pass/fail randomly
 <strong>Solution</strong>: Fix test, increase timeout, isolate dependencies</p>
@@ -11092,7 +11496,7 @@ Zero downtime
 <p><strong>Solution</strong>: Pre-deployment checks, canary deployments, rollback procedures</p>
 <h3 id="security-vulnerabilities"><a class="header" href="#security-vulnerabilities">Security Vulnerabilities</a></h3>
 <p><strong>Solution</strong>: Dependency scanning, static code analysis, container scanning</p>
-<h2 id="eli10-18"><a class="header" href="#eli10-18">ELI10</a></h2>
+<h2 id="eli10-19"><a class="header" href="#eli10-19">ELI10</a></h2>
 <p>CI/CD is like an assembly line:</p>
 <ol>
 <li><strong>CI</strong>: Test each part as made</li>
@@ -11100,7 +11504,7 @@ Zero downtime
 <li><strong>Monitoring</strong>: Check if delivery was successful</li>
 </ol>
 <p>Catch problems BEFORE customers see them!</p>
-<h2 id="further-resources-24"><a class="header" href="#further-resources-24">Further Resources</a></h2>
+<h2 id="further-resources-25"><a class="header" href="#further-resources-25">Further Resources</a></h2>
 <ul>
 <li><a href="https://docs.github.com/en/actions">GitHub Actions Documentation</a></li>
 <li><a href="https://docs.gitlab.com/ee/ci/">GitLab CI/CD</a></li>
@@ -11146,7 +11550,7 @@ Zero downtime
 <h2 id="navigation-3"><a class="header" href="#navigation-3">Navigation</a></h2>
 <p>Learn principles for designing systems at scale.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="scalability"><a class="header" href="#scalability">Scalability</a></h1>
-<h2 id="overview-30"><a class="header" href="#overview-30">Overview</a></h2>
+<h2 id="overview-31"><a class="header" href="#overview-31">Overview</a></h2>
 <p>Scalability is the ability to handle increased load by adding more resources.</p>
 <h2 id="vertical-scaling"><a class="header" href="#vertical-scaling">Vertical Scaling</a></h2>
 <p>Add more power to existing machines:</p>
@@ -11237,7 +11641,7 @@ Read (fast): From replicas
 <tr><td><strong>Availability</strong></td><td>5-9s</td></tr>
 </tbody></table>
 </div>
-<h2 id="eli10-19"><a class="header" href="#eli10-19">ELI10</a></h2>
+<h2 id="eli10-20"><a class="header" href="#eli10-20">ELI10</a></h2>
 <p>Scalability is like growing a restaurant:</p>
 <ul>
 <li><strong>Vertical</strong>: Make kitchen bigger (limited)</li>
@@ -11247,13 +11651,13 @@ Read (fast): From replicas
 <li><strong>Queues</strong>: Don't overwhelm kitchen</li>
 </ul>
 <p>Design for growth from day one!</p>
-<h2 id="further-resources-25"><a class="header" href="#further-resources-25">Further Resources</a></h2>
+<h2 id="further-resources-26"><a class="header" href="#further-resources-26">Further Resources</a></h2>
 <ul>
 <li><a href="https://dataintensive.app/">Designing Data-Intensive Applications</a></li>
 <li><a href="https://www.systemdesigninterview.com/">System Design Interview</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="caching-strategies"><a class="header" href="#caching-strategies">Caching Strategies</a></h1>
-<h2 id="overview-31"><a class="header" href="#overview-31">Overview</a></h2>
+<h2 id="overview-32"><a class="header" href="#overview-32">Overview</a></h2>
 <p>Caching stores frequently accessed data in fast memory to reduce latency and database load.</p>
 <h2 id="cache-levels"><a class="header" href="#cache-levels">Cache Levels</a></h2>
 <pre><code>L1: Browser cache (browser memory)
@@ -11397,7 +11801,7 @@ cache.set(key, value, ex=ttl)
 <li>Small datasets</li>
 <li>Rare access patterns</li>
 </ul>
-<h2 id="eli10-20"><a class="header" href="#eli10-20">ELI10</a></h2>
+<h2 id="eli10-21"><a class="header" href="#eli10-21">ELI10</a></h2>
 <p>Cache is like keeping your favorite book on your desk:</p>
 <ul>
 <li>Fast access (don't go to library)</li>
@@ -11406,7 +11810,7 @@ cache.set(key, value, ex=ttl)
 <li>Book gets outdated (invalidation)</li>
 </ul>
 <p>Trade memory for speed!</p>
-<h2 id="further-resources-26"><a class="header" href="#further-resources-26">Further Resources</a></h2>
+<h2 id="further-resources-27"><a class="header" href="#further-resources-27">Further Resources</a></h2>
 <ul>
 <li><a href="https://redis.io/docs/">Redis Documentation</a></li>
 <li><a href="https://codeahoy.com/2017/08/11/caching-strategies-and-patterns/">Caching Patterns</a></li>
@@ -11438,7 +11842,7 @@ cache.set(key, value, ex=ttl)
 <li><strong>Performance</strong>: Load and speed</li>
 <li><strong>Security</strong>: Vulnerability detection</li>
 </ul>
-<h2 id="best-practices-18"><a class="header" href="#best-practices-18">Best Practices</a></h2>
+<h2 id="best-practices-19"><a class="header" href="#best-practices-19">Best Practices</a></h2>
 <ol>
 <li><strong>Fast</strong>: Tests run quickly</li>
 <li><strong>Independent</strong>: No dependencies between tests</li>
@@ -11449,7 +11853,7 @@ cache.set(key, value, ex=ttl)
 <h2 id="navigation-4"><a class="header" href="#navigation-4">Navigation</a></h2>
 <p>Learn strategies to build reliable, quality software.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="unit-testing"><a class="header" href="#unit-testing">Unit Testing</a></h1>
-<h2 id="overview-32"><a class="header" href="#overview-32">Overview</a></h2>
+<h2 id="overview-33"><a class="header" href="#overview-33">Overview</a></h2>
 <p>Unit testing verifies individual functions or classes work correctly in isolation.</p>
 <h2 id="python---pytest"><a class="header" href="#python---pytest">Python - pytest</a></h2>
 <pre><code class="language-python"># test_calculator.py
@@ -11534,7 +11938,7 @@ def test_with_mock(mock_api):
     assert result == "success"
     mock_api.assert_called_once()
 </code></pre>
-<h2 id="best-practices-19"><a class="header" href="#best-practices-19">Best Practices</a></h2>
+<h2 id="best-practices-20"><a class="header" href="#best-practices-20">Best Practices</a></h2>
 <ol>
 <li><strong>One assertion per test</strong> (or related)</li>
 <li><strong>Arrange-Act-Assert pattern</strong></li>
@@ -11558,7 +11962,7 @@ assert x in list        # Membership
 with raises(Exception): # Exception
     function()
 </code></pre>
-<h2 id="eli10-21"><a class="header" href="#eli10-21">ELI10</a></h2>
+<h2 id="eli10-22"><a class="header" href="#eli10-22">ELI10</a></h2>
 <p>Unit tests are like checking individual pieces:</p>
 <ul>
 <li>Test each part separately</li>
@@ -11566,14 +11970,14 @@ with raises(Exception): # Exception
 <li>Catch problems early!</li>
 </ul>
 <p>Like quality control in a factory!</p>
-<h2 id="further-resources-27"><a class="header" href="#further-resources-27">Further Resources</a></h2>
+<h2 id="further-resources-28"><a class="header" href="#further-resources-28">Further Resources</a></h2>
 <ul>
 <li><a href="https://docs.pytest.org/">pytest Documentation</a></li>
 <li><a href="https://jestjs.io/">Jest Documentation</a></li>
 <li><a href="https://junit.org/junit5/docs/current/user-guide/">JUnit 5 Guide</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="test-driven-development-tdd"><a class="header" href="#test-driven-development-tdd">Test-Driven Development (TDD)</a></h1>
-<h2 id="overview-33"><a class="header" href="#overview-33">Overview</a></h2>
+<h2 id="overview-34"><a class="header" href="#overview-34">Overview</a></h2>
 <p>TDD: Write tests BEFORE writing code. Red → Green → Refactor cycle.</p>
 <h2 id="red-green-refactor-cycle"><a class="header" href="#red-green-refactor-cycle">Red-Green-Refactor Cycle</a></h2>
 <h3 id="1-red-write-failing-test"><a class="header" href="#1-red-write-failing-test">1. Red: Write Failing Test</a></h3>
@@ -11675,7 +12079,7 @@ test_system_prevents_overdraft()
 <li><strong>JUnit</strong>: Java testing</li>
 <li><strong>RSpec</strong>: Ruby testing</li>
 </ul>
-<h2 id="eli10-22"><a class="header" href="#eli10-22">ELI10</a></h2>
+<h2 id="eli10-23"><a class="header" href="#eli10-23">ELI10</a></h2>
 <p>TDD is like building with blueprints:</p>
 <ol>
 <li>Draw blueprint (write test)</li>
@@ -11683,7 +12087,7 @@ test_system_prevents_overdraft()
 <li>Improve design (refactor)</li>
 </ol>
 <p>Never start building without a plan!</p>
-<h2 id="further-resources-28"><a class="header" href="#further-resources-28">Further Resources</a></h2>
+<h2 id="further-resources-29"><a class="header" href="#further-resources-29">Further Resources</a></h2>
 <ul>
 <li><a href="https://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530">TDD by Example - Kent Beck</a></li>
 <li><a href="https://testdriven.io/blog/what-is-tdd/">What is TDD</a></li>

@@ -179,7 +179,7 @@ vim src/category/topic.md
 | **Testing** | 3 | Unit testing, TDD, best practices | ✅ Complete |
 | **Networking** | 20 | TCP/IP, IPv4/IPv6, WebSocket, WebRTC, NAT traversal | ✅ Complete |
 | **Security** | 9 | Encryption, SSL/TLS, certificates, OAuth 2.0, JWT | ✅ Complete |
-| **Linux** | 13 | Kernel, driver development, device tree, cfg80211/mac80211, networking, iptables, systemd | ✅ Complete |
+| **Linux** | 14 | Kernel, driver development, device tree, cross compilation, cfg80211/mac80211, networking, iptables, systemd | ✅ Complete |
 | **Programming** | 12 | Python, C/C++, TypeScript, JavaScript, Rust, Java, Go, Lua | ✅ Complete |
 | **Cloud** | 5 | AWS, GCP, Azure services | ✅ Complete |
 | **Finance** | 8 | Markets, analysis, crypto | ✅ Complete |

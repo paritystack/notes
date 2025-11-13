@@ -30,6 +30,7 @@
     - [Kernel Development Patterns](linux/kernel_patterns.md)
     - [Driver Development](linux/driver_development.md)
     - [Device Tree](linux/device_tree.md)
+    - [Cross Compilation](linux/cross_compilation.md)
     - [cfg80211 & mac80211](linux/cfg80211_mac80211.md)
     - [Linux Commands](linux/commands.md)
     - [Netfilter](linux/netfilter.md)

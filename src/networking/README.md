@@ -107,6 +107,15 @@ The practical 4-layer model used in modern networks:
 
 ## Real-Time Communication
 
+### [WebSocket](websocket.md)
+- Full-duplex bidirectional communication
+- Low-latency persistent connections
+- WebSocket handshake and frame format
+- Client and server implementations
+- Use cases: chat, live updates, gaming
+- Authentication and security
+- Heartbeat and reconnection strategies
+
 ### [WebRTC (Web Real-Time Communication)](webrtc.md)
 - Browser-based peer-to-peer communication
 - Video, audio, and data channels

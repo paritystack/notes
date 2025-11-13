@@ -8,13 +8,14 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 2. [Kernel Architecture](./kernel.md) - Linux kernel internals and development
 3. [Kernel Development Patterns](./kernel_patterns.md) - Common patterns and best practices for kernel development
 4. [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless subsystem frameworks for WiFi drivers
-5. [Networking](./networking.md) - Network configuration and troubleshooting
-6. [Netfilter](./netfilter.md) - Packet filtering framework
-7. [iptables](./iptables.md) - Firewall configuration
-8. [Traffic Control (tc)](./tc.md) - Network traffic management
-9. [systemd](./systemd.md) - Service management and init system
-10. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
-11. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
+5. [Driver Development](./driver_development.md) - Linux driver model and device driver development
+6. [Networking](./networking.md) - Network configuration and troubleshooting
+7. [Netfilter](./netfilter.md) - Packet filtering framework
+8. [iptables](./iptables.md) - Firewall configuration
+9. [Traffic Control (tc)](./tc.md) - Network traffic management
+10. [systemd](./systemd.md) - Service management and init system
+11. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
+12. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
 
 ## Overview
 
@@ -33,6 +34,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 ### For Developers
 - [Kernel Architecture](./kernel.md) - Understand Linux internals
 - [Kernel Development Patterns](./kernel_patterns.md) - Coding patterns and best practices
+- [Driver Development](./driver_development.md) - Linux driver model and device drivers
 - [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless driver development
 - [Essential Commands](./commands.md) - Development and debugging tools
 

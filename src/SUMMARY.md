@@ -83,6 +83,7 @@
     - [Transfer Learning](machine_learning/transfer_learning.md)
     - [Transformers](machine_learning/transformers.md)
     - [Hugging Face](machine_learning/hugging_face.md)
+    - [PyTorch](machine_learning/pytorch.md)
     - [Interesting Papers](machine_learning/interesting_papers.md)
 
 - [AI](ai/README.md)

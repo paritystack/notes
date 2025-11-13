@@ -7,9 +7,21 @@ Modern web development covering frontend, backend, APIs, and full-stack technolo
 ### Frontend Frameworks
 
 - **[React](react.md)**: Components, hooks, state management
+- **[Next.js](nextjs.md)**: Production-ready React framework with SSR, SSG, and API routes
 - **[Vue.js](vuejs.md)**: Progressive framework with Composition API
 - **[Svelte](svelte.md)**: Compiled framework with reactive programming
 - **[Tailwind CSS](tailwind.md)**: Utility-first CSS framework
+
+### Backend Frameworks
+
+#### Node.js Frameworks
+- **[Express.js](expressjs.md)**: Minimal and flexible Node.js web framework
+- **[NestJS](nestjs.md)**: TypeScript-first progressive Node.js framework with dependency injection
+
+#### Python Frameworks
+- **[Django](django.md)**: High-level Python web framework for rapid development
+- **[Flask](flask.md)**: Lightweight and flexible Python microframework
+- **[FastAPI](fastapi.md)**: Modern, fast Python framework with automatic API documentation
 
 ### Browser APIs
 

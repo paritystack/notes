@@ -13,7 +13,13 @@ Database systems and data engineering concepts for storing, querying, and managi
 
 ### NoSQL Databases
 
-- **[NoSQL](nosql.md)** - NoSQL databases, MongoDB, Redis, document stores
+- **[NoSQL](nosql.md)** - NoSQL databases overview, types, and use cases
+- **[MongoDB](mongodb.md)** - Document-oriented NoSQL database with rich query language
+- **[Redis](redis.md)** - In-memory data store for caching, pub/sub, and real-time applications
+
+### Message Queues & Event Streaming
+
+- **[Apache Kafka](kafka.md)** - Distributed event streaming platform for high-throughput data pipelines
 
 ## Database Concepts
 

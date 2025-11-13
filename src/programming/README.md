@@ -8,6 +8,7 @@ This section contains references and guides for various programming languages.
 - [C](c.md) - A general-purpose, procedural programming language
 - [C++](cpp.md) - An extension of C with object-oriented features
 - [JavaScript](javascript.md) - A scripting language for web development
+- [TypeScript](typescript.md) - A strongly-typed superset of JavaScript for large-scale applications
 - [Bash](bash.md) - A Unix shell and command language
 - [Java](java.md) - A class-based, object-oriented programming language
 - [Go](go.md) - A statically typed, compiled language with built-in concurrency

@@ -8,7 +8,7 @@ A comprehensive, continuously updated collection of technical tutorials and refe
 
 ## 📋 What's Inside
 
-This knowledge base contains **50+ topics** across **20 categories** with **5,000+ lines** of tutorial-style content, practical code examples, and best practices.
+This knowledge base contains **60+ topics** across **20 categories** with **15,000+ lines** of tutorial-style content, practical code examples, and best practices.
 
 ### Core Computer Science (8 topics)
 - **Data Structures**: Arrays, Linked Lists, Stacks, Queues, Hash Tables, Trees, Tries, Heaps
@@ -26,14 +26,16 @@ This knowledge base contains **50+ topics** across **20 categories** with **5,00
 - **APIs**: REST API Design, HTTP/HTTPS, Status Codes, Authentication
 - **Databases**: SQL (queries, joins, indexes, transactions), NoSQL (MongoDB, Redis, Cassandra, Neo4j)
 - **DevOps**: Docker, Kubernetes, CI/CD Pipelines, GitHub Actions, GitLab CI
-- **Networking**: TCP/IP, UDP, DNS, IP Routing, Firewalls, mDNS
+- **Networking**: TCP/IP, UDP, DNS, IP Routing (IPv4, IPv6), Firewalls, Real-time (WebSocket, WebRTC), NAT Traversal (STUN, TURN, ICE, PCP, NAT-PMP)
 - **Security**: Encryption (symmetric/asymmetric), SSL/TLS, Certificates, Hashing, HMAC, Digital Signatures
 - **Cloud**: AWS, Google Cloud, Azure
 - **Linux**: Kernel, Networking Stack, iptables, Netfilter, Commands
 
-### Frontend & Web Development (4 topics)
-- **React**: Components, Hooks, State Management, Best Practices
-- **GraphQL**: Schema Design, Queries, Mutations vs REST
+### Frontend & Web Development (8 topics)
+- **Frameworks**: React, Vue.js, Svelte (components, hooks, state management)
+- **CSS**: Tailwind CSS (utility-first framework)
+- **APIs**: REST, GraphQL, gRPC (schema design, queries, mutations)
+- **Browser APIs**: Storage (localStorage, IndexedDB), Workers (Web Workers, Service Workers), Notifications, Geolocation, File API, Observers (Intersection, Mutation, Resize)
 - **Web Fundamentals**: HTML, CSS, JavaScript
 - **Tools & Build**: Webpack, Vite, npm, yarn
 
@@ -163,12 +165,12 @@ vim src/category/topic.md
 | **Data Structures** | 6 | Arrays, lists, trees, graphs | ✅ Complete |
 | **Algorithms** | 13 | Sorting, searching, DP, graphs | ✅ Complete |
 | **Machine Learning** | 13 | Neural nets, deep learning, LLMs | ✅ Complete |
-| **Web Development** | 4 | React, GraphQL, REST, HTML/CSS | ✅ Complete |
+| **Web Development** | 9 | React, Vue, Svelte, Tailwind, Web APIs, REST, GraphQL, gRPC | ✅ Complete |
 | **DevOps & CI/CD** | 4 | Docker, Kubernetes, pipelines | ✅ Complete |
 | **Databases** | 3 | SQL, NoSQL, data modeling | ✅ Complete |
 | **System Design** | 3 | Scalability, caching, distributed systems | ✅ Complete |
 | **Testing** | 3 | Unit testing, TDD, best practices | ✅ Complete |
-| **Networking** | 13 | TCP/IP, DNS, HTTP, protocols | ✅ Complete |
+| **Networking** | 20 | TCP/IP, IPv4/IPv6, WebSocket, WebRTC, NAT traversal | ✅ Complete |
 | **Security** | 7 | Encryption, SSL/TLS, certificates | ✅ Complete |
 | **Linux** | 7 | Kernel, commands, networking | ✅ Complete |
 | **Programming** | 11 | Python, C++, Rust, JavaScript, Java | ✅ Complete |
@@ -180,7 +182,7 @@ vim src/category/topic.md
 | **Git** | 4 | Commands, workflows, GitHub | ✅ Complete |
 | **AI** | 9 | LLMs, prompt engineering, tools | ✅ Complete |
 
-**Total**: 20 categories, 150+ files, 5,000+ lines of content
+**Total**: 20 categories, 160+ files, 15,000+ lines of content
 
 ---
 
@@ -217,9 +219,9 @@ touch src/category/new_topic.md
 ## 📊 Statistics
 
 - **Total Categories**: 20
-- **Total Files**: 150+
-- **Total Content**: 5,000+ lines
-- **Code Examples**: 100+
+- **Total Files**: 160+
+- **Total Content**: 15,000+ lines
+- **Code Examples**: 200+
 - **Languages Covered**: 8+
 - **Last Updated**: 2024
 - **Automated Deployment**: Yes ✅

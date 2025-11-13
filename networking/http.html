@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -154,12 +177,197 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="httphttps"><a class="header" href="#httphttps">HTTP/HTTPS</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>HTTP (HyperText Transfer Protocol) is the foundation of data communication on the web. HTTPS adds encryption for secure communication.</p>
+<h2 id="http-basics"><a class="header" href="#http-basics">HTTP Basics</a></h2>
+<h3 id="request-response-model"><a class="header" href="#request-response-model">Request-Response Model</a></h3>
+<pre><code>Client                          Server
+
+    HTTP Request               -&gt;
+
+  &lt;-          HTTP Response
+
+</code></pre>
+<h3 id="http-methods"><a class="header" href="#http-methods">HTTP Methods</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Method</th><th>Purpose</th><th>Idempotent</th><th>Safe</th></tr></thead><tbody>
+<tr><td><strong>GET</strong></td><td>Retrieve resource</td><td>Yes</td><td>Yes</td></tr>
+<tr><td><strong>POST</strong></td><td>Create resource</td><td>No</td><td>No</td></tr>
+<tr><td><strong>PUT</strong></td><td>Replace resource</td><td>Yes</td><td>No</td></tr>
+<tr><td><strong>PATCH</strong></td><td>Partial update</td><td>No</td><td>No</td></tr>
+<tr><td><strong>DELETE</strong></td><td>Remove resource</td><td>Yes</td><td>No</td></tr>
+<tr><td><strong>HEAD</strong></td><td>Like GET, no body</td><td>Yes</td><td>Yes</td></tr>
+<tr><td><strong>OPTIONS</strong></td><td>Describe options</td><td>Yes</td><td>Yes</td></tr>
+</tbody></table>
+</div>
+<h3 id="status-codes"><a class="header" href="#status-codes">Status Codes</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Code</th><th>Meaning</th><th>Examples</th></tr></thead><tbody>
+<tr><td><strong>1xx</strong></td><td>Informational</td><td>100 Continue</td></tr>
+<tr><td><strong>2xx</strong></td><td>Success</td><td>200 OK, 201 Created</td></tr>
+<tr><td><strong>3xx</strong></td><td>Redirection</td><td>301 Moved, 304 Not Modified</td></tr>
+<tr><td><strong>4xx</strong></td><td>Client Error</td><td>400 Bad Request, 404 Not Found</td></tr>
+<tr><td><strong>5xx</strong></td><td>Server Error</td><td>500 Server Error, 503 Unavailable</td></tr>
+</tbody></table>
+</div>
+<h3 id="headers"><a class="header" href="#headers">Headers</a></h3>
+<p><strong>Request Headers</strong>:</p>
+<pre><code>Host: example.com
+User-Agent: Mozilla/5.0
+Accept: application/json
+Authorization: Bearer token123
+Cookie: session=abc123
+Content-Type: application/json
+</code></pre>
+<p><strong>Response Headers</strong>:</p>
+<pre><code>Content-Type: application/json
+Content-Length: 256
+Set-Cookie: session=def456
+Cache-Control: max-age=3600
+ETag: "12345abc"
+</code></pre>
+<h2 id="http-versions"><a class="header" href="#http-versions">HTTP Versions</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Version</th><th>Released</th><th>Features</th></tr></thead><tbody>
+<tr><td><strong>HTTP/1.1</strong></td><td>1997</td><td>Keep-alive, chunked transfer</td></tr>
+<tr><td><strong>HTTP/2</strong></td><td>2015</td><td>Multiplexing, server push, binary</td></tr>
+<tr><td><strong>HTTP/3</strong></td><td>2022</td><td>QUIC protocol, faster</td></tr>
+</tbody></table>
+</div>
+<h2 id="rest-api-design"><a class="header" href="#rest-api-design">REST API Design</a></h2>
+<h3 id="resource-oriented"><a class="header" href="#resource-oriented">Resource-Oriented</a></h3>
+<pre><code> GET /users           - List users
+ POST /users          - Create user
+ GET /users/123       - Get user 123
+ PUT /users/123       - Update user 123
+ DELETE /users/123    - Delete user 123
+
+ GET /getUser?id=123  - Procedural (bad)
+ POST /createUser     - Procedural (bad)
+</code></pre>
+<h3 id="requestresponse-example"><a class="header" href="#requestresponse-example">Request/Response Example</a></h3>
+<pre><code class="language-python"># Request
+GET /users/123 HTTP/1.1
+Host: api.example.com
+Authorization: Bearer token
+
+# Response
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 156
+
+{
+  "id": 123,
+  "name": "John",
+  "email": "john@example.com"
+}
+</code></pre>
+<h2 id="https-secure-http"><a class="header" href="#https-secure-http">HTTPS (Secure HTTP)</a></h2>
+<p>Adds TLS encryption on top of HTTP:</p>
+<pre><code>HTTP over TLS = HTTPS
+</code></pre>
+<h3 id="benefits"><a class="header" href="#benefits">Benefits</a></h3>
+<ul>
+<li><strong>Encryption</strong>: Data unreadable to eavesdroppers</li>
+<li><strong>Authentication</strong>: Verify server identity</li>
+<li><strong>Integrity</strong>: Detect tampering</li>
+</ul>
+<h3 id="certificate-process"><a class="header" href="#certificate-process">Certificate Process</a></h3>
+<pre><code>1. Generate private/public key pair
+2. Request certificate from CA
+3. CA verifies and signs certificate
+4. Browser verifies signature with CA's public key
+</code></pre>
+<h2 id="caching"><a class="header" href="#caching">Caching</a></h2>
+<h3 id="cache-headers"><a class="header" href="#cache-headers">Cache Headers</a></h3>
+<pre><code>Cache-Control: max-age=3600     # Cache for 1 hour
+Cache-Control: no-cache         # Validate before use
+Cache-Control: no-store         # Don't cache
+Cache-Control: private          # Only browser cache
+Cache-Control: public           # Any cache can store
+ETag: "12345"                   # Resource version
+</code></pre>
+<h3 id="conditional-requests"><a class="header" href="#conditional-requests">Conditional Requests</a></h3>
+<pre><code>If-None-Match: "12345"
+-&gt; Returns 304 Not Modified if unchanged
+</code></pre>
+<h2 id="authentication"><a class="header" href="#authentication">Authentication</a></h2>
+<h3 id="basic-auth"><a class="header" href="#basic-auth">Basic Auth</a></h3>
+<pre><code>Authorization: Basic base64(username:password)
+</code></pre>
+<h3 id="bearer-token"><a class="header" href="#bearer-token">Bearer Token</a></h3>
+<pre><code>Authorization: Bearer eyJhbGc...
+</code></pre>
+<h3 id="oauth-20"><a class="header" href="#oauth-20">OAuth 2.0</a></h3>
+<p>Multi-step authorization flow for 3rd party apps</p>
+<h2 id="cors-cross-origin-resource-sharing"><a class="header" href="#cors-cross-origin-resource-sharing">CORS (Cross-Origin Resource Sharing)</a></h2>
+<p>Enable browser to access cross-origin APIs:</p>
+<pre><code>Server Response:
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST
+Access-Control-Allow-Headers: Content-Type
+</code></pre>
+<h2 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h2>
+<h3 id="404-not-found"><a class="header" href="#404-not-found">404 Not Found</a></h3>
+<p>Resource doesn't exist</p>
+<h3 id="401-unauthorized"><a class="header" href="#401-unauthorized">401 Unauthorized</a></h3>
+<p>Missing/invalid authentication</p>
+<h3 id="403-forbidden"><a class="header" href="#403-forbidden">403 Forbidden</a></h3>
+<p>Authenticated but not allowed</p>
+<h3 id="429-too-many-requests"><a class="header" href="#429-too-many-requests">429 Too Many Requests</a></h3>
+<p>Rate limit exceeded</p>
+<h3 id="503-service-unavailable"><a class="header" href="#503-service-unavailable">503 Service Unavailable</a></h3>
+<p>Server temporarily down</p>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-use-appropriate-methods"><a class="header" href="#1-use-appropriate-methods">1. Use Appropriate Methods</a></h3>
+<pre><code> GET for reading (no side effects)
+ POST for creating
+ PUT for full replacement
+ PATCH for partial update
+</code></pre>
+<h3 id="2-meaningful-status-codes"><a class="header" href="#2-meaningful-status-codes">2. Meaningful Status Codes</a></h3>
+<pre><code> 200 OK for success
+ 201 Created for new resource
+ 204 No Content for delete
+ 200 for everything (bad)
+</code></pre>
+<h3 id="3-versioning"><a class="header" href="#3-versioning">3. Versioning</a></h3>
+<pre><code>/api/v1/users
+/api/v2/users
+</code></pre>
+<h3 id="4-error-responses"><a class="header" href="#4-error-responses">4. Error Responses</a></h3>
+<pre><code class="language-json">{
+  "error": "Invalid input",
+  "details": {
+    "email": "Email format invalid"
+  }
+}
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>HTTP is like sending letters:</p>
+<ul>
+<li><strong>GET</strong>: "What's the address of 123 Main St?"</li>
+<li><strong>POST</strong>: "Please add my address to your system"</li>
+<li><strong>PUT</strong>: "Update my address to..."</li>
+<li><strong>DELETE</strong>: "Remove my address"</li>
+</ul>
+<p>The server sends back a number (status code):</p>
+<ul>
+<li><strong>200</strong>: "Got it, here's what you asked for!"</li>
+<li><strong>404</strong>: "Can't find that address"</li>
+<li><strong>500</strong>: "I have a problem..."</li>
+</ul>
+<p>HTTPS adds a sealed envelope so only the right person can read it!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">MDN HTTP Guide</a></li>
+<li><a href="https://httpstat.us/">HTTP Status Codes</a></li>
+<li><a href="https://restfulapi.net/">REST API Best Practices</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../networking/tcp_ip_model.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../networking/udp.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -173,7 +381,7 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../networking/tcp_ip_model.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../networking/udp.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
@@ -201,6 +409,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

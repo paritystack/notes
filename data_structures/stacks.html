@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -154,7 +177,126 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="stacks"><a class="header" href="#stacks">Stacks</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A stack is a Last-In-First-Out (LIFO) data structure where elements are added and removed from the same end, called the top. Think of it like a stack of dinner plates - you put plates on top and take them from the top.</p>
+<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="lifo-principle"><a class="header" href="#lifo-principle">LIFO Principle</a></h3>
+<pre><code>Push: 1 -&gt; 2 -&gt; 3
+
+     3     Top (Last In)
+
+     2
+
+     1     First In
+
+
+Pop: Returns 3 (First Out)
+</code></pre>
+<h2 id="operations--time-complexity"><a class="header" href="#operations--time-complexity">Operations &amp; Time Complexity</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Time</th><th>Space</th></tr></thead><tbody>
+<tr><td>Push</td><td>O(1)</td><td>O(n)</td></tr>
+<tr><td>Pop</td><td>O(1)</td><td>-</td></tr>
+<tr><td>Peek</td><td>O(1)</td><td>-</td></tr>
+<tr><td>Is Empty</td><td>O(1)</td><td>-</td></tr>
+<tr><td>Search</td><td>O(n)</td><td>-</td></tr>
+</tbody></table>
+</div>
+<h2 id="implementation-python"><a class="header" href="#implementation-python">Implementation (Python)</a></h2>
+<pre><code class="language-python">class Stack:
+    def __init__(self):
+        self.items = []
+
+    def push(self, data):
+        self.items.append(data)
+
+    def pop(self):
+        return self.items.pop() if not self.is_empty() else None
+
+    def peek(self):
+        return self.items[-1] if not self.is_empty() else None
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def size(self):
+        return len(self.items)
+
+# Using deque for O(1) operations
+from collections import deque
+stack = deque()
+stack.append(1)  # Push O(1)
+stack.pop()      # Pop O(1)
+</code></pre>
+<h2 id="common-problems"><a class="header" href="#common-problems">Common Problems</a></h2>
+<h3 id="valid-parentheses"><a class="header" href="#valid-parentheses">Valid Parentheses</a></h3>
+<pre><code class="language-python">def is_valid(s):
+    stack = []
+    pairs = {'(': ')', '[': ']', '{': '}'}
+
+    for char in s:
+        if char in pairs:
+            stack.append(char)
+        else:
+            if not stack or pairs[stack.pop()] != char:
+                return False
+
+    return len(stack) == 0
+</code></pre>
+<h3 id="next-greater-element"><a class="header" href="#next-greater-element">Next Greater Element</a></h3>
+<pre><code class="language-python">def next_greater(arr):
+    stack = []
+    result = [-1] * len(arr)
+
+    for i in range(len(arr) - 1, -1, -1):
+        while stack and stack[-1] &lt;= arr[i]:
+            stack.pop()
+        if stack:
+            result[i] = stack[-1]
+        stack.append(arr[i])
+
+    return result
+</code></pre>
+<h3 id="postfix-evaluation"><a class="header" href="#postfix-evaluation">Postfix Evaluation</a></h3>
+<pre><code class="language-python">def evaluate_postfix(expr):
+    stack = []
+    ops = {'+', '-', '*', '/'}
+
+    for token in expr.split():
+        if token not in ops:
+            stack.append(int(token))
+        else:
+            b = stack.pop()
+            a = stack.pop()
+            if token == '+': stack.append(a + b)
+            elif token == '-': stack.append(a - b)
+            elif token == '*': stack.append(a * b)
+            else: stack.append(a // b)
+
+    return stack[0]
+</code></pre>
+<h2 id="real-world-uses"><a class="header" href="#real-world-uses">Real-World Uses</a></h2>
+<ul>
+<li><strong>Browser Back Button</strong>: Last visited page is first to go back to</li>
+<li><strong>Function Call Stack</strong>: Each function call pushed, returns pop</li>
+<li><strong>Undo/Redo</strong>: Last action undone first</li>
+<li><strong>Expression Parsing</strong>: Manage operator precedence</li>
+<li><strong>DFS (Depth-First Search)</strong>: Graph traversal</li>
+</ul>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>Imagine a stack of dinner plates - you:</p>
+<ul>
+<li>Add new plates on <strong>top</strong></li>
+<li>Take plates from <strong>top</strong></li>
+<li>Can't grab from the middle without removing top plates</li>
+</ul>
+<p>That's LIFO! Last In = First Out. The last plate you put on is the first one you take off.</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://leetcode.com/tag/stack/">LeetCode Stack Problems</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)">Stack Wikipedia</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -201,6 +343,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

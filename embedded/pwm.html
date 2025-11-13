@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -155,27 +178,564 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="pwm-pulse-width-modulation"><a class="header" href="#pwm-pulse-width-modulation">PWM (Pulse Width Modulation)</a></h1>
-<p>Pulse Width Modulation (PWM) is a technique used to control the amount of power delivered to an electrical device by varying the width of the pulses in a pulse train. It is commonly used in applications such as motor control, LED dimming, and signal generation.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Pulse Width Modulation (PWM) is a technique for controlling power delivery to electrical devices by rapidly switching between ON and OFF states. By varying the ratio of ON time to OFF time (duty cycle), you can control the average power delivered without actually changing the voltage level. This makes PWM highly efficient and versatile for applications ranging from LED dimming to motor control.</p>
 <h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="duty-cycle"><a class="header" href="#duty-cycle">Duty Cycle</a></h3>
+<p>The <strong>duty cycle</strong> is the percentage of time the signal is HIGH during one complete cycle.</p>
+<pre><code>Duty Cycle (%) = (Ton / (Ton + Toff)) × 100
+
+Where:
+- Ton = Time the signal is HIGH
+- Toff = Time the signal is LOW
+- Period = Ton + Toff
+</code></pre>
+<p><strong>Examples</strong>:</p>
 <ul>
-<li>
-<p><strong>Duty Cycle</strong>: The duty cycle is the percentage of one period in which a signal is active. A higher duty cycle means more power is delivered to the device.</p>
-</li>
-<li>
-<p><strong>Frequency</strong>: The frequency of the PWM signal determines how fast the pulses are repeated. It is important to choose an appropriate frequency for the application to ensure smooth operation.</p>
-</li>
+<li><strong>0% duty cycle</strong>: Always LOW (0V average)</li>
+<li><strong>25% duty cycle</strong>: HIGH for 1/4 of the period</li>
+<li><strong>50% duty cycle</strong>: HIGH for half the period</li>
+<li><strong>75% duty cycle</strong>: HIGH for 3/4 of the period</li>
+<li><strong>100% duty cycle</strong>: Always HIGH (full voltage)</li>
 </ul>
-<h2 id="example-usage"><a class="header" href="#example-usage">Example Usage</a></h2>
-<ol>
-<li>
-<p><strong>LED Dimming</strong>: By adjusting the duty cycle of a PWM signal, you can control the brightness of an LED. A higher duty cycle results in a brighter LED.</p>
-</li>
-<li>
-<p><strong>Motor Speed Control</strong>: PWM can be used to control the speed of a DC motor. By varying the duty cycle, you can adjust the average voltage supplied to the motor, thus controlling its speed.</p>
-</li>
-</ol>
-<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>PWM is a versatile technique that allows for efficient control of power in various applications. Understanding how to implement and utilize PWM can greatly enhance the performance of electronic devices.</p>
+<h3 id="frequency"><a class="header" href="#frequency">Frequency</a></h3>
+<p>The <strong>frequency</strong> determines how many ON/OFF cycles occur per second, measured in Hertz (Hz).</p>
+<pre><code>Frequency = 1 / Period
+Period = 1 / Frequency
+</code></pre>
+<p><strong>Typical Frequencies</strong>:</p>
+<ul>
+<li><strong>LED Dimming</strong>: 500 Hz - 20 kHz (above flicker perception ~60 Hz)</li>
+<li><strong>Motor Control</strong>: 1 kHz - 40 kHz</li>
+<li><strong>Audio</strong>: 40 kHz+ (above human hearing)</li>
+<li><strong>Servo Motors</strong>: 50 Hz (20ms period)</li>
+</ul>
+<h3 id="average-voltage"><a class="header" href="#average-voltage">Average Voltage</a></h3>
+<p>The average voltage delivered by PWM:</p>
+<pre><code>Average Voltage = Supply Voltage × (Duty Cycle / 100)
+
+Example (5V supply):
+- 0% duty → 0V average
+- 25% duty → 1.25V average
+- 50% duty → 2.5V average
+- 100% duty → 5V average
+</code></pre>
+<h3 id="visual-representation"><a class="header" href="#visual-representation">Visual Representation</a></h3>
+<pre><code>100% Duty Cycle (Always ON):
+█████████████████████████████
+
+75% Duty Cycle:
+██████████████████░░░░░░░
+
+50% Duty Cycle:
+█████████████░░░░░░░░░░░░
+
+25% Duty Cycle:
+██████░░░░░░░░░░░░░░░░░░░
+
+0% Duty Cycle (Always OFF):
+░░░░░░░░░░░░░░░░░░░░░░░░░
+</code></pre>
+<h2 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h2>
+<h3 id="hardware-pwm-vs-software-pwm"><a class="header" href="#hardware-pwm-vs-software-pwm">Hardware PWM vs Software PWM</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Hardware PWM</th><th>Software PWM</th></tr></thead><tbody>
+<tr><td><strong>Precision</strong></td><td>Very precise, timer-based</td><td>Can jitter with interrupts</td></tr>
+<tr><td><strong>CPU Load</strong></td><td>Zero (handled by hardware)</td><td>High (CPU must toggle pin)</td></tr>
+<tr><td><strong>Pins</strong></td><td>Limited (specific pins only)</td><td>Any digital pin</td></tr>
+<tr><td><strong>Frequency</strong></td><td>High (up to MHz)</td><td>Low (few kHz max)</td></tr>
+<tr><td><strong>Recommended</strong></td><td>Motors, audio, servos</td><td>Simple LED control</td></tr>
+</tbody></table>
+</div>
+<h3 id="pwm-resolution"><a class="header" href="#pwm-resolution">PWM Resolution</a></h3>
+<p>Resolution is the number of distinct duty cycle levels available:</p>
+<div class="table-wrapper"><table><thead><tr><th>Resolution</th><th>Levels</th><th>Step Size (at 5V)</th></tr></thead><tbody>
+<tr><td>8-bit</td><td>256</td><td>19.5 mV</td></tr>
+<tr><td>10-bit</td><td>1024</td><td>4.88 mV</td></tr>
+<tr><td>12-bit</td><td>4096</td><td>1.22 mV</td></tr>
+<tr><td>16-bit</td><td>65536</td><td>76 μV</td></tr>
+</tbody></table>
+</div>
+<p><strong>Note</strong>: Higher resolution requires lower maximum frequency:</p>
+<pre><code>Max Frequency = Clock Frequency / (2^Resolution)
+</code></pre>
+<h2 id="code-examples"><a class="header" href="#code-examples">Code Examples</a></h2>
+<h3 id="arduino-pwm-hardware"><a class="header" href="#arduino-pwm-hardware">Arduino PWM (Hardware)</a></h3>
+<pre><code class="language-cpp">// Arduino Uno PWM pins: 3, 5, 6, 9, 10, 11
+// Default frequency: ~490 Hz (pins 3,9,10,11) and ~980 Hz (pins 5,6)
+
+const int ledPin = 9;
+const int motorPin = 10;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(motorPin, OUTPUT);
+}
+
+void loop() {
+  // analogWrite uses 8-bit resolution (0-255)
+
+  // LED at 25% brightness
+  analogWrite(ledPin, 64);  // 64/255 = 25%
+  delay(1000);
+
+  // LED at 50% brightness
+  analogWrite(ledPin, 128);  // 128/255 = 50%
+  delay(1000);
+
+  // LED at 75% brightness
+  analogWrite(ledPin, 192);  // 192/255 = 75%
+  delay(1000);
+
+  // LED at 100% brightness
+  analogWrite(ledPin, 255);  // 255/255 = 100%
+  delay(1000);
+}
+
+// Smooth fade effect
+void fadeLED() {
+  // Fade in
+  for (int brightness = 0; brightness &lt;= 255; brightness++) {
+    analogWrite(ledPin, brightness);
+    delay(5);
+  }
+
+  // Fade out
+  for (int brightness = 255; brightness &gt;= 0; brightness--) {
+    analogWrite(ledPin, brightness);
+    delay(5);
+  }
+}
+
+// Change PWM frequency (Arduino Uno)
+void setPWMFrequency(int pin, int divisor) {
+  byte mode;
+
+  if (pin == 5 || pin == 6 || pin == 9 || pin == 10) {
+    switch(divisor) {
+      case 1: mode = 0x01; break;    // 31.25 kHz
+      case 8: mode = 0x02; break;    // 3.9 kHz
+      case 64: mode = 0x03; break;   // 490 Hz (default for 9,10)
+      case 256: mode = 0x04; break;  // 122 Hz
+      case 1024: mode = 0x05; break; // 30 Hz
+      default: return;
+    }
+
+    if (pin == 5 || pin == 6) {
+      TCCR0B = (TCCR0B &amp; 0b11111000) | mode;
+    } else {
+      TCCR1B = (TCCR1B &amp; 0b11111000) | mode;
+    }
+  }
+}
+
+void setup() {
+  pinMode(9, OUTPUT);
+  setPWMFrequency(9, 1);  // Set pin 9 to 31.25 kHz
+}
+</code></pre>
+<h3 id="esp32-pwm-ledc"><a class="header" href="#esp32-pwm-ledc">ESP32 PWM (LEDC)</a></h3>
+<pre><code class="language-cpp">// ESP32 uses LEDC (LED Control) for PWM
+// 16 independent channels, configurable frequency and resolution
+
+const int ledPin = 25;
+const int pwmChannel = 0;      // Channel 0-15
+const int pwmFrequency = 5000; // 5 kHz
+const int pwmResolution = 8;   // 8-bit (0-255)
+
+void setup() {
+  // Configure PWM channel
+  ledcSetup(pwmChannel, pwmFrequency, pwmResolution);
+
+  // Attach pin to PWM channel
+  ledcAttachPin(ledPin, pwmChannel);
+}
+
+void loop() {
+  // Set duty cycle (0-255 for 8-bit)
+  ledcWrite(pwmChannel, 128);  // 50% duty cycle
+  delay(1000);
+
+  ledcWrite(pwmChannel, 64);   // 25% duty cycle
+  delay(1000);
+}
+
+// High resolution PWM (16-bit)
+void setupHighResPWM() {
+  const int pwmChannel = 0;
+  const int pwmFreq = 1000;    // Lower freq for higher resolution
+  const int pwmRes = 16;       // 16-bit (0-65535)
+
+  ledcSetup(pwmChannel, pwmFreq, pwmRes);
+  ledcAttachPin(ledPin, pwmChannel);
+
+  // Set to 50% with 16-bit precision
+  ledcWrite(pwmChannel, 32768);
+}
+
+// Multiple PWM channels for RGB LED
+const int redPin = 25;
+const int greenPin = 26;
+const int bluePin = 27;
+
+void setupRGB() {
+  ledcSetup(0, 5000, 8);  // Red channel
+  ledcSetup(1, 5000, 8);  // Green channel
+  ledcSetup(2, 5000, 8);  // Blue channel
+
+  ledcAttachPin(redPin, 0);
+  ledcAttachPin(greenPin, 1);
+  ledcAttachPin(bluePin, 2);
+}
+
+void setRGBColor(uint8_t r, uint8_t g, uint8_t b) {
+  ledcWrite(0, r);
+  ledcWrite(1, g);
+  ledcWrite(2, b);
+}
+
+void loop() {
+  setRGBColor(255, 0, 0);    // Red
+  delay(1000);
+  setRGBColor(0, 255, 0);    // Green
+  delay(1000);
+  setRGBColor(0, 0, 255);    // Blue
+  delay(1000);
+  setRGBColor(255, 255, 0);  // Yellow
+  delay(1000);
+}
+</code></pre>
+<h3 id="stm32-hal-pwm"><a class="header" href="#stm32-hal-pwm">STM32 HAL PWM</a></h3>
+<pre><code class="language-c">#include "stm32f4xx_hal.h"
+
+TIM_HandleTypeDef htim3;
+
+void PWM_Init(void) {
+    TIM_OC_InitTypeDef sConfigOC = {0};
+
+    // Timer 3 configuration for PWM
+    htim3.Instance = TIM3;
+    htim3.Init.Prescaler = 84 - 1;       // 84 MHz / 84 = 1 MHz
+    htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim3.Init.Period = 1000 - 1;        // 1 MHz / 1000 = 1 kHz PWM
+    htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    HAL_TIM_PWM_Init(&amp;htim3);
+
+    // Configure PWM channel 1
+    sConfigOC.OCMode = TIM_OCMODE_PWM1;
+    sConfigOC.Pulse = 500;               // 50% duty cycle
+    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+    HAL_TIM_PWM_ConfigChannel(&amp;htim3, &amp;sConfigOC, TIM_CHANNEL_1);
+
+    // Start PWM
+    HAL_TIM_PWM_Start(&amp;htim3, TIM_CHANNEL_1);
+}
+
+void PWM_SetDutyCycle(uint16_t dutyCycle) {
+    // dutyCycle: 0-1000 (0-100%)
+    __HAL_TIM_SET_COMPARE(&amp;htim3, TIM_CHANNEL_1, dutyCycle);
+}
+
+void PWM_SetPercent(uint8_t percent) {
+    // percent: 0-100
+    uint16_t pulse = (percent * 1000) / 100;
+    PWM_SetDutyCycle(pulse);
+}
+</code></pre>
+<h3 id="servo-control-with-pwm"><a class="header" href="#servo-control-with-pwm">Servo Control with PWM</a></h3>
+<pre><code class="language-cpp">// Standard servo: 50 Hz (20ms period)
+// Pulse width: 1ms (0°) to 2ms (180°)
+
+const int servoPin = 9;
+
+void setup() {
+  pinMode(servoPin, OUTPUT);
+}
+
+void setServoAngle(int angle) {
+  // Map angle (0-180) to pulse width (1000-2000 μs)
+  int pulseWidth = map(angle, 0, 180, 1000, 2000);
+
+  // Generate 50 Hz PWM signal
+  digitalWrite(servoPin, HIGH);
+  delayMicroseconds(pulseWidth);
+  digitalWrite(servoPin, LOW);
+  delayMicroseconds(20000 - pulseWidth);  // Complete 20ms period
+}
+
+void loop() {
+  setServoAngle(0);      // 0 degrees
+  delay(1000);
+  setServoAngle(90);     // 90 degrees
+  delay(1000);
+  setServoAngle(180);    // 180 degrees
+  delay(1000);
+}
+
+// Using Servo library (easier)
+#include &lt;Servo.h&gt;
+
+Servo myServo;
+
+void setup() {
+  myServo.attach(9);     // Attach servo to pin 9
+}
+
+void loop() {
+  myServo.write(0);      // 0 degrees
+  delay(1000);
+  myServo.write(90);     // 90 degrees
+  delay(1000);
+  myServo.write(180);    // 180 degrees
+  delay(1000);
+}
+</code></pre>
+<h3 id="motor-control-h-bridge"><a class="header" href="#motor-control-h-bridge">Motor Control (H-Bridge)</a></h3>
+<pre><code class="language-cpp">// Control DC motor speed and direction with L298N H-Bridge
+
+const int motorPWM = 9;    // Speed control (PWM)
+const int motorIN1 = 7;    // Direction control
+const int motorIN2 = 8;    // Direction control
+
+void setup() {
+  pinMode(motorPWM, OUTPUT);
+  pinMode(motorIN1, OUTPUT);
+  pinMode(motorIN2, OUTPUT);
+}
+
+void setMotorSpeed(int speed) {
+  // speed: -255 (full reverse) to +255 (full forward)
+
+  if (speed &gt; 0) {
+    // Forward
+    digitalWrite(motorIN1, HIGH);
+    digitalWrite(motorIN2, LOW);
+    analogWrite(motorPWM, speed);
+  } else if (speed &lt; 0) {
+    // Reverse
+    digitalWrite(motorIN1, LOW);
+    digitalWrite(motorIN2, HIGH);
+    analogWrite(motorPWM, -speed);
+  } else {
+    // Stop
+    digitalWrite(motorIN1, LOW);
+    digitalWrite(motorIN2, LOW);
+    analogWrite(motorPWM, 0);
+  }
+}
+
+void loop() {
+  setMotorSpeed(128);    // 50% forward
+  delay(2000);
+  setMotorSpeed(255);    // 100% forward
+  delay(2000);
+  setMotorSpeed(0);      // Stop
+  delay(1000);
+  setMotorSpeed(-128);   // 50% reverse
+  delay(2000);
+}
+</code></pre>
+<h2 id="common-applications"><a class="header" href="#common-applications">Common Applications</a></h2>
+<h3 id="1-led-dimming"><a class="header" href="#1-led-dimming">1. LED Dimming</a></h3>
+<pre><code class="language-cpp">// Smooth breathing effect
+void breathingLED(int pin) {
+  const int maxBrightness = 255;
+  const int minBrightness = 0;
+  const int step = 5;
+  const int delayTime = 30;
+
+  // Breathe in
+  for (int brightness = minBrightness; brightness &lt;= maxBrightness; brightness += step) {
+    analogWrite(pin, brightness);
+    delay(delayTime);
+  }
+
+  // Breathe out
+  for (int brightness = maxBrightness; brightness &gt;= minBrightness; brightness -= step) {
+    analogWrite(pin, brightness);
+    delay(delayTime);
+  }
+}
+</code></pre>
+<h3 id="2-rgb-color-mixing"><a class="header" href="#2-rgb-color-mixing">2. RGB Color Mixing</a></h3>
+<pre><code class="language-cpp">void setColorHSV(float h, float s, float v) {
+  // Convert HSV to RGB
+  float c = v * s;
+  float x = c * (1 - abs(fmod(h / 60.0, 2) - 1));
+  float m = v - c;
+
+  float r, g, b;
+  if (h &lt; 60) { r = c; g = x; b = 0; }
+  else if (h &lt; 120) { r = x; g = c; b = 0; }
+  else if (h &lt; 180) { r = 0; g = c; b = x; }
+  else if (h &lt; 240) { r = 0; g = x; b = c; }
+  else if (h &lt; 300) { r = x; g = 0; b = c; }
+  else { r = c; g = 0; b = x; }
+
+  analogWrite(redPin, (r + m) * 255);
+  analogWrite(greenPin, (g + m) * 255);
+  analogWrite(bluePin, (b + m) * 255);
+}
+
+// Rainbow effect
+void rainbow() {
+  for (int hue = 0; hue &lt; 360; hue++) {
+    setColorHSV(hue, 1.0, 1.0);
+    delay(10);
+  }
+}
+</code></pre>
+<h3 id="3-speakerbuzzer-tone-generation"><a class="header" href="#3-speakerbuzzer-tone-generation">3. Speaker/Buzzer Tone Generation</a></h3>
+<pre><code class="language-cpp">void playTone(int pin, int frequency, int duration) {
+  int period = 1000000 / frequency;  // Period in microseconds
+  int halfPeriod = period / 2;
+
+  long cycles = ((long)frequency * duration) / 1000;
+
+  for (long i = 0; i &lt; cycles; i++) {
+    digitalWrite(pin, HIGH);
+    delayMicroseconds(halfPeriod);
+    digitalWrite(pin, LOW);
+    delayMicroseconds(halfPeriod);
+  }
+}
+
+void playMelody() {
+  playTone(buzzerPin, 262, 500);  // C4
+  playTone(buzzerPin, 294, 500);  // D4
+  playTone(buzzerPin, 330, 500);  // E4
+  playTone(buzzerPin, 349, 500);  // F4
+}
+
+// Using tone() function (easier)
+void playNote(int frequency) {
+  tone(buzzerPin, frequency);
+  delay(500);
+  noTone(buzzerPin);
+}
+</code></pre>
+<h3 id="4-fan-speed-control"><a class="header" href="#4-fan-speed-control">4. Fan Speed Control</a></h3>
+<pre><code class="language-cpp">int targetTemp = 25;    // Target temperature
+int currentTemp = 30;   // Read from sensor
+
+void controlFan() {
+  int tempDiff = currentTemp - targetTemp;
+
+  int fanSpeed;
+  if (tempDiff &lt;= 0) {
+    fanSpeed = 0;  // Too cold, fan off
+  } else if (tempDiff &gt;= 10) {
+    fanSpeed = 255;  // Very hot, max speed
+  } else {
+    // Proportional control
+    fanSpeed = map(tempDiff, 0, 10, 50, 255);
+  }
+
+  analogWrite(fanPin, fanSpeed);
+}
+</code></pre>
+<h3 id="5-power-supply-buck-converter"><a class="header" href="#5-power-supply-buck-converter">5. Power Supply (Buck Converter)</a></h3>
+<p>PWM is used in switching power supplies to efficiently convert voltage:</p>
+<ul>
+<li>High frequency (20-100 kHz) minimizes inductor size</li>
+<li>Duty cycle controls output voltage</li>
+<li>Feedback loop maintains regulation</li>
+</ul>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-choose-appropriate-frequency"><a class="header" href="#1-choose-appropriate-frequency">1. Choose Appropriate Frequency</a></h3>
+<pre><code class="language-cpp">// LED dimming: Use higher frequency to avoid flicker
+// Human eye perceives flicker below ~60 Hz
+setPWMFrequency(ledPin, 1);  // 31 kHz - no visible flicker
+
+// Motor control: Balance between smoothness and efficiency
+// Too high: Increased switching losses
+// Too low: Audible noise, torque ripple
+// Optimal: 10-25 kHz
+
+// Audio: Must be above hearing range
+// Humans hear up to ~20 kHz
+// Use 40+ kHz for audio PWM
+</code></pre>
+<h3 id="2-filter-pwm-for-analog-output"><a class="header" href="#2-filter-pwm-for-analog-output">2. Filter PWM for Analog Output</a></h3>
+<pre><code>PWM Pin ─── R ───┬─── Analog Output
+                 │
+                 C
+                 │
+                GND
+
+Cutoff Frequency = 1 / (2π × R × C)
+
+Example: R=1kΩ, C=10μF
+fc = 1 / (2π × 1000 × 0.00001) ≈ 16 Hz
+</code></pre>
+<h3 id="3-protect-inductive-loads"><a class="header" href="#3-protect-inductive-loads">3. Protect Inductive Loads</a></h3>
+<pre><code class="language-cpp">// Motors and solenoids are inductive
+// Add flyback diode across load!
+
+//        Motor
+//    ┌────┴────┐
+// PWM│         │GND
+//    │   ▼─    │
+//    └─────────┘
+//    Flyback Diode
+</code></pre>
+<h3 id="4-avoid-pwm-on-critical-pins"><a class="header" href="#4-avoid-pwm-on-critical-pins">4. Avoid PWM on Critical Pins</a></h3>
+<pre><code class="language-cpp">// Some Arduino pins share timers
+// Changing frequency on one affects others!
+
+// Pins 5 &amp; 6 share Timer 0 (also used by millis/delay!)
+// Pins 9 &amp; 10 share Timer 1
+// Pins 3 &amp; 11 share Timer 2
+
+// Changing Timer 0 frequency breaks millis() and delay()!
+</code></pre>
+<h2 id="common-issues-and-debugging"><a class="header" href="#common-issues-and-debugging">Common Issues and Debugging</a></h2>
+<h3 id="problem-led-flickering"><a class="header" href="#problem-led-flickering">Problem: LED Flickering</a></h3>
+<p><strong>Causes</strong>: PWM frequency too low
+<strong>Solution</strong>: Increase frequency above 60 Hz (ideally 500 Hz+)</p>
+<h3 id="problem-motor-whiningbuzzing"><a class="header" href="#problem-motor-whiningbuzzing">Problem: Motor Whining/Buzzing</a></h3>
+<p><strong>Causes</strong>: PWM frequency in audible range
+<strong>Solution</strong>: Increase frequency to 20+ kHz</p>
+<h3 id="problem-servo-jittering"><a class="header" href="#problem-servo-jittering">Problem: Servo Jittering</a></h3>
+<p><strong>Causes</strong>: Incorrect pulse width or timing
+<strong>Solution</strong>: Use dedicated Servo library, ensure 50 Hz signal</p>
+<h3 id="problem-pwm-not-working-after-changing-frequency"><a class="header" href="#problem-pwm-not-working-after-changing-frequency">Problem: PWM Not Working After Changing Frequency</a></h3>
+<p><strong>Causes</strong>: Modified Timer 0 which breaks delay() and millis()
+<strong>Solution</strong>: Use different timer, or use external library</p>
+<h2 id="eli10-explain-like-im-10"><a class="header" href="#eli10-explain-like-im-10">ELI10 (Explain Like I'm 10)</a></h2>
+<p>Imagine you have a light switch that you can flick on and off really, really fast - so fast that your eyes can't see it blinking!</p>
+<p><strong>PWM is like that super-fast blinking:</strong></p>
+<ul>
+<li>If the light is ON for half the time and OFF for half the time, it looks 50% bright</li>
+<li>If it's ON for most of the time and OFF for a tiny bit, it looks almost fully bright</li>
+<li>If it's ON for only a tiny bit and OFF most of the time, it looks dim</li>
+</ul>
+<p><strong>This works because</strong>:</p>
+<ul>
+<li>Your eyes can't see things blinking faster than about 60 times per second</li>
+<li>So when we blink the light 500 or 1000 times per second, your brain sees a steady dimmed light!</li>
+</ul>
+<p><strong>The cool part?</strong></p>
+<ul>
+<li>We're not actually reducing the voltage (which wastes energy as heat)</li>
+<li>We're just turning it on and off really fast (very efficient!)</li>
+<li>It's like running at full speed for short bursts vs. walking slowly all the time</li>
+</ul>
+<p><strong>Duty cycle</strong> is the percentage of time it's ON:</p>
+<ul>
+<li>100% = always on (full brightness)</li>
+<li>50% = on half the time (half brightness)</li>
+<li>0% = always off (no light)</li>
+</ul>
+<p>We use this same trick for controlling motor speeds, speakers, and lots of other things!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://docs.arduino.cc/learn/microcontrollers/analog-output">Arduino PWM Guide</a></li>
+<li><a href="https://www.arduino.cc/en/Tutorial/SecretsOfArduinoPWM">Secrets of Arduino PWM</a></li>
+<li><a href="https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/ledc.html">ESP32 LEDC Documentation</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Pulse-width_modulation">PWM Wikipedia</a></li>
+<li><a href="https://www.ti.com/lit/an/slva505/slva505.pdf">Motor Control with PWM</a></li>
+</ul>
 
                     </main>
 
@@ -223,6 +783,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

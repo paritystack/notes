@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -154,7 +177,89 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="hash-tables"><a class="header" href="#hash-tables">Hash Tables</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A hash table (hash map) stores key-value pairs with O(1) average-case lookup, insertion, and deletion. It uses a hash function to map keys to array indices.</p>
+<h2 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h2>
+<h3 id="hash-function"><a class="header" href="#hash-function">Hash Function</a></h3>
+<p>Converts key to index:</p>
+<pre><code>hash("name") = 5
+hash(123) = 2
+hash("email") = 5  (collision!)
+</code></pre>
+<h3 id="collision-resolution"><a class="header" href="#collision-resolution">Collision Resolution</a></h3>
+<p><strong>Chaining</strong>: Store multiple values at same index</p>
+<pre><code>Index 0: None
+Index 1: None
+Index 2: 123 -&gt; "John"
+Index 3: 456 -&gt; "Jane" -&gt; 789 -&gt; "Jack"
+</code></pre>
+<p><strong>Open Addressing</strong>: Find next empty slot</p>
+<pre><code>hash("a") = 5 (occupied)
+Try 6, 7, 8... until empty
+</code></pre>
+<h2 id="operations"><a class="header" href="#operations">Operations</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Average</th><th>Worst</th></tr></thead><tbody>
+<tr><td><strong>Get</strong></td><td>O(1)</td><td>O(n)</td></tr>
+<tr><td><strong>Set</strong></td><td>O(1)</td><td>O(n)</td></tr>
+<tr><td><strong>Delete</strong></td><td>O(1)</td><td>O(n)</td></tr>
+</tbody></table>
+</div>
+<h2 id="python-implementation"><a class="header" href="#python-implementation">Python Implementation</a></h2>
+<pre><code class="language-python"># Built-in dict
+d = {"key": "value"}
+d.get("key")  # O(1)
+d["key"] = "new_value"
+del d["key"]
+
+# Custom
+class HashTable:
+    def __init__(self, size=10):
+        self.table = [[] for _ in range(size)]
+
+    def set(self, key, value):
+        index = hash(key) % len(self.table)
+        for i, (k, v) in enumerate(self.table[index]):
+            if k == key:
+                self.table[index][i] = (key, value)
+                return
+        self.table[index].append((key, value))
+
+    def get(self, key):
+        index = hash(key) % len(self.table)
+        for k, v in self.table[index]:
+            if k == key:
+                return v
+        return None
+</code></pre>
+<h2 id="common-problems"><a class="header" href="#common-problems">Common Problems</a></h2>
+<h3 id="two-sum"><a class="header" href="#two-sum">Two Sum</a></h3>
+<pre><code class="language-python">def two_sum(arr, target):
+    seen = {}
+    for num in arr:
+        if target - num in seen:
+            return [seen[target - num], arr.index(num)]
+        seen[num] = arr.index(num)
+    return []
+</code></pre>
+<h3 id="duplicate-detection"><a class="header" href="#duplicate-detection">Duplicate Detection</a></h3>
+<pre><code class="language-python">def has_duplicates(arr):
+    return len(arr) != len(set(arr))
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>Think of hash tables like library catalogs:</p>
+<ul>
+<li><strong>Hash function</strong> = catalog system (tells you which shelf)</li>
+<li><strong>Index</strong> = shelf number</li>
+<li><strong>Value</strong> = book</li>
+</ul>
+<p>Instead of searching every shelf, the system instantly tells you which one!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://leetcode.com/tag/hash-table/">LeetCode Hash Table</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Hash_table">Hash Table Wikipedia</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -201,6 +306,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

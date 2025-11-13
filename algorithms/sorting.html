@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -155,28 +178,146 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="sorting-algorithms"><a class="header" href="#sorting-algorithms">Sorting Algorithms</a></h1>
-<h2 id="bubble-sort"><a class="header" href="#bubble-sort">Bubble Sort</a></h2>
-<p>Bubble Sort is a simple sorting algorithm that repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order. The pass through the list is repeated until the list is sorted.</p>
-<h3 id="example-implementation-in-python"><a class="header" href="#example-implementation-in-python">Example Implementation in Python</a></h3>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Sorting arranges elements in order. Different algorithms have different trade-offs in speed, memory, and stability.</p>
+<h2 id="common-algorithms"><a class="header" href="#common-algorithms">Common Algorithms</a></h2>
+<h3 id="bubble-sort"><a class="header" href="#bubble-sort">Bubble Sort</a></h3>
+<p><strong>Time</strong>: O(n²) | <strong>Space</strong>: O(1)</p>
 <pre><code class="language-python">def bubble_sort(arr):
     n = len(arr)
-    # Traverse through all array elements
     for i in range(n):
-        # Last i elements are already in place
-        for j in range(0, n-i-1):
-            # Traverse the array from 0 to n-i-1
-            # Swap if the element found is greater
-            # than the next element
-            if arr[j] &gt; arr[j+1]:
-                arr[j], arr[j+1] = arr[j+1], arr[j]
+        for j in range(0, n - i - 1):
+            if arr[j] &gt; arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
     return arr
-
-# Example usage
-if __name__ == "__main__":
-    sample_array = [64, 34, 25, 12, 22, 11, 90]
-    sorted_array = bubble_sort(sample_array)
-    print("Sorted array is:", sorted_array)
 </code></pre>
+<h3 id="selection-sort"><a class="header" href="#selection-sort">Selection Sort</a></h3>
+<p><strong>Time</strong>: O(n²) | <strong>Space</strong>: O(1)</p>
+<pre><code class="language-python">def selection_sort(arr):
+    for i in range(len(arr)):
+        min_idx = i
+        for j in range(i + 1, len(arr)):
+            if arr[j] &lt; arr[min_idx]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr
+</code></pre>
+<h3 id="insertion-sort"><a class="header" href="#insertion-sort">Insertion Sort</a></h3>
+<p><strong>Time</strong>: O(n²) | <strong>Space</strong>: O(1) | <strong>Best</strong>: O(n)</p>
+<pre><code class="language-python">def insertion_sort(arr):
+    for i in range(1, len(arr)):
+        key = arr[i]
+        j = i - 1
+        while j &gt;= 0 and arr[j] &gt; key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+    return arr
+</code></pre>
+<h3 id="merge-sort"><a class="header" href="#merge-sort">Merge Sort</a></h3>
+<p><strong>Time</strong>: O(n log n) | <strong>Space</strong>: O(n) | <strong>Stable</strong>: ✓</p>
+<pre><code class="language-python">def merge_sort(arr):
+    if len(arr) &lt;= 1:
+        return arr
+
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+
+    return merge(left, right)
+
+def merge(left, right):
+    result = []
+    i = j = 0
+    while i &lt; len(left) and j &lt; len(right):
+        if left[i] &lt; right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result
+</code></pre>
+<h3 id="quick-sort"><a class="header" href="#quick-sort">Quick Sort</a></h3>
+<p><strong>Time</strong>: O(n log n) avg, O(n²) worst | <strong>Space</strong>: O(log n)</p>
+<pre><code class="language-python">def quick_sort(arr):
+    if len(arr) &lt;= 1:
+        return arr
+
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x &lt; pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x &gt; pivot]
+
+    return quick_sort(left) + middle + quick_sort(right)
+</code></pre>
+<h3 id="heap-sort"><a class="header" href="#heap-sort">Heap Sort</a></h3>
+<p><strong>Time</strong>: O(n log n) | <strong>Space</strong>: O(1)</p>
+<pre><code class="language-python">def heap_sort(arr):
+    def heapify(arr, n, i):
+        largest = i
+        left = 2 * i + 1
+        right = 2 * i + 2
+
+        if left &lt; n and arr[left] &gt; arr[largest]:
+            largest = left
+        if right &lt; n and arr[right] &gt; arr[largest]:
+            largest = right
+
+        if largest != i:
+            arr[i], arr[largest] = arr[largest], arr[i]
+            heapify(arr, n, largest)
+
+    n = len(arr)
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+
+    for i in range(n - 1, 0, -1):
+        arr[0], arr[i] = arr[i], arr[0]
+        heapify(arr, i, 0)
+
+    return arr
+</code></pre>
+<h2 id="comparison"><a class="header" href="#comparison">Comparison</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable</th></tr></thead><tbody>
+<tr><td><strong>Bubble</strong></td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>✓</td></tr>
+<tr><td><strong>Selection</strong></td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>✗</td></tr>
+<tr><td><strong>Insertion</strong></td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>✓</td></tr>
+<tr><td><strong>Merge</strong></td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>✓</td></tr>
+<tr><td><strong>Quick</strong></td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>✗</td></tr>
+<tr><td><strong>Heap</strong></td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(1)</td><td>✗</td></tr>
+</tbody></table>
+</div>
+<h2 id="when-to-use"><a class="header" href="#when-to-use">When to Use</a></h2>
+<ul>
+<li><strong>Insertion Sort</strong>: Small arrays, nearly sorted</li>
+<li><strong>Merge Sort</strong>: Need stability, external sorting</li>
+<li><strong>Quick Sort</strong>: General purpose, good cache</li>
+<li><strong>Heap Sort</strong>: Guaranteed O(n log n), no extra space</li>
+</ul>
+<h2 id="python-built-in"><a class="header" href="#python-built-in">Python Built-in</a></h2>
+<pre><code class="language-python"># Best for most cases
+arr.sort()  # In-place, O(n log n)
+sorted(arr)  # Returns new list
+
+# Custom comparator
+arr.sort(key=lambda x: x['age'])
+</code></pre>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>Different sorting strategies:</p>
+<ul>
+<li><strong>Bubble</strong>: Compare neighbors (slow)</li>
+<li><strong>Quick</strong>: Pick pivot, divide and conquer (fast)</li>
+<li><strong>Merge</strong>: Split in half, merge back (reliable)</li>
+</ul>
+<p>Use built-in sorts unless learning!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://www.sortvisualizer.com/">Sorting Algorithms Visualized</a></li>
+<li><a href="https://www.bigocheatsheet.com/">Big-O Cheatsheet</a></li>
+</ul>
 
                     </main>
 
@@ -224,6 +365,7 @@ if __name__ == "__main__":
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

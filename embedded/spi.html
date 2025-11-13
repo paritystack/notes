@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -154,7 +177,288 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="spi-serial-peripheral-interface"><a class="header" href="#spi-serial-peripheral-interface">SPI (Serial Peripheral Interface)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>SPI (Serial Peripheral Interface) is a synchronous serial communication protocol used for short-distance communication between microcontrollers and peripheral devices like sensors, displays, SD cards, and flash memory. Developed by Motorola in the 1980s, SPI is known for its high-speed, full-duplex communication capabilities.</p>
+<h2 id="key-features"><a class="header" href="#key-features">Key Features</a></h2>
+<ul>
+<li><strong>Full-Duplex Communication</strong>: SPI can send and receive data simultaneously on separate lines</li>
+<li><strong>High Speed</strong>: Typically operates at speeds from 1 MHz to over 50 MHz</li>
+<li><strong>Master-Slave Architecture</strong>: Always has one master device controlling one or more slave devices</li>
+<li><strong>Four-Wire Interface</strong>: Uses separate lines for clock, data in, data out, and chip select</li>
+<li><strong>No Addressing</strong>: Slave selection is done via dedicated chip select lines</li>
+</ul>
+<h2 id="signal-lines"><a class="header" href="#signal-lines">Signal Lines</a></h2>
+<p>SPI uses four main signal lines:</p>
+<div class="table-wrapper"><table><thead><tr><th>Signal</th><th>Alternative Names</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>SCLK</strong></td><td>SCK, CLK</td><td>Serial Clock - Generated by master to synchronize data transfer</td></tr>
+<tr><td><strong>MOSI</strong></td><td>SDO, DO, SIMO</td><td>Master Out Slave In - Data from master to slave</td></tr>
+<tr><td><strong>MISO</strong></td><td>SDI, DI, SOMI</td><td>Master In Slave Out - Data from slave to master</td></tr>
+<tr><td><strong>SS</strong></td><td>CS, NSS</td><td>Slave Select/Chip Select - Selects which slave is active</td></tr>
+</tbody></table>
+</div>
+<h3 id="why-four-wires"><a class="header" href="#why-four-wires">Why Four Wires?</a></h3>
+<p>Unlike I2C's two-wire design, SPI uses separate data lines for sending and receiving, enabling full-duplex communication. Each slave device needs its own chip select line, which can increase pin count when multiple slaves are used.</p>
+<h2 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h2>
+<h3 id="basic-communication-flow"><a class="header" href="#basic-communication-flow">Basic Communication Flow</a></h3>
+<ol>
+<li><strong>Master selects slave</strong>: Pulls the slave's CS line LOW (active)</li>
+<li><strong>Master generates clock</strong>: Starts toggling the SCLK line</li>
+<li><strong>Data exchange</strong>: On each clock cycle:
+<ul>
+<li>Master shifts data out on MOSI</li>
+<li>Slave shifts data out on MISO</li>
+<li>Both shift data in simultaneously</li>
+</ul>
+</li>
+<li><strong>Master deselects slave</strong>: Pulls CS line HIGH (inactive)</li>
+</ol>
+<h3 id="clock-polarity-and-phase-cpolcpha"><a class="header" href="#clock-polarity-and-phase-cpolcpha">Clock Polarity and Phase (CPOL/CPHA)</a></h3>
+<p>SPI has four modes determined by two settings:</p>
+<ul>
+<li>
+<p><strong>CPOL (Clock Polarity)</strong>: Determines the idle state of the clock</p>
+<ul>
+<li>CPOL = 0: Clock idles LOW</li>
+<li>CPOL = 1: Clock idles HIGH</li>
+</ul>
+</li>
+<li>
+<p><strong>CPHA (Clock Phase)</strong>: Determines when data is sampled</p>
+<ul>
+<li>CPHA = 0: Data sampled on leading edge, shifted on trailing edge</li>
+<li>CPHA = 1: Data sampled on trailing edge, shifted on leading edge</li>
+</ul>
+</li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th>Mode</th><th>CPOL</th><th>CPHA</th><th>Clock Idle</th><th>Data Sampled</th></tr></thead><tbody>
+<tr><td>0</td><td>0</td><td>0</td><td>LOW</td><td>Leading (rising) edge</td></tr>
+<tr><td>1</td><td>0</td><td>1</td><td>LOW</td><td>Trailing (falling) edge</td></tr>
+<tr><td>2</td><td>1</td><td>0</td><td>HIGH</td><td>Leading (falling) edge</td></tr>
+<tr><td>3</td><td>1</td><td>1</td><td>HIGH</td><td>Trailing (rising) edge</td></tr>
+</tbody></table>
+</div>
+<p><strong>Important</strong>: Master and slave must use the same mode for successful communication!</p>
+<h2 id="code-examples"><a class="header" href="#code-examples">Code Examples</a></h2>
+<h3 id="arduino-spi-communication"><a class="header" href="#arduino-spi-communication">Arduino SPI Communication</a></h3>
+<pre><code class="language-cpp">#include &lt;SPI.h&gt;
+
+const int chipSelectPin = 10;
+
+void setup() {
+  // Initialize SPI pins
+  pinMode(chipSelectPin, OUTPUT);
+  digitalWrite(chipSelectPin, HIGH);  // Deselect slave initially
+
+  // Initialize SPI library
+  SPI.begin();
+
+  // Configure SPI settings
+  // Max speed: 4 MHz, MSB first, Mode 0
+  SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
+}
+
+void loop() {
+  // Select slave device
+  digitalWrite(chipSelectPin, LOW);
+
+  // Send a byte and receive response simultaneously
+  byte command = 0x3A;  // Example command
+  byte response = SPI.transfer(command);
+
+  // Send multiple bytes
+  byte dataToSend[] = {0x01, 0x02, 0x03};
+  for (int i = 0; i &lt; 3; i++) {
+    byte receivedByte = SPI.transfer(dataToSend[i]);
+  }
+
+  // Deselect slave
+  digitalWrite(chipSelectPin, HIGH);
+
+  delay(1000);
+}
+</code></pre>
+<h3 id="stm32-hal-spi-example"><a class="header" href="#stm32-hal-spi-example">STM32 HAL SPI Example</a></h3>
+<pre><code class="language-c">#include "stm32f4xx_hal.h"
+
+SPI_HandleTypeDef hspi1;
+
+void SPI_Init(void) {
+    hspi1.Instance = SPI1;
+    hspi1.Init.Mode = SPI_MODE_MASTER;
+    hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+    hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;    // CPOL = 0
+    hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;        // CPHA = 0
+    hspi1.Init.NSS = SPI_NSS_SOFT;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    HAL_SPI_Init(&amp;hspi1);
+}
+
+void SPI_Write_Read(uint8_t *txData, uint8_t *rxData, uint16_t size) {
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);  // CS LOW
+    HAL_SPI_TransmitReceive(&amp;hspi1, txData, rxData, size, 100);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);    // CS HIGH
+}
+</code></pre>
+<h3 id="esp32-spi-example"><a class="header" href="#esp32-spi-example">ESP32 SPI Example</a></h3>
+<pre><code class="language-cpp">#include &lt;SPI.h&gt;
+
+SPIClass spi(HSPI);  // Use HSPI bus
+const int CS_PIN = 15;
+
+void setup() {
+  spi.begin(14, 12, 13, CS_PIN);  // SCLK, MISO, MOSI, SS
+  pinMode(CS_PIN, OUTPUT);
+  digitalWrite(CS_PIN, HIGH);
+}
+
+uint8_t readRegister(uint8_t reg) {
+  digitalWrite(CS_PIN, LOW);
+  spi.transfer(reg | 0x80);  // Read bit set
+  uint8_t value = spi.transfer(0x00);  // Dummy byte to read
+  digitalWrite(CS_PIN, HIGH);
+  return value;
+}
+
+void writeRegister(uint8_t reg, uint8_t value) {
+  digitalWrite(CS_PIN, LOW);
+  spi.transfer(reg &amp; 0x7F);  // Write bit clear
+  spi.transfer(value);
+  digitalWrite(CS_PIN, HIGH);
+}
+</code></pre>
+<h2 id="common-use-cases"><a class="header" href="#common-use-cases">Common Use Cases</a></h2>
+<h3 id="1-sd-card-communication"><a class="header" href="#1-sd-card-communication">1. SD Card Communication</a></h3>
+<ul>
+<li>High-speed file I/O</li>
+<li>Supports both SPI and SDIO modes</li>
+<li>Ideal for data logging applications</li>
+</ul>
+<h3 id="2-display-interfaces"><a class="header" href="#2-display-interfaces">2. Display Interfaces</a></h3>
+<ul>
+<li>TFT LCD displays (ILI9341, ST7735)</li>
+<li>OLED displays</li>
+<li>E-ink displays</li>
+<li>Fast refresh rates for graphics</li>
+</ul>
+<h3 id="3-sensor-communication"><a class="header" href="#3-sensor-communication">3. Sensor Communication</a></h3>
+<ul>
+<li>Digital accelerometers (ADXL345)</li>
+<li>Gyroscopes (MPU6050 in SPI mode)</li>
+<li>Pressure sensors (BMP280)</li>
+</ul>
+<h3 id="4-memory-devices"><a class="header" href="#4-memory-devices">4. Memory Devices</a></h3>
+<ul>
+<li>Flash memory (W25Q128)</li>
+<li>EEPROM chips</li>
+<li>FRAM (Ferroelectric RAM)</li>
+</ul>
+<h3 id="5-wireless-modules"><a class="header" href="#5-wireless-modules">5. Wireless Modules</a></h3>
+<ul>
+<li>NRF24L01+ (2.4GHz transceiver)</li>
+<li>LoRa modules (SX1278)</li>
+<li>WiFi modules</li>
+</ul>
+<h2 id="spi-vs-i2c-comparison"><a class="header" href="#spi-vs-i2c-comparison">SPI vs I2C Comparison</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>SPI</th><th>I2C</th></tr></thead><tbody>
+<tr><td><strong>Wires</strong></td><td>4 (+ 1 per additional slave)</td><td>2</td></tr>
+<tr><td><strong>Speed</strong></td><td>Up to 50+ MHz</td><td>Up to 3.4 MHz</td></tr>
+<tr><td><strong>Duplex</strong></td><td>Full-duplex</td><td>Half-duplex</td></tr>
+<tr><td><strong>Addressing</strong></td><td>Hardware (CS pins)</td><td>Software (7/10-bit addresses)</td></tr>
+<tr><td><strong>Distance</strong></td><td>Short (&lt; 1 meter)</td><td>Short (&lt; 1 meter)</td></tr>
+<tr><td><strong>Complexity</strong></td><td>Simple protocol</td><td>More complex protocol</td></tr>
+<tr><td><strong>Multi-master</strong></td><td>No (typically)</td><td>Yes</td></tr>
+<tr><td><strong>Pins required</strong></td><td>Increases with slaves</td><td>Constant</td></tr>
+</tbody></table>
+</div>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-wire-length-and-speed"><a class="header" href="#1-wire-length-and-speed">1. Wire Length and Speed</a></h3>
+<ul>
+<li>Keep wires short (&lt; 30cm) for high speeds</li>
+<li>Reduce speed for longer connections</li>
+<li>Use twisted pairs for MOSI/MISO on longer runs</li>
+</ul>
+<h3 id="2-pull-up-resistors"><a class="header" href="#2-pull-up-resistors">2. Pull-up Resistors</a></h3>
+<ul>
+<li>MISO should have a pull-up resistor (~10k ohm)</li>
+<li>Prevents floating when no slave is selected</li>
+<li>Some slave devices have built-in pull-ups</li>
+</ul>
+<h3 id="3-chip-select-management"><a class="header" href="#3-chip-select-management">3. Chip Select Management</a></h3>
+<pre><code class="language-cpp">// Always wrap transfers in CS control
+digitalWrite(CS, LOW);
+// ... SPI operations ...
+digitalWrite(CS, HIGH);
+
+// For critical timing, disable interrupts
+noInterrupts();
+digitalWrite(CS, LOW);
+SPI.transfer(data);
+digitalWrite(CS, HIGH);
+interrupts();
+</code></pre>
+<h3 id="4-power-considerations"><a class="header" href="#4-power-considerations">4. Power Considerations</a></h3>
+<ul>
+<li>Ensure all devices share a common ground</li>
+<li>Check voltage levels (3.3V vs 5V)</li>
+<li>Use level shifters if needed</li>
+</ul>
+<h3 id="5-multiple-slave-devices"><a class="header" href="#5-multiple-slave-devices">5. Multiple Slave Devices</a></h3>
+<pre><code class="language-cpp">// Daisy chain method (saves CS pins)
+// Data flows through all slaves
+digitalWrite(CS_SHARED, LOW);
+SPI.transfer(dataForSlave1);
+SPI.transfer(dataForSlave2);
+SPI.transfer(dataForSlave3);
+digitalWrite(CS_SHARED, HIGH);
+
+// Individual CS method (parallel addressing)
+digitalWrite(CS_SLAVE1, LOW);
+SPI.transfer(dataForSlave1);
+digitalWrite(CS_SLAVE1, HIGH);
+</code></pre>
+<h2 id="common-issues-and-debugging"><a class="header" href="#common-issues-and-debugging">Common Issues and Debugging</a></h2>
+<h3 id="problem-no-data-received"><a class="header" href="#problem-no-data-received">Problem: No Data Received</a></h3>
+<ul>
+<li>Check CPOL/CPHA mode matches between master and slave</li>
+<li>Verify wiring (MOSI to MOSI, MISO to MISO)</li>
+<li>Ensure CS is properly toggled</li>
+<li>Check clock frequency is within slave's range</li>
+</ul>
+<h3 id="problem-corrupted-data"><a class="header" href="#problem-corrupted-data">Problem: Corrupted Data</a></h3>
+<ul>
+<li>Reduce SPI clock speed</li>
+<li>Check for loose connections</li>
+<li>Add small capacitors (10nF) near slave devices</li>
+<li>Ensure proper ground connections</li>
+</ul>
+<h3 id="problem-multiple-slaves-interfering"><a class="header" href="#problem-multiple-slaves-interfering">Problem: Multiple Slaves Interfering</a></h3>
+<ul>
+<li>Verify only one CS is active at a time</li>
+<li>Check for proper tri-state behavior on MISO</li>
+<li>Add pull-up on MISO line</li>
+</ul>
+<h2 id="eli10-explain-like-im-10"><a class="header" href="#eli10-explain-like-im-10">ELI10 (Explain Like I'm 10)</a></h2>
+<p>Imagine you're playing a game with your friend where you both pass notes at the same time:</p>
+<ul>
+<li><strong>The master</strong> is like the teacher who decides when to pass notes (controls the clock)</li>
+<li><strong>MOSI</strong> is the note you pass to your friend</li>
+<li><strong>MISO</strong> is the note your friend passes back to you</li>
+<li><strong>Chip Select</strong> is like tapping your friend's shoulder to say "Hey, I'm talking to you!"</li>
+<li><strong>Clock</strong> is like a metronome that keeps everyone in sync - you both write and read at the same time</li>
+</ul>
+<p>The cool part? You can both write notes to each other at the exact same time! That's why SPI is called "full-duplex" - it's like talking and listening simultaneously.</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Serial_Peripheral_Interface">SPI Wikipedia</a> - Detailed technical overview</li>
+<li><a href="https://www.analog.com/en/analog-dialogue/articles/introduction-to-spi-interface.html">Analog Devices SPI Tutorial</a></li>
+<li><a href="https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi">SparkFun SPI Tutorial</a></li>
+<li><a href="https://www.arduino.cc/en/reference/SPI">Arduino SPI Library Reference</a></li>
+<li>Application notes from your microcontroller manufacturer</li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -201,6 +505,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

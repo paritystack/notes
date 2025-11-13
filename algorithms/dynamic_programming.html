@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -155,9 +178,104 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="dynamic-programming"><a class="header" href="#dynamic-programming">Dynamic Programming</a></h1>
-<p>Dynamic programming is a powerful algorithmic technique used to solve complex problems by breaking them down into simpler subproblems. It is particularly effective for optimization problems where the solution can be constructed from solutions to smaller subproblems.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Dynamic Programming (DP) solves complex problems by breaking them into simpler subproblems, solving each once, and storing results to avoid recomputation. Essential for optimization problems.</p>
 <h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<p><strong>Optimal Substructure</strong>: Optimal solution built from optimal solutions of subproblems</p>
+<p><strong>Overlapping Subproblems</strong>: Same subproblem computed multiple times</p>
+<h2 id="approaches"><a class="header" href="#approaches">Approaches</a></h2>
+<h3 id="memoization-top-down"><a class="header" href="#memoization-top-down">Memoization (Top-Down)</a></h3>
+<pre><code class="language-python">def fib(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n &lt;= 1:
+        return n
+    memo[n] = fib(n-1, memo) + fib(n-2, memo)
+    return memo[n]
+</code></pre>
+<h3 id="tabulation-bottom-up"><a class="header" href="#tabulation-bottom-up">Tabulation (Bottom-Up)</a></h3>
+<pre><code class="language-python">def fib(n):
+    dp = [0] * (n + 1)
+    dp[1] = 1
+    for i in range(2, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+    return dp[n]
+</code></pre>
+<h2 id="classic-problems"><a class="header" href="#classic-problems">Classic Problems</a></h2>
+<h3 id="coin-change"><a class="header" href="#coin-change">Coin Change</a></h3>
+<pre><code class="language-python">def coin_change(coins, amount):
+    dp = [float('inf')] * (amount + 1)
+    dp[0] = 0
+    for coin in coins:
+        for i in range(coin, amount + 1):
+            dp[i] = min(dp[i], dp[i - coin] + 1)
+    return dp[amount] if dp[amount] != float('inf') else -1
+</code></pre>
+<h3 id="knapsack"><a class="header" href="#knapsack">Knapsack</a></h3>
+<pre><code class="language-python">def knapsack(weights, values, capacity):
+    dp = [[0] * (capacity + 1) for _ in range(len(weights) + 1)]
+    for i in range(1, len(weights) + 1):
+        for w in range(capacity + 1):
+            if weights[i-1] &lt;= w:
+                dp[i][w] = max(
+                    values[i-1] + dp[i-1][w - weights[i-1]],
+                    dp[i-1][w]
+                )
+            else:
+                dp[i][w] = dp[i-1][w]
+    return dp[len(weights)][capacity]
+</code></pre>
+<h3 id="longest-common-subsequence"><a class="header" href="#longest-common-subsequence">Longest Common Subsequence</a></h3>
+<pre><code class="language-python">def lcs(text1, text2):
+    m, n = len(text1), len(text2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if text1[i-1] == text2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[m][n]
+</code></pre>
+<h3 id="edit-distance"><a class="header" href="#edit-distance">Edit Distance</a></h3>
+<pre><code class="language-python">def editDistance(word1, word2):
+    m, n = len(word1), len(word2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(m + 1):
+        dp[i][0] = i
+    for j in range(n + 1):
+        dp[0][j] = j
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if word1[i-1] == word2[j-1]:
+                dp[i][j] = dp[i-1][j-1]
+            else:
+                dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+
+    return dp[m][n]
+</code></pre>
+<h2 id="patterns"><a class="header" href="#patterns">Patterns</a></h2>
+<p>1D DP: <code>dp[i] = f(dp[i-1], dp[i-2], ...)</code>
+2D DP: <code>dp[i][j] = f(dp[i-1][j], dp[i][j-1], ...)</code></p>
+<h2 id="complexity"><a class="header" href="#complexity">Complexity</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Problem</th><th>Naive</th><th>DP</th></tr></thead><tbody>
+<tr><td>Fibonacci</td><td>O(2^n)</td><td>O(n)</td></tr>
+<tr><td>Coin Change</td><td>O(n^m)</td><td>O(n*m)</td></tr>
+<tr><td>Knapsack</td><td>O(2^n)</td><td>O(n*w)</td></tr>
+</tbody></table>
+</div>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>DP is like climbing stairs - memorize steps you've already calculated instead of redoing them!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
 <ul>
+<li>
+<p><a href="https://leetcode.com/tag/dynamic-programming/">LeetCode DP Problems</a></p>
+</li>
+<li>
+<p>[Key Concepts</p>
+</li>
 <li>
 <p><strong>Overlapping Subproblems</strong>: Dynamic programming is applicable when the problem can be broken down into smaller, overlapping subproblems that can be solved independently. The results of these subproblems are stored to avoid redundant calculations.</p>
 </li>
@@ -236,6 +354,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

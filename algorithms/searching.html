@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -154,7 +177,208 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="searching-algorithms"><a class="header" href="#searching-algorithms">Searching Algorithms</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Searching algorithms help find elements in data structures. The choice depends on whether data is sorted and the size of the data.</p>
+<h2 id="linear-search"><a class="header" href="#linear-search">Linear Search</a></h2>
+<p><strong>Time</strong>: O(n) | <strong>Space</strong>: O(1) | <strong>Works on</strong>: Unsorted arrays</p>
+<pre><code class="language-python">def linear_search(arr, target):
+    for i in range(len(arr)):
+        if arr[i] == target:
+            return i
+    return -1
+</code></pre>
+<p><strong>When to use</strong>: Small arrays, unsorted data</p>
+<h2 id="binary-search"><a class="header" href="#binary-search">Binary Search</a></h2>
+<p><strong>Time</strong>: O(log n) | <strong>Space</strong>: O(1) | <strong>Requires</strong>: Sorted array</p>
+<pre><code class="language-python">def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1  # Not found
+</code></pre>
+<h3 id="variations"><a class="header" href="#variations">Variations</a></h3>
+<pre><code class="language-python"># Find first occurrence
+def find_first(arr, target):
+    left, right = 0, len(arr) - 1
+    result = -1
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2
+        if arr[mid] == target:
+            result = mid
+            right = mid - 1  # Keep searching left
+        elif arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return result
+
+# Find last occurrence
+def find_last(arr, target):
+    left, right = 0, len(arr) - 1
+    result = -1
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2
+        if arr[mid] == target:
+            result = mid
+            left = mid + 1  # Keep searching right
+        elif arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return result
+</code></pre>
+<h2 id="two-pointer-technique"><a class="header" href="#two-pointer-technique">Two Pointer Technique</a></h2>
+<p><strong>Time</strong>: O(n) | <strong>Space</strong>: O(1)</p>
+<pre><code class="language-python">def two_sum(arr, target):
+    """Find two numbers that sum to target"""
+    left, right = 0, len(arr) - 1
+
+    while left &lt; right:
+        current_sum = arr[left] + arr[right]
+        if current_sum == target:
+            return [left, right]
+        elif current_sum &lt; target:
+            left += 1
+        else:
+            right -= 1
+
+    return []
+</code></pre>
+<h2 id="jump-search"><a class="header" href="#jump-search">Jump Search</a></h2>
+<p><strong>Time</strong>: O(n) | <strong>Space</strong>: O(1) | <strong>Requires</strong>: Sorted array</p>
+<pre><code class="language-python">import math
+
+def jump_search(arr, target):
+    n = len(arr)
+    step = int(math.sqrt(n))
+    prev = 0
+
+    # Find block where target is present
+    while arr[min(step, n) - 1] &lt; target:
+        prev = step
+        step += int(math.sqrt(n))
+        if prev &gt;= n:
+            return -1
+
+    # Linear search in block
+    while arr[prev] &lt; target:
+        prev += 1
+        if prev == min(step, n):
+            return -1
+
+    # Check if target found
+    if arr[prev] == target:
+        return prev
+
+    return -1
+</code></pre>
+<h2 id="interpolation-search"><a class="header" href="#interpolation-search">Interpolation Search</a></h2>
+<p><strong>Time</strong>: O(log log n) average, O(n) worst | <strong>Requires</strong>: Sorted uniformly distributed data</p>
+<pre><code class="language-python">def interpolation_search(arr, target):
+    left, right = 0, len(arr) - 1
+
+    while (left &lt;= right and
+           target &gt;= arr[left] and
+           target &lt;= arr[right]):
+
+        # Estimate position
+        pos = left + int((right - left) / (arr[right] - arr[left]) *
+                        (target - arr[left]))
+
+        if arr[pos] == target:
+            return pos
+        elif arr[pos] &lt; target:
+            left = pos + 1
+        else:
+            right = pos - 1
+
+    return -1
+</code></pre>
+<h2 id="exponential-search"><a class="header" href="#exponential-search">Exponential Search</a></h2>
+<p><strong>Time</strong>: O(log n) | <strong>Space</strong>: O(1) | <strong>Requires</strong>: Sorted array</p>
+<pre><code class="language-python">def exponential_search(arr, target):
+    n = len(arr)
+
+    # Find range
+    i = 1
+    while i &lt; n and arr[i] &lt; target:
+        i *= 2
+
+    # Binary search in range
+    left = i // 2
+    right = min(i, n - 1)
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1
+</code></pre>
+<h2 id="sentinel-search"><a class="header" href="#sentinel-search">Sentinel Search</a></h2>
+<p>Optimize linear search by eliminating boundary check:</p>
+<pre><code class="language-python">def sentinel_search(arr, target):
+    n = len(arr)
+    last = arr[n - 1]
+    arr[n - 1] = target
+
+    i = 0
+    while arr[i] != target:
+        i += 1
+
+    arr[n - 1] = last  # Restore
+
+    if i &lt; n - 1 or last == target:
+        return i
+    return -1
+</code></pre>
+<h2 id="comparison"><a class="header" href="#comparison">Comparison</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Algorithm</th><th>Time (Avg)</th><th>Time (Worst)</th><th>Space</th><th>Requires Sorted</th></tr></thead><tbody>
+<tr><td>Linear</td><td>O(n)</td><td>O(n)</td><td>O(1)</td><td>No</td></tr>
+<tr><td>Binary</td><td>O(log n)</td><td>O(log n)</td><td>O(1)</td><td>Yes</td></tr>
+<tr><td>Jump</td><td>O(n)</td><td>O(n)</td><td>O(1)</td><td>Yes</td></tr>
+<tr><td>Interpolation</td><td>O(log log n)</td><td>O(n)</td><td>O(1)</td><td>Yes</td></tr>
+<tr><td>Exponential</td><td>O(log n)</td><td>O(log n)</td><td>O(1)</td><td>Yes</td></tr>
+</tbody></table>
+</div>
+<h2 id="key-takeaways"><a class="header" href="#key-takeaways">Key Takeaways</a></h2>
+<ol>
+<li><strong>Unsorted data?</strong> Use Linear Search or Hash Table</li>
+<li><strong>Sorted data?</strong> Use Binary Search for O(log n)</li>
+<li><strong>Uniformly distributed?</strong> Try Interpolation Search</li>
+<li><strong>Need flexibility?</strong> Build a Hash Table for O(1) lookup</li>
+</ol>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>Imagine finding a word in a dictionary:</p>
+<ul>
+<li><strong>Linear Search</strong>: Check every word from start (slow!)</li>
+<li><strong>Binary Search</strong>: Open middle, go left or right, repeat (fast!)</li>
+<li><strong>Interpolation</strong>: Estimate where word should be based on first letter</li>
+</ul>
+<p>Binary search is fastest for sorted data!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://leetcode.com/tag/binary-search/">LeetCode Binary Search</a></li>
+<li><a href="https://visualgo.net/en/search">Searching Algorithms Visualization</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -201,6 +425,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

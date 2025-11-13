@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -154,7 +177,210 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="large-language-models-llms"><a class="header" href="#large-language-models-llms">Large Language Models (LLMs)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Large Language Models are transformer-based neural networks trained on massive text corpora to predict and generate human language. They've revolutionized AI with capabilities in translation, summarization, question-answering, and reasoning.</p>
+<h2 id="architecture-basics"><a class="header" href="#architecture-basics">Architecture Basics</a></h2>
+<h3 id="transformers"><a class="header" href="#transformers">Transformers</a></h3>
+<p>Built on <strong>self-attention</strong> mechanism:</p>
+<ul>
+<li><strong>Query-Key-Value</strong>: "What am I looking for?" -&gt; "Where's the relevant info?" -&gt; "Get the info"</li>
+<li><strong>Multi-head Attention</strong>: Multiple attention patterns in parallel</li>
+<li><strong>Feed-forward Networks</strong>: Non-linear transformations</li>
+<li><strong>Layer Normalization</strong>: Stabilizes training</li>
+</ul>
+<h3 id="scaling-laws"><a class="header" href="#scaling-laws">Scaling Laws</a></h3>
+<p>Performance improves predictably with:</p>
+<ul>
+<li><strong>Model size</strong> (parameters): 7B -&gt; 70B -&gt; 700B</li>
+<li><strong>Dataset size</strong>: More tokens = better performance</li>
+<li><strong>Compute</strong>: More training = better convergence</li>
+</ul>
+<h2 id="popular-models"><a class="header" href="#popular-models">Popular Models</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Model</th><th>Size</th><th>Training Data</th><th>Strengths</th></tr></thead><tbody>
+<tr><td>GPT-4</td><td>~1.7T params</td><td>~13T tokens</td><td>Reasoning, coding, creative</td></tr>
+<tr><td>Claude</td><td>~100B params</td><td>High quality data</td><td>Instruction following, safety</td></tr>
+<tr><td>Llama 2</td><td>7B-70B</td><td>2T tokens</td><td>Open-source, efficient</td></tr>
+<tr><td>Mistral</td><td>7B-8x7B</td><td>7T tokens</td><td>Fast, efficient</td></tr>
+<tr><td>Palm 2</td><td>~340B</td><td>High quality</td><td>Reasoning, math</td></tr>
+</tbody></table>
+</div>
+<h2 id="training-process"><a class="header" href="#training-process">Training Process</a></h2>
+<h3 id="1-pre-training"><a class="header" href="#1-pre-training">1. Pre-training</a></h3>
+<pre><code>Objective: Predict next token
+Input: "The cat sat on the"
+Target: "mat"
+
+Loss = -log P(mat | previous tokens)
+</code></pre>
+<p>Train on unlabeled internet text (unsupervised)</p>
+<h3 id="2-supervised-fine-tuning"><a class="header" href="#2-supervised-fine-tuning">2. Supervised Fine-tuning</a></h3>
+<pre><code>Input: "What is 2+2?"
+Target: "2+2=4"
+</code></pre>
+<p>Train on labeled examples (supervised)</p>
+<h3 id="3-rlhf-reinforcement-learning-from-human-feedback"><a class="header" href="#3-rlhf-reinforcement-learning-from-human-feedback">3. RLHF (Reinforcement Learning from Human Feedback)</a></h3>
+<pre><code>1. Generate multiple responses
+2. Humans rank by quality
+3. Train reward model
+4. Use reward to optimize policy
+</code></pre>
+<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="tokenization"><a class="header" href="#tokenization">Tokenization</a></h3>
+<p>Convert text to numbers:</p>
+<pre><code>"Hello world" -&gt; [15339, 1159]
+</code></pre>
+<h3 id="embeddings"><a class="header" href="#embeddings">Embeddings</a></h3>
+<p>Represent tokens as vectors in semantic space:</p>
+<pre><code>king - man + woman ~= queen
+</code></pre>
+<h3 id="context-window"><a class="header" href="#context-window">Context Window</a></h3>
+<p>Maximum tokens model can consider:</p>
+<ul>
+<li>GPT-3: 2K tokens</li>
+<li>GPT-4: 32K - 128K tokens</li>
+<li>Claude: 100K+ tokens</li>
+<li>Llama 2: 4K tokens</li>
+</ul>
+<h3 id="temperature"><a class="header" href="#temperature">Temperature</a></h3>
+<p>Controls randomness of output:</p>
+<ul>
+<li><strong>0</strong>: Deterministic (always same answer)</li>
+<li><strong>0.7</strong>: Balanced (varied but coherent)</li>
+<li><strong>1+</strong>: Creative (more random)</li>
+</ul>
+<h2 id="prompting-techniques"><a class="header" href="#prompting-techniques">Prompting Techniques</a></h2>
+<h3 id="1-zero-shot"><a class="header" href="#1-zero-shot">1. Zero-Shot</a></h3>
+<pre><code>Question: What is 2+2?
+Answer: 4
+</code></pre>
+<h3 id="2-few-shot"><a class="header" href="#2-few-shot">2. Few-Shot</a></h3>
+<pre><code>Question: What is 3+3?
+Answer: 6
+
+Question: What is 2+2?
+Answer:
+</code></pre>
+<h3 id="3-chain-of-thought"><a class="header" href="#3-chain-of-thought">3. Chain-of-Thought</a></h3>
+<pre><code>Q: If there are 3 apples and you add 2 more, how many are there?
+
+A: Let me think step by step:
+1. Start with 3 apples
+2. Add 2 more
+3. Total: 3 + 2 = 5
+</code></pre>
+<h3 id="4-role-based"><a class="header" href="#4-role-based">4. Role-Based</a></h3>
+<pre><code>You are a helpful Python expert.
+Q: How do I reverse a list?
+A: [explanations as Python expert]
+</code></pre>
+<h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
+<h3 id="hallucinations"><a class="header" href="#hallucinations">Hallucinations</a></h3>
+<p>Making up false information confidently:</p>
+<pre><code>Q: What's the capital of Atlantis?
+A: The capital is Poseidiopolis. (Made up!)
+</code></pre>
+<h3 id="knowledge-cutoff"><a class="header" href="#knowledge-cutoff">Knowledge Cutoff</a></h3>
+<p>No information beyond training data:</p>
+<pre><code>Q: Who won the 2025 World Cup?
+A: I don't have info beyond April 2024.
+</code></pre>
+<h3 id="context-length"><a class="header" href="#context-length">Context Length</a></h3>
+<p>Can't process extremely long documents</p>
+<h3 id="reasoning"><a class="header" href="#reasoning">Reasoning</a></h3>
+<p>Struggles with:</p>
+<ul>
+<li>Multi-step complex logic</li>
+<li>Mathematics (prone to errors)</li>
+<li>Counting tokens accurately</li>
+</ul>
+<h2 id="fine-tuning-approaches"><a class="header" href="#fine-tuning-approaches">Fine-tuning Approaches</a></h2>
+<h3 id="full-fine-tuning"><a class="header" href="#full-fine-tuning">Full Fine-tuning</a></h3>
+<p>Update all parameters (expensive):</p>
+<pre><code>Memory: O(parameters)
+Time: O(tokens)
+</code></pre>
+<h3 id="lora-low-rank-adaptation"><a class="header" href="#lora-low-rank-adaptation">LoRA (Low-Rank Adaptation)</a></h3>
+<p>Add small trainable matrices (efficient):</p>
+<pre><code class="language-python"># Instead of: W' = W + delta_W
+# Use: W' = W + A*B (where A, B &lt;&lt; W)
+</code></pre>
+<h3 id="qlora"><a class="header" href="#qlora">QLoRA</a></h3>
+<p>Quantized LoRA (even more efficient):</p>
+<ul>
+<li>4-bit quantization</li>
+<li>Reduces memory to ~6GB for 7B model</li>
+</ul>
+<h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Use Case</th><th>Technique</th><th>Example</th></tr></thead><tbody>
+<tr><td><strong>Chat</strong></td><td>Conversation history</td><td>ChatGPT</td></tr>
+<tr><td><strong>Code</strong></td><td>In-context learning</td><td>GitHub Copilot</td></tr>
+<tr><td><strong>Search</strong></td><td>Semantic ranking</td><td>Perplexity AI</td></tr>
+<tr><td><strong>Translation</strong></td><td>Multilingual models</td><td>Google Translate</td></tr>
+<tr><td><strong>Summarization</strong></td><td>Extractive/abstractive</td><td>Claude summarization</td></tr>
+</tbody></table>
+</div>
+<h2 id="costs--efficiency"><a class="header" href="#costs--efficiency">Costs &amp; Efficiency</a></h2>
+<h3 id="api-usage"><a class="header" href="#api-usage">API Usage</a></h3>
+<pre><code>Pricing: $ per 1M tokens
+GPT-4: $30 input, $60 output
+Claude: $8 input, $24 output
+</code></pre>
+<h3 id="running-locally"><a class="header" href="#running-locally">Running Locally</a></h3>
+<pre><code>Model Size | VRAM Needed | Speed
+7B params  | 16GB        | Fast
+13B params | 24GB        | Medium
+70B params | 80GB (GPU)  | Slow
+</code></pre>
+<h2 id="evaluation-metrics"><a class="header" href="#evaluation-metrics">Evaluation Metrics</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Metric</th><th>What It Measures</th></tr></thead><tbody>
+<tr><td><strong>Perplexity</strong></td><td>How well model predicts text</td></tr>
+<tr><td><strong>BLEU</strong></td><td>Translation quality</td></tr>
+<tr><td><strong>ROUGE</strong></td><td>Summarization quality</td></tr>
+<tr><td><strong>Human Eval</strong></td><td>Actual user satisfaction</td></tr>
+</tbody></table>
+</div>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-prompt-engineering"><a class="header" href="#1-prompt-engineering">1. Prompt Engineering</a></h3>
+<pre><code>X Bad: "Write code"
+Checkmark Good: "Write Python function that takes list and returns sorted list in ascending order"
+</code></pre>
+<h3 id="2-breaking-complex-tasks"><a class="header" href="#2-breaking-complex-tasks">2. Breaking Complex Tasks</a></h3>
+<pre><code>Instead of: "Analyze this company and give investment advice"
+Try:
+1. "Summarize this company's financials"
+2. "What are the main risks?"
+3. "What are growth opportunities?"
+4. "Should we invest?"
+</code></pre>
+<h3 id="3-verification"><a class="header" href="#3-verification">3. Verification</a></h3>
+<p>Always verify facts from authoritative sources</p>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>Imagine teaching a child language by:</p>
+<ol>
+<li>Reading millions of books</li>
+<li>Learning to predict next word</li>
+<li>Getting feedback on quality</li>
+<li>Adjusting understanding</li>
+</ol>
+<p>That's basically how LLMs learn! They become really good at continuing conversations in natural human language.</p>
+<p>The trick: They learn statistics of language, not true understanding. So they might confidently say wrong things (hallucinations).</p>
+<h2 id="future-directions"><a class="header" href="#future-directions">Future Directions</a></h2>
+<ul>
+<li><strong>Multimodal</strong>: Understanding images + text + audio</li>
+<li><strong>Long Context</strong>: Processing entire books</li>
+<li><strong>Reasoning</strong>: Better at logic puzzles</li>
+<li><strong>Efficiency</strong>: Running on phones/devices</li>
+<li><strong>Robotics</strong>: Language guiding physical actions</li>
+</ul>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://arxiv.org/abs/1706.03762">Transformer Paper</a></li>
+<li><a href="https://openai.com/research/">OpenAI GPT Blog</a></li>
+<li><a href="https://huggingface.co/">Hugging Face</a></li>
+<li><a href="https://www.promptingguide.ai/">Prompt Engineering Guide</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -201,6 +427,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

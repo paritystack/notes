@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -154,7 +177,478 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="adc-analog-to-digital-converter"><a class="header" href="#adc-analog-to-digital-converter">ADC (Analog-to-Digital Converter)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>An Analog-to-Digital Converter (ADC) is a hardware component that converts continuous analog signals (like voltage, temperature, light intensity) into discrete digital values that a microcontroller can process. ADCs are essential for interfacing with the real world, enabling microcontrollers to read sensors and analog inputs.</p>
+<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="what-is-an-analog-signal"><a class="header" href="#what-is-an-analog-signal">What is an Analog Signal?</a></h3>
+<p>An analog signal is a continuous signal that can have any value within a range. Examples:</p>
+<ul>
+<li>Temperature: 0C to 100C</li>
+<li>Light intensity: 0 to maximum brightness</li>
+<li>Audio: continuous sound waves</li>
+<li>Voltage: 0V to 5V</li>
+</ul>
+<h3 id="what-is-a-digital-value"><a class="header" href="#what-is-a-digital-value">What is a Digital Value?</a></h3>
+<p>A digital value is a discrete number that represents the analog signal:</p>
+<ul>
+<li>8-bit ADC: 0 to 255 (256 possible values)</li>
+<li>10-bit ADC: 0 to 1023 (1024 possible values)</li>
+<li>12-bit ADC: 0 to 4095 (4096 possible values)</li>
+</ul>
+<h3 id="resolution"><a class="header" href="#resolution">Resolution</a></h3>
+<p>Resolution determines how finely an ADC can distinguish between different analog values.</p>
+<p><strong>Formula</strong>:</p>
+<pre><code>Resolution = Reference Voltage / (2^n - 1)
+
+Where n = number of bits
+</code></pre>
+<p><strong>Examples</strong>:</p>
+<div class="table-wrapper"><table><thead><tr><th>Bits</th><th>Levels</th><th>Resolution (5V ref)</th><th>Resolution (3.3V ref)</th></tr></thead><tbody>
+<tr><td>8-bit</td><td>256</td><td>19.6 mV</td><td>12.9 mV</td></tr>
+<tr><td>10-bit</td><td>1024</td><td>4.88 mV</td><td>3.22 mV</td></tr>
+<tr><td>12-bit</td><td>4096</td><td>1.22 mV</td><td>0.81 mV</td></tr>
+<tr><td>16-bit</td><td>65536</td><td>76.3 uV</td><td>50.4 uV</td></tr>
+</tbody></table>
+</div>
+<p><strong>What this means</strong>: A 10-bit ADC with 5V reference can distinguish voltage differences as small as ~4.88mV.</p>
+<h3 id="reference-voltage-vref"><a class="header" href="#reference-voltage-vref">Reference Voltage (VREF)</a></h3>
+<p>The reference voltage defines the maximum input voltage the ADC can measure.</p>
+<ul>
+<li><strong>Arduino Uno</strong>: 5V (can use external ref)</li>
+<li><strong>ESP32</strong>: 3.3V (default), 1.1V (attenuated)</li>
+<li><strong>STM32</strong>: 3.3V (typically)</li>
+</ul>
+<p><strong>Important</strong>: Never exceed VREF on analog input pins!</p>
+<h3 id="sampling-rate"><a class="header" href="#sampling-rate">Sampling Rate</a></h3>
+<p>How many times per second the ADC can take a measurement, measured in:</p>
+<ul>
+<li><strong>SPS</strong>: Samples Per Second</li>
+<li><strong>kSPS</strong>: Thousand samples per second</li>
+<li><strong>MSPS</strong>: Million samples per second</li>
+</ul>
+<p><strong>Examples</strong>:</p>
+<ul>
+<li>Arduino Uno: ~10 kSPS</li>
+<li>ESP32: ~100 kSPS</li>
+<li>STM32F4: Up to 2.4 MSPS</li>
+<li>External ADC (ADS1115): 860 SPS max</li>
+</ul>
+<h2 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h2>
+<h3 id="conversion-process"><a class="header" href="#conversion-process">Conversion Process</a></h3>
+<ol>
+<li><strong>Sample</strong>: Capture the analog voltage at a specific moment</li>
+<li><strong>Hold</strong>: Maintain that voltage level during conversion</li>
+<li><strong>Quantize</strong>: Divide the voltage range into discrete levels</li>
+<li><strong>Encode</strong>: Convert to a binary number</li>
+</ol>
+<pre><code>Analog Input (2.5V) -&gt; ADC -&gt; Digital Output (512 for 10-bit at 5V ref)
+
+Calculation: 2.5V / 5V * 1023 = 511.5 ~ 512
+</code></pre>
+<h3 id="conversion-formula"><a class="header" href="#conversion-formula">Conversion Formula</a></h3>
+<pre><code>Digital Value = (Analog Voltage / Reference Voltage) * (2^n - 1)
+
+Analog Voltage = (Digital Value / (2^n - 1)) * Reference Voltage
+</code></pre>
+<h2 id="code-examples"><a class="header" href="#code-examples">Code Examples</a></h2>
+<h3 id="arduino-avr-adc"><a class="header" href="#arduino-avr-adc">Arduino (AVR) ADC</a></h3>
+<pre><code class="language-cpp">// Simple analog read
+const int sensorPin = A0;
+
+void setup() {
+  Serial.begin(9600);
+
+  // Optional: Set analog reference
+  // analogReference(DEFAULT);  // 5V on Uno
+  // analogReference(INTERNAL); // 1.1V internal reference
+  // analogReference(EXTERNAL); // External AREF pin
+}
+
+void loop() {
+  // Read analog value (0-1023)
+  int rawValue = analogRead(sensorPin);
+
+  // Convert to voltage
+  float voltage = rawValue * (5.0 / 1023.0);
+
+  Serial.print("Raw: ");
+  Serial.print(rawValue);
+  Serial.print(" | Voltage: ");
+  Serial.print(voltage);
+  Serial.println(" V");
+
+  delay(500);
+}
+
+// Reading multiple analog pins
+void readMultipleSensors() {
+  int sensors[] = {A0, A1, A2, A3};
+
+  for (int i = 0; i &lt; 4; i++) {
+    int value = analogRead(sensors[i]);
+    float voltage = value * (5.0 / 1023.0);
+    Serial.print("Sensor ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(voltage);
+  }
+}
+</code></pre>
+<h3 id="esp32-adc"><a class="header" href="#esp32-adc">ESP32 ADC</a></h3>
+<pre><code class="language-cpp">// ESP32 has two ADC units with multiple channels
+const int analogPin = 34;  // ADC1_CH6 (GPIO 34)
+
+void setup() {
+  Serial.begin(115200);
+
+  // Set ADC resolution (9-12 bits)
+  analogReadResolution(12);  // Default is 12 bits (0-4095)
+
+  // Set ADC attenuation (changes measurement range)
+  // ADC_0db: 0-1.1V
+  // ADC_2_5db: 0-1.5V
+  // ADC_6db: 0-2.2V (default)
+  // ADC_11db: 0-3.3V
+  analogSetAttenuation(ADC_11db);
+
+  // Or set per pin
+  analogSetPinAttenuation(analogPin, ADC_11db);
+}
+
+void loop() {
+  int rawValue = analogRead(analogPin);
+
+  // Convert to voltage (with 11db attenuation, 0-3.3V range)
+  // Note: ESP32 ADC is non-linear, consider calibration
+  float voltage = rawValue * (3.3 / 4095.0);
+
+  Serial.print("Raw: ");
+  Serial.print(rawValue);
+  Serial.print(" | Voltage: ");
+  Serial.println(voltage);
+
+  delay(100);
+}
+
+// Better: Use calibrated read
+#include "esp_adc_cal.h"
+
+esp_adc_cal_characteristics_t adc_chars;
+
+void setupCalibrated() {
+  esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11,
+                           ADC_WIDTH_BIT_12, 1100, &amp;adc_chars);
+}
+
+void loopCalibrated() {
+  uint32_t voltage = analogRead(analogPin);
+  voltage = esp_adc_cal_raw_to_voltage(voltage, &amp;adc_chars);
+
+  Serial.print("Calibrated voltage: ");
+  Serial.print(voltage);
+  Serial.println(" mV");
+}
+</code></pre>
+<h3 id="stm32-hal-adc"><a class="header" href="#stm32-hal-adc">STM32 HAL ADC</a></h3>
+<pre><code class="language-c">#include "stm32f4xx_hal.h"
+
+ADC_HandleTypeDef hadc1;
+
+void ADC_Init(void) {
+    ADC_ChannelConfTypeDef sConfig = {0};
+
+    // Configure ADC
+    hadc1.Instance = ADC1;
+    hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+    hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+    hadc1.Init.ScanConvMode = DISABLE;
+    hadc1.Init.ContinuousConvMode = DISABLE;
+    hadc1.Init.DiscontinuousConvMode = DISABLE;
+    hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+    hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+    hadc1.Init.NbrOfConversion = 1;
+    HAL_ADC_Init(&amp;hadc1);
+
+    // Configure channel
+    sConfig.Channel = ADC_CHANNEL_0;
+    sConfig.Rank = 1;
+    sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
+    HAL_ADC_ConfigChannel(&amp;hadc1, &amp;sConfig);
+}
+
+uint16_t ADC_Read(uint32_t channel) {
+    ADC_ChannelConfTypeDef sConfig = {0};
+
+    sConfig.Channel = channel;
+    sConfig.Rank = 1;
+    HAL_ADC_ConfigChannel(&amp;hadc1, &amp;sConfig);
+
+    // Start conversion
+    HAL_ADC_Start(&amp;hadc1);
+
+    // Wait for conversion to complete
+    HAL_ADC_PollForConversion(&amp;hadc1, 100);
+
+    // Read value
+    uint16_t value = HAL_ADC_GetValue(&amp;hadc1);
+
+    return value;
+}
+
+float ADC_ReadVoltage(uint32_t channel) {
+    uint16_t raw = ADC_Read(channel);
+    // Convert to voltage (assuming 3.3V reference)
+    float voltage = (raw * 3.3f) / 4095.0f;
+    return voltage;
+}
+
+// DMA-based continuous conversion
+uint16_t adc_buffer[16];
+
+void ADC_Start_DMA(void) {
+    HAL_ADC_Start_DMA(&amp;hadc1, (uint32_t*)adc_buffer, 16);
+}
+</code></pre>
+<h3 id="external-adc-ads1115-via-i2c"><a class="header" href="#external-adc-ads1115-via-i2c">External ADC (ADS1115) via I2C</a></h3>
+<pre><code class="language-cpp">#include &lt;Wire.h&gt;
+#include &lt;Adafruit_ADS1X15.h&gt;
+
+Adafruit_ADS1115 ads;  // 16-bit ADC
+
+void setup() {
+  Serial.begin(115200);
+
+  // Initialize ADS1115
+  if (!ads.begin()) {
+    Serial.println("Failed to initialize ADS1115!");
+    while (1);
+  }
+
+  // Set gain
+  // ads.setGain(GAIN_TWOTHIRDS);  // +/-6.144V range
+  // ads.setGain(GAIN_ONE);        // +/-4.096V range
+  ads.setGain(GAIN_TWO);           // +/-2.048V range (default)
+  // ads.setGain(GAIN_FOUR);       // +/-1.024V range
+  // ads.setGain(GAIN_EIGHT);      // +/-0.512V range
+  // ads.setGain(GAIN_SIXTEEN);    // +/-0.256V range
+}
+
+void loop() {
+  // Read single-ended from channel 0
+  int16_t adc0 = ads.readADC_SingleEnded(0);
+  float voltage0 = ads.computeVolts(adc0);
+
+  // Read differential (channel 0 - channel 1)
+  int16_t diff01 = ads.readADC_Differential_0_1();
+
+  Serial.print("ADC0: ");
+  Serial.print(adc0);
+  Serial.print(" | Voltage: ");
+  Serial.println(voltage0);
+
+  delay(100);
+}
+</code></pre>
+<h2 id="common-applications"><a class="header" href="#common-applications">Common Applications</a></h2>
+<h3 id="1-temperature-sensors-thermistor"><a class="header" href="#1-temperature-sensors-thermistor">1. Temperature Sensors (Thermistor)</a></h3>
+<pre><code class="language-cpp">const int thermistorPin = A0;
+const float BETA = 3950;  // Beta coefficient
+const float R0 = 10000;   // Resistance at 25C
+const float T0 = 298.15;  // 25C in Kelvin
+
+float readTemperature() {
+  int raw = analogRead(thermistorPin);
+
+  // Convert to resistance
+  float R = 10000.0 * (1023.0 / raw - 1.0);
+
+  // Steinhart-Hart equation
+  float T = 1.0 / (1.0/T0 + (1.0/BETA) * log(R/R0));
+
+  return T - 273.15;  // Convert to Celsius
+}
+</code></pre>
+<h3 id="2-light-sensor-ldrphotoresistor"><a class="header" href="#2-light-sensor-ldrphotoresistor">2. Light Sensor (LDR/Photoresistor)</a></h3>
+<pre><code class="language-cpp">const int ldrPin = A1;
+
+int readLightLevel() {
+  int rawValue = analogRead(ldrPin);
+
+  // Convert to percentage
+  int lightPercent = map(rawValue, 0, 1023, 0, 100);
+
+  return lightPercent;
+}
+</code></pre>
+<h3 id="3-potentiometer-volume-control"><a class="header" href="#3-potentiometer-volume-control">3. Potentiometer (Volume Control)</a></h3>
+<pre><code class="language-cpp">const int potPin = A2;
+const int ledPin = 9;  // PWM pin
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+}
+
+void loop() {
+  int potValue = analogRead(potPin);
+
+  // Map to PWM range (0-255)
+  int brightness = map(potValue, 0, 1023, 0, 255);
+
+  analogWrite(ledPin, brightness);
+}
+</code></pre>
+<h3 id="4-battery-voltage-monitoring"><a class="header" href="#4-battery-voltage-monitoring">4. Battery Voltage Monitoring</a></h3>
+<pre><code class="language-cpp">const int batteryPin = A3;
+const float voltageDividerRatio = 2.0;  // R1=R2=10k
+
+float readBatteryVoltage() {
+  int raw = analogRead(batteryPin);
+
+  // Convert to actual voltage
+  float adcVoltage = raw * (5.0 / 1023.0);
+
+  // Account for voltage divider
+  float batteryVoltage = adcVoltage * voltageDividerRatio;
+
+  return batteryVoltage;
+}
+
+void checkBattery() {
+  float voltage = readBatteryVoltage();
+
+  if (voltage &lt; 3.3) {
+    Serial.println("WARNING: Low battery!");
+  }
+}
+</code></pre>
+<h3 id="5-current-sensing-acs712"><a class="header" href="#5-current-sensing-acs712">5. Current Sensing (ACS712)</a></h3>
+<pre><code class="language-cpp">const int currentSensorPin = A4;
+const float sensitivity = 0.185;  // 185mV/A for ACS712-05B
+
+float readCurrent() {
+  int raw = analogRead(currentSensorPin);
+  float voltage = raw * (5.0 / 1023.0);
+
+  // Zero point is 2.5V (Vcc/2)
+  float offsetVoltage = voltage - 2.5;
+
+  // Calculate current
+  float current = offsetVoltage / sensitivity;
+
+  return current;
+}
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-averaging-for-stability"><a class="header" href="#1-averaging-for-stability">1. Averaging for Stability</a></h3>
+<pre><code class="language-cpp">float readAverageAnalog(int pin, int samples = 10) {
+  long sum = 0;
+
+  for (int i = 0; i &lt; samples; i++) {
+    sum += analogRead(pin);
+    delay(10);  // Small delay between reads
+  }
+
+  return (float)sum / samples;
+}
+</code></pre>
+<h3 id="2-handling-noise"><a class="header" href="#2-handling-noise">2. Handling Noise</a></h3>
+<pre><code class="language-cpp">// Software low-pass filter (running average)
+const int numReadings = 10;
+int readings[numReadings];
+int readIndex = 0;
+int total = 0;
+
+int smoothedRead(int pin) {
+  total -= readings[readIndex];
+  readings[readIndex] = analogRead(pin);
+  total += readings[readIndex];
+  readIndex = (readIndex + 1) % numReadings;
+
+  return total / numReadings;
+}
+</code></pre>
+<h3 id="3-proper-voltage-divider"><a class="header" href="#3-proper-voltage-divider">3. Proper Voltage Divider</a></h3>
+<pre><code class="language-cpp">// To measure higher voltages, use voltage divider
+// Vin     R1  ,    R2     GND
+//
+//          ADC Pin
+
+// Example: Measure 12V with 5V ADC
+// R1 = 10k ohm, R2 = 7.5k ohm
+// Vout = Vin * (R2 / (R1 + R2))
+// Vout = 12V * (7.5 / 17.5) = 5.14V (slightly over, use 6.8k ohm for R2)
+</code></pre>
+<h3 id="4-calibration"><a class="header" href="#4-calibration">4. Calibration</a></h3>
+<pre><code class="language-cpp">struct CalibrationData {
+  float slope;
+  float offset;
+};
+
+CalibrationData calibrate(int pin, float knownVoltage) {
+  int rawValue = analogRead(pin);
+
+  CalibrationData cal;
+  cal.slope = knownVoltage / rawValue;
+  cal.offset = 0;  // Adjust if needed
+
+  return cal;
+}
+
+float calibratedRead(int pin, CalibrationData cal) {
+  int raw = analogRead(pin);
+  return (raw * cal.slope) + cal.offset;
+}
+</code></pre>
+<h2 id="common-issues-and-debugging"><a class="header" href="#common-issues-and-debugging">Common Issues and Debugging</a></h2>
+<h3 id="problem-noisy-readings"><a class="header" href="#problem-noisy-readings">Problem: Noisy Readings</a></h3>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Add 0.1uF capacitor between analog pin and ground</li>
+<li>Use averaging/filtering in software</li>
+<li>Keep analog wires short and away from digital signals</li>
+<li>Use twisted pair cables for long runs</li>
+<li>Add ferrite beads on long cables</li>
+</ul>
+<h3 id="problem-incorrect-voltage-readings"><a class="header" href="#problem-incorrect-voltage-readings">Problem: Incorrect Voltage Readings</a></h3>
+<p><strong>Check</strong>:</p>
+<ul>
+<li>Verify reference voltage is correct</li>
+<li>Check voltage divider calculations</li>
+<li>Ensure input doesn't exceed VREF</li>
+<li>Verify ground connection</li>
+</ul>
+<h3 id="problem-slow-response"><a class="header" href="#problem-slow-response">Problem: Slow Response</a></h3>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Reduce averaging samples</li>
+<li>Check ADC clock/prescaler settings</li>
+<li>Use faster ADC if needed (external)</li>
+<li>Enable DMA for continuous sampling</li>
+</ul>
+<h2 id="eli10-explain-like-im-10"><a class="header" href="#eli10-explain-like-im-10">ELI10 (Explain Like I'm 10)</a></h2>
+<p>Imagine you have a thermometer that shows any temperature between 0C and 100C, but you can only report whole numbers:</p>
+<ul>
+<li>If the real temperature is 23.7C, you might say "24C"</li>
+<li>If it's 23.2C, you might say "23C"</li>
+</ul>
+<p>An ADC does the same thing! It takes a smooth, continuous voltage (like the temperature) and converts it to a number your microcontroller can understand.</p>
+<p><strong>Resolution</strong> is like how many different numbers you can say:</p>
+<ul>
+<li>8-bit ADC: Can say 256 different numbers (0-255)</li>
+<li>10-bit ADC: Can say 1024 different numbers (0-1023)</li>
+<li>12-bit ADC: Can say 4096 different numbers (0-4095)</li>
+</ul>
+<p>More bits = more precise measurements = seeing smaller differences!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://learn.sparkfun.com/tutorials/analog-to-digital-conversion">ADC Tutorial - SparkFun</a></li>
+<li><a href="https://www.arduino.cc/reference/en/language/functions/analog-io/analogread/">Arduino analogRead() Reference</a></li>
+<li><a href="https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html">ESP32 ADC Documentation</a></li>
+<li><a href="https://www.microchip.com/en-us/application-notes/an2538">ADC Noise Reduction Techniques - AVR</a></li>
+<li><a href="https://www.ti.com/lit/an/slaa013/slaa013.pdf">Understanding ADC Parameters</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -201,6 +695,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

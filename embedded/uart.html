@@ -24,30 +24,43 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +74,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,17 +88,20 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -111,13 +128,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -134,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -154,7 +177,426 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="uart-universal-asynchronous-receiver-transmitter"><a class="header" href="#uart-universal-asynchronous-receiver-transmitter">UART (Universal Asynchronous Receiver-Transmitter)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>UART is one of the most commonly used serial communication protocols in embedded systems. Unlike SPI and I2C, UART is asynchronous - meaning it doesn't require a shared clock signal between devices. This makes it simple, robust, and perfect for point-to-point communication between two devices.</p>
+<h2 id="key-features"><a class="header" href="#key-features">Key Features</a></h2>
+<ul>
+<li><strong>Asynchronous</strong>: No shared clock required - devices use pre-agreed baud rates</li>
+<li><strong>Point-to-Point</strong>: Communication between exactly two devices</li>
+<li><strong>Two-Wire Interface</strong>: Only TX (transmit) and RX (receive) lines needed</li>
+<li><strong>Full-Duplex</strong>: Can send and receive data simultaneously</li>
+<li><strong>Simple</strong>: Easy to implement and debug</li>
+<li><strong>Universal</strong>: Supported by virtually all microcontrollers</li>
+</ul>
+<h2 id="signal-lines"><a class="header" href="#signal-lines">Signal Lines</a></h2>
+<p>UART uses only two main signal lines (plus ground):</p>
+<div class="table-wrapper"><table><thead><tr><th>Signal</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>TX</strong></td><td>Transmit Data - Output from device</td></tr>
+<tr><td><strong>RX</strong></td><td>Receive Data - Input to device</td></tr>
+<tr><td><strong>GND</strong></td><td>Common ground reference</td></tr>
+</tbody></table>
+</div>
+<p><strong>Important Wiring</strong>: TX of device A connects to RX of device B, and vice versa!</p>
+<pre><code>Device A              Device B
+  TX      --------&gt;     RX
+  RX      &lt;--------     TX
+  GND     ---------    GND
+</code></pre>
+<h2 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h2>
+<h3 id="data-frame-structure"><a class="header" href="#data-frame-structure">Data Frame Structure</a></h3>
+<p>A typical UART data frame consists of:</p>
+<pre><code>  Start   Data Bits   Parity  Stop
+   Bit    (5-9)       (Opt)  Bit(s)
+        , , , , , , ,
+        0 1 2 3 4 5 6 7
+</code></pre>
+<ol>
+<li><strong>Idle State</strong>: Line is HIGH when no data is being sent</li>
+<li><strong>Start Bit</strong>: Single LOW bit signals beginning of frame</li>
+<li><strong>Data Bits</strong>: 5-9 bits of actual data (usually 8 bits)</li>
+<li><strong>Parity Bit</strong> (Optional): Error checking bit</li>
+<li><strong>Stop Bit(s)</strong>: 1, 1.5, or 2 HIGH bits signal end of frame</li>
+</ol>
+<h3 id="baud-rate"><a class="header" href="#baud-rate">Baud Rate</a></h3>
+<p>Baud rate is the speed of communication, measured in bits per second (bps).</p>
+<p><strong>Common Baud Rates</strong>:</p>
+<ul>
+<li>9600 bps - Default for many applications</li>
+<li>19200 bps</li>
+<li>38400 bps</li>
+<li>57600 bps</li>
+<li>115200 bps - Common for debugging/logging</li>
+<li>230400 bps</li>
+<li>921600 bps - High-speed applications</li>
+</ul>
+<p><strong>Formula</strong>:</p>
+<pre><code>Bit Duration = 1 / Baud Rate
+</code></pre>
+<p>At 9600 baud: each bit takes ~104 microseconds</p>
+<h3 id="parity-bit"><a class="header" href="#parity-bit">Parity Bit</a></h3>
+<p>Parity is a simple error detection method:</p>
+<ul>
+<li><strong>Even Parity</strong>: Parity bit set so total number of 1s is even</li>
+<li><strong>Odd Parity</strong>: Parity bit set so total number of 1s is odd</li>
+<li><strong>None</strong>: No parity bit (most common)</li>
+</ul>
+<h3 id="configuration-format"><a class="header" href="#configuration-format">Configuration Format</a></h3>
+<p>UART settings are often written as: <strong>Baud-Data-Parity-Stop</strong></p>
+<p>Examples:</p>
+<ul>
+<li><code>9600-8-N-1</code>: 9600 baud, 8 data bits, No parity, 1 stop bit (most common)</li>
+<li><code>115200-8-E-1</code>: 115200 baud, 8 data bits, Even parity, 1 stop bit</li>
+</ul>
+<h2 id="code-examples"><a class="header" href="#code-examples">Code Examples</a></h2>
+<h3 id="arduino-uart"><a class="header" href="#arduino-uart">Arduino UART</a></h3>
+<pre><code class="language-cpp">void setup() {
+  // Initialize Serial (UART0) at 9600 baud
+  Serial.begin(9600);
+
+  // For other UART ports on boards like Arduino Mega:
+  // Serial1.begin(115200);
+  // Serial2.begin(9600);
+
+  // Wait for serial port to connect
+  while (!Serial) {
+    ; // Wait for serial port to connect (needed for native USB)
+  }
+
+  Serial.println("UART initialized!");
+}
+
+void loop() {
+  // Sending data
+  Serial.print("Temperature: ");
+  Serial.println(25.5);
+
+  // Sending formatted data
+  char buffer[50];
+  sprintf(buffer, "Value: %d, Time: %lu", 42, millis());
+  Serial.println(buffer);
+
+  // Reading data
+  if (Serial.available() &gt; 0) {
+    // Read a single byte
+    char incoming = Serial.read();
+
+    // Read until newline
+    String command = Serial.readStringUntil('\n');
+
+    // Read with timeout (default 1000ms)
+    Serial.setTimeout(500);
+    int value = Serial.parseInt();
+
+    Serial.print("Received: ");
+    Serial.println(command);
+  }
+
+  delay(1000);
+}
+</code></pre>
+<h3 id="esp32-multiple-uarts"><a class="header" href="#esp32-multiple-uarts">ESP32 Multiple UARTs</a></h3>
+<pre><code class="language-cpp">// ESP32 has 3 hardware UARTs
+HardwareSerial SerialGPS(1);   // UART1
+HardwareSerial SerialModem(2); // UART2
+
+void setup() {
+  // Serial0 (USB) - default pins
+  Serial.begin(115200);
+
+  // UART1 - custom pins (TX=17, RX=16)
+  SerialGPS.begin(9600, SERIAL_8N1, 16, 17);
+
+  // UART2 - custom pins (TX=25, RX=26)
+  SerialModem.begin(115200, SERIAL_8N1, 26, 25);
+}
+
+void loop() {
+  // Read from GPS on UART1
+  if (SerialGPS.available()) {
+    String gpsData = SerialGPS.readStringUntil('\n');
+    Serial.println("GPS: " + gpsData);
+  }
+
+  // Read from modem on UART2
+  if (SerialModem.available()) {
+    String modemResponse = SerialModem.readStringUntil('\n');
+    Serial.println("Modem: " + modemResponse);
+  }
+}
+</code></pre>
+<h3 id="stm32-hal-uart"><a class="header" href="#stm32-hal-uart">STM32 HAL UART</a></h3>
+<pre><code class="language-c">#include "stm32f4xx_hal.h"
+
+UART_HandleTypeDef huart2;
+
+void UART_Init(void) {
+    huart2.Instance = USART2;
+    huart2.Init.BaudRate = 115200;
+    huart2.Init.WordLength = UART_WORDLENGTH_8B;
+    huart2.Init.StopBits = UART_STOPBITS_1;
+    huart2.Init.Parity = UART_PARITY_NONE;
+    huart2.Init.Mode = UART_MODE_TX_RX;
+    huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+    HAL_UART_Init(&amp;huart2);
+}
+
+// Blocking transmission
+void UART_SendString(char *str) {
+    HAL_UART_Transmit(&amp;huart2, (uint8_t*)str, strlen(str), 100);
+}
+
+// Blocking reception
+void UART_ReceiveData(uint8_t *buffer, uint16_t size) {
+    HAL_UART_Receive(&amp;huart2, buffer, size, 1000);
+}
+
+// Interrupt-based reception
+void UART_ReceiveIT(uint8_t *buffer, uint16_t size) {
+    HAL_UART_Receive_IT(&amp;huart2, buffer, size);
+}
+
+// Callback when reception complete
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart-&gt;Instance == USART2) {
+        // Process received data
+        // Re-enable reception
+        HAL_UART_Receive_IT(&amp;huart2, rxBuffer, RX_BUFFER_SIZE);
+    }
+}
+
+// DMA-based high-speed transfer
+void UART_Transmit_DMA(uint8_t *data, uint16_t size) {
+    HAL_UART_Transmit_DMA(&amp;huart2, data, size);
+}
+</code></pre>
+<h3 id="bare-metal-avr-arduino-uno"><a class="header" href="#bare-metal-avr-arduino-uno">Bare-Metal AVR (Arduino Uno)</a></h3>
+<pre><code class="language-c">#include &lt;avr/io.h&gt;
+
+#define BAUD 9600
+#define UBRR_VALUE ((F_CPU / 16 / BAUD) - 1)
+
+void UART_Init(void) {
+    // Set baud rate
+    UBRR0H = (UBRR_VALUE &gt;&gt; 8);
+    UBRR0L = UBRR_VALUE;
+
+    // Enable transmitter and receiver
+    UCSR0B = (1 &lt;&lt; TXEN0) | (1 &lt;&lt; RXEN0);
+
+    // Set frame format: 8 data bits, 1 stop bit, no parity
+    UCSR0C = (1 &lt;&lt; UCSZ01) | (1 &lt;&lt; UCSZ00);
+}
+
+void UART_Transmit(uint8_t data) {
+    // Wait for empty transmit buffer
+    while (!(UCSR0A &amp; (1 &lt;&lt; UDRE0)));
+    // Put data into buffer, sends the data
+    UDR0 = data;
+}
+
+uint8_t UART_Receive(void) {
+    // Wait for data to be received
+    while (!(UCSR0A &amp; (1 &lt;&lt; RXC0)));
+    // Get and return received data from buffer
+    return UDR0;
+}
+
+void UART_Print(const char *str) {
+    while (*str) {
+        UART_Transmit(*str++);
+    }
+}
+</code></pre>
+<h2 id="common-use-cases"><a class="header" href="#common-use-cases">Common Use Cases</a></h2>
+<h3 id="1-debugging-and-logging"><a class="header" href="#1-debugging-and-logging">1. Debugging and Logging</a></h3>
+<pre><code class="language-cpp">// Real-time debugging output
+Serial.print("Sensor value: ");
+Serial.println(sensorValue);
+Serial.print("Free RAM: ");
+Serial.println(freeRam());
+</code></pre>
+<h3 id="2-gps-module-communication"><a class="header" href="#2-gps-module-communication">2. GPS Module Communication</a></h3>
+<pre><code class="language-cpp">// Reading NMEA sentences from GPS
+if (SerialGPS.available()) {
+    String nmea = SerialGPS.readStringUntil('\n');
+    if (nmea.startsWith("$GPGGA")) {
+        parseGPS(nmea);
+    }
+}
+</code></pre>
+<h3 id="3-wireless-module-bluetooth-wifi"><a class="header" href="#3-wireless-module-bluetooth-wifi">3. Wireless Module (Bluetooth, WiFi)</a></h3>
+<pre><code class="language-cpp">// AT command interface
+SerialBT.println("AT+NAME=MyDevice");
+delay(100);
+String response = SerialBT.readString();
+</code></pre>
+<h3 id="4-sensor-communication"><a class="header" href="#4-sensor-communication">4. Sensor Communication</a></h3>
+<pre><code class="language-cpp">// CO2 sensor command
+Serial1.write(cmd, 9);
+delay(100);
+if (Serial1.available() &gt;= 9) {
+    Serial1.readBytes(response, 9);
+}
+</code></pre>
+<h3 id="5-pc-communication"><a class="header" href="#5-pc-communication">5. PC Communication</a></h3>
+<pre><code class="language-cpp">// Command protocol with PC
+void loop() {
+    if (Serial.available()) {
+        char cmd = Serial.read();
+        switch(cmd) {
+            case 'L': digitalWrite(LED, HIGH); break;
+            case 'l': digitalWrite(LED, LOW); break;
+            case 'T': Serial.println(readTemp()); break;
+        }
+    }
+}
+</code></pre>
+<h2 id="uart-vs-other-protocols"><a class="header" href="#uart-vs-other-protocols">UART vs Other Protocols</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>UART</th><th>I2C</th><th>SPI</th></tr></thead><tbody>
+<tr><td><strong>Wires</strong></td><td>2 (+ GND)</td><td>2</td><td>4+</td></tr>
+<tr><td><strong>Clock</strong></td><td>Asynchronous</td><td>Synchronous</td><td>Synchronous</td></tr>
+<tr><td><strong>Devices</strong></td><td>2 (point-to-point)</td><td>Many (multi-master)</td><td>1 master, many slaves</td></tr>
+<tr><td><strong>Speed</strong></td><td>Up to ~5 Mbps</td><td>Up to 3.4 Mbps</td><td>Up to 50+ MHz</td></tr>
+<tr><td><strong>Distance</strong></td><td>Long (meters)</td><td>Short (&lt; 1m)</td><td>Short (&lt; 1m)</td></tr>
+<tr><td><strong>Complexity</strong></td><td>Simple</td><td>Medium</td><td>Simple</td></tr>
+<tr><td><strong>Error Detection</strong></td><td>Parity bit</td><td>ACK/NACK</td><td>None</td></tr>
+</tbody></table>
+</div>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-proper-baud-rate-calculation"><a class="header" href="#1-proper-baud-rate-calculation">1. Proper Baud Rate Calculation</a></h3>
+<pre><code class="language-cpp">// Ensure both devices use exact same baud rate
+// Check oscillator tolerance - should be &lt; 2%
+
+// For custom baud rates, verify with formula:
+// UBRR = (F_CPU / (16 * BAUD)) - 1
+</code></pre>
+<h3 id="2-buffer-management"><a class="header" href="#2-buffer-management">2. Buffer Management</a></h3>
+<pre><code class="language-cpp">// Check available space before reading
+if (Serial.available() &gt; 0) {
+    int bytesToRead = Serial.available();
+    for (int i = 0; i &lt; bytesToRead; i++) {
+        rxBuffer[i] = Serial.read();
+    }
+}
+
+// Or use built-in methods
+Serial.readBytes(rxBuffer, expectedSize);
+</code></pre>
+<h3 id="3-timeout-handling"><a class="header" href="#3-timeout-handling">3. Timeout Handling</a></h3>
+<pre><code class="language-cpp">// Set appropriate timeout
+Serial.setTimeout(500);  // 500ms
+
+// Check for timeout
+int value = Serial.parseInt();
+if (value == 0 &amp;&amp; Serial.peek() != '0') {
+    // Timeout occurred
+    Serial.println("Error: Timeout");
+}
+</code></pre>
+<h3 id="4-flow-control-hardware"><a class="header" href="#4-flow-control-hardware">4. Flow Control (Hardware)</a></h3>
+<pre><code>RTS (Request To Send) and CTS (Clear To Send)
+Used for high-speed communications or when receiver
+might not keep up with sender
+</code></pre>
+<h3 id="5-protocol-design"><a class="header" href="#5-protocol-design">5. Protocol Design</a></h3>
+<pre><code class="language-cpp">// Add framing for reliable communication
+// Example: &lt;START&gt;DATA&lt;END&gt;
+
+void sendPacket(uint8_t *data, uint8_t len) {
+    Serial.write(0x02);  // STX (Start of Text)
+    for (int i = 0; i &lt; len; i++) {
+        Serial.write(data[i]);
+    }
+    uint8_t checksum = calculateChecksum(data, len);
+    Serial.write(checksum);
+    Serial.write(0x03);  // ETX (End of Text)
+}
+</code></pre>
+<h2 id="common-issues-and-debugging"><a class="header" href="#common-issues-and-debugging">Common Issues and Debugging</a></h2>
+<h3 id="problem-garbage-characters"><a class="header" href="#problem-garbage-characters">Problem: Garbage Characters</a></h3>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Baud rate mismatch between devices</li>
+<li>Wrong oscillator frequency</li>
+<li>Noisy power supply</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-cpp">// Try common baud rates systematically
+Serial.begin(9600);   // Try this
+Serial.begin(115200); // Then this
+
+// Check your board's crystal frequency matches F_CPU
+</code></pre>
+<h3 id="problem-missing-characters"><a class="header" href="#problem-missing-characters">Problem: Missing Characters</a></h3>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Buffer overflow (data arriving faster than processing)</li>
+<li>Insufficient interrupt priority</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-cpp">// Increase serial buffer size (in HardwareSerial.cpp)
+#define SERIAL_RX_BUFFER_SIZE 256
+
+// Use hardware flow control
+// Process data promptly in loop()
+</code></pre>
+<h3 id="problem-first-character-lost"><a class="header" href="#problem-first-character-lost">Problem: First Character Lost</a></h3>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Receiver not initialized before transmitter sends</li>
+<li>Start bit detection issue</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-cpp">// Add startup delay
+void setup() {
+    Serial.begin(9600);
+    delay(100);  // Wait for UART to stabilize
+}
+
+// Send dummy byte first
+Serial.write(0x00);
+delay(10);
+</code></pre>
+<h2 id="voltage-levels"><a class="header" href="#voltage-levels">Voltage Levels</a></h2>
+<h3 id="ttl-uart-33v-or-5v"><a class="header" href="#ttl-uart-33v-or-5v">TTL UART (3.3V or 5V)</a></h3>
+<ul>
+<li><strong>Logic HIGH</strong>: 2.4V - 5V</li>
+<li><strong>Logic LOW</strong>: 0V - 0.8V</li>
+<li>Most microcontrollers use this</li>
+</ul>
+<h3 id="rs-232-uart-legacy"><a class="header" href="#rs-232-uart-legacy">RS-232 UART (Legacy)</a></h3>
+<ul>
+<li><strong>Logic HIGH (Space)</strong>: -3V to -15V</li>
+<li><strong>Logic LOW (Mark)</strong>: +3V to +15V</li>
+<li>Requires level shifter (MAX232, MAX3232)</li>
+<li>Longer cable runs possible</li>
+</ul>
+<pre><code class="language-cpp">// Using MAX232 level shifter
+// MCU TX -&gt; MAX232 T1IN -&gt; MAX232 T1OUT -&gt; PC RX
+// MCU RX &lt;- MAX232 R1OUT &lt;- MAX232 R1IN &lt;- PC TX
+</code></pre>
+<h2 id="eli10-explain-like-im-10"><a class="header" href="#eli10-explain-like-im-10">ELI10 (Explain Like I'm 10)</a></h2>
+<p>Imagine you and your friend are in different rooms and want to talk using two cans connected by a string:</p>
+<ul>
+<li><strong>TX (Transmit)</strong> is your mouth speaking into the can</li>
+<li><strong>RX (Receive)</strong> is your ear listening from the can</li>
+<li><strong>Baud Rate</strong> is how fast you talk - if one person talks super fast and the other listens slowly, you won't understand each other!</li>
+<li><strong>Start Bit</strong> is like saying "Hey, listen!" before each word</li>
+<li><strong>Stop Bit</strong> is like a pause after each word</li>
+</ul>
+<p>The cool thing? Both of you can talk and listen at the same time because you have two strings (wires)!</p>
+<p>The tricky part? You MUST both agree to talk at the same speed (baud rate) before starting, because there's no way to say "slow down!" once you've begun.</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter">UART Wikipedia</a></li>
+<li><a href="https://learn.sparkfun.com/tutorials/serial-communication">SparkFun Serial Communication Tutorial</a></li>
+<li><a href="https://www.arduino.cc/reference/en/language/functions/communication/serial/">Arduino Serial Reference</a></li>
+<li><a href="https://www.st.com/resource/en/application_note/an4666-stm32-uart-concepts-stmicroelectronics.pdf">AN4666: STM32 UART Concepts</a></li>
+<li><a href="http://wormfood.net/avrbaudcalc.php">Baud Rate Calculator</a></li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -201,6 +643,7 @@
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

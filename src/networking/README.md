@@ -183,16 +183,20 @@ upnpc -l                       # List UPnP devices
 ```
 Application Layer:
   HTTP, FTP, SMTP, DNS, DHCP, SSH
-       “
+       |
+       v
 Transport Layer:
   TCP (reliable) or UDP (fast)
-       “
+       |
+       v
 Network Layer:
   IP (routing and addressing)
-       “
+       |
+       v
 Data Link Layer:
   Ethernet, WiFi (MAC addresses)
-       “
+       |
+       v
 Physical Layer:
   Cables, signals, physical media
 ```
@@ -203,30 +207,30 @@ Physical Layer:
 1. Physical Layer
    - Cable connected?
    - Link lights on?
-   ’ Use: Visual inspection, ethtool
+   -> Use: Visual inspection, ethtool
 
 2. Data Link Layer
    - MAC address correct?
    - Switch working?
-   ’ Use: arp -a, show mac address-table
+   -> Use: arp -a, show mac address-table
 
 3. Network Layer
    - IP address assigned?
    - Can ping gateway?
    - Routing correct?
-   ’ Use: ip addr, ping, traceroute
+   -> Use: ip addr, ping, traceroute
 
 4. Transport Layer
    - Port open?
    - Firewall blocking?
    - Service running?
-   ’ Use: netstat, telnet, nc
+   -> Use: netstat, telnet, nc
 
 5. Application Layer
    - Service configured correctly?
    - Authentication working?
    - Application logs?
-   ’ Use: curl, application-specific tools
+   -> Use: curl, application-specific tools
 ```
 
 ## Security Best Practices

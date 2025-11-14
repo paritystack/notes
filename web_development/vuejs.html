@@ -307,6 +307,1924 @@ onUnmounted(() =&gt; {
 })
 &lt;/script&gt;
 </code></pre>
+<h2 id="composition-api-advanced-patterns"><a class="header" href="#composition-api-advanced-patterns">Composition API Advanced Patterns</a></h2>
+<h3 id="composables-reusable-logic"><a class="header" href="#composables-reusable-logic">Composables (Reusable Logic)</a></h3>
+<pre><code class="language-javascript">// composables/useCounter.js
+import { ref, computed } from 'vue'
+
+export function useCounter(initialValue = 0) {
+  const count = ref(initialValue)
+  const doubled = computed(() =&gt; count.value * 2)
+
+  function increment() {
+    count.value++
+  }
+
+  function decrement() {
+    count.value--
+  }
+
+  function reset() {
+    count.value = initialValue
+  }
+
+  return {
+    count,
+    doubled,
+    increment,
+    decrement,
+    reset
+  }
+}
+
+// Usage in component
+&lt;script setup&gt;
+import { useCounter } from './composables/useCounter'
+
+const { count, doubled, increment, decrement, reset } = useCounter(10)
+&lt;/script&gt;
+</code></pre>
+<h3 id="mouse-tracker-composable"><a class="header" href="#mouse-tracker-composable">Mouse Tracker Composable</a></h3>
+<pre><code class="language-javascript">// composables/useMouse.js
+import { ref, onMounted, onUnmounted } from 'vue'
+
+export function useMouse() {
+  const x = ref(0)
+  const y = ref(0)
+
+  function update(event) {
+    x.value = event.pageX
+    y.value = event.pageY
+  }
+
+  onMounted(() =&gt; window.addEventListener('mousemove', update))
+  onUnmounted(() =&gt; window.removeEventListener('mousemove', update))
+
+  return { x, y }
+}
+</code></pre>
+<h3 id="async-data-fetching-composable"><a class="header" href="#async-data-fetching-composable">Async Data Fetching Composable</a></h3>
+<pre><code class="language-javascript">// composables/useFetch.js
+import { ref, watchEffect, toValue } from 'vue'
+
+export function useFetch(url) {
+  const data = ref(null)
+  const error = ref(null)
+  const loading = ref(false)
+
+  const fetchData = async () =&gt; {
+    loading.value = true
+    error.value = null
+    data.value = null
+
+    try {
+      const response = await fetch(toValue(url))
+      if (!response.ok) throw new Error('Network response was not ok')
+      data.value = await response.json()
+    } catch (e) {
+      error.value = e.message
+    } finally {
+      loading.value = false
+    }
+  }
+
+  watchEffect(() =&gt; {
+    fetchData()
+  })
+
+  return { data, error, loading, refetch: fetchData }
+}
+
+// Usage
+&lt;script setup&gt;
+import { ref } from 'vue'
+import { useFetch } from './composables/useFetch'
+
+const userId = ref(1)
+const url = computed(() =&gt; `https://api.example.com/users/${userId.value}`)
+const { data, error, loading } = useFetch(url)
+&lt;/script&gt;
+</code></pre>
+<h3 id="toref-torefs-and-unref"><a class="header" href="#toref-torefs-and-unref">toRef, toRefs, and unref</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { reactive, toRef, toRefs, unref } from 'vue'
+
+const state = reactive({
+  name: 'John',
+  age: 30,
+  email: 'john@example.com'
+})
+
+// Create a ref to a single property
+const name = toRef(state, 'name')
+name.value = 'Jane' // Updates state.name
+
+// Convert all properties to refs (useful for destructuring)
+const { age, email } = toRefs(state)
+age.value = 31 // Updates state.age
+
+// unref - get value from ref or non-ref
+function logValue(maybeRef) {
+  console.log(unref(maybeRef)) // Works with refs and plain values
+}
+&lt;/script&gt;
+</code></pre>
+<h3 id="readonly-and-shallow-reactivity"><a class="header" href="#readonly-and-shallow-reactivity">Readonly and Shallow Reactivity</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { reactive, readonly, shallowRef, shallowReactive } from 'vue'
+
+// readonly - prevents mutations
+const original = reactive({ count: 0 })
+const copy = readonly(original)
+
+original.count++ // Works
+// copy.count++  // Warning: mutation on readonly proxy
+
+// shallowRef - only .value is reactive
+const shallowState = shallowRef({ nested: { count: 0 } })
+shallowState.value = { nested: { count: 1 } } // Triggers update
+shallowState.value.nested.count++ // Does NOT trigger update
+
+// shallowReactive - only root level is reactive
+const shallowObj = shallowReactive({
+  count: 0,
+  nested: { value: 1 }
+})
+shallowObj.count++ // Triggers update
+shallowObj.nested.value++ // Does NOT trigger update
+&lt;/script&gt;
+</code></pre>
+<h3 id="advanced-watchers"><a class="header" href="#advanced-watchers">Advanced Watchers</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, watch, watchEffect, watchPostEffect } from 'vue'
+
+const count = ref(0)
+const name = ref('John')
+
+// Watch specific sources
+watch([count, name], ([newCount, newName], [oldCount, oldName]) =&gt; {
+  console.log(`Count: ${oldCount} -&gt; ${newCount}`)
+  console.log(`Name: ${oldName} -&gt; ${newName}`)
+})
+
+// Watch with options
+watch(count, (newVal) =&gt; {
+  console.log('Count changed:', newVal)
+}, {
+  immediate: true,  // Run immediately
+  deep: true,       // Deep watch for objects
+  flush: 'post'     // Run after component updates
+})
+
+// watchEffect - automatically tracks dependencies
+watchEffect(() =&gt; {
+  console.log(`Count is ${count.value}`)
+})
+
+// watchPostEffect - runs after component updates (access updated DOM)
+watchPostEffect(() =&gt; {
+  console.log('DOM has been updated')
+})
+
+// Stop a watcher
+const stop = watchEffect(() =&gt; {
+  console.log(count.value)
+})
+stop() // Stop watching
+&lt;/script&gt;
+</code></pre>
+<h2 id="component-communication-patterns"><a class="header" href="#component-communication-patterns">Component Communication Patterns</a></h2>
+<h3 id="provide--inject"><a class="header" href="#provide--inject">Provide / Inject</a></h3>
+<pre><code class="language-vue">&lt;!-- Parent.vue (Provider) --&gt;
+&lt;script setup&gt;
+import { provide, ref } from 'vue'
+
+const theme = ref('dark')
+const updateTheme = (newTheme) =&gt; {
+  theme.value = newTheme
+}
+
+// Provide values to descendants
+provide('theme', theme)
+provide('updateTheme', updateTheme)
+
+// With injection key for type safety
+import { InjectionKey, Ref } from 'vue'
+export const themeKey = Symbol() as InjectionKey&lt;Ref&lt;string&gt;&gt;
+provide(themeKey, theme)
+&lt;/script&gt;
+
+&lt;!-- Child.vue (Consumer) --&gt;
+&lt;script setup&gt;
+import { inject } from 'vue'
+
+// Inject provided values
+const theme = inject('theme')
+const updateTheme = inject('updateTheme')
+
+// With default value
+const config = inject('config', { defaultValue: true })
+
+// With injection key
+import { themeKey } from './Parent.vue'
+const theme = inject(themeKey)
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div :class="theme"&gt;
+    &lt;button @click="updateTheme('light')"&gt;Light Mode&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="template-refs"><a class="header" href="#template-refs">Template Refs</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, onMounted } from 'vue'
+
+// DOM element ref
+const input = ref(null)
+const list = ref([])
+
+// Component ref
+const childComponent = ref(null)
+
+onMounted(() =&gt; {
+  // Access DOM element
+  input.value.focus()
+
+  // Access component instance (only exposed properties)
+  childComponent.value.someExposedMethod()
+})
+
+// Ref in v-for
+function setItemRef(el) {
+  if (el) {
+    list.value.push(el)
+  }
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;input ref="input" /&gt;
+  &lt;ChildComponent ref="childComponent" /&gt;
+
+  &lt;!-- Dynamic refs in v-for --&gt;
+  &lt;div v-for="item in items" :key="item.id" :ref="setItemRef"&gt;
+    {{ item.name }}
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="defineexpose"><a class="header" href="#defineexpose">defineExpose</a></h3>
+<pre><code class="language-vue">&lt;!-- Child.vue --&gt;
+&lt;script setup&gt;
+import { ref } from 'vue'
+
+const count = ref(0)
+const message = ref('Hello')
+
+function increment() {
+  count.value++
+}
+
+function reset() {
+  count.value = 0
+}
+
+// Expose specific properties and methods to parent
+defineExpose({
+  count,
+  increment,
+  reset
+  // message is NOT exposed
+})
+&lt;/script&gt;
+
+&lt;!-- Parent.vue --&gt;
+&lt;script setup&gt;
+import { ref } from 'vue'
+import Child from './Child.vue'
+
+const child = ref(null)
+
+function callChildMethod() {
+  child.value.increment()
+  console.log(child.value.count) // Accessible
+  // console.log(child.value.message) // undefined
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;Child ref="child" /&gt;
+  &lt;button @click="callChildMethod"&gt;Call Child Method&lt;/button&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="custom-v-model"><a class="header" href="#custom-v-model">Custom v-model</a></h3>
+<pre><code class="language-vue">&lt;!-- CustomInput.vue --&gt;
+&lt;script setup&gt;
+// Default v-model (modelValue prop, update:modelValue emit)
+const props = defineProps(['modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+function updateValue(event) {
+  emit('update:modelValue', event.target.value)
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;input
+    :value="modelValue"
+    @input="updateValue"
+  /&gt;
+&lt;/template&gt;
+
+&lt;!-- Multiple v-models --&gt;
+&lt;script setup&gt;
+defineProps(['firstName', 'lastName'])
+defineEmits(['update:firstName', 'update:lastName'])
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;input
+    :value="firstName"
+    @input="$emit('update:firstName', $event.target.value)"
+  /&gt;
+  &lt;input
+    :value="lastName"
+    @input="$emit('update:lastName', $event.target.value)"
+  /&gt;
+&lt;/template&gt;
+
+&lt;!-- Usage --&gt;
+&lt;CustomInput v-model="text" /&gt;
+&lt;CustomInput
+  v-model:first-name="first"
+  v-model:last-name="last"
+/&gt;
+
+&lt;!-- v-model with modifiers --&gt;
+&lt;script setup&gt;
+const props = defineProps({
+  modelValue: String,
+  modelModifiers: { default: () =&gt; ({}) }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+function emitValue(event) {
+  let value = event.target.value
+  if (props.modelModifiers.capitalize) {
+    value = value.charAt(0).toUpperCase() + value.slice(1)
+  }
+  emit('update:modelValue', value)
+}
+&lt;/script&gt;
+
+&lt;!-- Usage: &lt;CustomInput v-model.capitalize="text" /&gt; --&gt;
+</code></pre>
+<h3 id="slots-and-scoped-slots"><a class="header" href="#slots-and-scoped-slots">Slots and Scoped Slots</a></h3>
+<pre><code class="language-vue">&lt;!-- Card.vue --&gt;
+&lt;template&gt;
+  &lt;div class="card"&gt;
+    &lt;!-- Default slot --&gt;
+    &lt;div class="card-header"&gt;
+      &lt;slot name="header"&gt;Default Header&lt;/slot&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Default slot --&gt;
+    &lt;div class="card-body"&gt;
+      &lt;slot&gt;Default Content&lt;/slot&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Scoped slot - passing data to parent --&gt;
+    &lt;div class="card-footer"&gt;
+      &lt;slot name="footer" :date="new Date()" :version="1.0"&gt;
+        Default Footer
+      &lt;/slot&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;!-- Usage --&gt;
+&lt;template&gt;
+  &lt;Card&gt;
+    &lt;template #header&gt;
+      &lt;h1&gt;Custom Header&lt;/h1&gt;
+    &lt;/template&gt;
+
+    &lt;p&gt;Custom content&lt;/p&gt;
+
+    &lt;template #footer="{ date, version }"&gt;
+      &lt;p&gt;Version {{ version }} - {{ date.toLocaleDateString() }}&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/Card&gt;
+&lt;/template&gt;
+
+&lt;!-- List with scoped slots --&gt;
+&lt;script setup&gt;
+defineProps(['items'])
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;ul&gt;
+    &lt;li v-for="item in items" :key="item.id"&gt;
+      &lt;slot :item="item" :index="item.id"&gt;
+        {{ item.name }}
+      &lt;/slot&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/template&gt;
+
+&lt;!-- Usage --&gt;
+&lt;List :items="users"&gt;
+  &lt;template #default="{ item, index }"&gt;
+    &lt;strong&gt;{{ index }}:&lt;/strong&gt; {{ item.name }} ({{ item.email }})
+  &lt;/template&gt;
+&lt;/List&gt;
+</code></pre>
+<h2 id="advanced-component-patterns"><a class="header" href="#advanced-component-patterns">Advanced Component Patterns</a></h2>
+<h3 id="dynamic-components"><a class="header" href="#dynamic-components">Dynamic Components</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, shallowRef } from 'vue'
+import ComponentA from './ComponentA.vue'
+import ComponentB from './ComponentB.vue'
+import ComponentC from './ComponentC.vue'
+
+// Use shallowRef for component definitions (performance)
+const currentComponent = shallowRef(ComponentA)
+
+const tabs = {
+  a: ComponentA,
+  b: ComponentB,
+  c: ComponentC
+}
+
+function switchComponent(key) {
+  currentComponent.value = tabs[key]
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button @click="switchComponent('a')"&gt;Component A&lt;/button&gt;
+    &lt;button @click="switchComponent('b')"&gt;Component B&lt;/button&gt;
+    &lt;button @click="switchComponent('c')"&gt;Component C&lt;/button&gt;
+
+    &lt;!-- Dynamic component --&gt;
+    &lt;component :is="currentComponent" /&gt;
+
+    &lt;!-- With props and events --&gt;
+    &lt;component
+      :is="currentComponent"
+      :some-prop="value"
+      @some-event="handler"
+    /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="async-components-and-lazy-loading"><a class="header" href="#async-components-and-lazy-loading">Async Components and Lazy Loading</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { defineAsyncComponent } from 'vue'
+
+// Simple async component
+const AsyncComponent = defineAsyncComponent(() =&gt;
+  import('./components/AsyncComponent.vue')
+)
+
+// With loading and error states
+const AsyncComponentWithOptions = defineAsyncComponent({
+  loader: () =&gt; import('./components/HeavyComponent.vue'),
+  loadingComponent: LoadingSpinner,
+  errorComponent: ErrorDisplay,
+  delay: 200, // Delay before showing loading component
+  timeout: 3000, // Timeout for loading
+  suspensible: false,
+  onError(error, retry, fail, attempts) {
+    if (attempts &lt;= 3) {
+      retry()
+    } else {
+      fail()
+    }
+  }
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;AsyncComponent /&gt;
+  &lt;AsyncComponentWithOptions /&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="teleport-portal"><a class="header" href="#teleport-portal">Teleport (Portal)</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref } from 'vue'
+
+const showModal = ref(false)
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;button @click="showModal = true"&gt;Open Modal&lt;/button&gt;
+
+  &lt;!-- Teleport to body --&gt;
+  &lt;Teleport to="body"&gt;
+    &lt;div v-if="showModal" class="modal"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;h2&gt;Modal Title&lt;/h2&gt;
+        &lt;p&gt;Modal content&lt;/p&gt;
+        &lt;button @click="showModal = false"&gt;Close&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/Teleport&gt;
+
+  &lt;!-- Teleport to specific element --&gt;
+  &lt;Teleport to="#modals"&gt;
+    &lt;div&gt;Teleported content&lt;/div&gt;
+  &lt;/Teleport&gt;
+
+  &lt;!-- Conditional teleport --&gt;
+  &lt;Teleport :disabled="isMobile" to="body"&gt;
+    &lt;div&gt;Only teleported on desktop&lt;/div&gt;
+  &lt;/Teleport&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="keepalive-component-caching"><a class="header" href="#keepalive-component-caching">KeepAlive (Component Caching)</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref } from 'vue'
+import CompA from './CompA.vue'
+import CompB from './CompB.vue'
+
+const current = ref('CompA')
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;!-- Cache all components --&gt;
+  &lt;KeepAlive&gt;
+    &lt;component :is="current === 'CompA' ? CompA : CompB" /&gt;
+  &lt;/KeepAlive&gt;
+
+  &lt;!-- Cache specific components --&gt;
+  &lt;KeepAlive include="CompA,CompB"&gt;
+    &lt;component :is="current" /&gt;
+  &lt;/KeepAlive&gt;
+
+  &lt;!-- Exclude specific components --&gt;
+  &lt;KeepAlive exclude="CompC"&gt;
+    &lt;component :is="current" /&gt;
+  &lt;/KeepAlive&gt;
+
+  &lt;!-- With max cached instances --&gt;
+  &lt;KeepAlive :max="10"&gt;
+    &lt;component :is="current" /&gt;
+  &lt;/KeepAlive&gt;
+&lt;/template&gt;
+
+&lt;!-- Component with KeepAlive lifecycle hooks --&gt;
+&lt;script setup&gt;
+import { onActivated, onDeactivated } from 'vue'
+
+onActivated(() =&gt; {
+  console.log('Component activated (from cache)')
+})
+
+onDeactivated(() =&gt; {
+  console.log('Component deactivated (cached)')
+})
+&lt;/script&gt;
+</code></pre>
+<h3 id="suspense-async-boundaries"><a class="header" href="#suspense-async-boundaries">Suspense (Async Boundaries)</a></h3>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;Suspense&gt;
+    &lt;!-- Component with async setup --&gt;
+    &lt;template #default&gt;
+      &lt;AsyncComponent /&gt;
+    &lt;/template&gt;
+
+    &lt;!-- Loading state --&gt;
+    &lt;template #fallback&gt;
+      &lt;div&gt;Loading...&lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/Suspense&gt;
+&lt;/template&gt;
+
+&lt;!-- AsyncComponent.vue --&gt;
+&lt;script setup&gt;
+// Top-level await in script setup
+const data = await fetch('/api/data').then(r =&gt; r.json())
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;{{ data }}&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;!-- Multiple async components --&gt;
+&lt;template&gt;
+  &lt;Suspense&gt;
+    &lt;div&gt;
+      &lt;AsyncComponentA /&gt;
+      &lt;AsyncComponentB /&gt;
+      &lt;!-- Both must resolve before showing --&gt;
+    &lt;/div&gt;
+
+    &lt;template #fallback&gt;
+      &lt;LoadingSpinner /&gt;
+    &lt;/template&gt;
+  &lt;/Suspense&gt;
+&lt;/template&gt;
+
+&lt;!-- Error handling with Suspense --&gt;
+&lt;script setup&gt;
+import { onErrorCaptured, ref } from 'vue'
+
+const error = ref(null)
+
+onErrorCaptured((err) =&gt; {
+  error.value = err
+  return false // Prevent error from propagating
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div v-if="error"&gt;
+    Error: {{ error.message }}
+  &lt;/div&gt;
+  &lt;Suspense v-else&gt;
+    &lt;AsyncComponent /&gt;
+    &lt;template #fallback&gt;Loading...&lt;/template&gt;
+  &lt;/Suspense&gt;
+&lt;/template&gt;
+</code></pre>
+<h2 id="form-handling--validation"><a class="header" href="#form-handling--validation">Form Handling &amp; Validation</a></h2>
+<h3 id="complex-form-patterns"><a class="header" href="#complex-form-patterns">Complex Form Patterns</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { reactive, computed } from 'vue'
+
+const form = reactive({
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  acceptTerms: false
+})
+
+const errors = reactive({
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+})
+
+// Validation rules
+const rules = {
+  username: (value) =&gt; {
+    if (!value) return 'Username is required'
+    if (value.length &lt; 3) return 'Username must be at least 3 characters'
+    return ''
+  },
+  email: (value) =&gt; {
+    if (!value) return 'Email is required'
+    if (!/^\S+@\S+\.\S+$/.test(value)) return 'Email is invalid'
+    return ''
+  },
+  password: (value) =&gt; {
+    if (!value) return 'Password is required'
+    if (value.length &lt; 8) return 'Password must be at least 8 characters'
+    return ''
+  },
+  confirmPassword: (value) =&gt; {
+    if (value !== form.password) return 'Passwords do not match'
+    return ''
+  }
+}
+
+function validateField(field) {
+  errors[field] = rules[field](form[field])
+}
+
+function validateAll() {
+  Object.keys(rules).forEach(validateField)
+  return !Object.values(errors).some(error =&gt; error)
+}
+
+const isValid = computed(() =&gt; {
+  return form.username &amp;&amp;
+         form.email &amp;&amp;
+         form.password &amp;&amp;
+         form.password === form.confirmPassword &amp;&amp;
+         form.acceptTerms
+})
+
+async function handleSubmit() {
+  if (!validateAll()) {
+    return
+  }
+
+  try {
+    await submitForm(form)
+  } catch (error) {
+    console.error('Submit failed:', error)
+  }
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;form @submit.prevent="handleSubmit"&gt;
+    &lt;div&gt;
+      &lt;label&gt;Username&lt;/label&gt;
+      &lt;input
+        v-model="form.username"
+        @blur="validateField('username')"
+        :class="{ error: errors.username }"
+      /&gt;
+      &lt;span class="error-message"&gt;{{ errors.username }}&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;div&gt;
+      &lt;label&gt;Email&lt;/label&gt;
+      &lt;input
+        v-model="form.email"
+        type="email"
+        @blur="validateField('email')"
+        :class="{ error: errors.email }"
+      /&gt;
+      &lt;span class="error-message"&gt;{{ errors.email }}&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;div&gt;
+      &lt;label&gt;Password&lt;/label&gt;
+      &lt;input
+        v-model="form.password"
+        type="password"
+        @blur="validateField('password')"
+        :class="{ error: errors.password }"
+      /&gt;
+      &lt;span class="error-message"&gt;{{ errors.password }}&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;div&gt;
+      &lt;label&gt;Confirm Password&lt;/label&gt;
+      &lt;input
+        v-model="form.confirmPassword"
+        type="password"
+        @blur="validateField('confirmPassword')"
+        :class="{ error: errors.confirmPassword }"
+      /&gt;
+      &lt;span class="error-message"&gt;{{ errors.confirmPassword }}&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;div&gt;
+      &lt;label&gt;
+        &lt;input type="checkbox" v-model="form.acceptTerms" /&gt;
+        Accept Terms and Conditions
+      &lt;/label&gt;
+    &lt;/div&gt;
+
+    &lt;button type="submit" :disabled="!isValid"&gt;
+      Submit
+    &lt;/button&gt;
+  &lt;/form&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="v-model-modifiers"><a class="header" href="#v-model-modifiers">v-model Modifiers</a></h3>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;!-- .lazy - update on change instead of input --&gt;
+  &lt;input v-model.lazy="text" /&gt;
+
+  &lt;!-- .number - convert to number --&gt;
+  &lt;input v-model.number="age" type="number" /&gt;
+
+  &lt;!-- .trim - trim whitespace --&gt;
+  &lt;input v-model.trim="message" /&gt;
+
+  &lt;!-- Multiple modifiers --&gt;
+  &lt;input v-model.lazy.trim="username" /&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="debounced-input"><a class="header" href="#debounced-input">Debounced Input</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, watch } from 'vue'
+
+const searchQuery = ref('')
+const debouncedQuery = ref('')
+
+// Debounce function
+function debounce(fn, delay) {
+  let timeoutId
+  return (...args) =&gt; {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() =&gt; fn(...args), delay)
+  }
+}
+
+const updateDebounced = debounce((value) =&gt; {
+  debouncedQuery.value = value
+}, 500)
+
+watch(searchQuery, (newValue) =&gt; {
+  updateDebounced(newValue)
+})
+
+// Or as a composable
+import { customRef } from 'vue'
+
+function useDebouncedRef(value, delay = 300) {
+  return customRef((track, trigger) =&gt; {
+    let timeout
+    return {
+      get() {
+        track()
+        return value
+      },
+      set(newValue) {
+        clearTimeout(timeout)
+        timeout = setTimeout(() =&gt; {
+          value = newValue
+          trigger()
+        }, delay)
+      }
+    }
+  })
+}
+
+const debouncedSearch = useDebouncedRef('', 500)
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;input v-model="searchQuery" placeholder="Search..." /&gt;
+  &lt;p&gt;Debounced: {{ debouncedQuery }}&lt;/p&gt;
+&lt;/template&gt;
+</code></pre>
+<h2 id="vue-router"><a class="header" href="#vue-router">Vue Router</a></h2>
+<h3 id="router-setup"><a class="header" href="#router-setup">Router Setup</a></h3>
+<pre><code class="language-javascript">// router/index.js
+import { createRouter, createWebHistory } from 'vue-router'
+import Home from '../views/Home.vue'
+
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: Home
+  },
+  {
+    path: '/about',
+    name: 'about',
+    // Lazy-loaded route
+    component: () =&gt; import('../views/About.vue')
+  },
+  {
+    path: '/user/:id',
+    name: 'user',
+    component: () =&gt; import('../views/User.vue'),
+    props: true // Pass route params as props
+  },
+  {
+    path: '/posts/:id',
+    component: () =&gt; import('../views/Post.vue'),
+    // Route meta fields
+    meta: { requiresAuth: true }
+  },
+  {
+    // Nested routes
+    path: '/dashboard',
+    component: () =&gt; import('../views/Dashboard.vue'),
+    children: [
+      {
+        path: '',
+        component: () =&gt; import('../views/DashboardHome.vue')
+      },
+      {
+        path: 'profile',
+        component: () =&gt; import('../views/Profile.vue')
+      },
+      {
+        path: 'settings',
+        component: () =&gt; import('../views/Settings.vue')
+      }
+    ]
+  },
+  {
+    // 404 catch all
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () =&gt; import('../views/NotFound.vue')
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
+})
+
+export default router
+</code></pre>
+<h3 id="navigation-and-route-access"><a class="header" href="#navigation-and-route-access">Navigation and Route Access</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { useRouter, useRoute } from 'vue-router'
+import { computed } from 'vue'
+
+const router = useRouter()
+const route = useRoute()
+
+// Access route params and query
+const userId = computed(() =&gt; route.params.id)
+const page = computed(() =&gt; route.query.page || 1)
+
+// Programmatic navigation
+function goToHome() {
+  router.push('/')
+}
+
+function goToUser(id) {
+  router.push({ name: 'user', params: { id } })
+}
+
+function goToUserWithQuery(id) {
+  router.push({
+    path: `/user/${id}`,
+    query: { tab: 'posts', page: 1 }
+  })
+}
+
+function goBack() {
+  router.back()
+}
+
+function goForward() {
+  router.forward()
+}
+
+// Replace (no history entry)
+function replaceRoute() {
+  router.replace('/new-location')
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- Declarative navigation --&gt;
+    &lt;router-link to="/"&gt;Home&lt;/router-link&gt;
+    &lt;router-link :to="{ name: 'user', params: { id: 123 } }"&gt;
+      User 123
+    &lt;/router-link&gt;
+    &lt;router-link to="/about" active-class="active" exact&gt;
+      About
+    &lt;/router-link&gt;
+
+    &lt;!-- Current route info --&gt;
+    &lt;p&gt;Current path: {{ route.path }}&lt;/p&gt;
+    &lt;p&gt;User ID: {{ userId }}&lt;/p&gt;
+    &lt;p&gt;Page: {{ page }}&lt;/p&gt;
+
+    &lt;!-- Programmatic navigation --&gt;
+    &lt;button @click="goToHome"&gt;Go Home&lt;/button&gt;
+    &lt;button @click="goBack"&gt;Go Back&lt;/button&gt;
+
+    &lt;!-- Router view --&gt;
+    &lt;router-view /&gt;
+
+    &lt;!-- Named views --&gt;
+    &lt;router-view name="sidebar" /&gt;
+    &lt;router-view name="main" /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="navigation-guards"><a class="header" href="#navigation-guards">Navigation Guards</a></h3>
+<pre><code class="language-javascript">// Global guards (in router/index.js)
+router.beforeEach((to, from, next) =&gt; {
+  // Check authentication
+  if (to.meta.requiresAuth &amp;&amp; !isAuthenticated()) {
+    next({ name: 'login', query: { redirect: to.fullPath } })
+  } else {
+    next()
+  }
+})
+
+router.afterEach((to, from) =&gt; {
+  // Analytics, page title, etc.
+  document.title = to.meta.title || 'Default Title'
+})
+
+// Per-route guards
+const routes = [
+  {
+    path: '/admin',
+    component: Admin,
+    beforeEnter: (to, from, next) =&gt; {
+      if (!isAdmin()) {
+        next({ name: 'home' })
+      } else {
+        next()
+      }
+    }
+  }
+]
+
+// Component guards
+&lt;script setup&gt;
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
+
+onBeforeRouteLeave((to, from) =&gt; {
+  if (hasUnsavedChanges()) {
+    const answer = window.confirm('You have unsaved changes. Leave anyway?')
+    if (!answer) return false
+  }
+})
+
+onBeforeRouteUpdate(async (to, from) =&gt; {
+  // React to route changes on the same component
+  if (to.params.id !== from.params.id) {
+    await loadUser(to.params.id)
+  }
+})
+&lt;/script&gt;
+</code></pre>
+<h2 id="state-management"><a class="header" href="#state-management">State Management</a></h2>
+<h3 id="pinia-store"><a class="header" href="#pinia-store">Pinia Store</a></h3>
+<pre><code class="language-javascript">// stores/counter.js
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+// Option syntax
+export const useCounterStore = defineStore('counter', {
+  state: () =&gt; ({
+    count: 0,
+    name: 'Counter'
+  }),
+
+  getters: {
+    doubled: (state) =&gt; state.count * 2,
+    doubledPlusOne() {
+      return this.doubled + 1
+    }
+  },
+
+  actions: {
+    increment() {
+      this.count++
+    },
+    async fetchData() {
+      const data = await fetch('/api/data').then(r =&gt; r.json())
+      this.count = data.count
+    }
+  }
+})
+
+// Composition API syntax (recommended)
+export const useCounterStore = defineStore('counter', () =&gt; {
+  const count = ref(0)
+  const name = ref('Counter')
+
+  const doubled = computed(() =&gt; count.value * 2)
+
+  function increment() {
+    count.value++
+  }
+
+  async function fetchData() {
+    const data = await fetch('/api/data').then(r =&gt; r.json())
+    count.value = data.count
+  }
+
+  return {
+    count,
+    name,
+    doubled,
+    increment,
+    fetchData
+  }
+})
+</code></pre>
+<h3 id="using-stores"><a class="header" href="#using-stores">Using Stores</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { useCounterStore } from '@/stores/counter'
+import { storeToRefs } from 'pinia'
+
+const counterStore = useCounterStore()
+
+// Destructure actions (works directly)
+const { increment, fetchData } = counterStore
+
+// Destructure state (needs storeToRefs to maintain reactivity)
+const { count, doubled } = storeToRefs(counterStore)
+
+// Or use store directly
+// counterStore.count
+// counterStore.increment()
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p&gt;Count: {{ count }}&lt;/p&gt;
+    &lt;p&gt;Doubled: {{ doubled }}&lt;/p&gt;
+    &lt;button @click="increment"&gt;Increment&lt;/button&gt;
+    &lt;button @click="fetchData"&gt;Fetch Data&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="shared-state-with-composables"><a class="header" href="#shared-state-with-composables">Shared State with Composables</a></h3>
+<pre><code class="language-javascript">// composables/useSharedState.js
+import { ref, readonly } from 'vue'
+
+// Shared state (singleton)
+const count = ref(0)
+const isLoading = ref(false)
+
+export function useSharedState() {
+  function increment() {
+    count.value++
+  }
+
+  function decrement() {
+    count.value--
+  }
+
+  async function loadData() {
+    isLoading.value = true
+    try {
+      // Fetch data
+      await new Promise(resolve =&gt; setTimeout(resolve, 1000))
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  return {
+    count: readonly(count), // Expose as readonly
+    isLoading: readonly(isLoading),
+    increment,
+    decrement,
+    loadData
+  }
+}
+
+// Usage in multiple components
+&lt;script setup&gt;
+import { useSharedState } from '@/composables/useSharedState'
+
+const { count, increment } = useSharedState()
+&lt;/script&gt;
+</code></pre>
+<h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
+<h3 id="component-lazy-loading"><a class="header" href="#component-lazy-loading">Component Lazy Loading</a></h3>
+<pre><code class="language-javascript">// Lazy load in router
+const routes = [
+  {
+    path: '/dashboard',
+    component: () =&gt; import('./views/Dashboard.vue')
+  }
+]
+
+// Lazy load component
+&lt;script setup&gt;
+import { defineAsyncComponent } from 'vue'
+
+const HeavyComponent = defineAsyncComponent(() =&gt;
+  import('./components/HeavyComponent.vue')
+)
+&lt;/script&gt;
+
+// Webpack magic comments for chunk naming
+const Dashboard = () =&gt; import(
+  /* webpackChunkName: "dashboard" */
+  './views/Dashboard.vue'
+)
+</code></pre>
+<h3 id="computed-vs-methods-vs-watchers"><a class="header" href="#computed-vs-methods-vs-watchers">Computed vs Methods vs Watchers</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, computed, watch } from 'vue'
+
+const count = ref(0)
+const multiplier = ref(2)
+
+// ✅ GOOD: Use computed for derived values (cached, reactive)
+const doubled = computed(() =&gt; count.value * multiplier.value)
+
+// ❌ BAD: Don't use methods for derived values (recalculated every render)
+function getDoubled() {
+  return count.value * multiplier.value
+}
+
+// ✅ GOOD: Use watchers for side effects
+watch(count, (newValue, oldValue) =&gt; {
+  console.log('Count changed:', newValue)
+  // Side effects: API calls, DOM manipulation, etc.
+})
+
+// ❌ BAD: Don't use computed for side effects
+const badComputed = computed(() =&gt; {
+  console.log('This runs too often!')
+  return count.value * 2
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;!-- ✅ Computed (cached) --&gt;
+  &lt;p&gt;{{ doubled }}&lt;/p&gt;
+
+  &lt;!-- ❌ Method (recalculated every render) --&gt;
+  &lt;p&gt;{{ getDoubled() }}&lt;/p&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="v-memo-and-v-once"><a class="header" href="#v-memo-and-v-once">v-memo and v-once</a></h3>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;!-- v-once: render once, never update --&gt;
+  &lt;div v-once&gt;
+    &lt;h1&gt;{{ title }}&lt;/h1&gt;
+    &lt;p&gt;This content never changes&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;!-- v-memo: conditional caching (Vue 3.2+) --&gt;
+  &lt;div v-for="item in list" :key="item.id" v-memo="[item.id, item.selected]"&gt;
+    &lt;!-- Only re-render if item.id or item.selected changes --&gt;
+    &lt;p&gt;{{ item.name }}&lt;/p&gt;
+    &lt;p&gt;{{ item.description }}&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Without v-memo, entire item re-renders on any change --&gt;
+  &lt;!-- With v-memo, only re-renders when dependencies change --&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="virtual-scrolling-pattern"><a class="header" href="#virtual-scrolling-pattern">Virtual Scrolling Pattern</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, computed } from 'vue'
+
+const items = ref([/* thousands of items */])
+const containerHeight = ref(600)
+const itemHeight = 50
+const scrollTop = ref(0)
+
+const visibleStart = computed(() =&gt;
+  Math.floor(scrollTop.value / itemHeight)
+)
+
+const visibleEnd = computed(() =&gt;
+  Math.ceil((scrollTop.value + containerHeight.value) / itemHeight)
+)
+
+const visibleItems = computed(() =&gt;
+  items.value.slice(visibleStart.value, visibleEnd.value)
+)
+
+const totalHeight = computed(() =&gt;
+  items.value.length * itemHeight
+)
+
+const offsetY = computed(() =&gt;
+  visibleStart.value * itemHeight
+)
+
+function handleScroll(event) {
+  scrollTop.value = event.target.scrollTop
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div
+    class="virtual-scroll-container"
+    :style="{ height: containerHeight + 'px' }"
+    @scroll="handleScroll"
+  &gt;
+    &lt;div :style="{ height: totalHeight + 'px', position: 'relative' }"&gt;
+      &lt;div
+        :style="{ transform: `translateY(${offsetY}px)` }"
+      &gt;
+        &lt;div
+          v-for="item in visibleItems"
+          :key="item.id"
+          :style="{ height: itemHeight + 'px' }"
+        &gt;
+          {{ item.name }}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="production-optimization"><a class="header" href="#production-optimization">Production Optimization</a></h3>
+<pre><code class="language-javascript">// vite.config.js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [vue()],
+  build: {
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+      }
+    },
+    // Code splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['vue', 'vue-router', 'pinia'],
+          'ui': ['./src/components/ui']
+        }
+      }
+    },
+    // Chunk size warnings
+    chunkSizeWarningLimit: 500
+  }
+})
+</code></pre>
+<h2 id="typescript-integration"><a class="header" href="#typescript-integration">TypeScript Integration</a></h2>
+<h3 id="typed-props-and-emits"><a class="header" href="#typed-props-and-emits">Typed Props and Emits</a></h3>
+<pre><code class="language-vue">&lt;script setup lang="ts"&gt;
+import { ref } from 'vue'
+
+// Define props with TypeScript
+interface Props {
+  title: string
+  count?: number
+  items: Array&lt;{ id: number; name: string }&gt;
+  callback?: (value: number) =&gt; void
+}
+
+const props = withDefaults(defineProps&lt;Props&gt;(), {
+  count: 0,
+  callback: () =&gt; {}
+})
+
+// Define emits with TypeScript
+interface Emits {
+  (e: 'update', value: number): void
+  (e: 'delete', id: number): void
+  (e: 'submit', data: { name: string; email: string }): void
+}
+
+const emit = defineEmits&lt;Emits&gt;()
+
+// Or inline
+const emit = defineEmits&lt;{
+  update: [value: number]
+  delete: [id: number]
+}&gt;()
+
+function handleClick() {
+  emit('update', props.count + 1)
+}
+&lt;/script&gt;
+</code></pre>
+<h3 id="typed-refs-and-reactive"><a class="header" href="#typed-refs-and-reactive">Typed Refs and Reactive</a></h3>
+<pre><code class="language-vue">&lt;script setup lang="ts"&gt;
+import { ref, reactive, computed } from 'vue'
+
+// Typed ref
+const count = ref&lt;number&gt;(0)
+const name = ref&lt;string&gt;('John')
+
+// Typed ref with interface
+interface User {
+  id: number
+  name: string
+  email: string
+}
+
+const user = ref&lt;User&gt;({
+  id: 1,
+  name: 'John',
+  email: 'john@example.com'
+})
+
+// Typed reactive
+const state = reactive&lt;{
+  count: number
+  name: string
+}&gt;({
+  count: 0,
+  name: 'John'
+})
+
+// Typed computed
+const doubled = computed&lt;number&gt;(() =&gt; count.value * 2)
+
+// Typed template ref
+import { ComponentPublicInstance } from 'vue'
+import ChildComponent from './ChildComponent.vue'
+
+const child = ref&lt;ComponentPublicInstance&lt;typeof ChildComponent&gt;&gt;()
+&lt;/script&gt;
+</code></pre>
+<h3 id="typed-composables"><a class="header" href="#typed-composables">Typed Composables</a></h3>
+<pre><code class="language-typescript">// composables/useFetch.ts
+import { ref, Ref } from 'vue'
+
+interface UseFetchReturn&lt;T&gt; {
+  data: Ref&lt;T | null&gt;
+  error: Ref&lt;Error | null&gt;
+  loading: Ref&lt;boolean&gt;
+  refetch: () =&gt; Promise&lt;void&gt;
+}
+
+export function useFetch&lt;T&gt;(url: string): UseFetchReturn&lt;T&gt; {
+  const data = ref&lt;T | null&gt;(null)
+  const error = ref&lt;Error | null&gt;(null)
+  const loading = ref&lt;boolean&gt;(false)
+
+  async function fetchData() {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Network error')
+      data.value = await response.json()
+    } catch (e) {
+      error.value = e as Error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  fetchData()
+
+  return {
+    data,
+    error,
+    loading,
+    refetch: fetchData
+  }
+}
+
+// Usage
+interface User {
+  id: number
+  name: string
+  email: string
+}
+
+const { data, error, loading } = useFetch&lt;User[]&gt;('/api/users')
+</code></pre>
+<h3 id="generic-components"><a class="header" href="#generic-components">Generic Components</a></h3>
+<pre><code class="language-vue">&lt;script setup lang="ts" generic="T extends { id: number }"&gt;
+import { computed } from 'vue'
+
+interface Props {
+  items: T[]
+  selectedId?: number
+}
+
+const props = defineProps&lt;Props&gt;()
+
+const emit = defineEmits&lt;{
+  select: [item: T]
+}&gt;()
+
+const selectedItem = computed(() =&gt;
+  props.items.find(item =&gt; item.id === props.selectedId)
+)
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;div
+      v-for="item in items"
+      :key="item.id"
+      @click="emit('select', item)"
+    &gt;
+      &lt;slot :item="item" /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;!-- Usage --&gt;
+&lt;GenericList
+  :items="users"
+  @select="handleSelect"
+&gt;
+  &lt;template #default="{ item }"&gt;
+    {{ item.name }}
+  &lt;/template&gt;
+&lt;/GenericList&gt;
+</code></pre>
+<h2 id="common-utility-patterns"><a class="header" href="#common-utility-patterns">Common Utility Patterns</a></h2>
+<h3 id="async-data-fetching-with-loading-states"><a class="header" href="#async-data-fetching-with-loading-states">Async Data Fetching with Loading States</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, onMounted } from 'vue'
+
+const data = ref(null)
+const loading = ref(false)
+const error = ref(null)
+
+async function fetchData() {
+  loading.value = true
+  error.value = null
+
+  try {
+    const response = await fetch('/api/data')
+    if (!response.ok) throw new Error('Failed to fetch')
+    data.value = await response.json()
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() =&gt; {
+  fetchData()
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;div v-if="loading"&gt;Loading...&lt;/div&gt;
+    &lt;div v-else-if="error"&gt;Error: {{ error }}&lt;/div&gt;
+    &lt;div v-else-if="data"&gt;
+      &lt;!-- Display data --&gt;
+      &lt;pre&gt;{{ data }}&lt;/pre&gt;
+    &lt;/div&gt;
+    &lt;button @click="fetchData"&gt;Retry&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="error-boundary-pattern"><a class="header" href="#error-boundary-pattern">Error Boundary Pattern</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, onErrorCaptured } from 'vue'
+
+const error = ref(null)
+
+onErrorCaptured((err, instance, info) =&gt; {
+  error.value = err
+  console.error('Error captured:', err, info)
+  // Return false to prevent propagation
+  return false
+})
+
+function resetError() {
+  error.value = null
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;div v-if="error" class="error-boundary"&gt;
+      &lt;h2&gt;Something went wrong&lt;/h2&gt;
+      &lt;p&gt;{{ error.message }}&lt;/p&gt;
+      &lt;button @click="resetError"&gt;Try Again&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;slot v-else /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="conditional-classes-and-styles"><a class="header" href="#conditional-classes-and-styles">Conditional Classes and Styles</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, computed } from 'vue'
+
+const isActive = ref(true)
+const hasError = ref(false)
+const type = ref('primary')
+
+const buttonClasses = computed(() =&gt; ({
+  active: isActive.value,
+  error: hasError.value,
+  [`btn-${type.value}`]: true
+}))
+
+const dynamicStyles = computed(() =&gt; ({
+  color: isActive.value ? 'blue' : 'gray',
+  fontSize: '14px'
+}))
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;!-- Class binding --&gt;
+  &lt;div :class="{ active: isActive, error: hasError }"&gt;Basic&lt;/div&gt;
+
+  &lt;!-- Array syntax --&gt;
+  &lt;div :class="['btn', type, { active: isActive }]"&gt;Array&lt;/div&gt;
+
+  &lt;!-- Computed classes --&gt;
+  &lt;button :class="buttonClasses"&gt;Button&lt;/button&gt;
+
+  &lt;!-- Style binding --&gt;
+  &lt;div :style="{ color: 'red', fontSize: '14px' }"&gt;Inline&lt;/div&gt;
+  &lt;div :style="dynamicStyles"&gt;Dynamic&lt;/div&gt;
+
+  &lt;!-- Multiple style objects --&gt;
+  &lt;div :style="[baseStyles, overrideStyles]"&gt;Multiple&lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="debounce-and-throttle"><a class="header" href="#debounce-and-throttle">Debounce and Throttle</a></h3>
+<pre><code class="language-javascript">// utils/timing.js
+
+// Debounce: wait for pause in calls
+export function debounce(fn, delay) {
+  let timeoutId
+  return function (...args) {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() =&gt; fn.apply(this, args), delay)
+  }
+}
+
+// Throttle: limit call frequency
+export function throttle(fn, limit) {
+  let inThrottle
+  return function (...args) {
+    if (!inThrottle) {
+      fn.apply(this, args)
+      inThrottle = true
+      setTimeout(() =&gt; inThrottle = false, limit)
+    }
+  }
+}
+
+// Usage
+&lt;script setup&gt;
+import { ref } from 'vue'
+import { debounce, throttle } from '@/utils/timing'
+
+const searchQuery = ref('')
+
+const debouncedSearch = debounce((query) =&gt; {
+  console.log('Searching for:', query)
+  // API call here
+}, 500)
+
+const throttledScroll = throttle(() =&gt; {
+  console.log('Scroll event')
+}, 1000)
+
+function handleInput(event) {
+  searchQuery.value = event.target.value
+  debouncedSearch(event.target.value)
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;input @input="handleInput" /&gt;
+  &lt;div @scroll="throttledScroll"&gt;Scrollable content&lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h3 id="intersection-observer-lazy-loading"><a class="header" href="#intersection-observer-lazy-loading">Intersection Observer (Lazy Loading)</a></h3>
+<pre><code class="language-vue">&lt;script setup&gt;
+import { ref, onMounted, onUnmounted } from 'vue'
+
+const target = ref(null)
+const isVisible = ref(false)
+
+let observer
+
+onMounted(() =&gt; {
+  observer = new IntersectionObserver(
+    ([entry]) =&gt; {
+      isVisible.value = entry.isIntersecting
+
+      // Load once and disconnect
+      if (entry.isIntersecting) {
+        loadContent()
+        observer.disconnect()
+      }
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '50px'
+    }
+  )
+
+  if (target.value) {
+    observer.observe(target.value)
+  }
+})
+
+onUnmounted(() =&gt; {
+  if (observer) {
+    observer.disconnect()
+  }
+})
+
+function loadContent() {
+  console.log('Loading content...')
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div ref="target"&gt;
+    &lt;div v-if="isVisible"&gt;
+      &lt;!-- Lazy loaded content --&gt;
+      &lt;img src="large-image.jpg" /&gt;
+    &lt;/div&gt;
+    &lt;div v-else&gt;
+      Loading...
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<h2 id="testing-patterns"><a class="header" href="#testing-patterns">Testing Patterns</a></h2>
+<h3 id="component-testing-with-vitest"><a class="header" href="#component-testing-with-vitest">Component Testing with Vitest</a></h3>
+<pre><code class="language-javascript">// MyComponent.spec.js
+import { describe, it, expect, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import MyComponent from './MyComponent.vue'
+
+describe('MyComponent', () =&gt; {
+  it('renders properly', () =&gt; {
+    const wrapper = mount(MyComponent, {
+      props: {
+        title: 'Hello'
+      }
+    })
+
+    expect(wrapper.text()).toContain('Hello')
+  })
+
+  it('emits update event when button clicked', async () =&gt; {
+    const wrapper = mount(MyComponent)
+
+    await wrapper.find('button').trigger('click')
+
+    expect(wrapper.emitted()).toHaveProperty('update')
+    expect(wrapper.emitted('update')[0]).toEqual([1])
+  })
+
+  it('updates count when increment is called', async () =&gt; {
+    const wrapper = mount(MyComponent)
+
+    expect(wrapper.vm.count).toBe(0)
+
+    await wrapper.vm.increment()
+
+    expect(wrapper.vm.count).toBe(1)
+    expect(wrapper.html()).toContain('1')
+  })
+
+  it('handles async data fetching', async () =&gt; {
+    // Mock fetch
+    global.fetch = vi.fn(() =&gt;
+      Promise.resolve({
+        ok: true,
+        json: () =&gt; Promise.resolve({ data: 'test' })
+      })
+    )
+
+    const wrapper = mount(MyComponent)
+
+    // Wait for async operations
+    await wrapper.vm.$nextTick()
+    await new Promise(resolve =&gt; setTimeout(resolve, 0))
+
+    expect(wrapper.vm.data).toEqual({ data: 'test' })
+  })
+})
+</code></pre>
+<h3 id="testing-composables"><a class="header" href="#testing-composables">Testing Composables</a></h3>
+<pre><code class="language-javascript">// useCounter.spec.js
+import { describe, it, expect } from 'vitest'
+import { useCounter } from './useCounter'
+
+describe('useCounter', () =&gt; {
+  it('initializes with default value', () =&gt; {
+    const { count } = useCounter()
+    expect(count.value).toBe(0)
+  })
+
+  it('initializes with custom value', () =&gt; {
+    const { count } = useCounter(10)
+    expect(count.value).toBe(10)
+  })
+
+  it('increments count', () =&gt; {
+    const { count, increment } = useCounter()
+    increment()
+    expect(count.value).toBe(1)
+  })
+
+  it('computes doubled value', () =&gt; {
+    const { count, doubled, increment } = useCounter()
+    expect(doubled.value).toBe(0)
+    increment()
+    expect(doubled.value).toBe(2)
+  })
+})
+</code></pre>
+<h3 id="mocking-composables-and-stores"><a class="header" href="#mocking-composables-and-stores">Mocking Composables and Stores</a></h3>
+<pre><code class="language-javascript">// Component.spec.js
+import { describe, it, expect, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
+import MyComponent from './MyComponent.vue'
+import { useUserStore } from '@/stores/user'
+
+// Mock composable
+vi.mock('@/composables/useFetch', () =&gt; ({
+  useFetch: vi.fn(() =&gt; ({
+    data: { value: { name: 'Test' } },
+    loading: { value: false },
+    error: { value: null }
+  }))
+}))
+
+describe('MyComponent with mocks', () =&gt; {
+  it('uses mocked composable', () =&gt; {
+    const wrapper = mount(MyComponent)
+    expect(wrapper.text()).toContain('Test')
+  })
+
+  it('works with pinia store', () =&gt; {
+    setActivePinia(createPinia())
+
+    const store = useUserStore()
+    store.name = 'John'
+
+    const wrapper = mount(MyComponent, {
+      global: {
+        plugins: [createPinia()]
+      }
+    })
+
+    expect(wrapper.text()).toContain('John')
+  })
+})
+</code></pre>
+<h2 id="build--tooling"><a class="header" href="#build--tooling">Build &amp; Tooling</a></h2>
+<h3 id="vite-configuration"><a class="header" href="#vite-configuration">Vite Configuration</a></h3>
+<pre><code class="language-javascript">// vite.config.js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
+
+export default defineConfig({
+  plugins: [vue()],
+
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+      '@components': resolve(__dirname, 'src/components'),
+      '@utils': resolve(__dirname, 'src/utils')
+    }
+  },
+
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) =&gt; path.replace(/^\/api/, '')
+      }
+    }
+  },
+
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router', 'pinia']
+        }
+      }
+    }
+  },
+
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "@/styles/variables.scss";`
+      }
+    }
+  }
+})
+</code></pre>
+<h3 id="environment-variables"><a class="header" href="#environment-variables">Environment Variables</a></h3>
+<pre><code class="language-javascript">// .env
+VITE_API_URL=https://api.example.com
+VITE_APP_TITLE=My App
+
+// .env.development
+VITE_API_URL=http://localhost:3000
+
+// .env.production
+VITE_API_URL=https://api.production.com
+
+// Usage in code
+&lt;script setup&gt;
+const apiUrl = import.meta.env.VITE_API_URL
+const appTitle = import.meta.env.VITE_APP_TITLE
+const isDev = import.meta.env.DEV
+const isProd = import.meta.env.PROD
+
+console.log('API URL:', apiUrl)
+&lt;/script&gt;
+
+// Type definitions (env.d.ts)
+/// &lt;reference types="vite/client" /&gt;
+
+interface ImportMetaEnv {
+  readonly VITE_API_URL: string
+  readonly VITE_APP_TITLE: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+</code></pre>
 <h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
 <div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Syntax</th></tr></thead><tbody>
 <tr><td>Data binding</td><td><code>{{ variable }}</code></td></tr>
@@ -315,9 +2233,18 @@ onUnmounted(() =&gt; {
 <tr><td>Two-way binding</td><td><code>v-model="variable"</code></td></tr>
 <tr><td>Conditional</td><td><code>v-if</code>, <code>v-else-if</code>, <code>v-else</code></td></tr>
 <tr><td>Loop</td><td><code>v-for="item in items"</code></td></tr>
+<tr><td>Ref</td><td><code>ref(value)</code></td></tr>
+<tr><td>Reactive</td><td><code>reactive({})</code></td></tr>
+<tr><td>Computed</td><td><code>computed(() =&gt; value)</code></td></tr>
+<tr><td>Watch</td><td><code>watch(source, callback)</code></td></tr>
+<tr><td>Lifecycle</td><td><code>onMounted(() =&gt; {})</code></td></tr>
+<tr><td>Template Ref</td><td><code>ref(null)</code> + <code>ref="name"</code></td></tr>
+<tr><td>Provide</td><td><code>provide('key', value)</code></td></tr>
+<tr><td>Inject</td><td><code>inject('key')</code></td></tr>
+<tr><td>Slot</td><td><code>&lt;slot name="header" /&gt;</code></td></tr>
 </tbody></table>
 </div>
-<p>Vue.js provides an approachable, versatile, and performant framework for building modern web interfaces.</p>
+<p>Vue.js provides an approachable, versatile, and performant framework for building modern web interfaces with comprehensive tooling for state management, routing, testing, and production optimization.</p>
 
                     </main>
 

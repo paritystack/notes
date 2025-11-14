@@ -93,6 +93,8 @@
     - [Scanning](wifi/scanning.md)
     - [Roaming](wifi/roaming.md)
     - [QoS Management](wifi/qos_management.md)
+    - [Eap](wifi/eap.md)
+    - [Ofdma](wifi/ofdma.md)
 
 - [Machine Learning](machine_learning/README.md)
     - [Deep Learning](machine_learning/deep_learning.md)
@@ -123,6 +125,7 @@
     - [Fine Tuning](ai/fine_tuning.md)
     - [Deepseek R1](ai/deepseek_r1.md)
     - [Whisper](ai/whisper.md)
+    - [Phi](ai/phi.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)
@@ -262,8 +265,8 @@
 - [Mobile Development](mobile_development/README.md)
     - [React Native](mobile_development/react_native.md)
     - [Flutter](mobile_development/flutter.md)
-
     - [Android Dev](mobile_development/android_dev.md)
+
 - [Testing](testing/README.md)
     - [Unit Testing](testing/unit_testing.md)
     - [Integration Testing](testing/integration.md)

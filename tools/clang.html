@@ -1,0 +1,1829 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Clang - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="clang"><a class="header" href="#clang">Clang</a></h1>
+<p>Clang is a C/C++/Objective-C compiler frontend for the LLVM compiler infrastructure. It provides fast compilation, excellent diagnostics, and a modular architecture that powers various development tools including formatters, linters, static analyzers, and language servers.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Clang is part of the LLVM project and offers a comprehensive suite of tools for C-family language development. It's designed to be compatible with GCC while providing better error messages, faster compilation, and lower memory usage.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Fast compilation with low memory footprint</li>
+<li>Expressive diagnostics with fix-it hints</li>
+<li>GCC compatibility for most use cases</li>
+<li>Modular architecture enabling powerful tools</li>
+<li>Built-in static analyzer</li>
+<li>Sanitizers for runtime error detection</li>
+<li>Cross-compilation support</li>
+<li>Language Server Protocol implementation (clangd)</li>
+</ul>
+<p><strong>Common Use Cases:</strong></p>
+<ul>
+<li>C/C++/Objective-C compilation</li>
+<li>Code formatting and style enforcement</li>
+<li>Static analysis and linting</li>
+<li>IDE language server backend</li>
+<li>Cross-platform development</li>
+<li>Embedded systems development</li>
+<li>Security-focused compilation with sanitizers</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<h3 id="ubuntudebian"><a class="header" href="#ubuntudebian">Ubuntu/Debian</a></h3>
+<pre><code class="language-bash"># Latest stable version
+sudo apt update
+sudo apt install clang
+
+# Specific version
+sudo apt install clang-15
+
+# Full LLVM toolchain
+sudo apt install clang llvm lld
+
+# Additional tools
+sudo apt install clang-format clang-tidy clangd
+
+# Install all clang tools
+sudo apt install clang-tools
+
+# Verify installation
+clang --version
+clang-format --version
+clang-tidy --version
+</code></pre>
+<h3 id="macos"><a class="header" href="#macos">macOS</a></h3>
+<pre><code class="language-bash"># Xcode Command Line Tools (includes clang)
+xcode-select --install
+
+# Via Homebrew (LLVM version)
+brew install llvm
+
+# Add to PATH (Homebrew LLVM)
+export PATH="/usr/local/opt/llvm/bin:$PATH"
+
+# Verify installation
+clang --version
+</code></pre>
+<h3 id="windows"><a class="header" href="#windows">Windows</a></h3>
+<pre><code class="language-bash"># Via Visual Studio (includes clang-cl)
+# Install "C++ Clang tools for Windows" component
+
+# Via MSYS2
+pacman -S mingw-w64-x86_64-clang
+
+# Via Chocolatey
+choco install llvm
+
+# Verify installation
+clang --version
+</code></pre>
+<h3 id="from-source"><a class="header" href="#from-source">From Source</a></h3>
+<pre><code class="language-bash"># Clone LLVM project
+git clone https://github.com/llvm/llvm-project.git
+cd llvm-project
+
+# Create build directory
+mkdir build &amp;&amp; cd build
+
+# Configure with CMake
+cmake -G "Unix Makefiles" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+  ../llvm
+
+# Build (use -j for parallel builds)
+make -j$(nproc)
+
+# Install
+sudo make install
+
+# Verify
+clang --version
+</code></pre>
+<h2 id="clang-compiler"><a class="header" href="#clang-compiler">Clang Compiler</a></h2>
+<h3 id="basic-compilation"><a class="header" href="#basic-compilation">Basic Compilation</a></h3>
+<pre><code class="language-bash"># Compile C program
+clang hello.c -o hello
+
+# Compile C++ program
+clang++ hello.cpp -o hello
+
+# Compile with warnings
+clang -Wall -Wextra main.c -o program
+
+# Compile multiple files
+clang main.c utils.c helper.c -o program
+
+# Compile to object file
+clang -c module.c -o module.o
+
+# Link object files
+clang main.o utils.o -o program
+
+# Preprocess only
+clang -E source.c -o source.i
+
+# Compile to assembly
+clang -S source.c -o source.s
+
+# Show compilation stages
+clang -### main.c
+</code></pre>
+<h3 id="optimization-levels"><a class="header" href="#optimization-levels">Optimization Levels</a></h3>
+<pre><code class="language-bash"># No optimization (default, fastest compile)
+clang -O0 main.c -o program
+
+# Basic optimization
+clang -O1 main.c -o program
+
+# Moderate optimization (recommended)
+clang -O2 main.c -o program
+
+# Aggressive optimization
+clang -O3 main.c -o program
+
+# Optimize for size
+clang -Os main.c -o program
+
+# Aggressive size optimization
+clang -Oz main.c -o program
+
+# Fast math optimizations (less precise)
+clang -O3 -ffast-math main.c -o program
+
+# Debug optimization (optimize but keep debug info)
+clang -Og -g main.c -o program
+</code></pre>
+<h3 id="cc-standards"><a class="header" href="#cc-standards">C/C++ Standards</a></h3>
+<pre><code class="language-bash"># C standards
+clang -std=c89 main.c      # ANSI C (C89/C90)
+clang -std=c99 main.c      # C99
+clang -std=c11 main.c      # C11
+clang -std=c17 main.c      # C17
+clang -std=c2x main.c      # C23 (draft)
+
+# C++ standards
+clang++ -std=c++98 main.cpp   # C++98
+clang++ -std=c++11 main.cpp   # C++11
+clang++ -std=c++14 main.cpp   # C++14
+clang++ -std=c++17 main.cpp   # C++17
+clang++ -std=c++20 main.cpp   # C++20
+clang++ -std=c++2b main.cpp   # C++23 (draft)
+
+# GNU extensions (default)
+clang -std=gnu11 main.c
+clang++ -std=gnu++17 main.cpp
+</code></pre>
+<h3 id="warning-flags"><a class="header" href="#warning-flags">Warning Flags</a></h3>
+<pre><code class="language-bash"># Essential warnings
+clang -Wall main.c              # Common warnings
+clang -Wextra main.c            # Extra warnings
+clang -Wpedantic main.c         # Strict standard compliance
+
+# All warnings
+clang -Wall -Wextra -Wpedantic main.c
+
+# Treat warnings as errors
+clang -Werror main.c
+
+# Specific warnings
+clang -Wunused main.c           # Unused variables
+clang -Wshadow main.c           # Variable shadowing
+clang -Wconversion main.c       # Type conversions
+clang -Wcast-align main.c       # Alignment issues
+clang -Wformat=2 main.c         # Format string issues
+
+# Disable specific warnings
+clang -Wno-unused-parameter main.c
+
+# Everything (very verbose)
+clang -Weverything main.c
+
+# Recommended flags
+clang -Wall -Wextra -Wpedantic -Wshadow -Wconversion main.c
+</code></pre>
+<h3 id="include-paths-and-linking"><a class="header" href="#include-paths-and-linking">Include Paths and Linking</a></h3>
+<pre><code class="language-bash"># Add include directory
+clang -I/usr/local/include main.c
+
+# Multiple include paths
+clang -I./include -I./external/include main.c
+
+# System include path
+clang -isystem /usr/local/include main.c
+
+# Link library
+clang main.c -lm -o program              # Link math library
+clang main.c -lpthread -o program        # Link pthread
+
+# Library search path
+clang -L/usr/local/lib main.c -lmylib
+
+# Static linking
+clang -static main.c -o program
+
+# Shared library creation
+clang -shared -fPIC lib.c -o libmylib.so
+
+# Runtime library path
+clang -Wl,-rpath,/usr/local/lib main.c -lmylib
+</code></pre>
+<h3 id="debug-and-symbols"><a class="header" href="#debug-and-symbols">Debug and Symbols</a></h3>
+<pre><code class="language-bash"># Debug symbols
+clang -g main.c -o program
+
+# Debug with optimization
+clang -g -O2 main.c -o program
+
+# Debug symbols level
+clang -g0 main.c    # No debug info
+clang -g1 main.c    # Minimal debug info
+clang -g2 main.c    # Default debug info
+clang -g3 main.c    # Maximum debug info
+
+# DWARF version
+clang -gdwarf-4 main.c
+
+# Split debug info
+clang -gsplit-dwarf main.c
+
+# Strip symbols
+strip program
+</code></pre>
+<h3 id="preprocessor-options"><a class="header" href="#preprocessor-options">Preprocessor Options</a></h3>
+<pre><code class="language-bash"># Define macro
+clang -DDEBUG main.c
+clang -DVERSION=1.0 main.c
+
+# Undefine macro
+clang -UDEBUG main.c
+
+# Show defined macros
+clang -dM -E - &lt; /dev/null
+
+# Include file
+clang -include config.h main.c
+
+# Precompiled headers
+clang -x c-header header.h -o header.pch
+clang -include-pch header.pch main.c
+
+# Show include paths
+clang -E -v main.c
+</code></pre>
+<h3 id="position-independent-code"><a class="header" href="#position-independent-code">Position Independent Code</a></h3>
+<pre><code class="language-bash"># Position independent code (for shared libraries)
+clang -fPIC -c lib.c -o lib.o
+
+# Position independent executable
+clang -fPIE -pie main.c -o program
+
+# Create shared library
+clang -shared -fPIC lib.c -o libmylib.so
+
+# Link against shared library
+clang main.c -L. -lmylib -o program
+</code></pre>
+<h2 id="clang-format"><a class="header" href="#clang-format">clang-format</a></h2>
+<p>clang-format automatically formats C/C++/Objective-C code according to a specified style guide.</p>
+<h3 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h3>
+<pre><code class="language-bash"># Format file (output to stdout)
+clang-format file.cpp
+
+# Format and overwrite file
+clang-format -i file.cpp
+
+# Format multiple files
+clang-format -i src/*.cpp include/*.h
+
+# Format with specific style
+clang-format -style=llvm file.cpp
+clang-format -style=google file.cpp
+clang-format -style=chromium file.cpp
+clang-format -style=mozilla file.cpp
+clang-format -style=webkit file.cpp
+
+# Format specific lines
+clang-format -lines=10:20 file.cpp
+
+# Dry run (show what would change)
+clang-format -output-replacements-xml file.cpp
+
+# Check if formatting needed (exit code)
+clang-format --dry-run -Werror file.cpp
+</code></pre>
+<h3 id="configuration-file-clang-format"><a class="header" href="#configuration-file-clang-format">Configuration File (.clang-format)</a></h3>
+<pre><code class="language-yaml"># .clang-format in project root
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+IndentCaseLabels: true
+SpaceBeforeParens: ControlStatements
+PointerAlignment: Left
+</code></pre>
+<h3 id="common-styles"><a class="header" href="#common-styles">Common Styles</a></h3>
+<pre><code class="language-bash"># Generate .clang-format file
+clang-format -style=llvm -dump-config &gt; .clang-format
+
+# LLVM style
+clang-format -style=llvm -i file.cpp
+
+# Google C++ Style
+clang-format -style=google -i file.cpp
+
+# Chromium style
+clang-format -style=chromium -i file.cpp
+
+# Mozilla style
+clang-format -style=mozilla -i file.cpp
+
+# WebKit style
+clang-format -style=webkit -i file.cpp
+
+# Custom inline style
+clang-format -style="{BasedOnStyle: llvm, IndentWidth: 8}" file.cpp
+</code></pre>
+<h3 id="editor-integration"><a class="header" href="#editor-integration">Editor Integration</a></h3>
+<pre><code class="language-bash"># Vim integration (~/.vimrc)
+# map &lt;C-K&gt; :py3f /usr/share/clang/clang-format.py&lt;cr&gt;
+# imap &lt;C-K&gt; &lt;c-o&gt;:py3f /usr/share/clang/clang-format.py&lt;cr&gt;
+
+# VS Code
+# Install "C/C++" extension by Microsoft
+# Settings: "C_Cpp.clang_format_style": "file"
+
+# Emacs
+# (load "/usr/share/clang/clang-format.el")
+# (global-set-key [C-M-tab] 'clang-format-region)
+
+# Sublime Text
+# Install "Clang Format" package
+</code></pre>
+<h3 id="git-integration"><a class="header" href="#git-integration">Git Integration</a></h3>
+<pre><code class="language-bash"># Format staged files before commit
+git diff -U0 --no-color --cached | clang-format-diff -i -p1
+
+# Pre-commit hook
+# .git/hooks/pre-commit
+#!/bin/bash
+for file in $(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|cpp|h|hpp)$'); do
+    clang-format -i "$file"
+    git add "$file"
+done
+</code></pre>
+<h3 id="cicd-integration"><a class="header" href="#cicd-integration">CI/CD Integration</a></h3>
+<pre><code class="language-bash"># Check formatting in CI
+find src include -name '*.cpp' -o -name '*.h' | \
+  xargs clang-format --dry-run -Werror
+
+# Format all files
+find . -regex '.*\.\(cpp\|hpp\|c\|h\)' -exec clang-format -i {} \;
+
+# Check for formatting changes
+clang-format -i src/**/*.{cpp,h}
+git diff --exit-code
+</code></pre>
+<h2 id="clang-tidy"><a class="header" href="#clang-tidy">clang-tidy</a></h2>
+<p>clang-tidy is a clang-based C++ linter tool providing static analysis, style checking, and automated fixes.</p>
+<h3 id="basic-usage-1"><a class="header" href="#basic-usage-1">Basic Usage</a></h3>
+<pre><code class="language-bash"># Run clang-tidy on file
+clang-tidy file.cpp
+
+# With compilation database
+clang-tidy file.cpp -p build/
+
+# Specify checks
+clang-tidy -checks='*' file.cpp
+clang-tidy -checks='readability-*' file.cpp
+clang-tidy -checks='modernize-*,readability-*' file.cpp
+
+# Exclude checks
+clang-tidy -checks='*,-modernize-use-trailing-return-type' file.cpp
+
+# Apply fixes automatically
+clang-tidy -fix file.cpp
+
+# Apply fixes for errors only
+clang-tidy -fix-errors file.cpp
+
+# Export fixes to file
+clang-tidy -export-fixes=fixes.yaml file.cpp
+
+# List available checks
+clang-tidy -list-checks
+
+# Explain check
+clang-tidy -checks='readability-*' -explain-config
+</code></pre>
+<h3 id="configuration-file-clang-tidy"><a class="header" href="#configuration-file-clang-tidy">Configuration File (.clang-tidy)</a></h3>
+<pre><code class="language-yaml"># .clang-tidy in project root
+---
+Checks: &gt;
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -modernize-use-trailing-return-type,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: file
+CheckOptions:
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+</code></pre>
+<h3 id="check-categories"><a class="header" href="#check-categories">Check Categories</a></h3>
+<pre><code class="language-bash"># Bugprone checks
+clang-tidy -checks='bugprone-*' file.cpp
+
+# Performance checks
+clang-tidy -checks='performance-*' file.cpp
+
+# Modernization (C++11/14/17/20)
+clang-tidy -checks='modernize-*' file.cpp
+
+# Readability improvements
+clang-tidy -checks='readability-*' file.cpp
+
+# C++ Core Guidelines
+clang-tidy -checks='cppcoreguidelines-*' file.cpp
+
+# Clang static analyzer
+clang-tidy -checks='clang-analyzer-*' file.cpp
+
+# CERT secure coding
+clang-tidy -checks='cert-*' file.cpp
+
+# Google style guide
+clang-tidy -checks='google-*' file.cpp
+
+# LLVM coding standards
+clang-tidy -checks='llvm-*' file.cpp
+
+# Multiple categories
+clang-tidy -checks='bugprone-*,performance-*,modernize-*' file.cpp
+</code></pre>
+<h3 id="common-checks"><a class="header" href="#common-checks">Common Checks</a></h3>
+<pre><code class="language-bash"># Use auto where appropriate
+clang-tidy -checks='modernize-use-auto' -fix file.cpp
+
+# Use nullptr instead of NULL/0
+clang-tidy -checks='modernize-use-nullptr' -fix file.cpp
+
+# Use override keyword
+clang-tidy -checks='modernize-use-override' -fix file.cpp
+
+# Use range-based for loops
+clang-tidy -checks='modernize-loop-convert' -fix file.cpp
+
+# Avoid C-style casts
+clang-tidy -checks='cppcoreguidelines-pro-type-cstyle-cast' file.cpp
+
+# Check for memory leaks
+clang-tidy -checks='clang-analyzer-cplusplus.NewDelete*' file.cpp
+
+# Performance: unnecessary copies
+clang-tidy -checks='performance-unnecessary-copy-initialization' file.cpp
+
+# Readability: naming conventions
+clang-tidy -checks='readability-identifier-naming' file.cpp
+</code></pre>
+<h3 id="build-system-integration"><a class="header" href="#build-system-integration">Build System Integration</a></h3>
+<pre><code class="language-bash"># With CMake (generate compile_commands.json)
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+clang-tidy -p build/ src/file.cpp
+
+# Run on all files in compilation database
+find src -name '*.cpp' | xargs clang-tidy -p build/
+
+# Using run-clang-tidy.py (parallel execution)
+run-clang-tidy.py -p build/ -checks='*' -fix
+
+# Makefile integration
+make clean
+bear -- make
+clang-tidy -p . src/file.cpp
+</code></pre>
+<h3 id="suppressing-warnings"><a class="header" href="#suppressing-warnings">Suppressing Warnings</a></h3>
+<pre><code class="language-cpp">// Suppress specific warning
+// NOLINTNEXTLINE(check-name)
+int bad_code = 0;
+
+// Suppress for entire line
+int bad_code = 0;  // NOLINT
+
+// Suppress specific checks
+// NOLINTNEXTLINE(readability-magic-numbers, cppcoreguidelines-avoid-magic-numbers)
+int value = 42;
+
+// Suppress in region
+// NOLINTBEGIN(check-name)
+int bad_code1 = 0;
+int bad_code2 = 0;
+// NOLINTEND(check-name)
+</code></pre>
+<h2 id="clangd-language-server-protocol"><a class="header" href="#clangd-language-server-protocol">clangd (Language Server Protocol)</a></h2>
+<p>clangd is a language server that provides IDE features for C/C++ development.</p>
+<h3 id="installation-1"><a class="header" href="#installation-1">Installation</a></h3>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt install clangd
+
+# macOS
+brew install llvm
+# clangd is in /usr/local/opt/llvm/bin/clangd
+
+# Verify installation
+clangd --version
+
+# Update alternatives (if multiple versions)
+sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-15 100
+</code></pre>
+<h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
+<pre><code class="language-yaml"># ~/.config/clangd/config.yaml
+CompileFlags:
+  Add:
+    - "-Wall"
+    - "-Wextra"
+    - "-std=c++17"
+  Remove:
+    - "-W*"
+  CompilationDatabase: build/
+
+Index:
+  Background: Build
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - modernize*
+      - bugprone*
+    Remove:
+      - modernize-use-trailing-return-type
+  UnusedIncludes: Strict
+
+Hover:
+  ShowAKA: Yes
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+</code></pre>
+<h3 id="vs-code-integration"><a class="header" href="#vs-code-integration">VS Code Integration</a></h3>
+<pre><code class="language-json">// settings.json
+{
+  "clangd.path": "/usr/bin/clangd",
+  "clangd.arguments": [
+    "--background-index",
+    "--clang-tidy",
+    "--header-insertion=iwyu",
+    "--completion-style=detailed",
+    "--function-arg-placeholders",
+    "--fallback-style=llvm"
+  ],
+  "clangd.checkUpdates": true,
+  "[cpp]": {
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.formatOnSave": true
+  }
+}
+</code></pre>
+<h3 id="vimneovim-integration"><a class="header" href="#vimneovim-integration">Vim/Neovim Integration</a></h3>
+<pre><code class="language-vim">" Using coc.nvim
+" Install: :CocInstall coc-clangd
+
+" ~/.config/nvim/coc-settings.json
+{
+  "clangd.path": "/usr/bin/clangd",
+  "clangd.arguments": [
+    "--background-index",
+    "--clang-tidy",
+    "--header-insertion=iwyu"
+  ]
+}
+
+" Using vim-lsp
+Plug 'prabirshrestha/vim-lsp'
+Plug 'mattn/vim-lsp-settings'
+
+" Auto-install clangd
+:LspInstallServer clangd
+</code></pre>
+<h3 id="emacs-integration"><a class="header" href="#emacs-integration">Emacs Integration</a></h3>
+<pre><code class="language-elisp">;; Using lsp-mode
+(use-package lsp-mode
+  :commands lsp
+  :config
+  (setq lsp-clients-clangd-args
+    '("--background-index"
+      "--clang-tidy"
+      "--header-insertion=iwyu")))
+
+(add-hook 'c-mode-hook 'lsp)
+(add-hook 'c++-mode-hook 'lsp)
+</code></pre>
+<h3 id="compilation-database"><a class="header" href="#compilation-database">Compilation Database</a></h3>
+<pre><code class="language-bash"># Generate with CMake
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+ln -s build/compile_commands.json .
+
+# Generate with Bear
+bear -- make
+
+# Generate with compiledb (for Make)
+compiledb make
+
+# Manual compile_commands.json
+cat &gt; compile_commands.json &lt;&lt; 'EOF'
+[
+  {
+    "directory": "/home/user/project",
+    "command": "clang++ -std=c++17 -Wall src/main.cpp",
+    "file": "src/main.cpp"
+  }
+]
+EOF
+</code></pre>
+<h3 id="features"><a class="header" href="#features">Features</a></h3>
+<pre><code class="language-bash"># Code completion
+# Automatic as you type
+
+# Go to definition
+# Ctrl+Click or F12 (VS Code)
+# gd in Vim with LSP
+
+# Find references
+# Shift+F12 (VS Code)
+# gr in Vim
+
+# Hover documentation
+# Hover with mouse or K in Vim
+
+# Code formatting
+# Alt+Shift+F (VS Code)
+# :Format in Vim
+
+# Rename symbol
+# F2 (VS Code)
+# &lt;leader&gt;rn in Vim
+
+# Diagnostics
+# Automatic inline errors and warnings
+
+# Fix-its
+# Automatic code fixes suggested
+</code></pre>
+<h2 id="other-clang-tools"><a class="header" href="#other-clang-tools">Other Clang Tools</a></h2>
+<h3 id="clang-check"><a class="header" href="#clang-check">clang-check</a></h3>
+<p>Static analysis and AST dumping tool.</p>
+<pre><code class="language-bash"># Check syntax
+clang-check file.cpp
+
+# With compilation database
+clang-check -p build/ file.cpp
+
+# Dump AST
+clang-check -ast-dump file.cpp
+
+# Dump specific function
+clang-check -ast-dump -ast-dump-filter=functionName file.cpp
+
+# Run static analyzer
+clang-check --analyze file.cpp
+</code></pre>
+<h3 id="clang-query"><a class="header" href="#clang-query">clang-query</a></h3>
+<p>Interactive tool for querying the Clang AST.</p>
+<pre><code class="language-bash"># Start interactive mode
+clang-query file.cpp
+
+# Execute query from command line
+clang-query -c "match functionDecl()" file.cpp
+
+# Common queries
+match functionDecl()                    # Find all functions
+match functionDecl(isMain())            # Find main function
+match varDecl()                         # Find all variables
+match recordDecl(isClass())             # Find all classes
+match callExpr()                        # Find all function calls
+
+# With filters
+match functionDecl(hasName("foo"))
+match functionDecl(returns(asString("int")))
+match varDecl(hasType(isInteger()))
+
+# Set output style
+set output detailed
+set output dump
+</code></pre>
+<h3 id="scan-build"><a class="header" href="#scan-build">scan-build</a></h3>
+<p>Static analyzer wrapper for build systems.</p>
+<pre><code class="language-bash"># Analyze with make
+scan-build make
+
+# Analyze with CMake
+scan-build cmake ..
+scan-build make
+
+# Specify analyzer
+scan-build --use-analyzer=/usr/bin/clang make
+
+# View results in browser
+scan-build -o analysis-results make
+
+# Enable all checks
+scan-build -enable-checker alpha make
+
+# Verbose output
+scan-build -v make
+
+# Generate HTML report
+scan-build -o ./scan-results make
+</code></pre>
+<h3 id="clang-apply-replacements"><a class="header" href="#clang-apply-replacements">clang-apply-replacements</a></h3>
+<p>Apply fix-it hints and replacements.</p>
+<pre><code class="language-bash"># Apply fixes from clang-tidy
+clang-tidy -export-fixes=fixes.yaml file.cpp
+clang-apply-replacements .
+
+# Apply fixes from directory
+clang-apply-replacements /path/to/fixes/
+
+# Format after applying
+clang-apply-replacements -format .
+</code></pre>
+<h2 id="sanitizers"><a class="header" href="#sanitizers">Sanitizers</a></h2>
+<p>Sanitizers are runtime error detection tools built into Clang.</p>
+<h3 id="addresssanitizer-asan"><a class="header" href="#addresssanitizer-asan">AddressSanitizer (ASan)</a></h3>
+<p>Detects memory errors like buffer overflows, use-after-free, memory leaks.</p>
+<pre><code class="language-bash"># Compile with ASan
+clang -fsanitize=address -g program.c -o program
+
+# C++ with ASan
+clang++ -fsanitize=address -g program.cpp -o program
+
+# Run the program
+./program
+
+# With additional options
+ASAN_OPTIONS=detect_leaks=1:symbolize=1 ./program
+
+# Check for memory leaks only
+ASAN_OPTIONS=detect_leaks=1 ./program
+
+# Detailed error messages
+ASAN_OPTIONS=verbosity=1:malloc_context_size=20 ./program
+
+# Halt on first error
+ASAN_OPTIONS=halt_on_error=1 ./program
+
+# ASan with optimization
+clang -fsanitize=address -O1 -g -fno-omit-frame-pointer program.c
+</code></pre>
+<h3 id="memorysanitizer-msan"><a class="header" href="#memorysanitizer-msan">MemorySanitizer (MSan)</a></h3>
+<p>Detects use of uninitialized memory.</p>
+<pre><code class="language-bash"># Compile with MSan
+clang -fsanitize=memory -g program.c -o program
+
+# Track origins of uninitialized values
+clang -fsanitize=memory -fsanitize-memory-track-origins -g program.c
+
+# Run with options
+MSAN_OPTIONS=halt_on_error=0 ./program
+
+# Must compile ALL code with MSan (including libraries)
+clang -fsanitize=memory -g main.c lib.c -o program
+</code></pre>
+<h3 id="threadsanitizer-tsan"><a class="header" href="#threadsanitizer-tsan">ThreadSanitizer (TSan)</a></h3>
+<p>Detects data races in multithreaded programs.</p>
+<pre><code class="language-bash"># Compile with TSan
+clang -fsanitize=thread -g program.c -o program
+
+# Link with pthread
+clang -fsanitize=thread -g program.c -lpthread -o program
+
+# Run with options
+TSAN_OPTIONS=second_deadlock_stack=1 ./program
+
+# Suppress specific warnings
+# Create tsan.supp file
+echo "race:^FunctionName$" &gt; tsan.supp
+TSAN_OPTIONS=suppressions=tsan.supp ./program
+</code></pre>
+<h3 id="undefinedbehaviorsanitizer-ubsan"><a class="header" href="#undefinedbehaviorsanitizer-ubsan">UndefinedBehaviorSanitizer (UBSan)</a></h3>
+<p>Detects various undefined behaviors.</p>
+<pre><code class="language-bash"># Compile with UBSan
+clang -fsanitize=undefined -g program.c -o program
+
+# Specific checks
+clang -fsanitize=null -g program.c              # Null pointer
+clang -fsanitize=signed-integer-overflow -g     # Integer overflow
+clang -fsanitize=shift -g                       # Invalid shifts
+clang -fsanitize=bounds -g                      # Array bounds
+
+# Multiple checks
+clang -fsanitize=undefined,integer -g program.c
+
+# Trap on error (no runtime library)
+clang -fsanitize=undefined -fsanitize-trap=undefined program.c
+
+# Print stack traces
+UBSAN_OPTIONS=print_stacktrace=1 ./program
+
+# Halt on first error
+UBSAN_OPTIONS=halt_on_error=1 ./program
+</code></pre>
+<h3 id="leaksanitizer-lsan"><a class="header" href="#leaksanitizer-lsan">LeakSanitizer (LSan)</a></h3>
+<p>Detects memory leaks (part of ASan).</p>
+<pre><code class="language-bash"># Use with ASan
+clang -fsanitize=address -g program.c -o program
+
+# Standalone leak detection
+clang -fsanitize=leak -g program.c -o program
+
+# Run with leak detection
+LSAN_OPTIONS=verbosity=1:log_threads=1 ./program
+
+# Suppress leaks
+echo "leak:FunctionName" &gt; lsan.supp
+LSAN_OPTIONS=suppressions=lsan.supp ./program
+</code></pre>
+<h3 id="combining-sanitizers"><a class="header" href="#combining-sanitizers">Combining Sanitizers</a></h3>
+<pre><code class="language-bash"># ASan + UBSan
+clang -fsanitize=address,undefined -g program.c -o program
+
+# Multiple sanitizers (not all can be combined)
+clang -fsanitize=address,undefined,integer -g program.c
+
+# Cannot combine TSan with ASan/MSan
+# Use separately
+
+# Common combination for testing
+clang -fsanitize=address,undefined,leak \
+  -fno-omit-frame-pointer \
+  -g -O1 program.c -o program
+</code></pre>
+<h2 id="cross-compilation"><a class="header" href="#cross-compilation">Cross-Compilation</a></h2>
+<h3 id="target-specification"><a class="header" href="#target-specification">Target Specification</a></h3>
+<pre><code class="language-bash"># Specify target triple
+clang --target=arm-linux-gnueabihf main.c -o program
+
+# Common targets
+clang --target=aarch64-linux-gnu          # ARM64 Linux
+clang --target=arm-linux-gnueabihf        # ARM Linux (hard float)
+clang --target=x86_64-w64-mingw32         # Windows 64-bit
+clang --target=i686-w64-mingw32           # Windows 32-bit
+clang --target=wasm32-wasi                # WebAssembly
+
+# Show default target
+clang -v
+
+# List available targets
+llc --version
+</code></pre>
+<h3 id="sysroot-configuration"><a class="header" href="#sysroot-configuration">Sysroot Configuration</a></h3>
+<pre><code class="language-bash"># Specify sysroot
+clang --target=arm-linux-gnueabihf \
+  --sysroot=/usr/arm-linux-gnueabihf \
+  main.c -o program
+
+# With GCC toolchain
+clang --target=arm-linux-gnueabihf \
+  --gcc-toolchain=/usr/arm-linux-gnueabihf \
+  main.c -o program
+
+# Multiple paths
+clang --target=arm-linux-gnueabihf \
+  --sysroot=/usr/arm-linux-gnueabihf \
+  -I/opt/cross/include \
+  -L/opt/cross/lib \
+  main.c -o program
+</code></pre>
+<h3 id="cross-compilation-example"><a class="header" href="#cross-compilation-example">Cross-Compilation Example</a></h3>
+<pre><code class="language-bash"># Install ARM cross-compiler
+sudo apt install gcc-arm-linux-gnueabihf
+
+# Cross-compile for ARM
+clang --target=arm-linux-gnueabihf \
+  --sysroot=/usr/arm-linux-gnueabihf \
+  -march=armv7-a \
+  -mfpu=neon \
+  main.c -o program-arm
+
+# Verify target
+file program-arm
+# program-arm: ELF 32-bit LSB executable, ARM
+
+# Cross-compile for Windows
+sudo apt install mingw-w64
+clang --target=x86_64-w64-mingw32 \
+  -L/usr/x86_64-w64-mingw32/lib \
+  main.c -o program.exe
+
+# WebAssembly
+clang --target=wasm32-wasi \
+  --sysroot=/opt/wasi-sysroot \
+  main.c -o program.wasm
+</code></pre>
+<h3 id="cmake-cross-compilation"><a class="header" href="#cmake-cross-compilation">CMake Cross-Compilation</a></h3>
+<pre><code class="language-cmake"># toolchain.cmake
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR ARM)
+
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
+
+set(CMAKE_C_COMPILER_TARGET arm-linux-gnueabihf)
+set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabihf)
+
+set(CMAKE_SYSROOT /usr/arm-linux-gnueabihf)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+</code></pre>
+<pre><code class="language-bash"># Use toolchain file
+cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake ..
+make
+</code></pre>
+<h2 id="build-system-integration-1"><a class="header" href="#build-system-integration-1">Build System Integration</a></h2>
+<h3 id="cmake"><a class="header" href="#cmake">CMake</a></h3>
+<pre><code class="language-cmake"># CMakeLists.txt
+cmake_minimum_required(VERSION 3.10)
+project(MyProject)
+
+# Use Clang
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
+
+# C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Compiler flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+# Debug flags
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+
+# Release flags
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+
+# Export compile commands for clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Enable clang-tidy
+set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,readability-*)
+
+# AddressSanitizer
+option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+if(ENABLE_ASAN)
+    add_compile_options(-fsanitize=address)
+    add_link_options(-fsanitize=address)
+endif()
+
+# Executable
+add_executable(myprogram main.cpp utils.cpp)
+</code></pre>
+<pre><code class="language-bash"># Configure with Clang
+CC=clang CXX=clang++ cmake ..
+
+# Or with CMake option
+cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+
+# Build
+cmake --build .
+
+# With sanitizers
+cmake -DENABLE_ASAN=ON ..
+</code></pre>
+<h3 id="makefile"><a class="header" href="#makefile">Makefile</a></h3>
+<pre><code class="language-makefile"># Makefile
+CC = clang
+CXX = clang++
+CFLAGS = -Wall -Wextra -std=c11 -O2
+CXXFLAGS = -Wall -Wextra -std=c++17 -O2
+
+# Sanitizers (optional)
+SANITIZE = -fsanitize=address,undefined
+
+# Directories
+SRCDIR = src
+OBJDIR = obj
+BINDIR = bin
+
+# Files
+SRCS = $(wildcard $(SRCDIR)/*.cpp)
+OBJS = $(SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+TARGET = $(BINDIR)/program
+
+# Targets
+all: $(TARGET)
+
+$(TARGET): $(OBJS) | $(BINDIR)
+	$(CXX) $(CXXFLAGS) $(SANITIZE) -o $@ $^
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
+	$(CXX) $(CXXFLAGS) -c $&lt; -o $@
+
+$(BINDIR) $(OBJDIR):
+	mkdir -p $@
+
+clean:
+	rm -rf $(OBJDIR) $(BINDIR)
+
+# Format code
+format:
+	find $(SRCDIR) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
+
+# Run linter
+lint:
+	clang-tidy $(SRCS) -- $(CXXFLAGS)
+
+.PHONY: all clean format lint
+</code></pre>
+<h3 id="compilation-database-1"><a class="header" href="#compilation-database-1">Compilation Database</a></h3>
+<pre><code class="language-bash"># Generate with CMake
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+ln -s build/compile_commands.json .
+
+# Generate with Bear (for Makefiles)
+bear -- make
+
+# Generate with compiledb
+pip install compiledb
+compiledb make
+
+# Manual JSON format
+cat &gt; compile_commands.json &lt;&lt; 'EOF'
+[
+  {
+    "directory": "/home/user/project",
+    "command": "clang++ -std=c++17 -Wall -Iinclude -c src/main.cpp -o obj/main.o",
+    "file": "src/main.cpp"
+  },
+  {
+    "directory": "/home/user/project",
+    "command": "clang++ -std=c++17 -Wall -Iinclude -c src/utils.cpp -o obj/utils.o",
+    "file": "src/utils.cpp"
+  }
+]
+EOF
+
+# Verify compilation database
+clangd --check=/path/to/file.cpp
+</code></pre>
+<h2 id="common-patterns-and-workflows"><a class="header" href="#common-patterns-and-workflows">Common Patterns and Workflows</a></h2>
+<h3 id="development-workflow"><a class="header" href="#development-workflow">Development Workflow</a></h3>
+<pre><code class="language-bash"># 1. Project setup
+mkdir -p myproject/{src,include,build,tests}
+cd myproject
+
+# 2. Initialize Git
+git init
+
+# 3. Create .clang-format
+clang-format -style=llvm -dump-config &gt; .clang-format
+
+# 4. Create .clang-tidy
+cat &gt; .clang-tidy &lt;&lt; 'EOF'
+---
+Checks: &gt;
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  modernize-*,
+  performance-*,
+  readability-*
+EOF
+
+# 5. Create CMakeLists.txt
+cat &gt; CMakeLists.txt &lt;&lt; 'EOF'
+cmake_minimum_required(VERSION 3.10)
+project(MyProject CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_executable(myapp src/main.cpp)
+EOF
+
+# 6. Configure and build
+cd build
+cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+ln -s build/compile_commands.json ../compile_commands.json
+
+# 7. Develop with clangd LSP support
+# (automatic completion, diagnostics, etc.)
+
+# 8. Format before commit
+clang-format -i src/*.cpp include/*.h
+
+# 9. Run linter
+clang-tidy src/*.cpp
+
+# 10. Test with sanitizers
+cmake -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined" ..
+make &amp;&amp; ./myapp
+</code></pre>
+<h3 id="pre-commit-hook"><a class="header" href="#pre-commit-hook">Pre-commit Hook</a></h3>
+<pre><code class="language-bash"># .git/hooks/pre-commit
+#!/bin/bash
+
+# Format code
+echo "Running clang-format..."
+for file in $(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|cpp|h|hpp)$'); do
+    clang-format -i "$file"
+    git add "$file"
+done
+
+# Run clang-tidy
+echo "Running clang-tidy..."
+for file in $(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cpp)$'); do
+    clang-tidy "$file" -- -std=c++17
+    if [ $? -ne 0 ]; then
+        echo "clang-tidy failed for $file"
+        exit 1
+    fi
+done
+
+echo "Pre-commit checks passed!"
+</code></pre>
+<h3 id="cicd-pipeline-github-actions"><a class="header" href="#cicd-pipeline-github-actions">CI/CD Pipeline (GitHub Actions)</a></h3>
+<pre><code class="language-yaml"># .github/workflows/ci.yml
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y clang clang-format clang-tidy cmake
+
+    - name: Check formatting
+      run: |
+        find src include -name '*.cpp' -o -name '*.h' | \
+          xargs clang-format --dry-run -Werror
+
+    - name: Build
+      run: |
+        mkdir build &amp;&amp; cd build
+        cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+        make
+
+    - name: Run clang-tidy
+      run: |
+        cd build
+        run-clang-tidy.py -p . -checks='*' ../src
+
+    - name: Test with sanitizers
+      run: |
+        mkdir build-asan &amp;&amp; cd build-asan
+        cmake -DCMAKE_C_COMPILER=clang \
+              -DCMAKE_CXX_COMPILER=clang++ \
+              -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined" ..
+        make
+        ./myapp
+</code></pre>
+<h3 id="makefile-with-all-tools"><a class="header" href="#makefile-with-all-tools">Makefile with All Tools</a></h3>
+<pre><code class="language-makefile">CC = clang
+CXX = clang++
+CXXFLAGS = -Wall -Wextra -std=c++17 -O2
+TARGET = myapp
+SRCS = $(wildcard src/*.cpp)
+OBJS = $(SRCS:.cpp=.o)
+
+.PHONY: all clean format lint analyze asan
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $&lt; -o $@
+
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+format:
+	find src include -name '*.cpp' -o -name '*.h' | xargs clang-format -i
+
+lint:
+	clang-tidy $(SRCS) -- $(CXXFLAGS)
+
+lint-fix:
+	clang-tidy -fix $(SRCS) -- $(CXXFLAGS)
+
+analyze:
+	scan-build make
+
+asan:
+	$(CXX) $(CXXFLAGS) -fsanitize=address,undefined -g $(SRCS) -o $(TARGET)
+	./$(TARGET)
+
+compdb:
+	bear -- make
+</code></pre>
+<h3 id="code-review-workflow"><a class="header" href="#code-review-workflow">Code Review Workflow</a></h3>
+<pre><code class="language-bash"># 1. Format code
+make format
+
+# 2. Run static analysis
+make lint
+
+# 3. Fix automatic issues
+clang-tidy -fix src/*.cpp
+
+# 4. Run tests with sanitizers
+make asan
+
+# 5. Check for compilation database
+clangd --check=src/main.cpp
+
+# 6. Commit changes
+git add .
+git commit -m "Fix issues found by clang-tidy"
+
+# 7. Push for review
+git push origin feature-branch
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="project-configuration"><a class="header" href="#project-configuration">Project Configuration</a></h3>
+<pre><code class="language-bash"># Project structure
+myproject/
+├── .clang-format          # Code style
+├── .clang-tidy            # Linter config
+├── .clangd                # LSP config (optional)
+├── compile_commands.json  # Compilation database
+├── CMakeLists.txt         # Build config
+├── include/               # Public headers
+├── src/                   # Source files
+├── tests/                 # Test files
+└── build/                 # Build artifacts
+
+# Essential files
+.clang-format     # Consistent formatting
+.clang-tidy       # Static analysis rules
+.gitignore        # Exclude build artifacts
+CMakeLists.txt    # Build system
+</code></pre>
+<h3 id="compiler-flags"><a class="header" href="#compiler-flags">Compiler Flags</a></h3>
+<pre><code class="language-bash"># Development build
+clang++ -Wall -Wextra -Wpedantic -Wshadow \
+  -g -O0 -std=c++17 \
+  -fsanitize=address,undefined \
+  main.cpp -o myapp
+
+# Release build
+clang++ -Wall -Wextra -O3 -DNDEBUG \
+  -std=c++17 -flto \
+  main.cpp -o myapp
+
+# Security-hardened build
+clang++ -Wall -Wextra -O2 \
+  -D_FORTIFY_SOURCE=2 \
+  -fstack-protector-strong \
+  -fPIE -pie \
+  -Wformat -Wformat-security \
+  main.cpp -o myapp
+</code></pre>
+<h3 id="code-quality-checks"><a class="header" href="#code-quality-checks">Code Quality Checks</a></h3>
+<pre><code class="language-bash"># Comprehensive checking workflow
+make clean
+make format              # Format code
+make lint                # Run clang-tidy
+make analyze             # Static analysis with scan-build
+make asan                # Test with sanitizers
+make test                # Run unit tests
+
+# Automated in CI/CD
+clang-format --dry-run -Werror src/*.cpp
+clang-tidy src/*.cpp
+scan-build make
+make test
+</code></pre>
+<h3 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h3>
+<pre><code class="language-bash"># Profile-guided optimization (PGO)
+# Step 1: Build with profiling
+clang++ -O2 -fprofile-generate program.cpp -o program
+
+# Step 2: Run with typical workload
+./program &lt; typical_input.txt
+
+# Step 3: Build with profile data
+clang++ -O2 -fprofile-use program.cpp -o program
+
+# Link-time optimization (LTO)
+clang++ -O3 -flto main.cpp utils.cpp -o program
+
+# Fast math (trade precision for speed)
+clang++ -O3 -ffast-math program.cpp -o program
+
+# CPU-specific optimization
+clang++ -O3 -march=native program.cpp -o program
+</code></pre>
+<h3 id="ide-setup-recommendations"><a class="header" href="#ide-setup-recommendations">IDE Setup Recommendations</a></h3>
+<pre><code class="language-bash"># 1. Generate compilation database
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+
+# 2. Symlink to project root
+ln -s build/compile_commands.json .
+
+# 3. Configure clangd
+cat &gt; .clangd &lt;&lt; 'EOF'
+CompileFlags:
+  CompilationDatabase: build/
+EOF
+
+# 4. Install editor extension
+# VS Code: Install "clangd" extension
+# Vim: Install coc-clangd or vim-lsp
+# Emacs: Use lsp-mode with clangd
+
+# 5. Verify setup
+clangd --check=src/main.cpp
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-errors"><a class="header" href="#common-errors">Common Errors</a></h3>
+<pre><code class="language-bash"># "undefined reference" errors
+# Problem: Missing library or object file
+# Solution: Add -l flag for libraries
+clang main.c -lm -lpthread -o program
+
+# "cannot find -lxxx" error
+# Problem: Library not in search path
+# Solution: Add library path with -L
+clang main.c -L/usr/local/lib -lmylib -o program
+
+# "fatal error: 'header.h' file not found"
+# Problem: Include path not specified
+# Solution: Add include path with -I
+clang -I./include main.c -o program
+
+# Multiple definition errors
+# Problem: Symbol defined in multiple files
+# Solution: Use static or inline, or fix header guards
+
+# Sanitizer errors
+# Problem: Real bugs in code
+# Solution: Fix the code based on sanitizer output
+</code></pre>
+<h3 id="performance-issues"><a class="header" href="#performance-issues">Performance Issues</a></h3>
+<pre><code class="language-bash"># Slow compilation
+# Use ccache
+export CC="ccache clang"
+export CXX="ccache clang++"
+
+# Parallel compilation
+make -j$(nproc)
+
+# Precompiled headers
+clang++ -x c++-header pch.h -o pch.h.pch
+clang++ -include-pch pch.h.pch main.cpp
+
+# clangd high memory usage
+# Limit background indexing in .clangd config
+cat &gt; .clangd &lt;&lt; 'EOF'
+Index:
+  Background: Skip
+EOF
+
+# Slow clang-tidy
+# Run on changed files only
+git diff --name-only | grep '\.cpp$' | xargs clang-tidy
+</code></pre>
+<h3 id="debugging"><a class="header" href="#debugging">Debugging</a></h3>
+<pre><code class="language-bash"># Show compilation commands
+clang -v main.c
+
+# Show detailed compilation stages
+clang -### main.c
+
+# Dump preprocessor output
+clang -E main.c &gt; main.i
+
+# Dump AST
+clang -Xclang -ast-dump main.c
+
+# Show include tree
+clang -H main.c
+
+# Verbose linking
+clang -Wl,--verbose main.c
+
+# Debug clangd
+clangd --log=verbose --check=src/main.cpp 2&gt;&amp;1 | tee clangd.log
+</code></pre>
+<h3 id="clean-build"><a class="header" href="#clean-build">Clean Build</a></h3>
+<pre><code class="language-bash"># Full clean build
+make clean
+rm -rf build/
+mkdir build &amp;&amp; cd build
+cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+make
+
+# Clear ccache
+ccache --clear
+
+# Regenerate compilation database
+rm compile_commands.json
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+ln -s build/compile_commands.json .
+</code></pre>
+<h2 id="complete-example-project"><a class="header" href="#complete-example-project">Complete Example Project</a></h2>
+<pre><code class="language-bash"># Project structure
+mkdir -p myproject/{src,include,tests,build}
+cd myproject
+
+# Main source file
+cat &gt; src/main.cpp &lt;&lt; 'EOF'
+#include &lt;iostream&gt;
+#include "utils.h"
+
+int main() {
+    std::cout &lt;&lt; "Result: " &lt;&lt; calculate(10, 20) &lt;&lt; std::endl;
+    return 0;
+}
+EOF
+
+# Header file
+cat &gt; include/utils.h &lt;&lt; 'EOF'
+#ifndef UTILS_H
+#define UTILS_H
+
+int calculate(int a, int b);
+
+#endif
+EOF
+
+# Implementation file
+cat &gt; src/utils.cpp &lt;&lt; 'EOF'
+#include "utils.h"
+
+int calculate(int a, int b) {
+    return a + b;
+}
+EOF
+
+# CMakeLists.txt
+cat &gt; CMakeLists.txt &lt;&lt; 'EOF'
+cmake_minimum_required(VERSION 3.10)
+project(MyProject CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Compiler options
+add_compile_options(-Wall -Wextra -Wpedantic)
+
+# Include directories
+include_directories(include)
+
+# Executable
+add_executable(myapp
+    src/main.cpp
+    src/utils.cpp
+)
+
+# Optional: Enable sanitizers
+option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+if(ENABLE_ASAN)
+    target_compile_options(myapp PRIVATE -fsanitize=address,undefined)
+    target_link_options(myapp PRIVATE -fsanitize=address,undefined)
+endif()
+EOF
+
+# .clang-format
+cat &gt; .clang-format &lt;&lt; 'EOF'
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+EOF
+
+# .clang-tidy
+cat &gt; .clang-tidy &lt;&lt; 'EOF'
+---
+Checks: &gt;
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  modernize-*,
+  performance-*,
+  readability-*
+EOF
+
+# Makefile wrapper
+cat &gt; Makefile &lt;&lt; 'EOF'
+BUILD_DIR = build
+
+.PHONY: all configure build clean format lint test
+
+all: build
+
+configure:
+	mkdir -p $(BUILD_DIR)
+	cd $(BUILD_DIR) &amp;&amp; \
+	cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+	ln -sf $(BUILD_DIR)/compile_commands.json .
+
+build: configure
+	cmake --build $(BUILD_DIR)
+
+clean:
+	rm -rf $(BUILD_DIR) compile_commands.json
+
+format:
+	find src include -name '*.cpp' -o -name '*.h' | xargs clang-format -i
+
+lint:
+	clang-tidy src/*.cpp -- -Iinclude
+
+test:
+	$(BUILD_DIR)/myapp
+
+asan: configure
+	cd $(BUILD_DIR) &amp;&amp; cmake -DENABLE_ASAN=ON ..
+	cmake --build $(BUILD_DIR)
+	$(BUILD_DIR)/myapp
+EOF
+
+# Build and run
+make
+make test
+
+# Format and lint
+make format
+make lint
+
+# Test with sanitizers
+make asan
+</code></pre>
+<h2 id="useful-tips"><a class="header" href="#useful-tips">Useful Tips</a></h2>
+<ol>
+<li><strong>Always use compilation database</strong> (<code>compile_commands.json</code>) for accurate IDE support</li>
+<li><strong>Enable warnings</strong> (<code>-Wall -Wextra -Wpedantic</code>) to catch potential bugs early</li>
+<li><strong>Use sanitizers during development</strong> to find memory errors and undefined behavior</li>
+<li><strong>Format code automatically</strong> with clang-format to maintain consistency</li>
+<li><strong>Run clang-tidy regularly</strong> to catch common mistakes and enforce best practices</li>
+<li><strong>Configure clangd</strong> for powerful IDE features in any editor</li>
+<li><strong>Use link-time optimization</strong> (<code>-flto</code>) for release builds</li>
+<li><strong>Enable debug symbols</strong> (<code>-g</code>) even with optimization for better debugging</li>
+<li><strong>Create .clang-format and .clang-tidy</strong> files in project root for consistency</li>
+<li><strong>Test with multiple sanitizers</strong> to catch different classes of bugs</li>
+</ol>
+<p>Clang provides a comprehensive ecosystem of tools that improve code quality, catch bugs early, and enhance developer productivity through excellent IDE integration and static analysis capabilities.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../tools/bazel.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../tools/gcc.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../tools/bazel.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../tools/gcc.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,2477 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Udev - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="udev---linux-dynamic-device-management"><a class="header" href="#udev---linux-dynamic-device-management">udev - Linux Dynamic Device Management</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#core-components">Core Components</a></li>
+<li><a href="#rules-system">Rules System</a></li>
+<li><a href="#basic-operations">Basic Operations</a></li>
+<li><a href="#common-patterns">Common Patterns</a></li>
+<li><a href="#advanced-topics">Advanced Topics</a></li>
+<li><a href="#complete-use-cases">Complete Use Cases</a></li>
+<li><a href="#programming-with-libudev">Programming with libudev</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+<li><a href="#quick-reference">Quick Reference</a></li>
+<li><a href="#integration-examples">Integration Examples</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>udev is the Linux device manager responsible for dynamically managing device nodes in the <code>/dev</code> directory. It handles device events from the kernel, creates and removes device nodes, manages permissions and ownership, creates symbolic links, and can execute programs in response to device events.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Dynamic device node management</strong>: Creates/removes <code>/dev</code> entries as hardware is added/removed</li>
+<li><strong>Persistent device naming</strong>: Provides consistent names for devices across reboots</li>
+<li><strong>Event-driven architecture</strong>: Responds to kernel events in real-time</li>
+<li><strong>Flexible rules system</strong>: Powerful pattern matching and device configuration</li>
+<li><strong>Permission management</strong>: Controls device node ownership, group, and permissions</li>
+<li><strong>Integration with systemd</strong>: Tightly integrated with modern init systems</li>
+<li><strong>Extensible</strong>: Supports custom helper programs and scripts</li>
+<li><strong>Hardware database</strong>: Maintains metadata about devices</li>
+</ul>
+<h3 id="evolution"><a class="header" href="#evolution">Evolution</a></h3>
+<ul>
+<li><strong>Pre-udev era</strong>: Static <code>/dev</code> directory with pre-created device nodes</li>
+<li><strong>udev standalone</strong> (2003-2012): Independent device manager</li>
+<li><strong>systemd integration</strong> (2012+): Now part of systemd project</li>
+<li><strong>Modern udev</strong>: Uses devtmpfs for initial <code>/dev</code> population</li>
+</ul>
+<h3 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h3>
+<ul>
+<li>Automatically mount USB drives when inserted</li>
+<li>Assign persistent names to network interfaces</li>
+<li>Set custom permissions for development devices (Arduino, FPGA boards)</li>
+<li>Manage multiple identical USB serial devices</li>
+<li>Trigger backups when external drives connect</li>
+<li>Configure printers and scanners automatically</li>
+<li>Handle Android device connections for development</li>
+<li>Control LEDs or other hardware based on device state</li>
+</ul>
+<h2 id="architecture"><a class="header" href="#architecture">Architecture</a></h2>
+<p>udev sits between the Linux kernel and user space, managing the interface between hardware events and device nodes.</p>
+<h3 id="device-event-flow"><a class="header" href="#device-event-flow">Device Event Flow</a></h3>
+<pre><code>Kernel Space                    User Space
+┌─────────────┐              ┌──────────────┐
+│   Kernel    │              │    udevd     │
+│  (devices)  │              │   (daemon)   │
+└──────┬──────┘              └──────┬───────┘
+       │                            │
+       │ uevent                     │
+       ├───────────────────────────&gt;│
+       │                            │
+       │                     ┌──────▼───────┐
+┌──────▼──────┐              │ Rules Engine │
+│    sysfs    │&lt;─────────────┤  Processing  │
+│  /sys/...   │   reads      └──────┬───────┘
+└─────────────┘                     │
+                              ┌─────▼──────┐
+┌─────────────┐               │   Action   │
+│  devtmpfs   │&lt;──────────────┤  - NAME    │
+│  /dev/...   │   creates     │  - SYMLINK │
+└─────────────┘               │  - MODE    │
+                              │  - RUN     │
+                              └────────────┘
+</code></pre>
+<h3 id="components-interaction"><a class="header" href="#components-interaction">Components Interaction</a></h3>
+<ol>
+<li><strong>Kernel</strong> detects hardware change (device added/removed)</li>
+<li><strong>Kernel</strong> creates uevent and populates <strong>sysfs</strong> (<code>/sys</code>)</li>
+<li><strong>devtmpfs</strong> may create initial device node</li>
+<li><strong>udevd</strong> receives uevent from kernel via netlink socket</li>
+<li><strong>udevd</strong> reads device information from <strong>sysfs</strong></li>
+<li><strong>udevd</strong> processes rules in order</li>
+<li><strong>udevd</strong> applies actions (create symlinks, set permissions, run programs)</li>
+<li><strong>udevd</strong> updates device database</li>
+</ol>
+<h3 id="udevd-daemon-architecture"><a class="header" href="#udevd-daemon-architecture">udevd Daemon Architecture</a></h3>
+<ul>
+<li>Runs as PID 1's child (started by systemd)</li>
+<li>Listens on netlink socket for kernel events</li>
+<li>Processes events sequentially (by default) or in parallel (with restrictions)</li>
+<li>Maintains device database in <code>/run/udev/data/</code></li>
+<li>Enforces timeouts on rule execution</li>
+<li>Handles both coldplug (boot-time) and hotplug (runtime) events</li>
+</ul>
+<h2 id="core-components"><a class="header" href="#core-components">Core Components</a></h2>
+<h3 id="udevd-daemon"><a class="header" href="#udevd-daemon">udevd Daemon</a></h3>
+<p>The central daemon that processes device events.</p>
+<p><strong>Location</strong>: <code>/lib/systemd/systemd-udevd</code></p>
+<p><strong>Key responsibilities</strong>:</p>
+<ul>
+<li>Receive events from kernel</li>
+<li>Process rule files</li>
+<li>Execute actions</li>
+<li>Manage device database</li>
+<li>Enforce security policies</li>
+</ul>
+<p><strong>Configuration</strong>: <code>/etc/udev/udev.conf</code></p>
+<pre><code class="language-ini"># /etc/udev/udev.conf
+udev_log=info
+children_max=128
+exec_delay=0
+event_timeout=180
+resolve_names=early
+</code></pre>
+<h3 id="udevadm-utility"><a class="header" href="#udevadm-utility">udevadm Utility</a></h3>
+<p>The primary tool for interacting with udev.</p>
+<p><strong>Subcommands</strong>:</p>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>udevadm info</code></td><td>Query device information</td></tr>
+<tr><td><code>udevadm monitor</code></td><td>Monitor kernel events and udev processing</td></tr>
+<tr><td><code>udevadm test</code></td><td>Simulate rule processing for a device</td></tr>
+<tr><td><code>udevadm trigger</code></td><td>Request device events from kernel</td></tr>
+<tr><td><code>udevadm settle</code></td><td>Wait for event queue to empty</td></tr>
+<tr><td><code>udevadm control</code></td><td>Control udevd daemon behavior</td></tr>
+</tbody></table>
+</div>
+<h3 id="rules-files"><a class="header" href="#rules-files">Rules Files</a></h3>
+<p>Rules are stored in multiple directories, processed in lexical order:</p>
+<p><strong>System rules</strong> (don't modify):</p>
+<ul>
+<li><code>/lib/udev/rules.d/</code> - Distribution-provided rules</li>
+<li><code>/usr/lib/udev/rules.d/</code> - Package-installed rules</li>
+</ul>
+<p><strong>Custom rules</strong> (your rules go here):</p>
+<ul>
+<li><code>/etc/udev/rules.d/</code> - Local administrator rules</li>
+<li><code>/run/udev/rules.d/</code> - Runtime rules</li>
+</ul>
+<p><strong>Priority</strong>: Files in <code>/etc</code> override files in <code>/lib</code> with the same name. Numbering convention:</p>
+<ul>
+<li><code>00-99</code>: System and architecture rules</li>
+<li><code>60-69</code>: Storage and filesystem rules</li>
+<li><code>70-79</code>: Network rules</li>
+<li><code>80-89</code>: Local rules (your custom rules)</li>
+<li><code>90-99</code>: Late rules</li>
+</ul>
+<h3 id="helper-programs"><a class="header" href="#helper-programs">Helper Programs</a></h3>
+<p>Located in <code>/lib/udev/</code>:</p>
+<ul>
+<li><code>ata_id</code> - ATA device information</li>
+<li><code>cdrom_id</code> - CD/DVD device identification</li>
+<li><code>scsi_id</code> - SCSI device identification</li>
+<li><code>usb_id</code> - USB device identification</li>
+<li><code>mtd_probe</code> - Memory Technology Device identification</li>
+</ul>
+<h3 id="libudev-library"><a class="header" href="#libudev-library">libudev Library</a></h3>
+<p>C library for accessing udev functionality programmatically.</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li>Device enumeration</li>
+<li>Event monitoring</li>
+<li>Property querying</li>
+<li>Asynchronous operation</li>
+</ul>
+<h3 id="hardware-database-hwdb"><a class="header" href="#hardware-database-hwdb">Hardware Database (hwdb)</a></h3>
+<p>Binary database for hardware-specific information.</p>
+<p><strong>Locations</strong>:</p>
+<ul>
+<li><code>/lib/udev/hwdb.d/</code> - System database</li>
+<li><code>/etc/udev/hwdb.d/</code> - Local overrides</li>
+</ul>
+<p><strong>Update</strong>:</p>
+<pre><code class="language-bash">systemd-hwdb update    # Compile text files to binary
+</code></pre>
+<h2 id="rules-system"><a class="header" href="#rules-system">Rules System</a></h2>
+<h3 id="rule-file-syntax"><a class="header" href="#rule-file-syntax">Rule File Syntax</a></h3>
+<p>Each rule consists of one or more key-value pairs separated by commas. Rules span a single logical line (use <code>\</code> for line continuation).</p>
+<p><strong>Basic structure</strong>:</p>
+<pre><code>MATCH_KEY==value, MATCH_KEY2==value, ASSIGNMENT_KEY=value, ASSIGNMENT_KEY2=value
+</code></pre>
+<p><strong>Example</strong>:</p>
+<pre><code class="language-bash"># Match USB device and set permissions
+SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", \
+    MODE="0660", GROUP="dialout"
+</code></pre>
+<h3 id="match-keys"><a class="header" href="#match-keys">Match Keys</a></h3>
+<p>Match keys are used to identify devices. All match keys in a rule must match for the rule to apply.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>KERNEL</code></td><td>Match device kernel name</td><td><code>KERNEL=="sda"</code></td></tr>
+<tr><td><code>SUBSYSTEM</code></td><td>Match device subsystem</td><td><code>SUBSYSTEM=="net"</code></td></tr>
+<tr><td><code>DRIVER</code></td><td>Match device driver</td><td><code>DRIVER=="usb"</code></td></tr>
+<tr><td><code>ATTR{filename}</code></td><td>Match sysfs attribute</td><td><code>ATTR{idVendor}=="046d"</code></td></tr>
+<tr><td><code>ATTRS{filename}</code></td><td>Match parent's sysfs attribute</td><td><code>ATTRS{serial}=="ABC123"</code></td></tr>
+<tr><td><code>ENV{key}</code></td><td>Match environment variable</td><td><code>ENV{ID_USB_DRIVER}=="usb-storage"</code></td></tr>
+<tr><td><code>KERNELS</code></td><td>Match device or parent kernel name</td><td><code>KERNELS=="2-1.1"</code></td></tr>
+<tr><td><code>SUBSYSTEMS</code></td><td>Match device or parent subsystem</td><td><code>SUBSYSTEMS=="usb"</code></td></tr>
+<tr><td><code>DRIVERS</code></td><td>Match device or parent driver</td><td><code>DRIVERS=="usb-storage"</code></td></tr>
+<tr><td><code>TAG</code></td><td>Match device tag</td><td><code>TAG=="systemd"</code></td></tr>
+<tr><td><code>TEST{filename}</code></td><td>Test file existence</td><td><code>TEST=="/sys/module/kvm"</code></td></tr>
+<tr><td><code>PROGRAM</code></td><td>Execute program and match output</td><td><code>PROGRAM=="/lib/udev/scsi_id -g $devnode"</code></td></tr>
+<tr><td><code>RESULT</code></td><td>Match result of last PROGRAM</td><td><code>RESULT=="1234567890"</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="operators"><a class="header" href="#operators">Operators</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Operator</th><th>Meaning</th><th>Used With</th></tr></thead><tbody>
+<tr><td><code>==</code></td><td>Equality match</td><td>Match keys</td></tr>
+<tr><td><code>!=</code></td><td>Inequality match</td><td>Match keys</td></tr>
+<tr><td><code>=</code></td><td>Assign value</td><td>Assignment keys</td></tr>
+<tr><td><code>+=</code></td><td>Append to value</td><td>Assignment keys</td></tr>
+<tr><td><code>-=</code></td><td>Remove from value</td><td>Assignment keys</td></tr>
+<tr><td><code>:=</code></td><td>Assign final value (prevent changes)</td><td>Assignment keys</td></tr>
+</tbody></table>
+</div>
+<h3 id="assignment-keys"><a class="header" href="#assignment-keys">Assignment Keys</a></h3>
+<p>Assignment keys define actions to take when a rule matches.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>NAME</code></td><td>Device node name</td><td><code>NAME="mydevice"</code></td></tr>
+<tr><td><code>SYMLINK</code></td><td>Symbolic link(s) to create</td><td><code>SYMLINK+="disk/by-label/backup"</code></td></tr>
+<tr><td><code>OWNER</code></td><td>Device node owner</td><td><code>OWNER="root"</code></td></tr>
+<tr><td><code>GROUP</code></td><td>Device node group</td><td><code>GROUP="disk"</code></td></tr>
+<tr><td><code>MODE</code></td><td>Device node permissions</td><td><code>MODE="0660"</code></td></tr>
+<tr><td><code>TAG</code></td><td>Add device tag</td><td><code>TAG+="systemd"</code></td></tr>
+<tr><td><code>ENV{key}</code></td><td>Set environment variable</td><td><code>ENV{ID_MODEL}="MyDisk"</code></td></tr>
+<tr><td><code>RUN</code></td><td>Execute program (deprecated)</td><td><code>RUN+="/usr/local/bin/script.sh"</code></td></tr>
+<tr><td><code>RUN{program}</code></td><td>Execute program after event</td><td><code>RUN{program}+="/bin/mount $devnode"</code></td></tr>
+<tr><td><code>LABEL</code></td><td>Named label for GOTO</td><td><code>LABEL="my_label"</code></td></tr>
+<tr><td><code>GOTO</code></td><td>Jump to LABEL</td><td><code>GOTO="my_label"</code></td></tr>
+<tr><td><code>IMPORT</code></td><td>Import variables from program/file</td><td><code>IMPORT{program}="/lib/udev/usb_id"</code></td></tr>
+<tr><td><code>OPTIONS</code></td><td>Rule options</td><td><code>OPTIONS+="last_rule"</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="string-substitutions"><a class="header" href="#string-substitutions">String Substitutions</a></h3>
+<p>Variables available in rules:</p>
+<div class="table-wrapper"><table><thead><tr><th>Pattern</th><th>Meaning</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>$kernel</code> or <code>%k</code></td><td>Kernel name</td><td><code>sda</code></td></tr>
+<tr><td><code>$number</code> or <code>%n</code></td><td>Kernel number</td><td><code>1</code> (from sda1)</td></tr>
+<tr><td><code>$devpath</code> or <code>%p</code></td><td>Device path in <code>/sys</code></td><td><code>/devices/pci0000:00/...</code></td></tr>
+<tr><td><code>$id</code></td><td>Device ID</td><td>USB port number</td></tr>
+<tr><td><code>$driver</code></td><td>Device driver</td><td><code>usb-storage</code></td></tr>
+<tr><td><code>$devnode</code></td><td>Device node path</td><td><code>/dev/sda1</code></td></tr>
+<tr><td><code>$attr{file}</code></td><td>Sysfs attribute value</td><td><code>$attr{size}</code></td></tr>
+<tr><td><code>$env{key}</code></td><td>Environment variable</td><td><code>$env{ID_SERIAL}</code></td></tr>
+<tr><td><code>$major</code> or <code>%M</code></td><td>Device major number</td><td><code>8</code></td></tr>
+<tr><td><code>$minor</code> or <code>%m</code></td><td>Device minor number</td><td><code>1</code></td></tr>
+<tr><td><code>$result</code> or <code>%c</code></td><td>Output of PROGRAM</td><td>varies</td></tr>
+<tr><td><code>$parent</code></td><td>Parent device path</td><td>Parent device</td></tr>
+<tr><td><code>$name</code></td><td>Device name (after NAME)</td><td>Custom name</td></tr>
+<tr><td><code>$links</code></td><td>Space-separated symlinks</td><td>All symlinks</td></tr>
+<tr><td><code>$root</code></td><td>udev runtime directory</td><td><code>/run/udev</code></td></tr>
+<tr><td><code>$sys</code></td><td>sysfs mount point</td><td><code>/sys</code></td></tr>
+<tr><td><code>$tempnode</code></td><td>Temporary device node</td><td>For testing</td></tr>
+<tr><td><code>%%</code></td><td>Literal <code>%</code></td><td><code>%</code></td></tr>
+<tr><td><code>$$</code></td><td>Literal <code>$</code></td><td><code>$</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="string-modifiers"><a class="header" href="#string-modifiers">String Modifiers</a></h3>
+<p>Modify substitution values:</p>
+<pre><code class="language-bash"># Get last component of path
+SYMLINK+="disk/by-path/$env{ID_PATH}/basename"
+
+# Get all but last component
+PROGRAM="/bin/echo $env{ID_PATH}/dirname"
+
+# Replace characters
+SYMLINK+="disk/by-label/$env{ID_FS_LABEL}/replace{' ', '_'}"
+</code></pre>
+<h3 id="rule-processing-flow"><a class="header" href="#rule-processing-flow">Rule Processing Flow</a></h3>
+<ol>
+<li><strong>Event received</strong>: udevd receives uevent from kernel</li>
+<li><strong>Device matching</strong>: Each rule file processed in lexical order</li>
+<li><strong>Rule evaluation</strong>: For each rule, all match keys must match</li>
+<li><strong>Action execution</strong>: Assignment keys are processed</li>
+<li><strong>Early exit</strong>: <code>OPTIONS="last_rule"</code> stops processing</li>
+<li><strong>Database update</strong>: Device properties stored in <code>/run/udev/data/</code></li>
+</ol>
+<h3 id="rule-file-ordering"><a class="header" href="#rule-file-ordering">Rule File Ordering</a></h3>
+<p>Files are processed in lexical order. Use numeric prefixes to control order:</p>
+<pre><code class="language-bash">/etc/udev/rules.d/
+├── 10-local-network.rules      # Processed first
+├── 50-usb-devices.rules        # Processed second
+└── 99-local-late.rules         # Processed last
+</code></pre>
+<p>Within a file, rules are processed top to bottom.</p>
+<h2 id="basic-operations"><a class="header" href="#basic-operations">Basic Operations</a></h2>
+<h3 id="monitoring-device-events"><a class="header" href="#monitoring-device-events">Monitoring Device Events</a></h3>
+<p>Watch events in real-time:</p>
+<pre><code class="language-bash"># Monitor both kernel events and udev processing
+udevadm monitor
+
+# Monitor with more detail
+udevadm monitor --environment --property
+
+# Monitor specific subsystem
+udevadm monitor --subsystem-match=block
+
+# Monitor multiple subsystems
+udevadm monitor --subsystem-match=block --subsystem-match=usb
+
+# Monitor with kernel events only
+udevadm monitor --kernel
+</code></pre>
+<p>Example output:</p>
+<pre><code>KERNEL[12345.678] add      /devices/pci0000:00/.../block/sdb (block)
+UDEV  [12345.789] add      /devices/pci0000:00/.../block/sdb (block)
+</code></pre>
+<h3 id="querying-device-information"><a class="header" href="#querying-device-information">Querying Device Information</a></h3>
+<p>Get detailed device information:</p>
+<pre><code class="language-bash"># Query by device node
+udevadm info /dev/sda
+
+# Query by device path
+udevadm info --path=/sys/class/net/eth0
+
+# Query with all properties
+udevadm info --query=property /dev/sda
+
+# Query specific property
+udevadm info --query=property --property=ID_MODEL /dev/sda
+
+# Query all properties including parent devices
+udevadm info --attribute-walk /dev/sda
+
+# Show device path
+udevadm info --query=path /dev/sda
+
+# Show symlinks
+udevadm info --query=symlink /dev/sda
+</code></pre>
+<h3 id="listing-device-attributes"><a class="header" href="#listing-device-attributes">Listing Device Attributes</a></h3>
+<p>Walk the device tree to see available attributes:</p>
+<pre><code class="language-bash"># Show all attributes for matching
+udevadm info --attribute-walk --name=/dev/sda1
+
+# Example output:
+#   looking at device '/devices/pci0000:00/.../block/sda/sda1':
+#     KERNEL=="sda1"
+#     SUBSYSTEM=="block"
+#     ATTR{size}=="1953525168"
+#     ATTR{ro}=="0"
+#   looking at parent device:
+#     KERNELS=="sda"
+#     SUBSYSTEMS=="block"
+#     ATTRS{model}=="Samsung SSD 860"
+</code></pre>
+<h3 id="testing-rules"><a class="header" href="#testing-rules">Testing Rules</a></h3>
+<p>Test rules without applying them:</p>
+<pre><code class="language-bash"># Test rules for a device
+udevadm test /sys/class/net/eth0
+
+# Test with debugging output
+udevadm test --action=add /sys/class/block/sda
+
+# Test and show only what would be executed
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | grep -E "RUN|SYMLINK|NAME"
+</code></pre>
+<h3 id="triggering-events"><a class="header" href="#triggering-events">Triggering Events</a></h3>
+<p>Manually trigger device events:</p>
+<pre><code class="language-bash"># Trigger events for all devices
+udevadm trigger
+
+# Trigger for specific subsystem
+udevadm trigger --subsystem-match=block
+
+# Trigger for specific device
+udevadm trigger --name-match=/dev/sda
+
+# Trigger with specific action
+udevadm trigger --action=change --subsystem-match=net
+
+# Trigger for devices with specific attribute
+udevadm trigger --attr-match=idVendor=046d
+
+# Dry run (show what would be triggered)
+udevadm trigger --dry-run --subsystem-match=usb
+</code></pre>
+<h3 id="reloading-rules"><a class="header" href="#reloading-rules">Reloading Rules</a></h3>
+<p>Reload udev rules after making changes:</p>
+<pre><code class="language-bash"># Reload rules
+udevadm control --reload-rules
+
+# Reload and trigger events to apply new rules
+udevadm control --reload-rules &amp;&amp; udevadm trigger
+</code></pre>
+<h3 id="waiting-for-event-processing"><a class="header" href="#waiting-for-event-processing">Waiting for Event Processing</a></h3>
+<p>Wait for udev queue to empty:</p>
+<pre><code class="language-bash"># Wait for all events to be processed
+udevadm settle
+
+# Wait with timeout (30 seconds)
+udevadm settle --timeout=30
+
+# Wait for specific event
+udevadm trigger --name-match=/dev/sda &amp;&amp; udevadm settle
+</code></pre>
+<h3 id="controlling-the-daemon"><a class="header" href="#controlling-the-daemon">Controlling the Daemon</a></h3>
+<p>Control udevd behavior:</p>
+<pre><code class="language-bash"># Reload rules
+udevadm control --reload
+
+# Set log level
+udevadm control --log-level=debug
+
+# Stop executing rules (emergency)
+udevadm control --stop-exec-queue
+
+# Resume executing rules
+udevadm control --start-exec-queue
+
+# Show daemon status
+systemctl status systemd-udevd
+</code></pre>
+<h3 id="viewing-persistent-device-names"><a class="header" href="#viewing-persistent-device-names">Viewing Persistent Device Names</a></h3>
+<p>List persistent device naming schemes:</p>
+<pre><code class="language-bash"># View all symlinks for block devices
+ls -la /dev/disk/by-*
+
+# By UUID
+ls -la /dev/disk/by-uuid/
+
+# By label
+ls -la /dev/disk/by-label/
+
+# By path
+ls -la /dev/disk/by-path/
+
+# By ID
+ls -la /dev/disk/by-id/
+
+# By partition UUID
+ls -la /dev/disk/by-partuuid/
+</code></pre>
+<h3 id="examining-the-device-database"><a class="header" href="#examining-the-device-database">Examining the Device Database</a></h3>
+<p>View udev's internal database:</p>
+<pre><code class="language-bash"># Database location
+ls -la /run/udev/data/
+
+# Query database for device
+udevadm info --query=all /dev/sda | grep "^[ES]:"
+# E: = Environment variable
+# S: = Symlink
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="network-device-naming"><a class="header" href="#network-device-naming">Network Device Naming</a></h3>
+<h4 id="persistent-interface-name-by-mac-address"><a class="header" href="#persistent-interface-name-by-mac-address">Persistent Interface Name by MAC Address</a></h4>
+<pre><code class="language-bash"># /etc/udev/rules.d/70-persistent-net.rules
+# Rename network interface to eth0 based on MAC address
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="00:11:22:33:44:55", NAME="eth0"
+
+# Multiple interfaces
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="00:11:22:33:44:55", NAME="lan0"
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="00:11:22:33:44:56", NAME="wan0"
+</code></pre>
+<h4 id="custom-interface-names-by-driver"><a class="header" href="#custom-interface-names-by-driver">Custom Interface Names by Driver</a></h4>
+<pre><code class="language-bash"># Name wireless interfaces
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{type}=="1", \
+    KERNEL=="wlan*", NAME="wifi0"
+
+# Name USB ethernet adapters
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8152", NAME="usb-eth0"
+</code></pre>
+<h4 id="disable-predictable-network-names"><a class="header" href="#disable-predictable-network-names">Disable Predictable Network Names</a></h4>
+<pre><code class="language-bash"># Force traditional eth0 style naming
+SUBSYSTEM=="net", ACTION=="add", NAME="eth$env{IFINDEX}"
+</code></pre>
+<h4 id="name-by-pci-slot"><a class="header" href="#name-by-pci-slot">Name by PCI Slot</a></h4>
+<pre><code class="language-bash"># Name interface by PCI bus position
+SUBSYSTEM=="net", ACTION=="add", \
+    KERNELS=="0000:02:00.0", NAME="lan-slot2"
+</code></pre>
+<h3 id="storage-device-patterns"><a class="header" href="#storage-device-patterns">Storage Device Patterns</a></h3>
+<h4 id="persistent-disk-name-by-serial-number"><a class="header" href="#persistent-disk-name-by-serial-number">Persistent Disk Name by Serial Number</a></h4>
+<pre><code class="language-bash"># /etc/udev/rules.d/60-persistent-storage.rules
+# Create symlink for disk by serial number
+SUBSYSTEM=="block", KERNEL=="sd?", \
+    ATTRS{serial}=="S1234567890", \
+    SYMLINK+="disk/by-serial-custom/$attrs{serial}"
+
+# Specific partition
+SUBSYSTEM=="block", KERNEL=="sd?1", \
+    ATTRS{serial}=="S1234567890", \
+    SYMLINK+="disk/my-backup-disk"
+</code></pre>
+<h4 id="persistent-name-by-filesystem-label"><a class="header" href="#persistent-name-by-filesystem-label">Persistent Name by Filesystem Label</a></h4>
+<pre><code class="language-bash"># Create custom symlink for labeled filesystem
+SUBSYSTEM=="block", ENV{ID_FS_LABEL}=="BACKUP", \
+    SYMLINK+="backup-disk"
+
+# Multiple labels
+SUBSYSTEM=="block", ENV{ID_FS_LABEL}=="MEDIA", \
+    SYMLINK+="media-disk"
+SUBSYSTEM=="block", ENV{ID_FS_LABEL}=="ARCHIVE", \
+    SYMLINK+="archive-disk"
+</code></pre>
+<h4 id="persistent-name-for-usb-storage-by-port"><a class="header" href="#persistent-name-for-usb-storage-by-port">Persistent Name for USB Storage by Port</a></h4>
+<pre><code class="language-bash"># Identify USB storage by physical port
+SUBSYSTEM=="block", KERNEL=="sd?", \
+    KERNELS=="2-1.4", \
+    SYMLINK+="usb-port-front-left"
+
+# Partition on specific USB port
+SUBSYSTEM=="block", KERNEL=="sd?1", \
+    KERNELS=="2-1.4", \
+    SYMLINK+="usb-port-front-left-part1"
+</code></pre>
+<h4 id="auto-mount-detection-with-tag"><a class="header" href="#auto-mount-detection-with-tag">Auto-mount Detection with Tag</a></h4>
+<pre><code class="language-bash"># Tag removable media for systemd automount
+SUBSYSTEM=="block", ENV{ID_FS_USAGE}=="filesystem", \
+    ENV{UDISKS_AUTO}="1", TAG+="systemd"
+</code></pre>
+<h3 id="usb-device-patterns"><a class="header" href="#usb-device-patterns">USB Device Patterns</a></h3>
+<h4 id="set-permissions-for-usb-device"><a class="header" href="#set-permissions-for-usb-device">Set Permissions for USB Device</a></h4>
+<pre><code class="language-bash"># Grant access to specific USB device
+SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", \
+    MODE="0660", GROUP="dialout"
+
+# Multiple products from same vendor
+SUBSYSTEM=="usb", ATTR{idVendor}=="2341", \
+    MODE="0660", GROUP="arduino", TAG+="uaccess"
+</code></pre>
+<h4 id="identify-usb-device-by-serial-number"><a class="header" href="#identify-usb-device-by-serial-number">Identify USB Device by Serial Number</a></h4>
+<pre><code class="language-bash"># Match specific device instance
+SUBSYSTEM=="usb", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", \
+    ATTRS{serial}=="ABC123", \
+    SYMLINK+="usb-prolific-abc123"
+</code></pre>
+<h4 id="usb-device-by-manufacturer-string"><a class="header" href="#usb-device-by-manufacturer-string">USB Device by Manufacturer String</a></h4>
+<pre><code class="language-bash"># Match by manufacturer and product strings
+SUBSYSTEM=="usb", ATTRS{manufacturer}=="FTDI", \
+    ATTRS{product}=="FT232R USB UART", \
+    MODE="0660", GROUP="dialout"
+</code></pre>
+<h4 id="persistent-name-for-usb-serial-devices"><a class="header" href="#persistent-name-for-usb-serial-devices">Persistent Name for USB Serial Devices</a></h4>
+<pre><code class="language-bash"># Create persistent name for USB-serial converter
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", \
+    ATTRS{serial}=="FT123456", \
+    SYMLINK+="ttyUSB-FTDI-FT123456"
+
+# By position in device tree
+SUBSYSTEM=="tty", KERNELS=="1-1.2", \
+    SYMLINK+="ttyUSB-port-1"
+</code></pre>
+<h3 id="multiple-identical-devices"><a class="header" href="#multiple-identical-devices">Multiple Identical Devices</a></h3>
+<h4 id="differentiate-by-usb-port"><a class="header" href="#differentiate-by-usb-port">Differentiate by USB Port</a></h4>
+<pre><code class="language-bash"># /etc/udev/rules.d/80-usb-serial-ports.rules
+# Top port
+SUBSYSTEM=="tty", KERNELS=="2-1.1", \
+    SYMLINK+="arduino-top"
+
+# Bottom port
+SUBSYSTEM=="tty", KERNELS=="2-1.2", \
+    SYMLINK+="arduino-bottom"
+</code></pre>
+<h4 id="differentiate-by-serial-number"><a class="header" href="#differentiate-by-serial-number">Differentiate by Serial Number</a></h4>
+<pre><code class="language-bash"># Create unique names for identical USB devices
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", \
+    ATTRS{serial}=="001", SYMLINK+="cp210x-sensor1"
+
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", \
+    ATTRS{serial}=="002", SYMLINK+="cp210x-sensor2"
+</code></pre>
+<h3 id="permission-and-ownership-patterns"><a class="header" href="#permission-and-ownership-patterns">Permission and Ownership Patterns</a></h3>
+<h4 id="developer-device-access"><a class="header" href="#developer-device-access">Developer Device Access</a></h4>
+<pre><code class="language-bash"># Grant user access to FPGA development boards
+SUBSYSTEM=="usb", ATTR{idVendor}=="09fb", \
+    MODE="0666", GROUP="plugdev"
+
+# STM32 programmers
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="3748", \
+    MODE="0660", GROUP="developers", TAG+="uaccess"
+</code></pre>
+<h4 id="group-based-access-control"><a class="header" href="#group-based-access-control">Group-based Access Control</a></h4>
+<pre><code class="language-bash"># Video capture devices accessible by video group
+SUBSYSTEM=="video4linux", GROUP="video", MODE="0660"
+
+# Sound devices accessible by audio group
+SUBSYSTEM=="sound", GROUP="audio", MODE="0660"
+
+# Printer devices
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", \
+    ENV{ID_USB_INTERFACES}=="*:0701??:*", \
+    GROUP="lp", MODE="0660"
+</code></pre>
+<h4 id="security-devices"><a class="header" href="#security-devices">Security Devices</a></h4>
+<pre><code class="language-bash"># YubiKey security key
+SUBSYSTEM=="usb", ATTR{idVendor}=="1050", ATTR{idProduct}=="0407", \
+    MODE="0660", GROUP="yubikey", TAG+="uaccess"
+
+# Nitrokey
+SUBSYSTEM=="usb", ATTR{idVendor}=="20a0", ATTR{idProduct}=="4108", \
+    MODE="0660", GROUP="nitrokey"
+</code></pre>
+<h3 id="symlink-creation-patterns"><a class="header" href="#symlink-creation-patterns">Symlink Creation Patterns</a></h3>
+<h4 id="multiple-symlinks-for-one-device"><a class="header" href="#multiple-symlinks-for-one-device">Multiple Symlinks for One Device</a></h4>
+<pre><code class="language-bash"># Create multiple meaningful symlinks
+SUBSYSTEM=="block", ENV{ID_SERIAL}=="WD_My_Passport_1234", \
+    SYMLINK+="backup", \
+    SYMLINK+="western-digital", \
+    SYMLINK+="portable-hdd"
+</code></pre>
+<h4 id="directory-organized-links"><a class="header" href="#directory-organized-links">Directory-organized Links</a></h4>
+<pre><code class="language-bash"># Organize devices in /dev subdirectories
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2341", \
+    SYMLINK+="arduino/$attrs{serial}"
+
+SUBSYSTEM=="block", ENV{ID_FS_LABEL}=="*", \
+    SYMLINK+="disk/by-custom-label/$env{ID_FS_LABEL}"
+</code></pre>
+<h4 id="application-specific-paths"><a class="header" href="#application-specific-paths">Application-specific Paths</a></h4>
+<pre><code class="language-bash"># Create symlinks for specific applications
+SUBSYSTEM=="video4linux", ATTRS{product}=="*Webcam*", \
+    KERNEL=="video*", \
+    SYMLINK+="video-webcam", \
+    SYMLINK+="apps/skype/camera"
+</code></pre>
+<h3 id="running-programs-on-events"><a class="header" href="#running-programs-on-events">Running Programs on Events</a></h3>
+<h4 id="execute-script-on-device-add"><a class="header" href="#execute-script-on-device-add">Execute Script on Device Add</a></h4>
+<pre><code class="language-bash"># Run script when USB drive inserted
+SUBSYSTEM=="block", KERNEL=="sd[a-z][0-9]", \
+    ACTION=="add", \
+    ENV{ID_FS_UUID}=="1234-5678", \
+    RUN{program}+="/usr/local/bin/backup-script.sh"
+</code></pre>
+<h4 id="execute-with-device-information"><a class="header" href="#execute-with-device-information">Execute with Device Information</a></h4>
+<pre><code class="language-bash"># Pass device info to script
+SUBSYSTEM=="net", ACTION=="add", \
+    RUN{program}+="/usr/local/bin/network-notify.sh $kernel $attr{address}"
+</code></pre>
+<h4 id="set-environment-variables-for-programs"><a class="header" href="#set-environment-variables-for-programs">Set Environment Variables for Programs</a></h4>
+<pre><code class="language-bash"># Set environment for downstream processing
+SUBSYSTEM=="block", KERNEL=="sd?1", \
+    ENV{MY_MOUNT_POINT}="/mnt/external", \
+    ENV{MY_DEVICE_TYPE}="external_hdd"
+</code></pre>
+<h4 id="use-systemd-service-instead-of-run"><a class="header" href="#use-systemd-service-instead-of-run">Use systemd Service Instead of RUN</a></h4>
+<p>Modern approach - trigger systemd service:</p>
+<pre><code class="language-bash"># Tag device to trigger systemd template service
+SUBSYSTEM=="block", ENV{ID_FS_UUID}=="1234-5678", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="backup@%k.service"
+</code></pre>
+<h3 id="input-device-patterns"><a class="header" href="#input-device-patterns">Input Device Patterns</a></h3>
+<h4 id="keyboard-and-mouse-permissions"><a class="header" href="#keyboard-and-mouse-permissions">Keyboard and Mouse Permissions</a></h4>
+<pre><code class="language-bash"># Grant seat access to input devices
+SUBSYSTEM=="input", KERNEL=="event*", \
+    TAG+="uaccess"
+
+# Specific gaming devices
+SUBSYSTEM=="input", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", \
+    MODE="0660", GROUP="gamers"
+</code></pre>
+<h4 id="touchscreen-configuration"><a class="header" href="#touchscreen-configuration">Touchscreen Configuration</a></h4>
+<pre><code class="language-bash"># Tag touchscreen for X11
+SUBSYSTEM=="input", KERNEL=="event*", \
+    ENV{ID_INPUT_TOUCHSCREEN}=="1", \
+    TAG+="touchscreen"
+</code></pre>
+<h3 id="android-development"><a class="header" href="#android-development">Android Development</a></h3>
+<h4 id="adb-device-access"><a class="header" href="#adb-device-access">ADB Device Access</a></h4>
+<pre><code class="language-bash"># /etc/udev/rules.d/51-android.rules
+# Google devices
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0660", GROUP="adbusers", TAG+="uaccess"
+
+# Samsung devices
+SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", MODE="0660", GROUP="adbusers", TAG+="uaccess"
+
+# Generic Android devices
+SUBSYSTEM=="usb", ENV{ID_USB_INTERFACES}=="*:ff420?:*", \
+    MODE="0660", GROUP="adbusers", TAG+="uaccess"
+</code></pre>
+<h3 id="serial-port-patterns"><a class="header" href="#serial-port-patterns">Serial Port Patterns</a></h3>
+<h4 id="set-line-discipline"><a class="header" href="#set-line-discipline">Set Line Discipline</a></h4>
+<pre><code class="language-bash"># Configure serial port parameters
+SUBSYSTEM=="tty", KERNEL=="ttyUSB*", \
+    ATTRS{idVendor}=="0403", \
+    RUN{program}+="/bin/stty -F /dev/%k 115200 cs8 -cstopb -parenb"
+</code></pre>
+<h4 id="bluetooth-serial-ports"><a class="header" href="#bluetooth-serial-ports">Bluetooth Serial Ports</a></h4>
+<pre><code class="language-bash"># Bluetooth RFCOMM devices
+SUBSYSTEM=="tty", KERNEL=="rfcomm*", \
+    GROUP="dialout", MODE="0660"
+</code></pre>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="writing-portable-rules"><a class="header" href="#writing-portable-rules">Writing Portable Rules</a></h3>
+<h4 id="avoid-hardware-specific-paths"><a class="header" href="#avoid-hardware-specific-paths">Avoid Hardware-specific Paths</a></h4>
+<pre><code class="language-bash"># Bad - hardware path changes
+KERNEL=="ttyUSB0", SYMLINK+="mydevice"
+
+# Good - use attributes
+SUBSYSTEM=="tty", ATTRS{serial}=="ABC123", SYMLINK+="mydevice"
+</code></pre>
+<h4 id="use-parent-attributes-for-stability"><a class="header" href="#use-parent-attributes-for-stability">Use Parent Attributes for Stability</a></h4>
+<pre><code class="language-bash"># Match against parent device (more stable)
+SUBSYSTEM=="tty", SUBSYSTEMS=="usb", \
+    ATTRS{idVendor}=="0403", \
+    ATTRS{idProduct}=="6001", \
+    SYMLINK+="usb-serial-ftdi"
+</code></pre>
+<h4 id="distribution-agnostic-rules"><a class="header" href="#distribution-agnostic-rules">Distribution-agnostic Rules</a></h4>
+<pre><code class="language-bash"># Work across distributions
+SUBSYSTEM=="block", ENV{ID_FS_UUID}!="", \
+    SYMLINK+="disk/by-custom-uuid/$env{ID_FS_UUID}"
+
+# Don't rely on specific package paths
+# Import standard device identification
+IMPORT{builtin}="usb_id"
+IMPORT{builtin}="path_id"
+</code></pre>
+<h3 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h3>
+<h4 id="minimize-rule-complexity"><a class="header" href="#minimize-rule-complexity">Minimize Rule Complexity</a></h4>
+<pre><code class="language-bash"># Bad - multiple rules doing similar things
+SUBSYSTEM=="block", KERNEL=="sd?", PROGRAM=="/usr/bin/script1.sh"
+SUBSYSTEM=="block", KERNEL=="sd?", PROGRAM=="/usr/bin/script2.sh"
+
+# Good - combine when possible
+SUBSYSTEM=="block", KERNEL=="sd?", PROGRAM=="/usr/bin/combined-script.sh"
+</code></pre>
+<h4 id="use-early-exits"><a class="header" href="#use-early-exits">Use Early Exits</a></h4>
+<pre><code class="language-bash"># Skip irrelevant subsystems early
+SUBSYSTEM!="block", GOTO="end_block_rules"
+
+# ... block-specific rules ...
+
+LABEL="end_block_rules"
+</code></pre>
+<h4 id="avoid-slow-program-calls"><a class="header" href="#avoid-slow-program-calls">Avoid Slow PROGRAM Calls</a></h4>
+<pre><code class="language-bash"># Bad - calling external program for each device
+PROGRAM=="/usr/bin/slow-check.sh $kernel", RESULT=="1", ...
+
+# Good - use built-in tests when possible
+KERNEL=="sd?", TEST=="/sys/block/%k/queue/rotational", ...
+</code></pre>
+<h4 id="use-built-in-string-matching"><a class="header" href="#use-built-in-string-matching">Use Built-in String Matching</a></h4>
+<pre><code class="language-bash"># Built-in matching is fast
+KERNEL=="sd[a-z]", ...
+ATTR{size}=="*[0-9]", ...
+
+# Avoid external programs for simple checks
+# Bad: PROGRAM=="/usr/bin/test -f /sys/..."
+# Good: TEST=="/sys/..."
+</code></pre>
+<h3 id="custom-helper-programs"><a class="header" href="#custom-helper-programs">Custom Helper Programs</a></h3>
+<h4 id="writing-helper-programs"><a class="header" href="#writing-helper-programs">Writing Helper Programs</a></h4>
+<p>Helper programs receive device information via environment variables:</p>
+<pre><code class="language-bash">#!/bin/bash
+# /lib/udev/my-helper.sh
+# Environment variables available:
+# DEVPATH, SUBSYSTEM, ACTION, DEVNAME, MAJOR, MINOR, etc.
+
+echo "Device: $DEVNAME"
+echo "Subsystem: $SUBSYSTEM"
+echo "Action: $ACTION"
+
+# Return 0 for success
+exit 0
+</code></pre>
+<h4 id="using-helper-output"><a class="header" href="#using-helper-output">Using Helper Output</a></h4>
+<pre><code class="language-bash"># Capture program output
+SUBSYSTEM=="block", IMPORT{program}="/lib/udev/scsi_id -g $devnode"
+
+# Use the imported variables
+SUBSYSTEM=="block", ENV{ID_SERIAL}=="?*", \
+    SYMLINK+="disk/by-id/scsi-$env{ID_SERIAL}"
+</code></pre>
+<h4 id="timeout-handling"><a class="header" href="#timeout-handling">Timeout Handling</a></h4>
+<pre><code class="language-bash"># Rules have execution timeout (default 180s)
+# Long-running tasks should be spawned asynchronously
+SUBSYSTEM=="block", ACTION=="add", \
+    RUN{program}+="/usr/bin/systemd-run /usr/local/bin/long-task.sh"
+</code></pre>
+<h3 id="hardware-database-hwdb-1"><a class="header" href="#hardware-database-hwdb-1">Hardware Database (hwdb)</a></h3>
+<h4 id="custom-hwdb-entry"><a class="header" href="#custom-hwdb-entry">Custom hwdb Entry</a></h4>
+<pre><code class="language-bash"># /etc/udev/hwdb.d/90-custom-devices.hwdb
+# USB device metadata
+usb:v046Dp082D*
+ ID_MODEL=Logitech_HD_Webcam_C615
+ ID_VENDOR=Logitech
+
+# PCI device
+pci:v00008086d00001234*
+ ID_MODEL=Intel_Custom_Device
+</code></pre>
+<p>Update and apply:</p>
+<pre><code class="language-bash">systemd-hwdb update
+udevadm trigger --subsystem-match=usb
+</code></pre>
+<h3 id="integration-with-systemd"><a class="header" href="#integration-with-systemd">Integration with systemd</a></h3>
+<h4 id="trigger-systemd-mount"><a class="header" href="#trigger-systemd-mount">Trigger systemd Mount</a></h4>
+<pre><code class="language-bash"># Mount filesystem via systemd
+SUBSYSTEM=="block", ENV{ID_FS_UUID}=="1234-5678", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="mount-external.service"
+</code></pre>
+<h4 id="template-service-activation"><a class="header" href="#template-service-activation">Template Service Activation</a></h4>
+<pre><code class="language-bash"># /etc/udev/rules.d/90-backup-device.rules
+SUBSYSTEM=="block", ENV{ID_FS_LABEL}=="BACKUP*", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="backup@$env{ID_FS_LABEL}.service"
+</code></pre>
+<p>Corresponding service file:</p>
+<pre><code class="language-ini"># /etc/systemd/system/backup@.service
+[Unit]
+Description=Backup service for %I
+After=dev-disk-by\x2dlabel-%i.device
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup.sh /dev/disk/by-label/%I
+</code></pre>
+<h3 id="device-tagging"><a class="header" href="#device-tagging">Device Tagging</a></h3>
+<h4 id="using-tags-for-classification"><a class="header" href="#using-tags-for-classification">Using Tags for Classification</a></h4>
+<pre><code class="language-bash"># Tag devices for different purposes
+SUBSYSTEM=="block", ENV{ID_USB_DRIVER}=="usb-storage", \
+    TAG+="backup-eligible"
+
+# Process tagged devices differently
+TAG=="backup-eligible", ENV{ID_FS_TYPE}=="ext4", \
+    ENV{SYSTEMD_WANTS}="backup-check@%k.service"
+</code></pre>
+<h3 id="handling-race-conditions"><a class="header" href="#handling-race-conditions">Handling Race Conditions</a></h3>
+<h4 id="wait-for-device-initialization"><a class="header" href="#wait-for-device-initialization">Wait for Device Initialization</a></h4>
+<pre><code class="language-bash"># Some devices need time to initialize
+SUBSYSTEM=="tty", KERNEL=="ttyACM*", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="wait-for-tty@%k.service"
+</code></pre>
+<h4 id="use-udevadm-settle-in-scripts"><a class="header" href="#use-udevadm-settle-in-scripts">Use udevadm settle in Scripts</a></h4>
+<pre><code class="language-bash">#!/bin/bash
+# Script that depends on device being ready
+
+# Trigger event
+udevadm trigger --name-match=/dev/sda
+
+# Wait for processing
+udevadm settle --timeout=10
+
+# Now safe to proceed
+mount /dev/sda1 /mnt
+</code></pre>
+<h3 id="multi-path-device-management"><a class="header" href="#multi-path-device-management">Multi-path Device Management</a></h3>
+<h4 id="identify-multi-path-devices"><a class="header" href="#identify-multi-path-devices">Identify Multi-path Devices</a></h4>
+<pre><code class="language-bash"># Tag multipath components
+SUBSYSTEM=="block", ENV{DM_MULTIPATH_DEVICE_PATH}=="1", \
+    TAG+="multipath"
+
+# Use multipath-specific symlinks
+SUBSYSTEM=="block", ENV{DM_UUID}=="mpath-*", \
+    SYMLINK+="mapper/$env{DM_NAME}"
+</code></pre>
+<h2 id="complete-use-cases"><a class="header" href="#complete-use-cases">Complete Use Cases</a></h2>
+<h3 id="use-case-1-auto-mount-usb-drives-to-user-directories"><a class="header" href="#use-case-1-auto-mount-usb-drives-to-user-directories">Use Case 1: Auto-mount USB Drives to User Directories</a></h3>
+<p><strong>Objective</strong>: Automatically mount USB drives to <code>/media/username/label</code> when inserted.</p>
+<p><strong>Rule file</strong>: <code>/etc/udev/rules.d/90-usb-automount.rules</code></p>
+<pre><code class="language-bash"># Tag USB storage devices for automount
+SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{ID_FS_USAGE}=="filesystem", \
+    TAG+="systemd", ENV{SYSTEMD_WANTS}="usb-automount@%k.service"
+</code></pre>
+<p><strong>Systemd service</strong>: <code>/etc/systemd/system/usb-automount@.service</code></p>
+<pre><code class="language-ini">[Unit]
+Description=Auto-mount USB drive %I
+After=dev-%i.device
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/usb-mount.sh %I
+ExecStop=/usr/local/bin/usb-unmount.sh %I
+</code></pre>
+<p><strong>Mount script</strong>: <code>/usr/local/bin/usb-mount.sh</code></p>
+<pre><code class="language-bash">#!/bin/bash
+DEVICE=$1
+USER=$(who | awk '{print $1}' | head -1)
+LABEL=$(lsblk -no LABEL /dev/$DEVICE)
+MOUNTPOINT="/media/$USER/${LABEL:-$DEVICE}"
+
+mkdir -p "$MOUNTPOINT"
+mount -o uid=$(id -u $USER),gid=$(id -g $USER) /dev/$DEVICE "$MOUNTPOINT"
+chown $USER:$USER "$MOUNTPOINT"
+
+# Notify user
+sudo -u $USER DISPLAY=:0 notify-send "USB Drive Mounted" "$DEVICE mounted at $MOUNTPOINT"
+</code></pre>
+<p><strong>Unmount script</strong>: <code>/usr/local/bin/usb-unmount.sh</code></p>
+<pre><code class="language-bash">#!/bin/bash
+DEVICE=$1
+MOUNTPOINT=$(mount | grep "/dev/$DEVICE" | awk '{print $3}')
+
+if [ -n "$MOUNTPOINT" ]; then
+    umount "$MOUNTPOINT"
+    rmdir "$MOUNTPOINT"
+fi
+</code></pre>
+<h3 id="use-case-2-persistent-network-interface-naming-for-servers"><a class="header" href="#use-case-2-persistent-network-interface-naming-for-servers">Use Case 2: Persistent Network Interface Naming for Servers</a></h3>
+<p><strong>Objective</strong>: Ensure network interfaces have consistent names across reboots for a server with multiple NICs.</p>
+<p><strong>Rule file</strong>: <code>/etc/udev/rules.d/70-server-network.rules</code></p>
+<pre><code class="language-bash"># Management interface (IPMI/BMC on motherboard)
+SUBSYSTEM=="net", ACTION=="add", \
+    ATTR{address}=="00:25:90:xx:xx:01", \
+    NAME="mgmt0"
+
+# Data plane interfaces (PCIe cards)
+SUBSYSTEM=="net", ACTION=="add", \
+    ATTR{address}=="00:1b:21:xx:xx:10", \
+    NAME="data0"
+
+SUBSYSTEM=="net", ACTION=="add", \
+    ATTR{address}=="00:1b:21:xx:xx:11", \
+    NAME="data1"
+
+# Backup interface (onboard)
+SUBSYSTEM=="net", ACTION=="add", \
+    KERNELS=="0000:00:19.0", \
+    NAME="backup0"
+
+# Alternative: name by PCI slot
+SUBSYSTEM=="net", ACTION=="add", \
+    KERNELS=="0000:03:00.0", \
+    NAME="slot3-net0"
+</code></pre>
+<p><strong>Verification</strong>:</p>
+<pre><code class="language-bash"># Check interface names
+ip link show
+
+# Test rule without applying
+udevadm test /sys/class/net/eth0 2&gt;&amp;1 | grep NAME
+
+# Apply new rules
+udevadm control --reload-rules
+udevadm trigger --subsystem-match=net --action=add
+</code></pre>
+<h3 id="use-case-3-managing-multiple-identical-usb-serial-adapters"><a class="header" href="#use-case-3-managing-multiple-identical-usb-serial-adapters">Use Case 3: Managing Multiple Identical USB Serial Adapters</a></h3>
+<p><strong>Objective</strong>: Differentiate between 3 identical USB-serial adapters for industrial sensors.</p>
+<p><strong>Rule file</strong>: <code>/etc/udev/rules.d/80-industrial-sensors.rules</code></p>
+<pre><code class="language-bash"># Sensor 1 - Top USB port
+SUBSYSTEM=="tty", KERNELS=="1-1.1", \
+    ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", \
+    SYMLINK+="sensors/temperature", \
+    MODE="0660", GROUP="sensors"
+
+# Sensor 2 - Middle USB port
+SUBSYSTEM=="tty", KERNELS=="1-1.2", \
+    ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", \
+    SYMLINK+="sensors/pressure", \
+    MODE="0660", GROUP="sensors"
+
+# Sensor 3 - Bottom USB port
+SUBSYSTEM=="tty", KERNELS=="1-1.3", \
+    ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", \
+    SYMLINK+="sensors/humidity", \
+    MODE="0660", GROUP="sensors"
+
+# Notify monitoring system
+SUBSYSTEM=="tty", KERNEL=="ttyUSB*", \
+    SYMLINK=="sensors/*", \
+    RUN{program}+="/usr/local/bin/sensor-notify.sh $env{DEVNAME} add"
+</code></pre>
+<p><strong>Notification script</strong>: <code>/usr/local/bin/sensor-notify.sh</code></p>
+<pre><code class="language-bash">#!/bin/bash
+DEVICE=$1
+ACTION=$2
+LOGFILE=/var/log/sensors.log
+
+echo "$(date): Sensor $ACTION on $DEVICE" &gt;&gt; $LOGFILE
+
+# Restart monitoring service if all sensors present
+if [ "$ACTION" = "add" ]; then
+    if [ -e /dev/sensors/temperature ] &amp;&amp; \
+       [ -e /dev/sensors/pressure ] &amp;&amp; \
+       [ -e /dev/sensors/humidity ]; then
+        systemctl restart sensor-monitoring.service
+    fi
+fi
+</code></pre>
+<p><strong>Finding USB port paths</strong>:</p>
+<pre><code class="language-bash"># Plug in device and check kernel path
+udevadm info --query=path --name=/dev/ttyUSB0
+# Look for KERNELS value like "1-1.1"
+
+# Or monitor as you plug in
+udevadm monitor --kernel --subsystem-match=tty
+</code></pre>
+<h3 id="use-case-4-automated-backup-on-external-drive-insertion"><a class="header" href="#use-case-4-automated-backup-on-external-drive-insertion">Use Case 4: Automated Backup on External Drive Insertion</a></h3>
+<p><strong>Objective</strong>: Start backup automatically when specific external drive is connected.</p>
+<p><strong>Rule file</strong>: <code>/etc/udev/rules.d/90-backup-drive.rules</code></p>
+<pre><code class="language-bash"># Identify backup drive by UUID
+SUBSYSTEM=="block", ENV{ID_FS_UUID}=="abcd1234-5678-90ef-ghij-klmnopqrstuv", \
+    ENV{BACKUP_DRIVE}="true", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="external-backup.service"
+</code></pre>
+<p><strong>Service file</strong>: <code>/etc/systemd/system/external-backup.service</code></p>
+<pre><code class="language-ini">[Unit]
+Description=External Drive Backup
+After=dev-disk-by\x2duuid-abcd1234\x2d5678\x2d90ef\x2dghij\x2dklmnopqrstuv.device
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup-to-external.sh
+</code></pre>
+<p><strong>Backup script</strong>: <code>/usr/local/bin/backup-to-external.sh</code></p>
+<pre><code class="language-bash">#!/bin/bash
+
+BACKUP_UUID="abcd1234-5678-90ef-ghij-klmnopqrstuv"
+MOUNT_POINT="/mnt/backup"
+SOURCE_DIR="/home"
+BACKUP_DIR="$MOUNT_POINT/backups/$(hostname)"
+LOG_FILE="/var/log/external-backup.log"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S'): $1" | tee -a "$LOG_FILE"
+}
+
+# Mount if not already mounted
+if ! mountpoint -q "$MOUNT_POINT"; then
+    mkdir -p "$MOUNT_POINT"
+    mount UUID="$BACKUP_UUID" "$MOUNT_POINT" || {
+        log "ERROR: Failed to mount backup drive"
+        exit 1
+    }
+fi
+
+# Verify drive is correct
+if [ ! -f "$MOUNT_POINT/.backup_drive_marker" ]; then
+    log "ERROR: Drive verification failed"
+    umount "$MOUNT_POINT"
+    exit 1
+fi
+
+log "Starting backup to external drive"
+
+# Create backup directory
+mkdir -p "$BACKUP_DIR"
+
+# Perform incremental backup using rsync
+rsync -av --delete \
+    --exclude='.cache' \
+    --exclude='.local/share/Trash' \
+    --log-file="$LOG_FILE" \
+    "$SOURCE_DIR/" "$BACKUP_DIR/" || {
+    log "ERROR: Backup failed"
+    umount "$MOUNT_POINT"
+    exit 1
+}
+
+# Create timestamp
+date &gt; "$BACKUP_DIR/.last_backup"
+
+log "Backup completed successfully"
+
+# LED notification (if supported)
+echo 1 &gt; /sys/class/leds/backup-led/brightness 2&gt;/dev/null || true
+
+# Don't unmount - let user safely remove
+sync
+</code></pre>
+<h3 id="use-case-5-android-development-device-setup"><a class="header" href="#use-case-5-android-development-device-setup">Use Case 5: Android Development Device Setup</a></h3>
+<p><strong>Objective</strong>: Configure automatic access for Android devices connected via USB for ADB.</p>
+<p><strong>Rule file</strong>: <code>/etc/udev/rules.d/51-android-dev.rules</code></p>
+<pre><code class="language-bash"># Google Nexus/Pixel devices
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0660", \
+    GROUP="adbusers", TAG+="uaccess"
+
+# Samsung devices
+SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", MODE="0660", \
+    GROUP="adbusers", TAG+="uaccess"
+
+# OnePlus devices
+SUBSYSTEM=="usb", ATTR{idVendor}=="2a70", MODE="0660", \
+    GROUP="adbusers", TAG+="uaccess"
+
+# Xiaomi devices
+SUBSYSTEM=="usb", ATTR{idVendor}=="2717", MODE="0660", \
+    GROUP="adbusers", TAG+="uaccess"
+
+# Generic Android devices (ADB interface)
+SUBSYSTEM=="usb", ENV{ID_USB_INTERFACES}=="*:ff420?:*", \
+    MODE="0660", GROUP="adbusers", TAG+="uaccess"
+
+# Notify when Android device connected
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", \
+    RUN{program}+="/usr/local/bin/android-notify.sh add"
+
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ACTION=="remove", \
+    RUN{program}+="/usr/local/bin/android-notify.sh remove"
+</code></pre>
+<p><strong>Setup</strong>:</p>
+<pre><code class="language-bash"># Create adbusers group
+sudo groupadd -r adbusers
+
+# Add your user
+sudo usermod -a -G adbusers $USER
+
+# Reload rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+</code></pre>
+<p><strong>Notification script</strong>: <code>/usr/local/bin/android-notify.sh</code></p>
+<pre><code class="language-bash">#!/bin/bash
+ACTION=$1
+USER=$(who | grep -m1 "(:[0-9])" | awk '{print $1}')
+
+if [ "$ACTION" = "add" ]; then
+    # Start ADB server if not running
+    sudo -u $USER adb start-server 2&gt;/dev/null
+
+    # Wait for device
+    sleep 2
+
+    # Check if device is authorized
+    DEVICE_STATE=$(sudo -u $USER adb get-state 2&gt;&amp;1)
+
+    if [[ "$DEVICE_STATE" == "device" ]]; then
+        sudo -u $USER DISPLAY=:0 notify-send "Android Device" \
+            "Device connected and authorized"
+    else
+        sudo -u $USER DISPLAY=:0 notify-send "Android Device" \
+            "Device connected - check authorization on phone" \
+            -u critical
+    fi
+else
+    sudo -u $USER DISPLAY=:0 notify-send "Android Device" "Device disconnected"
+fi
+</code></pre>
+<h3 id="use-case-6-industrial-equipment-device-management"><a class="header" href="#use-case-6-industrial-equipment-device-management">Use Case 6: Industrial Equipment Device Management</a></h3>
+<p><strong>Objective</strong>: Manage industrial PLC and HMI devices with automatic configuration.</p>
+<p><strong>Rule file</strong>: <code>/etc/udev/rules.d/80-industrial-plc.rules</code></p>
+<pre><code class="language-bash"># Siemens PLC - Ethernet adapter
+SUBSYSTEM=="net", KERNELS=="0000:03:00.0", \
+    NAME="plc-eth", \
+    ENV{PLC_INTERFACE}="true"
+
+# Modbus RTU serial interface
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", \
+    ATTRS{serial}=="PLC001", \
+    SYMLINK+="plc/modbus-rtu", \
+    MODE="0660", GROUP="industrial", \
+    RUN{program}+="/bin/stty -F /dev/%k 19200 cs8 -cstopb -parenb"
+
+# HMI touchscreen
+SUBSYSTEM=="input", ATTRS{idVendor}=="0eef", ATTRS{idProduct}=="0001", \
+    ENV{DEVNAME}=="*event*", \
+    SYMLINK+="input/hmi-touch", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="hmi-calibration.service"
+
+# Emergency stop button
+SUBSYSTEM=="input", ATTRS{product}=="Emergency Stop", \
+    SYMLINK+="input/emergency-stop", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="estop-monitor.service"
+
+# Industrial sensors via USB
+SUBSYSTEM=="tty", SUBSYSTEMS=="usb", \
+    ATTRS{manufacturer}=="IndustrialSensors", \
+    SYMLINK+="sensors/$attr{product}", \
+    MODE="0660", GROUP="industrial"
+
+# Start monitoring when all devices present
+SUBSYSTEM=="tty", SYMLINK=="sensors/*", \
+    RUN{program}+="/usr/local/bin/check-all-devices.sh"
+</code></pre>
+<p><strong>Device checker</strong>: <code>/usr/local/bin/check-all-devices.sh</code></p>
+<pre><code class="language-bash">#!/bin/bash
+
+REQUIRED_DEVICES=(
+    "/dev/plc/modbus-rtu"
+    "/dev/input/hmi-touch"
+    "/dev/sensors/temperature"
+    "/dev/sensors/pressure"
+)
+
+all_present=true
+
+for device in "${REQUIRED_DEVICES[@]}"; do
+    if [ ! -e "$device" ]; then
+        all_present=false
+        logger "Industrial: Missing device $device"
+    fi
+done
+
+if [ "$all_present" = true ]; then
+    logger "Industrial: All devices present, starting production monitoring"
+    systemctl start production-monitoring.service
+fi
+</code></pre>
+<h3 id="use-case-7-led-control-based-on-device-state"><a class="header" href="#use-case-7-led-control-based-on-device-state">Use Case 7: LED Control Based on Device State</a></h3>
+<p><strong>Objective</strong>: Control chassis LEDs based on storage device activity.</p>
+<p><strong>Rule file</strong>: <code>/etc/udev/rules.d/90-storage-leds.rules</code></p>
+<pre><code class="language-bash"># Disk activity LED control
+SUBSYSTEM=="block", KERNEL=="sd[a-z]", \
+    RUN{program}+="/usr/local/bin/set-disk-led.sh %k add"
+
+SUBSYSTEM=="block", KERNEL=="sd[a-z]", ACTION=="remove", \
+    RUN{program}+="/usr/local/bin/set-disk-led.sh %k remove"
+
+# RAID array status
+SUBSYSTEM=="block", KERNEL=="md*", \
+    RUN{program}+="/usr/local/bin/raid-led-status.sh %k"
+</code></pre>
+<p><strong>LED control script</strong>: <code>/usr/local/bin/set-disk-led.sh</code></p>
+<pre><code class="language-bash">#!/bin/bash
+
+DISK=$1
+ACTION=$2
+LED_BASE="/sys/class/leds"
+
+# Map disk to LED (customize for your hardware)
+case $DISK in
+    sda)
+        LED="disk0-led"
+        ;;
+    sdb)
+        LED="disk1-led"
+        ;;
+    sdc)
+        LED="disk2-led"
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+LED_PATH="$LED_BASE/$LED/brightness"
+
+if [ ! -f "$LED_PATH" ]; then
+    exit 0
+fi
+
+if [ "$ACTION" = "add" ]; then
+    echo 1 &gt; "$LED_PATH"
+else
+    echo 0 &gt; "$LED_PATH"
+fi
+</code></pre>
+<h3 id="use-case-8-printer-and-scanner-automatic-configuration"><a class="header" href="#use-case-8-printer-and-scanner-automatic-configuration">Use Case 8: Printer and Scanner Automatic Configuration</a></h3>
+<p><strong>Objective</strong>: Auto-configure network printers and scanners when connected.</p>
+<p><strong>Rule file</strong>: <code>/etc/udev/rules.d/80-printers-scanners.rules</code></p>
+<pre><code class="language-bash"># USB printers
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", \
+    ENV{ID_USB_INTERFACES}=="*:0701??:*", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="configure-printer@$env{BUSNUM}-$env{DEVNUM}.service"
+
+# USB scanners
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", \
+    ENV{ID_USB_INTERFACES}=="*:070103:*", \
+    MODE="0660", GROUP="scanner", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="configure-scanner@$env{BUSNUM}-$env{DEVNUM}.service"
+
+# HP multi-function devices
+SUBSYSTEM=="usb", ATTR{idVendor}=="03f0", \
+    ATTRS{product}=="*LaserJet*", \
+    MODE="0660", GROUP="lp", \
+    RUN{program}+="/usr/local/bin/hp-device-setup.sh"
+</code></pre>
+<p><strong>Printer configuration service</strong>: <code>/etc/systemd/system/configure-printer@.service</code></p>
+<pre><code class="language-ini">[Unit]
+Description=Auto-configure printer %I
+After=cups.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/auto-add-printer.sh %I
+</code></pre>
+<p><strong>Auto-add script</strong>: <code>/usr/local/bin/auto-add-printer.sh</code></p>
+<pre><code class="language-bash">#!/bin/bash
+
+DEVICE_ID=$1
+
+# Wait for CUPS
+sleep 2
+
+# Get USB device info
+VENDOR=$(udevadm info --query=property /dev/bus/usb/$DEVICE_ID | \
+    grep ID_VENDOR= | cut -d= -f2)
+MODEL=$(udevadm info --query=property /dev/bus/usb/$DEVICE_ID | \
+    grep ID_MODEL= | cut -d= -f2)
+
+PRINTER_NAME="${VENDOR}_${MODEL}"
+
+# Check if already configured
+if lpstat -p "$PRINTER_NAME" &gt;/dev/null 2&gt;&amp;1; then
+    logger "Printer $PRINTER_NAME already configured"
+    exit 0
+fi
+
+# Add printer
+lpadmin -p "$PRINTER_NAME" \
+    -E \
+    -v "usb://$DEVICE_ID" \
+    -m everywhere
+
+logger "Added printer: $PRINTER_NAME"
+
+# Set as default if no default exists
+if [ -z "$(lpstat -d 2&gt;/dev/null)" ]; then
+    lpadmin -d "$PRINTER_NAME"
+    logger "Set $PRINTER_NAME as default printer"
+fi
+</code></pre>
+<h2 id="programming-with-libudev"><a class="header" href="#programming-with-libudev">Programming with libudev</a></h2>
+<h3 id="basic-device-enumeration"><a class="header" href="#basic-device-enumeration">Basic Device Enumeration</a></h3>
+<pre><code class="language-c">#include &lt;libudev.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+    struct udev *udev;
+    struct udev_enumerate *enumerate;
+    struct udev_list_entry *devices, *dev_list_entry;
+
+    // Create udev context
+    udev = udev_new();
+    if (!udev) {
+        fprintf(stderr, "Cannot create udev context\n");
+        return 1;
+    }
+
+    // Create enumeration
+    enumerate = udev_enumerate_new(udev);
+    udev_enumerate_add_match_subsystem(enumerate, "block");
+    udev_enumerate_scan_devices(enumerate);
+    devices = udev_enumerate_get_list_entry(enumerate);
+
+    // Iterate through devices
+    udev_list_entry_foreach(dev_list_entry, devices) {
+        const char *path;
+        struct udev_device *dev;
+
+        path = udev_list_entry_get_name(dev_list_entry);
+        dev = udev_device_new_from_syspath(udev, path);
+
+        printf("Device: %s\n", udev_device_get_devnode(dev));
+        printf("  Type: %s\n", udev_device_get_devtype(dev));
+        printf("  Sysname: %s\n", udev_device_get_sysname(dev));
+
+        udev_device_unref(dev);
+    }
+
+    udev_enumerate_unref(enumerate);
+    udev_unref(udev);
+
+    return 0;
+}
+</code></pre>
+<p><strong>Compile</strong>:</p>
+<pre><code class="language-bash">gcc -o list-devices list-devices.c $(pkg-config --cflags --libs libudev)
+</code></pre>
+<h3 id="monitoring-device-events-1"><a class="header" href="#monitoring-device-events-1">Monitoring Device Events</a></h3>
+<pre><code class="language-c">#include &lt;libudev.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;poll.h&gt;
+
+int main() {
+    struct udev *udev;
+    struct udev_monitor *mon;
+    struct pollfd fds[1];
+    int ret;
+
+    udev = udev_new();
+    if (!udev) {
+        fprintf(stderr, "Cannot create udev context\n");
+        return 1;
+    }
+
+    // Create monitor
+    mon = udev_monitor_new_from_netlink(udev, "udev");
+    udev_monitor_filter_add_match_subsystem_devtype(mon, "usb", NULL);
+    udev_monitor_enable_receiving(mon);
+
+    // Setup polling
+    fds[0].fd = udev_monitor_get_fd(mon);
+    fds[0].events = POLLIN;
+
+    printf("Monitoring USB devices...\n");
+
+    while (1) {
+        ret = poll(fds, 1, -1);
+        if (ret &gt; 0 &amp;&amp; (fds[0].revents &amp; POLLIN)) {
+            struct udev_device *dev;
+
+            dev = udev_monitor_receive_device(mon);
+            if (dev) {
+                printf("Action: %s\n", udev_device_get_action(dev));
+                printf("Device: %s\n", udev_device_get_devnode(dev) ?: "N/A");
+                printf("Vendor: %s\n",
+                    udev_device_get_sysattr_value(dev, "idVendor") ?: "N/A");
+                printf("Product: %s\n",
+                    udev_device_get_sysattr_value(dev, "idProduct") ?: "N/A");
+                printf("\n");
+
+                udev_device_unref(dev);
+            }
+        }
+    }
+
+    udev_monitor_unref(mon);
+    udev_unref(udev);
+
+    return 0;
+}
+</code></pre>
+<h3 id="querying-device-properties"><a class="header" href="#querying-device-properties">Querying Device Properties</a></h3>
+<pre><code class="language-c">#include &lt;libudev.h&gt;
+#include &lt;stdio.h&gt;
+
+void print_device_properties(struct udev_device *dev) {
+    struct udev_list_entry *properties, *entry;
+
+    properties = udev_device_get_properties_list_entry(dev);
+
+    printf("Properties:\n");
+    udev_list_entry_foreach(entry, properties) {
+        printf("  %s=%s\n",
+            udev_list_entry_get_name(entry),
+            udev_list_entry_get_value(entry));
+    }
+}
+
+int main(int argc, char *argv[]) {
+    struct udev *udev;
+    struct udev_device *dev;
+
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s &lt;device_path&gt;\n", argv[0]);
+        return 1;
+    }
+
+    udev = udev_new();
+    if (!udev) {
+        fprintf(stderr, "Cannot create udev context\n");
+        return 1;
+    }
+
+    // Create device from syspath or devnode
+    dev = udev_device_new_from_syspath(udev, argv[1]);
+    if (!dev) {
+        dev = udev_device_new_from_devnum(udev, 'b', makedev(8, 0));
+    }
+
+    if (dev) {
+        printf("Device node: %s\n", udev_device_get_devnode(dev));
+        printf("Subsystem: %s\n", udev_device_get_subsystem(dev));
+        printf("Device type: %s\n", udev_device_get_devtype(dev) ?: "N/A");
+
+        print_device_properties(dev);
+
+        udev_device_unref(dev);
+    } else {
+        fprintf(stderr, "Device not found\n");
+    }
+
+    udev_unref(udev);
+    return 0;
+}
+</code></pre>
+<h3 id="complete-event-monitor-with-filtering"><a class="header" href="#complete-event-monitor-with-filtering">Complete Event Monitor with Filtering</a></h3>
+<pre><code class="language-c">#include &lt;libudev.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;poll.h&gt;
+#include &lt;signal.h&gt;
+
+static int running = 1;
+
+void sighandler(int signum) {
+    running = 0;
+}
+
+int main(int argc, char *argv[]) {
+    struct udev *udev;
+    struct udev_monitor *mon;
+    struct pollfd fds[1];
+    const char *subsystem = NULL;
+    int ret;
+
+    if (argc &gt; 1) {
+        subsystem = argv[1];
+    }
+
+    signal(SIGINT, sighandler);
+    signal(SIGTERM, sighandler);
+
+    udev = udev_new();
+    if (!udev) {
+        fprintf(stderr, "Cannot create udev context\n");
+        return 1;
+    }
+
+    mon = udev_monitor_new_from_netlink(udev, "udev");
+
+    if (subsystem) {
+        printf("Filtering for subsystem: %s\n", subsystem);
+        udev_monitor_filter_add_match_subsystem_devtype(mon, subsystem, NULL);
+    }
+
+    udev_monitor_enable_receiving(mon);
+
+    fds[0].fd = udev_monitor_get_fd(mon);
+    fds[0].events = POLLIN;
+
+    printf("Monitoring device events (Ctrl+C to stop)...\n\n");
+
+    while (running) {
+        ret = poll(fds, 1, 1000);
+
+        if (ret &lt; 0) {
+            break;
+        }
+
+        if (ret &gt; 0 &amp;&amp; (fds[0].revents &amp; POLLIN)) {
+            struct udev_device *dev;
+            const char *action, *devnode, *subsys;
+
+            dev = udev_monitor_receive_device(mon);
+            if (dev) {
+                action = udev_device_get_action(dev);
+                devnode = udev_device_get_devnode(dev);
+                subsys = udev_device_get_subsystem(dev);
+
+                printf("EVENT: %s %s %s\n",
+                    action ? action : "unknown",
+                    subsys ? subsys : "unknown",
+                    devnode ? devnode : "no_devnode");
+
+                // Print relevant properties
+                printf("  SYS_PATH: %s\n", udev_device_get_syspath(dev));
+
+                const char *vendor = udev_device_get_sysattr_value(dev, "idVendor");
+                const char *product = udev_device_get_sysattr_value(dev, "idProduct");
+
+                if (vendor &amp;&amp; product) {
+                    printf("  USB_ID: %s:%s\n", vendor, product);
+                }
+
+                printf("\n");
+
+                udev_device_unref(dev);
+            }
+        }
+    }
+
+    printf("Shutting down...\n");
+    udev_monitor_unref(mon);
+    udev_unref(udev);
+
+    return 0;
+}
+</code></pre>
+<p><strong>Compile and run</strong>:</p>
+<pre><code class="language-bash">gcc -o udev-monitor udev-monitor.c $(pkg-config --cflags --libs libudev)
+./udev-monitor block    # Monitor block devices only
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="rules-not-being-applied"><a class="header" href="#rules-not-being-applied">Rules Not Being Applied</a></h3>
+<p><strong>Symptoms</strong>: Device appears but rules don't take effect.</p>
+<p><strong>Diagnosis</strong>:</p>
+<pre><code class="language-bash"># Check rule syntax
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | grep -i error
+
+# Verify rule is loaded
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | grep "Reading rules file"
+
+# Check for conflicting rules
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | grep "NAME"
+</code></pre>
+<p><strong>Common causes</strong>:</p>
+<ol>
+<li><strong>Syntax errors in rules</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Wrong - missing comma
+SUBSYSTEM=="block" KERNEL=="sda" SYMLINK+="mydisk"
+
+# Correct
+SUBSYSTEM=="block", KERNEL=="sda", SYMLINK+="mydisk"
+</code></pre>
+<ol start="2">
+<li><strong>Incorrect match keys</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Check available attributes
+udevadm info --attribute-walk --name=/dev/sda
+
+# Verify your match keys exist in output
+</code></pre>
+<ol start="3">
+<li><strong>Rule file name/location</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Must be in correct directory
+ls -la /etc/udev/rules.d/
+# Must end with .rules
+# Must have numeric prefix (e.g., 80-custom.rules)
+</code></pre>
+<ol start="4">
+<li><strong>Rules not reloaded</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Always reload after editing
+udevadm control --reload-rules
+udevadm trigger --name-match=/dev/sda
+</code></pre>
+<h3 id="permission-denied-errors"><a class="header" href="#permission-denied-errors">Permission Denied Errors</a></h3>
+<p><strong>Symptoms</strong>: Cannot access device even though it exists.</p>
+<p><strong>Diagnosis</strong>:</p>
+<pre><code class="language-bash"># Check device permissions
+ls -l /dev/ttyUSB0
+
+# Check user groups
+groups
+
+# Check udev database
+udevadm info --query=property /dev/ttyUSB0 | grep -E "OWNER|GROUP|MODE"
+</code></pre>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Add user to correct group</strong>:</li>
+</ol>
+<pre><code class="language-bash"># For serial devices
+sudo usermod -a -G dialout $USER
+
+# For USB devices
+sudo usermod -a -G plugdev $USER
+
+# Log out and back in for changes to take effect
+</code></pre>
+<ol start="2">
+<li><strong>Fix rule permissions</strong>:</li>
+</ol>
+<pre><code class="language-bash"># /etc/udev/rules.d/80-mydevice.rules
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", \
+    MODE="0660", GROUP="dialout"
+</code></pre>
+<ol start="3">
+<li><strong>Use TAG+="uaccess" for user sessions</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Allow currently logged-in user
+SUBSYSTEM=="usb", ATTR{idVendor}=="0403", \
+    TAG+="uaccess"
+</code></pre>
+<h3 id="device-not-recognized"><a class="header" href="#device-not-recognized">Device Not Recognized</a></h3>
+<p><strong>Symptoms</strong>: Device connected but no <code>/dev</code> entry created.</p>
+<p><strong>Diagnosis</strong>:</p>
+<pre><code class="language-bash"># Check if kernel sees device
+dmesg | tail -50
+
+# Check if udev received event
+udevadm monitor --kernel --property
+
+# Check sysfs
+ls -la /sys/bus/usb/devices/
+</code></pre>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Driver issue</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Check if driver loaded
+lsmod | grep &lt;driver_name&gt;
+
+# Load driver manually
+modprobe &lt;driver_name&gt;
+
+# Check dmesg for errors
+dmesg | grep -i error
+</code></pre>
+<ol start="2">
+<li><strong>Wait for device initialization</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Some devices need time
+udevadm settle --timeout=30
+</code></pre>
+<h3 id="timing-and-race-conditions"><a class="header" href="#timing-and-race-conditions">Timing and Race Conditions</a></h3>
+<p><strong>Symptoms</strong>: Rules work intermittently or device attributes unavailable.</p>
+<p><strong>Diagnosis</strong>:</p>
+<pre><code class="language-bash"># Monitor timing
+udevadm monitor --property | ts '[%Y-%m-%d %H:%M:%.S]'
+
+# Test multiple times
+for i in {1..10}; do
+    udevadm trigger --name-match=/dev/sda
+    udevadm settle
+    sleep 1
+done
+</code></pre>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Use WAIT_FOR or TEST</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Wait for file to exist
+SUBSYSTEM=="block", KERNEL=="sd?", \
+    WAIT_FOR="/sys/block/%k/queue/rotational"
+
+# Test file exists
+SUBSYSTEM=="block", KERNEL=="sd?", \
+    TEST=="/sys/block/%k/queue/rotational", \
+    ATTR{queue/rotational}=="0", \
+    TAG+="ssd"
+</code></pre>
+<ol start="2">
+<li><strong>Import parent attributes properly</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Use ATTRS (with S) to search up device tree
+SUBSYSTEM=="tty", SUBSYSTEMS=="usb", \
+    ATTRS{idVendor}=="0403", \
+    SYMLINK+="mydevice"
+</code></pre>
+<ol start="3">
+<li><strong>Use systemd for complex setups</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Tag for systemd instead of RUN
+SUBSYSTEM=="block", ENV{ID_FS_UUID}=="1234", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="mount-device.service"
+</code></pre>
+<h3 id="rules-execution-timeout"><a class="header" href="#rules-execution-timeout">Rules Execution Timeout</a></h3>
+<p><strong>Symptoms</strong>: Long-running scripts cause udev delays.</p>
+<p><strong>Diagnosis</strong>:</p>
+<pre><code class="language-bash"># Check for timeout errors
+journalctl -u systemd-udevd | grep timeout
+
+# Monitor event processing time
+udevadm monitor --property | grep -E "SEQNUM|USEC_INITIALIZED"
+</code></pre>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Use systemd-run for long tasks</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Bad - blocks udev
+RUN{program}+="/usr/local/bin/long-script.sh"
+
+# Good - runs asynchronously
+RUN{program}+="/usr/bin/systemd-run /usr/local/bin/long-script.sh"
+</code></pre>
+<ol start="2">
+<li><strong>Optimize scripts</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Move slow operations to background
+#!/bin/bash
+(
+    # Long operation
+    /usr/bin/process-device.sh "$DEVNAME"
+) &amp;
+</code></pre>
+<ol start="3">
+<li><strong>Increase timeout (last resort)</strong>:</li>
+</ol>
+<pre><code class="language-bash"># /etc/udev/udev.conf
+event_timeout=300
+</code></pre>
+<h3 id="name-assignment-not-working"><a class="header" href="#name-assignment-not-working">NAME Assignment Not Working</a></h3>
+<p><strong>Symptoms</strong>: NAME assignment ignored, device keeps kernel name.</p>
+<p><strong>Diagnosis</strong>:</p>
+<pre><code class="language-bash"># Test rule
+udevadm test /sys/class/net/eth0 2&gt;&amp;1 | grep NAME
+
+# Check for conflicts
+udevadm test /sys/class/net/eth0 2&gt;&amp;1 | grep -E "NAME|name"
+</code></pre>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Use SYMLINK instead</strong>:</li>
+</ol>
+<pre><code class="language-bash"># NAME only works for some subsystems
+# Use SYMLINK for flexibility
+SUBSYSTEM=="block", KERNEL=="sd?", \
+    SYMLINK+="mydisk"
+</code></pre>
+<ol start="2">
+<li><strong>Check NAME is allowed</strong>:</li>
+</ol>
+<pre><code class="language-bash"># NAME works for network interfaces
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="...", NAME="eth0"
+
+# NAME doesn't work well for block devices (use SYMLINK)
+</code></pre>
+<ol start="3">
+<li><strong>Ensure no later rule overrides</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Use OPTIONS to prevent override
+SUBSYSTEM=="net", ATTR{address}=="...", \
+    NAME="eth0", \
+    OPTIONS+="last_rule"
+</code></pre>
+<h3 id="debugging-complex-rules"><a class="header" href="#debugging-complex-rules">Debugging Complex Rules</a></h3>
+<p><strong>Enable debug logging</strong>:</p>
+<pre><code class="language-bash"># Increase log level
+udevadm control --log-level=debug
+
+# View logs
+journalctl -u systemd-udevd -f
+
+# Reset log level
+udevadm control --log-level=info
+</code></pre>
+<p><strong>Test step by step</strong>:</p>
+<pre><code class="language-bash"># Test single device
+udevadm test --action=add /sys/class/block/sda 2&gt;&amp;1 | less
+
+# Look for specific match
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | grep "ATTR{size}"
+
+# Check what properties are available
+udevadm info --query=property /dev/sda
+</code></pre>
+<p><strong>Verify rule matching</strong>:</p>
+<pre><code class="language-bash"># See which rules matched
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | \
+    grep -A2 "Reading rules file"
+</code></pre>
+<h3 id="common-syntax-errors"><a class="header" href="#common-syntax-errors">Common Syntax Errors</a></h3>
+<pre><code class="language-bash"># 1. Forgetting comma separator
+# Wrong:
+SUBSYSTEM=="block" KERNEL=="sda"
+# Right:
+SUBSYSTEM=="block", KERNEL=="sda"
+
+# 2. Using = instead of ==
+# Wrong:
+SUBSYSTEM="block", KERNEL="sda"
+# Right:
+SUBSYSTEM=="block", KERNEL=="sda"
+
+# 3. Wrong quote marks
+# Wrong:
+SUBSYSTEM=="block', KERNEL=="sda"
+# Right:
+SUBSYSTEM=="block", KERNEL=="sda"
+
+# 4. Missing + for append
+# Wrong (overwrites):
+SYMLINK="disk1"
+SYMLINK="disk2"  # Only disk2 exists
+# Right (both exist):
+SYMLINK+="disk1"
+SYMLINK+="disk2"
+
+# 5. Attribute syntax
+# Wrong:
+ATTRS="idVendor"=="0403"
+# Right:
+ATTRS{idVendor}=="0403"
+</code></pre>
+<h3 id="performance-issues"><a class="header" href="#performance-issues">Performance Issues</a></h3>
+<p><strong>Symptoms</strong>: Slow boot, delayed device recognition.</p>
+<p><strong>Diagnosis</strong>:</p>
+<pre><code class="language-bash"># Analyze boot performance
+systemd-analyze blame | grep udev
+
+# Monitor event processing
+udevadm monitor --property | ts
+</code></pre>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Reduce rule complexity</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Bad - runs program for every device
+SUBSYSTEM=="block", PROGRAM="/usr/bin/check-device.sh"
+
+# Good - limit scope
+SUBSYSTEM=="block", KERNEL=="sd[a-z]", \
+    ATTRS{vendor}=="SpecificVendor", \
+    PROGRAM="/usr/bin/check-device.sh"
+</code></pre>
+<ol start="2">
+<li><strong>Remove unnecessary rules</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Audit rules
+ls -la /etc/udev/rules.d/
+# Remove unused rules
+</code></pre>
+<ol start="3">
+<li><strong>Use early exits</strong>:</li>
+</ol>
+<pre><code class="language-bash"># Skip non-relevant devices early
+SUBSYSTEM!="block", GOTO="end_block_rules"
+KERNEL!="sd*", GOTO="end_block_rules"
+
+# ... block-specific rules ...
+
+LABEL="end_block_rules"
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-rule-organization"><a class="header" href="#1-rule-organization">1. Rule Organization</a></h3>
+<p><strong>Naming convention</strong>:</p>
+<ul>
+<li>Use descriptive prefixes: <code>70-persistent-net.rules</code></li>
+<li>Follow numbering: 60-69 storage, 70-79 network, 80-89 local</li>
+<li>One purpose per file</li>
+</ul>
+<p><strong>Structure</strong>:</p>
+<pre><code class="language-bash">/etc/udev/rules.d/
+├── 70-network-naming.rules       # Network interface names
+├── 80-usb-devices.rules          # USB device permissions
+├── 85-serial-ports.rules         # Serial port mappings
+└── 90-local-automation.rules     # Custom automation
+</code></pre>
+<h3 id="2-security-considerations"><a class="header" href="#2-security-considerations">2. Security Considerations</a></h3>
+<p><strong>Minimize permissions</strong>:</p>
+<pre><code class="language-bash"># Bad - world writable
+MODE="0666"
+
+# Good - group writable only
+MODE="0660", GROUP="dialout"
+</code></pre>
+<p><strong>Validate before execution</strong>:</p>
+<pre><code class="language-bash"># Validate device attributes before running scripts
+SUBSYSTEM=="block", ENV{ID_FS_UUID}=="known-uuid", \
+    TEST=="/usr/local/bin/safe-script.sh", \
+    RUN{program}+="/usr/local/bin/safe-script.sh"
+</code></pre>
+<p><strong>Avoid running untrusted code</strong>:</p>
+<pre><code class="language-bash"># Don't use device-controlled values in RUN
+# Bad:
+RUN{program}+="/bin/sh $attr{script}"  # DANGEROUS!
+
+# Good:
+ENV{SAFE_LABEL}="$env{ID_FS_LABEL}"
+RUN{program}+="/usr/local/bin/process.sh"
+</code></pre>
+<p><strong>Use TAG+="uaccess" for user devices</strong>:</p>
+<pre><code class="language-bash"># Give current user access
+SUBSYSTEM=="usb", ATTR{idVendor}=="1234", \
+    TAG+="uaccess"
+</code></pre>
+<h3 id="3-testing-strategies"><a class="header" href="#3-testing-strategies">3. Testing Strategies</a></h3>
+<p><strong>Test before deploying</strong>:</p>
+<pre><code class="language-bash"># Always test rules
+udevadm test /sys/class/block/sda
+
+# Check syntax
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | grep -i error
+
+# Dry run triggers
+udevadm trigger --dry-run --subsystem-match=block
+</code></pre>
+<p><strong>Version control</strong>:</p>
+<pre><code class="language-bash"># Track rule changes
+cd /etc/udev/rules.d/
+git init
+git add *.rules
+git commit -m "Initial udev rules"
+</code></pre>
+<p><strong>Backup before changes</strong>:</p>
+<pre><code class="language-bash"># Backup existing rules
+sudo cp -a /etc/udev/rules.d /etc/udev/rules.d.backup.$(date +%Y%m%d)
+</code></pre>
+<p><strong>Test in stages</strong>:</p>
+<pre><code class="language-bash"># 1. Test rule syntax
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | grep -E "error|warning" -i
+
+# 2. Check what would happen
+udevadm test /sys/class/block/sda 2&gt;&amp;1 | grep -E "SYMLINK|NAME|RUN"
+
+# 3. Apply to one device
+udevadm trigger --name-match=/dev/sda
+
+# 4. Apply to subsystem
+udevadm trigger --subsystem-match=block
+
+# 5. Apply to all
+udevadm trigger
+</code></pre>
+<h3 id="4-documentation"><a class="header" href="#4-documentation">4. Documentation</a></h3>
+<p><strong>Comment your rules</strong>:</p>
+<pre><code class="language-bash"># Purpose: Persistent naming for server NICs
+# Created: 2024-01-15
+# Author: admin
+
+# Management interface (onboard NIC)
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="00:11:22:33:44:55", \
+    NAME="mgmt0"
+</code></pre>
+<p><strong>Document device identification</strong>:</p>
+<pre><code class="language-bash"># How to find these values:
+# udevadm info --attribute-walk --name=/dev/ttyUSB0 | grep -E "idVendor|idProduct|serial"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", \
+    ATTRS{serial}=="ABC123", \
+    SYMLINK+="mydevice"
+</code></pre>
+<p><strong>Maintain a README</strong>:</p>
+<pre><code class="language-bash"># /etc/udev/rules.d/README.md
+cat &gt; /etc/udev/rules.d/README.md &lt;&lt; 'EOF'
+# Custom udev Rules
+
+## Overview
+This directory contains custom udev rules for this system.
+
+## Rules Files
+
+- `70-network-naming.rules` - Persistent network interface names
+- `80-usb-devices.rules` - USB device permissions for development
+- `90-automation.rules` - Automated mounting and backups
+
+## Testing Changes
+
+After modifying rules:
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+</code></pre>
+<h2 id="troubleshooting-1"><a class="header" href="#troubleshooting-1">Troubleshooting</a></h2>
+<p>See logs:</p>
+<pre><code class="language-bash">journalctl -u systemd-udevd
+</code></pre>
+<p>EOF</p>
+<pre><code>
+### 5. Avoid Common Pitfalls
+
+**Don't hardcode device nodes**:
+```bash
+# Bad
+PROGRAM=="/usr/bin/backup.sh /dev/sdb1"
+
+# Good
+PROGRAM=="/usr/bin/backup.sh $devnode"
+</code></pre>
+<p><strong>Use appropriate operators</strong>:</p>
+<pre><code class="language-bash"># Match: use ==
+KERNEL=="sda"
+
+# Assign: use =
+NAME="mydisk"
+
+# Append: use +=
+SYMLINK+="disk/by-label/backup"
+</code></pre>
+<p><strong>Limit PROGRAM usage</strong>:</p>
+<pre><code class="language-bash"># Bad - slow
+SUBSYSTEM=="block", PROGRAM="/usr/bin/get-info.sh", ...
+
+# Good - use attributes
+SUBSYSTEM=="block", ATTR{size}=="*", ...
+</code></pre>
+<p><strong>Watch for quoting issues</strong>:</p>
+<pre><code class="language-bash"># Variables don't need quotes in assignments
+NAME="disk-$env{ID_SERIAL}"  # Correct
+
+# But be careful with spaces
+SYMLINK+="My Disk"  # Creates two symlinks: "My" and "Disk"
+SYMLINK+="My_Disk"  # Correct
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="udevadm-commands"><a class="header" href="#udevadm-commands">udevadm Commands</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>info</code></td><td>Query device information</td><td><code>udevadm info /dev/sda</code></td></tr>
+<tr><td><code>monitor</code></td><td>Monitor events</td><td><code>udevadm monitor --subsystem-match=block</code></td></tr>
+<tr><td><code>test</code></td><td>Simulate rule processing</td><td><code>udevadm test /sys/class/block/sda</code></td></tr>
+<tr><td><code>trigger</code></td><td>Request device events</td><td><code>udevadm trigger --name-match=/dev/sda</code></td></tr>
+<tr><td><code>settle</code></td><td>Wait for events</td><td><code>udevadm settle --timeout=30</code></td></tr>
+<tr><td><code>control --reload</code></td><td>Reload rules</td><td><code>udevadm control --reload-rules</code></td></tr>
+<tr><td><code>control --log-level</code></td><td>Set logging</td><td><code>udevadm control --log-level=debug</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="match-keys-reference"><a class="header" href="#match-keys-reference">Match Keys Reference</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Matches</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>KERNEL</code></td><td>Device kernel name</td><td><code>KERNEL=="sda"</code></td></tr>
+<tr><td><code>SUBSYSTEM</code></td><td>Device subsystem</td><td><code>SUBSYSTEM=="block"</code></td></tr>
+<tr><td><code>DRIVER</code></td><td>Device driver name</td><td><code>DRIVER=="usb-storage"</code></td></tr>
+<tr><td><code>ATTR{file}</code></td><td>Sysfs attribute (current device)</td><td><code>ATTR{idVendor}=="0403"</code></td></tr>
+<tr><td><code>ATTRS{file}</code></td><td>Sysfs attribute (any parent)</td><td><code>ATTRS{serial}=="ABC123"</code></td></tr>
+<tr><td><code>ENV{key}</code></td><td>Environment variable</td><td><code>ENV{ID_FS_TYPE}=="ext4"</code></td></tr>
+<tr><td><code>TAG</code></td><td>Device tag</td><td><code>TAG=="systemd"</code></td></tr>
+<tr><td><code>TEST{file}</code></td><td>File existence</td><td><code>TEST=="/sys/module/kvm"</code></td></tr>
+<tr><td><code>PROGRAM</code></td><td>Execute and match stdout</td><td><code>PROGRAM=="/usr/bin/check.sh"</code></td></tr>
+<tr><td><code>RESULT</code></td><td>Match PROGRAM result</td><td><code>RESULT=="match_this"</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="assignment-keys-reference"><a class="header" href="#assignment-keys-reference">Assignment Keys Reference</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Action</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>NAME</code></td><td>Device node name</td><td><code>NAME="mydevice"</code></td></tr>
+<tr><td><code>SYMLINK</code></td><td>Create symlink</td><td><code>SYMLINK+="disk/backup"</code></td></tr>
+<tr><td><code>OWNER</code></td><td>Set owner</td><td><code>OWNER="root"</code></td></tr>
+<tr><td><code>GROUP</code></td><td>Set group</td><td><code>GROUP="disk"</code></td></tr>
+<tr><td><code>MODE</code></td><td>Set permissions</td><td><code>MODE="0660"</code></td></tr>
+<tr><td><code>TAG</code></td><td>Add tag</td><td><code>TAG+="systemd"</code></td></tr>
+<tr><td><code>ENV{key}</code></td><td>Set environment</td><td><code>ENV{MY_VAR}="value"</code></td></tr>
+<tr><td><code>RUN{program}</code></td><td>Execute program</td><td><code>RUN{program}+="/usr/bin/script.sh"</code></td></tr>
+<tr><td><code>LABEL</code></td><td>Named label</td><td><code>LABEL="my_label"</code></td></tr>
+<tr><td><code>GOTO</code></td><td>Jump to label</td><td><code>GOTO="my_label"</code></td></tr>
+<tr><td><code>IMPORT</code></td><td>Import variables</td><td><code>IMPORT{program}="/lib/udev/usb_id"</code></td></tr>
+<tr><td><code>OPTIONS</code></td><td>Special options</td><td><code>OPTIONS+="last_rule"</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="operators-1"><a class="header" href="#operators-1">Operators</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Operator</th><th>Meaning</th><th>Used With</th></tr></thead><tbody>
+<tr><td><code>==</code></td><td>Equal (match)</td><td>Match keys</td></tr>
+<tr><td><code>!=</code></td><td>Not equal (match)</td><td>Match keys</td></tr>
+<tr><td><code>=</code></td><td>Assign</td><td>Assignment keys</td></tr>
+<tr><td><code>+=</code></td><td>Append</td><td>Assignment keys</td></tr>
+<tr><td><code>-=</code></td><td>Remove</td><td>Assignment keys</td></tr>
+<tr><td><code>:=</code></td><td>Assign final (no override)</td><td>Assignment keys</td></tr>
+</tbody></table>
+</div>
+<h3 id="string-substitutions-1"><a class="header" href="#string-substitutions-1">String Substitutions</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Pattern</th><th>Expands To</th><th>Example Value</th></tr></thead><tbody>
+<tr><td><code>%k</code>, <code>$kernel</code></td><td>Kernel device name</td><td><code>sda</code></td></tr>
+<tr><td><code>%n</code>, <code>$number</code></td><td>Kernel number</td><td><code>1</code></td></tr>
+<tr><td><code>%p</code>, <code>$devpath</code></td><td>Device path</td><td><code>/devices/pci...</code></td></tr>
+<tr><td><code>%M</code>, <code>$major</code></td><td>Major number</td><td><code>8</code></td></tr>
+<tr><td><code>%m</code>, <code>$minor</code></td><td>Minor number</td><td><code>0</code></td></tr>
+<tr><td><code>$attr{file}</code></td><td>Sysfs attribute</td><td>varies</td></tr>
+<tr><td><code>$env{key}</code></td><td>Environment variable</td><td>varies</td></tr>
+<tr><td><code>$devnode</code></td><td>Device node path</td><td><code>/dev/sda</code></td></tr>
+<tr><td><code>$result</code></td><td>PROGRAM output</td><td>varies</td></tr>
+<tr><td><code>%%</code></td><td>Literal <code>%</code></td><td><code>%</code></td></tr>
+<tr><td><code>$$</code></td><td>Literal <code>$</code></td><td><code>$</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="common-subsystems"><a class="header" href="#common-subsystems">Common Subsystems</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Subsystem</th><th>Device Type</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>block</code></td><td>Block devices</td><td><code>/dev/sda</code>, <code>/dev/nvme0n1</code></td></tr>
+<tr><td><code>net</code></td><td>Network interfaces</td><td><code>eth0</code>, <code>wlan0</code></td></tr>
+<tr><td><code>tty</code></td><td>Serial/terminal</td><td><code>/dev/ttyUSB0</code>, <code>/dev/ttyS0</code></td></tr>
+<tr><td><code>usb</code></td><td>USB devices</td><td>Various</td></tr>
+<tr><td><code>input</code></td><td>Input devices</td><td>Keyboards, mice</td></tr>
+<tr><td><code>sound</code></td><td>Audio devices</td><td>Sound cards</td></tr>
+<tr><td><code>video4linux</code></td><td>Video devices</td><td>Webcams, capture cards</td></tr>
+<tr><td><code>scsi</code></td><td>SCSI devices</td><td>Disks, optical drives</td></tr>
+<tr><td><code>pci</code></td><td>PCI devices</td><td>Various</td></tr>
+<tr><td><code>hidraw</code></td><td>HID devices</td><td>Raw HID access</td></tr>
+</tbody></table>
+</div>
+<h3 id="useful-attributes"><a class="header" href="#useful-attributes">Useful Attributes</a></h3>
+<p><strong>Block devices</strong>:</p>
+<ul>
+<li><code>size</code> - Device size in sectors</li>
+<li><code>ro</code> - Read-only flag</li>
+<li><code>removable</code> - Removable media flag</li>
+<li><code>queue/rotational</code> - HDD (1) vs SSD (0)</li>
+</ul>
+<p><strong>USB devices</strong>:</p>
+<ul>
+<li><code>idVendor</code> - USB vendor ID</li>
+<li><code>idProduct</code> - USB product ID</li>
+<li><code>serial</code> - Serial number</li>
+<li><code>manufacturer</code> - Manufacturer string</li>
+<li><code>product</code> - Product string</li>
+</ul>
+<p><strong>Network devices</strong>:</p>
+<ul>
+<li><code>address</code> - MAC address</li>
+<li><code>type</code> - Interface type</li>
+<li><code>carrier</code> - Link status</li>
+</ul>
+<h2 id="integration-examples"><a class="header" href="#integration-examples">Integration Examples</a></h2>
+<h3 id="systemd-mount-units"><a class="header" href="#systemd-mount-units">systemd Mount Units</a></h3>
+<p>Automatically mount devices using systemd:</p>
+<p><strong>udev rule</strong>: <code>/etc/udev/rules.d/90-automount.rules</code></p>
+<pre><code class="language-bash">SUBSYSTEM=="block", ENV{ID_FS_UUID}=="1234-5678", \
+    TAG+="systemd", \
+    ENV{SYSTEMD_WANTS}="mnt-backup.mount"
+</code></pre>
+<p><strong>Mount unit</strong>: <code>/etc/systemd/system/mnt-backup.mount</code></p>
+<pre><code class="language-ini">[Unit]
+Description=Backup Drive
+After=dev-disk-by\x2duuid-1234\x2d5678.device
+
+[Mount]
+What=/dev/disk/by-uuid/1234-5678
+Where=/mnt/backup
+Type=ext4
+Options=defaults,noatime
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h3 id="desktop-environment-integration"><a class="header" href="#desktop-environment-integration">Desktop Environment Integration</a></h3>
+<p>Integration with desktop notifications:</p>
+<pre><code class="language-bash"># /etc/udev/rules.d/90-desktop-notify.rules
+SUBSYSTEM=="block", KERNEL=="sd[a-z][0-9]", \
+    ACTION=="add", \
+    ENV{ID_FS_LABEL}=="*", \
+    RUN{program}+="/usr/local/bin/notify-user.sh add '%E{ID_FS_LABEL}'"
+
+SUBSYSTEM=="block", KERNEL=="sd[a-z][0-9]", \
+    ACTION=="remove", \
+    RUN{program}+="/usr/local/bin/notify-user.sh remove"
+</code></pre>
+<p><strong>Notification script</strong>:</p>
+<pre><code class="language-bash">#!/bin/bash
+ACTION=$1
+LABEL=$2
+USER=$(who | grep -m1 '(:[0-9])' | awk '{print $1}')
+
+if [ "$ACTION" = "add" ]; then
+    sudo -u $USER DISPLAY=:0 notify-send \
+        "USB Device Connected" \
+        "Device: $LABEL" \
+        -i drive-removable-media
+else
+    sudo -u $USER DISPLAY=:0 notify-send \
+        "USB Device Removed" \
+        -i drive-removable-media
+fi
+</code></pre>
+<h3 id="container-device-handling"><a class="header" href="#container-device-handling">Container Device Handling</a></h3>
+<p>Pass devices to containers:</p>
+<pre><code class="language-bash"># /etc/udev/rules.d/90-container-devices.rules
+# Tag devices for container access
+SUBSYSTEM=="usb", ATTR{idVendor}=="0403", \
+    TAG+="container-passthrough", \
+    ENV{CONTAINER_NAME}="dev-environment"
+
+# Notify container runtime
+SUBSYSTEM=="usb", TAG=="container-passthrough", \
+    RUN{program}+="/usr/local/bin/container-device-notify.sh $env{CONTAINER_NAME} $devnode"
+</code></pre>
+<h3 id="virtual-machine-device-passthrough"><a class="header" href="#virtual-machine-device-passthrough">Virtual Machine Device Passthrough</a></h3>
+<p>Prepare devices for VM passthrough:</p>
+<pre><code class="language-bash"># /etc/udev/rules.d/80-vfio.rules
+# Bind devices to VFIO driver for VM passthrough
+SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x1234", \
+    DRIVER=="nouveau", \
+    RUN{program}+="/usr/bin/vfio-bind.sh %k"
+</code></pre>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
+<h3 id="man-pages"><a class="header" href="#man-pages">Man Pages</a></h3>
+<ul>
+<li><code>man udev</code> - Overview of udev</li>
+<li><code>man udevadm</code> - udevadm utility</li>
+<li><code>man systemd-udevd</code> - udev daemon</li>
+<li><code>man udev.conf</code> - udev configuration</li>
+<li><code>man hwdb</code> - Hardware database</li>
+</ul>
+<h3 id="files-and-directories"><a class="header" href="#files-and-directories">Files and Directories</a></h3>
+<ul>
+<li><code>/lib/udev/rules.d/</code> - System rules</li>
+<li><code>/etc/udev/rules.d/</code> - Custom rules</li>
+<li><code>/run/udev/rules.d/</code> - Runtime rules</li>
+<li><code>/etc/udev/udev.conf</code> - udev configuration</li>
+<li><code>/run/udev/data/</code> - Device database</li>
+<li><code>/sys/</code> - sysfs mount point</li>
+</ul>
+<h3 id="online-resources"><a class="header" href="#online-resources">Online Resources</a></h3>
+<ul>
+<li>systemd.io - Official systemd/udev documentation</li>
+<li>kernel.org - Kernel device management documentation</li>
+<li>freedesktop.org - Historical udev documentation</li>
+<li>Arch Wiki - Comprehensive udev examples</li>
+</ul>
+<h3 id="related-tools"><a class="header" href="#related-tools">Related Tools</a></h3>
+<ul>
+<li><code>lsusb</code> - List USB devices</li>
+<li><code>lspci</code> - List PCI devices</li>
+<li><code>lsblk</code> - List block devices</li>
+<li><code>hwinfo</code> - Hardware information</li>
+<li><code>systemd-analyze</code> - Boot performance analysis</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../linux/selinux.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../android/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../linux/selinux.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../android/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

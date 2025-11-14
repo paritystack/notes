@@ -1,0 +1,2041 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Ripgrep - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ripgrep-rg"><a class="header" href="#ripgrep-rg">ripgrep (rg)</a></h1>
+<p>ripgrep is a line-oriented search tool that recursively searches your current directory for a regex pattern. It is extremely fast and respects your gitignore rules by default. ripgrep was created by Andrew Gallant (BurntSushi) as a faster, more user-friendly alternative to grep, ag (the silver searcher), and ack.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>ripgrep is built on top of Rust's regex engine and optimizes for speed without sacrificing usability. It's particularly well-suited for searching large codebases and respects common developer workflows.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Extremely fast (often 2-10x faster than alternatives)</li>
+<li>Respects .gitignore and other ignore files by default</li>
+<li>Automatic recursive directory search</li>
+<li>Automatic skip of hidden files and binary files</li>
+<li>Smart case searching (case-insensitive if all lowercase, sensitive if mixed)</li>
+<li>Supports numerous text encodings (UTF-8, UTF-16, Latin-1, etc.)</li>
+<li>Parallel directory traversal and searching</li>
+<li>Powerful regex support with multiple regex engines</li>
+<li>Cross-platform (Linux, macOS, Windows, BSD)</li>
+<li>Compressed file search support</li>
+<li>Preprocessor support for custom file handling</li>
+</ul>
+<p><strong>Common Use Cases:</strong></p>
+<ul>
+<li>Searching code repositories</li>
+<li>Finding text patterns in large codebases</li>
+<li>Grepping log files</li>
+<li>Code refactoring and analysis</li>
+<li>Security audits (finding API keys, passwords, etc.)</li>
+<li>Documentation searches</li>
+<li>Configuration file searches</li>
+<li>Quick file content exploration</li>
+<li>Build output analysis</li>
+<li>Data mining and text extraction</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># Debian/Ubuntu
+sudo apt update
+sudo apt install ripgrep
+
+# RHEL/CentOS/Fedora
+sudo dnf install ripgrep
+# or
+sudo yum install ripgrep
+
+# Arch Linux
+sudo pacman -S ripgrep
+
+# macOS (Homebrew)
+brew install ripgrep
+
+# macOS (MacPorts)
+sudo port install ripgrep
+
+# Windows (Chocolatey)
+choco install ripgrep
+
+# Windows (Scoop)
+scoop install ripgrep
+
+# Windows (Winget)
+winget install BurntSushi.ripgrep.MSVC
+
+# Cargo (Rust package manager - any platform)
+cargo install ripgrep
+
+# From source (requires Rust)
+git clone https://github.com/BurntSushi/ripgrep
+cd ripgrep
+cargo build --release
+sudo cp target/release/rg /usr/local/bin/
+
+# Verify installation
+rg --version
+</code></pre>
+<h2 id="basic-concepts"><a class="header" href="#basic-concepts">Basic Concepts</a></h2>
+<h3 id="how-ripgrep-works"><a class="header" href="#how-ripgrep-works">How ripgrep Works</a></h3>
+<p>ripgrep operates in several phases:</p>
+<ol>
+<li><strong>Pattern Compilation</strong> - Compiles the regex pattern</li>
+<li><strong>Directory Traversal</strong> - Walks the directory tree (in parallel)</li>
+<li><strong>File Filtering</strong> - Applies ignore rules and file type filters</li>
+<li><strong>File Searching</strong> - Searches each file for matches (in parallel)</li>
+<li><strong>Output Formatting</strong> - Formats and displays results</li>
+</ol>
+<h3 id="smart-defaults"><a class="header" href="#smart-defaults">Smart Defaults</a></h3>
+<p>ripgrep comes with intelligent defaults that make it work well out of the box:</p>
+<ul>
+<li><strong>Recursive search</strong> - Searches subdirectories automatically</li>
+<li><strong>Gitignore awareness</strong> - Respects .gitignore, .ignore, .rgignore files</li>
+<li><strong>Hidden file skipping</strong> - Skips hidden files and directories by default</li>
+<li><strong>Binary file skipping</strong> - Automatically skips binary files</li>
+<li><strong>Smart case</strong> - Case-insensitive if pattern is all lowercase, sensitive otherwise</li>
+<li><strong>Automatic encoding detection</strong> - Handles UTF-8, UTF-16, etc.</li>
+<li><strong>Line buffering</strong> - Optimized output for terminals and pipes</li>
+</ul>
+<h3 id="regex-syntax"><a class="header" href="#regex-syntax">Regex Syntax</a></h3>
+<p>By default, ripgrep uses Rust's regex engine which is similar to Perl-compatible regex (PCRE):</p>
+<ul>
+<li><code>.</code> - Any character except newline</li>
+<li><code>^</code> - Start of line</li>
+<li><code>$</code> - End of line</li>
+<li><code>*</code> - Zero or more repetitions</li>
+<li><code>+</code> - One or more repetitions</li>
+<li><code>?</code> - Zero or one repetition</li>
+<li><code>{n,m}</code> - Between n and m repetitions</li>
+<li><code>[abc]</code> - Character class (a, b, or c)</li>
+<li><code>[^abc]</code> - Negated character class (not a, b, or c)</li>
+<li><code>\d</code> - Digit</li>
+<li><code>\w</code> - Word character</li>
+<li><code>\s</code> - Whitespace</li>
+<li><code>(...)</code> - Capturing group</li>
+<li><code>|</code> - Alternation (or)</li>
+<li><code>\b</code> - Word boundary</li>
+</ul>
+<h2 id="basic-operations"><a class="header" href="#basic-operations">Basic Operations</a></h2>
+<h3 id="simple-search"><a class="header" href="#simple-search">Simple Search</a></h3>
+<pre><code class="language-bash"># Search for pattern in current directory
+rg "pattern"
+rg "function"
+rg "TODO"
+
+# Search for exact string (no regex)
+rg -F "exact.string.with.dots"
+rg --fixed-strings "literal$string"
+
+# Search in specific file
+rg "pattern" file.txt
+
+# Search in multiple files
+rg "pattern" file1.txt file2.txt
+
+# Search with multiple patterns (OR)
+rg "pattern1|pattern2"
+rg "error|warning|critical"
+
+# Case-sensitive search
+rg -s "Pattern"
+rg --case-sensitive "CamelCase"
+
+# Case-insensitive search (force)
+rg -i "pattern"
+rg --ignore-case "PATTERN"
+</code></pre>
+<h3 id="recursive-search"><a class="header" href="#recursive-search">Recursive Search</a></h3>
+<pre><code class="language-bash"># Search recursively in current directory (default)
+rg "pattern"
+
+# Search in specific directory
+rg "pattern" /path/to/directory
+
+# Search in multiple directories
+rg "pattern" dir1/ dir2/ dir3/
+
+# Limit recursion depth
+rg --max-depth 2 "pattern"
+rg --max-depth 1 "pattern"  # Only current directory
+
+# Search without recursion
+rg --max-depth 1 "pattern"
+</code></pre>
+<h3 id="file-type-filtering"><a class="header" href="#file-type-filtering">File Type Filtering</a></h3>
+<pre><code class="language-bash"># Search only in specific file types
+rg -t py "pattern"          # Python files
+rg -t js "pattern"          # JavaScript files
+rg -t rust "pattern"        # Rust files
+rg -t cpp "pattern"         # C++ files
+rg -t java "pattern"        # Java files
+rg -t go "pattern"          # Go files
+rg -t md "pattern"          # Markdown files
+rg -t html "pattern"        # HTML files
+rg -t css "pattern"         # CSS files
+rg -t json "pattern"        # JSON files
+
+# Multiple file types
+rg -t py -t js "pattern"
+rg --type python --type javascript "pattern"
+
+# Exclude file types
+rg -T js "pattern"          # Exclude JavaScript files
+rg --type-not javascript "pattern"
+
+# List available file types
+rg --type-list
+
+# Add custom file type
+rg --type-add 'custom:*.foo' -t custom "pattern"
+</code></pre>
+<h3 id="glob-patterns"><a class="header" href="#glob-patterns">Glob Patterns</a></h3>
+<pre><code class="language-bash"># Search files matching glob pattern
+rg -g "*.py" "pattern"
+rg --glob "*.js" "pattern"
+
+# Multiple glob patterns
+rg -g "*.{js,ts}" "pattern"
+rg -g "*.py" -g "*.pyx" "pattern"
+
+# Exclude with glob patterns
+rg -g "!*.min.js" "pattern"
+rg -g "!test*" "pattern"
+rg --glob "!vendor/*" "pattern"
+
+# Complex glob patterns
+rg -g "src/**/*.rs" "pattern"
+rg -g "**/test_*.py" "pattern"
+</code></pre>
+<h3 id="basic-output-control"><a class="header" href="#basic-output-control">Basic Output Control</a></h3>
+<pre><code class="language-bash"># Show line numbers (default)
+rg "pattern"
+
+# Hide line numbers
+rg -N "pattern"
+rg --no-line-number "pattern"
+
+# Show column numbers
+rg --column "pattern"
+
+# Show only filenames with matches
+rg -l "pattern"
+rg --files-with-matches "pattern"
+
+# Show only filenames without matches
+rg --files-without-match "pattern"
+
+# Count matches per file
+rg -c "pattern"
+rg --count "pattern"
+
+# Count total matches
+rg --count-matches "pattern"
+
+# Show only matching part (not full line)
+rg -o "pattern"
+rg --only-matching "pattern"
+</code></pre>
+<h2 id="advanced-searching"><a class="header" href="#advanced-searching">Advanced Searching</a></h2>
+<h3 id="context-lines"><a class="header" href="#context-lines">Context Lines</a></h3>
+<pre><code class="language-bash"># Show N lines after match
+rg -A 3 "pattern"
+rg --after-context 3 "pattern"
+
+# Show N lines before match
+rg -B 3 "pattern"
+rg --before-context 3 "pattern"
+
+# Show N lines before and after match
+rg -C 3 "pattern"
+rg --context 3 "pattern"
+
+# Different before/after context
+rg -B 5 -A 2 "pattern"
+</code></pre>
+<h3 id="multiline-search"><a class="header" href="#multiline-search">Multiline Search</a></h3>
+<pre><code class="language-bash"># Enable multiline mode
+rg -U "pattern.*across.*lines"
+rg --multiline "start.*\n.*middle.*\n.*end"
+
+# Search for function definitions across lines
+rg -U "function.*\{.*\n.*return"
+
+# Find multi-line comments
+rg -U "/\*.*\*/"
+
+# Complex multiline patterns
+rg -U "class \w+.*\n.*def __init__"
+</code></pre>
+<h3 id="word-boundaries"><a class="header" href="#word-boundaries">Word Boundaries</a></h3>
+<pre><code class="language-bash"># Match whole words only
+rg -w "word"
+rg --word-regexp "function"
+
+# Match word boundaries with regex
+rg "\bword\b"
+rg "\bfunction\b"
+
+# Combine with other options
+rg -w -i "class"
+</code></pre>
+<h3 id="replacement-and-transformation"><a class="header" href="#replacement-and-transformation">Replacement and Transformation</a></h3>
+<pre><code class="language-bash"># Show replacements (doesn't modify files)
+rg "old" -r "new"
+rg "pattern" --replace "replacement"
+
+# With capture groups
+rg "(\w+)@(\w+)" -r '$2@$1'
+rg "function (\w+)" -r 'def $1'
+
+# Passthrough mode (prints all lines, highlighting matches)
+rg --passthru "pattern"
+
+# Passthrough with replacement
+rg --passthru "old" -r "new"
+</code></pre>
+<h3 id="hidden-and-ignored-files"><a class="header" href="#hidden-and-ignored-files">Hidden and Ignored Files</a></h3>
+<pre><code class="language-bash"># Include hidden files
+rg --hidden "pattern"
+rg -. "pattern"
+
+# Search all files (ignore .gitignore, .ignore, etc.)
+rg -u "pattern"                    # Ignore .gitignore
+rg -uu "pattern"                   # Ignore .gitignore and hidden files
+rg -uuu "pattern"                  # Search everything (including binary)
+
+# Don't respect ignore files
+rg --no-ignore "pattern"
+
+# Don't respect .gitignore
+rg --no-ignore-vcs "pattern"
+
+# Don't respect parent .gitignore
+rg --no-ignore-parent "pattern"
+
+# Don't skip hidden files
+rg --hidden "pattern"
+</code></pre>
+<h3 id="binary-files"><a class="header" href="#binary-files">Binary Files</a></h3>
+<pre><code class="language-bash"># Search binary files
+rg -a "pattern"
+rg --text "pattern"
+
+# Show binary file matches as hex
+rg --binary "pattern"
+
+# Skip binary files explicitly (default)
+rg "pattern"
+
+# Search binary with specific encoding
+rg -E latin1 "pattern"
+</code></pre>
+<h3 id="follow-symlinks"><a class="header" href="#follow-symlinks">Follow Symlinks</a></h3>
+<pre><code class="language-bash"># Follow symbolic links
+rg -L "pattern"
+rg --follow "pattern"
+
+# Default: don't follow symlinks
+rg "pattern"
+</code></pre>
+<h3 id="compressed-files"><a class="header" href="#compressed-files">Compressed Files</a></h3>
+<pre><code class="language-bash"># Search in compressed files
+rg -z "pattern"
+rg --search-zip "pattern"
+
+# Supported formats: gzip, bzip2, xz, lz4, lzma, zstd
+
+# Search in .gz files
+rg -z "pattern" logs.gz
+
+# Search in multiple compressed files
+rg -z "error" *.gz
+</code></pre>
+<h2 id="pattern-matching"><a class="header" href="#pattern-matching">Pattern Matching</a></h2>
+<h3 id="literal-strings"><a class="header" href="#literal-strings">Literal Strings</a></h3>
+<pre><code class="language-bash"># Fixed string (no regex)
+rg -F "string.with.dots"
+rg -F "regex chars like * + ?"
+
+# Useful for searching special characters
+rg -F '$variable'
+rg -F '[bracket]'
+rg -F '(parenthesis)'
+</code></pre>
+<h3 id="regular-expressions"><a class="header" href="#regular-expressions">Regular Expressions</a></h3>
+<pre><code class="language-bash"># Basic regex
+rg "fo+"                           # One or more 'o'
+rg "colou?r"                       # Optional 'u'
+rg "file\d+"                       # file followed by digits
+rg "test_\w+"                      # test_ followed by word chars
+
+# Character classes
+rg "[aeiou]"                       # Any vowel
+rg "[0-9]+"                        # One or more digits
+rg "[A-Z][a-z]+"                   # Capital letter + lowercase
+
+# Anchors
+rg "^import"                       # Lines starting with import
+rg "return$"                       # Lines ending with return
+rg "^$"                            # Empty lines
+
+# Word boundaries
+rg "\bword\b"                      # Whole word
+rg "\Btest"                        # Not at word boundary
+
+# Alternation
+rg "error|warning|fatal"
+rg "(jpg|png|gif)$"
+
+# Grouping
+rg "func(tion)?"
+rg "(get|set)_(\w+)"
+
+# Quantifiers
+rg "a{3}"                          # Exactly 3 'a's
+rg "a{2,4}"                        # Between 2 and 4 'a's
+rg "a{2,}"                         # 2 or more 'a's
+
+# Lookahead (not in default engine, use -P)
+rg -P "foo(?=bar)"                 # foo followed by bar
+rg -P "foo(?!bar)"                 # foo not followed by bar
+
+# Lookbehind (use -P)
+rg -P "(?&lt;=foo)bar"                # bar preceded by foo
+rg -P "(?&lt;!foo)bar"                # bar not preceded by foo
+</code></pre>
+<h3 id="pcre2-engine"><a class="header" href="#pcre2-engine">PCRE2 Engine</a></h3>
+<pre><code class="language-bash"># Use PCRE2 engine for advanced features
+rg -P "pattern"
+rg --pcre2 "pattern"
+
+# Lookahead assertions
+rg -P "password(?=.*[A-Z])"
+
+# Lookbehind assertions
+rg -P "(?&lt;=\$)\d+"                 # Digits after $
+
+# Recursive patterns
+rg -P "\((?:[^()]++|(?R))*+\)"     # Balanced parentheses
+
+# Named groups
+rg -P "(?P&lt;year&gt;\d{4})-(?P&lt;month&gt;\d{2})"
+
+# Conditionals
+rg -P "(?(condition)yes-pattern|no-pattern)"
+</code></pre>
+<h3 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h3>
+<pre><code class="language-bash"># Email addresses
+rg "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+
+# IP addresses
+rg "\b(?:\d{1,3}\.){3}\d{1,3}\b"
+rg "\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b"
+
+# URLs
+rg "https?://[^\s]+"
+
+# Phone numbers (US)
+rg "\b\d{3}-\d{3}-\d{4}\b"
+rg "\(\d{3}\)\s*\d{3}-\d{4}"
+
+# UUIDs
+rg "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+
+# Hex colors
+rg "#[0-9a-fA-F]{6}\b"
+
+# Credit card numbers (simple pattern)
+rg "\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b"
+
+# Social Security Numbers
+rg "\b\d{3}-\d{2}-\d{4}\b"
+
+# Dates (YYYY-MM-DD)
+rg "\b\d{4}-\d{2}-\d{2}\b"
+
+# Dates (MM/DD/YYYY)
+rg "\b\d{1,2}/\d{1,2}/\d{4}\b"
+
+# Times (HH:MM:SS)
+rg "\b\d{2}:\d{2}:\d{2}\b"
+
+# MAC addresses
+rg "([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})"
+
+# IPv6 addresses
+rg "([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}"
+
+# Base64 strings
+rg "[A-Za-z0-9+/]{40,}={0,2}"
+</code></pre>
+<h2 id="code-searching"><a class="header" href="#code-searching">Code Searching</a></h2>
+<h3 id="function-and-class-definitions"><a class="header" href="#function-and-class-definitions">Function and Class Definitions</a></h3>
+<pre><code class="language-bash"># Find function definitions (Python)
+rg "^def \w+\("
+rg "^\s*def \w+\("
+
+# Find class definitions (Python)
+rg "^class \w+"
+
+# Find function definitions (JavaScript)
+rg "function \w+\("
+rg "const \w+ = \("
+
+# Find function definitions (C/C++)
+rg "^\w+\s+\w+\([^)]*\)\s*\{"
+
+# Find class definitions (Java)
+rg "^(public|private|protected)?\s*(class|interface) \w+"
+
+# Find method definitions (Ruby)
+rg "^\s*def \w+"
+
+# Find function definitions (Go)
+rg "^func \w+\("
+
+# Find class definitions (Rust)
+rg "^(pub\s+)?struct \w+"
+</code></pre>
+<h3 id="import-and-include-statements"><a class="header" href="#import-and-include-statements">Import and Include Statements</a></h3>
+<pre><code class="language-bash"># Python imports
+rg "^import \w+"
+rg "^from .* import"
+
+# JavaScript/TypeScript imports
+rg "^import .* from"
+rg "^import\s+.*\s+from\s+"
+
+# C/C++ includes
+rg "^#include [&lt;\"].*[&gt;\"]"
+
+# Java imports
+rg "^import .*;"
+
+# Go imports
+rg "^import \("
+</code></pre>
+<h3 id="variable-and-constant-declarations"><a class="header" href="#variable-and-constant-declarations">Variable and Constant Declarations</a></h3>
+<pre><code class="language-bash"># JavaScript const/let/var
+rg "^(const|let|var) \w+"
+
+# Python variables (assignments at module level)
+rg "^\w+ = "
+
+# C/C++ variable declarations
+rg "^(int|char|float|double|void|bool|auto) \w+"
+
+# Java variable declarations
+rg "^(private|public|protected)?\s*(static)?\s*(final)?\s*\w+ \w+\s*[=;]"
+
+# Rust let bindings
+rg "^\s*let (mut )?\w+"
+
+# Constants in various languages
+rg "^const \w+"
+rg "^(static )?final \w+"
+rg "^#define \w+"
+</code></pre>
+<h3 id="comments-and-documentation"><a class="header" href="#comments-and-documentation">Comments and Documentation</a></h3>
+<pre><code class="language-bash"># Single-line comments (C-style)
+rg "//.*"
+
+# Multi-line comments (C-style)
+rg -U "/\*.*?\*/"
+
+# Python docstrings
+rg '""".*?"""'
+rg -U '""".*?"""'
+
+# TODO/FIXME/HACK comments
+rg "TODO:"
+rg "FIXME:"
+rg "HACK:"
+rg "XXX:"
+rg "NOTE:"
+rg "(TODO|FIXME|HACK|XXX|NOTE):"
+
+# JSDoc comments
+rg -U "/\*\*.*?\*/"
+
+# Python comments
+rg "^\s*#.*"
+</code></pre>
+<h3 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h3>
+<pre><code class="language-bash"># Try-catch blocks
+rg "try\s*\{"
+rg "catch\s*\("
+rg "except\s+.*:"
+
+# Error returns (Go)
+rg "if err != nil"
+rg "return.*err"
+
+# Raise/throw statements
+rg "raise \w+"
+rg "throw new \w+"
+
+# Error logging
+rg "log\.error"
+rg "console\.error"
+rg "logger\.error"
+</code></pre>
+<h3 id="api-keys-and-secrets"><a class="header" href="#api-keys-and-secrets">API Keys and Secrets</a></h3>
+<pre><code class="language-bash"># Generic API keys
+rg -i "api[_-]?key"
+rg -i "api[_-]?secret"
+rg -i "apikey\s*=\s*['\"]?\w+"
+
+# AWS credentials
+rg "AKIA[0-9A-Z]{16}"              # AWS Access Key ID
+rg "aws_secret_access_key"
+
+# GitHub tokens
+rg "ghp_[0-9a-zA-Z]{36}"           # GitHub Personal Access Token
+rg "gho_[0-9a-zA-Z]{36}"           # GitHub OAuth Token
+
+# Slack tokens
+rg "xox[baprs]-[0-9a-zA-Z-]+"
+
+# Generic secrets
+rg -i "(password|passwd|pwd)\s*=\s*['\"]?\w+"
+rg -i "secret\s*=\s*['\"]?\w+"
+rg -i "token\s*=\s*['\"]?\w+"
+
+# Private keys
+rg "BEGIN.*PRIVATE KEY"
+rg "-----BEGIN RSA PRIVATE KEY-----"
+
+# Database connection strings
+rg "mongodb://.*@"
+rg "mysql://.*@"
+rg "postgres://.*@"
+</code></pre>
+<h3 id="test-files-and-test-cases"><a class="header" href="#test-files-and-test-cases">Test Files and Test Cases</a></h3>
+<pre><code class="language-bash"># Python tests
+rg "def test_\w+"
+rg "class Test\w+"
+
+# JavaScript tests
+rg "describe\(['\"]"
+rg "it\(['\"]"
+rg "test\(['\"]"
+
+# Go tests
+rg "func Test\w+\(t \*testing\.T\)"
+
+# Rust tests
+rg "#\[test\]"
+
+# Ruby tests
+rg "def test_\w+"
+rg "it ['\"].*['\"] do"
+</code></pre>
+<h2 id="output-formatting"><a class="header" href="#output-formatting">Output Formatting</a></h2>
+<h3 id="color-and-styling"><a class="header" href="#color-and-styling">Color and Styling</a></h3>
+<pre><code class="language-bash"># Force color output
+rg --color always "pattern"
+rg --color always "pattern" | less -R
+
+# Disable colors
+rg --color never "pattern"
+
+# Auto color (default, colors for TTY)
+rg --color auto "pattern"
+
+# Custom colors
+rg --colors 'match:fg:red' --colors 'path:fg:blue' "pattern"
+
+# Available color types:
+# - path: file path
+# - line: line numbers
+# - column: column numbers
+# - match: matched text
+
+# Available color specs:
+# - fg:color (foreground color)
+# - bg:color (background color)
+# - style:bold, intense, underline
+</code></pre>
+<h3 id="output-formats"><a class="header" href="#output-formats">Output Formats</a></h3>
+<pre><code class="language-bash"># Default format (show filename, line number, content)
+rg "pattern"
+
+# Compact format (no line numbers, no colors)
+rg -N --color never "pattern"
+
+# Machine-readable format (null-separated)
+rg --null "pattern"
+
+# JSON output
+rg --json "pattern"
+
+# Vim-style output (filename:line:column:content)
+rg --vimgrep "pattern"
+
+# Custom path separator
+rg --path-separator '/' "pattern"
+
+# Custom heading
+rg --heading "pattern"           # Group by file (default with TTY)
+rg --no-heading "pattern"        # Don't group by file
+
+# Show file paths as hyperlinks (some terminals)
+rg --hyperlink-format default "pattern"
+</code></pre>
+<h3 id="statistics-and-summary"><a class="header" href="#statistics-and-summary">Statistics and Summary</a></h3>
+<pre><code class="language-bash"># Count matches per file
+rg -c "pattern"
+
+# Count total matches (not lines)
+rg --count-matches "pattern"
+
+# Show statistics
+rg --stats "pattern"
+
+# Quiet mode (only exit code)
+rg -q "pattern"
+
+# Only show filenames with matches
+rg -l "pattern"
+
+# Only show filenames without matches
+rg --files-without-match "pattern"
+</code></pre>
+<h3 id="limiting-output"><a class="header" href="#limiting-output">Limiting Output</a></h3>
+<pre><code class="language-bash"># Limit matches per file
+rg -m 5 "pattern"
+rg --max-count 5 "pattern"
+
+# Stop after first match
+rg -m 1 "pattern"
+
+# Limit total number of results
+# (no direct option, use head)
+rg "pattern" | head -n 20
+</code></pre>
+<h2 id="file-listing-and-filtering"><a class="header" href="#file-listing-and-filtering">File Listing and Filtering</a></h2>
+<h3 id="list-files"><a class="header" href="#list-files">List Files</a></h3>
+<pre><code class="language-bash"># List all files that would be searched
+rg --files
+
+# List files of specific type
+rg --files -t py
+rg --files --type rust
+
+# List files matching glob
+rg --files -g "*.js"
+rg --files --glob "**/*.py"
+
+# List files with specific encoding
+rg --files -E utf8
+</code></pre>
+<h3 id="type-definitions"><a class="header" href="#type-definitions">Type Definitions</a></h3>
+<pre><code class="language-bash"># Show all type definitions
+rg --type-list
+
+# Custom type definition
+rg --type-add 'web:*.{html,css,js}' -t web "pattern"
+
+# Multiple patterns in custom type
+rg --type-add 'config:*.{yml,yaml,json,toml}' -t config "pattern"
+
+# Add type for this session
+rg --type-add 'custom:*.foo' -t custom "pattern"
+</code></pre>
+<h3 id="ignore-files"><a class="header" href="#ignore-files">Ignore Files</a></h3>
+<pre><code class="language-bash"># Use .gitignore (default)
+rg "pattern"
+
+# Also use .ignore files
+rg "pattern"
+
+# Use .rgignore files
+rg "pattern"
+
+# Ignore specific patterns
+rg --ignore-file custom-ignore.txt "pattern"
+
+# Don't use ignore files
+rg --no-ignore "pattern"
+
+# Don't use .gitignore
+rg --no-ignore-vcs "pattern"
+
+# Don't use global ignore files
+rg --no-ignore-global "pattern"
+</code></pre>
+<h3 id="custom-ignore-patterns"><a class="header" href="#custom-ignore-patterns">Custom Ignore Patterns</a></h3>
+<p>Create <code>.rgignore</code> file:</p>
+<pre><code># .rgignore example
+*.log
+*.tmp
+node_modules/
+.git/
+dist/
+build/
+__pycache__/
+*.pyc
+.DS_Store
+</code></pre>
+<h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
+<h3 id="parallel-search"><a class="header" href="#parallel-search">Parallel Search</a></h3>
+<pre><code class="language-bash"># Default: automatic parallelism based on CPU cores
+rg "pattern"
+
+# Specify number of threads
+rg -j 4 "pattern"
+rg --threads 4 "pattern"
+
+# Single-threaded search
+rg -j 1 "pattern"
+
+# Maximum threads
+rg -j $(nproc) "pattern"
+</code></pre>
+<h3 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h3>
+<pre><code class="language-bash"># Use memory-mapped files (faster for large files)
+rg --mmap "pattern"
+
+# Don't use memory mapping
+rg --no-mmap "pattern"
+
+# Auto (default, uses heuristics)
+# Uses mmap for large files, regular reading for small files
+</code></pre>
+<h3 id="optimizing-searches"><a class="header" href="#optimizing-searches">Optimizing Searches</a></h3>
+<pre><code class="language-bash"># Use fixed-strings for literal matches (faster)
+rg -F "literal_string"
+
+# Limit file types to reduce search space
+rg -t py "pattern"
+
+# Use more specific patterns
+rg "^import specific" vs rg "import"
+
+# Limit recursion depth
+rg --max-depth 2 "pattern"
+
+# Skip large files
+rg --max-filesize 1M "pattern"
+
+# Combine multiple optimizations
+rg -F -t py --max-depth 3 "literal_pattern"
+</code></pre>
+<h3 id="benchmarking"><a class="header" href="#benchmarking">Benchmarking</a></h3>
+<pre><code class="language-bash"># Time the search
+time rg "pattern"
+
+# With stats
+rg --stats "pattern"
+
+# Compare different options
+time rg "pattern"
+time rg -F "pattern"
+time rg -t py "pattern"
+</code></pre>
+<h2 id="practical-use-cases"><a class="header" href="#practical-use-cases">Practical Use Cases</a></h2>
+<h3 id="code-refactoring"><a class="header" href="#code-refactoring">Code Refactoring</a></h3>
+<pre><code class="language-bash"># Find all usages of a function
+rg "\bfunction_name\b"
+rg -w "function_name"
+
+# Find all usages with context
+rg -C 3 "function_name"
+
+# Show which files use a function
+rg -l "function_name"
+
+# Count usages per file
+rg -c "function_name"
+
+# Find and show replacements
+rg "oldName" -r "newName"
+
+# Find function definitions and calls
+rg "def function_name|function_name\("
+</code></pre>
+<h3 id="security-auditing"><a class="header" href="#security-auditing">Security Auditing</a></h3>
+<pre><code class="language-bash"># Find potential secrets
+rg -i "(password|secret|api_key|token)\s*=\s*['\"]?\w+"
+
+# Find TODO/FIXME in security contexts
+rg "TODO.*security"
+rg "FIXME.*(auth|password|token)"
+
+# Find SQL queries (potential injection points)
+rg "SELECT.*FROM"
+rg "execute\(.*SELECT"
+
+# Find eval/exec (potential code injection)
+rg "\beval\("
+rg "\bexec\("
+
+# Find file operations
+rg "open\(['\"]"
+rg "readFile|writeFile"
+
+# Find network operations
+rg "http\.request"
+rg "fetch\("
+rg "requests\.get|requests\.post"
+</code></pre>
+<h3 id="log-analysis"><a class="header" href="#log-analysis">Log Analysis</a></h3>
+<pre><code class="language-bash"># Find errors in logs
+rg "ERROR|FATAL|CRITICAL" logs/
+
+# Find errors with timestamp
+rg "\d{4}-\d{2}-\d{2}.*ERROR" logs/
+
+# Find specific error codes
+rg "HTTP [45]\d{2}"
+rg "status.*[45]\d{2}"
+
+# Find exceptions
+rg "Exception|Traceback" logs/
+
+# Search compressed logs
+rg -z "ERROR" logs/*.gz
+
+# Find slow queries
+rg "duration.*[0-9]{4,}" logs/
+
+# Search logs by date
+rg "2024-01-15" logs/
+rg "Jan 15" logs/
+</code></pre>
+<h3 id="documentation-search"><a class="header" href="#documentation-search">Documentation Search</a></h3>
+<pre><code class="language-bash"># Search markdown files
+rg -t md "pattern"
+
+# Search in code comments and docs
+rg "//.*pattern|/\*.*pattern" -t cpp
+rg "#.*pattern" -t py
+
+# Find specific sections
+rg "^## \w+" -t md
+
+# Find TODO items in docs
+rg "TODO" -t md
+
+# Search across multiple doc formats
+rg -t md -t rst -t txt "pattern"
+</code></pre>
+<h3 id="configuration-management"><a class="header" href="#configuration-management">Configuration Management</a></h3>
+<pre><code class="language-bash"># Search config files
+rg -t yaml -t json -t toml "pattern"
+
+# Find specific settings
+rg "debug\s*=\s*true" -t yaml
+
+# Find database configs
+rg "host.*:.*port" -t yaml
+
+# Find environment variables
+rg "\$\{?\w+\}?" -g "*.env"
+
+# Search INI files
+rg --type-add 'ini:*.ini' -t ini "pattern"
+</code></pre>
+<h3 id="finding-duplicated-code"><a class="header" href="#finding-duplicated-code">Finding Duplicated Code</a></h3>
+<pre><code class="language-bash"># Find similar function signatures
+rg "def \w+\([^)]*\):" -t py | sort | uniq -c
+
+# Find repeated patterns
+rg "console\.log" | wc -l
+
+# Find copied error messages
+rg "error occurred" -c
+</code></pre>
+<h3 id="dependency-analysis"><a class="header" href="#dependency-analysis">Dependency Analysis</a></h3>
+<pre><code class="language-bash"># Find all imports of a module
+rg "import.*module_name"
+rg "from module_name import"
+
+# Find package versions
+rg "==\d+\.\d+\.\d+" requirements.txt
+rg "\"version\":\s*\"" package.json
+
+# Find outdated copyright years
+rg "Copyright.*201[0-9]"
+
+# Find specific library usage
+rg "import requests"
+rg "import.*pandas"
+</code></pre>
+<h3 id="build-and-cicd"><a class="header" href="#build-and-cicd">Build and CI/CD</a></h3>
+<pre><code class="language-bash"># Find failing tests
+rg "FAILED|ERROR" test-results/
+
+# Find deprecated warnings
+rg "DeprecationWarning"
+rg "deprecated"
+
+# Check for hardcoded values
+rg "localhost:3000"
+rg "http://127\.0\.0\.1"
+
+# Find debug code
+rg "console\.log"
+rg "debugger"
+rg "import pdb"
+</code></pre>
+<h2 id="integration-with-other-tools"><a class="header" href="#integration-with-other-tools">Integration with Other Tools</a></h2>
+<h3 id="with-git"><a class="header" href="#with-git">With Git</a></h3>
+<pre><code class="language-bash"># Search only tracked files
+git ls-files | rg "pattern"
+
+# Search files changed in last commit
+git diff --name-only HEAD~1 | xargs rg "pattern"
+
+# Search in specific branch
+git show branch:file.txt | rg "pattern"
+
+# Search commit messages
+git log --all --grep="pattern"
+
+# Combine with git grep
+git ls-files | rg "pattern"
+</code></pre>
+<h3 id="with-find"><a class="header" href="#with-find">With Find</a></h3>
+<pre><code class="language-bash"># ripgrep replaces most find use cases
+# But you can combine them:
+
+# Find files, then search content
+find . -name "*.py" | xargs rg "pattern"
+
+# Better: use ripgrep's built-in filtering
+rg -t py "pattern"
+
+# Find files modified in last day, then search
+find . -mtime -1 -type f | xargs rg "pattern"
+</code></pre>
+<h3 id="with-sedawk"><a class="header" href="#with-sedawk">With Sed/Awk</a></h3>
+<pre><code class="language-bash"># ripgrep to find, sed to replace
+rg -l "oldtext" | xargs sed -i 's/oldtext/newtext/g'
+
+# ripgrep with awk for processing
+rg "pattern" | awk '{print $1}'
+
+# Extract specific fields
+rg "error" logs/ | awk -F: '{print $1}' | sort | uniq
+</code></pre>
+<h3 id="with-vim"><a class="header" href="#with-vim">With Vim</a></h3>
+<pre><code class="language-bash"># Use ripgrep as grep program in Vim
+# Add to .vimrc:
+# set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case
+# set grepformat=%f:%l:%c:%m
+
+# Then in Vim:
+:grep pattern
+:copen
+
+# Use with fzf.vim
+# :Rg pattern
+</code></pre>
+<h3 id="with-fzf"><a class="header" href="#with-fzf">With FZF</a></h3>
+<pre><code class="language-bash"># Interactive file search
+rg --files | fzf
+
+# Interactive content search
+rg --no-heading --color always "pattern" | fzf --ansi
+
+# Live search
+fzf --preview 'rg --pretty --context 3 {q} || true' --phony -q ""
+
+# Bash key binding
+# Add to .bashrc:
+# bind '"\C-f": "rg --files | fzf\n"'
+</code></pre>
+<h3 id="with-clipboard-xclippbcopy"><a class="header" href="#with-clipboard-xclippbcopy">With Clipboard (xclip/pbcopy)</a></h3>
+<pre><code class="language-bash"># Copy results to clipboard (Linux)
+rg "pattern" | xclip -selection clipboard
+
+# Copy results to clipboard (macOS)
+rg "pattern" | pbcopy
+
+# Copy just filenames
+rg -l "pattern" | xclip -selection clipboard
+</code></pre>
+<h3 id="with-watch"><a class="header" href="#with-watch">With Watch</a></h3>
+<pre><code class="language-bash"># Monitor changes in real-time
+watch -n 1 'rg "ERROR" logs/latest.log | tail -20'
+
+# Watch for new matches
+watch -n 2 'rg -c "pattern"'
+</code></pre>
+<h3 id="with-entr"><a class="header" href="#with-entr">With Entr</a></h3>
+<pre><code class="language-bash"># Re-run search when files change
+rg --files | entr -c rg "pattern"
+
+# Run tests when files change
+rg --files -t py | entr -c pytest
+</code></pre>
+<h3 id="pipes-and-filters"><a class="header" href="#pipes-and-filters">Pipes and Filters</a></h3>
+<pre><code class="language-bash"># Count unique matches
+rg -o "pattern" | sort | uniq | wc -l
+
+# Most common matches
+rg -o "\b\w+\b" | sort | uniq -c | sort -rn | head -20
+
+# Filter results
+rg "pattern" | grep -v "exclude_this"
+
+# Format output
+rg "pattern" | column -t
+
+# Extract and process
+rg -o "email@\w+\.\w+" | sort -u &gt; emails.txt
+</code></pre>
+<h2 id="scripting-with-ripgrep"><a class="header" href="#scripting-with-ripgrep">Scripting with ripgrep</a></h2>
+<h3 id="bash-scripts"><a class="header" href="#bash-scripts">Bash Scripts</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# Find and count TODOs by author
+
+echo "TODO count by file:"
+rg -c "TODO" | while IFS=: read -r file count; do
+    if [ "$count" -gt 0 ]; then
+        printf "%-50s %d\n" "$file" "$count"
+    fi
+done | sort -k2 -rn
+</code></pre>
+<pre><code class="language-bash">#!/bin/bash
+# Security audit script
+
+echo "=== Potential Security Issues ==="
+
+echo -e "\n[*] Looking for hardcoded passwords..."
+rg -i "password\s*=\s*['\"][^'\"]+['\"]" -g '!*.{md,txt}'
+
+echo -e "\n[*] Looking for API keys..."
+rg -i "api[_-]?key\s*=\s*['\"][^'\"]+['\"]"
+
+echo -e "\n[*] Looking for AWS credentials..."
+rg "AKIA[0-9A-Z]{16}"
+
+echo -e "\n[*] Looking for private keys..."
+rg "BEGIN.*PRIVATE KEY"
+
+echo -e "\n[*] Looking for potential SQL injection..."
+rg "execute.*SELECT.*\+" -t py
+
+echo -e "\n[*] Looking for eval/exec usage..."
+rg "\b(eval|exec)\(" -t py
+</code></pre>
+<pre><code class="language-bash">#!/bin/bash
+# Find and replace across files
+
+PATTERN="$1"
+REPLACEMENT="$2"
+
+if [ -z "$PATTERN" ] || [ -z "$REPLACEMENT" ]; then
+    echo "Usage: $0 &lt;pattern&gt; &lt;replacement&gt;"
+    exit 1
+fi
+
+# Show preview
+echo "Preview of changes:"
+rg "$PATTERN" -r "$REPLACEMENT" --color always | head -20
+
+read -p "Continue with replacement? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Get list of files
+    FILES=$(rg -l "$PATTERN")
+
+    # Replace in each file
+    for file in $FILES; do
+        echo "Processing $file..."
+        sed -i "s/$PATTERN/$REPLACEMENT/g" "$file"
+    done
+
+    echo "Done!"
+fi
+</code></pre>
+<h3 id="python-integration"><a class="header" href="#python-integration">Python Integration</a></h3>
+<pre><code class="language-python">#!/usr/bin/env python3
+import subprocess
+import json
+import sys
+
+def search_with_rg(pattern, path='.', file_type=None):
+    """Search using ripgrep and return results as structured data."""
+    cmd = ['rg', '--json', pattern]
+
+    if file_type:
+        cmd.extend(['-t', file_type])
+
+    cmd.append(path)
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    matches = []
+    for line in result.stdout.strip().split('\n'):
+        if line:
+            data = json.loads(line)
+            if data.get('type') == 'match':
+                matches.append({
+                    'file': data['data']['path']['text'],
+                    'line_number': data['data']['line_number'],
+                    'line': data['data']['lines']['text'].strip(),
+                })
+
+    return matches
+
+def find_todos():
+    """Find all TODO items and organize by file."""
+    matches = search_with_rg('TODO:')
+
+    by_file = {}
+    for match in matches:
+        file = match['file']
+        if file not in by_file:
+            by_file[file] = []
+        by_file[file].append(match)
+
+    for file, items in sorted(by_file.items()):
+        print(f"\n{file}:")
+        for item in items:
+            print(f"  Line {item['line_number']}: {item['line']}")
+
+def analyze_imports(file_type='py'):
+    """Analyze import statements in codebase."""
+    pattern = '^(import|from) .*'
+    matches = search_with_rg(pattern, file_type=file_type)
+
+    imports = {}
+    for match in matches:
+        module = match['line'].split()[1]
+        imports[module] = imports.get(module, 0) + 1
+
+    print("Most used imports:")
+    for module, count in sorted(imports.items(), key=lambda x: x[1], reverse=True)[:10]:
+        print(f"  {module}: {count}")
+
+if __name__ == '__main__':
+    if len(sys.argv) &gt; 1:
+        pattern = sys.argv[1]
+        results = search_with_rg(pattern)
+        print(f"Found {len(results)} matches")
+        for r in results[:10]:
+            print(f"{r['file']}:{r['line_number']}: {r['line']}")
+    else:
+        find_todos()
+</code></pre>
+<h3 id="json-output-processing"><a class="header" href="#json-output-processing">JSON Output Processing</a></h3>
+<pre><code class="language-bash"># Parse JSON output with jq
+rg --json "pattern" | jq -s '[.[] | select(.type == "match") | .data.path.text] | unique'
+
+# Extract specific fields
+rg --json "error" | jq -r 'select(.type == "match") | "\(.data.path.text):\(.data.line_number)"'
+
+# Count matches per file
+rg --json "pattern" | jq -s 'group_by(.data.path.text) | map({file: .[0].data.path.text, count: length})'
+
+# Get statistics
+rg --json "pattern" | jq -s 'length'
+</code></pre>
+<h2 id="comparison-with-other-tools"><a class="header" href="#comparison-with-other-tools">Comparison with Other Tools</a></h2>
+<h3 id="ripgrep-vs-grep"><a class="header" href="#ripgrep-vs-grep">ripgrep vs grep</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>ripgrep</th><th>grep</th></tr></thead><tbody>
+<tr><td>Speed</td><td>Much faster (2-10x)</td><td>Slower</td></tr>
+<tr><td>Recursive search</td><td>Default</td><td>Need -r flag</td></tr>
+<tr><td>Gitignore support</td><td>Yes (default)</td><td>No</td></tr>
+<tr><td>Unicode support</td><td>Full</td><td>Limited</td></tr>
+<tr><td>PCRE support</td><td>Yes (-P)</td><td>Depends on version</td></tr>
+<tr><td>Binary file handling</td><td>Smart (auto-skip)</td><td>Basic</td></tr>
+<tr><td>Parallel search</td><td>Yes</td><td>No</td></tr>
+<tr><td>Compressed files</td><td>Yes (-z)</td><td>Need zgrep</td></tr>
+</tbody></table>
+</div>
+<pre><code class="language-bash"># ripgrep equivalent of common grep commands
+
+# grep -r "pattern" .
+rg "pattern"
+
+# grep -i "pattern" file
+rg -i "pattern" file
+
+# grep -w "word" file
+rg -w "word" file
+
+# grep -v "pattern" file
+rg --invert-match "pattern" file
+
+# grep -l "pattern" *
+rg -l "pattern"
+
+# grep -c "pattern" file
+rg -c "pattern" file
+
+# grep -A 3 -B 3 "pattern" file
+rg -C 3 "pattern" file
+
+# grep -E "pattern1|pattern2" file
+rg "pattern1|pattern2" file
+</code></pre>
+<h3 id="ripgrep-vs-ag-the-silver-searcher"><a class="header" href="#ripgrep-vs-ag-the-silver-searcher">ripgrep vs ag (The Silver Searcher)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>ripgrep</th><th>ag</th></tr></thead><tbody>
+<tr><td>Speed</td><td>Faster</td><td>Fast</td></tr>
+<tr><td>Regex engine</td><td>Rust regex / PCRE2</td><td>PCRE</td></tr>
+<tr><td>Memory usage</td><td>Lower</td><td>Higher</td></tr>
+<tr><td>Active development</td><td>Very active</td><td>Less active</td></tr>
+<tr><td>Compressed files</td><td>Yes</td><td>No</td></tr>
+<tr><td>Encoding support</td><td>Excellent</td><td>Good</td></tr>
+</tbody></table>
+</div>
+<pre><code class="language-bash"># ag equivalent commands
+
+# ag "pattern"
+rg "pattern"
+
+# ag -l "pattern"
+rg -l "pattern"
+
+# ag -i "pattern"
+rg -i "pattern"
+
+# ag --ignore-dir dir "pattern"
+rg -g '!dir/**' "pattern"
+</code></pre>
+<h3 id="ripgrep-vs-ack"><a class="header" href="#ripgrep-vs-ack">ripgrep vs ack</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>ripgrep</th><th>ack</th></tr></thead><tbody>
+<tr><td>Speed</td><td>Much faster</td><td>Slower</td></tr>
+<tr><td>Language</td><td>Rust</td><td>Perl</td></tr>
+<tr><td>Dependencies</td><td>None (binary)</td><td>Perl required</td></tr>
+<tr><td>File type detection</td><td>Excellent</td><td>Excellent</td></tr>
+<tr><td>Customization</td><td>Good</td><td>Excellent</td></tr>
+</tbody></table>
+</div>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<h3 id="config-file"><a class="header" href="#config-file">Config File</a></h3>
+<p>Create <code>~/.ripgreprc</code> or set <code>RIPGREP_CONFIG_PATH</code>:</p>
+<pre><code class="language-bash"># ~/.ripgreprc example
+
+# Smart case searching
+--smart-case
+
+# Show column numbers
+--column
+
+# Search hidden files
+--hidden
+
+# Don't search these directories
+--glob=!.git/
+--glob=!node_modules/
+--glob=!.venv/
+--glob=!__pycache__/
+--glob=!*.min.js
+--glob=!*.map
+
+# Custom file types
+--type-add=web:*.{html,css,js,jsx,tsx}
+--type-add=config:*.{yaml,yml,json,toml,ini}
+
+# Default colors
+--colors=line:fg:yellow
+--colors=match:fg:red
+--colors=match:style:bold
+</code></pre>
+<p>Use the config file:</p>
+<pre><code class="language-bash"># Set environment variable
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+
+# Add to .bashrc or .zshrc
+echo 'export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"' &gt;&gt; ~/.bashrc
+</code></pre>
+<h3 id="shell-aliases"><a class="header" href="#shell-aliases">Shell Aliases</a></h3>
+<pre><code class="language-bash"># Add to .bashrc or .zshrc
+
+# Common searches
+alias rgf='rg --files | rg'              # Search filenames
+alias rgi='rg -i'                         # Case insensitive
+alias rgl='rg -l'                         # List files only
+alias rgc='rg -C 3'                       # With context
+alias rgt='rg -t'                         # By file type
+
+# Code search aliases
+alias rgpy='rg -t py'                     # Python files
+alias rgjs='rg -t js'                     # JavaScript files
+alias rggo='rg -t go'                     # Go files
+alias rgrs='rg -t rust'                   # Rust files
+
+# Security audit aliases
+alias rgsec='rg -i "(password|secret|api_key|token)\s*=\s*"'
+alias rgaws='rg "AKIA[0-9A-Z]{16}"'
+
+# Development aliases
+alias rgtodo='rg "TODO|FIXME|HACK|XXX|NOTE"'
+alias rgbug='rg -i "bug|issue|problem"'
+alias rgtest='rg -t py "def test_"'
+
+# Git-related
+alias rgstaged='git diff --staged --name-only | xargs rg'
+alias rgchanged='git diff --name-only | xargs rg'
+</code></pre>
+<h3 id="environment-variables"><a class="header" href="#environment-variables">Environment Variables</a></h3>
+<pre><code class="language-bash"># Config file location
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+
+# Set default options
+export RIPGREP_ARGS="--smart-case --hidden"
+
+# Disable colors (useful for scripts)
+export RIPGREP_COLOR=never
+
+# Custom type definitions
+# (better to put in config file)
+</code></pre>
+<h2 id="advanced-techniques"><a class="header" href="#advanced-techniques">Advanced Techniques</a></h2>
+<h3 id="preprocessing"><a class="header" href="#preprocessing">Preprocessing</a></h3>
+<pre><code class="language-bash"># Use preprocessor for custom file handling
+# Create a preprocessor script
+
+# Example: decompress before search
+rg --pre gunzip --pre-glob '*.gz' "pattern"
+
+# Example: search in PDFs (requires pdftotext)
+rg --pre pdftotext --pre-glob '*.pdf' "pattern"
+
+# Example: search in Office docs (requires catdoc, etc.)
+#!/bin/bash
+# preprocessor.sh
+case "$1" in
+    *.doc) catdoc "$1" ;;
+    *.docx) docx2txt "$1" - ;;
+    *.pdf) pdftotext "$1" - ;;
+    *.odt) odt2txt "$1" ;;
+    *) cat "$1" ;;
+esac
+
+# Use it
+rg --pre ./preprocessor.sh --pre-glob '*.{doc,docx,pdf,odt}' "pattern"
+</code></pre>
+<h3 id="complex-filters"><a class="header" href="#complex-filters">Complex Filters</a></h3>
+<pre><code class="language-bash"># Multiple type filters
+rg -t py -t js "pattern"
+
+# Multiple glob patterns
+rg -g '*.{py,pyx,pxd}' "pattern"
+
+# Exclude multiple patterns
+rg -g '!*.min.{js,css}' -g '!vendor/**' "pattern"
+
+# Combine type and glob
+rg -t py -g '!test_*' "pattern"
+
+# Complex boolean filters using multiple invocations
+rg "pattern" | rg -v "exclude" | rg "include"
+</code></pre>
+<h3 id="working-with-encodings"><a class="header" href="#working-with-encodings">Working with Encodings</a></h3>
+<pre><code class="language-bash"># Specify encoding
+rg -E utf8 "pattern"
+rg -E latin1 "pattern"
+rg -E utf16le "pattern"
+
+# Auto-detect encoding (default)
+rg "pattern"
+
+# Search across multiple encodings
+for enc in utf8 latin1 utf16le; do
+    echo "=== $enc ==="
+    rg -E $enc "pattern"
+done
+</code></pre>
+<h3 id="negation-and-inversion"><a class="header" href="#negation-and-inversion">Negation and Inversion</a></h3>
+<pre><code class="language-bash"># Invert match (show lines NOT matching)
+rg -v "pattern"
+rg --invert-match "pattern"
+
+# Files without matches
+rg --files-without-match "pattern"
+
+# Exclude file types
+rg -T js "pattern"
+
+# Exclude paths
+rg -g '!vendor/**' "pattern"
+
+# Show context but exclude matches
+rg -v "exclude" | rg -C 2 "include"
+</code></pre>
+<h3 id="sorting-and-uniqueness"><a class="header" href="#sorting-and-uniqueness">Sorting and Uniqueness</a></h3>
+<pre><code class="language-bash"># Sort files by name
+rg "pattern" | sort
+
+# Sort by line number
+rg "pattern" | sort -t: -k2 -n
+
+# Unique matches only
+rg -o "pattern" | sort -u
+
+# Count unique matches
+rg -o "pattern" | sort | uniq | wc -l
+
+# Most common matches
+rg -o "\b\w+\b" | sort | uniq -c | sort -rn | head -20
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<pre><code class="language-bash"># Pattern not found but should be
+# Check: hidden files, gitignore, file types
+
+# Include hidden files
+rg --hidden "pattern"
+
+# Ignore gitignore
+rg --no-ignore "pattern"
+
+# Search all files (including binary)
+rg -uuu "pattern"
+
+# Check what files would be searched
+rg --files
+
+# Regex not matching
+# Try literal search
+rg -F "literal.string"
+
+# Try different regex engine
+rg -P "pcre2_pattern"
+
+# Performance issues
+# Use fixed strings if possible
+rg -F "literal"
+
+# Limit file types
+rg -t py "pattern"
+
+# Reduce threads if CPU-bound
+rg -j 2 "pattern"
+
+# Encoding issues
+# Try different encodings
+rg -E latin1 "pattern"
+rg -E utf16le "pattern"
+
+# Include binary files
+rg -a "pattern"
+</code></pre>
+<h3 id="debug-mode"><a class="header" href="#debug-mode">Debug Mode</a></h3>
+<pre><code class="language-bash"># Show debug information
+rg --debug "pattern" 2&gt;&amp;1 | less
+
+# Trace what's being searched
+rg --debug "pattern" 2&gt;&amp;1 | grep "search path"
+
+# Check ignore rules
+rg --debug "pattern" 2&gt;&amp;1 | grep -i "ignore"
+
+# Verify regex compilation
+rg --debug "pattern" 2&gt;&amp;1 | grep -i "regex"
+</code></pre>
+<h3 id="permission-errors"><a class="header" href="#permission-errors">Permission Errors</a></h3>
+<pre><code class="language-bash"># Permission denied errors
+# Use sudo if needed
+sudo rg "pattern" /root/
+
+# Skip permission errors
+rg "pattern" 2&gt;/dev/null
+
+# Show only permission errors
+rg "pattern" 2&gt;&amp;1 &gt;/dev/null
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="general-guidelines"><a class="header" href="#general-guidelines">General Guidelines</a></h3>
+<ol>
+<li>
+<p><strong>Use specific patterns</strong> - More specific patterns are faster</p>
+<pre><code class="language-bash">rg "^import specific" # Better than rg "import"
+</code></pre>
+</li>
+<li>
+<p><strong>Use file type filters</strong> - Reduce search space</p>
+<pre><code class="language-bash">rg -t py "pattern" # Better than rg "pattern"
+</code></pre>
+</li>
+<li>
+<p><strong>Use literal search when possible</strong> - Faster than regex</p>
+<pre><code class="language-bash">rg -F "literal.string" # Better than rg "literal\.string"
+</code></pre>
+</li>
+<li>
+<p><strong>Leverage gitignore</strong> - Default behavior is usually right</p>
+<pre><code class="language-bash">rg "pattern" # Respects .gitignore
+</code></pre>
+</li>
+<li>
+<p><strong>Use word boundaries for identifiers</strong></p>
+<pre><code class="language-bash">rg -w "function_name" # Better than rg "function_name"
+</code></pre>
+</li>
+</ol>
+<h3 id="performance-tips"><a class="header" href="#performance-tips">Performance Tips</a></h3>
+<ol>
+<li>
+<p><strong>Start with narrow searches</strong></p>
+<pre><code class="language-bash">rg -t py --max-depth 2 "specific_pattern"
+</code></pre>
+</li>
+<li>
+<p><strong>Use appropriate thread count</strong></p>
+<pre><code class="language-bash">rg -j 4 "pattern" # For CPU-bound systems
+</code></pre>
+</li>
+<li>
+<p><strong>Avoid unnecessary context</strong></p>
+<pre><code class="language-bash">rg "pattern" # Instead of rg -C 10 "pattern" when not needed
+</code></pre>
+</li>
+<li>
+<p><strong>Use count when possible</strong></p>
+<pre><code class="language-bash">rg -c "pattern" # Faster than rg "pattern" | wc -l
+</code></pre>
+</li>
+<li>
+<p><strong>Limit output early</strong></p>
+<pre><code class="language-bash">rg -m 10 "pattern" # Stop after 10 matches per file
+</code></pre>
+</li>
+</ol>
+<h3 id="security-best-practices"><a class="header" href="#security-best-practices">Security Best Practices</a></h3>
+<ol>
+<li>
+<p><strong>Regular secret scanning</strong></p>
+<pre><code class="language-bash">rg -i "(password|secret|api_key|token)\s*=\s*['\"]?\w+"
+</code></pre>
+</li>
+<li>
+<p><strong>Check before committing</strong></p>
+<pre><code class="language-bash"># Add to git pre-commit hook
+rg --quiet "FIXME|TODO|password.*=" &amp;&amp; exit 1
+</code></pre>
+</li>
+<li>
+<p><strong>Audit dependencies</strong></p>
+<pre><code class="language-bash">rg "==|&gt;=|&lt;=" requirements.txt
+rg "\"version\":" package.json
+</code></pre>
+</li>
+<li>
+<p><strong>Find debug code</strong></p>
+<pre><code class="language-bash">rg "console\.(log|debug)|debugger|import pdb"
+</code></pre>
+</li>
+</ol>
+<h3 id="code-quality"><a class="header" href="#code-quality">Code Quality</a></h3>
+<ol>
+<li>
+<p><strong>Find TODOs regularly</strong></p>
+<pre><code class="language-bash">rg "TODO|FIXME|HACK|XXX" -g '!vendor/**'
+</code></pre>
+</li>
+<li>
+<p><strong>Check for code smells</strong></p>
+<pre><code class="language-bash">rg "eval\(|exec\(" -t py
+rg "var " -t js
+</code></pre>
+</li>
+<li>
+<p><strong>Monitor test coverage</strong></p>
+<pre><code class="language-bash">rg "def test_" -t py -c
+</code></pre>
+</li>
+<li>
+<p><strong>Find duplicated code</strong></p>
+<pre><code class="language-bash">rg "error message" -c | sort -t: -k2 -rn
+</code></pre>
+</li>
+</ol>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="essential-commands"><a class="header" href="#essential-commands">Essential Commands</a></h3>
+<pre><code class="language-bash"># Basic search
+rg "pattern"
+
+# Case-insensitive
+rg -i "pattern"
+
+# Whole words only
+rg -w "word"
+
+# Fixed strings (literal)
+rg -F "literal.string"
+
+# File type filter
+rg -t py "pattern"
+
+# Exclude file type
+rg -T js "pattern"
+
+# Show filenames only
+rg -l "pattern"
+
+# Count matches
+rg -c "pattern"
+
+# With context
+rg -C 3 "pattern"
+
+# Include hidden files
+rg --hidden "pattern"
+
+# Ignore .gitignore
+rg --no-ignore "pattern"
+
+# List files
+rg --files
+
+# Multiline search
+rg -U "pattern.*\n.*pattern"
+
+# Replace preview
+rg "old" -r "new"
+
+# JSON output
+rg --json "pattern"
+
+# Statistics
+rg --stats "pattern"
+</code></pre>
+<h3 id="common-options"><a class="header" href="#common-options">Common Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Short</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--type</code></td><td><code>-t</code></td><td>Filter by file type</td></tr>
+<tr><td><code>--type-not</code></td><td><code>-T</code></td><td>Exclude file type</td></tr>
+<tr><td><code>--glob</code></td><td><code>-g</code></td><td>Include/exclude by glob</td></tr>
+<tr><td><code>--files</code></td><td></td><td>List files to search</td></tr>
+<tr><td><code>--ignore-case</code></td><td><code>-i</code></td><td>Case-insensitive search</td></tr>
+<tr><td><code>--smart-case</code></td><td><code>-S</code></td><td>Smart case (default)</td></tr>
+<tr><td><code>--word-regexp</code></td><td><code>-w</code></td><td>Match whole words</td></tr>
+<tr><td><code>--fixed-strings</code></td><td><code>-F</code></td><td>Literal strings</td></tr>
+<tr><td><code>--count</code></td><td><code>-c</code></td><td>Count matches per file</td></tr>
+<tr><td><code>--files-with-matches</code></td><td><code>-l</code></td><td>Show filenames only</td></tr>
+<tr><td><code>--context</code></td><td><code>-C</code></td><td>Show context lines</td></tr>
+<tr><td><code>--after-context</code></td><td><code>-A</code></td><td>Show lines after</td></tr>
+<tr><td><code>--before-context</code></td><td><code>-B</code></td><td>Show lines before</td></tr>
+<tr><td><code>--only-matching</code></td><td><code>-o</code></td><td>Show only matched part</td></tr>
+<tr><td><code>--multiline</code></td><td><code>-U</code></td><td>Multiline search</td></tr>
+<tr><td><code>--replace</code></td><td><code>-r</code></td><td>Show replacement</td></tr>
+<tr><td><code>--hidden</code></td><td></td><td>Search hidden files</td></tr>
+<tr><td><code>--no-ignore</code></td><td></td><td>Don't respect ignore files</td></tr>
+<tr><td><code>--max-depth</code></td><td></td><td>Limit recursion depth</td></tr>
+</tbody></table>
+</div>
+<h3 id="file-type-shortcuts"><a class="header" href="#file-type-shortcuts">File Type Shortcuts</a></h3>
+<pre><code class="language-bash">rg -t py      # Python
+rg -t js      # JavaScript
+rg -t ts      # TypeScript
+rg -t rust    # Rust
+rg -t go      # Go
+rg -t cpp     # C++
+rg -t c       # C
+rg -t java    # Java
+rg -t ruby    # Ruby
+rg -t php     # PHP
+rg -t html    # HTML
+rg -t css     # CSS
+rg -t md      # Markdown
+rg -t json    # JSON
+rg -t yaml    # YAML
+rg -t xml     # XML
+rg -t sql     # SQL
+rg -t sh      # Shell scripts
+</code></pre>
+<h3 id="common-patterns-1"><a class="header" href="#common-patterns-1">Common Patterns</a></h3>
+<pre><code class="language-bash"># Functions
+rg "^(def|function|func|fn) \w+"
+
+# Classes
+rg "^(class|struct|interface) \w+"
+
+# Imports
+rg "^(import|from|#include|use) "
+
+# TODOs
+rg "TODO|FIXME|HACK|XXX|NOTE"
+
+# Email
+rg "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+
+# IP addresses
+rg "\b(?:\d{1,3}\.){3}\d{1,3}\b"
+
+# URLs
+rg "https?://[^\s]+"
+
+# Hex colors
+rg "#[0-9a-fA-F]{6}\b"
+
+# UUIDs
+rg "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+</code></pre>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>ripgrep is a modern, fast, and user-friendly search tool that has become essential for developers. Its intelligent defaults, respect for version control systems, and excellent performance make it the go-to choice for code searching.</p>
+<p><strong>Key Takeaways:</strong></p>
+<ul>
+<li>ripgrep is significantly faster than traditional grep and alternatives</li>
+<li>Smart defaults (gitignore, smart case, recursive) make it intuitive</li>
+<li>Extensive file type support and filtering options</li>
+<li>Powerful regex support with both Rust regex and PCRE2 engines</li>
+<li>Excellent Unicode and encoding support</li>
+<li>Integrates well with editors, shells, and other tools</li>
+<li>Highly configurable through config files and environment variables</li>
+</ul>
+<p><strong>Learning Path:</strong></p>
+<ol>
+<li><strong>Day 1</strong>: Basic searches, file type filtering, simple patterns</li>
+<li><strong>Week 1</strong>: Context, output formatting, glob patterns, common use cases</li>
+<li><strong>Week 2</strong>: Advanced regex, multiline search, replacement preview</li>
+<li><strong>Month 1</strong>: Configuration, shell integration, scripting</li>
+<li><strong>Month 2+</strong>: Advanced filtering, preprocessing, performance optimization</li>
+</ol>
+<p><strong>Resources:</strong></p>
+<ul>
+<li>Official repository: https://github.com/BurntSushi/ripgrep</li>
+<li>User guide: https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md</li>
+<li>Regex syntax: https://docs.rs/regex/latest/regex/#syntax</li>
+<li>Configuration: https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md#configuration-file</li>
+</ul>
+<p><strong>When to Use ripgrep:</strong></p>
+<ul>
+<li>Searching large codebases</li>
+<li>Quick file content exploration</li>
+<li>Code refactoring and analysis</li>
+<li>Log file analysis</li>
+<li>Security auditing</li>
+<li>Any recursive text search</li>
+</ul>
+<p><strong>When to Use Alternatives:</strong></p>
+<ul>
+<li>Need POSIX compliance (use grep)</li>
+<li>Embedded systems without ripgrep (use grep)</li>
+<li>Very specific edge cases requiring special grep features</li>
+<li>Already have complex grep scripts (though ripgrep is usually compatible)</li>
+</ul>
+<p>ripgrep's combination of speed, usability, and intelligent defaults makes it an indispensable tool for modern development workflows. Once you start using it, you'll wonder how you lived without it.</p>
+<p>Happy searching!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../tools/ninja.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../tools/tcpdump.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../tools/ninja.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../tools/tcpdump.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

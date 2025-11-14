@@ -1,0 +1,2908 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Filesystems - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="linux-filesystems"><a class="header" href="#linux-filesystems">Linux Filesystems</a></h1>
+<p>Comprehensive guide to Linux filesystem types, operations, and patterns. Covers traditional filesystems (ext4, XFS, Btrfs, ZFS), special filesystems (procfs, sysfs), and modern container storage with OverlayFS.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#filesystem-types">Filesystem Types</a>
+<ul>
+<li><a href="#ext4">ext4</a></li>
+<li><a href="#xfs">XFS</a></li>
+<li><a href="#btrfs">Btrfs</a></li>
+<li><a href="#zfs">ZFS</a></li>
+<li><a href="#f2fs">F2FS</a></li>
+<li><a href="#tmpfs-and-ramfs">tmpfs and ramfs</a></li>
+<li><a href="#fatvfatexfat">FAT/VFAT/exFAT</a></li>
+<li><a href="#other-filesystems">Other Filesystems</a></li>
+</ul>
+</li>
+<li><a href="#virtual-and-special-filesystems">Virtual and Special Filesystems</a>
+<ul>
+<li><a href="#procfs">procfs</a></li>
+<li><a href="#sysfs">sysfs</a></li>
+<li><a href="#debugfs">debugfs</a></li>
+<li><a href="#devtmpfs">devtmpfs</a></li>
+<li><a href="#configfs">configfs</a></li>
+<li><a href="#cgroup-filesystems">cgroup Filesystems</a></li>
+<li><a href="#other-special-filesystems">Other Special Filesystems</a></li>
+</ul>
+</li>
+<li><a href="#overlayfs-deep-dive">OverlayFS Deep Dive</a>
+<ul>
+<li><a href="#architecture-and-concepts">Architecture and Concepts</a></li>
+<li><a href="#copy-up-mechanism">Copy-Up Mechanism</a></li>
+<li><a href="#whiteouts-and-opaque-directories">Whiteouts and Opaque Directories</a></li>
+<li><a href="#multiple-lower-layers">Multiple Lower Layers</a></li>
+<li><a href="#container-integration">Container Integration</a></li>
+<li><a href="#advanced-features">Advanced Features</a></li>
+<li><a href="#performance-and-limitations">Performance and Limitations</a></li>
+<li><a href="#overlayfs-troubleshooting">OverlayFS Troubleshooting</a></li>
+</ul>
+</li>
+<li><a href="#mount-operations">Mount Operations</a>
+<ul>
+<li><a href="#basic-mounting">Basic Mounting</a></li>
+<li><a href="#mount-options">Mount Options</a></li>
+<li><a href="#fstab-configuration">fstab Configuration</a></li>
+<li><a href="#systemd-mount-units">Systemd Mount Units</a></li>
+<li><a href="#bind-mounts">Bind Mounts</a></li>
+<li><a href="#mount-propagation">Mount Propagation</a></li>
+<li><a href="#remounting-and-unmounting">Remounting and Unmounting</a></li>
+<li><a href="#mount-inspection">Mount Inspection</a></li>
+</ul>
+</li>
+<li><a href="#filesystem-management">Filesystem Management</a>
+<ul>
+<li><a href="#creating-filesystems">Creating Filesystems</a></li>
+<li><a href="#checking-and-repairing">Checking and Repairing</a></li>
+<li><a href="#resizing-filesystems">Resizing Filesystems</a></li>
+<li><a href="#tuning-parameters">Tuning Parameters</a></li>
+<li><a href="#labels-and-uuids">Labels and UUIDs</a></li>
+<li><a href="#monitoring">Monitoring</a></li>
+</ul>
+</li>
+<li><a href="#performance-considerations">Performance Considerations</a>
+<ul>
+<li><a href="#io-schedulers">I/O Schedulers</a></li>
+<li><a href="#mount-options-for-performance">Mount Options for Performance</a></li>
+<li><a href="#ssd-optimizations">SSD Optimizations</a></li>
+<li><a href="#block-size-and-inode-sizing">Block Size and Inode Sizing</a></li>
+<li><a href="#journal-tuning">Journal Tuning</a></li>
+<li><a href="#read-ahead-tuning">Read-Ahead Tuning</a></li>
+<li><a href="#filesystem-specific-optimizations">Filesystem-Specific Optimizations</a></li>
+</ul>
+</li>
+<li><a href="#common-patterns">Common Patterns</a>
+<ul>
+<li><a href="#container-storage-with-overlayfs">Container Storage with OverlayFS</a></li>
+<li><a href="#ram-disk-creation">RAM Disk Creation</a></li>
+<li><a href="#encrypted-filesystems">Encrypted Filesystems</a></li>
+<li><a href="#lvm-integration">LVM Integration</a></li>
+<li><a href="#snapshot-workflows">Snapshot Workflows</a></li>
+<li><a href="#quota-management">Quota Management</a></li>
+<li><a href="#extended-attributes-and-acls">Extended Attributes and ACLs</a></li>
+<li><a href="#network-filesystems">Network Filesystems</a></li>
+<li><a href="#loop-device-mounting">Loop Device Mounting</a></li>
+</ul>
+</li>
+<li><a href="#best-practices">Best Practices</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#quick-reference">Quick Reference</a></li>
+</ul>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>The Linux Virtual Filesystem (VFS) provides a unified interface for interacting with different filesystem types. This abstraction allows applications to work with files and directories without knowing the underlying filesystem implementation.</p>
+<h3 id="vfs-architecture"><a class="header" href="#vfs-architecture">VFS Architecture</a></h3>
+<p>The VFS layer sits between user-space applications and filesystem implementations, providing a consistent API for file operations:</p>
+<pre><code>User Applications
+       |
+   System Calls (open, read, write, etc.)
+       |
+   Virtual Filesystem (VFS)
+       |
+   +---+---+---+---+---+---+
+   |   |   |   |   |   |   |
+  ext4 XFS Btrfs NFS tmpfs overlay
+   |   |   |   |   |   |   |
+  Block Layer / Network / Memory
+</code></pre>
+<h3 id="key-vfs-concepts"><a class="header" href="#key-vfs-concepts">Key VFS Concepts</a></h3>
+<ul>
+<li><strong>Superblock</strong>: Contains filesystem metadata (size, block size, state)</li>
+<li><strong>Inode</strong>: Represents a file or directory with metadata (permissions, timestamps, size)</li>
+<li><strong>Dentry</strong>: Directory entry that maps names to inodes</li>
+<li><strong>File</strong>: Represents an open file descriptor</li>
+</ul>
+<h2 id="filesystem-types"><a class="header" href="#filesystem-types">Filesystem Types</a></h2>
+<h3 id="ext4"><a class="header" href="#ext4">ext4</a></h3>
+<p>The fourth extended filesystem, ext4, is the default filesystem for most Linux distributions. It's stable, well-tested, and performs well for general-purpose use.</p>
+<h4 id="key-features"><a class="header" href="#key-features">Key Features</a></h4>
+<ul>
+<li><strong>Extents</strong>: More efficient large file storage (replaced block mapping)</li>
+<li><strong>Journaling</strong>: Metadata and optional data journaling for crash recovery</li>
+<li><strong>Delayed allocation</strong>: Improved performance and reduced fragmentation</li>
+<li><strong>Large filesystem support</strong>: Up to 1 EiB volume, 16 TiB files</li>
+<li><strong>Online defragmentation</strong>: e4defrag for reducing fragmentation</li>
+<li><strong>Backward compatibility</strong>: Can mount ext2/ext3 filesystems</li>
+</ul>
+<h4 id="creating-ext4-filesystems"><a class="header" href="#creating-ext4-filesystems">Creating ext4 Filesystems</a></h4>
+<pre><code class="language-bash"># Create with default options
+mkfs.ext4 /dev/sdb1
+
+# Create with specific block size (4K is typical)
+mkfs.ext4 -b 4096 /dev/sdb1
+
+# Create with label
+mkfs.ext4 -L mydata /dev/sdb1
+
+# Create with more inodes (useful for many small files)
+mkfs.ext4 -i 8192 /dev/sdb1  # One inode per 8KB
+
+# Create with specific inode size (256 is default, 512 for extended attributes)
+mkfs.ext4 -I 512 /dev/sdb1
+
+# Create without reserved blocks (useful for data partitions)
+mkfs.ext4 -m 0 /dev/sdb1
+
+# Create with directory indexing (enabled by default, improves lookup)
+mkfs.ext4 -O dir_index /dev/sdb1
+</code></pre>
+<h4 id="journaling-modes"><a class="header" href="#journaling-modes">Journaling Modes</a></h4>
+<p>ext4 supports three journaling modes, balancing safety and performance:</p>
+<pre><code class="language-bash"># Journal mode: data + metadata journaled (slowest, safest)
+mount -o data=journal /dev/sdb1 /mnt
+
+# Ordered mode: metadata journaled, data written before commit (default)
+mount -o data=ordered /dev/sdb1 /mnt
+
+# Writeback mode: metadata journaled only (fastest, least safe)
+mount -o data=writeback /dev/sdb1 /mnt
+</code></pre>
+<h4 id="tuning-ext4"><a class="header" href="#tuning-ext4">Tuning ext4</a></h4>
+<pre><code class="language-bash"># View current filesystem settings
+tune2fs -l /dev/sdb1
+
+# Set volume label
+tune2fs -L mydata /dev/sdb1
+
+# Adjust reserved block percentage (default 5%)
+tune2fs -m 1 /dev/sdb1
+
+# Set mount options in superblock
+tune2fs -o journal_data_writeback /dev/sdb1
+
+# Disable last-mounted time updates (reduces writes)
+tune2fs -O ^has_journal /dev/sdb1  # Remove journal (convert to ext2)
+tune2fs -O has_journal /dev/sdb1   # Add journal back
+
+# Set filesystem check interval
+tune2fs -c 30 /dev/sdb1            # Check every 30 mounts
+tune2fs -i 6m /dev/sdb1            # Check every 6 months
+tune2fs -c 0 -i 0 /dev/sdb1        # Disable periodic checks
+
+# Enable or disable features
+tune2fs -O extent /dev/sdb1        # Enable extents
+tune2fs -O dir_index /dev/sdb1     # Enable directory indexing
+tune2fs -O ^dir_index /dev/sdb1    # Disable feature (^ prefix)
+</code></pre>
+<h4 id="ext4-performance-tips"><a class="header" href="#ext4-performance-tips">ext4 Performance Tips</a></h4>
+<ul>
+<li>Use noatime mount option to reduce writes</li>
+<li>Consider data=writeback for workloads where data consistency is less critical</li>
+<li>Use larger block sizes (4K) for large files</li>
+<li>Enable journal checksumming for better reliability</li>
+</ul>
+<h3 id="xfs"><a class="header" href="#xfs">XFS</a></h3>
+<p>XFS is a high-performance 64-bit journaling filesystem originally developed by SGI. It excels with large files and parallel I/O workloads.</p>
+<h4 id="key-features-1"><a class="header" href="#key-features-1">Key Features</a></h4>
+<ul>
+<li><strong>Excellent scalability</strong>: Designed for large files and filesystems</li>
+<li><strong>Parallel I/O</strong>: Multiple threads can perform I/O simultaneously</li>
+<li><strong>Allocation groups</strong>: Divides filesystem for parallel operations</li>
+<li><strong>Delayed allocation</strong>: Optimizes data placement</li>
+<li><strong>Online defragmentation</strong>: Can defragment while mounted</li>
+<li><strong>Metadata journaling</strong>: Fast crash recovery</li>
+<li><strong>Project quotas</strong>: Quotas per directory tree</li>
+<li><strong>No ability to shrink</strong>: Can only grow, not shrink</li>
+</ul>
+<h4 id="creating-xfs-filesystems"><a class="header" href="#creating-xfs-filesystems">Creating XFS Filesystems</a></h4>
+<pre><code class="language-bash"># Create with default options
+mkfs.xfs /dev/sdb1
+
+# Create with label
+mkfs.xfs -L mydata /dev/sdb1
+
+# Create with specific block size
+mkfs.xfs -b size=4096 /dev/sdb1
+
+# Create with specific allocation group size (for parallelism)
+mkfs.xfs -d agcount=8 /dev/sdb1
+
+# Create with specific inode size (512 for extended attributes)
+mkfs.xfs -i size=512 /dev/sdb1
+
+# Create optimized for SSDs
+mkfs.xfs -d sunit=512,swidth=2048 /dev/sdb1
+
+# Force creation (overwrite existing filesystem)
+mkfs.xfs -f /dev/sdb1
+</code></pre>
+<h4 id="xfs-management"><a class="header" href="#xfs-management">XFS Management</a></h4>
+<pre><code class="language-bash"># View filesystem information
+xfs_info /dev/sdb1
+# Or for mounted filesystem
+xfs_info /mnt/data
+
+# Grow filesystem (online, while mounted)
+xfs_growfs /mnt/data
+
+# Defragment filesystem
+xfs_fsr /mnt/data               # Defragment entire filesystem
+xfs_fsr -v /mnt/data/file.img   # Defragment specific file
+
+# Check filesystem (must be unmounted)
+xfs_repair /dev/sdb1
+
+# Check in no-modify mode (read-only check)
+xfs_repair -n /dev/sdb1
+
+# Dump/restore metadata
+xfs_metadump /dev/sdb1 dump.img
+xfs_mdrestore dump.img /dev/sdc1
+
+# Copy filesystem data
+xfs_copy /dev/sdb1 /dev/sdc1
+</code></pre>
+<h4 id="xfs-tuning"><a class="header" href="#xfs-tuning">XFS Tuning</a></h4>
+<pre><code class="language-bash"># Set filesystem label
+xfs_admin -L mydata /dev/sdb1
+
+# Set UUID
+xfs_admin -U generate /dev/sdb1
+
+# Modify parameters (rare, most set at creation)
+xfs_admin -l /dev/sdb1  # View label
+xfs_admin -u /dev/sdb1  # View UUID
+
+# Mount options for performance
+mount -o noatime,nodiratime,logbufs=8,logbsize=256k /dev/sdb1 /mnt
+</code></pre>
+<h4 id="xfs-performance-tips"><a class="header" href="#xfs-performance-tips">XFS Performance Tips</a></h4>
+<ul>
+<li>Use allocation groups matching expected parallelism</li>
+<li>Consider larger log buffer size for write-heavy workloads</li>
+<li>Use nobarrier for battery-backed RAID controllers</li>
+<li>Project quotas are faster than user/group quotas</li>
+</ul>
+<h3 id="btrfs"><a class="header" href="#btrfs">Btrfs</a></h3>
+<p>Btrfs (B-tree Filesystem) is a modern copy-on-write filesystem with advanced features like snapshots, compression, and RAID support built-in.</p>
+<h4 id="key-features-2"><a class="header" href="#key-features-2">Key Features</a></h4>
+<ul>
+<li><strong>Copy-on-write (CoW)</strong>: Data is never overwritten in place</li>
+<li><strong>Snapshots</strong>: Instant, space-efficient snapshots</li>
+<li><strong>Subvolumes</strong>: Independent file trees within the filesystem</li>
+<li><strong>Built-in RAID</strong>: RAID 0, 1, 5, 6, 10 without mdadm</li>
+<li><strong>Compression</strong>: Transparent compression (zlib, lzo, zstd)</li>
+<li><strong>Checksums</strong>: Data and metadata checksumming for integrity</li>
+<li><strong>Send/receive</strong>: Efficient incremental backups</li>
+<li><strong>Online resizing</strong>: Grow and shrink while mounted</li>
+<li><strong>Deduplication</strong>: Offline and online deduplication support</li>
+</ul>
+<h4 id="creating-btrfs-filesystems"><a class="header" href="#creating-btrfs-filesystems">Creating Btrfs Filesystems</a></h4>
+<pre><code class="language-bash"># Create simple filesystem
+mkfs.btrfs /dev/sdb1
+
+# Create with label
+mkfs.btrfs -L mydata /dev/sdb1
+
+# Create with specific node size (16K default, affects metadata)
+mkfs.btrfs -n 32768 /dev/sdb1
+
+# Create RAID1 across multiple devices (metadata and data)
+mkfs.btrfs -m raid1 -d raid1 /dev/sdb1 /dev/sdc1
+
+# Create RAID0 for data, RAID1 for metadata
+mkfs.btrfs -m raid1 -d raid0 /dev/sdb1 /dev/sdc1
+
+# Create RAID10
+mkfs.btrfs -m raid10 -d raid10 /dev/sd[b-e]1
+
+# Force creation
+mkfs.btrfs -f /dev/sdb1
+</code></pre>
+<h4 id="subvolume-management"><a class="header" href="#subvolume-management">Subvolume Management</a></h4>
+<pre><code class="language-bash"># Create subvolume
+btrfs subvolume create /mnt/data/subvol1
+
+# List subvolumes
+btrfs subvolume list /mnt/data
+
+# Show subvolume details
+btrfs subvolume show /mnt/data/subvol1
+
+# Delete subvolume
+btrfs subvolume delete /mnt/data/subvol1
+
+# Set default subvolume (mounted if no subvol= option)
+btrfs subvolume set-default &lt;id&gt; /mnt/data
+
+# Get default subvolume
+btrfs subvolume get-default /mnt/data
+
+# Mount specific subvolume
+mount -o subvol=subvol1 /dev/sdb1 /mnt/subvol1
+mount -o subvolid=256 /dev/sdb1 /mnt/subvol1
+</code></pre>
+<h4 id="snapshot-operations"><a class="header" href="#snapshot-operations">Snapshot Operations</a></h4>
+<pre><code class="language-bash"># Create snapshot (read-write)
+btrfs subvolume snapshot /mnt/data /mnt/data/snapshots/snap1
+
+# Create read-only snapshot
+btrfs subvolume snapshot -r /mnt/data /mnt/data/snapshots/snap1
+
+# List snapshots (snapshots are subvolumes)
+btrfs subvolume list -s /mnt/data
+
+# Delete snapshot
+btrfs subvolume delete /mnt/data/snapshots/snap1
+
+# Rollback by changing default subvolume
+btrfs subvolume set-default &lt;snapshot-id&gt; /mnt/data
+# Then reboot or remount
+</code></pre>
+<h4 id="compression"><a class="header" href="#compression">Compression</a></h4>
+<pre><code class="language-bash"># Enable compression on mount
+mount -o compress=zstd /dev/sdb1 /mnt/data
+mount -o compress=lzo /dev/sdb1 /mnt/data
+mount -o compress=zlib /dev/sdb1 /mnt/data
+
+# Set compression level (zstd supports 1-15)
+mount -o compress=zstd:3 /dev/sdb1 /mnt/data
+
+# Enable compression for existing data
+btrfs filesystem defragment -r -czstd /mnt/data
+
+# Set compression property on directory
+btrfs property set /mnt/data/logs compression zstd
+
+# Check compression property
+btrfs property get /mnt/data/logs compression
+</code></pre>
+<h4 id="sendreceive-for-backups"><a class="header" href="#sendreceive-for-backups">Send/Receive for Backups</a></h4>
+<pre><code class="language-bash"># Create initial snapshot
+btrfs subvolume snapshot -r /mnt/data /mnt/data/snap1
+
+# Send snapshot to another location
+btrfs send /mnt/data/snap1 | btrfs receive /mnt/backup/
+
+# Incremental backup
+btrfs subvolume snapshot -r /mnt/data /mnt/data/snap2
+btrfs send -p /mnt/data/snap1 /mnt/data/snap2 | btrfs receive /mnt/backup/
+
+# Send over network
+btrfs send /mnt/data/snap1 | ssh user@backup 'btrfs receive /backup/'
+
+# Send with compression
+btrfs send /mnt/data/snap1 | gzip | ssh user@backup 'gunzip | btrfs receive /backup/'
+</code></pre>
+<h4 id="btrfs-device-management"><a class="header" href="#btrfs-device-management">Btrfs Device Management</a></h4>
+<pre><code class="language-bash"># Add device to filesystem
+btrfs device add /dev/sdc1 /mnt/data
+
+# Remove device
+btrfs device remove /dev/sdc1 /mnt/data
+
+# Balance filesystem (redistribute data across devices)
+btrfs balance start /mnt/data
+
+# Balance only data, convert to RAID1
+btrfs balance start -dconvert=raid1 /mnt/data
+
+# Balance only metadata
+btrfs balance start -mconvert=raid1 /mnt/data
+
+# Check balance status
+btrfs balance status /mnt/data
+
+# Replace failing device
+btrfs replace start /dev/sdb1 /dev/sdd1 /mnt/data
+
+# Scrub filesystem (verify checksums)
+btrfs scrub start /mnt/data
+btrfs scrub status /mnt/data
+</code></pre>
+<h4 id="btrfs-maintenance"><a class="header" href="#btrfs-maintenance">Btrfs Maintenance</a></h4>
+<pre><code class="language-bash"># Check filesystem (unmounted)
+btrfs check /dev/sdb1
+
+# Check with repair (dangerous, backup first)
+btrfs check --repair /dev/sdb1
+
+# Show filesystem usage
+btrfs filesystem usage /mnt/data
+
+# Show device stats
+btrfs device stats /mnt/data
+
+# Resize filesystem
+btrfs filesystem resize +10G /mnt/data    # Grow by 10GB
+btrfs filesystem resize -5G /mnt/data     # Shrink by 5GB
+btrfs filesystem resize max /mnt/data     # Grow to device size
+
+# Defragment
+btrfs filesystem defragment -r /mnt/data
+</code></pre>
+<h3 id="zfs"><a class="header" href="#zfs">ZFS</a></h3>
+<p>ZFS is an advanced filesystem and volume manager originally developed by Sun Microsystems. On Linux, it's available through OpenZFS.</p>
+<h4 id="key-features-3"><a class="header" href="#key-features-3">Key Features</a></h4>
+<ul>
+<li><strong>Pooled storage</strong>: Combines volume management and filesystem</li>
+<li><strong>Copy-on-write</strong>: Data integrity and snapshots</li>
+<li><strong>Snapshots and clones</strong>: Instant, space-efficient</li>
+<li><strong>RAID-Z</strong>: Software RAID with better characteristics than traditional RAID5/6</li>
+<li><strong>Compression</strong>: Built-in transparent compression</li>
+<li><strong>Deduplication</strong>: Block-level deduplication</li>
+<li><strong>ARC/L2ARC</strong>: Sophisticated caching with RAM and SSD</li>
+<li><strong>Send/receive</strong>: Efficient replication and backups</li>
+<li><strong>Self-healing</strong>: Automatic data corruption repair with redundancy</li>
+</ul>
+<h4 id="installing-zfs-on-linux"><a class="header" href="#installing-zfs-on-linux">Installing ZFS on Linux</a></h4>
+<pre><code class="language-bash"># Ubuntu/Debian
+apt install zfsutils-linux
+
+# RHEL/CentOS/Fedora
+dnf install zfs
+
+# Arch Linux
+pacman -S zfs-linux
+
+# Load kernel module
+modprobe zfs
+</code></pre>
+<h4 id="creating-zfs-pools"><a class="header" href="#creating-zfs-pools">Creating ZFS Pools</a></h4>
+<pre><code class="language-bash"># Create simple pool
+zpool create mypool /dev/sdb
+
+# Create mirror pool (RAID1)
+zpool create mypool mirror /dev/sdb /dev/sdc
+
+# Create RAID-Z pool (similar to RAID5, single parity)
+zpool create mypool raidz /dev/sd[b-e]
+
+# Create RAID-Z2 pool (similar to RAID6, double parity)
+zpool create mypool raidz2 /dev/sd[b-f]
+
+# Create RAID-Z3 pool (triple parity)
+zpool create mypool raidz3 /dev/sd[b-g]
+
+# Create with specific mount point
+zpool create -m /data mypool /dev/sdb
+
+# Create with specific ashift (sector size: 9=512B, 12=4K, 13=8K)
+zpool create -o ashift=12 mypool /dev/sdb
+
+# Add cache device (L2ARC)
+zpool add mypool cache /dev/sdf
+
+# Add log device (SLOG/ZIL)
+zpool add mypool log mirror /dev/sdg /dev/sdh
+</code></pre>
+<h4 id="zfs-pool-management"><a class="header" href="#zfs-pool-management">ZFS Pool Management</a></h4>
+<pre><code class="language-bash"># List pools
+zpool list
+
+# Show pool status
+zpool status mypool
+
+# Show detailed I/O statistics
+zpool iostat mypool 1  # Update every second
+
+# Add device to pool
+zpool add mypool /dev/sdf
+
+# Replace device
+zpool replace mypool /dev/sdb /dev/sdg
+
+# Remove device (only cache/log devices)
+zpool remove mypool /dev/sdf
+
+# Scrub pool (verify all data)
+zpool scrub mypool
+
+# Stop scrub
+zpool scrub -s mypool
+
+# Export pool (unmount, prepare for import elsewhere)
+zpool export mypool
+
+# Import pool
+zpool import mypool
+
+# Import pool with different name
+zpool import oldname newname
+
+# Import pool that was last used on another system
+zpool import -f mypool
+
+# Upgrade pool to latest features
+zpool upgrade mypool
+</code></pre>
+<h4 id="zfs-dataset-management"><a class="header" href="#zfs-dataset-management">ZFS Dataset Management</a></h4>
+<pre><code class="language-bash"># Create dataset (filesystem)
+zfs create mypool/data
+
+# Create dataset with specific mount point
+zfs create -o mountpoint=/data mypool/data
+
+# List datasets
+zfs list
+
+# Show detailed properties
+zfs get all mypool/data
+
+# Set properties
+zfs set compression=lz4 mypool/data
+zfs set recordsize=1M mypool/data           # Block size
+zfs set atime=off mypool/data
+zfs set quota=100G mypool/data
+zfs set reservation=50G mypool/data
+
+# Create dataset with properties
+zfs create -o compression=lz4 -o mountpoint=/data mypool/data
+
+# Destroy dataset
+zfs destroy mypool/data
+
+# Rename dataset
+zfs rename mypool/data mypool/newdata
+</code></pre>
+<h4 id="zfs-snapshots"><a class="header" href="#zfs-snapshots">ZFS Snapshots</a></h4>
+<pre><code class="language-bash"># Create snapshot
+zfs snapshot mypool/data@snap1
+
+# Create recursive snapshot (all child datasets)
+zfs snapshot -r mypool/data@snap1
+
+# List snapshots
+zfs list -t snapshot
+
+# Rollback to snapshot (destroys newer data)
+zfs rollback mypool/data@snap1
+
+# Clone snapshot (create writable copy)
+zfs clone mypool/data@snap1 mypool/clone
+
+# Promote clone (make it independent)
+zfs promote mypool/clone
+
+# Destroy snapshot
+zfs destroy mypool/data@snap1
+
+# Destroy all snapshots for dataset
+zfs destroy -r mypool/data
+</code></pre>
+<h4 id="zfs-sendreceive"><a class="header" href="#zfs-sendreceive">ZFS Send/Receive</a></h4>
+<pre><code class="language-bash"># Send full snapshot
+zfs send mypool/data@snap1 &gt; /backup/snap1.zfs
+
+# Receive snapshot
+zfs receive mypool/restore &lt; /backup/snap1.zfs
+
+# Send incremental snapshot
+zfs send -i mypool/data@snap1 mypool/data@snap2 &gt; /backup/incremental.zfs
+
+# Send over network
+zfs send mypool/data@snap1 | ssh user@backup 'zfs receive backuppool/data'
+
+# Send with compression
+zfs send mypool/data@snap1 | gzip | ssh user@backup 'gunzip | zfs receive backuppool/data'
+
+# Send recursively (all child datasets)
+zfs send -R mypool/data@snap1 | zfs receive backuppool/data
+</code></pre>
+<h4 id="zfs-performance-tuning"><a class="header" href="#zfs-performance-tuning">ZFS Performance Tuning</a></h4>
+<pre><code class="language-bash"># Set recordsize for large sequential I/O
+zfs set recordsize=1M mypool/data
+
+# Set recordsize for small random I/O
+zfs set recordsize=8K mypool/data
+
+# Enable compression (lz4 is fast and efficient)
+zfs set compression=lz4 mypool/data
+
+# Disable atime updates
+zfs set atime=off mypool/data
+
+# Set ARC cache size (in /etc/modprobe.d/zfs.conf)
+# options zfs zfs_arc_max=8589934592  # 8GB
+
+# Enable deduplication (very RAM intensive, usually not recommended)
+zfs set dedup=on mypool/data
+
+# Set sync behavior
+zfs set sync=standard mypool/data  # Default
+zfs set sync=always mypool/data    # Slower, safer
+zfs set sync=disabled mypool/data  # Faster, dangerous
+</code></pre>
+<h3 id="f2fs"><a class="header" href="#f2fs">F2FS</a></h3>
+<p>F2FS (Flash-Friendly File System) is optimized for flash storage devices like SSDs, eMMC, and SD cards. It's designed with flash characteristics in mind, such as wear-leveling and write amplification.</p>
+<h4 id="key-features-4"><a class="header" href="#key-features-4">Key Features</a></h4>
+<ul>
+<li><strong>Flash-optimized</strong>: Designed for NAND flash characteristics</li>
+<li><strong>Log-structured</strong>: Reduces write amplification</li>
+<li><strong>Multi-head logging</strong>: Multiple active logs for different data temperatures</li>
+<li><strong>Adaptive logging</strong>: Switches between threaded and normal logging</li>
+<li><strong>Inline data</strong>: Small files stored in inode</li>
+<li><strong>Data compression</strong>: Transparent compression support</li>
+</ul>
+<h4 id="creating-f2fs"><a class="header" href="#creating-f2fs">Creating F2FS</a></h4>
+<pre><code class="language-bash"># Create F2FS filesystem
+mkfs.f2fs /dev/sdb1
+
+# Create with label
+mkfs.f2fs -l mydata /dev/sdb1
+
+# Create with specific overprovision ratio (extra space for GC)
+mkfs.f2fs -o 5 /dev/sdb1  # 5% overprovision
+
+# Create with specific segment size
+mkfs.f2fs -s 4 /dev/sdb1  # 4MB segments
+</code></pre>
+<h4 id="mounting-f2fs"><a class="header" href="#mounting-f2fs">Mounting F2FS</a></h4>
+<pre><code class="language-bash"># Mount with default options
+mount -t f2fs /dev/sdb1 /mnt/data
+
+# Mount with background GC
+mount -t f2fs -o background_gc=on /dev/sdb1 /mnt/data
+
+# Mount with inline data and inline dentry
+mount -t f2fs -o inline_data,inline_dentry /dev/sdb1 /mnt/data
+
+# Mount with compression
+mount -t f2fs -o compress_algorithm=lz4 /dev/sdb1 /mnt/data
+</code></pre>
+<h3 id="tmpfs-and-ramfs"><a class="header" href="#tmpfs-and-ramfs">tmpfs and ramfs</a></h3>
+<p>Memory-based filesystems store data in RAM, providing extremely fast access but volatile storage (data lost on reboot).</p>
+<h4 id="tmpfs"><a class="header" href="#tmpfs">tmpfs</a></h4>
+<p>tmpfs uses both RAM and swap space, can be limited in size, and is the more commonly used option.</p>
+<pre><code class="language-bash"># Create tmpfs mount
+mount -t tmpfs tmpfs /mnt/ramdisk
+
+# Create with size limit
+mount -t tmpfs -o size=1G tmpfs /mnt/ramdisk
+
+# Create with size limit and specific permissions
+mount -t tmpfs -o size=512M,mode=1777 tmpfs /tmp
+
+# Create with uid/gid
+mount -t tmpfs -o size=256M,uid=1000,gid=1000 tmpfs /mnt/ramdisk
+
+# Create with inode limit
+mount -t tmpfs -o size=1G,nr_inodes=10k tmpfs /mnt/ramdisk
+
+# Show tmpfs usage
+df -h /tmp
+</code></pre>
+<h4 id="ramfs"><a class="header" href="#ramfs">ramfs</a></h4>
+<p>ramfs is simpler than tmpfs, using only RAM (no swap), and cannot be limited in size.</p>
+<pre><code class="language-bash"># Create ramfs mount (no size limit, be careful!)
+mount -t ramfs ramfs /mnt/ramdisk
+
+# ramfs is rarely used; tmpfs is preferred in most cases
+</code></pre>
+<h4 id="common-tmpfs-locations"><a class="header" href="#common-tmpfs-locations">Common tmpfs Locations</a></h4>
+<pre><code class="language-bash"># /tmp as tmpfs (common on modern systems)
+tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0
+
+# /run for runtime data
+tmpfs /run tmpfs defaults,noatime,mode=0755 0 0
+
+# /dev/shm for shared memory
+tmpfs /dev/shm tmpfs defaults,noatime,mode=1777 0 0
+</code></pre>
+<h3 id="fatvfatexfat"><a class="header" href="#fatvfatexfat">FAT/VFAT/exFAT</a></h3>
+<p>FAT filesystems are primarily used for compatibility with Windows and removable media.</p>
+<h4 id="fat-variants"><a class="header" href="#fat-variants">FAT Variants</a></h4>
+<ul>
+<li><strong>FAT16</strong>: Legacy, max 2GB partition, max 2GB file</li>
+<li><strong>FAT32 (VFAT)</strong>: Max 2TB partition, max 4GB file</li>
+<li><strong>exFAT</strong>: Modern, large files and partitions, Windows/Mac compatible</li>
+</ul>
+<h4 id="creating-fat-filesystems"><a class="header" href="#creating-fat-filesystems">Creating FAT Filesystems</a></h4>
+<pre><code class="language-bash"># Create FAT32
+mkfs.vfat /dev/sdb1
+
+# Create FAT32 with label
+mkfs.vfat -n MYUSB /dev/sdb1
+
+# Create with specific cluster size
+mkfs.vfat -s 8 /dev/sdb1  # 4KB clusters (8 * 512B)
+
+# Create exFAT
+mkfs.exfat /dev/sdb1
+
+# Create exFAT with label
+mkfs.exfat -n MYUSB /dev/sdb1
+</code></pre>
+<h4 id="mounting-fat-filesystems"><a class="header" href="#mounting-fat-filesystems">Mounting FAT Filesystems</a></h4>
+<pre><code class="language-bash"># Mount with default options
+mount -t vfat /dev/sdb1 /mnt/usb
+
+# Mount with specific UID/GID (all files owned by user)
+mount -t vfat -o uid=1000,gid=1000 /dev/sdb1 /mnt/usb
+
+# Mount with UTF-8 encoding
+mount -t vfat -o iocharset=utf8 /dev/sdb1 /mnt/usb
+
+# Mount with specific umask (permissions)
+mount -t vfat -o umask=022 /dev/sdb1 /mnt/usb
+
+# Mount exFAT
+mount -t exfat /dev/sdb1 /mnt/usb
+</code></pre>
+<h3 id="other-filesystems"><a class="header" href="#other-filesystems">Other Filesystems</a></h3>
+<h4 id="ntfs"><a class="header" href="#ntfs">NTFS</a></h4>
+<pre><code class="language-bash"># Install NTFS-3G driver
+apt install ntfs-3g
+
+# Mount NTFS
+mount -t ntfs-3g /dev/sdb1 /mnt/windows
+
+# Mount with full permissions for user
+mount -t ntfs-3g -o uid=1000,gid=1000,dmask=022,fmask=133 /dev/sdb1 /mnt/windows
+</code></pre>
+<h4 id="squashfs"><a class="header" href="#squashfs">SquashFS</a></h4>
+<p>Read-only compressed filesystem, commonly used for live CDs and snap packages.</p>
+<pre><code class="language-bash"># Create SquashFS
+mksquashfs /source/dir filesystem.squashfs
+
+# Create with specific compression
+mksquashfs /source/dir filesystem.squashfs -comp xz
+
+# Mount SquashFS
+mount -t squashfs filesystem.squashfs /mnt/squash
+</code></pre>
+<h4 id="erofs"><a class="header" href="#erofs">EROFS</a></h4>
+<p>Enhanced Read-Only File System, modern replacement for SquashFS in some distributions.</p>
+<pre><code class="language-bash"># Create EROFS
+mkfs.erofs filesystem.erofs /source/dir
+
+# Mount EROFS
+mount -t erofs filesystem.erofs /mnt/erofs
+</code></pre>
+<h4 id="iso9660"><a class="header" href="#iso9660">ISO9660</a></h4>
+<pre><code class="language-bash"># Create ISO
+genisoimage -o image.iso /source/dir
+
+# Mount ISO
+mount -o loop image.iso /mnt/iso
+</code></pre>
+<h2 id="virtual-and-special-filesystems"><a class="header" href="#virtual-and-special-filesystems">Virtual and Special Filesystems</a></h2>
+<p>Virtual filesystems don't store data on disk but provide interfaces to kernel data structures, device information, and debugging capabilities.</p>
+<h3 id="procfs"><a class="header" href="#procfs">procfs</a></h3>
+<p>The proc filesystem provides an interface to kernel data structures and process information.</p>
+<h4 id="key-directories-and-files"><a class="header" href="#key-directories-and-files">Key Directories and Files</a></h4>
+<pre><code class="language-bash"># Process information (one directory per PID)
+/proc/[pid]/cmdline     # Command line
+/proc/[pid]/environ     # Environment variables
+/proc/[pid]/cwd         # Current working directory (symlink)
+/proc/[pid]/exe         # Executable file (symlink)
+/proc/[pid]/fd/         # Open file descriptors
+/proc/[pid]/maps        # Memory mappings
+/proc/[pid]/status      # Process status
+/proc/[pid]/stat        # Process statistics
+/proc/[pid]/io          # I/O statistics
+/proc/[pid]/limits      # Resource limits
+
+# System information
+/proc/cpuinfo          # CPU information
+/proc/meminfo          # Memory information
+/proc/version          # Kernel version
+/proc/uptime           # System uptime
+/proc/loadavg          # Load average
+
+# Kernel configuration
+/proc/cmdline          # Kernel boot parameters
+/proc/modules          # Loaded kernel modules
+/proc/mounts           # Mounted filesystems
+/proc/partitions       # Partition information
+/proc/swaps            # Swap space information
+
+# Network information
+/proc/net/dev          # Network device statistics
+/proc/net/route        # Routing table
+/proc/net/tcp          # TCP socket information
+/proc/net/udp          # UDP socket information
+
+# System configuration (sysctl interface)
+/proc/sys/kernel/      # Kernel parameters
+/proc/sys/net/         # Network parameters
+/proc/sys/vm/          # Virtual memory parameters
+/proc/sys/fs/          # Filesystem parameters
+</code></pre>
+<h4 id="common-procfs-operations"><a class="header" href="#common-procfs-operations">Common procfs Operations</a></h4>
+<pre><code class="language-bash"># View process command line
+cat /proc/1234/cmdline | tr '\0' ' '
+
+# View open files for process
+ls -l /proc/1234/fd/
+
+# Check process memory usage
+cat /proc/1234/status | grep VmRSS
+
+# View system memory
+cat /proc/meminfo
+
+# View CPU info
+cat /proc/cpuinfo
+
+# View kernel parameters
+cat /proc/sys/net/ipv4/ip_forward
+
+# Modify kernel parameter (temporary, lost on reboot)
+echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+
+# Better way: use sysctl
+sysctl -w net.ipv4.ip_forward=1
+</code></pre>
+<h3 id="sysfs"><a class="header" href="#sysfs">sysfs</a></h3>
+<p>The sys filesystem exposes kernel objects, their attributes, and relationships between them. It's structured around the kernel's device model.</p>
+<h4 id="key-directories"><a class="header" href="#key-directories">Key Directories</a></h4>
+<pre><code class="language-bash">/sys/block/           # Block devices
+/sys/bus/             # Bus types (pci, usb, etc.)
+/sys/class/           # Device classes (net, input, etc.)
+/sys/devices/         # Device tree
+/sys/firmware/        # Firmware information
+/sys/fs/              # Filesystem information
+/sys/kernel/          # Kernel information
+/sys/module/          # Loaded modules
+/sys/power/           # Power management
+</code></pre>
+<h4 id="common-sysfs-operations"><a class="header" href="#common-sysfs-operations">Common sysfs Operations</a></h4>
+<pre><code class="language-bash"># View network device information
+ls /sys/class/net/
+cat /sys/class/net/eth0/address        # MAC address
+cat /sys/class/net/eth0/statistics/rx_bytes
+cat /sys/class/net/eth0/speed          # Link speed
+
+# View block device information
+ls /sys/block/
+cat /sys/block/sda/size                # Size in sectors
+cat /sys/block/sda/queue/scheduler     # I/O scheduler
+cat /sys/block/sda/device/model        # Device model
+
+# Change I/O scheduler
+echo mq-deadline &gt; /sys/block/sda/queue/scheduler
+
+# View CPU information
+ls /sys/devices/system/cpu/
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# View module parameters
+ls /sys/module/zfs/parameters/
+cat /sys/module/zfs/parameters/zfs_arc_max
+
+# Modify module parameter
+echo 8589934592 &gt; /sys/module/zfs/parameters/zfs_arc_max
+
+# View USB devices
+ls /sys/bus/usb/devices/
+
+# View PCI devices
+ls /sys/bus/pci/devices/
+</code></pre>
+<h3 id="debugfs"><a class="header" href="#debugfs">debugfs</a></h3>
+<p>A RAM-based filesystem for kernel debugging information. Not normally mounted on production systems.</p>
+<pre><code class="language-bash"># Mount debugfs
+mount -t debugfs debugfs /sys/kernel/debug
+
+# View tracing information
+cat /sys/kernel/debug/tracing/available_tracers
+
+# View block device trace
+cat /sys/kernel/debug/block/sda/trace
+
+# View filesystem-specific debug info
+ls /sys/kernel/debug/ext4/sda1/
+ls /sys/kernel/debug/btrfs/
+</code></pre>
+<h3 id="devtmpfs"><a class="header" href="#devtmpfs">devtmpfs</a></h3>
+<p>Automatically manages device nodes in /dev. Modern systems use devtmpfs with udev.</p>
+<pre><code class="language-bash"># devtmpfs is typically mounted automatically at boot
+mount -t devtmpfs devtmpfs /dev
+
+# View mount
+mount | grep devtmpfs
+</code></pre>
+<h3 id="configfs"><a class="header" href="#configfs">configfs</a></h3>
+<p>Used for kernel object configuration, particularly in storage and network subsystems.</p>
+<pre><code class="language-bash"># Mount configfs
+mount -t configfs configfs /sys/kernel/config
+
+# Used by various kernel subsystems
+ls /sys/kernel/config/
+# target/       - SCSI target subsystem
+# usb_gadget/   - USB gadget configuration
+# nvmet/        - NVMe target
+</code></pre>
+<h3 id="cgroup-filesystems"><a class="header" href="#cgroup-filesystems">cgroup Filesystems</a></h3>
+<p>Control groups provide resource limiting, prioritization, and accounting.</p>
+<h4 id="cgroup-v1"><a class="header" href="#cgroup-v1">cgroup v1</a></h4>
+<pre><code class="language-bash"># Mount cgroup v1 (typically at /sys/fs/cgroup/)
+mount -t cgroup -o cpu cpu /sys/fs/cgroup/cpu
+mount -t cgroup -o memory memory /sys/fs/cgroup/memory
+mount -t cgroup -o blkio blkio /sys/fs/cgroup/blkio
+
+# Create cgroup
+mkdir /sys/fs/cgroup/cpu/mygroup
+
+# Set CPU limit (50% of one CPU)
+echo 50000 &gt; /sys/fs/cgroup/cpu/mygroup/cpu.cfs_quota_us
+echo 100000 &gt; /sys/fs/cgroup/cpu/mygroup/cpu.cfs_period_us
+
+# Add process to cgroup
+echo $PID &gt; /sys/fs/cgroup/cpu/mygroup/cgroup.procs
+</code></pre>
+<h4 id="cgroup-v2"><a class="header" href="#cgroup-v2">cgroup v2</a></h4>
+<pre><code class="language-bash"># Mount cgroup v2 (unified hierarchy)
+mount -t cgroup2 cgroup2 /sys/fs/cgroup
+
+# Create cgroup
+mkdir /sys/fs/cgroup/mygroup
+
+# Enable controllers
+echo "+cpu +memory +io" &gt; /sys/fs/cgroup/cgroup.subtree_control
+
+# Set CPU weight (100-10000, default 100)
+echo 500 &gt; /sys/fs/cgroup/mygroup/cpu.weight
+
+# Set memory limit
+echo 1G &gt; /sys/fs/cgroup/mygroup/memory.max
+
+# Add process
+echo $PID &gt; /sys/fs/cgroup/mygroup/cgroup.procs
+</code></pre>
+<p>For more information on cgroup interaction with namespaces, see <a href="namespace.html">namespace.md</a>.</p>
+<h3 id="other-special-filesystems"><a class="header" href="#other-special-filesystems">Other Special Filesystems</a></h3>
+<pre><code class="language-bash"># securityfs - Security module information
+mount -t securityfs securityfs /sys/kernel/security
+
+# fusectl - FUSE control filesystem
+mount -t fusectl fusectl /sys/fs/fuse/connections
+
+# tracefs - Tracing infrastructure
+mount -t tracefs tracefs /sys/kernel/tracing
+
+# bpf - BPF filesystem for pinning BPF objects
+mount -t bpf bpf /sys/fs/bpf
+
+# pstore - Persistent storage for oops/panic logs
+mount -t pstore pstore /sys/fs/pstore
+
+# efivarfs - UEFI variable filesystem
+mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+</code></pre>
+<h2 id="overlayfs-deep-dive"><a class="header" href="#overlayfs-deep-dive">OverlayFS Deep Dive</a></h2>
+<p>OverlayFS is a union mount filesystem that combines multiple directories into a single merged view. It's the default storage driver for Docker and widely used in containers.</p>
+<h3 id="architecture-and-concepts"><a class="header" href="#architecture-and-concepts">Architecture and Concepts</a></h3>
+<p>OverlayFS combines layers of directories with specific roles:</p>
+<pre><code>Merged View (appears to user)
+         |
+    +---------+
+    |         |
+  Upper     Lower
+  (r/w)     (r/o)
+
+Actual layout:
+  /merged    &lt;- Merged view (mount point)
+  /upper     &lt;- Read-write layer
+  /work      &lt;- Work directory (internal)
+  /lower     &lt;- Read-only base layer
+</code></pre>
+<h4 id="key-components"><a class="header" href="#key-components">Key Components</a></h4>
+<ul>
+<li><strong>Lower Directory</strong>: Read-only base layer(s). Can be multiple layers stacked.</li>
+<li><strong>Upper Directory</strong>: Read-write layer where all changes are stored.</li>
+<li><strong>Work Directory</strong>: Internal directory used by OverlayFS for atomic operations.</li>
+<li><strong>Merged Directory</strong>: The unified view presented to users.</li>
+</ul>
+<h4 id="basic-overlayfs-mount"><a class="header" href="#basic-overlayfs-mount">Basic OverlayFS Mount</a></h4>
+<pre><code class="language-bash"># Create directories
+mkdir -p /tmp/overlay/{lower,upper,work,merged}
+
+# Add some content to lower layer
+echo "Base content" &gt; /tmp/overlay/lower/file.txt
+
+# Mount overlay
+mount -t overlay overlay \
+  -o lowerdir=/tmp/overlay/lower,upperdir=/tmp/overlay/upper,workdir=/tmp/overlay/work \
+  /tmp/overlay/merged
+
+# View merged content
+ls /tmp/overlay/merged  # Shows file.txt from lower
+
+# Modify file (copy-up occurs)
+echo "Modified content" &gt; /tmp/overlay/merged/file.txt
+
+# Original in lower is unchanged
+cat /tmp/overlay/lower/file.txt    # "Base content"
+
+# Modified version in upper
+cat /tmp/overlay/upper/file.txt    # "Modified content"
+
+# Merged view shows modified version
+cat /tmp/overlay/merged/file.txt   # "Modified content"
+</code></pre>
+<h3 id="copy-up-mechanism"><a class="header" href="#copy-up-mechanism">Copy-Up Mechanism</a></h3>
+<p>When a file from the lower layer is modified, OverlayFS copies it to the upper layer (copy-up). This is a key characteristic of copy-on-write behavior.</p>
+<h4 id="copy-up-behavior"><a class="header" href="#copy-up-behavior">Copy-Up Behavior</a></h4>
+<pre><code class="language-bash"># Initial state: file exists only in lower
+stat /tmp/overlay/lower/file.txt   # Exists
+stat /tmp/overlay/upper/file.txt   # Does not exist
+
+# Read file (no copy-up)
+cat /tmp/overlay/merged/file.txt
+
+# Copy-up happens on first write
+echo "new content" &gt;&gt; /tmp/overlay/merged/file.txt
+
+# Now file exists in upper
+stat /tmp/overlay/upper/file.txt   # Exists
+
+# Metadata changes also trigger copy-up
+chmod 755 /tmp/overlay/merged/script.sh  # Triggers copy-up
+</code></pre>
+<h4 id="copy-up-performance-considerations"><a class="header" href="#copy-up-performance-considerations">Copy-Up Performance Considerations</a></h4>
+<ul>
+<li>Copy-up happens for the entire file, even for small changes</li>
+<li>Large files incur significant copy-up cost on first write</li>
+<li>Use volumes or bind mounts for database files and large mutable data</li>
+<li>Read-only workloads avoid copy-up entirely</li>
+</ul>
+<pre><code class="language-bash"># Check copy-up activity
+# Files in upper directory show what has been copied up
+find /tmp/overlay/upper -type f
+</code></pre>
+<h3 id="whiteouts-and-opaque-directories"><a class="header" href="#whiteouts-and-opaque-directories">Whiteouts and Opaque Directories</a></h3>
+<p>OverlayFS uses special markers to represent deleted files and directories.</p>
+<h4 id="whiteout-files"><a class="header" href="#whiteout-files">Whiteout Files</a></h4>
+<p>When a file is deleted from the merged view, OverlayFS creates a whiteout file in the upper layer.</p>
+<pre><code class="language-bash"># File exists in lower
+echo "content" &gt; /tmp/overlay/lower/file.txt
+mount -t overlay ...
+
+# Delete file from merged view
+rm /tmp/overlay/merged/file.txt
+
+# File still exists in lower (read-only)
+ls /tmp/overlay/lower/file.txt
+
+# Whiteout created in upper (character device 0:0)
+ls -l /tmp/overlay/upper/
+# c--------- 1 root root 0, 0 Jan 1 12:00 file.txt
+
+# Whiteout hides lower file in merged view
+ls /tmp/overlay/merged/file.txt  # No such file
+
+# Check if file is a whiteout
+stat /tmp/overlay/upper/file.txt
+# Character Device (0:0)
+</code></pre>
+<h4 id="opaque-directories"><a class="header" href="#opaque-directories">Opaque Directories</a></h4>
+<p>When a directory is deleted and recreated, or when rmdir/mkdir happens, OverlayFS may create an opaque directory.</p>
+<pre><code class="language-bash"># Directory exists in lower with content
+mkdir -p /tmp/overlay/lower/dir
+echo "lower content" &gt; /tmp/overlay/lower/dir/file.txt
+
+# Remove directory in merged view
+rm -rf /tmp/overlay/merged/dir
+
+# Whiteout created for directory
+ls -l /tmp/overlay/upper/
+# c--------- 1 root root 0, 0 Jan 1 12:00 dir
+
+# Recreate directory
+mkdir /tmp/overlay/merged/dir
+echo "new content" &gt; /tmp/overlay/merged/dir/newfile.txt
+
+# Directory becomes opaque (trusted.overlay.opaque=y xattr)
+getfattr -n trusted.overlay.opaque /tmp/overlay/upper/dir
+# trusted.overlay.opaque="y"
+
+# Opaque directory hides all lower contents
+ls /tmp/overlay/merged/dir/
+# newfile.txt (file.txt from lower is hidden)
+</code></pre>
+<h3 id="multiple-lower-layers"><a class="header" href="#multiple-lower-layers">Multiple Lower Layers</a></h3>
+<p>OverlayFS supports multiple lower layers, which is essential for container images with multiple layers.</p>
+<pre><code class="language-bash"># Create multiple lower layers
+mkdir -p /tmp/overlay/{lower1,lower2,lower3,upper,work,merged}
+
+# Add content to different layers
+echo "Layer 1" &gt; /tmp/overlay/lower1/file1.txt
+echo "Layer 2" &gt; /tmp/overlay/lower2/file2.txt
+echo "Layer 3" &gt; /tmp/overlay/lower3/file3.txt
+
+# Same file in multiple layers (highest priority wins)
+echo "From layer 1" &gt; /tmp/overlay/lower1/common.txt
+echo "From layer 2" &gt; /tmp/overlay/lower2/common.txt
+
+# Mount with multiple lower layers (left to right = high to low priority)
+mount -t overlay overlay \
+  -o lowerdir=/tmp/overlay/lower1:/tmp/overlay/lower2:/tmp/overlay/lower3,upperdir=/tmp/overlay/upper,workdir=/tmp/overlay/work \
+  /tmp/overlay/merged
+
+# Merged view shows all files
+ls /tmp/overlay/merged/
+# file1.txt file2.txt file3.txt common.txt
+
+# common.txt comes from lower1 (highest priority)
+cat /tmp/overlay/merged/common.txt
+# From layer 1
+
+# Layer ordering matters: lower1 &gt; lower2 &gt; lower3
+</code></pre>
+<h4 id="layer-limits"><a class="header" href="#layer-limits">Layer Limits</a></h4>
+<pre><code class="language-bash"># Maximum number of lower layers varies by kernel version
+# Kernel &lt; 4.13: ~500 layers
+# Kernel &gt;= 4.13: ~500 layers (practical limit)
+# Kernel &gt;= 5.11: ~500 layers (with performance optimizations)
+
+# Check overlay module info
+modinfo overlay | grep -i layer
+</code></pre>
+<h3 id="container-integration"><a class="header" href="#container-integration">Container Integration</a></h3>
+<p>OverlayFS is the default storage driver for Docker and commonly used in Kubernetes.</p>
+<h4 id="docker-overlayfs-structure"><a class="header" href="#docker-overlayfs-structure">Docker OverlayFS Structure</a></h4>
+<pre><code class="language-bash"># Docker overlay2 storage driver layout
+/var/lib/docker/overlay2/
+├── l/                    # Shortened layer identifiers (symlinks)
+├── &lt;layer-id&gt;/
+│   ├── diff/            # Layer content
+│   ├── link             # Shortened identifier
+│   ├── lower            # Parent layer references
+│   └── work/            # Work directory
+└── &lt;layer-id&gt;/
+    └── merged/          # Container's merged filesystem (when running)
+
+# Inspect Docker storage driver
+docker info | grep -A5 "Storage Driver"
+
+# View layer information for image
+docker inspect nginx:latest | grep -A20 GraphDriver
+
+# View overlay mounts for running containers
+mount | grep overlay
+docker ps -q | xargs -I {} docker inspect -f '{{.GraphDriver.Data}}' {}
+</code></pre>
+<h4 id="docker-overlay2-mount-example"><a class="header" href="#docker-overlay2-mount-example">Docker Overlay2 Mount Example</a></h4>
+<pre><code class="language-bash"># When a container runs, Docker creates overlay mount
+# Example mount command (simplified):
+mount -t overlay overlay \
+  -o lowerdir=/var/lib/docker/overlay2/l/ABC:/var/lib/docker/overlay2/l/DEF:/var/lib/docker/overlay2/l/GHI,\
+     upperdir=/var/lib/docker/overlay2/xyz/diff,\
+     workdir=/var/lib/docker/overlay2/xyz/work \
+  /var/lib/docker/overlay2/xyz/merged
+
+# Container's root filesystem is at merged/
+# All changes go to upperdir (container layer)
+# Image layers are in lowerdir (read-only)
+</code></pre>
+<h4 id="kubernetes-and-containerd"><a class="header" href="#kubernetes-and-containerd">Kubernetes and containerd</a></h4>
+<pre><code class="language-bash"># containerd uses overlay snapshots
+/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/
+
+# View containerd snapshots
+ctr -n k8s.io snapshots ls
+
+# Kubernetes pod overlay mounts
+mount | grep overlay | grep kube
+</code></pre>
+<h3 id="advanced-features"><a class="header" href="#advanced-features">Advanced Features</a></h3>
+<h4 id="redirect_dir"><a class="header" href="#redirect_dir">redirect_dir</a></h4>
+<p>Allows directory rename/merge operations to be more efficient.</p>
+<pre><code class="language-bash"># Mount with redirect_dir (requires kernel &gt;= 4.10)
+mount -t overlay overlay \
+  -o redirect_dir=on,lowerdir=/lower,upperdir=/upper,workdir=/work \
+  /merged
+
+# Directory renames don't require full copy
+# Instead, xattr marks redirect: trusted.overlay.redirect
+</code></pre>
+<h4 id="index"><a class="header" href="#index">index</a></h4>
+<p>Improves performance and fixes hardlink issues.</p>
+<pre><code class="language-bash"># Mount with index feature (requires kernel &gt;= 4.13)
+mount -t overlay overlay \
+  -o index=on,lowerdir=/lower,upperdir=/upper,workdir=/work \
+  /merged
+
+# Index directory created in work directory
+ls /work/index/
+
+# Hardlinks work correctly across layers
+# Inode numbers are consistent
+</code></pre>
+<h4 id="metacopy"><a class="header" href="#metacopy">metacopy</a></h4>
+<p>Optimizes small metadata-only changes.</p>
+<pre><code class="language-bash"># Mount with metacopy (requires kernel &gt;= 4.19)
+mount -t overlay overlay \
+  -o metacopy=on,lowerdir=/lower,upperdir=/upper,workdir=/work \
+  /merged
+
+# For metadata-only changes (chmod, chown), only metadata copied
+# Data remains in lower layer (efficient)
+</code></pre>
+<h4 id="xino"><a class="header" href="#xino">xino</a></h4>
+<p>Provides unique inode numbers across layers.</p>
+<pre><code class="language-bash"># Mount with xino (requires kernel &gt;= 4.17)
+mount -t overlay overlay \
+  -o xino=on,lowerdir=/lower,upperdir=/upper,workdir=/work \
+  /merged
+
+# Ensures unique inode numbers even with multiple layers
+# Prevents inode collisions
+</code></pre>
+<h3 id="performance-and-limitations"><a class="header" href="#performance-and-limitations">Performance and Limitations</a></h3>
+<h4 id="performance-characteristics"><a class="header" href="#performance-characteristics">Performance Characteristics</a></h4>
+<pre><code class="language-bash"># Read performance:
+# - Lower layer reads: Fast, direct from lower filesystem
+# - Upper layer reads: Fast, direct from upper filesystem
+# - Merged metadata operations: Slight overhead
+
+# Write performance:
+# - New files: Fast, written directly to upper
+# - Modified files: First write incurs copy-up cost
+# - Large files: Significant copy-up penalty
+
+# Directory operations:
+# - Readdir: Must merge entries from all layers (can be slow)
+# - Directory rename: Complex, may require copying
+</code></pre>
+<h4 id="limitations"><a class="header" href="#limitations">Limitations</a></h4>
+<pre><code class="language-bash"># 1. Copy-up of large files is expensive
+# Workaround: Use volumes for large mutable files
+
+# 2. Some operations not supported on lower layers
+# - Extended attributes may not work correctly
+# Workaround: Use specific mount options (xattr, noxattr)
+
+# 3. Limited inode operations
+# - Hardlinks across layers may not work without index=on
+
+# 4. Nested overlays can cause issues
+# Don't mount overlay on top of another overlay
+
+# 5. File descriptor inconsistency
+# After copy-up, existing file descriptors point to lower file
+# New opens point to upper file
+
+# 6. Rename limitations
+# Some complex rename operations may fail or be inefficient
+</code></pre>
+<h4 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h4>
+<pre><code class="language-bash"># 1. Use volumes for databases and large files
+docker run -v /host/data:/container/data ...
+
+# 2. Minimize layer count (merge layers in Dockerfile)
+RUN apt-get update &amp;&amp; apt-get install -y pkg1 pkg2 &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# 3. Enable modern features
+mount -o index=on,xino=on,redirect_dir=on ...
+
+# 4. Use appropriate filesystem for upper/lower
+# - Upper: Fast filesystem with xattr support (ext4, xfs)
+# - Lower: Can be anything, even compressed squashfs
+
+# 5. Monitor overlay usage
+du -sh /var/lib/docker/overlay2/
+docker system df -v
+</code></pre>
+<h3 id="overlayfs-troubleshooting"><a class="header" href="#overlayfs-troubleshooting">OverlayFS Troubleshooting</a></h3>
+<h4 id="error-upperdir-is-in-use"><a class="header" href="#error-upperdir-is-in-use">Error: upperdir is in-use</a></h4>
+<pre><code class="language-bash"># Error message:
+# overlayfs: upperdir is in-use as upperdir/workdir of another mount
+
+# Cause: Directory already used by another overlay mount
+
+# Solution 1: Unmount existing overlay
+umount /merged
+
+# Solution 2: Use different upper/work directories
+mkdir /upper2 /work2
+mount -t overlay overlay -o lowerdir=/lower,upperdir=/upper2,workdir=/work2 /merged
+
+# Solution 3: Check for stale mounts
+mount | grep overlay
+findmnt -t overlay
+</code></pre>
+<h4 id="error-workdir-and-upperdir-must-be-separate"><a class="header" href="#error-workdir-and-upperdir-must-be-separate">Error: workdir and upperdir must be separate</a></h4>
+<pre><code class="language-bash"># Error message:
+# overlayfs: workdir and upperdir must be separate subtrees
+
+# Cause: Work directory inside upper directory or vice versa
+
+# Solution: Use separate directories
+mkdir -p /overlay/{upper,work}  # Siblings, not nested
+mount -t overlay overlay -o lowerdir=/lower,upperdir=/overlay/upper,workdir=/overlay/work /merged
+</code></pre>
+<h4 id="error-failed-to-resolve-lowerdir"><a class="header" href="#error-failed-to-resolve-lowerdir">Error: failed to resolve lowerdir</a></h4>
+<pre><code class="language-bash"># Error message:
+# overlayfs: failed to resolve 'lowerdir': -2
+
+# Cause: Lower directory doesn't exist or path incorrect
+
+# Solution: Verify all directories exist
+mkdir -p /lower /upper /work /merged
+ls -ld /lower /upper /work
+</code></pre>
+<h4 id="whiteouts-visible"><a class="header" href="#whiteouts-visible">Whiteouts Visible</a></h4>
+<pre><code class="language-bash"># If you see character devices (0:0) in merged view, overlay is not working
+
+# Check mount options
+mount | grep overlay
+
+# Verify proper mount
+findmnt -t overlay
+
+# Remount with correct options
+umount /merged
+mount -t overlay overlay -o lowerdir=/lower,upperdir=/upper,workdir=/work /merged
+</code></pre>
+<h4 id="permission-denied-after-copy-up"><a class="header" href="#permission-denied-after-copy-up">Permission Denied After Copy-Up</a></h4>
+<pre><code class="language-bash"># Issue: File becomes inaccessible after modification
+
+# Check filesystem xattr support
+tune2fs -l /dev/sda1 | grep xattr
+
+# Enable user_xattr if needed
+mount -o remount,user_xattr /upper
+
+# Or in fstab:
+# /dev/sda1 /upper ext4 user_xattr 0 2
+</code></pre>
+<h4 id="debugging-overlayfs"><a class="header" href="#debugging-overlayfs">Debugging OverlayFS</a></h4>
+<pre><code class="language-bash"># Enable overlay debugging (requires debugfs)
+mount -t debugfs debugfs /sys/kernel/debug
+echo 1 &gt; /sys/kernel/debug/overlayfs
+
+# View kernel logs
+dmesg | grep overlay
+
+# Check overlay mount details
+cat /proc/mounts | grep overlay
+
+# Inspect file origin (which layer it comes from)
+getfattr -n trusted.overlay.origin /merged/file.txt
+
+# Check if directory is opaque
+getfattr -n trusted.overlay.opaque /merged/dir/
+</code></pre>
+<h2 id="mount-operations"><a class="header" href="#mount-operations">Mount Operations</a></h2>
+<p>Mounting attaches a filesystem to the directory tree at a specific point (mount point).</p>
+<h3 id="basic-mounting"><a class="header" href="#basic-mounting">Basic Mounting</a></h3>
+<pre><code class="language-bash"># Mount device to directory
+mount /dev/sdb1 /mnt/data
+
+# Mount with specific filesystem type
+mount -t ext4 /dev/sdb1 /mnt/data
+
+# Mount with options
+mount -o ro,noatime /dev/sdb1 /mnt/data
+
+# Mount all filesystems in /etc/fstab
+mount -a
+
+# Mount by label
+mount LABEL=mydata /mnt/data
+
+# Mount by UUID
+mount UUID=12345678-1234-1234-1234-123456789abc /mnt/data
+
+# Unmount
+umount /mnt/data
+# Or by device
+umount /dev/sdb1
+</code></pre>
+<h3 id="mount-options"><a class="header" href="#mount-options">Mount Options</a></h3>
+<p>Mount options control filesystem behavior. Options are specified with -o and comma-separated.</p>
+<h4 id="generic-mount-options"><a class="header" href="#generic-mount-options">Generic Mount Options</a></h4>
+<pre><code class="language-bash"># Read-only / Read-write
+mount -o ro /dev/sdb1 /mnt/data    # Read-only
+mount -o rw /dev/sdb1 /mnt/data    # Read-write (default)
+
+# Access time updates
+mount -o atime /dev/sdb1 /mnt/data      # Update access time (default)
+mount -o noatime /dev/sdb1 /mnt/data    # Don't update access time (faster)
+mount -o relatime /dev/sdb1 /mnt/data   # Update if older than mtime (default on modern systems)
+mount -o nodiratime /dev/sdb1 /mnt/data # Don't update directory access times
+
+# Synchronous I/O
+mount -o sync /dev/sdb1 /mnt/data      # All I/O synchronous (slow, safe)
+mount -o async /dev/sdb1 /mnt/data     # Asynchronous I/O (default)
+
+# Execution and device files
+mount -o exec /dev/sdb1 /mnt/data      # Allow execution (default)
+mount -o noexec /dev/sdb1 /mnt/data    # Prevent execution
+mount -o dev /dev/sdb1 /mnt/data       # Allow device files (default)
+mount -o nodev /dev/sdb1 /mnt/data     # Ignore device files
+mount -o suid /dev/sdb1 /mnt/data      # Allow setuid/setgid (default)
+mount -o nosuid /dev/sdb1 /mnt/data    # Ignore setuid/setgid
+
+# User mounts
+mount -o user /dev/sdb1 /mnt/data      # Allow user to mount
+mount -o users /dev/sdb1 /mnt/data     # Allow any user to mount
+mount -o nouser /dev/sdb1 /mnt/data    # Only root can mount (default)
+
+# Automatic mounting
+mount -o auto /dev/sdb1 /mnt/data      # Can be mounted with -a (default)
+mount -o noauto /dev/sdb1 /mnt/data    # Skip with -a
+
+# Common combined options for security
+mount -o noexec,nodev,nosuid /dev/sdb1 /mnt/data
+</code></pre>
+<h4 id="filesystem-specific-options"><a class="header" href="#filesystem-specific-options">Filesystem-Specific Options</a></h4>
+<pre><code class="language-bash"># ext4 options
+mount -o data=journal /dev/sdb1 /mnt      # Journal data and metadata
+mount -o data=ordered /dev/sdb1 /mnt      # Journal metadata only (default)
+mount -o data=writeback /dev/sdb1 /mnt    # No data ordering
+mount -o barrier=1 /dev/sdb1 /mnt         # Enable write barriers
+mount -o nobarrier /dev/sdb1 /mnt         # Disable write barriers
+mount -o journal_checksum /dev/sdb1 /mnt  # Enable journal checksums
+mount -o discard /dev/sdb1 /mnt           # Enable TRIM for SSDs
+mount -o nodiscard /dev/sdb1 /mnt         # Disable TRIM
+
+# XFS options
+mount -o logbufs=8 /dev/sdb1 /mnt         # Number of log buffers
+mount -o logbsize=256k /dev/sdb1 /mnt     # Log buffer size
+mount -o nobarrier /dev/sdb1 /mnt         # Disable write barriers
+mount -o discard /dev/sdb1 /mnt           # Enable TRIM
+
+# Btrfs options
+mount -o compress=zstd /dev/sdb1 /mnt     # Enable compression
+mount -o compress-force=lzo /dev/sdb1 /mnt # Force compression
+mount -o space_cache=v2 /dev/sdb1 /mnt    # Free space cache version
+mount -o ssd /dev/sdb1 /mnt               # SSD optimizations
+mount -o nossd /dev/sdb1 /mnt             # Disable SSD optimizations
+mount -o subvol=name /dev/sdb1 /mnt       # Mount specific subvolume
+mount -o subvolid=256 /dev/sdb1 /mnt      # Mount by subvolume ID
+
+# tmpfs options
+mount -t tmpfs -o size=1G tmpfs /mnt      # Size limit
+mount -t tmpfs -o nr_inodes=10k tmpfs /mnt # Inode limit
+mount -t tmpfs -o mode=1777 tmpfs /mnt    # Permissions
+mount -t tmpfs -o uid=1000,gid=1000 tmpfs /mnt # Owner
+
+# NTFS-3G options
+mount -t ntfs-3g -o uid=1000,gid=1000 /dev/sdb1 /mnt  # User ownership
+mount -t ntfs-3g -o permissions /dev/sdb1 /mnt        # Unix permissions
+mount -t ntfs-3g -o windows_names /dev/sdb1 /mnt      # Windows filename rules
+
+# NFS options
+mount -t nfs -o vers=4.2 server:/export /mnt          # NFS version
+mount -t nfs -o soft,timeo=30 server:/export /mnt     # Soft mount with timeout
+mount -t nfs -o hard,intr server:/export /mnt         # Hard mount, interruptible
+mount -t nfs -o tcp server:/export /mnt               # Use TCP (default for NFSv4)
+mount -t nfs -o udp server:/export /mnt               # Use UDP
+</code></pre>
+<h3 id="fstab-configuration"><a class="header" href="#fstab-configuration">fstab Configuration</a></h3>
+<p>The <code>/etc/fstab</code> file defines filesystems to be mounted at boot.</p>
+<h4 id="fstab-format"><a class="header" href="#fstab-format">fstab Format</a></h4>
+<pre><code class="language-bash"># /etc/fstab format:
+# &lt;device&gt; &lt;mount point&gt; &lt;type&gt; &lt;options&gt; &lt;dump&gt; &lt;pass&gt;
+
+# Example entries:
+UUID=12345678-1234-1234-1234-123456789abc /               ext4    errors=remount-ro 0 1
+UUID=abcdef12-3456-7890-abcd-ef1234567890 /home           ext4    defaults,noatime  0 2
+UUID=11111111-2222-3333-4444-555555555555 none            swap    sw                0 0
+/dev/sdb1                                   /mnt/data     ext4    defaults,nofail   0 2
+LABEL=backup                                /mnt/backup   xfs     defaults,noauto   0 0
+tmpfs                                       /tmp          tmpfs   defaults,size=2G  0 0
+server.example.com:/export                  /mnt/nfs      nfs     defaults,_netdev  0 0
+
+# Fields:
+# 1. Device: /dev/sdX, UUID, LABEL, or remote path
+# 2. Mount point: Where to mount
+# 3. Filesystem type: ext4, xfs, btrfs, nfs, etc.
+# 4. Options: Comma-separated mount options
+# 5. Dump: Backup with dump command (0=no, 1=yes)
+# 6. Pass: fsck order (0=skip, 1=root, 2=other)
+</code></pre>
+<h4 id="common-fstab-patterns"><a class="header" href="#common-fstab-patterns">Common fstab Patterns</a></h4>
+<pre><code class="language-bash"># Root filesystem (errors=remount-ro protects system)
+UUID=xxx / ext4 errors=remount-ro 0 1
+
+# Home with noatime for performance
+UUID=xxx /home ext4 defaults,noatime 0 2
+
+# Swap space
+UUID=xxx none swap sw 0 0
+
+# Data partition (nofail allows boot if device missing)
+UUID=xxx /mnt/data ext4 defaults,nofail 0 2
+
+# External drive (noauto prevents automatic mount)
+LABEL=backup /mnt/backup ext4 defaults,noauto 0 0
+
+# Removable media with user mount permission
+/dev/sdc1 /media/usb vfat defaults,noauto,user,uid=1000,gid=1000 0 0
+
+# tmpfs for /tmp
+tmpfs /tmp tmpfs defaults,noatime,mode=1777,size=2G 0 0
+
+# NFS mount (_netdev waits for network)
+server:/export /mnt/nfs nfs defaults,_netdev 0 0
+
+# Bind mount
+/home/user/docs /var/www/docs none bind 0 0
+
+# OverlayFS (advanced)
+overlay /merged overlay noauto,x-systemd.requires-mounts-for=/lower:/upper,lowerdir=/lower,upperdir=/upper,workdir=/work 0 0
+</code></pre>
+<h4 id="uuid-and-label-discovery"><a class="header" href="#uuid-and-label-discovery">UUID and Label Discovery</a></h4>
+<pre><code class="language-bash"># Find UUID
+blkid /dev/sdb1
+lsblk -f /dev/sdb1
+ls -l /dev/disk/by-uuid/
+
+# Find label
+blkid -s LABEL /dev/sdb1
+e2label /dev/sdb1                # ext2/3/4
+xfs_admin -l /dev/sdb1           # XFS
+btrfs filesystem label /mnt/data # Btrfs
+
+# Set label
+e2label /dev/sdb1 newlabel       # ext2/3/4
+xfs_admin -L newlabel /dev/sdb1  # XFS
+tune2fs -L newlabel /dev/sdb1    # ext2/3/4
+</code></pre>
+<h3 id="systemd-mount-units"><a class="header" href="#systemd-mount-units">Systemd Mount Units</a></h3>
+<p>Systemd can manage mounts with unit files, providing better control and dependencies.</p>
+<pre><code class="language-bash"># Create mount unit: /etc/systemd/system/mnt-data.mount
+[Unit]
+Description=Data partition
+After=local-fs-pre.target
+
+[Mount]
+What=/dev/disk/by-uuid/12345678-1234-1234-1234-123456789abc
+Where=/mnt/data
+Type=ext4
+Options=defaults,noatime
+
+[Install]
+WantedBy=multi-user.target
+
+# Enable and start
+systemctl daemon-reload
+systemctl enable mnt-data.mount
+systemctl start mnt-data.mount
+
+# Status
+systemctl status mnt-data.mount
+
+# Note: Unit name must match mount path with dashes
+# /mnt/data -&gt; mnt-data.mount
+# /mnt/my-data -&gt; mnt-my\x2ddata.mount (escape dashes with \x2d)
+</code></pre>
+<h3 id="bind-mounts"><a class="header" href="#bind-mounts">Bind Mounts</a></h3>
+<p>Bind mounts make a directory appear at another location.</p>
+<pre><code class="language-bash"># Create bind mount
+mount --bind /source/dir /dest/dir
+
+# Read-only bind mount
+mount --bind /source/dir /dest/dir
+mount -o remount,ro,bind /dest/dir
+
+# Recursive bind mount (include submounts)
+mount --rbind /source/dir /dest/dir
+
+# Bind mount in fstab
+/source/dir /dest/dir none bind 0 0
+/source/dir /dest/dir none rbind 0 0
+
+# Use cases:
+# - Exposing directories in chroots
+# - Container filesystem isolation
+# - Sharing directories without symlinks
+</code></pre>
+<h3 id="mount-propagation"><a class="header" href="#mount-propagation">Mount Propagation</a></h3>
+<p>Mount propagation controls how mount/unmount events propagate between mount namespaces. See <a href="namespace.html">namespace.md</a> for detailed coverage.</p>
+<pre><code class="language-bash"># Make mount shared (propagates to/from peers)
+mount --make-shared /mnt/data
+
+# Make mount private (no propagation)
+mount --make-private /mnt/data
+
+# Make mount slave (receive but don't send propagation)
+mount --make-slave /mnt/data
+
+# Make mount unbindable (prevent bind mounts)
+mount --make-unbindable /mnt/data
+
+# Recursive versions
+mount --make-rshared /mnt/data
+mount --make-rprivate /mnt/data
+mount --make-rslave /mnt/data
+mount --make-runbindable /mnt/data
+
+# View propagation
+findmnt -o TARGET,PROPAGATION
+cat /proc/self/mountinfo
+</code></pre>
+<h3 id="remounting-and-unmounting"><a class="header" href="#remounting-and-unmounting">Remounting and Unmounting</a></h3>
+<pre><code class="language-bash"># Remount with different options (no unmount required)
+mount -o remount,ro /mnt/data       # Change to read-only
+mount -o remount,rw /mnt/data       # Change to read-write
+mount -o remount,noatime /mnt/data  # Add noatime option
+
+# Normal unmount
+umount /mnt/data
+
+# Force unmount (kills processes using filesystem)
+umount -f /mnt/data
+
+# Lazy unmount (detach immediately, cleanup when no longer busy)
+umount -l /mnt/data
+
+# Unmount all filesystems of a type
+umount -a -t nfs
+
+# Find processes using a filesystem
+lsof /mnt/data
+fuser -m /mnt/data
+fuser -km /mnt/data  # Kill processes
+</code></pre>
+<h3 id="mount-inspection"><a class="header" href="#mount-inspection">Mount Inspection</a></h3>
+<pre><code class="language-bash"># Show all mounts
+mount
+
+# Show specific filesystem types
+mount -t ext4
+
+# findmnt (modern, structured output)
+findmnt                          # Tree view
+findmnt -l                       # List view
+findmnt /mnt/data                # Specific mount point
+findmnt /dev/sdb1                # By device
+findmnt -t ext4                  # By type
+findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS  # Custom columns
+
+# /proc/mounts (kernel view)
+cat /proc/mounts
+
+# /etc/mtab (user-space view, usually symlink to /proc/self/mounts)
+cat /etc/mtab
+
+# lsblk (block device tree)
+lsblk
+lsblk -f                         # Include filesystem info
+lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT,UUID
+
+# df (disk usage)
+df -h                            # Human-readable
+df -T                            # Include filesystem type
+df -i                            # Inode usage
+
+# /proc/self/mountinfo (detailed propagation info)
+cat /proc/self/mountinfo
+</code></pre>
+<h2 id="filesystem-management"><a class="header" href="#filesystem-management">Filesystem Management</a></h2>
+<h3 id="creating-filesystems"><a class="header" href="#creating-filesystems">Creating Filesystems</a></h3>
+<pre><code class="language-bash"># Generic mkfs command (calls appropriate mkfs.*)
+mkfs -t ext4 /dev/sdb1
+
+# Specific mkfs commands
+mkfs.ext4 /dev/sdb1
+mkfs.xfs /dev/sdb1
+mkfs.btrfs /dev/sdb1
+mkfs.vfat /dev/sdb1
+mkfs.exfat /dev/sdb1
+
+# Warning: This destroys all data on the device!
+# Always verify device name before running mkfs
+
+# Common options:
+# -L label      Set filesystem label
+# -m percent    Reserved blocks percentage (ext4)
+# -n            Dry run (ext4)
+# -f            Force creation
+
+# Verify device first
+lsblk
+fdisk -l /dev/sdb
+</code></pre>
+<h3 id="checking-and-repairing"><a class="header" href="#checking-and-repairing">Checking and Repairing</a></h3>
+<p>Filesystem checking should be done on unmounted filesystems (or read-only mounts).</p>
+<pre><code class="language-bash"># ext2/ext3/ext4
+fsck.ext4 /dev/sdb1               # Check and repair
+fsck.ext4 -n /dev/sdb1            # Check only (no modifications)
+fsck.ext4 -p /dev/sdb1            # Automatic repair (safe)
+fsck.ext4 -y /dev/sdb1            # Answer yes to all questions
+fsck.ext4 -f /dev/sdb1            # Force check even if clean
+
+# XFS
+xfs_repair /dev/sdb1              # Check and repair
+xfs_repair -n /dev/sdb1           # Check only (no modifications)
+xfs_repair -L /dev/sdb1           # Zero log (last resort)
+xfs_repair -v /dev/sdb1           # Verbose output
+
+# Btrfs
+btrfs check /dev/sdb1             # Check filesystem
+btrfs check --repair /dev/sdb1    # Dangerous! Backup first
+btrfs scrub start /mnt/btrfs      # Online check (while mounted)
+btrfs scrub status /mnt/btrfs
+
+# FAT
+fsck.vfat /dev/sdb1               # Check and repair
+fsck.vfat -a /dev/sdb1            # Automatic repair
+fsck.vfat -n /dev/sdb1            # Check only
+
+# Generic fsck (detects type automatically)
+fsck /dev/sdb1
+fsck -A                            # Check all in /etc/fstab
+fsck -AR                           # Check all except root
+</code></pre>
+<h3 id="resizing-filesystems"><a class="header" href="#resizing-filesystems">Resizing Filesystems</a></h3>
+<p>Always backup before resizing!</p>
+<pre><code class="language-bash"># ext2/ext3/ext4
+# Shrink requires unmount, grow can be online
+e2fsck -f /dev/sdb1                # Must check first
+resize2fs /dev/sdb1 50G            # Resize to 50GB
+resize2fs /dev/sdb1                # Grow to partition size
+
+# XFS (can only grow, not shrink)
+xfs_growfs /mnt/data               # Grow to device size (must be mounted)
+xfs_growfs -D 13107200 /mnt/data   # Grow to specific size (blocks)
+
+# Btrfs (online resize)
+btrfs filesystem resize +10G /mnt/data   # Grow by 10GB
+btrfs filesystem resize -5G /mnt/data    # Shrink by 5GB
+btrfs filesystem resize max /mnt/data    # Grow to device size
+btrfs filesystem resize 1:+10G /mnt/data # Resize specific device in multi-device FS
+
+# Typical workflow:
+# 1. Resize partition (fdisk, parted, etc.)
+# 2. Resize filesystem
+
+# Example: Growing ext4
+parted /dev/sdb resizepart 1 100%
+resize2fs /dev/sdb1
+
+# Example: Shrinking ext4
+umount /mnt/data
+e2fsck -f /dev/sdb1
+resize2fs /dev/sdb1 50G
+parted /dev/sdb resizepart 1 50GB
+mount /dev/sdb1 /mnt/data
+</code></pre>
+<h3 id="tuning-parameters"><a class="header" href="#tuning-parameters">Tuning Parameters</a></h3>
+<pre><code class="language-bash"># ext2/ext3/ext4 (tune2fs)
+tune2fs -l /dev/sdb1                    # List parameters
+tune2fs -L newlabel /dev/sdb1           # Set label
+tune2fs -m 1 /dev/sdb1                  # Reserved blocks (1%)
+tune2fs -c 0 /dev/sdb1                  # Disable mount count check
+tune2fs -i 0 /dev/sdb1                  # Disable time-based check
+tune2fs -O ^has_journal /dev/sdb1       # Remove journal (ext4-&gt;ext2)
+tune2fs -O has_journal /dev/sdb1        # Add journal
+tune2fs -o journal_data_writeback /dev/sdb1  # Default mount options
+
+# XFS (xfs_admin)
+xfs_admin -l /dev/sdb1                  # Show label
+xfs_admin -L newlabel /dev/sdb1         # Set label
+xfs_admin -u /dev/sdb1                  # Show UUID
+xfs_admin -U generate /dev/sdb1         # Generate new UUID
+
+# Btrfs (btrfs property)
+btrfs filesystem label /mnt/data newlabel  # Set label
+btrfs property get /mnt/data            # Get properties
+btrfs property set /mnt/data compression zstd  # Set property
+</code></pre>
+<h3 id="labels-and-uuids"><a class="header" href="#labels-and-uuids">Labels and UUIDs</a></h3>
+<pre><code class="language-bash"># View label and UUID
+blkid /dev/sdb1
+lsblk -f /dev/sdb1
+
+# Set label
+e2label /dev/sdb1 newlabel              # ext2/3/4
+tune2fs -L newlabel /dev/sdb1           # ext2/3/4
+xfs_admin -L newlabel /dev/sdb1         # XFS
+btrfs filesystem label /mnt/data newlabel  # Btrfs
+fatlabel /dev/sdb1 newlabel             # FAT
+exfatlabel /dev/sdb1 newlabel           # exFAT
+
+# Set UUID
+tune2fs -U random /dev/sdb1             # ext2/3/4 (generate)
+tune2fs -U 12345678-1234-1234-1234-123456789abc /dev/sdb1  # ext2/3/4 (specific)
+xfs_admin -U generate /dev/sdb1         # XFS (generate)
+xfs_admin -U 12345678-1234-1234-1234-123456789abc /dev/sdb1  # XFS (specific)
+btrfstune -U 12345678-1234-1234-1234-123456789abc /dev/sdb1  # Btrfs
+</code></pre>
+<h3 id="monitoring"><a class="header" href="#monitoring">Monitoring</a></h3>
+<pre><code class="language-bash"># Disk space usage
+df -h                                   # Human-readable
+df -i                                   # Inodes
+df -T                                   # Include filesystem type
+
+# Directory usage
+du -sh /path/to/dir                     # Summary
+du -h --max-depth=1 /path/to/dir        # One level deep
+du -ah /path/to/dir | sort -h           # All files, sorted
+
+# Filesystem statistics
+stat -f /mnt/data                       # Filesystem stats
+stat /mnt/data/file                     # File stats
+
+# ext4 specific
+dumpe2fs /dev/sdb1                      # Detailed filesystem info
+tune2fs -l /dev/sdb1                    # Superblock info
+
+# XFS specific
+xfs_info /mnt/data                      # Filesystem geometry
+xfs_db -r -c "freesp -s" /dev/sdb1      # Free space analysis
+
+# Btrfs specific
+btrfs filesystem show                   # All Btrfs filesystems
+btrfs filesystem usage /mnt/data        # Usage breakdown
+btrfs device stats /mnt/data            # Device statistics
+
+# ZFS specific
+zpool list                              # Pool summary
+zfs list                                # Dataset list
+zpool iostat -v 1                       # I/O stats (1 sec interval)
+
+# I/O statistics
+iostat -x 1                             # Extended I/O stats (1 sec interval)
+iotop                                   # Top-like I/O monitor
+</code></pre>
+<h2 id="performance-considerations"><a class="header" href="#performance-considerations">Performance Considerations</a></h2>
+<h3 id="io-schedulers"><a class="header" href="#io-schedulers">I/O Schedulers</a></h3>
+<p>The I/O scheduler determines how I/O requests are ordered and dispatched to block devices.</p>
+<pre><code class="language-bash"># View current scheduler
+cat /sys/block/sda/queue/scheduler
+# Output: [mq-deadline] none kyber bfq
+# Brackets indicate active scheduler
+
+# Available schedulers (modern multi-queue)
+# none        - No scheduling (direct dispatch)
+# mq-deadline - Deadline-based (good general purpose)
+# kyber       - Token-based (low latency)
+# bfq         - Budget Fair Queueing (desktop, interactive)
+
+# Change scheduler (temporary)
+echo mq-deadline &gt; /sys/block/sda/queue/scheduler
+echo bfq &gt; /sys/block/sda/queue/scheduler
+
+# Change scheduler permanently (kernel parameter)
+# Add to GRUB_CMDLINE_LINUX in /etc/default/grub:
+# elevator=mq-deadline
+
+# Or with udev rule (/etc/udev/rules.d/60-scheduler.rules):
+# ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/scheduler}="mq-deadline"
+# ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
+
+# Recommendations:
+# - SSDs/NVMe: none or mq-deadline
+# - HDDs: mq-deadline or bfq
+# - Virtual machines: none (let hypervisor handle)
+# - Database servers: mq-deadline
+# - Desktops: bfq
+</code></pre>
+<h3 id="mount-options-for-performance"><a class="header" href="#mount-options-for-performance">Mount Options for Performance</a></h3>
+<pre><code class="language-bash"># Reduce writes (improves SSD lifespan and performance)
+mount -o noatime,nodiratime /dev/sdb1 /mnt/data
+# noatime: Don't update access time on reads
+# relatime: Update access time only if mtime is newer (default, good compromise)
+
+# Commit interval (seconds between periodic syncs)
+mount -o commit=60 /dev/sdb1 /mnt/data
+# Default: 5 seconds
+# Higher value = less frequent writes, more data loss potential
+
+# Disable barriers (only if hardware has battery-backed cache)
+mount -o nobarrier /dev/sdb1 /mnt/data
+# Dangerous without protected cache!
+
+# ext4 writeback mode (metadata only journaling)
+mount -o data=writeback /dev/sdb1 /mnt/data
+# Fastest, least safe
+
+# Async mount (default, but explicit)
+mount -o async /dev/sdb1 /mnt/data
+
+# Optimal options for performance (SSD with integrity trade-off)
+mount -o noatime,nodiratime,commit=60,data=writeback /dev/sdb1 /mnt/data
+</code></pre>
+<h3 id="ssd-optimizations"><a class="header" href="#ssd-optimizations">SSD Optimizations</a></h3>
+<pre><code class="language-bash"># Enable TRIM/discard
+mount -o discard /dev/sdb1 /mnt/data
+# Immediate TRIM on file deletion (may impact performance)
+
+# Periodic TRIM (preferred for most SSDs)
+# Enabled by fstrim.timer systemd unit
+systemctl status fstrim.timer
+systemctl enable fstrim.timer
+
+# Manual TRIM
+fstrim -v /mnt/data
+fstrim -av                  # All mounted filesystems
+
+# Check TRIM support
+lsblk -D
+# DISC-GRAN and DISC-MAX show TRIM granularity and max discard size
+
+# XFS discard options
+mount -o discard /dev/sdb1 /mnt/data           # Async discard
+
+# Btrfs discard
+mount -o discard=async /dev/sdb1 /mnt/data     # Async discard (recommended)
+mount -o discard=sync /dev/sdb1 /mnt/data      # Sync discard
+
+# F2FS (already SSD-optimized)
+mount -o background_gc=on /dev/sdb1 /mnt/data
+
+# Check SSD write amplification
+# ZFS: zpool iostat -v
+# Btrfs: btrfs device stats /mnt/data
+</code></pre>
+<h3 id="block-size-and-inode-sizing"><a class="header" href="#block-size-and-inode-sizing">Block Size and Inode Sizing</a></h3>
+<pre><code class="language-bash"># ext4 block size (set at creation)
+mkfs.ext4 -b 4096 /dev/sdb1            # 4KB blocks (default, recommended)
+mkfs.ext4 -b 1024 /dev/sdb1            # 1KB blocks (many small files)
+# Larger blocks waste space with small files
+# Smaller blocks add overhead for large files
+
+# ext4 inode size
+mkfs.ext4 -I 256 /dev/sdb1             # 256 bytes (default)
+mkfs.ext4 -I 512 /dev/sdb1             # 512 bytes (more space for extended attributes)
+# Larger inodes support more extended attributes and nanosecond timestamps
+
+# ext4 inode ratio (bytes per inode)
+mkfs.ext4 -i 16384 /dev/sdb1           # One inode per 16KB (default)
+mkfs.ext4 -i 4096 /dev/sdb1            # One inode per 4KB (many small files)
+# More inodes = less data space but supports more files
+
+# XFS block size
+mkfs.xfs -b size=4096 /dev/sdb1        # 4KB blocks
+
+# Btrfs node size (metadata)
+mkfs.btrfs -n 16384 /dev/sdb1          # 16KB (default)
+mkfs.btrfs -n 32768 /dev/sdb1          # 32KB (large filesystems)
+
+# ZFS recordsize (like block size)
+zfs set recordsize=128K pool/dataset   # 128KB (large sequential I/O)
+zfs set recordsize=8K pool/dataset     # 8KB (databases, random I/O)
+zfs set recordsize=1M pool/dataset     # 1MB (video/large files)
+</code></pre>
+<h3 id="journal-tuning"><a class="header" href="#journal-tuning">Journal Tuning</a></h3>
+<pre><code class="language-bash"># ext4 journal size (set at creation)
+mkfs.ext4 -J size=128 /dev/sdb1        # 128MB journal
+# Larger journal = longer recovery, more write buffering
+
+# ext4 journal options
+mount -o journal_checksum /dev/sdb1 /mnt/data     # Enable checksums (safety)
+mount -o journal_async_commit /dev/sdb1 /mnt/data # Async commit (performance)
+
+# ext4 journal on separate device
+mkfs.ext4 -J device=/dev/sdc1 /dev/sdb1
+
+# Remove ext4 journal (convert to ext2)
+tune2fs -O ^has_journal /dev/sdb1
+# Only for read-heavy workloads on reliable systems
+
+# XFS journal (log) size
+mkfs.xfs -l size=128m /dev/sdb1        # 128MB log
+
+# XFS log buffer tuning
+mount -o logbufs=8,logbsize=256k /dev/sdb1 /mnt/data
+# More buffers and larger size = better performance for write-heavy workloads
+</code></pre>
+<h3 id="read-ahead-tuning"><a class="header" href="#read-ahead-tuning">Read-Ahead Tuning</a></h3>
+<p>Read-ahead prefetches data from disk to improve sequential read performance.</p>
+<pre><code class="language-bash"># View current read-ahead (in 512-byte sectors)
+blockdev --getra /dev/sda
+# Typical default: 256 (128 KB)
+
+# Set read-ahead (in 512-byte sectors)
+blockdev --setra 512 /dev/sda          # 256 KB
+blockdev --setra 1024 /dev/sda         # 512 KB
+blockdev --setra 4096 /dev/sda         # 2 MB
+
+# Set permanently with udev rule (/etc/udev/rules.d/60-readahead.rules):
+# ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{bdi/read_ahead_kb}="512"
+
+# Recommendations:
+# - Sequential workloads: Higher (2-4 MB)
+# - Random workloads: Lower (128-256 KB)
+# - SSDs: Moderate (256-512 KB)
+# - HDDs: Higher (512 KB - 2 MB)
+</code></pre>
+<h3 id="filesystem-specific-optimizations"><a class="header" href="#filesystem-specific-optimizations">Filesystem-Specific Optimizations</a></h3>
+<pre><code class="language-bash"># ext4: Enable fast commits (kernel &gt;= 5.10)
+mount -o fast_commit /dev/sdb1 /mnt/data
+
+# XFS: Allocation group count (parallelism)
+mkfs.xfs -d agcount=16 /dev/sdb1
+# More AGs = better parallel I/O
+
+# Btrfs: Space cache v2 (better performance)
+mount -o space_cache=v2 /dev/sdb1 /mnt/data
+
+# Btrfs: Compression (can improve performance with fast CPU)
+mount -o compress=lzo /dev/sdb1 /mnt/data      # Fast compression
+mount -o compress=zstd:3 /dev/sdb1 /mnt/data   # Balanced
+
+# ZFS: ARC size tuning
+# Edit /etc/modprobe.d/zfs.conf:
+# options zfs zfs_arc_max=8589934592  # 8GB
+# options zfs zfs_arc_min=4294967296  # 4GB
+
+# ZFS: Compression
+zfs set compression=lz4 pool/dataset   # Fast, good ratio
+zfs set compression=zstd pool/dataset  # Better ratio, slower
+
+# F2FS: Background GC
+mount -o background_gc=on /dev/sdb1 /mnt/data
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="container-storage-with-overlayfs"><a class="header" href="#container-storage-with-overlayfs">Container Storage with OverlayFS</a></h3>
+<pre><code class="language-bash"># Manual container-like overlay setup
+mkdir -p /var/lib/mycontainer/{lower,upper,work,merged}
+
+# Lower layer: base image
+mkdir -p /var/lib/mycontainer/lower/{bin,lib,etc}
+# ... populate base system ...
+
+# Mount overlay for container
+mount -t overlay overlay \
+  -o lowerdir=/var/lib/mycontainer/lower,\
+     upperdir=/var/lib/mycontainer/upper,\
+     workdir=/var/lib/mycontainer/work \
+  /var/lib/mycontainer/merged
+
+# Run process in container root
+chroot /var/lib/mycontainer/merged /bin/bash
+
+# Cleanup
+umount /var/lib/mycontainer/merged
+</code></pre>
+<h3 id="ram-disk-creation"><a class="header" href="#ram-disk-creation">RAM Disk Creation</a></h3>
+<pre><code class="language-bash"># Create 1GB tmpfs RAM disk
+mkdir /mnt/ramdisk
+mount -t tmpfs -o size=1G tmpfs /mnt/ramdisk
+
+# Use cases:
+# - Temporary build directory
+tmpfs /tmp/build tmpfs size=4G,mode=0755 0 0
+
+# - Browser cache
+tmpfs /home/user/.cache tmpfs size=2G,uid=1000,gid=1000 0 0
+
+# - Application temporary files
+mkdir /mnt/appcache
+mount -t tmpfs -o size=512M,mode=0700 tmpfs /mnt/appcache
+</code></pre>
+<h3 id="encrypted-filesystems"><a class="header" href="#encrypted-filesystems">Encrypted Filesystems</a></h3>
+<pre><code class="language-bash"># Install cryptsetup (LUKS)
+apt install cryptsetup
+
+# Create encrypted device
+cryptsetup luksFormat /dev/sdb1
+# Enter passphrase
+
+# Open encrypted device
+cryptsetup luksOpen /dev/sdb1 encrypted_data
+# Enter passphrase
+
+# Create filesystem on encrypted device
+mkfs.ext4 /dev/mapper/encrypted_data
+
+# Mount
+mount /dev/mapper/encrypted_data /mnt/encrypted
+
+# Unmount and close
+umount /mnt/encrypted
+cryptsetup luksClose encrypted_data
+
+# Add to /etc/crypttab for automatic mounting
+# encrypted_data UUID=xxx none luks
+
+# Add to /etc/fstab
+# /dev/mapper/encrypted_data /mnt/encrypted ext4 defaults 0 2
+
+# Key file instead of passphrase
+dd if=/dev/urandom of=/root/keyfile bs=1024 count=4
+chmod 0400 /root/keyfile
+cryptsetup luksAddKey /dev/sdb1 /root/keyfile
+# In /etc/crypttab:
+# encrypted_data UUID=xxx /root/keyfile luks
+</code></pre>
+<h3 id="lvm-integration"><a class="header" href="#lvm-integration">LVM Integration</a></h3>
+<pre><code class="language-bash"># Create physical volume
+pvcreate /dev/sdb1
+
+# Create volume group
+vgcreate myvg /dev/sdb1
+
+# Create logical volume
+lvcreate -L 10G -n mylv myvg
+
+# Create filesystem
+mkfs.ext4 /dev/myvg/mylv
+
+# Mount
+mount /dev/myvg/mylv /mnt/data
+
+# LVM snapshots
+lvcreate -L 2G -s -n mylv_snap /dev/myvg/mylv
+mount /dev/myvg/mylv_snap /mnt/snapshot
+
+# Extend logical volume
+lvextend -L +5G /dev/myvg/mylv
+resize2fs /dev/myvg/mylv
+
+# Merge snapshot back (revert changes)
+umount /mnt/data
+lvconvert --merge /dev/myvg/mylv_snap
+mount /dev/myvg/mylv /mnt/data
+</code></pre>
+<h3 id="snapshot-workflows"><a class="header" href="#snapshot-workflows">Snapshot Workflows</a></h3>
+<pre><code class="language-bash"># Btrfs snapshots for backups
+btrfs subvolume snapshot -r /mnt/data /mnt/data/.snapshots/$(date +%Y%m%d)
+
+# Automatic snapshot script
+#!/bin/bash
+DATE=$(date +%Y%m%d-%H%M%S)
+btrfs subvolume snapshot -r /mnt/data /mnt/data/.snapshots/$DATE
+# Keep only last 7 days
+find /mnt/data/.snapshots -maxdepth 1 -type d -mtime +7 -exec btrfs subvolume delete {} \;
+
+# ZFS snapshots
+zfs snapshot pool/data@$(date +%Y%m%d)
+
+# Automatic ZFS snapshots (zfs-auto-snapshot package)
+apt install zfs-auto-snapshot
+# Creates frequent, hourly, daily, weekly, monthly snapshots
+
+# List ZFS snapshots
+zfs list -t snapshot
+
+# Rollback to snapshot
+zfs rollback pool/data@20250114
+</code></pre>
+<h3 id="quota-management"><a class="header" href="#quota-management">Quota Management</a></h3>
+<pre><code class="language-bash"># ext4 quotas
+# Enable quotas at mount
+mount -o usrquota,grpquota /dev/sdb1 /mnt/data
+
+# Or in fstab
+# /dev/sdb1 /mnt/data ext4 defaults,usrquota,grpquota 0 2
+
+# Create quota files
+quotacheck -cugm /mnt/data
+
+# Enable quotas
+quotaon /mnt/data
+
+# Set quota for user
+edquota -u username
+# Or with command:
+setquota -u username 10G 12G 0 0 /mnt/data
+# soft=10GB hard=12GB, 0 inodes (unlimited)
+
+# Set quota for group
+setquota -g groupname 50G 55G 0 0 /mnt/data
+
+# View quota
+quota -u username
+repquota -a
+
+# XFS quotas (project quotas)
+mount -o prjquota /dev/sdb1 /mnt/data
+
+# Define project
+echo "42:/mnt/data/project1" &gt;&gt; /etc/projects
+echo "project1:42" &gt;&gt; /etc/projid
+
+# Initialize project
+xfs_quota -x -c 'project -s project1' /mnt/data
+
+# Set project quota
+xfs_quota -x -c 'limit -p bsoft=10g bhard=12g project1' /mnt/data
+
+# View project quota
+xfs_quota -x -c 'report -ph' /mnt/data
+
+# ZFS quotas
+zfs set quota=100G pool/data
+zfs set refquota=50G pool/data              # Exclude snapshots
+zfs set userquota@username=10G pool/data
+zfs set groupquota@groupname=50G pool/data
+</code></pre>
+<h3 id="extended-attributes-and-acls"><a class="header" href="#extended-attributes-and-acls">Extended Attributes and ACLs</a></h3>
+<pre><code class="language-bash"># Extended attributes (xattr)
+# Set attribute
+setfattr -n user.comment -v "Important file" file.txt
+
+# Get attribute
+getfattr -n user.comment file.txt
+
+# List all attributes
+getfattr -d file.txt
+
+# Remove attribute
+setfattr -x user.comment file.txt
+
+# ACLs (Access Control Lists)
+# Set ACL
+setfacl -m u:username:rw file.txt           # User permission
+setfacl -m g:groupname:rx file.txt          # Group permission
+setfacl -m o::r file.txt                    # Other permission
+
+# View ACL
+getfacl file.txt
+
+# Remove specific ACL
+setfacl -x u:username file.txt
+
+# Remove all ACLs
+setfacl -b file.txt
+
+# Default ACLs (for directories)
+setfacl -d -m u:username:rwx /mnt/data/dir  # New files inherit
+
+# Copy ACLs
+getfacl source.txt | setfacl --set-file=- dest.txt
+
+# Enable ACLs at mount (usually enabled by default)
+mount -o acl /dev/sdb1 /mnt/data
+</code></pre>
+<h3 id="network-filesystems"><a class="header" href="#network-filesystems">Network Filesystems</a></h3>
+<pre><code class="language-bash"># NFS mount
+mount -t nfs server.example.com:/export /mnt/nfs
+
+# NFS with options
+mount -t nfs -o vers=4.2,soft,timeo=30,retrans=3 server:/export /mnt/nfs
+
+# CIFS/SMB mount
+mount -t cifs //server/share /mnt/smb -o username=user,password=pass
+
+# CIFS with credentials file
+# Create /root/.smbcredentials:
+# username=user
+# password=pass
+chmod 0600 /root/.smbcredentials
+mount -t cifs //server/share /mnt/smb -o credentials=/root/.smbcredentials,uid=1000,gid=1000
+
+# SSHFS (FUSE)
+sshfs user@server:/remote/path /mnt/sshfs
+fusermount -u /mnt/sshfs  # Unmount
+</code></pre>
+<h3 id="loop-device-mounting"><a class="header" href="#loop-device-mounting">Loop Device Mounting</a></h3>
+<pre><code class="language-bash"># Mount disk image
+mount -o loop disk.img /mnt/image
+
+# Mount ISO
+mount -o loop ubuntu.iso /mnt/iso
+
+# Create disk image
+dd if=/dev/zero of=disk.img bs=1M count=1024  # 1GB
+mkfs.ext4 disk.img
+mount -o loop disk.img /mnt/image
+
+# Automatic loop device
+losetup -f                          # Find free loop device
+losetup /dev/loop0 disk.img         # Attach
+mount /dev/loop0 /mnt/image
+umount /mnt/image
+losetup -d /dev/loop0               # Detach
+
+# Multiple partitions in image
+losetup -P /dev/loop0 disk.img      # Scan partitions
+mount /dev/loop0p1 /mnt/part1
+</code></pre>
+<h2 id="best-practices-1"><a class="header" href="#best-practices-1">Best Practices</a></h2>
+<h3 id="filesystem-selection"><a class="header" href="#filesystem-selection">Filesystem Selection</a></h3>
+<pre><code class="language-bash"># General purpose (root, home):
+# - ext4: Stable, well-tested, good performance
+# - XFS: Better for large files, cannot shrink
+
+# Large files and databases:
+# - XFS: Excellent performance
+# - ext4: Also good
+
+# Snapshots and advanced features:
+# - Btrfs: Built-in snapshots, compression, RAID
+# - ZFS: Most advanced features, requires more RAM
+
+# SSDs and flash:
+# - F2FS: Optimized for flash
+# - ext4: Also works well with TRIM
+
+# Containers:
+# - OverlayFS: Standard for Docker
+# - Btrfs: Alternative with native snapshots
+# - ZFS: Alternative with native snapshots (requires setup)
+
+# Temporary/cache:
+# - tmpfs: RAM-based, very fast
+
+# Removable media:
+# - FAT32/exFAT: Windows/Mac compatibility
+# - ext4: Linux-only, better features
+</code></pre>
+<h3 id="security"><a class="header" href="#security">Security</a></h3>
+<pre><code class="language-bash"># Mount options for security
+# /tmp and /var/tmp should prevent execution
+tmpfs /tmp tmpfs defaults,noexec,nodev,nosuid 0 0
+
+# User-writable locations
+/dev/sdb1 /mnt/usb ext4 defaults,noexec,nodev,nosuid 0 0
+
+# Network filesystems
+server:/export /mnt/nfs nfs defaults,nosuid,nodev,_netdev 0 0
+
+# Filesystem encryption
+# Use LUKS for block device encryption
+
+# Secure deletion
+# Some filesystems support secure deletion via extended attributes
+chattr +s file.txt  # ext4 (may not be effective on SSDs)
+
+# Immutable files (prevent deletion/modification)
+chattr +i file.txt
+chattr -i file.txt  # Remove immutable flag
+</code></pre>
+<h3 id="partition-alignment"><a class="header" href="#partition-alignment">Partition Alignment</a></h3>
+<pre><code class="language-bash"># Modern tools (parted, fdisk &gt;= 2.26) align automatically to 1MiB
+# This is optimal for most disks
+
+# Check alignment
+parted /dev/sdb align-check opt 1
+
+# Create aligned partition with parted
+parted /dev/sdb
+(parted) mklabel gpt
+(parted) mkpart primary 0% 100%
+(parted) align-check opt 1
+
+# Manual alignment (rarely needed)
+# Start at 2048 sectors (1MiB) for traditional tools
+fdisk /dev/sdb
+# First sector: 2048
+</code></pre>
+<h3 id="backup-strategies"><a class="header" href="#backup-strategies">Backup Strategies</a></h3>
+<pre><code class="language-bash"># Filesystem snapshots
+# - Instant, space-efficient
+# - Btrfs: btrfs subvolume snapshot
+# - ZFS: zfs snapshot
+# - LVM: lvcreate -s
+
+# File-level backups
+# - rsync: Incremental, efficient
+# - tar: Archives, compression
+# - restic/borg: Deduplication, encryption
+
+# Block-level backups
+# - dd: Raw copy (slow, complete)
+# - partclone: Filesystem-aware (faster)
+
+# Remote backups
+# - Btrfs send/receive
+# - ZFS send/receive
+# - rsync over SSH
+
+# Example: Btrfs incremental backup
+btrfs subvolume snapshot -r /data /data/.snap/$(date +%Y%m%d)
+btrfs send -p /data/.snap/20250113 /data/.snap/20250114 | ssh backup 'btrfs receive /backup/'
+
+# Example: ZFS incremental backup
+zfs snapshot pool/data@$(date +%Y%m%d)
+zfs send -i pool/data@20250113 pool/data@20250114 | ssh backup 'zfs receive pool/backup'
+</code></pre>
+<h3 id="monitoring-1"><a class="header" href="#monitoring-1">Monitoring</a></h3>
+<pre><code class="language-bash"># Regular checks
+# - Disk space: df -h
+# - Inode usage: df -i
+# - Filesystem errors: dmesg | grep -i error
+# - SMART status: smartctl -a /dev/sda
+
+# Automated monitoring
+# - Set up alerts for low disk space
+# - Monitor filesystem errors in logs
+# - Schedule regular scrubs (Btrfs, ZFS)
+
+# Example: Disk space alert
+df -h | awk '$5+0 &gt; 90 {print "Warning: " $1 " is " $5 " full"}'
+
+# Btrfs scrub schedule (monthly)
+# Systemd timer: /etc/systemd/system/btrfs-scrub.timer
+# [Timer]
+# OnCalendar=monthly
+
+# ZFS scrub schedule (monthly)
+# Cron: 0 0 1 * * zpool scrub pool
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="filesystem-corruption"><a class="header" href="#filesystem-corruption">Filesystem Corruption</a></h3>
+<pre><code class="language-bash"># Symptoms:
+# - I/O errors in dmesg
+# - Mount failures
+# - Read-only remount
+# - File access errors
+
+# Check dmesg for errors
+dmesg | tail -50
+dmesg | grep -i error
+
+# Unmount filesystem
+umount /mnt/data
+# If busy:
+lsof /mnt/data
+fuser -km /mnt/data
+umount /mnt/data
+
+# Check and repair
+fsck.ext4 -f /dev/sdb1     # ext4
+xfs_repair /dev/sdb1       # XFS
+btrfs check /dev/sdb1      # Btrfs (unmounted only)
+
+# If automatic repair fails
+fsck.ext4 -y /dev/sdb1     # Answer yes to all
+
+# Last resort (ext4)
+fsck.ext4 -b 32768 /dev/sdb1  # Use backup superblock
+
+# Check SMART status for hardware issues
+smartctl -a /dev/sda
+</code></pre>
+<h3 id="read-only-filesystem"><a class="header" href="#read-only-filesystem">Read-Only Filesystem</a></h3>
+<pre><code class="language-bash"># Causes:
+# - Filesystem errors detected
+# - Mount option explicitly ro
+# - Write error triggering remount-ro
+
+# Check mount options
+mount | grep /mnt/data
+
+# Check filesystem errors
+dmesg | grep -i "read-only"
+
+# Remount read-write
+mount -o remount,rw /mnt/data
+
+# If remount fails, filesystem check needed
+umount /mnt/data
+fsck /dev/sdb1
+mount /dev/sdb1 /mnt/data
+</code></pre>
+<h3 id="mount-failures"><a class="header" href="#mount-failures">Mount Failures</a></h3>
+<pre><code class="language-bash"># Error: mount: unknown filesystem type 'xfs'
+# Solution: Install filesystem tools
+apt install xfsprogs     # XFS
+apt install btrfs-progs  # Btrfs
+apt install zfsutils-linux  # ZFS
+
+# Error: mount: wrong fs type, bad option, bad superblock
+# Solution 1: Specify filesystem type
+mount -t ext4 /dev/sdb1 /mnt/data
+
+# Solution 2: Check superblock
+dumpe2fs /dev/sdb1 | grep superblock  # ext4
+xfs_db -r -c "sb 0" -c "p" /dev/sdb1  # XFS
+
+# Solution 3: Try backup superblock
+mount -o sb=32768 /dev/sdb1 /mnt/data
+
+# Error: device or resource busy
+# Solution: Find and stop processes
+lsof /mnt/data
+fuser -m /mnt/data
+fuser -km /mnt/data  # Kill processes
+
+# Error: structure needs cleaning
+# Solution: Run fsck
+fsck /dev/sdb1
+</code></pre>
+<h3 id="no-space-left-on-device"><a class="header" href="#no-space-left-on-device">No Space Left on Device</a></h3>
+<pre><code class="language-bash"># Check disk space
+df -h /mnt/data
+
+# Check inode usage (can run out even with space available)
+df -i /mnt/data
+
+# If inodes exhausted:
+# Find directories with many files
+find /mnt/data -xdev -type d -exec sh -c 'echo "$(ls -a {} | wc -l) {}"' \; | sort -n | tail
+
+# Solutions:
+# - Delete unnecessary files
+# - Recreate filesystem with more inodes
+mkfs.ext4 -i 4096 /dev/sdb1  # One inode per 4KB
+
+# Check for deleted but open files (still consuming space)
+lsof +L1 /mnt/data
+# Kill or restart processes holding deleted files
+</code></pre>
+<h3 id="permission-denied-with-acls"><a class="header" href="#permission-denied-with-acls">Permission Denied with ACLs</a></h3>
+<pre><code class="language-bash"># Check ACLs
+getfacl /mnt/data/file.txt
+
+# Check if filesystem supports ACLs
+mount | grep /mnt/data
+
+# Enable ACLs at mount
+mount -o remount,acl /mnt/data
+
+# Or in /etc/fstab
+/dev/sdb1 /mnt/data ext4 defaults,acl 0 2
+
+# Reset ACLs
+setfacl -b /mnt/data/file.txt
+</code></pre>
+<h3 id="overlayfs-issues"><a class="header" href="#overlayfs-issues">OverlayFS Issues</a></h3>
+<p>See <a href="#overlayfs-troubleshooting">OverlayFS Troubleshooting</a> section above for detailed OverlayFS-specific issues.</p>
+<h3 id="performance-degradation"><a class="header" href="#performance-degradation">Performance Degradation</a></h3>
+<pre><code class="language-bash"># Check I/O statistics
+iostat -x 1 5                # 5 samples, 1 second apart
+
+# Look for:
+# - High %util: Device saturated
+# - High await: I/O latency
+# - High r_await/w_await: Read/write latency
+
+# Check for fragmentation (ext4)
+e4defrag -c /mnt/data        # Check fragmentation
+e4defrag /mnt/data           # Defragment
+
+# XFS fragmentation
+xfs_db -r -c frag /dev/sdb1  # Check
+xfs_fsr /mnt/data            # Defragment
+
+# Btrfs defragmentation
+btrfs filesystem defragment -r /mnt/data
+
+# Check for failing disk
+smartctl -a /dev/sda
+smartctl -t short /dev/sda   # Run short test
+smartctl -t long /dev/sda    # Run long test
+
+# Check for swap thrashing
+free -h
+vmstat 1
+
+# Check for inode exhaustion
+df -i
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="filesystem-comparison"><a class="header" href="#filesystem-comparison">Filesystem Comparison</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>ext4</th><th>XFS</th><th>Btrfs</th><th>ZFS</th><th>F2FS</th></tr></thead><tbody>
+<tr><td>Stability</td><td>Excellent</td><td>Excellent</td><td>Good</td><td>Excellent</td><td>Good</td></tr>
+<tr><td>Max File Size</td><td>16 TiB</td><td>8 EiB</td><td>16 EiB</td><td>16 EiB</td><td>3.94 TiB</td></tr>
+<tr><td>Max Volume Size</td><td>1 EiB</td><td>8 EiB</td><td>16 EiB</td><td>256 ZiB</td><td>3.94 TiB</td></tr>
+<tr><td>Journaling</td><td>Yes</td><td>Yes</td><td>CoW</td><td>CoW</td><td>Yes</td></tr>
+<tr><td>Snapshots</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+<tr><td>Compression</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Deduplication</td><td>No</td><td>No</td><td>Limited</td><td>Yes</td><td>No</td></tr>
+<tr><td>Online Resize</td><td>Grow</td><td>Grow</td><td>Both</td><td>N/A</td><td>No</td></tr>
+<tr><td>RAID Support</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+<tr><td>SSD Optimization</td><td>TRIM</td><td>TRIM</td><td>TRIM</td><td>TRIM</td><td>Native</td></tr>
+<tr><td>Maturity</td><td>Mature</td><td>Mature</td><td>Maturing</td><td>Mature</td><td>Newer</td></tr>
+</tbody></table>
+</div>
+<h3 id="common-mount-options"><a class="header" href="#common-mount-options">Common Mount Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>ro</code></td><td>Mount read-only</td></tr>
+<tr><td><code>rw</code></td><td>Mount read-write (default)</td></tr>
+<tr><td><code>noatime</code></td><td>Don't update access times</td></tr>
+<tr><td><code>nodiratime</code></td><td>Don't update directory access times</td></tr>
+<tr><td><code>relatime</code></td><td>Update access time if older than modify time (default)</td></tr>
+<tr><td><code>noexec</code></td><td>Prevent execution of binaries</td></tr>
+<tr><td><code>nodev</code></td><td>Ignore device files</td></tr>
+<tr><td><code>nosuid</code></td><td>Ignore setuid/setgid bits</td></tr>
+<tr><td><code>sync</code></td><td>Synchronous I/O</td></tr>
+<tr><td><code>async</code></td><td>Asynchronous I/O (default)</td></tr>
+<tr><td><code>user</code></td><td>Allow user to mount</td></tr>
+<tr><td><code>noauto</code></td><td>Don't mount with <code>mount -a</code></td></tr>
+<tr><td><code>nofail</code></td><td>Don't fail boot if device missing</td></tr>
+<tr><td><code>_netdev</code></td><td>Network device (wait for network)</td></tr>
+</tbody></table>
+</div>
+<h3 id="command-cheat-sheet"><a class="header" href="#command-cheat-sheet">Command Cheat Sheet</a></h3>
+<pre><code class="language-bash"># Filesystem creation
+mkfs.ext4 /dev/sdb1
+mkfs.xfs /dev/sdb1
+mkfs.btrfs /dev/sdb1
+mkfs.vfat /dev/sdb1
+
+# Mounting
+mount /dev/sdb1 /mnt/data
+mount -t ext4 -o noatime /dev/sdb1 /mnt/data
+umount /mnt/data
+
+# Checking
+fsck.ext4 /dev/sdb1
+xfs_repair /dev/sdb1
+btrfs check /dev/sdb1
+
+# Resizing
+resize2fs /dev/sdb1
+xfs_growfs /mnt/data
+btrfs filesystem resize max /mnt/data
+
+# Information
+df -h
+df -i
+lsblk -f
+blkid
+findmnt
+
+# Tuning
+tune2fs -l /dev/sdb1
+tune2fs -L mylabel /dev/sdb1
+xfs_admin -l /dev/sdb1
+
+# Btrfs specific
+btrfs subvolume create /mnt/data/subvol
+btrfs subvolume snapshot /mnt/data /mnt/data/snap
+btrfs filesystem usage /mnt/data
+
+# ZFS specific
+zpool create pool /dev/sdb
+zfs create pool/dataset
+zfs snapshot pool/dataset@snap
+zfs send pool/dataset@snap | zfs receive backup/dataset
+
+# OverlayFS
+mount -t overlay overlay -o lowerdir=/lower,upperdir=/upper,workdir=/work /merged
+</code></pre>
+<h3 id="filesystem-limits"><a class="header" href="#filesystem-limits">Filesystem Limits</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Filesystem</th><th>Max File Size</th><th>Max Volume Size</th><th>Max Filename</th><th>Max Path</th></tr></thead><tbody>
+<tr><td>ext4</td><td>16 TiB</td><td>1 EiB</td><td>255 bytes</td><td>4096 bytes</td></tr>
+<tr><td>XFS</td><td>8 EiB</td><td>8 EiB</td><td>255 bytes</td><td>4096 bytes</td></tr>
+<tr><td>Btrfs</td><td>16 EiB</td><td>16 EiB</td><td>255 bytes</td><td>4096 bytes</td></tr>
+<tr><td>ZFS</td><td>16 EiB</td><td>256 ZiB</td><td>255 bytes</td><td>No limit</td></tr>
+<tr><td>FAT32</td><td>4 GiB</td><td>2 TiB</td><td>255 chars</td><td>No limit</td></tr>
+<tr><td>exFAT</td><td>16 EiB</td><td>64 ZiB</td><td>255 chars</td><td>No limit</td></tr>
+<tr><td>NTFS</td><td>16 EiB</td><td>16 EiB</td><td>255 chars</td><td>32767 chars</td></tr>
+</tbody></table>
+</div>
+<h3 id="performance-characteristics-1"><a class="header" href="#performance-characteristics-1">Performance Characteristics</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Filesystem</th><th>Sequential Read</th><th>Sequential Write</th><th>Random Read</th><th>Random Write</th><th>Metadata</th></tr></thead><tbody>
+<tr><td>ext4</td><td>Excellent</td><td>Excellent</td><td>Very Good</td><td>Very Good</td><td>Good</td></tr>
+<tr><td>XFS</td><td>Excellent</td><td>Excellent</td><td>Very Good</td><td>Very Good</td><td>Excellent</td></tr>
+<tr><td>Btrfs</td><td>Very Good</td><td>Good</td><td>Good</td><td>Good</td><td>Good</td></tr>
+<tr><td>ZFS</td><td>Excellent</td><td>Good</td><td>Very Good</td><td>Good</td><td>Very Good</td></tr>
+<tr><td>F2FS</td><td>Very Good</td><td>Excellent</td><td>Very Good</td><td>Excellent</td><td>Good</td></tr>
+<tr><td>tmpfs</td><td>Excellent</td><td>Excellent</td><td>Excellent</td><td>Excellent</td><td>Excellent</td></tr>
+</tbody></table>
+</div>
+<p>Note: Performance varies greatly based on hardware, configuration, and workload. These are general characteristics.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../networking/rtp.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../linux/namespace.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../networking/rtp.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../linux/namespace.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

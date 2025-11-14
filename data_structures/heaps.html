@@ -187,34 +187,838 @@
 <li>
 <p><strong>Complete Binary Tree</strong>: Heaps are typically implemented as complete binary trees, where all levels are fully filled except possibly for the last level, which is filled from left to right.</p>
 </li>
+<li>
+<p><strong>Array Representation</strong>: Heaps are efficiently stored in arrays where for any element at index <code>i</code>:</p>
+<ul>
+<li>Parent: <code>(i - 1) / 2</code></li>
+<li>Left Child: <code>2 * i + 1</code></li>
+<li>Right Child: <code>2 * i + 2</code></li>
 </ul>
-<h2 id="common-operations"><a class="header" href="#common-operations">Common Operations</a></h2>
+</li>
+<li>
+<p><strong>Height</strong>: A heap with <code>n</code> elements has height $O(\log n)$, which makes many operations logarithmic.</p>
+</li>
+</ul>
+<h2 id="types-of-heaps"><a class="header" href="#types-of-heaps">Types of Heaps</a></h2>
+<h3 id="binary-heap"><a class="header" href="#binary-heap">Binary Heap</a></h3>
+<ul>
+<li><strong>Min Heap</strong>: Parent is smaller than or equal to children. Root contains minimum element.</li>
+<li><strong>Max Heap</strong>: Parent is greater than or equal to children. Root contains maximum element.</li>
+<li>Most common and straightforward implementation.</li>
+</ul>
+<h3 id="d-ary-heap"><a class="header" href="#d-ary-heap">D-ary Heap</a></h3>
+<ul>
+<li>Each node has <code>d</code> children instead of 2.</li>
+<li>Better cache performance for large datasets.</li>
+<li>Trade-off: Faster insertion, slower deletion.</li>
+</ul>
+<h3 id="fibonacci-heap"><a class="header" href="#fibonacci-heap">Fibonacci Heap</a></h3>
+<ul>
+<li>Collection of trees satisfying min/max heap property.</li>
+<li>Supports amortized $O(1)$ for insert, decrease-key, and merge operations.</li>
+<li>Used in advanced graph algorithms (Dijkstra, Prim).</li>
+</ul>
+<h3 id="binomial-heap"><a class="header" href="#binomial-heap">Binomial Heap</a></h3>
+<ul>
+<li>Collection of binomial trees.</li>
+<li>Supports efficient merge operation in $O(\log n)$.</li>
+<li>Each binomial tree satisfies heap property.</li>
+</ul>
+<h2 id="implementation-details"><a class="header" href="#implementation-details">Implementation Details</a></h2>
+<h3 id="array-representation"><a class="header" href="#array-representation">Array Representation</a></h3>
+<p>A heap can be efficiently represented as an array:</p>
+<pre><code>Array:  [1, 3, 6, 5, 9, 8]
+Tree:       1
+           / \
+          3   6
+         / \  /
+        5  9 8
+</code></pre>
+<p><strong>Index Formulas (0-indexed):</strong></p>
+<ul>
+<li>Parent of node at index <code>i</code>: <code>⌊(i-1)/2⌋</code></li>
+<li>Left child of node at index <code>i</code>: <code>2i + 1</code></li>
+<li>Right child of node at index <code>i</code>: <code>2i + 2</code></li>
+</ul>
+<p><strong>Index Formulas (1-indexed):</strong></p>
+<ul>
+<li>Parent of node at index <code>i</code>: <code>⌊i/2⌋</code></li>
+<li>Left child of node at index <code>i</code>: <code>2i</code></li>
+<li>Right child of node at index <code>i</code>: <code>2i + 1</code></li>
+</ul>
+<h2 id="detailed-operations"><a class="header" href="#detailed-operations">Detailed Operations</a></h2>
+<h3 id="1-insertion-push"><a class="header" href="#1-insertion-push">1. Insertion (Push)</a></h3>
+<p><strong>Process:</strong></p>
+<ol>
+<li>Add the new element at the end of the array (next available position)</li>
+<li>"Bubble up" (percolate up): Compare with parent and swap if heap property is violated</li>
+<li>Continue until heap property is restored or reach root</li>
+</ol>
+<p><strong>Time Complexity:</strong> $O(\log n)$
+<strong>Space Complexity:</strong> $O(1)$</p>
+<p><strong>Pseudocode:</strong></p>
+<pre><code>insert(heap, value):
+    heap.append(value)
+    index = heap.size - 1
+
+    while index &gt; 0:
+        parent = (index - 1) / 2
+        if heap[parent] &gt; heap[index]:  // for min heap
+            swap(heap[parent], heap[index])
+            index = parent
+        else:
+            break
+</code></pre>
+<h3 id="2-extract-minmax-pop"><a class="header" href="#2-extract-minmax-pop">2. Extract Min/Max (Pop)</a></h3>
+<p><strong>Process:</strong></p>
+<ol>
+<li>Save the root element (min/max) to return</li>
+<li>Replace root with the last element in the heap</li>
+<li>Remove the last element</li>
+<li>"Bubble down" (percolate down): Compare with children and swap with smaller/larger child if heap property is violated</li>
+<li>Continue until heap property is restored or reach leaf</li>
+</ol>
+<p><strong>Time Complexity:</strong> $O(\log n)$
+<strong>Space Complexity:</strong> $O(1)$</p>
+<p><strong>Pseudocode:</strong></p>
+<pre><code>extractMin(heap):
+    if heap.isEmpty():
+        return null
+
+    minValue = heap[0]
+    heap[0] = heap[heap.size - 1]
+    heap.removeLast()
+
+    index = 0
+    while true:
+        left = 2 * index + 1
+        right = 2 * index + 2
+        smallest = index
+
+        if left &lt; heap.size and heap[left] &lt; heap[smallest]:
+            smallest = left
+        if right &lt; heap.size and heap[right] &lt; heap[smallest]:
+            smallest = right
+
+        if smallest != index:
+            swap(heap[index], heap[smallest])
+            index = smallest
+        else:
+            break
+
+    return minValue
+</code></pre>
+<h3 id="3-peek-get-minmax"><a class="header" href="#3-peek-get-minmax">3. Peek (Get Min/Max)</a></h3>
+<p><strong>Process:</strong></p>
+<ul>
+<li>Simply return the root element without removing it</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(1)$
+<strong>Space Complexity:</strong> $O(1)$</p>
+<h3 id="4-heapify"><a class="header" href="#4-heapify">4. Heapify</a></h3>
+<p><strong>Process:</strong> Convert an arbitrary array into a heap.</p>
+<p><strong>Bottom-Up Approach (Optimal):</strong></p>
+<ol>
+<li>Start from the last non-leaf node: <code>⌊n/2⌋ - 1</code></li>
+<li>Apply "bubble down" operation on each node moving towards root</li>
+<li>This ensures all subtrees satisfy heap property before processing parent</li>
+</ol>
+<p><strong>Time Complexity:</strong> $O(n)$ - Though it seems $O(n \log n)$, mathematical analysis proves it's linear
+<strong>Space Complexity:</strong> $O(1)$ for iterative, $O(\log n)$ for recursive (call stack)</p>
+<p><strong>Pseudocode:</strong></p>
+<pre><code>heapify(array):
+    n = array.length
+    // Start from last non-leaf node
+    for i from (n/2 - 1) down to 0:
+        bubbleDown(array, i, n)
+
+bubbleDown(array, index, heapSize):
+    while true:
+        left = 2 * index + 1
+        right = 2 * index + 2
+        smallest = index
+
+        if left &lt; heapSize and array[left] &lt; array[smallest]:
+            smallest = left
+        if right &lt; heapSize and array[right] &lt; array[smallest]:
+            smallest = right
+
+        if smallest != index:
+            swap(array[index], array[smallest])
+            index = smallest
+        else:
+            break
+</code></pre>
+<h3 id="5-decrease-key-min-heap--increase-key-max-heap"><a class="header" href="#5-decrease-key-min-heap--increase-key-max-heap">5. Decrease Key (Min Heap) / Increase Key (Max Heap)</a></h3>
+<p><strong>Process:</strong></p>
+<ol>
+<li>Decrease the value at given index</li>
+<li>Bubble up to restore heap property</li>
+</ol>
+<p><strong>Time Complexity:</strong> $O(\log n)$
+<strong>Space Complexity:</strong> $O(1)$</p>
+<p><strong>Use Cases:</strong> Dijkstra's algorithm, Prim's algorithm</p>
+<h3 id="6-delete-arbitrary-element"><a class="header" href="#6-delete-arbitrary-element">6. Delete Arbitrary Element</a></h3>
+<p><strong>Process:</strong></p>
+<ol>
+<li>Replace element with the last element</li>
+<li>Remove last element</li>
+<li>Bubble up or bubble down as needed</li>
+</ol>
+<p><strong>Time Complexity:</strong> $O(\log n)$
+<strong>Space Complexity:</strong> $O(1)$</p>
+<h3 id="7-merge-two-heaps"><a class="header" href="#7-merge-two-heaps">7. Merge Two Heaps</a></h3>
+<p><strong>Process:</strong></p>
+<ul>
+<li><strong>Simple approach</strong>: Combine arrays and heapify: $O(n + m)$</li>
+<li><strong>For Fibonacci/Binomial heaps</strong>: More efficient merge operations</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(n + m)$ for binary heaps
+<strong>Space Complexity:</strong> $O(n + m)$ or $O(1)$ if in-place</p>
+<h2 id="common-patterns-and-use-cases"><a class="header" href="#common-patterns-and-use-cases">Common Patterns and Use Cases</a></h2>
+<h3 id="1-k-largestsmallest-elements"><a class="header" href="#1-k-largestsmallest-elements">1. K Largest/Smallest Elements</a></h3>
+<p><strong>Pattern:</strong> Use a min heap of size K to find K largest elements (or max heap for K smallest).</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Maintain a min heap of size K</li>
+<li>For each element, if it's larger than heap's minimum, remove min and add new element</li>
+<li>Final heap contains K largest elements</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(n \log k)$
+<strong>Space Complexity:</strong> $O(k)$</p>
+<p><strong>Example Problem:</strong> Find the Kth largest element in an array.</p>
+<pre><code class="language-python">def findKthLargest(nums, k):
+    heap = []
+    for num in nums:
+        heappush(heap, num)
+        if len(heap) &gt; k:
+            heappop(heap)
+    return heap[0]  # root of min heap
+</code></pre>
+<p><strong>Variations:</strong></p>
+<ul>
+<li>K largest elements in a stream</li>
+<li>K closest points to origin</li>
+<li>K most frequent elements</li>
+</ul>
+<h3 id="2-merge-k-sorted-listsarrays"><a class="header" href="#2-merge-k-sorted-listsarrays">2. Merge K Sorted Lists/Arrays</a></h3>
+<p><strong>Pattern:</strong> Use a min heap to efficiently merge K sorted sequences.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Add the first element from each list to a min heap (with list index tracking)</li>
+<li>Repeatedly extract min, add to result, and insert next element from same list</li>
+<li>Continue until all elements are processed</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(N \log k)$ where N is total elements
+<strong>Space Complexity:</strong> $O(k)$ for the heap</p>
+<p><strong>Example Problem:</strong> Merge K sorted linked lists.</p>
+<pre><code class="language-python">def mergeKLists(lists):
+    heap = []
+    result = []
+
+    # Initialize heap with first element from each list
+    for i, lst in enumerate(lists):
+        if lst:
+            heappush(heap, (lst[0], i, 0))  # (value, list_index, element_index)
+
+    while heap:
+        val, list_idx, elem_idx = heappop(heap)
+        result.append(val)
+
+        # Add next element from same list
+        if elem_idx + 1 &lt; len(lists[list_idx]):
+            next_val = lists[list_idx][elem_idx + 1]
+            heappush(heap, (next_val, list_idx, elem_idx + 1))
+
+    return result
+</code></pre>
+<p><strong>Variations:</strong></p>
+<ul>
+<li>Smallest range covering elements from K lists</li>
+<li>Merge K sorted arrays</li>
+</ul>
+<h3 id="3-median-maintenance-two-heaps"><a class="header" href="#3-median-maintenance-two-heaps">3. Median Maintenance (Two Heaps)</a></h3>
+<p><strong>Pattern:</strong> Use two heaps to maintain running median in a data stream.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li><strong>Max heap (left)</strong>: Stores smaller half of numbers</li>
+<li><strong>Min heap (right)</strong>: Stores larger half of numbers</li>
+<li>Balance: Ensure size difference is at most 1</li>
+<li>Median: If equal size, average of two tops; otherwise, top of larger heap</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(\log n)$ per insertion
+<strong>Space Complexity:</strong> $O(n)$</p>
+<p><strong>Example Problem:</strong> Find median from data stream.</p>
+<pre><code class="language-python">class MedianFinder:
+    def __init__(self):
+        self.small = []  # max heap (negate values)
+        self.large = []  # min heap
+
+    def addNum(self, num):
+        # Add to max heap (small)
+        heappush(self.small, -num)
+
+        # Balance: move largest from small to large
+        heappush(self.large, -heappop(self.small))
+
+        # Maintain size property
+        if len(self.small) &lt; len(self.large):
+            heappush(self.small, -heappop(self.large))
+
+    def findMedian(self):
+        if len(self.small) &gt; len(self.large):
+            return -self.small[0]
+        return (-self.small[0] + self.large[0]) / 2.0
+</code></pre>
+<p><strong>Variations:</strong></p>
+<ul>
+<li>Sliding window median</li>
+<li>Find median in specific range</li>
+</ul>
+<h3 id="4-sliding-window-maximumminimum"><a class="header" href="#4-sliding-window-maximumminimum">4. Sliding Window Maximum/Minimum</a></h3>
+<p><strong>Pattern:</strong> Use heap with lazy deletion or monotonic deque.</p>
+<p><strong>Approach with Heap:</strong></p>
+<ul>
+<li>Maintain a max heap with (value, index) pairs</li>
+<li>For each window, add new element</li>
+<li>Remove elements outside window (lazy deletion - check index)</li>
+<li>Top of heap is maximum for current window</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(n \log n)$
+<strong>Space Complexity:</strong> $O(n)$</p>
+<p><strong>Example Problem:</strong> Sliding window maximum.</p>
+<pre><code class="language-python">def maxSlidingWindow(nums, k):
+    heap = []
+    result = []
+
+    for i, num in enumerate(nums):
+        heappush(heap, (-num, i))  # max heap
+
+        if i &gt;= k - 1:
+            # Remove elements outside window
+            while heap and heap[0][1] &lt;= i - k:
+                heappop(heap)
+            result.append(-heap[0][0])
+
+    return result
+</code></pre>
+<p><strong>Note:</strong> Monotonic deque is more optimal $O(n)$ for this specific pattern.</p>
+<h3 id="5-top-k-frequent-elements"><a class="header" href="#5-top-k-frequent-elements">5. Top K Frequent Elements</a></h3>
+<p><strong>Pattern:</strong> Use heap to find most/least frequent elements.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Count frequency using hash map</li>
+<li>Use min heap of size K to track K most frequent</li>
+<li>Or use bucket sort for $O(n)$ solution</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(n \log k)$
+<strong>Space Complexity:</strong> $O(n)$</p>
+<p><strong>Example Problem:</strong> Top K frequent words.</p>
+<pre><code class="language-python">def topKFrequent(words, k):
+    from collections import Counter
+    count = Counter(words)
+
+    # Min heap of size k
+    heap = []
+    for word, freq in count.items():
+        heappush(heap, (freq, word))
+        if len(heap) &gt; k:
+            heappop(heap)
+
+    # Extract and reverse for descending order
+    result = []
+    while heap:
+        result.append(heappop(heap)[1])
+    return result[::-1]
+</code></pre>
+<h3 id="6-task-scheduling--meeting-rooms"><a class="header" href="#6-task-scheduling--meeting-rooms">6. Task Scheduling / Meeting Rooms</a></h3>
+<p><strong>Pattern:</strong> Use heap to track ongoing tasks/meetings and their end times.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Sort intervals by start time</li>
+<li>Use min heap to track end times of ongoing intervals</li>
+<li>For each new interval, remove finished ones from heap</li>
+<li>Heap size represents minimum resources needed</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(n \log n)$
+<strong>Space Complexity:</strong> $O(n)$</p>
+<p><strong>Example Problem:</strong> Meeting Rooms II (minimum conference rooms needed).</p>
+<pre><code class="language-python">def minMeetingRooms(intervals):
+    if not intervals:
+        return 0
+
+    intervals.sort(key=lambda x: x[0])  # sort by start time
+    heap = []
+
+    for interval in intervals:
+        # If earliest ending meeting finishes before current starts
+        if heap and heap[0] &lt;= interval[0]:
+            heappop(heap)
+        heappush(heap, interval[1])  # add end time
+
+    return len(heap)  # heap size = rooms needed
+</code></pre>
+<p><strong>Variations:</strong></p>
+<ul>
+<li>CPU task scheduling with cooldown</li>
+<li>Car pooling (capacity constraints)</li>
+<li>Maximum CPU load</li>
+</ul>
+<h3 id="7-dijkstras-shortest-path"><a class="header" href="#7-dijkstras-shortest-path">7. Dijkstra's Shortest Path</a></h3>
+<p><strong>Pattern:</strong> Use min heap to always process nearest unvisited vertex.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Initialize heap with (distance, node) starting from source</li>
+<li>Extract minimum distance node</li>
+<li>Update distances to neighbors</li>
+<li>Continue until destination reached or heap empty</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O((V + E) \log V)$ with binary heap
+<strong>Space Complexity:</strong> $O(V)$</p>
+<p><strong>Example Problem:</strong> Single source shortest path.</p>
+<pre><code class="language-python">def dijkstra(graph, start):
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    heap = [(0, start)]
+    visited = set()
+
+    while heap:
+        current_dist, node = heappop(heap)
+
+        if node in visited:
+            continue
+        visited.add(node)
+
+        for neighbor, weight in graph[node]:
+            distance = current_dist + weight
+
+            if distance &lt; distances[neighbor]:
+                distances[neighbor] = distance
+                heappush(heap, (distance, neighbor))
+
+    return distances
+</code></pre>
+<h3 id="8-prims-minimum-spanning-tree"><a class="header" href="#8-prims-minimum-spanning-tree">8. Prim's Minimum Spanning Tree</a></h3>
+<p><strong>Pattern:</strong> Use min heap to select minimum weight edge connecting tree to non-tree vertex.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Start with arbitrary vertex</li>
+<li>Maintain heap of edges from tree to non-tree vertices</li>
+<li>Repeatedly add minimum weight edge that extends tree</li>
+<li>Continue until all vertices included</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(E \log V)$
+<strong>Space Complexity:</strong> $O(V)$</p>
+<h3 id="9-huffman-coding"><a class="header" href="#9-huffman-coding">9. Huffman Coding</a></h3>
+<p><strong>Pattern:</strong> Use min heap to build optimal prefix-free encoding tree.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Create leaf node for each character with frequency</li>
+<li>Build min heap of all nodes</li>
+<li>Repeatedly extract two minimum nodes, create parent with combined frequency</li>
+<li>Continue until one node remains (root)</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(n \log n)$
+<strong>Space Complexity:</strong> $O(n)$</p>
+<h3 id="10-continuous-median--running-statistics"><a class="header" href="#10-continuous-median--running-statistics">10. Continuous Median / Running Statistics</a></h3>
+<p><strong>Pattern:</strong> Two heaps for dynamic median, can extend to percentiles.</p>
+<p><strong>Use Case:</strong></p>
+<ul>
+<li>Real-time analytics</li>
+<li>Monitoring systems</li>
+<li>Streaming data processing</li>
+</ul>
+<p><strong>Example Problem:</strong> Find 95th percentile in stream (use two heaps with 95:5 ratio).</p>
+<h3 id="11-reorganize-string--task-scheduler"><a class="header" href="#11-reorganize-string--task-scheduler">11. Reorganize String / Task Scheduler</a></h3>
+<p><strong>Pattern:</strong> Use max heap to greedily select most frequent character/task.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Count frequencies</li>
+<li>Use max heap to always select most frequent available item</li>
+<li>Track cooldown or previously used item</li>
+<li>Build result by alternating selections</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(n \log k)$ where k is unique items
+<strong>Space Complexity:</strong> $O(k)$</p>
+<p><strong>Example Problem:</strong> Reorganize string (no two adjacent characters same).</p>
+<pre><code class="language-python">def reorganizeString(s):
+    from collections import Counter
+    count = Counter(s)
+    heap = [(-freq, char) for char, freq in count.items()]
+    heapify(heap)
+
+    result = []
+    prev_freq, prev_char = 0, ''
+
+    while heap:
+        freq, char = heappop(heap)
+        result.append(char)
+
+        if prev_freq &lt; 0:
+            heappush(heap, (prev_freq, prev_char))
+
+        prev_freq, prev_char = freq + 1, char
+
+    result_str = ''.join(result)
+    return result_str if len(result_str) == len(s) else ""
+</code></pre>
+<h3 id="12-stock-price-fluctuation--maximum-in-window"><a class="header" href="#12-stock-price-fluctuation--maximum-in-window">12. Stock Price Fluctuation / Maximum in Window</a></h3>
+<p><strong>Pattern:</strong> Track maximum/minimum with ability to update past values.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Use heap with timestamps or indices</li>
+<li>Support update operation</li>
+<li>Lazy deletion for outdated entries</li>
+</ul>
+<h3 id="13-trapping-rain-water-ii-2d"><a class="header" href="#13-trapping-rain-water-ii-2d">13. Trapping Rain Water II (2D)</a></h3>
+<p><strong>Pattern:</strong> Use min heap to process cells from outside to inside.</p>
+<p><strong>Approach:</strong></p>
+<ul>
+<li>Start with all boundary cells in min heap</li>
+<li>Process cells in order of height</li>
+<li>Track water level as maximum height seen</li>
+<li>Calculate trapped water as difference</li>
+</ul>
+<p><strong>Time Complexity:</strong> $O(mn \log(mn))$
+<strong>Space Complexity:</strong> $O(mn)$</p>
+<h2 id="time--space-complexity-reference"><a class="header" href="#time--space-complexity-reference">Time &amp; Space Complexity Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Binary Heap</th><th>Fibonacci Heap</th><th>Binomial Heap</th></tr></thead><tbody>
+<tr><td>Insert</td><td>$O(\log n)$</td><td>$O(1)$*</td><td>$O(\log n)$</td></tr>
+<tr><td>Extract-Min/Max</td><td>$O(\log n)$</td><td>$O(\log n)$*</td><td>$O(\log n)$</td></tr>
+<tr><td>Peek</td><td>$O(1)$</td><td>$O(1)$</td><td>$O(1)$</td></tr>
+<tr><td>Decrease-Key</td><td>$O(\log n)$</td><td>$O(1)$*</td><td>$O(\log n)$</td></tr>
+<tr><td>Delete</td><td>$O(\log n)$</td><td>$O(\log n)$*</td><td>$O(\log n)$</td></tr>
+<tr><td>Merge</td><td>$O(n)$</td><td>$O(1)$</td><td>$O(\log n)$</td></tr>
+<tr><td>Build Heap</td><td>$O(n)$</td><td>$O(n)$</td><td>$O(n)$</td></tr>
+</tbody></table>
+</div>
+<p>* Amortized time complexity</p>
+<p><strong>Space Complexity:</strong> $O(n)$ for storing n elements in all heap types.</p>
+<h2 id="problem-solving-strategies"><a class="header" href="#problem-solving-strategies">Problem-Solving Strategies</a></h2>
+<h3 id="when-to-use-heaps"><a class="header" href="#when-to-use-heaps">When to Use Heaps</a></h3>
 <ol>
 <li>
-<p><strong>Insertion</strong>: Adding a new element to the heap while maintaining the heap property. This is typically done by adding the element at the end of the tree and then "bubbling up" to restore the heap property.</p>
+<p><strong>Need repeated access to minimum/maximum element</strong></p>
+<ul>
+<li>Priority queues</li>
+<li>Scheduling problems</li>
+</ul>
 </li>
 <li>
-<p><strong>Deletion</strong>: Removing the root element (the maximum or minimum) from the heap. This involves replacing the root with the last element in the tree and then "bubbling down" to restore the heap property.</p>
+<p><strong>K-way problems</strong></p>
+<ul>
+<li>K largest/smallest elements</li>
+<li>Merge K sorted sequences</li>
+<li>Top K frequent items</li>
+</ul>
 </li>
 <li>
-<p><strong>Heapify</strong>: The process of converting an arbitrary array into a heap. This can be done in linear time using the bottom-up approach.</p>
+<p><strong>Streaming/online algorithms</strong></p>
+<ul>
+<li>Running median</li>
+<li>Top K in real-time</li>
+<li>Continuous statistics</li>
+</ul>
+</li>
+<li>
+<p><strong>Greedy algorithms</strong></p>
+<ul>
+<li>Always need next best choice</li>
+<li>Dijkstra's, Prim's algorithms</li>
+<li>Huffman coding</li>
+</ul>
+</li>
+<li>
+<p><strong>Partial sorting</strong></p>
+<ul>
+<li>Don't need full sort, just top/bottom K elements</li>
+<li>More efficient than full sort: $O(n \log k)$ vs $O(n \log n)$</li>
+</ul>
 </li>
 </ol>
+<h3 id="when-not-to-use-heaps"><a class="header" href="#when-not-to-use-heaps">When NOT to Use Heaps</a></h3>
+<ol>
+<li><strong>Need to access arbitrary elements</strong> - Use hash map or array</li>
+<li><strong>Need to maintain sorted order of all elements</strong> - Use balanced BST</li>
+<li><strong>Need to search for specific element</strong> - $O(n)$ in heap, use hash map for $O(1)$</li>
+<li><strong>Small K relative to N</strong> - For K=1 or K=2, simple variables might be faster</li>
+</ol>
+<h3 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h3>
+<ol>
+<li>
+<p><strong>Forgetting heap property during custom comparisons</strong></p>
+<ul>
+<li>When using tuples, ensure primary sort key is correct</li>
+<li>Python uses lexicographic order for tuples</li>
+</ul>
+</li>
+<li>
+<p><strong>Max heap in languages with only min heap</strong></p>
+<ul>
+<li>Python's heapq only provides min heap</li>
+<li>Solution: Negate values for max heap behavior</li>
+</ul>
+</li>
+<li>
+<p><strong>Not handling empty heap</strong></p>
+<ul>
+<li>Always check <code>heap.isEmpty()</code> before <code>peek()</code> or <code>pop()</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Index calculation errors</strong></p>
+<ul>
+<li>Remember: 0-indexed vs 1-indexed affects formulas</li>
+<li>Parent: <code>(i-1)/2</code> for 0-indexed, <code>i/2</code> for 1-indexed</li>
+</ul>
+</li>
+<li>
+<p><strong>Inefficient heap building</strong></p>
+<ul>
+<li>Use bottom-up heapify $O(n)$ instead of repeated insertion $O(n \log n)$</li>
+</ul>
+</li>
+<li>
+<p><strong>Memory issues with large datasets</strong></p>
+<ul>
+<li>Heap of size K uses $O(k)$ space, not $O(n)$</li>
+<li>Better than sorting entire array for top-K problems</li>
+</ul>
+</li>
+</ol>
+<h3 id="optimization-techniques"><a class="header" href="#optimization-techniques">Optimization Techniques</a></h3>
+<ol>
+<li>
+<p><strong>Lazy Deletion</strong></p>
+<ul>
+<li>Mark elements as deleted instead of removing</li>
+<li>Clean up when encountered during extract operations</li>
+<li>Useful for sliding window problems</li>
+</ul>
+</li>
+<li>
+<p><strong>Custom Comparators</strong></p>
+<ul>
+<li>Define comparison based on specific problem needs</li>
+<li>Can store complex objects in heap</li>
+</ul>
+</li>
+<li>
+<p><strong>Heap + Hash Map</strong></p>
+<ul>
+<li>Hash map for $O(1)$ lookups</li>
+<li>Heap for $O(\log n)$ priority operations</li>
+<li>Useful for LRU/LFU caches with priority</li>
+</ul>
+</li>
+<li>
+<p><strong>Two Heaps Pattern</strong></p>
+<ul>
+<li>Separate min and max heaps</li>
+<li>Powerful for median, percentile problems</li>
+<li>Can generalize to multiple heaps for different priorities</li>
+</ul>
+</li>
+</ol>
+<h2 id="code-examples"><a class="header" href="#code-examples">Code Examples</a></h2>
+<h3 id="python-implementation"><a class="header" href="#python-implementation">Python Implementation</a></h3>
+<pre><code class="language-python">import heapq
+from typing import List
+
+class MinHeap:
+    def __init__(self):
+        self.heap = []
+
+    def push(self, val):
+        heapq.heappush(self.heap, val)
+
+    def pop(self):
+        return heapq.heappop(self.heap)
+
+    def peek(self):
+        return self.heap[0] if self.heap else None
+
+    def size(self):
+        return len(self.heap)
+
+# Max Heap (negate values)
+class MaxHeap:
+    def __init__(self):
+        self.heap = []
+
+    def push(self, val):
+        heapq.heappush(self.heap, -val)
+
+    def pop(self):
+        return -heapq.heappop(self.heap)
+
+    def peek(self):
+        return -self.heap[0] if self.heap else None
+
+# Build heap from array
+def build_heap(arr: List[int]) -&gt; List[int]:
+    heapq.heapify(arr)  # O(n) operation
+    return arr
+
+# Heap sort
+def heap_sort(arr: List[int]) -&gt; List[int]:
+    heapq.heapify(arr)
+    return [heapq.heappop(arr) for _ in range(len(arr))]
+</code></pre>
+<h3 id="java-implementation"><a class="header" href="#java-implementation">Java Implementation</a></h3>
+<pre><code class="language-java">import java.util.*;
+
+public class HeapExamples {
+    // Min Heap
+    public static void minHeapExample() {
+        PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;();
+        minHeap.offer(5);
+        minHeap.offer(3);
+        minHeap.offer(7);
+        System.out.println(minHeap.poll()); // 3
+    }
+
+    // Max Heap
+    public static void maxHeapExample() {
+        PriorityQueue&lt;Integer&gt; maxHeap =
+            new PriorityQueue&lt;&gt;(Collections.reverseOrder());
+        maxHeap.offer(5);
+        maxHeap.offer(3);
+        maxHeap.offer(7);
+        System.out.println(maxHeap.poll()); // 7
+    }
+
+    // Custom Comparator
+    public static void customComparator() {
+        PriorityQueue&lt;int[]&gt; pq = new PriorityQueue&lt;&gt;(
+            (a, b) -&gt; a[1] - b[1]  // compare by second element
+        );
+        pq.offer(new int[]{1, 5});
+        pq.offer(new int[]{2, 3});
+        System.out.println(Arrays.toString(pq.poll())); // [2, 3]
+    }
+}
+</code></pre>
+<h3 id="c-implementation"><a class="header" href="#c-implementation">C++ Implementation</a></h3>
+<pre><code class="language-cpp">#include &lt;queue&gt;
+#include &lt;vector&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    // Min Heap (default)
+    priority_queue&lt;int, vector&lt;int&gt;, greater&lt;int&gt;&gt; minHeap;
+    minHeap.push(5);
+    minHeap.push(3);
+    minHeap.push(7);
+    cout &lt;&lt; minHeap.top() &lt;&lt; endl; // 3
+
+    // Max Heap
+    priority_queue&lt;int&gt; maxHeap;
+    maxHeap.push(5);
+    maxHeap.push(3);
+    maxHeap.push(7);
+    cout &lt;&lt; maxHeap.top() &lt;&lt; endl; // 7
+
+    // Custom Comparator
+    auto cmp = [](pair&lt;int,int&gt; a, pair&lt;int,int&gt; b) {
+        return a.second &gt; b.second;
+    };
+    priority_queue&lt;pair&lt;int,int&gt;, vector&lt;pair&lt;int,int&gt;&gt;, decltype(cmp)&gt; pq(cmp);
+    pq.push({1, 5});
+    pq.push({2, 3});
+    cout &lt;&lt; pq.top().first &lt;&lt; endl; // 2
+
+    return 0;
+}
+</code></pre>
 <h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
-<p>Heaps are widely used in various applications, including:</p>
+<p>Heaps are widely used in various applications across computer science and software engineering:</p>
+<h3 id="core-applications"><a class="header" href="#core-applications">Core Applications</a></h3>
 <ul>
 <li>
-<p><strong>Priority Queues</strong>: Heaps provide an efficient way to implement priority queues, allowing for quick access to the highest (or lowest) priority element.</p>
+<p><strong>Priority Queues</strong>: Heaps provide an efficient way to implement priority queues, allowing for quick access to the highest (or lowest) priority element. Used in task scheduling, event-driven simulation, and job scheduling systems.</p>
 </li>
 <li>
-<p><strong>Heap Sort</strong>: A comparison-based sorting algorithm that uses the heap data structure to sort elements in $O(n \log n)$ time.</p>
+<p><strong>Heap Sort</strong>: A comparison-based sorting algorithm that uses the heap data structure to sort elements in $O(n \log n)$ time. While not as cache-friendly as quicksort, it guarantees worst-case $O(n \log n)$ performance.</p>
 </li>
 <li>
-<p><strong>Graph Algorithms</strong>: Heaps are used in algorithms like Dijkstra's and Prim's to efficiently manage the set of vertices being processed.</p>
+<p><strong>Graph Algorithms</strong>:</p>
+<ul>
+<li><strong>Dijkstra's Algorithm</strong>: Shortest path finding using min heap to select nearest vertex</li>
+<li><strong>Prim's Algorithm</strong>: Minimum spanning tree construction</li>
+<li><strong>A* Search</strong>: Pathfinding with heuristic priority</li>
+</ul>
 </li>
 </ul>
+<h3 id="data-processing"><a class="header" href="#data-processing">Data Processing</a></h3>
+<ul>
+<li>
+<p><strong>Stream Processing</strong>: Finding top-K elements, medians, or percentiles in streaming data without storing entire dataset.</p>
+</li>
+<li>
+<p><strong>Data Compression</strong>: Huffman coding uses heaps to build optimal encoding trees for compression algorithms.</p>
+</li>
+<li>
+<p><strong>External Sorting</strong>: K-way merge operations when sorting data that doesn't fit in memory.</p>
+</li>
+</ul>
+<h3 id="system-design"><a class="header" href="#system-design">System Design</a></h3>
+<ul>
+<li>
+<p><strong>Operating Systems</strong>:</p>
+<ul>
+<li>Process scheduling (priority-based scheduling)</li>
+<li>Memory management (best-fit allocation)</li>
+<li>Event handling in real-time systems</li>
+</ul>
+</li>
+<li>
+<p><strong>Database Systems</strong>:</p>
+<ul>
+<li>Query optimization (join order selection)</li>
+<li>Buffer management</li>
+<li>Index construction</li>
+</ul>
+</li>
+<li>
+<p><strong>Network Systems</strong>:</p>
+<ul>
+<li>Bandwidth management</li>
+<li>Packet scheduling in routers</li>
+<li>Connection pooling</li>
+</ul>
+</li>
+</ul>
+<h3 id="real-world-use-cases"><a class="header" href="#real-world-use-cases">Real-world Use Cases</a></h3>
+<ul>
+<li><strong>E-commerce</strong>: Order processing by priority, customer service queue management</li>
+<li><strong>Gaming</strong>: AI decision-making, pathfinding, event processing</li>
+<li><strong>Finance</strong>: High-frequency trading (processing orders by price-time priority)</li>
+<li><strong>Healthcare</strong>: Emergency room triage systems, appointment scheduling</li>
+<li><strong>Transportation</strong>: Route optimization, ride-sharing algorithms</li>
+</ul>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Heaps are a versatile data structure that provides efficient solutions for various problems, particularly those involving priority management and sorting. Understanding heaps and their operations is essential for developing efficient algorithms in computer science and software engineering.</p>
+<p>Heaps are a fundamental and versatile data structure that provides efficient solutions for a wide range of problems, particularly those involving priority management, partial sorting, and dynamic datasets. Their ability to maintain the min/max element in $O(1)$ time while supporting $O(\log n)$ insertions and deletions makes them indispensable in modern software systems.</p>
+<p><strong>Key Takeaways:</strong></p>
+<ol>
+<li>
+<p><strong>Efficiency</strong>: Heaps provide optimal time complexity for priority queue operations and enable $O(n)$ heap construction.</p>
+</li>
+<li>
+<p><strong>Versatility</strong>: From simple top-K problems to complex graph algorithms, heaps solve diverse computational challenges.</p>
+</li>
+<li>
+<p><strong>Patterns</strong>: Mastering common heap patterns (two heaps for median, heap for K-way problems, heap with hash map) enables elegant solutions to many algorithm problems.</p>
+</li>
+<li>
+<p><strong>Trade-offs</strong>: Understanding when to use heaps versus other data structures (BST, hash maps, arrays) is crucial for optimal algorithm design.</p>
+</li>
+<li>
+<p><strong>Implementation</strong>: While conceptually a tree, heaps are efficiently implemented as arrays, providing excellent cache performance.</p>
+</li>
+</ol>
+<p>Whether you're implementing a task scheduler, optimizing graph traversal, or processing streaming data, heaps offer a powerful tool in your algorithmic toolkit. Mastery of heap operations and patterns is essential for technical interviews, competitive programming, and building high-performance systems.</p>
 
                     </main>
 

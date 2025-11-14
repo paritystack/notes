@@ -7,11 +7,11 @@ DevOps practices, tools, and methodologies for continuous integration, delivery,
 - **[CI/CD](cicd.md)**: Continuous integration and deployment pipelines, automation, workflows
 - **[Docker](docker.md)**: Containerization, images, containers, Docker Compose
 - **[Kubernetes](kubernetes.md)**: Container orchestration, deployments, services, scaling
-- **Terraform**: Infrastructure as code, cloud provisioning
-- **GitHub Actions**: CI/CD workflows, automation
-- **Monitoring**: Logging, metrics, observability
-- **Cloud Deployment**: AWS, GCP, Azure
-- **Infrastructure**: Networking, security, scaling
+- **[Terraform](terraform.md)**: Infrastructure as code, cloud provisioning, state management
+- **[GitHub Actions](github-actions.md)**: CI/CD workflows, automation, reusable workflows
+- **[Monitoring](monitoring.md)**: Logging, metrics, observability, alerting, SLOs
+- **[Cloud Deployment](cloud-deployment.md)**: AWS, GCP, Azure deployment strategies
+- **[Infrastructure](infrastructure.md)**: Networking, security, scaling, high availability
 
 ## Key Concepts
 

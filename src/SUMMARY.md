@@ -7,6 +7,7 @@
 - [Git](git/README.md)
     - [Git Cheatsheet](git/cheatsheet.md)
     - [Git Commands](git/commands.md)
+    - [Git Internals](git/internals.md)
     - [Github](git/github.md)
 
 - [Programming Languages](programming/README.md)
@@ -105,6 +106,7 @@
     - [Transformers](machine_learning/transformers.md)
     - [Hugging Face](machine_learning/hugging_face.md)
     - [PyTorch](machine_learning/pytorch.md)
+    - [Quantization](machine_learning/quantization.md)
     - [Interesting Papers](machine_learning/interesting_papers.md)
 
 - [AI](ai/README.md)
@@ -249,6 +251,10 @@
     - [GDB](debugging/gdb.md)
     - [Core Dump Analysis](debugging/core_dump.md)
     - [Linux Kernel Debugging](debugging/linux_kernel.md)
+
+- [Miscellaneous](misc/)
+    - [Mathematics](misc/math.md)
+    - [Statistics](misc/statistics.md)
 
 - [RTOS](rtos/README.md)
     - [FreeRTOS](rtos/freertos.md)

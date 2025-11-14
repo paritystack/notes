@@ -721,6 +721,9 @@ wc -c file.txt                    # Byte count
 # tr (translate characters)
 echo "hello" | tr 'a-z' 'A-Z'     # HELLO
 echo "hello123" | tr -d '0-9'     # hello
+
+# fold
+echo "hell" | fold -w 2	  	  # he and ll
 ```
 
 ---

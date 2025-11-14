@@ -4940,7 +4940,426 @@ if __name__ == "__main__":
 
 ---
 
+#### Command Pattern
+
+**Intent**: Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable operations.
+
+**Problem**: You need to issue requests to objects without knowing anything about the operation being requested or the receiver of the request. You want to support undo/redo, queuing, or logging of operations.
+
+**Solution**: Create command objects that encapsulate all information needed to perform an action or trigger an event. Commands have an execute() method and optionally an undo() method.
+
+**When to Use**:
+- Parameterize objects by an action to perform
+- Queue operations, schedule their execution, or execute them remotely
+- Support undo/redo functionality
+- Structure system around high-level operations built on primitive operations
+- Support logging changes for crash recovery
+
+**Real-World Examples**:
+- GUI buttons and menu items
+- Macro recording in applications
+- Transaction-based systems
+- Task scheduling systems
+- Undo/redo in text editors
+- Remote control systems
+
+**Implementation in C++**:
+
+```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+#include <stack>
+
+// Receiver
+class Light {
+public:
+    void on() {
+        isOn_ = true;
+        std::cout << "Light is ON" << std::endl;
+    }
+
+    void off() {
+        isOn_ = false;
+        std::cout << "Light is OFF" << std::endl;
+    }
+
+    bool isOn() const { return isOn_; }
+
+private:
+    bool isOn_ = false;
+};
+
+// Command interface
+class Command {
+public:
+    virtual ~Command() = default;
+    virtual void execute() = 0;
+    virtual void undo() = 0;
+};
+
+// Concrete Commands
+class LightOnCommand : public Command {
+public:
+    LightOnCommand(std::shared_ptr<Light> light) : light_(light) {}
+
+    void execute() override {
+        light_->on();
+    }
+
+    void undo() override {
+        light_->off();
+    }
+
+private:
+    std::shared_ptr<Light> light_;
+};
+
+class LightOffCommand : public Command {
+public:
+    LightOffCommand(std::shared_ptr<Light> light) : light_(light) {}
+
+    void execute() override {
+        light_->off();
+    }
+
+    void undo() override {
+        light_->on();
+    }
+
+private:
+    std::shared_ptr<Light> light_;
+};
+
+// Text editor example
+class TextEditor {
+public:
+    void insertText(const std::string& text) {
+        content_ += text;
+        std::cout << "Inserted: " << text << std::endl;
+    }
+
+    void deleteText(size_t length) {
+        if (length <= content_.length()) {
+            deletedText_ = content_.substr(content_.length() - length);
+            content_ = content_.substr(0, content_.length() - length);
+            std::cout << "Deleted: " << deletedText_ << std::endl;
+        }
+    }
+
+    std::string getDeletedText() const { return deletedText_; }
+    std::string getContent() const { return content_; }
+
+    void print() const {
+        std::cout << "Content: \"" << content_ << "\"" << std::endl;
+    }
+
+private:
+    std::string content_;
+    std::string deletedText_;
+};
+
+class InsertCommand : public Command {
+public:
+    InsertCommand(std::shared_ptr<TextEditor> editor, const std::string& text)
+        : editor_(editor), text_(text) {}
+
+    void execute() override {
+        editor_->insertText(text_);
+    }
+
+    void undo() override {
+        editor_->deleteText(text_.length());
+    }
+
+private:
+    std::shared_ptr<TextEditor> editor_;
+    std::string text_;
+};
+
+class DeleteCommand : public Command {
+public:
+    DeleteCommand(std::shared_ptr<TextEditor> editor, size_t length)
+        : editor_(editor), length_(length) {}
+
+    void execute() override {
+        editor_->deleteText(length_);
+        deletedText_ = editor_->getDeletedText();
+    }
+
+    void undo() override {
+        editor_->insertText(deletedText_);
+    }
+
+private:
+    std::shared_ptr<TextEditor> editor_;
+    size_t length_;
+    std::string deletedText_;
+};
+
+// Invoker
+class RemoteControl {
+public:
+    void setCommand(std::shared_ptr<Command> command) {
+        command_ = command;
+    }
+
+    void pressButton() {
+        if (command_) {
+            command_->execute();
+            history_.push(command_);
+        }
+    }
+
+    void pressUndo() {
+        if (!history_.empty()) {
+            auto command = history_.top();
+            command->undo();
+            history_.pop();
+        }
+    }
+
+private:
+    std::shared_ptr<Command> command_;
+    std::stack<std::shared_ptr<Command>> history_;
+};
+
+// Usage
+int main() {
+    // Light control example
+    auto livingRoomLight = std::make_shared<Light>();
+
+    auto lightOn = std::make_shared<LightOnCommand>(livingRoomLight);
+    auto lightOff = std::make_shared<LightOffCommand>(livingRoomLight);
+
+    RemoteControl remote;
+
+    remote.setCommand(lightOn);
+    remote.pressButton();
+
+    remote.setCommand(lightOff);
+    remote.pressButton();
+
+    remote.pressUndo();  // Undo last command
+
+    std::cout << "\n---\n\n";
+
+    // Text editor example
+    auto editor = std::make_shared<TextEditor>();
+
+    std::stack<std::shared_ptr<Command>> commandHistory;
+
+    auto insertHello = std::make_shared<InsertCommand>(editor, "Hello ");
+    insertHello->execute();
+    commandHistory.push(insertHello);
+
+    auto insertWorld = std::make_shared<InsertCommand>(editor, "World!");
+    insertWorld->execute();
+    commandHistory.push(insertWorld);
+
+    editor->print();
+
+    // Undo last two commands
+    while (!commandHistory.empty()) {
+        commandHistory.top()->undo();
+        commandHistory.pop();
+    }
+
+    editor->print();
+
+    return 0;
+}
+```
+
+**Implementation in Python**:
+
+```python
+from abc import ABC, abstractmethod
+from typing import List
+
+# Receiver
+class Light:
+    def __init__(self):
+        self._is_on = False
+
+    def on(self) -> None:
+        self._is_on = True
+        print("Light is ON")
+
+    def off(self) -> None:
+        self._is_on = False
+        print("Light is OFF")
+
+    def is_on(self) -> bool:
+        return self._is_on
+
+# Command interface
+class Command(ABC):
+    @abstractmethod
+    def execute(self) -> None:
+        pass
+
+    @abstractmethod
+    def undo(self) -> None:
+        pass
+
+# Concrete Commands
+class LightOnCommand(Command):
+    def __init__(self, light: Light):
+        self.light = light
+
+    def execute(self) -> None:
+        self.light.on()
+
+    def undo(self) -> None:
+        self.light.off()
+
+class LightOffCommand(Command):
+    def __init__(self, light: Light):
+        self.light = light
+
+    def execute(self) -> None:
+        self.light.off()
+
+    def undo(self) -> None:
+        self.light.on()
+
+# Text editor
+class TextEditor:
+    def __init__(self):
+        self._content = ""
+        self._deleted_text = ""
+
+    def insert_text(self, text: str) -> None:
+        self._content += text
+        print(f"Inserted: {text}")
+
+    def delete_text(self, length: int) -> None:
+        if length <= len(self._content):
+            self._deleted_text = self._content[-length:]
+            self._content = self._content[:-length]
+            print(f"Deleted: {self._deleted_text}")
+
+    def get_deleted_text(self) -> str:
+        return self._deleted_text
+
+    def get_content(self) -> str:
+        return self._content
+
+    def print_content(self) -> None:
+        print(f"Content: \"{self._content}\"")
+
+class InsertCommand(Command):
+    def __init__(self, editor: TextEditor, text: str):
+        self.editor = editor
+        self.text = text
+
+    def execute(self) -> None:
+        self.editor.insert_text(self.text)
+
+    def undo(self) -> None:
+        self.editor.delete_text(len(self.text))
+
+# Invoker
+class RemoteControl:
+    def __init__(self):
+        self._command: Command = None
+        self._history: List[Command] = []
+
+    def set_command(self, command: Command) -> None:
+        self._command = command
+
+    def press_button(self) -> None:
+        if self._command:
+            self._command.execute()
+            self._history.append(self._command)
+
+    def press_undo(self) -> None:
+        if self._history:
+            command = self._history.pop()
+            command.undo()
+
+# Usage
+if __name__ == "__main__":
+    # Light control
+    living_room_light = Light()
+
+    light_on = LightOnCommand(living_room_light)
+    light_off = LightOffCommand(living_room_light)
+
+    remote = RemoteControl()
+
+    remote.set_command(light_on)
+    remote.press_button()
+
+    remote.set_command(light_off)
+    remote.press_button()
+
+    remote.press_undo()  # Undo
+
+    print("\n---\n")
+
+    # Text editor
+    editor = TextEditor()
+    command_history = []
+
+    insert_hello = InsertCommand(editor, "Hello ")
+    insert_hello.execute()
+    command_history.append(insert_hello)
+
+    insert_world = InsertCommand(editor, "World!")
+    insert_world.execute()
+    command_history.append(insert_world)
+
+    editor.print_content()
+
+    # Undo
+    while command_history:
+        command_history.pop().undo()
+
+    editor.print_content()
+```
+
+**Advantages**:
+- Decouples object that invokes operation from one that knows how to perform it
+- Commands are first-class objects (can be manipulated and extended)
+- Can assemble commands into composite commands (macro commands)
+- Easy to add new commands (Open/Closed Principle)
+- Supports undo/redo
+
+**Disadvantages**:
+- Increases number of classes for each individual command
+- Can become complex with many commands
+
+**Related Patterns**:
+- **Memento**: Can be used to keep state for undo
+- **Composite**: Can be used to implement macro commands
+- **Prototype**: Commands that must be copied before being placed on history list
+
+---
+
 ## Conclusion
 
 Design patterns are invaluable tools for software developers, providing standardized solutions to recurring design problems. By understanding and applying appropriate design patterns, developers can create more flexible, reusable, and maintainable codebases.
+
+**Key Takeaways**:
+
+1. **Choose the Right Pattern**: Not every problem requires a design pattern. Use patterns when they genuinely simplify your design.
+
+2. **Understand the Trade-offs**: Each pattern has advantages and disadvantages. Consider the complexity vs. flexibility trade-off.
+
+3. **Patterns Work Together**: Many real-world applications combine multiple patterns. For example, MVC uses Observer, Strategy, and Composite patterns.
+
+4. **Start Simple**: Don't over-engineer. Refactor towards patterns when the need becomes clear.
+
+5. **Language Matters**: Some patterns are more natural in certain programming languages. For instance, Strategy pattern is trivial in languages with first-class functions.
+
+**Common Pattern Categories**:
+
+- **Creational** (Singleton, Factory Method, Abstract Factory, Builder, Prototype): Object creation mechanisms
+- **Structural** (Adapter, Bridge, Composite, Decorator, Facade, Flyweight, Proxy): Object composition and relationships
+- **Behavioral** (Observer, Strategy, Command, and others): Communication between objects
+
+This guide has covered the most fundamental and widely-used design patterns with comprehensive examples in both C++ and Python. Each pattern includes practical implementations, real-world use cases, and guidance on when to apply them. By mastering these patterns, you'll be better equipped to design robust, maintainable, and scalable software systems.
 

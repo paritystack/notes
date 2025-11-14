@@ -1,0 +1,772 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>GDB - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="gdb-gnu-debugger"><a class="header" href="#gdb-gnu-debugger">GDB (GNU Debugger)</a></h1>
+<p>GDB is the GNU Project debugger, allowing you to see what is going on inside a program while it executes or what it was doing at the moment it crashed. It's an essential tool for debugging C, C++, and other compiled languages.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>GDB provides extensive facilities for tracing and altering program execution, including breakpoints, watchpoints, examining variables, and manipulating program state.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Set breakpoints and watchpoints</li>
+<li>Step through code line by line</li>
+<li>Examine and modify variables</li>
+<li>Analyze core dumps</li>
+<li>Remote debugging</li>
+<li>Multi-threaded debugging</li>
+<li>Reverse debugging</li>
+<li>Python scripting support</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt update
+sudo apt install gdb
+
+# macOS (or use lldb)
+brew install gdb
+
+# CentOS/RHEL
+sudo yum install gdb
+
+# Arch Linux
+sudo pacman -S gdb
+
+# Verify installation
+gdb --version
+</code></pre>
+<h2 id="compiling-for-debugging"><a class="header" href="#compiling-for-debugging">Compiling for Debugging</a></h2>
+<pre><code class="language-bash"># Compile with debug symbols (-g flag)
+gcc -g program.c -o program
+g++ -g program.cpp -o program
+
+# Disable optimization for better debugging
+gcc -g -O0 program.c -o program
+
+# With all warnings
+gcc -g -O0 -Wall -Wextra program.c -o program
+
+# For C++ with debug symbols
+g++ -g -std=c++17 program.cpp -o program
+</code></pre>
+<h2 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h2>
+<h3 id="starting-gdb"><a class="header" href="#starting-gdb">Starting GDB</a></h3>
+<pre><code class="language-bash"># Start GDB with program
+gdb ./program
+
+# With arguments
+gdb --args ./program arg1 arg2
+
+# Attach to running process
+gdb -p &lt;pid&gt;
+gdb attach &lt;pid&gt;
+
+# Analyze core dump
+gdb ./program core
+
+# Quiet mode (no intro message)
+gdb -q ./program
+</code></pre>
+<h3 id="basic-commands"><a class="header" href="#basic-commands">Basic Commands</a></h3>
+<pre><code class="language-gdb"># Running the program
+(gdb) run                    # Start program
+(gdb) run arg1 arg2          # Start with arguments
+(gdb) start                  # Start and break at main()
+(gdb) continue               # Continue execution (c)
+(gdb) kill                   # Kill running program
+(gdb) quit                   # Exit GDB (q)
+
+# Breakpoints
+(gdb) break main             # Break at function
+(gdb) break main.c:42        # Break at line in file
+(gdb) break *0x400500        # Break at address
+(gdb) tbreak main            # Temporary breakpoint
+(gdb) info breakpoints       # List breakpoints (info b)
+(gdb) delete 1               # Delete breakpoint 1 (d 1)
+(gdb) delete                 # Delete all breakpoints
+(gdb) disable 1              # Disable breakpoint 1
+(gdb) enable 1               # Enable breakpoint 1
+
+# Stepping
+(gdb) step                   # Step into (s)
+(gdb) next                   # Step over (n)
+(gdb) finish                 # Run until function returns
+(gdb) until 50               # Run until line 50
+(gdb) stepi                  # Step one instruction (si)
+(gdb) nexti                  # Next instruction (ni)
+
+# Examining code
+(gdb) list                   # Show source code (l)
+(gdb) list main              # List function
+(gdb) list 42                # List around line 42
+(gdb) disassemble            # Show assembly
+(gdb) disassemble main       # Disassemble function
+
+# Stack and frames
+(gdb) backtrace              # Show call stack (bt)
+(gdb) frame 0                # Switch to frame 0 (f 0)
+(gdb) up                     # Move up stack frame
+(gdb) down                   # Move down stack frame
+(gdb) info frame             # Current frame info
+(gdb) info args              # Function arguments
+(gdb) info locals            # Local variables
+</code></pre>
+<h2 id="examining-variables"><a class="header" href="#examining-variables">Examining Variables</a></h2>
+<pre><code class="language-gdb"># Print variables
+(gdb) print variable         # Print variable (p)
+(gdb) print *pointer         # Dereference pointer
+(gdb) print array[5]         # Array element
+(gdb) print struct.member    # Structure member
+
+# Different formats
+(gdb) print/x variable       # Hexadecimal
+(gdb) print/d variable       # Decimal
+(gdb) print/t variable       # Binary
+(gdb) print/c variable       # Character
+(gdb) print/f variable       # Float
+(gdb) print/s string_ptr     # String
+
+# Display (auto-print on each stop)
+(gdb) display variable       # Auto-display variable
+(gdb) info display           # Show display list
+(gdb) undisplay 1            # Remove display 1
+
+# Examine memory
+(gdb) x/10x $rsp             # Examine 10 hex words at stack pointer
+(gdb) x/10i main             # Examine 10 instructions at main
+(gdb) x/s string_ptr         # Examine string
+(gdb) x/10b buffer           # Examine 10 bytes
+
+# Format: x/[count][format][size] address
+# Format: x=hex, d=decimal, i=instruction, s=string, c=char
+# Size: b=byte, h=halfword, w=word, g=giant (8 bytes)
+
+# Set variables
+(gdb) set variable x = 42    # Set variable value
+(gdb) set $i = 0             # Set convenience variable
+</code></pre>
+<h2 id="watchpoints"><a class="header" href="#watchpoints">Watchpoints</a></h2>
+<pre><code class="language-gdb"># Watch for changes
+(gdb) watch variable         # Break when variable changes
+(gdb) rwatch variable        # Break when variable is read
+(gdb) awatch variable        # Break on read or write
+
+# Conditional watchpoint
+(gdb) watch x if x &gt; 100
+
+# Info and delete
+(gdb) info watchpoints       # List watchpoints
+(gdb) delete 2               # Delete watchpoint 2
+</code></pre>
+<h2 id="conditional-breakpoints"><a class="header" href="#conditional-breakpoints">Conditional Breakpoints</a></h2>
+<pre><code class="language-gdb"># Set conditional breakpoint
+(gdb) break main.c:42 if x == 5
+
+# Add condition to existing breakpoint
+(gdb) condition 1 x == 5
+
+# Remove condition
+(gdb) condition 1
+
+# Commands to execute at breakpoint
+(gdb) commands 1
+&gt; print x
+&gt; continue
+&gt; end
+
+# Ignore breakpoint N times
+(gdb) ignore 1 10            # Ignore first 10 hits
+</code></pre>
+<h2 id="thread-debugging"><a class="header" href="#thread-debugging">Thread Debugging</a></h2>
+<pre><code class="language-gdb"># Thread information
+(gdb) info threads           # List all threads
+(gdb) thread 3               # Switch to thread 3
+(gdb) thread apply all bt    # Backtrace all threads
+(gdb) thread apply all print x
+
+# Thread-specific breakpoints
+(gdb) break main.c:42 thread 2
+
+# Non-stop mode (continue while other threads stop)
+(gdb) set non-stop on
+</code></pre>
+<h2 id="core-dump-analysis"><a class="header" href="#core-dump-analysis">Core Dump Analysis</a></h2>
+<pre><code class="language-bash"># Generate core dump
+ulimit -c unlimited          # Enable core dumps
+
+# Debug core dump
+gdb ./program core
+
+# In GDB
+(gdb) bt                     # See where it crashed
+(gdb) frame 0                # Examine crash frame
+(gdb) print variable         # Check variable values
+(gdb) info registers         # CPU registers at crash
+</code></pre>
+<h2 id="advanced-features"><a class="header" href="#advanced-features">Advanced Features</a></h2>
+<h3 id="reverse-debugging"><a class="header" href="#reverse-debugging">Reverse Debugging</a></h3>
+<pre><code class="language-gdb"># Record execution
+(gdb) record                 # Start recording
+(gdb) record stop            # Stop recording
+
+# Reverse execution
+(gdb) reverse-step           # Step backward (rs)
+(gdb) reverse-next           # Next backward (rn)
+(gdb) reverse-continue       # Continue backward (rc)
+(gdb) reverse-finish         # Reverse to function call
+</code></pre>
+<h3 id="checkpoints"><a class="header" href="#checkpoints">Checkpoints</a></h3>
+<pre><code class="language-gdb"># Save program state
+(gdb) checkpoint             # Create checkpoint
+(gdb) info checkpoints       # List checkpoints
+(gdb) restart 1              # Restore checkpoint 1
+(gdb) delete checkpoint 1    # Delete checkpoint
+</code></pre>
+<h3 id="python-scripting"><a class="header" href="#python-scripting">Python Scripting</a></h3>
+<pre><code class="language-gdb"># Python in GDB
+(gdb) python print("Hello from GDB")
+
+# Load Python script
+(gdb) source script.py
+
+# Python example
+(gdb) python
+&gt; for i in range(5):
+&gt;     gdb.execute("print $i++")
+&gt; end
+</code></pre>
+<h2 id="gdb-configuration"><a class="header" href="#gdb-configuration">GDB Configuration</a></h2>
+<h3 id="gdbinit-file"><a class="header" href="#gdbinit-file">.gdbinit File</a></h3>
+<pre><code class="language-bash"># ~/.gdbinit
+set history save on
+set history size 10000
+set history filename ~/.gdb_history
+set print pretty on
+set print array on
+set print array-indexes on
+set python print-stack full
+
+# Auto-load local .gdbinit
+set auto-load safe-path /
+
+# Custom commands
+define phead
+    print *($arg0)-&gt;head
+end
+
+define ptail
+    print *($arg0)-&gt;tail
+end
+</code></pre>
+<h3 id="gdb-dashboard"><a class="header" href="#gdb-dashboard">GDB Dashboard</a></h3>
+<pre><code class="language-bash"># Install GDB Dashboard
+wget -P ~ https://git.io/.gdbinit
+
+# Or with curl
+curl -sSL https://git.io/.gdbinit &gt; ~/.gdbinit
+
+# Customization in ~/.gdbinit.d/init
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="debugging-segmentation-fault"><a class="header" href="#debugging-segmentation-fault">Debugging Segmentation Fault</a></h3>
+<pre><code class="language-gdb"># Run program
+(gdb) run
+
+# When it crashes
+Program received signal SIGSEGV, Segmentation fault.
+
+# Check where it crashed
+(gdb) backtrace
+
+# Examine the failing instruction
+(gdb) frame 0
+(gdb) list
+
+# Check variables
+(gdb) print pointer
+(gdb) print *pointer          # This might fail if NULL
+
+# Check registers
+(gdb) info registers
+</code></pre>
+<h3 id="finding-memory-leaks"><a class="header" href="#finding-memory-leaks">Finding Memory Leaks</a></h3>
+<pre><code class="language-gdb"># Set breakpoint at allocation
+(gdb) break malloc
+(gdb) commands
+&gt; backtrace
+&gt; continue
+&gt; end
+
+# Set breakpoint at free
+(gdb) break free
+(gdb) commands
+&gt; backtrace
+&gt; continue
+&gt; end
+
+# Or use Valgrind instead
+</code></pre>
+<h3 id="debugging-infinite-loop"><a class="header" href="#debugging-infinite-loop">Debugging Infinite Loop</a></h3>
+<pre><code class="language-gdb"># Start program
+(gdb) run
+
+# Interrupt (Ctrl+C)
+^C
+Program received signal SIGINT
+
+# Check where it's stuck
+(gdb) backtrace
+(gdb) list
+
+# Set breakpoint and check variable changes
+(gdb) break main.c:loop_line
+(gdb) commands
+&gt; print loop_var
+&gt; continue
+&gt; end
+</code></pre>
+<h3 id="catching-signals"><a class="header" href="#catching-signals">Catching Signals</a></h3>
+<pre><code class="language-gdb"># Catch specific signal
+(gdb) catch signal SIGSEGV
+
+# Catch all signals
+(gdb) catch signal all
+
+# Info signals
+(gdb) info signals
+
+# Handle signal (pass, nopass, stop, nostop, print, noprint)
+(gdb) handle SIGINT nostop print pass
+</code></pre>
+<h2 id="remote-debugging"><a class="header" href="#remote-debugging">Remote Debugging</a></h2>
+<h3 id="gdb-server"><a class="header" href="#gdb-server">GDB Server</a></h3>
+<pre><code class="language-bash"># On remote machine
+gdbserver :1234 ./program
+
+# Or attach to running process
+gdbserver :1234 --attach &lt;pid&gt;
+
+# On local machine
+gdb ./program
+(gdb) target remote remote-host:1234
+(gdb) continue
+</code></pre>
+<h3 id="serialuart-debugging"><a class="header" href="#serialuart-debugging">Serial/UART Debugging</a></h3>
+<pre><code class="language-bash"># Connect via serial port
+gdb ./program
+(gdb) target remote /dev/ttyUSB0
+
+# Set baud rate (if needed, in .gdbinit)
+set serial baud 115200
+</code></pre>
+<h2 id="tui-mode-text-user-interface"><a class="header" href="#tui-mode-text-user-interface">TUI Mode (Text User Interface)</a></h2>
+<pre><code class="language-gdb"># Start TUI mode
+(gdb) tui enable
+(gdb) Ctrl+X A               # Toggle TUI
+
+# TUI layouts
+(gdb) layout src             # Source code
+(gdb) layout asm             # Assembly
+(gdb) layout split           # Source and assembly
+(gdb) layout regs            # Registers
+
+# Window focus
+(gdb) focus cmd              # Focus command window
+(gdb) focus src              # Focus source window
+
+# Refresh display
+(gdb) Ctrl+L                 # Refresh screen
+</code></pre>
+<h2 id="useful-tricks"><a class="header" href="#useful-tricks">Useful Tricks</a></h2>
+<h3 id="pretty-printing"><a class="header" href="#pretty-printing">Pretty Printing</a></h3>
+<pre><code class="language-gdb"># Enable pretty printing
+(gdb) set print pretty on
+(gdb) set print array on
+(gdb) set print array-indexes on
+
+# STL pretty printers (C++)
+(gdb) python
+import sys
+sys.path.insert(0, '/usr/share/gcc/python')
+from libstdcxx.v6.printers import register_libstdcxx_printers
+register_libstdcxx_printers(None)
+end
+
+# Now print STL containers nicely
+(gdb) print my_vector
+(gdb) print my_map
+</code></pre>
+<h3 id="logging"><a class="header" href="#logging">Logging</a></h3>
+<pre><code class="language-gdb"># Enable logging
+(gdb) set logging on          # Logs to gdb.txt
+(gdb) set logging file mylog.txt
+(gdb) set logging overwrite on
+
+# Log and display
+(gdb) set logging redirect off
+</code></pre>
+<h3 id="macros"><a class="header" href="#macros">Macros</a></h3>
+<pre><code class="language-bash"># ~/.gdbinit
+define plist
+    set $node = $arg0
+    while $node != 0
+        print *$node
+        set $node = $node-&gt;next
+    end
+end
+
+# Usage
+(gdb) plist head
+</code></pre>
+<h3 id="function-breakpoints"><a class="header" href="#function-breakpoints">Function Breakpoints</a></h3>
+<pre><code class="language-gdb"># Break on all functions matching pattern
+(gdb) rbreak ^my_.*          # All functions starting with my_
+
+# Break on exception throw (C++)
+(gdb) catch throw
+
+# Break on system calls
+(gdb) catch syscall write
+</code></pre>
+<h2 id="debugging-optimized-code"><a class="header" href="#debugging-optimized-code">Debugging Optimized Code</a></h2>
+<pre><code class="language-gdb"># Problems with -O2, -O3
+# Variables optimized away
+# Inlining makes stepping difficult
+
+# Solutions:
+# 1. Compile with -Og (optimize for debugging)
+gcc -g -Og program.c -o program
+
+# 2. Disable specific optimizations
+gcc -g -O2 -fno-inline program.c -o program
+
+# 3. Use volatile for critical variables
+volatile int debug_var;
+
+# In GDB, skip inlined functions
+(gdb) skip -rfu ^std::
+</code></pre>
+<h2 id="integration-with-other-tools"><a class="header" href="#integration-with-other-tools">Integration with Other Tools</a></h2>
+<h3 id="valgrind-and-gdb"><a class="header" href="#valgrind-and-gdb">Valgrind and GDB</a></h3>
+<pre><code class="language-bash"># Run program under Valgrind with GDB server
+valgrind --vgdb=yes --vgdb-error=0 ./program
+
+# In another terminal
+gdb ./program
+(gdb) target remote | vgdb
+</code></pre>
+<h3 id="gdb-with-make"><a class="header" href="#gdb-with-make">GDB with Make</a></h3>
+<pre><code class="language-makefile"># Makefile
+debug: program
+	gdb ./program
+
+.PHONY: debug
+</code></pre>
+<h3 id="gdb-in-vscode"><a class="header" href="#gdb-in-vscode">GDB in VSCode</a></h3>
+<pre><code class="language-json">// .vscode/launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "GDB Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/program",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<pre><code class="language-gdb"># Can't see source code
+(gdb) directory /path/to/source
+
+# Symbols not loaded
+# Ensure compiled with -g
+# Check symbols loaded
+(gdb) info sources
+
+# Can't set breakpoint
+# Check function exists
+(gdb) info functions pattern
+
+# Program behavior different in GDB
+# Try without breakpoints
+# Timing-sensitive bugs
+
+# GDB hangs
+# Check for infinite loops in pretty printers
+(gdb) set print elements 100
+
+# Can't debug strip binary
+# Need unstripped version or separate debug symbols
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>run</code></td><td>Start program</td></tr>
+<tr><td><code>break</code></td><td>Set breakpoint</td></tr>
+<tr><td><code>continue</code></td><td>Continue execution</td></tr>
+<tr><td><code>step</code></td><td>Step into</td></tr>
+<tr><td><code>next</code></td><td>Step over</td></tr>
+<tr><td><code>print</code></td><td>Print variable</td></tr>
+<tr><td><code>backtrace</code></td><td>Show stack</td></tr>
+<tr><td><code>frame</code></td><td>Select frame</td></tr>
+<tr><td><code>info locals</code></td><td>Show local variables</td></tr>
+<tr><td><code>info args</code></td><td>Show function arguments</td></tr>
+<tr><td><code>watch</code></td><td>Set watchpoint</td></tr>
+<tr><td><code>list</code></td><td>Show source code</td></tr>
+<tr><td><code>disassemble</code></td><td>Show assembly</td></tr>
+<tr><td><code>quit</code></td><td>Exit GDB</td></tr>
+</tbody></table>
+</div>
+<h2 id="keyboard-shortcuts"><a class="header" href="#keyboard-shortcuts">Keyboard Shortcuts</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody>
+<tr><td><code>Ctrl+C</code></td><td>Interrupt program</td></tr>
+<tr><td><code>Ctrl+D</code></td><td>Exit GDB</td></tr>
+<tr><td><code>Enter</code></td><td>Repeat last command</td></tr>
+<tr><td><code>Ctrl+X A</code></td><td>Toggle TUI mode</td></tr>
+<tr><td><code>Ctrl+L</code></td><td>Refresh screen</td></tr>
+<tr><td><code>Ctrl+P</code></td><td>Previous command</td></tr>
+<tr><td><code>Ctrl+N</code></td><td>Next command</td></tr>
+</tbody></table>
+</div>
+<p>GDB is an indispensable tool for debugging compiled programs, offering powerful features for understanding program behavior, finding bugs, and analyzing crashes.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../debugging/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../debugging/core_dump.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../debugging/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../debugging/core_dump.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

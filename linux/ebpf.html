@@ -1,0 +1,1252 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>eBPF - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ebpf-extended-berkeley-packet-filter"><a class="header" href="#ebpf-extended-berkeley-packet-filter">eBPF (Extended Berkeley Packet Filter)</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#program-types">Program Types</a></li>
+<li><a href="#ebpf-maps">eBPF Maps</a></li>
+<li><a href="#development-tools">Development Tools</a></li>
+<li><a href="#writing-ebpf-programs">Writing eBPF Programs</a></li>
+<li><a href="#common-use-cases">Common Use Cases</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#security-and-safety">Security and Safety</a></li>
+<li><a href="#debugging">Debugging</a></li>
+<li><a href="#resources">Resources</a></li>
+</ol>
+<hr />
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<h3 id="what-is-ebpf"><a class="header" href="#what-is-ebpf">What is eBPF?</a></h3>
+<p>eBPF (Extended Berkeley Packet Filter) is a revolutionary Linux kernel technology that allows running sandboxed programs in kernel space without changing kernel source code or loading kernel modules. It enables dynamic extension of kernel capabilities for networking, observability, security, and performance analysis.</p>
+<h3 id="history"><a class="header" href="#history">History</a></h3>
+<ul>
+<li><strong>1992</strong>: Original BPF (Berkeley Packet Filter) created for packet filtering in BSD</li>
+<li><strong>2014</strong>: eBPF introduced in Linux kernel 3.18, extending BPF beyond networking</li>
+<li><strong>2016-Present</strong>: Rapid evolution with new program types, maps, and helper functions</li>
+</ul>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Safe</strong>: Verifier ensures programs are safe to run in kernel space</li>
+<li><strong>Efficient</strong>: JIT compilation for native performance</li>
+<li><strong>Dynamic</strong>: Load/unload programs without rebooting</li>
+<li><strong>Programmable</strong>: Write custom kernel extensions in C/Rust</li>
+<li><strong>Event-driven</strong>: Attach to kernel/user events without overhead when not triggered</li>
+</ul>
+<h3 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h3>
+<ul>
+<li>Network packet filtering and manipulation</li>
+<li>Performance monitoring and profiling</li>
+<li>Security enforcement and runtime protection</li>
+<li>Tracing and observability</li>
+<li>Load balancing and service mesh</li>
+<li>Container networking</li>
+</ul>
+<hr />
+<h2 id="architecture"><a class="header" href="#architecture">Architecture</a></h2>
+<h3 id="ebpf-virtual-machine"><a class="header" href="#ebpf-virtual-machine">eBPF Virtual Machine</a></h3>
+<p>eBPF programs run in a virtual machine within the kernel with:</p>
+<ul>
+<li><strong>11 64-bit registers</strong> (R0-R10)</li>
+<li><strong>512-byte stack</strong></li>
+<li><strong>RISC-like instruction set</strong> (similar to x86-64)</li>
+<li><strong>Bounded loops</strong> (since kernel 5.3)</li>
+</ul>
+<pre><code>R0:  Return value from functions/exit value
+R1-R5: Function arguments
+R6-R9: Callee-saved registers
+R10: Read-only frame pointer
+</code></pre>
+<h3 id="core-components"><a class="header" href="#core-components">Core Components</a></h3>
+<h4 id="1-verifier"><a class="header" href="#1-verifier">1. Verifier</a></h4>
+<ul>
+<li>Static analysis of eBPF bytecode before loading</li>
+<li>Ensures memory safety (no out-of-bounds access)</li>
+<li>Validates control flow (no infinite loops, reachable code)</li>
+<li>Checks register states and types</li>
+<li>Limits program complexity</li>
+</ul>
+<h4 id="2-jit-compiler"><a class="header" href="#2-jit-compiler">2. JIT Compiler</a></h4>
+<ul>
+<li>Compiles eBPF bytecode to native machine code</li>
+<li>Available for x86-64, ARM64, RISC-V, etc.</li>
+<li>Provides near-native performance</li>
+<li>Can be disabled (interpreter fallback)</li>
+</ul>
+<pre><code class="language-bash"># Enable JIT compiler
+echo 1 &gt; /proc/sys/net/core/bpf_jit_enable
+
+# Enable JIT debug (dump compiled code)
+echo 2 &gt; /proc/sys/net/core/bpf_jit_enable
+</code></pre>
+<h4 id="3-helper-functions"><a class="header" href="#3-helper-functions">3. Helper Functions</a></h4>
+<ul>
+<li>Kernel functions callable from eBPF programs</li>
+<li>Type-safe interfaces to kernel functionality</li>
+<li>Examples: map operations, packet manipulation, time functions</li>
+</ul>
+<h4 id="4-maps"><a class="header" href="#4-maps">4. Maps</a></h4>
+<ul>
+<li>Data structures for sharing data between eBPF programs and user space</li>
+<li>Persistent storage across program invocations</li>
+<li>Various types: hash, array, ring buffer, etc.</li>
+</ul>
+<h3 id="attachment-points-hooks"><a class="header" href="#attachment-points-hooks">Attachment Points (Hooks)</a></h3>
+<p>eBPF programs attach to kernel events:</p>
+<ul>
+<li><strong>Network</strong>: XDP, TC, socket operations, cgroups</li>
+<li><strong>Tracing</strong>: kprobes, uprobes, tracepoints, USDT</li>
+<li><strong>Security</strong>: LSM hooks, seccomp</li>
+<li><strong>Cgroups</strong>: Device access, socket operations, sysctl</li>
+</ul>
+<hr />
+<h2 id="program-types"><a class="header" href="#program-types">Program Types</a></h2>
+<h3 id="xdp-express-data-path"><a class="header" href="#xdp-express-data-path">XDP (eXpress Data Path)</a></h3>
+<p>Processes packets at the earliest point in the network stack (driver level).</p>
+<p><strong>Use Cases</strong>: DDoS mitigation, load balancing, packet filtering</p>
+<p><strong>Return Codes</strong>:</p>
+<ul>
+<li><code>XDP_DROP</code>: Drop packet</li>
+<li><code>XDP_PASS</code>: Pass to network stack</li>
+<li><code>XDP_TX</code>: Bounce packet back out same interface</li>
+<li><code>XDP_REDIRECT</code>: Redirect to another interface</li>
+<li><code>XDP_ABORTED</code>: Error, drop packet</li>
+</ul>
+<p><strong>Example Hook</strong>:</p>
+<pre><code class="language-c">SEC("xdp")
+int xdp_prog(struct xdp_md *ctx) {
+    // Access packet data
+    void *data_end = (void *)(long)ctx-&gt;data_end;
+    void *data = (void *)(long)ctx-&gt;data;
+
+    // Process packet
+    return XDP_PASS;
+}
+</code></pre>
+<h3 id="tc-traffic-control"><a class="header" href="#tc-traffic-control">TC (Traffic Control)</a></h3>
+<p>Attaches to network queueing discipline (ingress/egress).</p>
+<p><strong>Use Cases</strong>: QoS, traffic shaping, packet modification</p>
+<p><strong>Attachment</strong>:</p>
+<pre><code class="language-bash">tc qdisc add dev eth0 clsact
+tc filter add dev eth0 ingress bpf da obj prog.o sec classifier
+</code></pre>
+<h3 id="tracepoints"><a class="header" href="#tracepoints">Tracepoints</a></h3>
+<p>Static instrumentation points in the kernel.</p>
+<p><strong>Advantages</strong>: Stable ABI, defined arguments
+<strong>Locations</strong>: Scheduling, system calls, network events</p>
+<pre><code class="language-c">SEC("tracepoint/syscalls/sys_enter_execve")
+int trace_execve(struct trace_event_raw_sys_enter *ctx) {
+    // Trace execve system call
+    return 0;
+}
+</code></pre>
+<h3 id="kprobeskretprobes"><a class="header" href="#kprobeskretprobes">Kprobes/Kretprobes</a></h3>
+<p>Dynamic instrumentation of any kernel function.</p>
+<p><strong>Kprobe</strong>: Execute at function entry
+<strong>Kretprobe</strong>: Execute at function return</p>
+<pre><code class="language-c">SEC("kprobe/tcp_connect")
+int trace_tcp_connect(struct pt_regs *ctx) {
+    // Hook tcp_connect function
+    return 0;
+}
+
+SEC("kretprobe/tcp_connect")
+int trace_tcp_connect_ret(struct pt_regs *ctx) {
+    // Get return value
+    int ret = PT_REGS_RC(ctx);
+    return 0;
+}
+</code></pre>
+<h3 id="uprobesuretprobes"><a class="header" href="#uprobesuretprobes">Uprobes/Uretprobes</a></h3>
+<p>Dynamic instrumentation of user-space functions.</p>
+<p><strong>Use Cases</strong>: Application profiling, library tracing</p>
+<pre><code class="language-c">SEC("uprobe/usr/lib/libc.so.6:malloc")
+int trace_malloc(struct pt_regs *ctx) {
+    size_t size = PT_REGS_PARM1(ctx);
+    return 0;
+}
+</code></pre>
+<h3 id="socket-filters"><a class="header" href="#socket-filters">Socket Filters</a></h3>
+<p>Filter and process socket data.</p>
+<p><strong>Types</strong>:</p>
+<ul>
+<li><code>BPF_PROG_TYPE_SOCKET_FILTER</code>: Classic socket filtering</li>
+<li><code>BPF_PROG_TYPE_SOCK_OPS</code>: Socket operations monitoring</li>
+<li><code>BPF_PROG_TYPE_SK_SKB</code>: Socket buffer redirection</li>
+<li><code>BPF_PROG_TYPE_SK_MSG</code>: Socket message filtering</li>
+</ul>
+<h3 id="lsm-linux-security-module"><a class="header" href="#lsm-linux-security-module">LSM (Linux Security Module)</a></h3>
+<p>Implement security policies using LSM hooks.</p>
+<p><strong>Requirements</strong>: Kernel 5.7+, BPF LSM enabled</p>
+<pre><code class="language-c">SEC("lsm/file_open")
+int BPF_PROG(file_open, struct file *file) {
+    // Implement access control
+    return 0; // Allow
+}
+</code></pre>
+<h3 id="other-program-types"><a class="header" href="#other-program-types">Other Program Types</a></h3>
+<ul>
+<li><strong>Cgroup programs</strong>: Control resource access per cgroup</li>
+<li><strong>Perf event</strong>: Attach to performance monitoring events</li>
+<li><strong>Raw tracepoints</strong>: Low-overhead tracing</li>
+<li><strong>BTF-enabled programs</strong>: Type information for portability</li>
+</ul>
+<hr />
+<h2 id="ebpf-maps"><a class="header" href="#ebpf-maps">eBPF Maps</a></h2>
+<p>Maps are key-value data structures for storing state and communicating between eBPF programs and user space.</p>
+<h3 id="map-types"><a class="header" href="#map-types">Map Types</a></h3>
+<h4 id="bpf_map_type_hash"><a class="header" href="#bpf_map_type_hash">BPF_MAP_TYPE_HASH</a></h4>
+<p>Hash table for arbitrary key-value pairs.</p>
+<pre><code class="language-c">struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 10000);
+    __type(key, u32);
+    __type(value, u64);
+} my_hash_map SEC(".maps");
+</code></pre>
+<h4 id="bpf_map_type_array"><a class="header" href="#bpf_map_type_array">BPF_MAP_TYPE_ARRAY</a></h4>
+<p>Fixed-size array indexed by integer.</p>
+<pre><code class="language-c">struct {
+    __uint(type, BPF_MAP_TYPE_ARRAY);
+    __uint(max_entries, 256);
+    __type(key, u32);
+    __type(value, u64);
+} my_array SEC(".maps");
+</code></pre>
+<h4 id="bpf_map_type_percpu_hash--percpu_array"><a class="header" href="#bpf_map_type_percpu_hash--percpu_array">BPF_MAP_TYPE_PERCPU_HASH / PERCPU_ARRAY</a></h4>
+<p>Per-CPU variants for better performance (no locking).</p>
+<pre><code class="language-c">struct {
+    __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
+    __uint(max_entries, 256);
+    __type(key, u32);
+    __type(value, u64);
+} percpu_stats SEC(".maps");
+</code></pre>
+<h4 id="bpf_map_type_ringbuf"><a class="header" href="#bpf_map_type_ringbuf">BPF_MAP_TYPE_RINGBUF</a></h4>
+<p>Ring buffer for efficient kernel-to-user data streaming (kernel 5.8+).</p>
+<pre><code class="language-c">struct {
+    __uint(type, BPF_MAP_TYPE_RINGBUF);
+    __uint(max_entries, 256 * 1024);
+} events SEC(".maps");
+
+// Reserve and submit
+struct event *e = bpf_ringbuf_reserve(&amp;events, sizeof(*e), 0);
+if (e) {
+    e-&gt;pid = bpf_get_current_pid_tgid() &gt;&gt; 32;
+    bpf_ringbuf_submit(e, 0);
+}
+</code></pre>
+<h4 id="bpf_map_type_perf_event_array"><a class="header" href="#bpf_map_type_perf_event_array">BPF_MAP_TYPE_PERF_EVENT_ARRAY</a></h4>
+<p>Per-CPU event buffers (older than ringbuf).</p>
+<pre><code class="language-c">struct {
+    __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+    __uint(key_size, sizeof(u32));
+    __uint(value_size, sizeof(u32));
+} events SEC(".maps");
+</code></pre>
+<h4 id="bpf_map_type_lru_hash"><a class="header" href="#bpf_map_type_lru_hash">BPF_MAP_TYPE_LRU_HASH</a></h4>
+<p>Hash table with Least Recently Used eviction.</p>
+<pre><code class="language-c">struct {
+    __uint(type, BPF_MAP_TYPE_LRU_HASH);
+    __uint(max_entries, 10000);
+    __type(key, u32);
+    __type(value, u64);
+} lru_cache SEC(".maps");
+</code></pre>
+<h4 id="bpf_map_type_stack_trace"><a class="header" href="#bpf_map_type_stack_trace">BPF_MAP_TYPE_STACK_TRACE</a></h4>
+<p>Store stack traces.</p>
+<pre><code class="language-c">struct {
+    __uint(type, BPF_MAP_TYPE_STACK_TRACE);
+    __uint(max_entries, 1000);
+    __type(key, u32);
+    __type(value, u64[127]);
+} stack_traces SEC(".maps");
+</code></pre>
+<h4 id="bpf_map_type_prog_array"><a class="header" href="#bpf_map_type_prog_array">BPF_MAP_TYPE_PROG_ARRAY</a></h4>
+<p>Array of eBPF programs for tail calls.</p>
+<pre><code class="language-c">struct {
+    __uint(type, BPF_MAP_TYPE_PROG_ARRAY);
+    __uint(max_entries, 10);
+    __type(key, u32);
+    __type(value, u32);
+} prog_array SEC(".maps");
+
+// Tail call
+bpf_tail_call(ctx, &amp;prog_array, index);
+</code></pre>
+<h3 id="map-operations"><a class="header" href="#map-operations">Map Operations</a></h3>
+<pre><code class="language-c">// Lookup
+value = bpf_map_lookup_elem(&amp;my_map, &amp;key);
+
+// Update
+bpf_map_update_elem(&amp;my_map, &amp;key, &amp;value, BPF_ANY);
+
+// Delete
+bpf_map_delete_elem(&amp;my_map, &amp;key);
+</code></pre>
+<p><strong>Update Flags</strong>:</p>
+<ul>
+<li><code>BPF_ANY</code>: Create or update</li>
+<li><code>BPF_NOEXIST</code>: Create only if doesn't exist</li>
+<li><code>BPF_EXIST</code>: Update only if exists</li>
+</ul>
+<hr />
+<h2 id="development-tools"><a class="header" href="#development-tools">Development Tools</a></h2>
+<h3 id="bcc-bpf-compiler-collection"><a class="header" href="#bcc-bpf-compiler-collection">BCC (BPF Compiler Collection)</a></h3>
+<p>Python/Lua framework for writing eBPF programs.</p>
+<p><strong>Pros</strong>: High-level, rapid development, many examples
+<strong>Cons</strong>: Runtime compilation, LLVM dependency on target</p>
+<pre><code class="language-python">from bcc import BPF
+
+prog = """
+int hello(void *ctx) {
+    bpf_trace_printk("Hello, World!\\n");
+    return 0;
+}
+"""
+
+b = BPF(text=prog)
+b.attach_kprobe(event="sys_clone", fn_name="hello")
+</code></pre>
+<h3 id="libbpf"><a class="header" href="#libbpf">libbpf</a></h3>
+<p>C library for loading and managing eBPF programs.</p>
+<p><strong>Pros</strong>: No runtime dependencies, CO-RE support, production-ready
+<strong>Cons</strong>: Lower-level, more boilerplate</p>
+<pre><code class="language-c">struct bpf_object *obj;
+struct bpf_program *prog;
+struct bpf_link *link;
+
+obj = bpf_object__open_file("prog.o", NULL);
+bpf_object__load(obj);
+prog = bpf_object__find_program_by_name(obj, "xdp_prog");
+link = bpf_program__attach(prog);
+</code></pre>
+<h3 id="bpftool"><a class="header" href="#bpftool">bpftool</a></h3>
+<p>Command-line tool for inspecting and managing eBPF programs/maps.</p>
+<pre><code class="language-bash"># List programs
+bpftool prog list
+
+# Show program details
+bpftool prog show id 123
+
+# Dump program bytecode
+bpftool prog dump xlated id 123
+
+# List maps
+bpftool map list
+
+# Dump map contents
+bpftool map dump id 456
+
+# Load program
+bpftool prog load prog.o /sys/fs/bpf/myprog
+
+# Pin map
+bpftool map pin id 456 /sys/fs/bpf/mymap
+</code></pre>
+<h3 id="ebpf-for-go"><a class="header" href="#ebpf-for-go">eBPF for Go</a></h3>
+<pre><code class="language-go">import "github.com/cilium/ebpf"
+
+spec, err := ebpf.LoadCollectionSpec("prog.o")
+coll, err := ebpf.NewCollection(spec)
+defer coll.Close()
+
+prog := coll.Programs["xdp_prog"]
+link, err := link.AttachXDP(link.XDPOptions{
+    Program:   prog,
+    Interface: iface.Index,
+})
+defer link.Close()
+</code></pre>
+<h3 id="other-tools"><a class="header" href="#other-tools">Other Tools</a></h3>
+<ul>
+<li><strong>Cilium</strong>: Container networking with eBPF</li>
+<li><strong>Katran</strong>: Layer 4 load balancer (Facebook)</li>
+<li><strong>Falco</strong>: Runtime security monitoring</li>
+<li><strong>Pixie</strong>: Observability platform</li>
+<li><strong>bpftrace</strong>: High-level tracing language</li>
+</ul>
+<hr />
+<h2 id="writing-ebpf-programs"><a class="header" href="#writing-ebpf-programs">Writing eBPF Programs</a></h2>
+<h3 id="development-workflow"><a class="header" href="#development-workflow">Development Workflow</a></h3>
+<ol>
+<li><strong>Write C code</strong> with eBPF program</li>
+<li><strong>Compile to eBPF bytecode</strong> using Clang/LLVM</li>
+<li><strong>Load into kernel</strong> using libbpf/BCC</li>
+<li><strong>Attach to hook point</strong></li>
+<li><strong>Communicate via maps</strong></li>
+<li><strong>Unload/detach</strong> when done</li>
+</ol>
+<h3 id="basic-c-program-structure"><a class="header" href="#basic-c-program-structure">Basic C Program Structure</a></h3>
+<pre><code class="language-c">#include &lt;linux/bpf.h&gt;
+#include &lt;bpf/bpf_helpers.h&gt;
+
+// Define map
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 1024);
+    __type(key, u32);
+    __type(value, u64);
+} stats SEC(".maps");
+
+// eBPF program
+SEC("xdp")
+int xdp_main(struct xdp_md *ctx) {
+    u32 key = 0;
+    u64 *count;
+
+    count = bpf_map_lookup_elem(&amp;stats, &amp;key);
+    if (count) {
+        __sync_fetch_and_add(count, 1);
+    }
+
+    return XDP_PASS;
+}
+
+char LICENSE[] SEC("license") = "GPL";
+</code></pre>
+<h3 id="compilation"><a class="header" href="#compilation">Compilation</a></h3>
+<pre><code class="language-bash"># Compile to eBPF bytecode
+clang -O2 -g -target bpf -c prog.c -o prog.o
+
+# With BTF (Type Information)
+clang -O2 -g -target bpf -D__TARGET_ARCH_x86 \
+    -I/usr/include/bpf -c prog.c -o prog.o
+</code></pre>
+<h3 id="co-re-compile-once---run-everywhere"><a class="header" href="#co-re-compile-once---run-everywhere">CO-RE (Compile Once - Run Everywhere)</a></h3>
+<p><strong>Problem</strong>: Kernel data structures change across versions
+<strong>Solution</strong>: BTF (BPF Type Format) + CO-RE relocations</p>
+<pre><code class="language-c">#include &lt;vmlinux.h&gt;
+#include &lt;bpf/bpf_core_read.h&gt;
+
+SEC("kprobe/tcp_connect")
+int trace_connect(struct pt_regs *ctx) {
+    struct sock *sk = (struct sock *)PT_REGS_PARM1(ctx);
+    u16 family;
+
+    // CO-RE read - portable across kernel versions
+    BPF_CORE_READ_INTO(&amp;family, sk, __sk_common.skc_family);
+
+    return 0;
+}
+</code></pre>
+<p><strong>Generate vmlinux.h</strong> (kernel type definitions):</p>
+<pre><code class="language-bash">bpftool btf dump file /sys/kernel/btf/vmlinux format c &gt; vmlinux.h
+</code></pre>
+<h3 id="user-space-loader-libbpf"><a class="header" href="#user-space-loader-libbpf">User-Space Loader (libbpf)</a></h3>
+<pre><code class="language-c">#include &lt;bpf/libbpf.h&gt;
+#include &lt;bpf/bpf.h&gt;
+
+int main() {
+    struct bpf_object *obj;
+    struct bpf_program *prog;
+    int prog_fd, map_fd;
+
+    // Open and load
+    obj = bpf_object__open_file("prog.o", NULL);
+    bpf_object__load(obj);
+
+    // Get program
+    prog = bpf_object__find_program_by_name(obj, "xdp_main");
+    prog_fd = bpf_program__fd(prog);
+
+    // Get map
+    map_fd = bpf_object__find_map_fd_by_name(obj, "stats");
+
+    // Attach (XDP example)
+    int ifindex = if_nametoindex("eth0");
+    bpf_xdp_attach(ifindex, prog_fd, XDP_FLAGS_UPDATE_IF_NOEXIST, NULL);
+
+    // Read from map
+    u32 key = 0;
+    u64 value;
+    bpf_map_lookup_elem(map_fd, &amp;key, &amp;value);
+    printf("Count: %llu\n", value);
+
+    // Cleanup
+    bpf_xdp_detach(ifindex, XDP_FLAGS_UPDATE_IF_NOEXIST, NULL);
+    bpf_object__close(obj);
+
+    return 0;
+}
+</code></pre>
+<p><strong>Compile user-space loader</strong>:</p>
+<pre><code class="language-bash">gcc -o loader loader.c -lbpf -lelf -lz
+</code></pre>
+<hr />
+<h2 id="common-use-cases"><a class="header" href="#common-use-cases">Common Use Cases</a></h2>
+<h3 id="1-network-packet-filtering"><a class="header" href="#1-network-packet-filtering">1. Network Packet Filtering</a></h3>
+<p><strong>XDP-based firewall</strong>:</p>
+<ul>
+<li>Drop malicious packets at driver level</li>
+<li>Block by IP, port, protocol</li>
+<li>DDoS mitigation</li>
+</ul>
+<h3 id="2-load-balancing"><a class="header" href="#2-load-balancing">2. Load Balancing</a></h3>
+<p><strong>Layer 4 load balancing</strong>:</p>
+<ul>
+<li>Distribute connections across backends</li>
+<li>Connection tracking</li>
+<li>Health checks</li>
+</ul>
+<p><strong>Examples</strong>: Katran (Facebook), Cilium</p>
+<h3 id="3-observability-and-tracing"><a class="header" href="#3-observability-and-tracing">3. Observability and Tracing</a></h3>
+<p><strong>System call tracing</strong>:</p>
+<ul>
+<li>Monitor file access</li>
+<li>Track network connections</li>
+<li>Profile CPU usage</li>
+</ul>
+<p><strong>Tools</strong>: BCC tools (execsnoop, opensnoop, tcpconnect)</p>
+<h3 id="4-security-monitoring"><a class="header" href="#4-security-monitoring">4. Security Monitoring</a></h3>
+<p><strong>Runtime security</strong>:</p>
+<ul>
+<li>Detect malicious behavior</li>
+<li>File integrity monitoring</li>
+<li>Process ancestry tracking</li>
+</ul>
+<p><strong>Tools</strong>: Falco, Tracee</p>
+<h3 id="5-performance-analysis"><a class="header" href="#5-performance-analysis">5. Performance Analysis</a></h3>
+<p><strong>Profiling</strong>:</p>
+<ul>
+<li>CPU flame graphs</li>
+<li>I/O latency</li>
+<li>Memory allocation tracking</li>
+</ul>
+<h3 id="6-container-networking"><a class="header" href="#6-container-networking">6. Container Networking</a></h3>
+<p><strong>CNI plugins</strong>:</p>
+<ul>
+<li>Pod networking</li>
+<li>Network policies</li>
+<li>Service mesh data plane</li>
+</ul>
+<p><strong>Examples</strong>: Cilium, Calico eBPF</p>
+<h3 id="7-network-monitoring"><a class="header" href="#7-network-monitoring">7. Network Monitoring</a></h3>
+<p><strong>Metrics collection</strong>:</p>
+<ul>
+<li>Packet counters</li>
+<li>Bandwidth monitoring</li>
+<li>Protocol analysis</li>
+</ul>
+<hr />
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h3 id="example-1-packet-counter-xdp"><a class="header" href="#example-1-packet-counter-xdp">Example 1: Packet Counter (XDP)</a></h3>
+<p><strong>prog.c</strong>:</p>
+<pre><code class="language-c">#include &lt;linux/bpf.h&gt;
+#include &lt;linux/if_ether.h&gt;
+#include &lt;linux/ip.h&gt;
+#include &lt;bpf/bpf_helpers.h&gt;
+
+struct {
+    __uint(type, BPF_MAP_TYPE_ARRAY);
+    __uint(max_entries, 256);
+    __type(key, u32);
+    __type(value, u64);
+} proto_count SEC(".maps");
+
+SEC("xdp")
+int count_packets(struct xdp_md *ctx) {
+    void *data_end = (void *)(long)ctx-&gt;data_end;
+    void *data = (void *)(long)ctx-&gt;data;
+
+    struct ethhdr *eth = data;
+    if ((void *)(eth + 1) &gt; data_end)
+        return XDP_PASS;
+
+    if (eth-&gt;h_proto != __constant_htons(ETH_P_IP))
+        return XDP_PASS;
+
+    struct iphdr *ip = (void *)(eth + 1);
+    if ((void *)(ip + 1) &gt; data_end)
+        return XDP_PASS;
+
+    u32 key = ip-&gt;protocol;
+    u64 *count = bpf_map_lookup_elem(&amp;proto_count, &amp;key);
+    if (count)
+        __sync_fetch_and_add(count, 1);
+
+    return XDP_PASS;
+}
+
+char LICENSE[] SEC("license") = "GPL";
+</code></pre>
+<p><strong>Compile and load</strong>:</p>
+<pre><code class="language-bash">clang -O2 -g -target bpf -c prog.c -o prog.o
+ip link set dev eth0 xdp obj prog.o sec xdp
+</code></pre>
+<p><strong>Read stats</strong>:</p>
+<pre><code class="language-bash">bpftool map dump name proto_count
+</code></pre>
+<h3 id="example-2-process-execution-tracer"><a class="header" href="#example-2-process-execution-tracer">Example 2: Process Execution Tracer</a></h3>
+<p><strong>execsnoop.c</strong>:</p>
+<pre><code class="language-c">#include &lt;vmlinux.h&gt;
+#include &lt;bpf/bpf_helpers.h&gt;
+#include &lt;bpf/bpf_core_read.h&gt;
+
+struct event {
+    u32 pid;
+    char comm[16];
+};
+
+struct {
+    __uint(type, BPF_MAP_TYPE_RINGBUF);
+    __uint(max_entries, 256 * 1024);
+} events SEC(".maps");
+
+SEC("tracepoint/syscalls/sys_enter_execve")
+int trace_execve(struct trace_event_raw_sys_enter *ctx) {
+    struct event *e;
+
+    e = bpf_ringbuf_reserve(&amp;events, sizeof(*e), 0);
+    if (!e)
+        return 0;
+
+    e-&gt;pid = bpf_get_current_pid_tgid() &gt;&gt; 32;
+    bpf_get_current_comm(&amp;e-&gt;comm, sizeof(e-&gt;comm));
+
+    bpf_ringbuf_submit(e, 0);
+    return 0;
+}
+
+char LICENSE[] SEC("license") = "GPL";
+</code></pre>
+<p><strong>User-space consumer</strong>:</p>
+<pre><code class="language-c">#include &lt;bpf/libbpf.h&gt;
+#include &lt;bpf/bpf.h&gt;
+
+struct event {
+    u32 pid;
+    char comm[16];
+};
+
+int handle_event(void *ctx, void *data, size_t len) {
+    struct event *e = data;
+    printf("PID: %d, COMM: %s\n", e-&gt;pid, e-&gt;comm);
+    return 0;
+}
+
+int main() {
+    struct bpf_object *obj;
+    struct ring_buffer *rb;
+    int map_fd;
+
+    obj = bpf_object__open_file("execsnoop.o", NULL);
+    bpf_object__load(obj);
+
+    map_fd = bpf_object__find_map_fd_by_name(obj, "events");
+    rb = ring_buffer__new(map_fd, handle_event, NULL, NULL);
+
+    while (1) {
+        ring_buffer__poll(rb, 100);
+    }
+
+    return 0;
+}
+</code></pre>
+<h3 id="example-3-tcp-connection-tracking"><a class="header" href="#example-3-tcp-connection-tracking">Example 3: TCP Connection Tracking</a></h3>
+<p><strong>tcpconnect.c</strong>:</p>
+<pre><code class="language-c">#include &lt;vmlinux.h&gt;
+#include &lt;bpf/bpf_helpers.h&gt;
+#include &lt;bpf/bpf_core_read.h&gt;
+
+struct conn_event {
+    u32 pid;
+    u32 saddr;
+    u32 daddr;
+    u16 sport;
+    u16 dport;
+};
+
+struct {
+    __uint(type, BPF_MAP_TYPE_RINGBUF);
+    __uint(max_entries, 256 * 1024);
+} events SEC(".maps");
+
+SEC("kprobe/tcp_connect")
+int trace_connect(struct pt_regs *ctx) {
+    struct sock *sk = (struct sock *)PT_REGS_PARM1(ctx);
+    struct conn_event *e;
+    u16 family;
+
+    BPF_CORE_READ_INTO(&amp;family, sk, __sk_common.skc_family);
+    if (family != AF_INET)
+        return 0;
+
+    e = bpf_ringbuf_reserve(&amp;events, sizeof(*e), 0);
+    if (!e)
+        return 0;
+
+    e-&gt;pid = bpf_get_current_pid_tgid() &gt;&gt; 32;
+    BPF_CORE_READ_INTO(&amp;e-&gt;saddr, sk, __sk_common.skc_rcv_saddr);
+    BPF_CORE_READ_INTO(&amp;e-&gt;daddr, sk, __sk_common.skc_daddr);
+    BPF_CORE_READ_INTO(&amp;e-&gt;sport, sk, __sk_common.skc_num);
+    BPF_CORE_READ_INTO(&amp;e-&gt;dport, sk, __sk_common.skc_dport);
+    e-&gt;dport = __bpf_ntohs(e-&gt;dport);
+
+    bpf_ringbuf_submit(e, 0);
+    return 0;
+}
+
+char LICENSE[] SEC("license") = "GPL";
+</code></pre>
+<h3 id="example-4-simple-lsm-hook"><a class="header" href="#example-4-simple-lsm-hook">Example 4: Simple LSM Hook</a></h3>
+<p><strong>file_access.c</strong> (kernel 5.7+):</p>
+<pre><code class="language-c">#include &lt;vmlinux.h&gt;
+#include &lt;bpf/bpf_helpers.h&gt;
+#include &lt;bpf/bpf_core_read.h&gt;
+
+SEC("lsm/file_open")
+int BPF_PROG(restrict_file_open, struct file *file, int ret) {
+    const char *filename;
+    char comm[16];
+    char name[256];
+
+    if (ret != 0)
+        return ret;
+
+    bpf_get_current_comm(&amp;comm, sizeof(comm));
+
+    filename = BPF_CORE_READ(file, f_path.dentry, d_name.name);
+    bpf_probe_read_kernel_str(name, sizeof(name), filename);
+
+    // Block access to /etc/shadow for specific process
+    if (__builtin_memcmp(name, "shadow", 6) == 0) {
+        bpf_printk("Blocked access to %s by %s\n", name, comm);
+        return -1; // EPERM
+    }
+
+    return 0;
+}
+
+char LICENSE[] SEC("license") = "GPL";
+</code></pre>
+<hr />
+<h2 id="security-and-safety"><a class="header" href="#security-and-safety">Security and Safety</a></h2>
+<h3 id="verifier-guarantees"><a class="header" href="#verifier-guarantees">Verifier Guarantees</a></h3>
+<p>The eBPF verifier ensures:</p>
+<ol>
+<li>
+<p><strong>Memory Safety</strong></p>
+<ul>
+<li>No out-of-bounds access</li>
+<li>All memory access through pointers is validated</li>
+<li>Null pointer checks required</li>
+</ul>
+</li>
+<li>
+<p><strong>Termination</strong></p>
+<ul>
+<li>Bounded loops (kernel 5.3+) or loop unrolling</li>
+<li>No infinite loops</li>
+<li>Limited complexity (instruction count)</li>
+</ul>
+</li>
+<li>
+<p><strong>No Undefined Behavior</strong></p>
+<ul>
+<li>All code paths return a value</li>
+<li>No unreachable code</li>
+<li>Register initialization checked</li>
+</ul>
+</li>
+</ol>
+<h3 id="verifier-checks"><a class="header" href="#verifier-checks">Verifier Checks</a></h3>
+<pre><code class="language-c">// ❌ BAD: Unbounded loop (pre-5.3)
+for (int i = 0; i &lt; n; i++) { }
+
+// ✅ GOOD: Bounded loop
+#pragma unroll
+for (int i = 0; i &lt; 10; i++) { }
+
+// ✅ GOOD: Bounded with verifier check (5.3+)
+for (int i = 0; i &lt; n &amp;&amp; i &lt; 100; i++) { }
+</code></pre>
+<pre><code class="language-c">// ❌ BAD: Unchecked pointer
+void *data = (void *)(long)ctx-&gt;data;
+struct ethhdr *eth = data;
+return eth-&gt;h_proto; // Verifier error!
+
+// ✅ GOOD: Bounds check
+void *data = (void *)(long)ctx-&gt;data;
+void *data_end = (void *)(long)ctx-&gt;data_end;
+struct ethhdr *eth = data;
+if ((void *)(eth + 1) &gt; data_end)
+    return XDP_DROP;
+return eth-&gt;h_proto;
+</code></pre>
+<h3 id="required-capabilities"><a class="header" href="#required-capabilities">Required Capabilities</a></h3>
+<p>Loading eBPF programs requires:</p>
+<ul>
+<li><code>CAP_BPF</code> (kernel 5.8+) for eBPF operations</li>
+<li><code>CAP_PERFMON</code> for tracing programs</li>
+<li><code>CAP_NET_ADMIN</code> for networking programs</li>
+</ul>
+<p><strong>Legacy</strong> (pre-5.8): <code>CAP_SYS_ADMIN</code> required</p>
+<pre><code class="language-bash"># Grant specific capabilities
+setcap cap_bpf,cap_perfmon,cap_net_admin+eip ./my_program
+</code></pre>
+<h3 id="unprivileged-ebpf"><a class="header" href="#unprivileged-ebpf">Unprivileged eBPF</a></h3>
+<p>Limited eBPF for unprivileged users (disabled by default):</p>
+<pre><code class="language-bash"># Enable (use with caution)
+sysctl kernel.unprivileged_bpf_disabled=0
+
+# Disable (recommended)
+sysctl kernel.unprivileged_bpf_disabled=1
+</code></pre>
+<h3 id="restrictions"><a class="header" href="#restrictions">Restrictions</a></h3>
+<ul>
+<li>Limited helper functions (no arbitrary kernel memory access)</li>
+<li>No direct kernel pointer access</li>
+<li>Stack size limited to 512 bytes</li>
+<li>Program size limits (1M instructions)</li>
+<li>Map size limits (configurable)</li>
+</ul>
+<hr />
+<h2 id="debugging"><a class="header" href="#debugging">Debugging</a></h2>
+<h3 id="common-verifier-errors"><a class="header" href="#common-verifier-errors">Common Verifier Errors</a></h3>
+<h4 id="1-invalid-memory-access"><a class="header" href="#1-invalid-memory-access">1. Invalid memory access</a></h4>
+<pre><code>R0 invalid mem access 'inv'
+</code></pre>
+<p><strong>Solution</strong>: Add bounds checks before pointer dereference</p>
+<h4 id="2-unreachable-instructions"><a class="header" href="#2-unreachable-instructions">2. Unreachable instructions</a></h4>
+<pre><code>unreachable insn 123
+</code></pre>
+<p><strong>Solution</strong>: Ensure all code paths are reachable</p>
+<h4 id="3-infinite-loop-detected"><a class="header" href="#3-infinite-loop-detected">3. Infinite loop detected</a></h4>
+<pre><code>back-edge from insn 45 to 12
+</code></pre>
+<p><strong>Solution</strong>: Add loop bounds or use <code>#pragma unroll</code></p>
+<h4 id="4-invalid-register-state"><a class="header" href="#4-invalid-register-state">4. Invalid register state</a></h4>
+<pre><code>R1 !read_ok
+</code></pre>
+<p><strong>Solution</strong>: Initialize register before use</p>
+<h3 id="debugging-techniques"><a class="header" href="#debugging-techniques">Debugging Techniques</a></h3>
+<h4 id="1-bpf_printk-kernel-tracing"><a class="header" href="#1-bpf_printk-kernel-tracing">1. bpf_printk (Kernel Tracing)</a></h4>
+<pre><code class="language-c">bpf_printk("Debug: value=%d\n", value);
+</code></pre>
+<p><strong>Read output</strong>:</p>
+<pre><code class="language-bash">cat /sys/kernel/debug/tracing/trace_pipe
+# or
+bpftool prog tracelog
+</code></pre>
+<p><strong>Limitations</strong>:</p>
+<ul>
+<li>Limited format strings</li>
+<li>Performance overhead</li>
+<li>Max 3 arguments</li>
+</ul>
+<h4 id="2-bpftool-inspection"><a class="header" href="#2-bpftool-inspection">2. bpftool Inspection</a></h4>
+<pre><code class="language-bash"># Dump translated bytecode
+bpftool prog dump xlated id 123
+
+# Dump JIT code
+bpftool prog dump jited id 123
+
+# Show verifier log
+bpftool prog load prog.o /sys/fs/bpf/prog 2&gt;&amp;1 | less
+</code></pre>
+<h4 id="3-verbose-verifier-output"><a class="header" href="#3-verbose-verifier-output">3. Verbose Verifier Output</a></h4>
+<pre><code class="language-c">// In user-space loader
+LIBBPF_OPTS(bpf_object_open_opts, opts,
+    .kernel_log_level = 1 | 2 | 4,  // Verbosity levels
+);
+obj = bpf_object__open_file("prog.o", &amp;opts);
+</code></pre>
+<p>Or with bpftool:</p>
+<pre><code class="language-bash">bpftool -d prog load prog.o /sys/fs/bpf/prog
+</code></pre>
+<h4 id="4-map-debugging"><a class="header" href="#4-map-debugging">4. Map Debugging</a></h4>
+<pre><code class="language-bash"># Dump all map entries
+bpftool map dump id 123
+
+# Update map entry
+bpftool map update id 123 key 0 0 0 0 value 1 0 0 0 0 0 0 0
+
+# Delete entry
+bpftool map delete id 123 key 0 0 0 0
+</code></pre>
+<h4 id="5-statistics"><a class="header" href="#5-statistics">5. Statistics</a></h4>
+<pre><code class="language-bash"># Enable statistics
+bpftool feature probe kernel | grep stats
+sysctl -w kernel.bpf_stats_enabled=1
+
+# View program stats (run count, runtime)
+bpftool prog show id 123
+</code></pre>
+<h3 id="performance-profiling"><a class="header" href="#performance-profiling">Performance Profiling</a></h3>
+<h4 id="1-measure-program-runtime"><a class="header" href="#1-measure-program-runtime">1. Measure Program Runtime</a></h4>
+<pre><code class="language-c">u64 start = bpf_ktime_get_ns();
+// ... program logic ...
+u64 duration = bpf_ktime_get_ns() - start;
+</code></pre>
+<h4 id="2-use-perf-with-ebpf"><a class="header" href="#2-use-perf-with-ebpf">2. Use perf with eBPF</a></h4>
+<pre><code class="language-bash"># Profile eBPF program
+perf record -e bpf:bpf_prog_run -a
+perf report
+</code></pre>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<h4 id="issue-program-rejected-by-verifier"><a class="header" href="#issue-program-rejected-by-verifier">Issue: Program rejected by verifier</a></h4>
+<ul>
+<li><strong>Check</strong>: Verifier log for specific error</li>
+<li><strong>Solutions</strong>: Add bounds checks, limit loop iterations, reduce complexity</li>
+</ul>
+<h4 id="issue-map-update-fails"><a class="header" href="#issue-map-update-fails">Issue: Map update fails</a></h4>
+<ul>
+<li><strong>Check</strong>: Map is full, wrong flags</li>
+<li><strong>Solutions</strong>: Use LRU maps, increase size, check update flags</li>
+</ul>
+<h4 id="issue-helper-function-not-found"><a class="header" href="#issue-helper-function-not-found">Issue: Helper function not found</a></h4>
+<ul>
+<li><strong>Check</strong>: Kernel version, program type</li>
+<li><strong>Solutions</strong>: Update kernel, use available helpers for program type</li>
+</ul>
+<h4 id="issue-btfco-re-errors"><a class="header" href="#issue-btfco-re-errors">Issue: BTF/CO-RE errors</a></h4>
+<ul>
+<li><strong>Check</strong>: BTF available (<code>/sys/kernel/btf/vmlinux</code>)</li>
+<li><strong>Solutions</strong>: Enable CONFIG_DEBUG_INFO_BTF, use correct libbpf version</li>
+</ul>
+<hr />
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<h3 id="documentation"><a class="header" href="#documentation">Documentation</a></h3>
+<ul>
+<li><strong>Official eBPF Docs</strong>: https://ebpf.io/</li>
+<li><strong>Kernel Documentation</strong>: https://www.kernel.org/doc/html/latest/bpf/</li>
+<li><strong>BPF and XDP Reference Guide</strong>: https://docs.cilium.io/en/latest/bpf/</li>
+<li><strong>libbpf Documentation</strong>: https://libbpf.readthedocs.io/</li>
+</ul>
+<h3 id="books"><a class="header" href="#books">Books</a></h3>
+<ul>
+<li><strong>"Learning eBPF"</strong> by Liz Rice (O'Reilly, 2023)</li>
+<li><strong>"BPF Performance Tools"</strong> by Brendan Gregg (Addison-Wesley, 2019)</li>
+<li><strong>"Linux Observability with BPF"</strong> by David Calavera &amp; Lorenzo Fontana (O'Reilly, 2019)</li>
+</ul>
+<h3 id="key-projects"><a class="header" href="#key-projects">Key Projects</a></h3>
+<ul>
+<li><strong>BCC</strong>: https://github.com/iovisor/bcc</li>
+<li><strong>libbpf</strong>: https://github.com/libbpf/libbpf</li>
+<li><strong>bpftool</strong>: https://github.com/libbpf/bpftool</li>
+<li><strong>Cilium</strong>: https://github.com/cilium/cilium</li>
+<li><strong>Katran</strong>: https://github.com/facebookincubator/katran</li>
+<li><strong>Falco</strong>: https://github.com/falcosecurity/falco</li>
+<li><strong>bpftrace</strong>: https://github.com/iovisor/bpftrace</li>
+</ul>
+<h3 id="example-collections"><a class="header" href="#example-collections">Example Collections</a></h3>
+<ul>
+<li><strong>BCC Tools</strong>: https://github.com/iovisor/bcc/tree/master/tools</li>
+<li><strong>libbpf-bootstrap</strong>: https://github.com/libbpf/libbpf-bootstrap</li>
+<li><strong>Linux kernel samples</strong>: https://github.com/torvalds/linux/tree/master/samples/bpf</li>
+</ul>
+<h3 id="community"><a class="header" href="#community">Community</a></h3>
+<ul>
+<li><strong>eBPF Summit</strong>: Annual conference</li>
+<li><strong>eBPF Slack</strong>: https://ebpf.io/slack</li>
+<li><strong>Mailing List</strong>: bpf@vger.kernel.org</li>
+<li><strong>Reddit</strong>: r/ebpf</li>
+</ul>
+<h3 id="tutorials"><a class="header" href="#tutorials">Tutorials</a></h3>
+<ul>
+<li><strong>Cilium eBPF Tutorial</strong>: https://github.com/cilium/ebpf-tutorial</li>
+<li><strong>XDP Hands-On Tutorial</strong>: https://github.com/xdp-project/xdp-tutorial</li>
+<li><strong>libbpf-bootstrap Examples</strong>: Step-by-step guides</li>
+</ul>
+<h3 id="tools-and-utilities"><a class="header" href="#tools-and-utilities">Tools and Utilities</a></h3>
+<pre><code class="language-bash"># Install development tools (Ubuntu/Debian)
+apt install -y clang llvm libelf-dev libz-dev libbpf-dev \
+    linux-tools-common linux-tools-generic bpftool
+
+# Install BCC
+apt install -y bpfcc-tools python3-bpfcc
+
+# Install bpftrace
+apt install -y bpftrace
+</code></pre>
+<hr />
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="common-commands"><a class="header" href="#common-commands">Common Commands</a></h3>
+<pre><code class="language-bash"># List all eBPF programs
+bpftool prog list
+
+# List all maps
+bpftool map list
+
+# Show program by ID
+bpftool prog show id &lt;ID&gt;
+
+# Dump program bytecode
+bpftool prog dump xlated id &lt;ID&gt;
+
+# Pin program to filesystem
+bpftool prog pin id &lt;ID&gt; /sys/fs/bpf/&lt;name&gt;
+
+# Load program from object file
+bpftool prog load prog.o /sys/fs/bpf/myprog
+
+# Attach XDP program
+ip link set dev &lt;iface&gt; xdp obj prog.o sec xdp
+
+# Detach XDP program
+ip link set dev &lt;iface&gt; xdp off
+
+# Attach TC program
+tc qdisc add dev &lt;iface&gt; clsact
+tc filter add dev &lt;iface&gt; ingress bpf da obj prog.o
+
+# View trace output
+cat /sys/kernel/debug/tracing/trace_pipe
+</code></pre>
+<h3 id="helper-function-categories"><a class="header" href="#helper-function-categories">Helper Function Categories</a></h3>
+<ul>
+<li><strong>Map operations</strong>: <code>bpf_map_lookup_elem</code>, <code>bpf_map_update_elem</code>, <code>bpf_map_delete_elem</code></li>
+<li><strong>Time</strong>: <code>bpf_ktime_get_ns</code>, <code>bpf_ktime_get_boot_ns</code></li>
+<li><strong>Process/Thread</strong>: <code>bpf_get_current_pid_tgid</code>, <code>bpf_get_current_uid_gid</code>, <code>bpf_get_current_comm</code></li>
+<li><strong>Tracing</strong>: <code>bpf_probe_read</code>, <code>bpf_probe_read_kernel</code>, <code>bpf_probe_read_user</code></li>
+<li><strong>Networking</strong>: <code>bpf_skb_load_bytes</code>, <code>bpf_skb_store_bytes</code>, <code>bpf_xdp_adjust_head</code></li>
+<li><strong>Output</strong>: <code>bpf_printk</code>, <code>bpf_perf_event_output</code>, <code>bpf_ringbuf_submit</code></li>
+<li><strong>Stack</strong>: <code>bpf_get_stackid</code>, <code>bpf_get_stack</code></li>
+</ul>
+<h3 id="kernel-version-features"><a class="header" href="#kernel-version-features">Kernel Version Features</a></h3>
+<ul>
+<li><strong>3.18</strong> (2014): Initial eBPF support</li>
+<li><strong>4.1</strong> (2015): BPF maps, tail calls</li>
+<li><strong>4.4</strong> (2016): XDP support</li>
+<li><strong>4.8</strong> (2016): Direct packet access</li>
+<li><strong>4.18</strong> (2018): BTF (BPF Type Format)</li>
+<li><strong>5.2</strong> (2019): Bounded loops support</li>
+<li><strong>5.7</strong> (2020): LSM BPF programs</li>
+<li><strong>5.8</strong> (2020): Ring buffer, <code>CAP_BPF</code></li>
+<li><strong>5.13</strong> (2021): Kernel module function calls</li>
+<li><strong>6.0</strong> (2022): Sleepable programs enhancements</li>
+</ul>
+<hr />
+<p><strong>Last Updated</strong>: 2024
+<strong>Kernel Version Coverage</strong>: Linux 3.18 - 6.x</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../linux/cfg80211_mac80211.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../linux/commands.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../linux/cfg80211_mac80211.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../linux/commands.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

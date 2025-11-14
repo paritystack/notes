@@ -178,6 +178,66 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="roaming"><a class="header" href="#roaming">Roaming</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>WiFi roaming is the process by which a client device (such as a smartphone or laptop) seamlessly transitions from one access point (AP) to another within the same network without losing connectivity. This is essential for maintaining uninterrupted service in environments with multiple APs, such as offices, campuses, and large homes.</p>
+<h3 id="the-roaming-process"><a class="header" href="#the-roaming-process">The Roaming Process</a></h3>
+<p>When a client device roams, several steps occur:</p>
+<ol>
+<li><strong>Discovery</strong>: The client scans for available APs and measures their signal strength (RSSI - Received Signal Strength Indicator).</li>
+<li><strong>Decision</strong>: Based on signal strength, network load, and other factors, the client decides to roam to a different AP.</li>
+<li><strong>Authentication</strong>: The client authenticates with the new AP.</li>
+<li><strong>Reassociation</strong>: The client reassociates with the new AP, completing the handoff.</li>
+<li><strong>Key Exchange</strong>: Security keys are exchanged to establish a secure connection.</li>
+</ol>
+<h3 id="legacy-roaming-challenges"><a class="header" href="#legacy-roaming-challenges">Legacy Roaming Challenges</a></h3>
+<p>Traditional roaming (without 802.11r/k/v/w) has several challenges:</p>
+<ul>
+<li><strong>High Latency</strong>: Full 802.1X authentication can take 50-100ms or more, disrupting real-time applications like VoIP.</li>
+<li><strong>Poor Decision Making</strong>: Clients lack information about neighboring APs and may make suboptimal roaming decisions.</li>
+<li><strong>Security Vulnerabilities</strong>: Management frames are unprotected, allowing deauthentication attacks.</li>
+<li><strong>Inefficient Scanning</strong>: Clients must actively scan all channels to discover APs, wasting time and battery.</li>
+</ul>
+<p>The 802.11r, 802.11k, 802.11v, and 802.11w standards address these challenges by introducing fast transitions, radio resource management, network management, and security enhancements.</p>
+<h3 id="basic-roaming-flow-diagram"><a class="header" href="#basic-roaming-flow-diagram">Basic Roaming Flow Diagram</a></h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant AP1 as Current AP
+    participant AP2 as Target AP
+    participant DS as Distribution System
+
+    Note over Client,AP1: Client connected to AP1
+    Client-&gt;&gt;Client: Monitors signal strength (RSSI)
+    Client-&gt;&gt;Client: Signal from AP1 weakening
+
+    Note over Client: Discovery Phase
+    Client-&gt;&gt;Client: Scan for nearby APs
+    Client-&gt;&gt;AP2: Probe Request
+    AP2-&gt;&gt;Client: Probe Response
+
+    Note over Client: Decision Phase
+    Client-&gt;&gt;Client: Evaluate AP options&lt;br/&gt;(signal, load, capabilities)
+    Client-&gt;&gt;Client: Select AP2 as target
+
+    Note over Client,AP2: Reassociation Phase
+    Client-&gt;&gt;AP2: Authentication Request
+    AP2-&gt;&gt;Client: Authentication Response
+    Client-&gt;&gt;AP2: Reassociation Request
+    AP2-&gt;&gt;DS: Notify about client reassociation
+    DS-&gt;&gt;AP1: Forward reassociation notice
+    AP1-&gt;&gt;DS: Release client context
+    AP2-&gt;&gt;Client: Reassociation Response
+
+    Note over Client,AP2: Client now connected to AP2
+</code></pre>
+<h3 id="roaming-standards-comparison"><a class="header" href="#roaming-standards-comparison">Roaming Standards Comparison</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Standard</th><th>Purpose</th><th>Key Benefit</th><th>Typical Latency</th></tr></thead><tbody>
+<tr><td>Legacy</td><td>Basic roaming</td><td>Simple implementation</td><td>50-100ms+</td></tr>
+<tr><td>802.11r</td><td>Fast BSS Transition</td><td>Reduced authentication time</td><td>&lt;10ms</td></tr>
+<tr><td>802.11k</td><td>Radio Resource Management</td><td>Better AP selection</td><td>N/A (decision aid)</td></tr>
+<tr><td>802.11v</td><td>Network Management</td><td>Network-assisted roaming</td><td>Improved efficiency</td></tr>
+<tr><td>802.11w</td><td>Protected Management Frames</td><td>Security against attacks</td><td>N/A (security)</td></tr>
+</tbody></table>
+</div>
 <h2 id="80211r"><a class="header" href="#80211r">802.11r</a></h2>
 <ul>
 <li>Also known as Fast BSS Transition (FT).</li>
@@ -235,8 +295,129 @@
 <li>802.11r is designed to be backward compatible with non-802.11r devices. APs can support both 802.11r and non-802.11r clients simultaneously, ensuring a smooth transition for devices that do not support the standard.</li>
 </ul>
 </li>
+<li>
+<p><strong>Key Hierarchy in 802.11r</strong>:</p>
+<ul>
+<li>The key hierarchy in 802.11r builds upon the existing 802.11i security framework:
+<ul>
+<li><strong>PMK (Pairwise Master Key)</strong>: Derived from the initial 802.1X authentication, cached for reuse during fast transitions</li>
+<li><strong>PMK-R0</strong>: First-level derivation from PMK, includes the mobility domain identifier (MDID)</li>
+<li><strong>PMK-R1</strong>: Second-level derivation, specific to the target AP's R1 Key Holder</li>
+<li><strong>PTK (Pairwise Transient Key)</strong>: Final session key derived from PMK-R1 during reassociation</li>
+</ul>
+</li>
+<li>This hierarchical approach enables APs to derive session keys without contacting the authentication server</li>
+</ul>
+</li>
+<li>
+<p><strong>Mobility Domain</strong>:</p>
+<ul>
+<li>A Mobility Domain (MD) is a group of APs that share the same security context and allow fast transitions</li>
+<li>All APs in the same MD advertise the same Mobility Domain Identifier (MDID) in their beacons</li>
+<li>Clients that associate with an AP in an MD can roam to any other AP in the same MD using fast transitions</li>
+<li>The MD eliminates the need for full re-authentication when moving between APs</li>
+</ul>
+</li>
+<li>
+<p><strong>R0 and R1 Key Holders</strong>:</p>
+<ul>
+<li><strong>R0 Key Holder (R0KH)</strong>: Typically the RADIUS/authentication server or a centralized controller that holds PMK-R0</li>
+<li><strong>R1 Key Holder (R1KH)</strong>: Each AP in the mobility domain, holds PMK-R1 keys for clients</li>
+<li>During FT, the target AP's R1KH requests the PMK-R1 from the R0KH or retrieves it from the current AP</li>
+</ul>
+</li>
 </ol>
 <p>By implementing these technical features, 802.11r enhances the efficiency and reliability of the roaming process, providing a better user experience in environments with multiple access points.</p>
+<h3 id="80211r-key-hierarchy"><a class="header" href="#80211r-key-hierarchy">802.11r Key Hierarchy</a></h3>
+<pre><code class="language-mermaid">graph TB
+    MSK[MSK - Master Session Key&lt;br/&gt;from 802.1X/EAP Auth]
+
+    MSK --&gt; PMK[PMK - Pairwise Master Key&lt;br/&gt;Derived via PRF]
+
+    PMK --&gt; PMKR0[PMK-R0&lt;br/&gt;Includes: SSID + MDID + R0KHID&lt;br/&gt;Stored at R0 Key Holder]
+
+    PMKR0 --&gt; PMKR1_AP1[PMK-R1 for AP1&lt;br/&gt;Includes: R1KHID AP1&lt;br/&gt;Stored at AP1]
+    PMKR0 --&gt; PMKR1_AP2[PMK-R1 for AP2&lt;br/&gt;Includes: R1KHID AP2&lt;br/&gt;Stored at AP2]
+    PMKR0 --&gt; PMKR1_AP3[PMK-R1 for AP3&lt;br/&gt;Includes: R1KHID AP3&lt;br/&gt;Stored at AP3]
+
+    PMKR1_AP1 --&gt; PTK1[PTK for Session with AP1&lt;br/&gt;Ephemeral, per-association]
+    PMKR1_AP2 --&gt; PTK2[PTK for Session with AP2&lt;br/&gt;Ephemeral, per-association]
+    PMKR1_AP3 --&gt; PTK3[PTK for Session with AP3&lt;br/&gt;Ephemeral, per-association]
+
+    PTK1 --&gt; Traffic1[Encrypted Traffic]
+    PTK2 --&gt; Traffic2[Encrypted Traffic]
+    PTK3 --&gt; Traffic3[Encrypted Traffic]
+
+    style MSK fill:#FFE6E6
+    style PMK fill:#FFE6E6
+    style PMKR0 fill:#FFF9E6
+    style PMKR1_AP1 fill:#E6F3FF
+    style PMKR1_AP2 fill:#E6F3FF
+    style PMKR1_AP3 fill:#E6F3FF
+    style PTK1 fill:#E6FFE6
+    style PTK2 fill:#E6FFE6
+    style PTK3 fill:#E6FFE6
+</code></pre>
+<h3 id="80211r-fast-bss-transition-flow"><a class="header" href="#80211r-fast-bss-transition-flow">802.11r Fast BSS Transition Flow</a></h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant CurrentAP as Current AP (AP1)
+    participant TargetAP as Target AP (AP2)
+    participant DS as Distribution System
+    participant AuthServer as Authentication Server
+
+    Note over Client,CurrentAP: Initial Association with FT
+    Client-&gt;&gt;CurrentAP: Association Request (MDIE, RSN)
+    CurrentAP-&gt;&gt;AuthServer: Full 802.1X Authentication
+    AuthServer-&gt;&gt;CurrentAP: PMK (Pairwise Master Key)
+    CurrentAP-&gt;&gt;CurrentAP: Derive PTK, GTK
+    CurrentAP-&gt;&gt;Client: Association Response (MDIE, FTIE)
+    Note over Client,CurrentAP: Client now part of Mobility Domain
+
+    Note over Client: Signal weakening, client scans
+    Client-&gt;&gt;TargetAP: Probe Request
+    TargetAP-&gt;&gt;Client: Probe Response (MDIE, FT-capable)
+
+    alt Over-the-Air FT
+        Note over Client,TargetAP: Fast Transition (Over-the-Air)
+        Client-&gt;&gt;TargetAP: FT Authentication Request (FTIE, MDIE)
+        TargetAP-&gt;&gt;CurrentAP: Request PMK context (via DS)
+        CurrentAP-&gt;&gt;TargetAP: Transfer PMK context
+        TargetAP-&gt;&gt;TargetAP: Derive new PTK using PMK
+        TargetAP-&gt;&gt;Client: FT Authentication Response (FTIE)
+        Client-&gt;&gt;TargetAP: FT Reassociation Request
+        TargetAP-&gt;&gt;Client: FT Reassociation Response
+        Note over Client,TargetAP: Handoff complete (~10ms)
+    else Over-the-DS FT
+        Note over Client,DS: Fast Transition (Over-the-DS)
+        Client-&gt;&gt;CurrentAP: FT Request (to TargetAP)
+        CurrentAP-&gt;&gt;TargetAP: Forward FT Request + PMK
+        TargetAP-&gt;&gt;TargetAP: Derive new PTK
+        TargetAP-&gt;&gt;CurrentAP: FT Response
+        CurrentAP-&gt;&gt;Client: FT Response
+        Client-&gt;&gt;TargetAP: FT Reassociation Request
+        TargetAP-&gt;&gt;Client: FT Reassociation Response
+        Note over Client,TargetAP: Handoff complete (~10ms)
+    end
+</code></pre>
+<h3 id="key-differences-legacy-vs-80211r"><a class="header" href="#key-differences-legacy-vs-80211r">Key Differences: Legacy vs 802.11r</a></h3>
+<pre><code class="language-mermaid">flowchart TD
+    subgraph Legacy["Legacy Roaming (50-100ms)"]
+        L1[Scan &amp; Probe] --&gt; L2[Open Authentication]
+        L2 --&gt; L3[Full 802.1X Auth]
+        L3 --&gt; L4[4-Way Handshake]
+        L4 --&gt; L5[Reassociation]
+    end
+
+    subgraph FT["802.11r Fast Transition (&lt;10ms)"]
+        F1[Scan &amp; Probe] --&gt; F2[FT Authentication&lt;br/&gt;with PMK Cache]
+        F2 --&gt; F3[FT Reassociation&lt;br/&gt;PTK Derived]
+        style F3 fill:#90EE90
+    end
+
+    style Legacy fill:#FFB6C6
+    style FT fill:#B6FFB6
+</code></pre>
 <h2 id="80211k"><a class="header" href="#80211k">802.11k</a></h2>
 <ul>
 <li>Also known as Radio Resource Management (RRM).</li>
@@ -291,6 +472,63 @@
 </li>
 </ol>
 <p>By implementing these technical features, 802.11k enhances the ability of client devices to make informed roaming decisions, leading to improved network performance and a better user experience in environments with multiple access points.</p>
+<h3 id="80211k-neighbor-discovery-and-reporting"><a class="header" href="#80211k-neighbor-discovery-and-reporting">802.11k Neighbor Discovery and Reporting</a></h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant AP1 as Current AP
+    participant AP2 as Neighbor AP
+    participant AP3 as Neighbor AP
+
+    Note over Client,AP1: Client associated with AP1
+
+    rect rgb(230, 240, 255)
+        Note over Client,AP1: Neighbor Report Request
+        Client-&gt;&gt;AP1: Neighbor Report Request
+        AP1-&gt;&gt;AP1: Generate neighbor list&lt;br/&gt;(AP2, AP3, etc.)
+        AP1-&gt;&gt;Client: Neighbor Report Response&lt;br/&gt;(AP info: BSSID, Channel, PHY)
+    end
+
+    rect rgb(255, 240, 230)
+        Note over Client: Beacon Report Request (optional)
+        Client-&gt;&gt;Client: Request detailed beacon info
+        AP1-&gt;&gt;Client: Beacon Request (scan AP2, AP3)
+        Client-&gt;&gt;Client: Passive/Active scan
+        Client-&gt;&gt;AP1: Beacon Report&lt;br/&gt;(RSSI, Channel Load, etc.)
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Client: Radio Measurement Reports
+        Client-&gt;&gt;Client: Analyze reports:&lt;br/&gt;• Signal strength (RSSI)&lt;br/&gt;• Channel utilization&lt;br/&gt;• Noise histogram&lt;br/&gt;• Link quality
+        Client-&gt;&gt;Client: Select best AP for roaming
+    end
+
+    Note over Client,AP2: Client roams to AP2
+</code></pre>
+<h3 id="80211k-report-types"><a class="header" href="#80211k-report-types">802.11k Report Types</a></h3>
+<pre><code class="language-mermaid">graph TB
+    subgraph RRM["802.11k Radio Resource Management"]
+        NR[Neighbor Report]
+        BR[Beacon Report]
+        CLR[Channel Load Report]
+        NHR[Noise Histogram]
+        LMR[Link Measurement]
+
+        NR --&gt;|Provides| NR1[BSSID, Channel,&lt;br/&gt;Operating Class]
+        BR --&gt;|Provides| BR1[RSSI, Beacon Interval,&lt;br/&gt;Capability Info]
+        CLR --&gt;|Provides| CLR1[Channel Busy %,&lt;br/&gt;Medium Utilization]
+        NHR --&gt;|Provides| NHR1[Interference Levels&lt;br/&gt;per Channel]
+        LMR --&gt;|Provides| LMR1[SNR, Packet Error Rate,&lt;br/&gt;Transmit Power]
+    end
+
+    NR1 --&gt; Decision[Intelligent&lt;br/&gt;Roaming Decision]
+    BR1 --&gt; Decision
+    CLR1 --&gt; Decision
+    NHR1 --&gt; Decision
+    LMR1 --&gt; Decision
+
+    style Decision fill:#90EE90
+    style RRM fill:#E6F3FF
+</code></pre>
 <h2 id="80211v"><a class="header" href="#80211v">802.11v</a></h2>
 <ul>
 <li>Also known as Wireless Network Management.</li>
@@ -339,6 +577,82 @@
 </li>
 </ol>
 <p>By implementing these technical features, 802.11v enhances the management and performance of wireless networks, leading to improved efficiency, better power management, and a more reliable user experience in environments with multiple access points.</p>
+<h3 id="80211v-bss-transition-management"><a class="header" href="#80211v-bss-transition-management">802.11v BSS Transition Management</a></h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant AP1 as Current AP
+    participant AP2 as Target AP (Preferred)
+    participant Controller as Network Controller
+
+    Note over Client,AP1: Client connected to AP1
+
+    rect rgb(255, 230, 230)
+        Note over AP1,Controller: Network-Initiated Roaming
+        Controller-&gt;&gt;AP1: Detect client should move&lt;br/&gt;(load balancing/signal)
+        AP1-&gt;&gt;Client: BTM Request&lt;br/&gt;(Candidate List: AP2)
+        Note over Client: Candidate List includes:&lt;br/&gt;• BSSID of target APs&lt;br/&gt;• Operating class &amp; channel&lt;br/&gt;• Preference values
+    end
+
+    rect rgb(230, 255, 230)
+        Note over Client: Client Decision
+        Client-&gt;&gt;Client: Evaluate BTM candidates&lt;br/&gt;+ own scan results
+        Client-&gt;&gt;Client: Select AP2 (highest preference)
+        Client-&gt;&gt;AP1: BTM Response (Accept)
+    end
+
+    rect rgb(230, 230, 255)
+        Note over Client,AP2: Roaming Process
+        Client-&gt;&gt;AP2: Authentication &amp; Reassociation
+        AP2-&gt;&gt;Client: Association Response
+        Note over Client,AP2: Client now on AP2
+    end
+
+    Client-&gt;&gt;AP2: BTM Status Report (optional)
+</code></pre>
+<h3 id="80211v-features-overview"><a class="header" href="#80211v-features-overview">802.11v Features Overview</a></h3>
+<pre><code class="language-mermaid">graph LR
+    subgraph WNM["802.11v Wireless Network Management"]
+        BTM[BSS Transition&lt;br/&gt;Management]
+        DMS[Directed Multicast&lt;br/&gt;Service]
+        FMS[Flexible Multicast&lt;br/&gt;Service]
+        TFS[Traffic Filtering&lt;br/&gt;Service]
+        Sleep[WNM Sleep Mode]
+    end
+
+    BTM --&gt;|Benefit| BTM1[Network-assisted&lt;br/&gt;roaming decisions]
+    DMS --&gt;|Benefit| DMS1[Efficient multicast&lt;br/&gt;delivery]
+    FMS --&gt;|Benefit| FMS1[Scheduled multicast&lt;br/&gt;for power saving]
+    TFS --&gt;|Benefit| TFS1[Filter unwanted&lt;br/&gt;traffic at AP]
+    Sleep --&gt;|Benefit| Sleep1[Deep sleep while&lt;br/&gt;maintaining connection]
+
+    BTM1 --&gt; Outcome[Better Performance&lt;br/&gt;&amp; Battery Life]
+    DMS1 --&gt; Outcome
+    FMS1 --&gt; Outcome
+    TFS1 --&gt; Outcome
+    Sleep1 --&gt; Outcome
+
+    style Outcome fill:#90EE90
+    style WNM fill:#FFE6F0
+</code></pre>
+<h3 id="client-initiated-vs-network-initiated-roaming"><a class="header" href="#client-initiated-vs-network-initiated-roaming">Client-Initiated vs Network-Initiated Roaming</a></h3>
+<pre><code class="language-mermaid">flowchart TB
+    subgraph Client["Client-Initiated (Legacy)"]
+        C1[Client monitors RSSI] --&gt; C2[Signal weakens]
+        C2 --&gt; C3[Client scans all channels]
+        C3 --&gt; C4[Client selects AP]
+        C4 --&gt; C5[Client initiates roam]
+    end
+
+    subgraph Network["Network-Initiated (802.11v)"]
+        N1[AP/Controller monitors&lt;br/&gt;client conditions] --&gt; N2[AP detects poor signal&lt;br/&gt;or load imbalance]
+        N2 --&gt; N3[AP sends BTM Request&lt;br/&gt;with candidate list]
+        N3 --&gt; N4[Client evaluates&lt;br/&gt;suggestions]
+        N4 --&gt; N5[Client roams to&lt;br/&gt;recommended AP]
+    end
+
+    style Client fill:#FFE6E6
+    style Network fill:#E6FFE6
+</code></pre>
 <h2 id="80211w"><a class="header" href="#80211w">802.11w</a></h2>
 <ul>
 <li>Also known as Protected Management Frames (PMF).</li>
@@ -379,8 +693,455 @@
 <li>802.11w specifically addresses deauthentication and disassociation attacks, where an attacker forces a device to disconnect from the network. By securing these management frames, the standard helps maintain stable and reliable network connections.</li>
 </ul>
 </li>
+<li>
+<p><strong>Cryptographic Protection Mechanisms</strong>:</p>
+<ul>
+<li><strong>IGTK (Integrity Group Temporal Key)</strong>: Used to protect broadcast/multicast management frames</li>
+<li><strong>BIP (Broadcast/Multicast Integrity Protocol)</strong>: Default integrity algorithm, uses AES-128-CMAC</li>
+<li><strong>MIC (Message Integrity Code)</strong>: Appended to protected management frames to verify authenticity</li>
+<li><strong>SA Query Mechanism</strong>: Allows clients to verify the authenticity of disassociation/deauthentication frames</li>
+</ul>
+</li>
+<li>
+<p><strong>Protected Frame Types</strong>:</p>
+<ul>
+<li><strong>Disassociation</strong>: Protected to prevent forced disconnection attacks</li>
+<li><strong>Deauthentication</strong>: Protected to prevent session hijacking</li>
+<li><strong>Robust Management Frames</strong>: Action frames related to QoS, spectrum management, and fast BSS transition</li>
+<li><strong>Unprotected Frames</strong>: Beacon, Probe Request/Response, and Authentication frames remain unprotected for compatibility</li>
+</ul>
+</li>
+<li>
+<p><strong>PMF Modes</strong>:</p>
+<ul>
+<li><strong>Optional (PMF=1)</strong>: Client can connect with or without PMF support</li>
+<li><strong>Required (PMF=2)</strong>: Client must support PMF to connect (WPA3 requirement)</li>
+<li>Mixed mode allows gradual migration from legacy to protected networks</li>
+</ul>
+</li>
 </ol>
 <p>By implementing these technical features, 802.11w enhances the security of wireless networks, protecting against various types of attacks and ensuring the integrity and reliability of network operations.</p>
+<h3 id="80211w-protected-management-frames"><a class="header" href="#80211w-protected-management-frames">802.11w Protected Management Frames</a></h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Attacker
+    participant Client
+    participant AP
+
+    Note over Client,AP: Without 802.11w (Vulnerable)
+    rect rgb(255, 200, 200)
+        Attacker-&gt;&gt;Client: Deauth Frame (Spoofed)
+        Client-&gt;&gt;Client: Disconnect from AP
+        Note over Client: Connection disrupted!
+    end
+
+    Note over Client,AP: With 802.11w (Protected)
+    rect rgb(200, 255, 200)
+        Client-&gt;&gt;AP: Initial 4-Way Handshake
+        AP-&gt;&gt;Client: Establish IGTK (Integrity Group Temporal Key)
+        Attacker-&gt;&gt;Client: Deauth Frame (Spoofed)
+        Client-&gt;&gt;Client: Verify frame integrity&lt;br/&gt;using MIC (Message Integrity Code)
+        Client-&gt;&gt;Client: Invalid MIC - Frame rejected
+        Note over Client,AP: Connection maintained!
+    end
+</code></pre>
+<h2 id="comprehensive-roaming-comparison"><a class="header" href="#comprehensive-roaming-comparison">Comprehensive Roaming Comparison</a></h2>
+<h3 id="legacy-vs-modern-roaming"><a class="header" href="#legacy-vs-modern-roaming">Legacy vs Modern Roaming</a></h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant C as Client
+    participant OldAP as Current AP
+    participant NewAP as Target AP
+    participant Auth as Auth Server
+
+    rect rgb(255, 230, 230)
+        Note over C,Auth: Legacy Roaming (~100ms)
+        C-&gt;&gt;C: Scan all channels (20-50ms)
+        C-&gt;&gt;NewAP: Probe Request
+        NewAP-&gt;&gt;C: Probe Response
+        C-&gt;&gt;NewAP: Authentication Request
+        NewAP-&gt;&gt;C: Authentication Response
+        C-&gt;&gt;NewAP: Association Request
+        NewAP-&gt;&gt;Auth: Full 802.1X (30-50ms)
+        Auth-&gt;&gt;NewAP: PMK
+        NewAP-&gt;&gt;C: 4-Way Handshake (20ms)
+        C-&gt;&gt;NewAP: Reassociation Complete
+    end
+
+    Note over C: ---
+
+    rect rgb(230, 255, 230)
+        Note over C,Auth: Modern Roaming with 802.11r/k/v (&lt;20ms)
+        OldAP-&gt;&gt;C: Neighbor Report (802.11k)
+        OldAP-&gt;&gt;C: BTM Request (802.11v)
+        C-&gt;&gt;C: Targeted scan (5-10ms)
+        C-&gt;&gt;NewAP: FT Authentication (802.11r)
+        NewAP-&gt;&gt;OldAP: Request PMK context
+        OldAP-&gt;&gt;NewAP: Transfer PMK
+        NewAP-&gt;&gt;C: FT Authentication Response
+        C-&gt;&gt;NewAP: FT Reassociation (&lt;10ms)
+        Note over C,NewAP: Roaming complete!
+    end
+</code></pre>
+<h3 id="how-the-standards-work-together"><a class="header" href="#how-the-standards-work-together">How the Standards Work Together</a></h3>
+<pre><code class="language-mermaid">graph TB
+    Client[WiFi Client Device]
+
+    subgraph Discovery["Discovery Phase (802.11k)"]
+        K1[Request Neighbor Report] --&gt; K2[Receive AP List with&lt;br/&gt;RSSI, Channel, Load]
+        K2 --&gt; K3[Targeted Scanning]
+    end
+
+    subgraph Decision["Decision Phase (802.11v)"]
+        V1[Receive BTM Request] --&gt; V2[Evaluate Candidates&lt;br/&gt;+ Network Suggestions]
+        V2 --&gt; V3[Select Optimal AP]
+    end
+
+    subgraph Transition["Transition Phase (802.11r)"]
+        R1[FT Authentication&lt;br/&gt;with PMK Cache] --&gt; R2[Fast Key Derivation]
+        R2 --&gt; R3[FT Reassociation&lt;br/&gt;&lt;10ms]
+    end
+
+    subgraph Security["Security (802.11w)"]
+        W1[Protected Management&lt;br/&gt;Frames] --&gt; W2[Prevent Deauth Attacks]
+        W2 --&gt; W3[Secure Roaming Process]
+    end
+
+    Client --&gt; Discovery
+    Discovery --&gt; Decision
+    Decision --&gt; Transition
+    Transition --&gt; Security
+    Security --&gt; Connected[Connected to New AP]
+
+    style Discovery fill:#E6F3FF
+    style Decision fill:#FFE6F0
+    style Transition fill:#E6FFE6
+    style Security fill:#FFF9E6
+    style Connected fill:#90EE90
+</code></pre>
+<h3 id="performance-comparison-table"><a class="header" href="#performance-comparison-table">Performance Comparison Table</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Roaming Aspect</th><th>Legacy</th><th>With 802.11r</th><th>With 802.11r/k/v</th><th>Full r/k/v/w</th></tr></thead><tbody>
+<tr><td><strong>Latency</strong></td><td>50-100ms</td><td>&lt;10ms</td><td>&lt;10ms</td><td>&lt;10ms</td></tr>
+<tr><td><strong>AP Discovery</strong></td><td>Full scan (all channels)</td><td>Full scan</td><td>Targeted scan</td><td>Targeted scan</td></tr>
+<tr><td><strong>Decision Making</strong></td><td>Client-only</td><td>Client-only</td><td>Network-assisted</td><td>Network-assisted</td></tr>
+<tr><td><strong>Authentication</strong></td><td>Full 802.1X</td><td>PMK caching</td><td>PMK caching</td><td>PMK caching</td></tr>
+<tr><td><strong>Security</strong></td><td>Vulnerable to deauth</td><td>Vulnerable to deauth</td><td>Vulnerable to deauth</td><td>Protected</td></tr>
+<tr><td><strong>VoIP Quality</strong></td><td>May experience dropouts</td><td>Seamless</td><td>Seamless</td><td>Seamless</td></tr>
+<tr><td><strong>Battery Impact</strong></td><td>High (full scans)</td><td>Medium</td><td>Low (targeted)</td><td>Low (targeted)</td></tr>
+<tr><td><strong>Best For</strong></td><td>Simple networks</td><td>Fast handoffs</td><td>Enterprise</td><td>Enterprise + Security</td></tr>
+</tbody></table>
+</div>
+<h3 id="real-world-roaming-timeline"><a class="header" href="#real-world-roaming-timeline">Real-World Roaming Timeline</a></h3>
+<pre><code class="language-mermaid">gantt
+    title Roaming Process Timeline Comparison
+    dateFormat X
+    axisFormat %Lms
+
+    section Legacy
+    Channel Scanning           :0, 50
+    Authentication             :50, 30
+    4-Way Handshake           :80, 20
+    Total (100ms)             :0, 100
+
+    section 802.11r Only
+    Channel Scanning           :0, 40
+    FT Authentication         :40, 5
+    FT Reassociation          :45, 5
+    Total (50ms)              :0, 50
+
+    section 802.11r+k+v
+    Targeted Scanning         :0, 10
+    FT Authentication         :10, 5
+    FT Reassociation          :15, 5
+    Total (20ms)              :0, 20
+</code></pre>
+<h2 id="implementation-considerations"><a class="header" href="#implementation-considerations">Implementation Considerations</a></h2>
+<h3 id="enabling-fast-roaming"><a class="header" href="#enabling-fast-roaming">Enabling Fast Roaming</a></h3>
+<p>To achieve optimal roaming performance, consider the following:</p>
+<ol>
+<li>
+<p><strong>Network Requirements</strong>:</p>
+<ul>
+<li>All APs must support the same roaming standards (802.11r/k/v/w)</li>
+<li>APs should be part of the same Mobility Domain (for 802.11r)</li>
+<li>Backend infrastructure must support PMK caching and distribution</li>
+</ul>
+</li>
+<li>
+<p><strong>Configuration Best Practices</strong>:</p>
+<ul>
+<li>Enable FT over-the-DS for better performance in dense deployments</li>
+<li>Configure neighbor reports accurately with current AP information</li>
+<li>Set appropriate BTM preference values to guide client decisions</li>
+<li>Ensure PMF (802.11w) is enabled for security</li>
+</ul>
+</li>
+<li>
+<p><strong>Client Support</strong>:</p>
+<ul>
+<li>Verify client devices support the required standards</li>
+<li>Update client drivers and firmware for best compatibility</li>
+<li>Test roaming behavior with target applications (VoIP, video conferencing)</li>
+</ul>
+</li>
+<li>
+<p><strong>Tuning Parameters</strong>:</p>
+<ul>
+<li>RSSI thresholds for roaming triggers (typically -70 to -75 dBm)</li>
+<li>Channel overlap and interference considerations</li>
+<li>Load balancing thresholds for BTM requests</li>
+<li>Roaming retry intervals and timeouts</li>
+</ul>
+</li>
+</ol>
+<h3 id="common-deployment-scenarios"><a class="header" href="#common-deployment-scenarios">Common Deployment Scenarios</a></h3>
+<pre><code class="language-mermaid">graph LR
+    subgraph Scenario1["Enterprise Office"]
+        S1[High Density APs] --&gt; S1A[802.11r/k/v/w&lt;br/&gt;All Enabled]
+        S1A --&gt; S1B[VoIP &amp; Video&lt;br/&gt;Optimized]
+    end
+
+    subgraph Scenario2["Public Venue"]
+        S2[Medium Density APs] --&gt; S2A[802.11r/k&lt;br/&gt;Minimum]
+        S2A --&gt; S2B[Basic Mobility&lt;br/&gt;Support]
+    end
+
+    subgraph Scenario3["Home/Small Office"]
+        S3[2-3 APs] --&gt; S3A[Legacy or&lt;br/&gt;802.11r Only]
+        S3A --&gt; S3B[Simple Setup&lt;br/&gt;Acceptable]
+    end
+
+    style Scenario1 fill:#E6FFE6
+    style Scenario2 fill:#FFF9E6
+    style Scenario3 fill:#FFE6E6
+</code></pre>
+<h2 id="troubleshooting-and-monitoring"><a class="header" href="#troubleshooting-and-monitoring">Troubleshooting and Monitoring</a></h2>
+<h3 id="common-roaming-issues"><a class="header" href="#common-roaming-issues">Common Roaming Issues</a></h3>
+<ol>
+<li>
+<p><strong>Sticky Client Problem</strong>:</p>
+<ul>
+<li><strong>Symptom</strong>: Client stays connected to distant AP despite closer APs being available</li>
+<li><strong>Cause</strong>: Client roaming algorithm too conservative, high RSSI disconnect threshold</li>
+<li><strong>Solution</strong>: Use 802.11v BTM to encourage roaming, adjust AP minimum RSSI settings</li>
+</ul>
+</li>
+<li>
+<p><strong>Ping-Pong Roaming</strong>:</p>
+<ul>
+<li><strong>Symptom</strong>: Client rapidly switches between two APs</li>
+<li><strong>Cause</strong>: APs have overlapping coverage with similar signal strength</li>
+<li><strong>Solution</strong>: Adjust AP transmit power, implement roaming hysteresis, use 802.11k/v</li>
+</ul>
+</li>
+<li>
+<p><strong>Failed Fast Transitions</strong>:</p>
+<ul>
+<li><strong>Symptom</strong>: Roaming takes longer than expected or fails completely</li>
+<li><strong>Cause</strong>: PMK not properly distributed, Mobility Domain misconfiguration</li>
+<li><strong>Solution</strong>: Verify all APs share same MDID, check R0KH/R1KH communication</li>
+</ul>
+</li>
+<li>
+<p><strong>Authentication Timeouts</strong>:</p>
+<ul>
+<li><strong>Symptom</strong>: Client disconnects during roaming attempt</li>
+<li><strong>Cause</strong>: Slow authentication server, network latency</li>
+<li><strong>Solution</strong>: Enable 802.11r PMK caching, optimize RADIUS server response time</li>
+</ul>
+</li>
+</ol>
+<h3 id="monitoring-tools-and-metrics"><a class="header" href="#monitoring-tools-and-metrics">Monitoring Tools and Metrics</a></h3>
+<pre><code class="language-mermaid">graph TB
+    subgraph Metrics["Key Roaming Metrics"]
+        M1[Roaming Latency&lt;br/&gt;Target: &lt;50ms]
+        M2[Roaming Success Rate&lt;br/&gt;Target: &gt;95%]
+        M3[Average RSSI&lt;br/&gt;at Roaming Decision&lt;br/&gt;Target: -70 to -75 dBm]
+        M4[Failed Authentications&lt;br/&gt;Target: &lt;1%]
+        M5[Client Association Time&lt;br/&gt;Target: &lt;100ms]
+    end
+
+    subgraph Tools["Monitoring Tools"]
+        T1[Wireless Controller Logs]
+        T2[RADIUS Server Logs]
+        T3[Client-Side Tools&lt;br/&gt;iw, wpa_supplicant]
+        T4[Packet Capture&lt;br/&gt;Wireshark, tcpdump]
+        T5[Network Management System]
+    end
+
+    Metrics --&gt; Analysis[Roaming&lt;br/&gt;Performance Analysis]
+    Tools --&gt; Analysis
+
+    Analysis --&gt; Actions[Optimization Actions]
+
+    style Metrics fill:#E6F3FF
+    style Tools fill:#FFE6F0
+    style Analysis fill:#FFF9E6
+    style Actions fill:#90EE90
+</code></pre>
+<h3 id="debugging-commands"><a class="header" href="#debugging-commands">Debugging Commands</a></h3>
+<p><strong>Linux Client (iw/wpa_supplicant)</strong>:</p>
+<pre><code class="language-bash"># Check current connection and roaming capabilities
+iw dev wlan0 link
+iw dev wlan0 scan | grep -E "BSS|SSID|freq|signal|capability"
+
+# Monitor roaming events in real-time
+wpa_cli -i wlan0
+&gt; status
+&gt; bss_flush 0
+&gt; scan
+&gt; scan_results
+
+# Check FT (802.11r) capabilities
+iw dev wlan0 scan | grep -A 20 "your-ssid" | grep -E "FT|Mobility"
+
+# Monitor neighbor reports (802.11k)
+iw dev wlan0 station dump
+</code></pre>
+<p><strong>Access Point (hostapd)</strong>:</p>
+<pre><code class="language-bash"># Enable debug logging for roaming events
+hostapd -dd /etc/hostapd/hostapd.conf | grep -E "FT|BTM|neighbor"
+
+# Check associated clients and their roaming status
+hostapd_cli all_sta
+hostapd_cli status
+
+# Send BSS transition management request
+hostapd_cli bss_tm_req &lt;client-mac&gt; neighbor=&lt;target-bssid&gt;,&lt;op-class&gt;,&lt;channel&gt;
+</code></pre>
+<p><strong>Wireshark Filters for Roaming Analysis</strong>:</p>
+<pre><code># 802.11r Fast BSS Transition frames
+wlan.fc.type_subtype == 0x000b || wlan.fc.type_subtype == 0x000c
+
+# Authentication and Reassociation
+wlan.fc.type_subtype == 0x0000 || wlan.fc.type_subtype == 0x0001 ||
+wlan.fc.type_subtype == 0x0002 || wlan.fc.type_subtype == 0x0003
+
+# 802.11k Neighbor Reports
+wlan.tag.number == 52
+
+# 802.11v BSS Transition Management
+wlan.fixed.action_code == 7 || wlan.fixed.action_code == 8
+
+# 802.11w Protected Management Frames
+wlan.fc.protected == 1 &amp;&amp; (wlan.fc.type == 0)
+</code></pre>
+<h3 id="performance-optimization-tips"><a class="header" href="#performance-optimization-tips">Performance Optimization Tips</a></h3>
+<ol>
+<li>
+<p><strong>Channel Planning</strong>:</p>
+<ul>
+<li>Use non-overlapping channels (1, 6, 11 for 2.4 GHz)</li>
+<li>Minimize co-channel interference in high-density deployments</li>
+<li>Consider DFS channels in 5 GHz for additional capacity</li>
+</ul>
+</li>
+<li>
+<p><strong>AP Placement and Power</strong>:</p>
+<ul>
+<li>Ensure 20-30% cell overlap for seamless roaming</li>
+<li>Reduce AP transmit power in dense deployments to prevent sticky clients</li>
+<li>Use site survey tools to validate coverage</li>
+</ul>
+</li>
+<li>
+<p><strong>RSSI Thresholds</strong>:</p>
+<ul>
+<li>Set roaming trigger at -70 to -75 dBm for optimal performance</li>
+<li>Configure minimum RSSI for association rejection at -80 to -85 dBm</li>
+<li>Implement different thresholds for 2.4 GHz vs 5 GHz</li>
+</ul>
+</li>
+<li>
+<p><strong>Fast Roaming Configuration</strong>:</p>
+<ul>
+<li>Enable FT over-the-DS for centralized architectures</li>
+<li>Configure neighbor reports with accurate channel and BSSID information</li>
+<li>Set appropriate BTM preference values to guide client decisions</li>
+<li>Ensure PMK caching timeout (default 43200 seconds) is appropriate</li>
+</ul>
+</li>
+</ol>
+<h3 id="sample-wpa_supplicant-configuration"><a class="header" href="#sample-wpa_supplicant-configuration">Sample wpa_supplicant Configuration</a></h3>
+<pre><code class="language-conf">network={
+    ssid="YourNetwork"
+    psk="YourPassword"
+    key_mgmt=WPA-PSK WPA-PSK-SHA256 FT-PSK
+    ieee80211w=2                    # Require PMF (802.11w)
+
+    # Fast roaming settings
+    proactive_key_caching=1         # Enable opportunistic key caching
+    ft_eap_pmksa_caching=1          # Enable PMK caching for FT
+
+    # Roaming aggressiveness (0-3, 0 = disabled, 3 = most aggressive)
+    bgscan="simple:30:-70:3600"     # Background scanning
+
+    # Scan frequency configuration
+    scan_freq=2412 2437 2462 5180 5200 5220 5240 5745 5765 5785 5805
+}
+</code></pre>
+<h3 id="sample-hostapd-configuration"><a class="header" href="#sample-hostapd-configuration">Sample hostapd Configuration</a></h3>
+<pre><code class="language-conf"># Basic settings
+interface=wlan0
+driver=nl80211
+ssid=YourNetwork
+wpa=2
+wpa_key_mgmt=WPA-PSK FT-PSK
+wpa_pairwise=CCMP
+
+# 802.11r Fast BSS Transition
+mobility_domain=a1b2              # Same for all APs in the domain
+ft_over_ds=1                       # Enable FT over Distribution System
+ft_psk_generate_local=1            # Generate PMK-R0/R1 locally
+nas_identifier=ap1.example.com     # Unique per AP
+r0kh=02:00:00:00:03:00 ap1.example.com 000102030405060708090a0b0c0d0e0f
+r1kh=02:00:00:00:03:00 00:00:00:00:03:00 000102030405060708090a0b0c0d0e0f
+
+# 802.11k Radio Resource Management
+rrm_neighbor_report=1
+rrm_beacon_report=1
+
+# 802.11v BSS Transition Management
+bss_transition=1
+wnm_sleep_mode=1
+time_advertisement=2
+
+# 802.11w Protected Management Frames
+ieee80211w=2                       # Required (2) or Optional (1)
+group_mgmt_cipher=AES-128-CMAC
+
+# Roaming optimization
+ap_max_inactivity=300
+disassoc_low_ack=1
+skip_inactivity_poll=0
+</code></pre>
+<h2 id="references-and-further-reading"><a class="header" href="#references-and-further-reading">References and Further Reading</a></h2>
+<ol>
+<li>
+<p><strong>IEEE Standards</strong>:</p>
+<ul>
+<li>IEEE 802.11r-2008: Fast BSS Transition</li>
+<li>IEEE 802.11k-2008: Radio Resource Measurement</li>
+<li>IEEE 802.11v-2011: Wireless Network Management</li>
+<li>IEEE 802.11w-2009: Protected Management Frames</li>
+</ul>
+</li>
+<li>
+<p><strong>RFCs and Documentation</strong>:</p>
+<ul>
+<li>RFC 5416: Control and Provisioning of Wireless Access Points (CAPWAP) Protocol</li>
+<li>Wi-Fi Alliance: WPA3 Security Specification</li>
+<li>hostapd documentation: https://w1.fi/hostapd/</li>
+<li>wpa_supplicant documentation: https://w1.fi/wpa_supplicant/</li>
+</ul>
+</li>
+<li>
+<p><strong>Best Practices</strong>:</p>
+<ul>
+<li>Cisco Enterprise Mobility Design Guide</li>
+<li>Aruba Best Practices for High-Density WiFi Deployments</li>
+<li>Ruckus SmartRoam Technology Overview</li>
+</ul>
+</li>
+</ol>
 
                     </main>
 

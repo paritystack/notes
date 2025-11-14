@@ -105,12 +105,11 @@ def add_to_summary(summary_file, files_to_add):
         with open(summary_file, "w") as f:
             f.writelines(lines)
 
-def update_operation(summary_file):
-    """Create missing files and add unreferenced files to SUMMARY.md"""
+def update_fs_operation(summary_file):
+    """Create missing files referenced in SUMMARY.md"""
     summary_files = set(get_files_from_summary(summary_file))
     directory_files = set(get_files_from_directory("src"))
 
-    # Part 1: Create missing files referenced in SUMMARY.md
     missing_in_directory = summary_files - directory_files
     if missing_in_directory:
         print("Creating missing files referenced in SUMMARY.md:")
@@ -124,28 +123,34 @@ def update_operation(summary_file):
             with open(f"src/{filename}", "w") as f:
                 pass
             print(f"  Created: src/{filename}")
-        print()
+    else:
+        print("All files referenced in SUMMARY.md exist in directory.")
 
-    # Part 2: Add unreferenced files to SUMMARY.md
+def update_summary_operation(summary_file):
+    """Add unreferenced files to SUMMARY.md"""
+    summary_files = set(get_files_from_summary(summary_file))
+    directory_files = set(get_files_from_directory("src"))
+
     missing_in_summary = directory_files - summary_files
     if missing_in_summary:
         print("Adding unreferenced files to SUMMARY.md:")
         add_to_summary(summary_file, sorted(missing_in_summary))
-
-    if not missing_in_directory and not missing_in_summary:
-        print("Everything is in sync - no updates needed.")
+    else:
+        print("All files in directory are referenced in SUMMARY.md.")
 
 def main():
     parser = argparse.ArgumentParser(description="For creating missing files in the src directory")
     parser.add_argument("--file", default="src/SUMMARY.md", type=str, help="Input file")
-    parser.add_argument("--op", default="update", type=str, choices=["check", "update"],
-                        help="Operation: 'check' to compare files, 'update' to create missing files")
+    parser.add_argument("--op", default="update_fs", type=str, choices=["check", "update_fs", "update_summary"],
+                        help="Operation: 'check' to compare files, 'update_fs' to create missing files, 'update_summary' to add unreferenced files to SUMMARY.md")
     args = parser.parse_args()
 
     if args.op == "check":
         check_operation(args.file)
-    elif args.op == "update":
-        update_operation(args.file)
+    elif args.op == "update_fs":
+        update_fs_operation(args.file)
+    elif args.op == "update_summary":
+        update_summary_operation(args.file)
 
 
 if __name__ == "__main__":

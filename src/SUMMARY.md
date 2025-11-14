@@ -106,6 +106,7 @@
     - [Transformers](machine_learning/transformers.md)
     - [Hugging Face](machine_learning/hugging_face.md)
     - [PyTorch](machine_learning/pytorch.md)
+    - [NumPy](machine_learning/numpy.md)
     - [Quantization](machine_learning/quantization.md)
     - [Interesting Papers](machine_learning/interesting_papers.md)
 
@@ -255,6 +256,7 @@
 - [Miscellaneous](misc/README.md)
     - [Mathematics](misc/math.md)
     - [Statistics](misc/statistics.md)
+    - [Matplotlib](misc/matplotlib.md)
 
 - [RTOS](rtos/README.md)
     - [FreeRTOS](rtos/freertos.md)

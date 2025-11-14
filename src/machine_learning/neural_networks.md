@@ -20,17 +20,17 @@ Input Layer    Hidden Layers          Output Layer
 ## Key Components
 
 ### Neurons
-Each neuron applies transformation: **output = activation(weights * inputs + bias)**
+Each neuron applies transformation: $\text{output} = \text{activation}(\text{weights} \cdot \text{inputs} + \text{bias})$
 
 ### Activation Functions
 
 | Function | Formula | Range | Use Case |
 |----------|---------|-------|----------|
-| ReLU | max(0, x) | [0, infinity) | Hidden layers |
-| Sigmoid | 1/(1+e^-x) | (0, 1) | Binary classification |
-| Tanh | (e^x - e^-x)/(e^x + e^-x) | (-1, 1) | Hidden layers |
-| Softmax | e^xi / Sum(e^xj) | (0, 1) probabilities | Multi-class output |
-| Linear | x | (-infinity, infinity) | Regression output |
+| ReLU | $\max(0, x)$ | $[0, \infty)$ | Hidden layers |
+| Sigmoid | $\frac{1}{1+e^{-x}}$ | $(0, 1)$ | Binary classification |
+| Tanh | $\frac{e^x - e^{-x}}{e^x + e^{-x}}$ | $(-1, 1)$ | Hidden layers |
+| Softmax | $\frac{e^{x_i}}{\sum_j e^{x_j}}$ | $(0, 1)$ probabilities | Multi-class output |
+| Linear | $x$ | $(-\infty, \infty)$ | Regression output |
 
 ### Layers
 
@@ -43,7 +43,7 @@ Each neuron applies transformation: **output = activation(weights * inputs + bia
 ### Forward Pass
 Input flows through network:
 ```
-x -> w1 + b1 -> activation -> ... -> output
+x → w1 + b1 → activation → ... → output
 ```
 
 ### Loss Function
@@ -55,8 +55,8 @@ Measures prediction error:
 Calculates gradients and updates weights:
 ```
 1. Compute loss
-2. Calculate gradients (d(loss)/d(weights))
-3. Update weights: w = w - learning_rate * gradient
+2. Calculate gradients: ∂(loss)/∂(weights)
+3. Update weights: w = w - learning_rate × gradient
 4. Repeat
 ```
 
@@ -179,8 +179,8 @@ for epoch in range(100):
 |---------|-------|----------|
 | Underfitting | Model too simple | Increase hidden units, epochs |
 | Overfitting | Model too complex | Add dropout, L2 regularization |
-| Vanishing Gradients | Gradients -> 0 | Use ReLU, batch norm |
-| Exploding Gradients | Gradients -> infinity | Gradient clipping |
+| Vanishing Gradients | Gradients $\to$ 0 | Use ReLU, batch norm |
+| Exploding Gradients | Gradients $\to \infty$ | Gradient clipping |
 
 ## Modern Architectures
 

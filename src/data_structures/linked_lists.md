@@ -26,9 +26,9 @@ A linked list is a linear data structure where elements (nodes) are connected vi
 
 | Feature | Linked List | Array |
 |---------|------------|-------|
-| **Access** | O(n) | O(1) |
-| **Insert/Delete at start** | O(1) | O(n) |
-| **Insert/Delete in middle** | O(n) to find, O(1) to insert | O(n) |
+| **Access** | $O(n)$ | $O(1)$ |
+| **Insert/Delete at start** | $O(1)$ | $O(n)$ |
+| **Insert/Delete in middle** | $O(n)$ to find, $O(1)$ to insert | $O(n)$ |
 | **Memory** | Flexible, dynamic | Fixed or expensive to resize |
 | **Cache Efficiency** | Poor | Excellent |
 
@@ -429,13 +429,13 @@ def remove_nth_from_end(head, n):
 
 | Operation | Singly | Doubly |
 |-----------|--------|--------|
-| **Access** | O(n) | O(n) |
-| **Search** | O(n) | O(n) |
-| **Insert at head** | O(1) | O(1) |
-| **Insert at tail** | O(n) | O(1)* |
-| **Delete from head** | O(1) | O(1) |
-| **Delete from tail** | O(n) | O(1)* |
-| **Reverse** | O(n) | O(n) |
+| **Access** | $O(n)$ | $O(n)$ |
+| **Search** | $O(n)$ | $O(n)$ |
+| **Insert at head** | $O(1)$ | $O(1)$ |
+| **Insert at tail** | $O(n)$ | $O(1)$* |
+| **Delete from head** | $O(1)$ | $O(1)$ |
+| **Delete from tail** | $O(n)$ | $O(1)$* |
+| **Reverse** | $O(n)$ | $O(n)$ |
 
 *With tail pointer
 

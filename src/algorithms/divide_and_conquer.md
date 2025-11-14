@@ -52,8 +52,8 @@ sorted_arr = merge_sort(arr)
 print(sorted_arr)  # Output: [3, 9, 10, 27, 38, 43, 82]
 ```
 
-**Time Complexity**: O(n log n)
-**Space Complexity**: O(n)
+**Time Complexity**: $O(n \log n)$
+**Space Complexity**: $O(n)$
 
 ## Quick Sort
 
@@ -103,8 +103,8 @@ quick_sort_inplace(arr, 0, len(arr) - 1)
 print(arr)  # Output: [1, 5, 7, 8, 9, 10]
 ```
 
-**Time Complexity**: O(n log n) average, O(n²) worst
-**Space Complexity**: O(log n) for recursion stack
+**Time Complexity**: $O(n \log n)$ average, $O(n^2)$ worst
+**Space Complexity**: $O(\log n)$ for recursion stack
 
 ## Binary Search
 
@@ -146,8 +146,8 @@ print(binary_search(arr, 7))  # Output: 3
 print(binary_search_recursive(arr, 13, 0, len(arr) - 1))  # Output: 6
 ```
 
-**Time Complexity**: O(log n)
-**Space Complexity**: O(1) iterative, O(log n) recursive
+**Time Complexity**: $O(\log n)$
+**Space Complexity**: $O(1)$ iterative, $O(\log n)$ recursive
 
 ## Maximum Subarray (Kadane's Algorithm)
 
@@ -194,7 +194,7 @@ max_sum = max_subarray_divide_conquer(arr, 0, len(arr) - 1)
 print(f"Maximum subarray sum: {max_sum}")  # Output: 6 ([4,-1,2,1])
 ```
 
-**Time Complexity**: O(n log n)
+**Time Complexity**: $O(n \log n)$
 
 ## Count Inversions
 
@@ -359,7 +359,7 @@ def matrix_sub(A, B):
     return [[A[i][j] - B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
 ```
 
-**Time Complexity**: O(n^2.807) vs O(n³) for standard multiplication
+**Time Complexity**: $O(n^{2.807})$ vs $O(n^3)$ for standard multiplication
 
 ## Divide and Conquer Template
 

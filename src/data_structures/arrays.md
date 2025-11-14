@@ -12,7 +12,7 @@ An array is a fundamental data structure that stores elements of the same type i
 - **Contiguous Memory**: Elements stored sequentially in memory
 - **Index-Based**: Access elements using zero-based indexing
 - **Homogeneous**: All elements must be of the same type
-- **Fast Access**: O(1) time complexity for accessing any element
+- **Fast Access**: $O(1)$ time complexity for accessing any element
 
 ### Memory Layout
 
@@ -26,12 +26,12 @@ Address: 1000 1004 1008 1012 1016  (for 4-byte integers)
 
 | Operation | Time Complexity |
 |-----------|----------------|
-| **Access** | O(1) |
-| **Search** | O(n) |
-| **Insert (at end)** | O(1) amortized* |
-| **Insert (at position)** | O(n) |
-| **Delete (at end)** | O(1) |
-| **Delete (at position)** | O(n) |
+| **Access** | $O(1)$ |
+| **Search** | $O(n)$ |
+| **Insert (at end)** | $O(1)$ amortized* |
+| **Insert (at position)** | $O(n)$ |
+| **Delete (at end)** | $O(1)$ |
+| **Delete (at position)** | $O(n)$ |
 
 *For dynamic arrays like Python lists or C++ vectors
 
@@ -231,7 +231,7 @@ def linear_search(arr, target):
             return i
     return -1  # Not found
 
-# Time: O(n), Space: O(1)
+# Time: $O(n)$, Space: $O(1)$
 ```
 
 ### Binary Search (Sorted Array)
@@ -252,7 +252,7 @@ def binary_search(arr, target):
 
     return -1  # Not found
 
-# Time: O(log n), Space: O(1)
+# Time: $O(\log n)$, Space: $O(1)$
 ```
 
 ### Two Pointers Technique
@@ -293,7 +293,7 @@ def max_sum_subarray(arr, k):
 
     return max_sum
 
-# Time: O(n), Space: O(1)
+# Time: $O(n)$, Space: $O(1)$
 ```
 
 ### Kadane's Algorithm (Maximum Subarray)
@@ -310,7 +310,7 @@ def max_subarray_sum(arr):
 
     return max_so_far
 
-# Time: O(n), Space: O(1)
+# Time: $O(n)$, Space: $O(1)$
 # Example: [-2, 1, -3, 4, -1, 2, 1, -5, 4] -> 6 (subarray [4, -1, 2, 1])
 ```
 

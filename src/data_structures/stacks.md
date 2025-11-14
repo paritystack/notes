@@ -24,11 +24,11 @@ Pop: Returns 3 (First Out)
 
 | Operation | Time | Space |
 |-----------|------|-------|
-| Push | O(1) | O(n) |
-| Pop | O(1) | - |
-| Peek | O(1) | - |
-| Is Empty | O(1) | - |
-| Search | O(n) | - |
+| Push | $O(1)$ | $O(n)$ |
+| Pop | $O(1)$ | - |
+| Peek | $O(1)$ | - |
+| Is Empty | $O(1)$ | - |
+| Search | $O(n)$ | - |
 
 ## Implementation (Python)
 
@@ -52,11 +52,11 @@ class Stack:
     def size(self):
         return len(self.items)
 
-# Using deque for O(1) operations
+# Using deque for $O(1)$ operations
 from collections import deque
 stack = deque()
-stack.append(1)  # Push O(1)
-stack.pop()      # Pop O(1)
+stack.append(1)  # Push $O(1)$
+stack.pop()      # Pop $O(1)$
 ```
 
 ## Common Problems

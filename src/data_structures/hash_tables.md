@@ -2,7 +2,7 @@
 
 ## Overview
 
-A hash table (hash map) stores key-value pairs with O(1) average-case lookup, insertion, and deletion. It uses a hash function to map keys to array indices.
+A hash table (hash map) stores key-value pairs with $O(1)$ average-case lookup, insertion, and deletion. It uses a hash function to map keys to array indices.
 
 ## How It Works
 
@@ -34,16 +34,16 @@ Try 6, 7, 8... until empty
 
 | Operation | Average | Worst |
 |-----------|---------|-------|
-| **Get** | O(1) | O(n) |
-| **Set** | O(1) | O(n) |
-| **Delete** | O(1) | O(n) |
+| **Get** | $O(1)$ | $O(n)$ |
+| **Set** | $O(1)$ | $O(n)$ |
+| **Delete** | $O(1)$ | $O(n)$ |
 
 ## Python Implementation
 
 ```python
 # Built-in dict
 d = {"key": "value"}
-d.get("key")  # O(1)
+d.get("key")  # $O(1)$
 d["key"] = "new_value"
 del d["key"]
 

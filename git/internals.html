@@ -1,0 +1,1492 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Git Internals - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="git-internals"><a class="header" href="#git-internals">Git Internals</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Git is often described as a "content-addressable filesystem with a VCS user interface on top." Understanding Git's internal architecture reveals how it efficiently stores data, tracks changes, and enables powerful version control operations. This guide explores the plumbing commands, internal data structures, and core concepts that make Git work.</p>
+<p><strong>Why Learn Git Internals?</strong></p>
+<ul>
+<li>Debug complex issues more effectively</li>
+<li>Understand what commands actually do</li>
+<li>Recover from disasters</li>
+<li>Optimize repository performance</li>
+<li>Build custom Git tools and automation</li>
+</ul>
+<h2 id="the-git-directory"><a class="header" href="#the-git-directory">The .git Directory</a></h2>
+<p>Every Git repository has a <code>.git</code> directory containing all Git metadata and objects.</p>
+<h3 id="directory-structure"><a class="header" href="#directory-structure">Directory Structure</a></h3>
+<pre><code class="language-bash">.git/
+├── HEAD              # Points to current branch
+├── config            # Repository-specific configuration
+├── description       # Repository description (for GitWeb)
+├── index             # Staging area (binary file)
+├── hooks/            # Client and server-side hook scripts
+├── info/             # Global exclude file and refs
+│   └── exclude       # gitignore patterns not in .gitignore
+├── objects/          # All content: commits, trees, blobs, tags
+│   ├── pack/         # Packfiles for efficient storage
+│   └── info/         # Object info and packs
+├── refs/             # References (branches and tags)
+│   ├── heads/        # Local branches
+│   ├── remotes/      # Remote-tracking branches
+│   └── tags/         # Tags
+├── logs/             # Reflog information
+│   ├── HEAD          # HEAD history
+│   └── refs/         # Branch history
+└── packed-refs       # Packed references for performance
+</code></pre>
+<h3 id="exploring-git-directory"><a class="header" href="#exploring-git-directory">Exploring .git Directory</a></h3>
+<pre><code class="language-bash"># Navigate to .git
+cd .git
+
+# View HEAD (current branch pointer)
+cat HEAD
+# Output: ref: refs/heads/main
+
+# View current branch
+cat refs/heads/main
+# Output: a3f2b1c... (commit SHA-1)
+
+# View remote branch
+cat refs/remotes/origin/main
+
+# List all objects
+find objects/ -type f
+</code></pre>
+<h2 id="git-objects-the-building-blocks"><a class="header" href="#git-objects-the-building-blocks">Git Objects: The Building Blocks</a></h2>
+<p>Git stores everything as objects identified by SHA-1 hashes. There are four object types:</p>
+<ol>
+<li><strong>Blob</strong> - File content</li>
+<li><strong>Tree</strong> - Directory structure</li>
+<li><strong>Commit</strong> - Snapshot with metadata</li>
+<li><strong>Tag</strong> - Annotated tag with metadata</li>
+</ol>
+<h3 id="object-storage"><a class="header" href="#object-storage">Object Storage</a></h3>
+<p>Objects are stored in <code>.git/objects/</code>:</p>
+<ul>
+<li>First 2 characters of SHA-1 = subdirectory</li>
+<li>Remaining 38 characters = filename</li>
+<li>Content is zlib-compressed</li>
+</ul>
+<pre><code class="language-bash"># Example: Object a3f2b1c4...
+# Stored at: .git/objects/a3/f2b1c4...
+</code></pre>
+<h3 id="1-blob-objects"><a class="header" href="#1-blob-objects">1. Blob Objects</a></h3>
+<p>Blobs store file content (data only, no filename or metadata).</p>
+<pre><code class="language-bash"># Create a blob manually (plumbing)
+echo "Hello, Git!" | git hash-object -w --stdin
+# Output: 8ab686eafeb1f44702738c8b0f24f2567c36da6d
+
+# -w = write to object database
+# --stdin = read from standard input
+
+# View blob content
+git cat-file -p 8ab686eafeb1f44702738c8b0f24f2567c36da6d
+# Output: Hello, Git!
+
+# Check object type
+git cat-file -t 8ab686ea
+# Output: blob
+
+# View object size
+git cat-file -s 8ab686ea
+# Output: 12
+</code></pre>
+<p><strong>Creating blobs from files:</strong></p>
+<pre><code class="language-bash"># Create a file
+echo "Git internals are fascinating" &gt; test.txt
+
+# Hash and store the file
+git hash-object -w test.txt
+# Output: 2c8b4e3b7c1a9f...
+
+# The blob is now in .git/objects/
+# File content is stored, but filename is NOT
+</code></pre>
+<h3 id="2-tree-objects"><a class="header" href="#2-tree-objects">2. Tree Objects</a></h3>
+<p>Trees represent directory structure, mapping filenames to blobs and other trees.</p>
+<pre><code class="language-bash"># View a tree object
+git cat-file -p main^{tree}
+# Output:
+# 100644 blob a3f2b1c...    README.md
+# 100644 blob 7e4d3a2...    index.js
+# 040000 tree 9c1f5b8...    src
+
+# Tree entries format:
+# &lt;mode&gt; &lt;type&gt; &lt;sha-1&gt; &lt;filename&gt;
+</code></pre>
+<p><strong>File Modes:</strong></p>
+<ul>
+<li><code>100644</code> - Normal file</li>
+<li><code>100755</code> - Executable file</li>
+<li><code>120000</code> - Symbolic link</li>
+<li><code>040000</code> - Directory (tree)</li>
+<li><code>160000</code> - Gitlink (submodule)</li>
+</ul>
+<p><strong>Creating a tree manually:</strong></p>
+<pre><code class="language-bash"># Create a tree from index
+git write-tree
+# Output: 9c1f5b8a... (tree SHA-1)
+
+# Add files to index first
+git update-index --add --cacheinfo 100644 \
+  a3f2b1c4... README.md
+
+git update-index --add --cacheinfo 100644 \
+  7e4d3a2b... index.js
+
+# Write tree from current index
+git write-tree
+</code></pre>
+<p><strong>Reading tree contents:</strong></p>
+<pre><code class="language-bash"># List tree contents recursively
+git ls-tree -r -t main^{tree}
+# -r = recursive
+# -t = show trees as well
+
+# Pretty print tree structure
+git ls-tree --abbrev main^{tree}
+</code></pre>
+<h3 id="3-commit-objects"><a class="header" href="#3-commit-objects">3. Commit Objects</a></h3>
+<p>Commits point to a tree (snapshot) and contain metadata.</p>
+<pre><code class="language-bash"># View commit object
+git cat-file -p HEAD
+# Output:
+# tree 9c1f5b8a...
+# parent a3f2b1c4...
+# author John Doe &lt;john@example.com&gt; 1234567890 -0500
+# committer John Doe &lt;john@example.com&gt; 1234567890 -0500
+#
+# Commit message here
+</code></pre>
+<p><strong>Commit Structure:</strong></p>
+<ul>
+<li><code>tree</code> - Points to root tree (project snapshot)</li>
+<li><code>parent</code> - Previous commit(s); merge commits have multiple</li>
+<li><code>author</code> - Who wrote the code (name, email, timestamp)</li>
+<li><code>committer</code> - Who committed (may differ from author)</li>
+<li>Commit message</li>
+</ul>
+<p><strong>Creating a commit manually:</strong></p>
+<pre><code class="language-bash"># Create a commit (plumbing)
+echo "Initial commit" | git commit-tree 9c1f5b8a
+# Output: b4e3c2d1... (commit SHA-1)
+
+# Create commit with parent
+echo "Second commit" | git commit-tree 7a2b3c4d -p b4e3c2d1
+
+# Update branch to point to new commit
+git update-ref refs/heads/main b4e3c2d1
+</code></pre>
+<h3 id="4-tag-objects"><a class="header" href="#4-tag-objects">4. Tag Objects</a></h3>
+<p>Annotated tags are objects containing metadata about a tag.</p>
+<pre><code class="language-bash"># Create annotated tag
+git tag -a v1.0 -m "Version 1.0"
+
+# View tag object
+git cat-file -p v1.0
+# Output:
+# object a3f2b1c4...
+# type commit
+# tag v1.0
+# tagger John Doe &lt;john@example.com&gt; 1234567890 -0500
+#
+# Version 1.0
+</code></pre>
+<p><strong>Lightweight vs Annotated Tags:</strong></p>
+<pre><code class="language-bash"># Lightweight tag (just a ref)
+git tag v1.0-light
+cat .git/refs/tags/v1.0-light
+# Output: a3f2b1c4... (points directly to commit)
+
+# Annotated tag (object)
+git tag -a v1.0 -m "Release"
+cat .git/refs/tags/v1.0
+# Output: b7e8f3a... (points to tag object)
+</code></pre>
+<h2 id="content-addressable-storage"><a class="header" href="#content-addressable-storage">Content-Addressable Storage</a></h2>
+<p>Git uses SHA-1 hashing to create content-addressable storage.</p>
+<h3 id="how-sha-1-works-in-git"><a class="header" href="#how-sha-1-works-in-git">How SHA-1 Works in Git</a></h3>
+<pre><code class="language-bash"># Git computes SHA-1 of:
+# "blob &lt;size&gt;\0&lt;content&gt;"
+
+# Example calculation
+content="Hello, Git!"
+size=${#content}
+(printf "blob %s\0" $size; echo -n "$content") | sha1sum
+# Output: 8ab686eafeb1f44702738c8b0f24f2567c36da6d
+
+# This matches what git hash-object produces
+echo "Hello, Git!" | git hash-object --stdin
+</code></pre>
+<h3 id="properties-of-content-addressable-storage"><a class="header" href="#properties-of-content-addressable-storage">Properties of Content-Addressable Storage</a></h3>
+<ol>
+<li><strong>Deduplication</strong>: Identical content = same hash = stored once</li>
+<li><strong>Integrity</strong>: SHA-1 acts as checksum; corruption is detectable</li>
+<li><strong>Immutability</strong>: Can't change content without changing hash</li>
+<li><strong>Efficient</strong>: Easy to check if object exists (hash lookup)</li>
+</ol>
+<pre><code class="language-bash"># Example: Two files with identical content
+echo "Same content" &gt; file1.txt
+echo "Same content" &gt; file2.txt
+
+# Both produce same blob
+git hash-object file1.txt  # abc123...
+git hash-object file2.txt  # abc123... (identical!)
+
+# Git stores content only once
+</code></pre>
+<h2 id="file-tracking-and-the-index"><a class="header" href="#file-tracking-and-the-index">File Tracking and the Index</a></h2>
+<p>The <strong>index</strong> (staging area) is a binary file at <code>.git/index</code> that serves as a staging area between the working directory and repository.</p>
+<h3 id="the-three-states-of-files"><a class="header" href="#the-three-states-of-files">The Three States of Files</a></h3>
+<pre><code>┌─────────────────┐    git add    ┌─────────────────┐   git commit   ┌─────────────────┐
+│  Working Dir    │──────────────→│  Staging Area   │───────────────→│   Repository    │
+│   (modified)    │               │    (staged)     │                │   (committed)   │
+└─────────────────┘               └─────────────────┘                └─────────────────┘
+        ↑                                                                     │
+        └─────────────────────────────── git checkout ────────────────────────┘
+</code></pre>
+<h3 id="file-states"><a class="header" href="#file-states">File States</a></h3>
+<ol>
+<li><strong>Untracked</strong>: Not in index or last commit</li>
+<li><strong>Unmodified</strong>: In repository, unchanged</li>
+<li><strong>Modified</strong>: Changed since last commit</li>
+<li><strong>Staged</strong>: Marked for next commit</li>
+</ol>
+<pre><code class="language-bash"># File lifecycle diagram
+Untracked ──add──→ Staged ──commit──→ Unmodified
+                      ↑                    │
+                      │                    │ edit
+                      │                    ↓
+                      └────────────────Modified
+</code></pre>
+<h3 id="viewing-the-index"><a class="header" href="#viewing-the-index">Viewing the Index</a></h3>
+<pre><code class="language-bash"># View index contents
+git ls-files --stage
+# Output:
+# 100644 a3f2b1c... 0    README.md
+# 100644 7e4d3a2... 0    src/index.js
+# 100644 9f8e7d6... 0    package.json
+
+# Format: &lt;mode&gt; &lt;sha-1&gt; &lt;stage&gt; &lt;filename&gt;
+# stage: 0 = normal, 1-3 = conflict resolution stages
+</code></pre>
+<p><strong>Index Stages (for merge conflicts):</strong></p>
+<ul>
+<li>Stage 0: Normal entry</li>
+<li>Stage 1: Common ancestor version</li>
+<li>Stage 2: "ours" (current branch)</li>
+<li>Stage 3: "theirs" (merging branch)</li>
+</ul>
+<pre><code class="language-bash"># During merge conflict
+git ls-files --stage
+# 100644 a1b2c3... 1    conflicted.txt  (base)
+# 100644 d4e5f6... 2    conflicted.txt  (ours)
+# 100644 g7h8i9... 3    conflicted.txt  (theirs)
+</code></pre>
+<h3 id="working-with-the-index"><a class="header" href="#working-with-the-index">Working with the Index</a></h3>
+<pre><code class="language-bash"># Add file to index
+git update-index --add --cacheinfo 100644 a3f2b1c README.md
+
+# Remove from index (keep in working dir)
+git update-index --force-remove README.md
+
+# Refresh index (update stat info)
+git update-index --refresh
+
+# Show index and working tree differences
+git diff-files
+# Shows files modified in working dir
+
+# Show index and repository differences
+git diff-index --cached HEAD
+# Shows staged changes
+</code></pre>
+<h3 id="how-git-add-works-internally"><a class="header" href="#how-git-add-works-internally">How git add Works Internally</a></h3>
+<pre><code class="language-bash"># When you run: git add file.txt
+
+# 1. Git computes SHA-1 of file content
+hash=$(git hash-object -w file.txt)
+
+# 2. Stores blob in .git/objects/
+# (Already done by -w flag above)
+
+# 3. Updates index with new hash
+git update-index --add --cacheinfo 100644 $hash file.txt
+
+# This is what git add does behind the scenes!
+</code></pre>
+<h2 id="refs-pointers-to-commits"><a class="header" href="#refs-pointers-to-commits">Refs: Pointers to Commits</a></h2>
+<p><strong>References (refs)</strong> are human-readable names that point to commits. They're stored in <code>.git/refs/</code>.</p>
+<h3 id="types-of-refs"><a class="header" href="#types-of-refs">Types of Refs</a></h3>
+<ol>
+<li><strong>Heads</strong> (branches): <code>.git/refs/heads/</code></li>
+<li><strong>Tags</strong>: <code>.git/refs/tags/</code></li>
+<li><strong>Remotes</strong>: <code>.git/refs/remotes/</code></li>
+</ol>
+<pre><code class="language-bash"># View a ref (just a file with commit SHA-1)
+cat .git/refs/heads/main
+# Output: a3f2b1c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0
+
+# All refs are just text files!
+</code></pre>
+<h3 id="head-the-current-reference"><a class="header" href="#head-the-current-reference">HEAD: The Current Reference</a></h3>
+<p><strong>HEAD</strong> is a symbolic reference pointing to the current branch.</p>
+<pre><code class="language-bash"># View HEAD
+cat .git/HEAD
+# Output: ref: refs/heads/main
+
+# HEAD points to a branch, which points to a commit
+cat .git/refs/heads/main
+# Output: a3f2b1c...
+</code></pre>
+<p><strong>Normal HEAD (attached):</strong></p>
+<pre><code>HEAD → refs/heads/main → commit a3f2b1c
+</code></pre>
+<p><strong>Detached HEAD:</strong></p>
+<pre><code>HEAD → commit a3f2b1c (no branch)
+</code></pre>
+<h3 id="detached-head-state"><a class="header" href="#detached-head-state">Detached HEAD State</a></h3>
+<pre><code class="language-bash"># Checkout specific commit
+git checkout a3f2b1c
+# Warning: You are in 'detached HEAD' state
+
+# HEAD now points directly to commit
+cat .git/HEAD
+# Output: a3f2b1c... (no longer "ref: refs/heads/...")
+
+# Any commits made here are "orphaned" unless you create a branch
+git switch -c new-branch  # Attach HEAD to new branch
+</code></pre>
+<h3 id="symbolic-references"><a class="header" href="#symbolic-references">Symbolic References</a></h3>
+<pre><code class="language-bash"># HEAD is a symbolic ref
+git symbolic-ref HEAD
+# Output: refs/heads/main
+
+# Change HEAD to point to different branch
+git symbolic-ref HEAD refs/heads/develop
+# Now on develop branch (without checking out files)
+
+# Read the ref HEAD points to
+git symbolic-ref HEAD
+git rev-parse HEAD  # Get the commit SHA-1
+</code></pre>
+<h3 id="special-refs"><a class="header" href="#special-refs">Special Refs</a></h3>
+<ul>
+<li><strong>HEAD</strong>: Current commit/branch</li>
+<li><strong>ORIG_HEAD</strong>: Previous HEAD (before risky operations)</li>
+<li><strong>FETCH_HEAD</strong>: Last fetched branch</li>
+<li><strong>MERGE_HEAD</strong>: Commit being merged</li>
+<li><strong>CHERRY_PICK_HEAD</strong>: Commit being cherry-picked</li>
+</ul>
+<pre><code class="language-bash"># ORIG_HEAD is set by commands that move HEAD
+git reset --hard HEAD~1  # ORIG_HEAD now points to previous HEAD
+
+# Undo the reset
+git reset --hard ORIG_HEAD
+
+# MERGE_HEAD during merge
+git merge feature-branch
+# .git/MERGE_HEAD exists during merge conflict
+cat .git/MERGE_HEAD  # Shows commit being merged
+</code></pre>
+<h3 id="creating-and-managing-refs"><a class="header" href="#creating-and-managing-refs">Creating and Managing Refs</a></h3>
+<pre><code class="language-bash"># Create a branch (low-level)
+git update-ref refs/heads/new-branch a3f2b1c
+
+# This is what git branch does!
+# Equivalent to:
+echo "a3f2b1c..." &gt; .git/refs/heads/new-branch
+
+# Delete a ref
+git update-ref -d refs/heads/old-branch
+
+# List all refs
+git for-each-ref
+# Output:
+# a3f2b1c... commit refs/heads/main
+# b4e3c2d... commit refs/heads/feature
+# 7a2b3c4... commit refs/remotes/origin/main
+# 9f8e7d6... tag    refs/tags/v1.0
+
+# Format output
+git for-each-ref --format='%(refname:short) %(objecttype) %(objectname:short)'
+</code></pre>
+<h3 id="packed-references"><a class="header" href="#packed-references">Packed References</a></h3>
+<p>For performance, Git can pack refs into <code>.git/packed-refs</code>.</p>
+<pre><code class="language-bash"># View packed refs
+cat .git/packed-refs
+# Output:
+# # pack-refs with: peeled fully-peeled sorted
+# a3f2b1c... refs/heads/main
+# b4e3c2d... refs/remotes/origin/main
+# 7a2b3c4... refs/tags/v1.0
+# ^9f8e7d6... (peeled tag - points to commit, not tag object)
+
+# Pack refs manually
+git pack-refs --all --prune
+
+# Loose refs take precedence over packed refs
+</code></pre>
+<h2 id="plumbing-vs-porcelain-commands"><a class="header" href="#plumbing-vs-porcelain-commands">Plumbing vs Porcelain Commands</a></h2>
+<p>Git commands are divided into two categories:</p>
+<ul>
+<li><strong>Porcelain</strong>: High-level user-friendly commands (<code>git commit</code>, <code>git push</code>)</li>
+<li><strong>Plumbing</strong>: Low-level commands that manipulate Git internals</li>
+</ul>
+<h3 id="why-plumbing-commands"><a class="header" href="#why-plumbing-commands">Why Plumbing Commands?</a></h3>
+<ol>
+<li><strong>Automation</strong>: Build scripts and tools</li>
+<li><strong>Understanding</strong>: Learn how Git works</li>
+<li><strong>Recovery</strong>: Fix broken repositories</li>
+<li><strong>Debugging</strong>: Investigate issues</li>
+</ol>
+<h3 id="essential-plumbing-commands"><a class="header" href="#essential-plumbing-commands">Essential Plumbing Commands</a></h3>
+<h4 id="object-inspection"><a class="header" href="#object-inspection">Object Inspection</a></h4>
+<pre><code class="language-bash"># cat-file: View object content
+git cat-file -t a3f2b1c     # Type (blob, tree, commit, tag)
+git cat-file -s a3f2b1c     # Size
+git cat-file -p a3f2b1c     # Pretty-print content
+git cat-file blob a3f2b1c   # View blob content
+
+# rev-parse: Parse revisions
+git rev-parse HEAD          # Full SHA-1 of HEAD
+git rev-parse --short HEAD  # Short SHA-1
+git rev-parse main          # Resolve branch to commit
+git rev-parse HEAD~3        # Three commits before HEAD
+
+# ls-tree: List tree contents
+git ls-tree HEAD            # Root tree
+git ls-tree -r HEAD         # Recursive
+git ls-tree HEAD src/       # Specific directory
+</code></pre>
+<h4 id="object-creation"><a class="header" href="#object-creation">Object Creation</a></h4>
+<pre><code class="language-bash"># hash-object: Create blob
+echo "content" | git hash-object -w --stdin
+git hash-object -w file.txt
+
+# mktree: Create tree from stdin
+# Format: &lt;mode&gt; SP &lt;type&gt; SP &lt;sha1&gt; TAB &lt;filename&gt;
+cat | git mktree &lt;&lt; EOF
+100644 blob a3f2b1c... file1.txt
+100644 blob b4e3c2d... file2.txt
+040000 tree 7a2b3c4... subdir
+EOF
+
+# commit-tree: Create commit
+echo "Commit message" | git commit-tree 9c1f5b8 -p a3f2b1c
+
+# write-tree: Create tree from index
+git write-tree
+</code></pre>
+<h4 id="reference-management"><a class="header" href="#reference-management">Reference Management</a></h4>
+<pre><code class="language-bash"># update-ref: Create/update references
+git update-ref refs/heads/test a3f2b1c
+git update-ref -d refs/heads/test  # Delete
+
+# symbolic-ref: Manage symbolic refs
+git symbolic-ref HEAD refs/heads/main
+
+# for-each-ref: Iterate over refs
+git for-each-ref refs/heads/
+git for-each-ref --format='%(refname)' refs/tags/
+</code></pre>
+<h4 id="index-manipulation"><a class="header" href="#index-manipulation">Index Manipulation</a></h4>
+<pre><code class="language-bash"># update-index: Modify index
+git update-index --add --cacheinfo 100644 a3f2b1c file.txt
+git update-index --remove file.txt
+git update-index --refresh
+
+# ls-files: Show index contents
+git ls-files                  # All tracked files
+git ls-files --stage          # With hash and mode
+git ls-files --deleted        # Deleted in working dir
+git ls-files --modified       # Modified in working dir
+git ls-files --others         # Untracked files
+
+# read-tree: Read tree into index
+git read-tree HEAD            # Reset index to HEAD
+git read-tree --prefix=sub/ HEAD  # Read into subdirectory
+</code></pre>
+<h4 id="comparison-and-diffing"><a class="header" href="#comparison-and-diffing">Comparison and Diffing</a></h4>
+<pre><code class="language-bash"># diff-tree: Compare trees
+git diff-tree HEAD HEAD~1     # Compare commits
+git diff-tree -r HEAD HEAD~1  # Recursive
+
+# diff-index: Compare index
+git diff-index HEAD           # Index vs HEAD
+git diff-index --cached HEAD  # Staged changes
+
+# diff-files: Compare working dir
+git diff-files                # Working dir vs index
+</code></pre>
+<h3 id="building-porcelain-with-plumbing"><a class="header" href="#building-porcelain-with-plumbing">Building Porcelain with Plumbing</a></h3>
+<p><strong>Example: Implementing <code>git add</code> with plumbing</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+# add.sh - Simplified git add implementation
+
+file=$1
+
+# 1. Hash and store file content
+hash=$(git hash-object -w "$file")
+
+# 2. Update index
+git update-index --add --cacheinfo 100644 "$hash" "$file"
+
+echo "Added $file (hash: $hash)"
+</code></pre>
+<p><strong>Example: Implementing <code>git commit</code> with plumbing</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+# commit.sh - Simplified git commit implementation
+
+message=$1
+
+# 1. Create tree from current index
+tree=$(git write-tree)
+
+# 2. Get parent commit
+parent=$(git rev-parse HEAD)
+
+# 3. Create commit object
+commit=$(echo "$message" | git commit-tree "$tree" -p "$parent")
+
+# 4. Update branch ref
+git update-ref refs/heads/$(git rev-parse --abbrev-ref HEAD) "$commit"
+
+echo "Created commit $commit"
+</code></pre>
+<h2 id="commit-ancestry-and-references"><a class="header" href="#commit-ancestry-and-references">Commit Ancestry and References</a></h2>
+<p>Git uses special syntax to refer to commits relative to each other.</p>
+<h3 id="ancestry-references"><a class="header" href="#ancestry-references">Ancestry References</a></h3>
+<pre><code class="language-bash"># Parent references
+HEAD~1      # First parent (same as HEAD^)
+HEAD~2      # Second parent (grandparent)
+HEAD~3      # Third parent (great-grandparent)
+
+# Multiple parents (merge commits)
+HEAD^1      # First parent
+HEAD^2      # Second parent (merged branch)
+
+# Combining
+HEAD~2^2    # Second parent of grandparent
+</code></pre>
+<p><strong>Difference between ~ and ^:</strong></p>
+<ul>
+<li><code>~</code> always follows first parent</li>
+<li><code>^</code> can select which parent</li>
+</ul>
+<pre><code class="language-bash"># Merge commit example
+    A
+   / \
+  B   C
+  |
+  D
+
+# A~1 = B (first parent)
+# A^1 = B (first parent)
+# A^2 = C (second parent)
+# A~2 = D (grandparent via first parent)
+</code></pre>
+<h3 id="commit-ranges"><a class="header" href="#commit-ranges">Commit Ranges</a></h3>
+<pre><code class="language-bash"># Double dot: Commits in B not in A
+git log A..B
+# Example: main..feature (commits in feature not in main)
+
+# Triple dot: Commits in A or B, but not both
+git log A...B
+# Example: main...feature (symmetric difference)
+
+# All ancestors of B excluding A
+git log ^A B
+git log A..B  # Equivalent
+
+# Multiple exclusions
+git log ^A ^B C
+# Commits in C but not in A or B
+</code></pre>
+<p><strong>Practical examples:</strong></p>
+<pre><code class="language-bash"># View commits in feature branch not in main
+git log main..feature
+
+# View commits that will be pushed
+git log origin/main..HEAD
+
+# View commits in current branch since branching from main
+git log main..HEAD
+
+# Show what changed between two branches
+git log --oneline main...feature
+
+# Find merge base
+git merge-base main feature
+</code></pre>
+<h3 id="refspecs"><a class="header" href="#refspecs">Refspecs</a></h3>
+<p><strong>Refspecs</strong> define mappings between remote and local refs.</p>
+<pre><code class="language-bash"># View refspec
+git config --get-regexp remote.origin
+# Output:
+# remote.origin.url https://github.com/user/repo.git
+# remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
+
+# Refspec format:
+# [+]&lt;source&gt;:&lt;destination&gt;
+# + = force update
+</code></pre>
+<p><strong>Fetch refspec:</strong> <code>+refs/heads/*:refs/remotes/origin/*</code></p>
+<ul>
+<li>Maps all remote branches to local remote-tracking branches</li>
+<li><code>refs/heads/main</code> → <code>refs/remotes/origin/main</code></li>
+</ul>
+<p><strong>Push refspec:</strong> <code>refs/heads/*:refs/heads/*</code></p>
+<ul>
+<li>Maps local branches to remote branches</li>
+<li><code>refs/heads/main</code> → <code>refs/heads/main</code> (on remote)</li>
+</ul>
+<pre><code class="language-bash"># Custom refspec examples
+
+# Fetch only main branch
+git config remote.origin.fetch refs/heads/main:refs/remotes/origin/main
+
+# Fetch all branches (default)
+git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+
+# Push branch to different name
+git push origin local-branch:remote-branch
+
+# Push to different ref
+git push origin HEAD:refs/heads/new-branch
+
+# Delete remote branch
+git push origin :branch-to-delete
+# Or
+git push origin --delete branch-to-delete
+
+# Fetch pull request (GitHub)
+git fetch origin pull/123/head:pr-123
+</code></pre>
+<h2 id="the-reflog"><a class="header" href="#the-reflog">The Reflog</a></h2>
+<p>The <strong>reflog</strong> records when refs (HEAD, branches) were updated. It's essential for recovery.</p>
+<h3 id="understanding-reflog"><a class="header" href="#understanding-reflog">Understanding Reflog</a></h3>
+<pre><code class="language-bash"># View HEAD reflog
+git reflog
+# Output:
+# a3f2b1c (HEAD -&gt; main) HEAD@{0}: commit: Add feature
+# b4e3c2d HEAD@{1}: commit: Fix bug
+# 7a2b3c4 HEAD@{2}: checkout: moving from dev to main
+
+# Reflog for specific ref
+git reflog show main
+git reflog show origin/main
+</code></pre>
+<h3 id="reflog-syntax"><a class="header" href="#reflog-syntax">Reflog Syntax</a></h3>
+<pre><code class="language-bash"># @{n} - nth prior value
+HEAD@{0}    # Current HEAD
+HEAD@{1}    # Previous HEAD
+HEAD@{2}    # Two steps back
+
+# @{time} - Value at specific time
+HEAD@{5.minutes.ago}
+HEAD@{yesterday}
+HEAD@{2.days.ago}
+HEAD@{2023-01-01}
+
+# Examples
+git show HEAD@{5}             # Show 5th prior HEAD
+git diff HEAD@{0} HEAD@{1}    # Compare current vs previous
+git log -g HEAD               # Show reflog as log
+</code></pre>
+<h3 id="recovery-with-reflog"><a class="header" href="#recovery-with-reflog">Recovery with Reflog</a></h3>
+<pre><code class="language-bash"># Scenario: Accidentally reset hard
+git reset --hard HEAD~3  # Oops!
+
+# Find commit before reset
+git reflog
+# a3f2b1c HEAD@{0}: reset: moving to HEAD~3
+# b4e3c2d HEAD@{1}: commit: Lost commit
+
+# Recover
+git reset --hard HEAD@{1}
+# Or
+git reset --hard b4e3c2d
+
+# Recover deleted branch
+git reflog --all  # Show all refs
+git branch recovered-branch a3f2b1c
+</code></pre>
+<p><strong>Scenario: Recover from bad rebase</strong></p>
+<pre><code class="language-bash"># Before rebase
+git log --oneline
+# a3f2b1c (HEAD -&gt; feature) Feature work
+# b4e3c2d More feature work
+# 7a2b3c4 (main) Main work
+
+# Bad interactive rebase (dropped commits)
+git rebase -i main
+# Accidentally deleted commits!
+
+# Find commits in reflog
+git reflog
+# 9f8e7d6 HEAD@{0}: rebase -i: finish
+# a3f2b1c HEAD@{1}: rebase -i: start
+
+# Reset to before rebase
+git reset --hard HEAD@{1}
+</code></pre>
+<h3 id="reflog-expiration"><a class="header" href="#reflog-expiration">Reflog Expiration</a></h3>
+<pre><code class="language-bash"># Reflogs are temporary (default: 90 days)
+# Unreachable commits expire after 30 days
+
+# View reflog expiration config
+git config --get gc.reflogExpire        # Default: 90 days
+git config --get gc.reflogExpireUnreachable  # Default: 30 days
+
+# Manually expire reflog
+git reflog expire --expire=now --all
+git gc --prune=now
+
+# Keep reflog forever (not recommended)
+git config gc.reflogExpire never
+</code></pre>
+<h2 id="branches-under-the-hood"><a class="header" href="#branches-under-the-hood">Branches Under the Hood</a></h2>
+<p>Branches are simply refs pointing to commits. Understanding this reveals Git's power.</p>
+<h3 id="what-is-a-branch"><a class="header" href="#what-is-a-branch">What is a Branch?</a></h3>
+<pre><code class="language-bash"># A branch is just a file containing a commit hash
+cat .git/refs/heads/main
+# Output: a3f2b1c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0
+
+# That's it! Just 40 bytes (or less in packed-refs)
+</code></pre>
+<h3 id="creating-branches-with-plumbing"><a class="header" href="#creating-branches-with-plumbing">Creating Branches with Plumbing</a></h3>
+<pre><code class="language-bash"># Porcelain
+git branch new-feature
+
+# Plumbing equivalent
+git update-ref refs/heads/new-feature HEAD
+
+# Or even more manual
+echo $(git rev-parse HEAD) &gt; .git/refs/heads/new-feature
+</code></pre>
+<h3 id="switching-branches"><a class="header" href="#switching-branches">Switching Branches</a></h3>
+<pre><code class="language-bash"># Porcelain
+git checkout main
+
+# Plumbing steps:
+# 1. Update HEAD
+git symbolic-ref HEAD refs/heads/main
+
+# 2. Update index and working directory
+git read-tree --reset -u HEAD
+
+# 3. That's it!
+</code></pre>
+<h3 id="merging-fast-forward-vs-three-way"><a class="header" href="#merging-fast-forward-vs-three-way">Merging: Fast-Forward vs Three-Way</a></h3>
+<p><strong>Fast-forward merge:</strong></p>
+<pre><code>Before:
+  main     feature
+    ↓         ↓
+A - B - C - D
+
+After (git merge feature):
+  main/feature
+       ↓
+A - B - C - D
+</code></pre>
+<pre><code class="language-bash"># Fast-forward is just updating the ref
+git update-ref refs/heads/main $(git rev-parse feature)
+</code></pre>
+<p><strong>Three-way merge:</strong></p>
+<pre><code>Before:
+      C (main)
+     /
+A - B
+     \
+      D (feature)
+
+After (git merge feature):
+      C - M (main)
+     /   /
+A - B - D
+</code></pre>
+<pre><code class="language-bash"># Three-way merge creates new commit with two parents
+# Parents: current HEAD and merged branch
+
+# Plumbing equivalent:
+tree=$(git write-tree)  # From merge resolution
+commit=$(echo "Merge message" | git commit-tree $tree \
+  -p $(git rev-parse HEAD) \
+  -p $(git rev-parse feature))
+git update-ref refs/heads/main $commit
+</code></pre>
+<h2 id="remote-tracking"><a class="header" href="#remote-tracking">Remote Tracking</a></h2>
+<p>Understanding how Git tracks remote branches.</p>
+<h3 id="remote-tracking-branches"><a class="header" href="#remote-tracking-branches">Remote-Tracking Branches</a></h3>
+<pre><code class="language-bash"># Remote-tracking branches are refs under refs/remotes/
+ls -la .git/refs/remotes/origin/
+# main
+# develop
+# feature-123
+
+# They're just refs, like local branches
+cat .git/refs/remotes/origin/main
+# b4e3c2d1... (commit hash)
+</code></pre>
+<h3 id="how-git-fetch-works"><a class="header" href="#how-git-fetch-works">How git fetch Works</a></h3>
+<pre><code class="language-bash"># Porcelain
+git fetch origin
+
+# Plumbing steps:
+# 1. Connect to remote
+# 2. Receive pack of new objects
+# 3. Store objects in .git/objects/
+# 4. Update refs/remotes/origin/* refs
+
+# Fetch specific branch
+git fetch origin main:refs/remotes/origin/main
+</code></pre>
+<h3 id="how-git-pull-works"><a class="header" href="#how-git-pull-works">How git pull Works</a></h3>
+<pre><code class="language-bash"># git pull = git fetch + git merge
+
+# Equivalent to:
+git fetch origin
+git merge origin/main
+
+# Or with rebase:
+git fetch origin
+git rebase origin/main
+</code></pre>
+<h3 id="how-git-push-works"><a class="header" href="#how-git-push-works">How git push Works</a></h3>
+<pre><code class="language-bash"># Porcelain
+git push origin main
+
+# Plumbing steps:
+# 1. Check if fast-forward possible
+# 2. Pack objects not on remote
+# 3. Send pack to remote
+# 4. Remote updates refs/heads/main
+
+# Push creates commits on remote, then updates ref
+# Equivalent refspec:
+git push origin refs/heads/main:refs/heads/main
+</code></pre>
+<h3 id="tracking-branches"><a class="header" href="#tracking-branches">Tracking Branches</a></h3>
+<pre><code class="language-bash"># Set upstream branch
+git branch --set-upstream-to=origin/main main
+
+# This adds to .git/config:
+# [branch "main"]
+#     remote = origin
+#     merge = refs/heads/main
+
+# View tracking relationship
+git branch -vv
+# main  a3f2b1c [origin/main] Latest commit
+
+# Remote tracking allows:
+git pull   # Knows to pull from origin/main
+git push   # Knows to push to origin/main
+</code></pre>
+<h2 id="pack-files-and-storage-optimization"><a class="header" href="#pack-files-and-storage-optimization">Pack Files and Storage Optimization</a></h2>
+<p>Git uses pack files to compress objects efficiently.</p>
+<h3 id="loose-vs-packed-objects"><a class="header" href="#loose-vs-packed-objects">Loose vs Packed Objects</a></h3>
+<p><strong>Loose objects:</strong></p>
+<ul>
+<li>Individual files in <code>.git/objects/ab/cdef...</code></li>
+<li>Zlib-compressed</li>
+<li>One object per file</li>
+<li>Fast to create, slower to access in bulk</li>
+</ul>
+<p><strong>Packed objects:</strong></p>
+<ul>
+<li>Combined into <code>.git/objects/pack/pack-*.pack</code></li>
+<li>Delta-compressed (stores differences)</li>
+<li>Accompanied by <code>.idx</code> index file</li>
+<li>Slower to create, much faster to access</li>
+</ul>
+<h3 id="viewing-object-storage"><a class="header" href="#viewing-object-storage">Viewing Object Storage</a></h3>
+<pre><code class="language-bash"># Count objects
+git count-objects -v
+# Output:
+# count: 150           # Loose objects
+# size: 600            # KB
+# in-pack: 3500        # Packed objects
+# packs: 1             # Number of pack files
+# size-pack: 1200      # KB in packs
+# prune-packable: 0
+# garbage: 0
+# size-garbage: 0
+
+# List pack files
+ls -lh .git/objects/pack/
+# pack-abc123.idx
+# pack-abc123.pack
+</code></pre>
+<h3 id="pack-file-structure"><a class="header" href="#pack-file-structure">Pack File Structure</a></h3>
+<pre><code class="language-bash"># .pack file: Contains compressed objects
+# .idx file: Index for finding objects in pack
+
+# Verify pack
+git verify-pack -v .git/objects/pack/pack-*.idx
+# Output:
+# a3f2b1c blob   150 140 12
+# b4e3c2d blob   200 185 152
+# 7a2b3c4 commit 250 235 337
+# ...
+# non delta: 150 objects
+# chain length = 10: 50 objects
+</code></pre>
+<h3 id="delta-compression"><a class="header" href="#delta-compression">Delta Compression</a></h3>
+<p>Git stores deltas (differences) to save space:</p>
+<pre><code class="language-bash"># Example: Two similar files
+# version1.txt: "Hello World"
+# version2.txt: "Hello World!\nNew line"
+
+# Git stores:
+# - Full version2.txt (base)
+# - Delta: version1 relative to version2
+
+# Verify pack shows delta chains
+git verify-pack -v .git/objects/pack/pack-*.idx | grep chain
+</code></pre>
+<h3 id="garbage-collection"><a class="header" href="#garbage-collection">Garbage Collection</a></h3>
+<pre><code class="language-bash"># Manual garbage collection
+git gc
+# - Packs loose objects
+# - Removes unreachable objects
+# - Optimizes repository
+
+# Aggressive GC (slow but thorough)
+git gc --aggressive
+# More thorough delta compression
+
+# Prune unreachable objects
+git prune
+# Remove objects not reachable from any ref
+
+# Prune everything older than 2 weeks
+git prune --expire=2.weeks.ago
+
+# Automatic GC
+git config gc.auto 6700  # Auto-gc after 6700 loose objects
+git config gc.autopacklimit 50  # Auto-gc after 50 pack files
+</code></pre>
+<h3 id="optimizing-repository"><a class="header" href="#optimizing-repository">Optimizing Repository</a></h3>
+<pre><code class="language-bash"># Create pack file from scratch
+git repack -a -d -f
+# -a = all objects
+# -d = remove redundant packs
+# -f = force
+
+# Aggressive repacking
+git repack -a -d -f --depth=250 --window=250
+
+# Reduce repository size
+git gc --aggressive --prune=now
+
+# Clone with shallow history (for large repos)
+git clone --depth 1 &lt;url&gt;
+# Only most recent commit
+</code></pre>
+<h2 id="advanced-internals-topics"><a class="header" href="#advanced-internals-topics">Advanced Internals Topics</a></h2>
+<h3 id="the-index-file-format"><a class="header" href="#the-index-file-format">The Index File Format</a></h3>
+<p>The index is a binary file with this structure:</p>
+<pre><code>Header (12 bytes):
+- Signature: "DIRC" (DIrectory Cache)
+- Version: 2, 3, or 4
+- Number of entries
+
+Entry (variable length):
+- ctime/mtime metadata
+- Device/inode
+- Mode (file permissions)
+- UID/GID
+- File size
+- SHA-1 (20 bytes)
+- Flags (name length, stage)
+- File name
+
+Extensions:
+- Tree cache
+- Resolve undo
+- etc.
+</code></pre>
+<pre><code class="language-bash"># Dump index in human-readable format
+git ls-files --stage --debug
+</code></pre>
+<h3 id="object-database-deep-dive"><a class="header" href="#object-database-deep-dive">Object Database Deep Dive</a></h3>
+<pre><code class="language-bash"># Find all objects
+find .git/objects -type f
+
+# Object file structure:
+# - zlib compressed
+# - Header: "&lt;type&gt; &lt;size&gt;\0"
+# - Content
+
+# Decompress object manually (example)
+printf "\x1f\x8b\x08\x00\x00\x00\x00\x00" | \
+  cat - .git/objects/ab/cdef... | \
+  gunzip
+
+# Or use Git's plumbing
+git cat-file -p abcdef
+</code></pre>
+<h3 id="git-hooks-and-plumbing"><a class="header" href="#git-hooks-and-plumbing">Git Hooks and Plumbing</a></h3>
+<p>Hooks are scripts in <code>.git/hooks/</code> that run at specific points.</p>
+<pre><code class="language-bash"># Example: pre-commit hook using plumbing
+# .git/hooks/pre-commit
+
+#!/bin/bash
+# Check for TODO comments in staged files
+
+for file in $(git diff-index --cached --name-only HEAD); do
+  if git cat-file -p :0:$file | grep -q "TODO"; then
+    echo "Error: TODO found in $file"
+    exit 1
+  fi
+done
+</code></pre>
+<h3 id="inspecting-repository-health"><a class="header" href="#inspecting-repository-health">Inspecting Repository Health</a></h3>
+<pre><code class="language-bash"># Check repository integrity
+git fsck
+# - Verifies object connectivity
+# - Checks for corruption
+# - Reports dangling/unreachable objects
+
+# Full check
+git fsck --full
+# Output:
+# Checking object directories: 100% (256/256), done.
+# Checking objects: 100% (3456/3456), done.
+# dangling commit abc123...
+
+# Find large objects
+git rev-list --objects --all | \
+  git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | \
+  awk '/^blob/ {print substr($0,6)}' | \
+  sort -nk2 | \
+  tail -20
+</code></pre>
+<h2 id="practical-plumbing-use-cases"><a class="header" href="#practical-plumbing-use-cases">Practical Plumbing Use Cases</a></h2>
+<h3 id="1-find-when-file-was-deleted"><a class="header" href="#1-find-when-file-was-deleted">1. Find When File Was Deleted</a></h3>
+<pre><code class="language-bash"># Find when file was deleted
+git log --all --full-history -- deleted-file.txt
+
+# Using plumbing
+git rev-list --all -- deleted-file.txt | while read commit; do
+  if ! git ls-tree -r $commit | grep -q deleted-file.txt; then
+    echo "Deleted in: $commit"
+    break
+  fi
+done
+</code></pre>
+<h3 id="2-extract-file-from-history"><a class="header" href="#2-extract-file-from-history">2. Extract File from History</a></h3>
+<pre><code class="language-bash"># Get file from specific commit
+commit="abc123"
+file="path/to/file.txt"
+
+# Find blob hash
+blob=$(git ls-tree $commit $file | awk '{print $3}')
+
+# Extract content
+git cat-file blob $blob &gt; recovered-file.txt
+</code></pre>
+<h3 id="3-rewrite-history-to-remove-sensitive-data"><a class="header" href="#3-rewrite-history-to-remove-sensitive-data">3. Rewrite History to Remove Sensitive Data</a></h3>
+<pre><code class="language-bash"># Remove file from all commits (using plumbing concepts)
+git filter-branch --tree-filter 'rm -f passwords.txt' HEAD
+
+# Or with plumbing (manual approach for understanding):
+git rev-list --all | while read commit; do
+  # Get tree
+  tree=$(git rev-parse $commit^{tree})
+
+  # Create new tree without sensitive file
+  # (Complex - requires manual tree manipulation)
+
+  # Create new commit
+  new_commit=$(git commit-tree ...)
+
+  # Update refs
+  git update-ref ...
+done
+</code></pre>
+<h3 id="4-create-orphan-branch"><a class="header" href="#4-create-orphan-branch">4. Create Orphan Branch</a></h3>
+<pre><code class="language-bash"># Porcelain
+git checkout --orphan new-root
+
+# Plumbing equivalent
+# Create empty tree
+empty_tree=$(git hash-object -t tree /dev/null)
+
+# Create first commit
+commit=$(echo "Initial" | git commit-tree $empty_tree)
+
+# Create branch
+git update-ref refs/heads/new-root $commit
+
+# Switch to branch
+git symbolic-ref HEAD refs/heads/new-root
+git reset --hard
+</code></pre>
+<h3 id="5-analyze-repository-statistics"><a class="header" href="#5-analyze-repository-statistics">5. Analyze Repository Statistics</a></h3>
+<pre><code class="language-bash"># Count commits per author
+git rev-list --all --pretty=format:'%an' | \
+  grep -v '^commit' | \
+  sort | uniq -c | sort -nr
+
+# Find largest commits
+git rev-list --objects --all | \
+  git cat-file --batch-check='%(objecttype) %(objectsize) %(rest)' | \
+  grep '^commit' | \
+  sort -k2 -n | \
+  tail -10
+
+# List all files ever committed
+git rev-list --objects --all | \
+  grep -v '^commit' | \
+  cut -d' ' -f2- | \
+  sort -u
+</code></pre>
+<h2 id="debugging-with-plumbing"><a class="header" href="#debugging-with-plumbing">Debugging with Plumbing</a></h2>
+<h3 id="trace-git-commands"><a class="header" href="#trace-git-commands">Trace Git Commands</a></h3>
+<pre><code class="language-bash"># See what Git is doing
+GIT_TRACE=1 git commit -m "Test"
+# Output shows underlying commands
+
+# Trace pack operations
+GIT_TRACE_PACK_ACCESS=1 git fetch
+
+# Trace performance
+GIT_TRACE_PERFORMANCE=1 git status
+</code></pre>
+<h3 id="verbose-object-information"><a class="header" href="#verbose-object-information">Verbose Object Information</a></h3>
+<pre><code class="language-bash"># Find object by content
+echo "search content" | git hash-object --stdin
+
+# Check if object exists
+git cat-file -e abc123 &amp;&amp; echo "exists"
+
+# Batch check objects
+echo -e "abc123\ndef456\n789abc" | \
+  git cat-file --batch-check
+
+# Follow rename history
+git log --follow --all -- file.txt
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li>
+<p><strong>Don't Modify .git Manually</strong></p>
+<ul>
+<li>Use plumbing commands instead</li>
+<li>Prevents corruption</li>
+</ul>
+</li>
+<li>
+<p><strong>Understand Before Using</strong></p>
+<ul>
+<li>Plumbing commands can be destructive</li>
+<li>Test in disposable repositories first</li>
+</ul>
+</li>
+<li>
+<p><strong>Use Reflog for Safety</strong></p>
+<ul>
+<li>Reflog can recover from mistakes</li>
+<li>Keep reflog enabled</li>
+</ul>
+</li>
+<li>
+<p><strong>Regular Maintenance</strong></p>
+<ul>
+<li>Run <code>git gc</code> periodically</li>
+<li>Check health with <code>git fsck</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Backup Before Experiments</strong></p>
+<ul>
+<li><code>cp -r .git .git.backup</code></li>
+<li>Or use separate clone</li>
+</ul>
+</li>
+<li>
+<p><strong>Learn Incrementally</strong></p>
+<ul>
+<li>Start with inspection commands</li>
+<li>Progress to modification commands</li>
+<li>Master recovery techniques</li>
+</ul>
+</li>
+</ol>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Git's internals are elegant and understandable:</p>
+<ul>
+<li><strong>Objects</strong> (blob, tree, commit, tag) are the foundation</li>
+<li><strong>Refs</strong> are pointers to commits</li>
+<li><strong>Index</strong> bridges working directory and repository</li>
+<li><strong>Plumbing</strong> commands manipulate these primitives directly</li>
+<li><strong>Pack files</strong> optimize storage</li>
+<li><strong>Reflog</strong> enables recovery</li>
+</ul>
+<p>Understanding internals empowers you to:</p>
+<ul>
+<li>Debug complex issues</li>
+<li>Recover from disasters</li>
+<li>Build custom automation</li>
+<li>Optimize repository performance</li>
+<li>Contribute to Git itself</li>
+</ul>
+<p>The next time a porcelain command behaves unexpectedly, you'll understand why and how to fix it using plumbing commands.</p>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<h3 id="official-documentation"><a class="header" href="#official-documentation">Official Documentation</a></h3>
+<ul>
+<li><a href="https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain">Git Internals - Git Book</a></li>
+<li><a href="https://git-scm.com/docs/git#_low_level_commands_plumbing">Git Plumbing Commands</a></li>
+<li><a href="https://git-scm.com/docs/gitrepository-layout">Git Repository Layout</a></li>
+</ul>
+<h3 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h3>
+<ul>
+<li><a href="https://git-scm.com/docs/pack-format">Git Pack Format</a></li>
+<li><a href="https://git-scm.com/docs/index-format">Git Index Format</a></li>
+<li><a href="https://git-scm.com/docs/protocol-v2">Git Protocol</a></li>
+</ul>
+<h3 id="tools"><a class="header" href="#tools">Tools</a></h3>
+<ul>
+<li><a href="https://github.com/github/git-sizer">git-sizer</a> - Analyze repository size</li>
+<li><a href="https://rtyley.github.io/bfg-repo-cleaner/">BFG Repo-Cleaner</a> - Remove sensitive data</li>
+<li><a href="https://github.com/newren/git-filter-repo">git-filter-repo</a> - Rewrite history</li>
+</ul>
+<h3 id="visualization"><a class="header" href="#visualization">Visualization</a></h3>
+<ul>
+<li><a href="https://git-school.github.io/visualizing-git/">Git Object Model Visualizer</a></li>
+<li><a href="https://onlywei.github.io/explain-git-with-d3/">Explain Git with D3</a></li>
+</ul>
+<p>Remember: With great power (plumbing commands) comes great responsibility. Always have backups!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../git/commands.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../git/github.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../git/commands.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../git/github.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

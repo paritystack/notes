@@ -1,0 +1,2090 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Quantization - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="quantization"><a class="header" href="#quantization">Quantization</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Quantization is the process of reducing the precision of numerical representations in neural networks, typically converting high-precision floating-point weights and activations to lower-precision formats like integers. This technique is fundamental for deploying machine learning models efficiently on resource-constrained devices and achieving faster inference with minimal accuracy loss.</p>
+<p>In modern deep learning, quantization has become essential for:</p>
+<ul>
+<li>Deploying large language models (LLMs) on consumer hardware</li>
+<li>Running neural networks on edge devices (smartphones, IoT)</li>
+<li>Reducing inference costs in production systems</li>
+<li>Enabling real-time applications with strict latency requirements</li>
+</ul>
+<h2 id="fundamentals"><a class="header" href="#fundamentals">Fundamentals</a></h2>
+<h3 id="numerical-representations"><a class="header" href="#numerical-representations">Numerical Representations</a></h3>
+<p>Neural networks traditionally use floating-point arithmetic:</p>
+<div class="table-wrapper"><table><thead><tr><th>Format</th><th>Bits</th><th>Sign</th><th>Exponent</th><th>Mantissa</th><th>Range</th><th>Precision</th></tr></thead><tbody>
+<tr><td>FP32</td><td>32</td><td>1</td><td>8</td><td>23</td><td>±3.4×10³⁸</td><td>~7 decimal digits</td></tr>
+<tr><td>FP16</td><td>16</td><td>1</td><td>5</td><td>10</td><td>±65,504</td><td>~3 decimal digits</td></tr>
+<tr><td>BF16</td><td>16</td><td>1</td><td>8</td><td>7</td><td>±3.4×10³⁸</td><td>~2 decimal digits</td></tr>
+<tr><td>INT8</td><td>8</td><td>1</td><td>-</td><td>7</td><td>-128 to 127</td><td>Discrete</td></tr>
+<tr><td>INT4</td><td>4</td><td>1</td><td>-</td><td>3</td><td>-8 to 7</td><td>Discrete</td></tr>
+</tbody></table>
+</div>
+<p><strong>Brain Float 16 (BF16)</strong>: Maintains FP32's range with reduced precision, ideal for training.</p>
+<p><strong>Integer Formats</strong>: Fixed-point arithmetic, faster on specialized hardware.</p>
+<h3 id="quantization-mathematics"><a class="header" href="#quantization-mathematics">Quantization Mathematics</a></h3>
+<p>The core quantization operation maps continuous values to discrete levels:</p>
+<pre><code>Quantization: q = round(x / scale) + zero_point
+Dequantization: x_approx = (q - zero_point) * scale
+</code></pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>scale</code>: Scaling factor determining step size</li>
+<li><code>zero_point</code>: Offset for asymmetric quantization</li>
+<li><code>q</code>: Quantized integer value</li>
+<li><code>x</code>: Original floating-point value</li>
+</ul>
+<h3 id="symmetric-quantization"><a class="header" href="#symmetric-quantization">Symmetric Quantization</a></h3>
+<p>Zero-point is 0, simplifying computation:</p>
+<pre><code>scale = max(|x_max|, |x_min|) / (2^(b-1) - 1)
+q = round(x / scale)
+</code></pre>
+<p>For INT8: <code>scale = max(|x_max|, |x_min|) / 127</code></p>
+<p><strong>Example</strong>:</p>
+<pre><code class="language-python">import numpy as np
+
+def symmetric_quantize(x, num_bits=8):
+    """Symmetric quantization"""
+    qmax = 2**(num_bits - 1) - 1  # 127 for INT8
+    scale = np.max(np.abs(x)) / qmax
+    q = np.round(x / scale).astype(np.int8)
+    return q, scale
+
+# Example
+x = np.array([1.5, -2.3, 0.5, 3.1])
+q, scale = symmetric_quantize(x)
+print(f"Original: {x}")
+print(f"Quantized: {q}")
+print(f"Scale: {scale}")
+
+# Dequantize
+x_dequant = q * scale
+print(f"Dequantized: {x_dequant}")
+print(f"Error: {np.abs(x - x_dequant)}")
+</code></pre>
+<h3 id="asymmetric-quantization"><a class="header" href="#asymmetric-quantization">Asymmetric Quantization</a></h3>
+<p>Uses both scale and zero-point for full range utilization:</p>
+<pre><code>scale = (x_max - x_min) / (2^b - 1)
+zero_point = round(-x_min / scale)
+q = round(x / scale) + zero_point
+</code></pre>
+<p>For UINT8: Full range [0, 255] is utilized.</p>
+<p><strong>Example</strong>:</p>
+<pre><code class="language-python">def asymmetric_quantize(x, num_bits=8):
+    """Asymmetric quantization"""
+    qmin = 0
+    qmax = 2**num_bits - 1  # 255 for UINT8
+
+    x_min, x_max = x.min(), x.max()
+    scale = (x_max - x_min) / (qmax - qmin)
+    zero_point = qmin - round(x_min / scale)
+
+    q = np.round(x / scale + zero_point)
+    q = np.clip(q, qmin, qmax).astype(np.uint8)
+
+    return q, scale, zero_point
+
+# Example with positive-only activations (ReLU output)
+x = np.array([0.2, 1.5, 0.8, 3.1])
+q, scale, zp = asymmetric_quantize(x)
+print(f"Original: {x}")
+print(f"Quantized: {q}")
+print(f"Scale: {scale}, Zero-point: {zp}")
+
+# Dequantize
+x_dequant = (q - zp) * scale
+print(f"Dequantized: {x_dequant}")
+</code></pre>
+<h2 id="why-quantization"><a class="header" href="#why-quantization">Why Quantization?</a></h2>
+<h3 id="model-size-reduction"><a class="header" href="#model-size-reduction">Model Size Reduction</a></h3>
+<p>Quantization directly reduces model size by using fewer bits per parameter:</p>
+<div class="table-wrapper"><table><thead><tr><th>Precision</th><th>Memory per Parameter</th><th>7B Model Size</th><th>Reduction</th></tr></thead><tbody>
+<tr><td>FP32</td><td>4 bytes</td><td>28 GB</td><td>Baseline</td></tr>
+<tr><td>FP16</td><td>2 bytes</td><td>14 GB</td><td>2×</td></tr>
+<tr><td>INT8</td><td>1 byte</td><td>7 GB</td><td>4×</td></tr>
+<tr><td>INT4</td><td>0.5 bytes</td><td>3.5 GB</td><td>8×</td></tr>
+</tbody></table>
+</div>
+<p><strong>Example</strong>: LLaMA-7B model:</p>
+<ul>
+<li>FP32: ~28 GB (unusable on consumer GPUs)</li>
+<li>INT8: ~7 GB (fits on RTX 3090)</li>
+<li>INT4: ~3.5 GB (runs on MacBook Pro)</li>
+</ul>
+<h3 id="inference-speed-improvement"><a class="header" href="#inference-speed-improvement">Inference Speed Improvement</a></h3>
+<p>Integer operations are significantly faster than floating-point:</p>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>NVIDIA A100 Throughput</th><th>Speedup</th></tr></thead><tbody>
+<tr><td>FP32</td><td>19.5 TFLOPS</td><td>1×</td></tr>
+<tr><td>FP16 (Tensor Core)</td><td>312 TFLOPS</td><td>16×</td></tr>
+<tr><td>INT8 (Tensor Core)</td><td>624 TOPS</td><td>32×</td></tr>
+</tbody></table>
+</div>
+<p><strong>Memory Bandwidth</strong>: Moving data is often the bottleneck</p>
+<ul>
+<li>INT8 requires 4× less memory bandwidth than FP32</li>
+<li>Critical for large models where compute is memory-bound</li>
+</ul>
+<h3 id="energy-efficiency"><a class="header" href="#energy-efficiency">Energy Efficiency</a></h3>
+<p>Lower precision = lower energy consumption:</p>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Energy (pJ)</th><th>Relative</th></tr></thead><tbody>
+<tr><td>INT8 ADD</td><td>0.03</td><td>1×</td></tr>
+<tr><td>FP16 ADD</td><td>0.4</td><td>13×</td></tr>
+<tr><td>FP32 ADD</td><td>0.9</td><td>30×</td></tr>
+<tr><td>FP32 MULT</td><td>3.7</td><td>123×</td></tr>
+</tbody></table>
+</div>
+<p>Essential for:</p>
+<ul>
+<li>Mobile devices (battery life)</li>
+<li>Edge computing (power constraints)</li>
+<li>Data centers (operational costs)</li>
+</ul>
+<h3 id="edge-deployment"><a class="header" href="#edge-deployment">Edge Deployment</a></h3>
+<p>Many edge devices only support integer operations:</p>
+<ul>
+<li>ARM Cortex-M processors</li>
+<li>Google Edge TPU</li>
+<li>Qualcomm Hexagon DSP</li>
+<li>Apple Neural Engine</li>
+</ul>
+<p>Quantization enables running sophisticated models on these devices.</p>
+<h2 id="types-of-quantization"><a class="header" href="#types-of-quantization">Types of Quantization</a></h2>
+<h3 id="post-training-quantization-ptq"><a class="header" href="#post-training-quantization-ptq">Post-Training Quantization (PTQ)</a></h3>
+<p>Quantize a pre-trained model without retraining. Fast but may lose accuracy.</p>
+<h4 id="dynamic-quantization"><a class="header" href="#dynamic-quantization">Dynamic Quantization</a></h4>
+<p>Quantizes weights statically, activations dynamically at runtime.</p>
+<p><strong>Characteristics</strong>:</p>
+<ul>
+<li>Weights: Quantized and stored as INT8</li>
+<li>Activations: Quantized on-the-fly during inference</li>
+<li>No calibration data needed</li>
+<li>Best for memory-bound models (LSTMs, Transformers)</li>
+</ul>
+<p><strong>PyTorch Example</strong>:</p>
+<pre><code class="language-python">import torch
+import torch.quantization
+
+# Original model
+model = MyTransformer()
+model.eval()
+
+# Dynamic quantization
+quantized_model = torch.quantization.quantize_dynamic(
+    model,
+    {torch.nn.Linear, torch.nn.LSTM},  # Layers to quantize
+    dtype=torch.qint8
+)
+
+# Inference
+with torch.no_grad():
+    output = quantized_model(input_tensor)
+
+# Check size reduction
+original_size = sum(p.numel() * p.element_size() for p in model.parameters())
+quantized_size = sum(p.numel() * p.element_size() for p in quantized_model.parameters())
+print(f"Size reduction: {original_size / quantized_size:.2f}×")
+</code></pre>
+<p><strong>When to use</strong>:</p>
+<ul>
+<li>Quick deployment without accuracy loss</li>
+<li>LSTM/Transformer models</li>
+<li>When activation distribution changes per input</li>
+</ul>
+<h4 id="static-quantization"><a class="header" href="#static-quantization">Static Quantization</a></h4>
+<p>Quantizes both weights and activations using calibration data.</p>
+<p><strong>Characteristics</strong>:</p>
+<ul>
+<li>Weights: Pre-quantized to INT8</li>
+<li>Activations: Pre-computed scale/zero-point from calibration</li>
+<li>Requires representative calibration dataset</li>
+<li>Best for convolutional networks</li>
+<li>Maximum performance gain</li>
+</ul>
+<p><strong>PyTorch Example</strong>:</p>
+<pre><code class="language-python">import torch
+import torch.quantization
+
+# Prepare model for quantization
+model = MyConvNet()
+model.eval()
+
+# Specify quantization configuration
+model.qconfig = torch.quantization.get_default_qconfig('fbgemm')  # x86 CPUs
+
+# Fuse operations (Conv + BatchNorm + ReLU)
+torch.quantization.fuse_modules(model, [['conv', 'bn', 'relu']], inplace=True)
+
+# Prepare for static quantization
+torch.quantization.prepare(model, inplace=True)
+
+# Calibration: Run representative data through model
+with torch.no_grad():
+    for batch in calibration_data_loader:
+        model(batch)
+
+# Convert to quantized model
+torch.quantization.convert(model, inplace=True)
+
+# Save quantized model
+torch.save(model.state_dict(), 'quantized_model.pth')
+
+# Inference
+with torch.no_grad():
+    output = model(input_tensor)
+</code></pre>
+<p><strong>Calibration Best Practices</strong>:</p>
+<pre><code class="language-python">def calibrate_model(model, data_loader, num_batches=100):
+    """
+    Calibrate quantization parameters
+    """
+    model.eval()
+    with torch.no_grad():
+        for i, (images, _) in enumerate(data_loader):
+            if i &gt;= num_batches:
+                break
+            model(images)
+    return model
+
+# Use diverse calibration data
+# 100-1000 samples usually sufficient
+calibrated_model = calibrate_model(prepared_model, val_loader, num_batches=200)
+</code></pre>
+<h3 id="quantization-aware-training-qat"><a class="header" href="#quantization-aware-training-qat">Quantization-Aware Training (QAT)</a></h3>
+<p>Simulates quantization during training to maintain accuracy.</p>
+<p><strong>Characteristics</strong>:</p>
+<ul>
+<li>Fake quantization in forward pass</li>
+<li>Full precision gradients in backward pass</li>
+<li>Highest accuracy for aggressive quantization</li>
+<li>Requires training time and data</li>
+</ul>
+<p><strong>How it works</strong>:</p>
+<ol>
+<li>Forward pass: Apply quantization (fake quant nodes)</li>
+<li>Compute loss with quantized values</li>
+<li>Backward pass: Use straight-through estimators</li>
+<li>Update weights in full precision</li>
+</ol>
+<p><strong>PyTorch Example</strong>:</p>
+<pre><code class="language-python">import torch
+import torch.quantization
+
+# Start with pre-trained model
+model = MyModel()
+model.load_state_dict(torch.load('pretrained.pth'))
+
+# Set to training mode
+model.train()
+
+# Configure QAT
+model.qconfig = torch.quantization.get_default_qat_qconfig('fbgemm')
+
+# Prepare for QAT
+torch.quantization.prepare_qat(model, inplace=True)
+
+# Fine-tune with quantization simulation
+optimizer = torch.optim.SGD(model.parameters(), lr=0.0001)
+criterion = torch.nn.CrossEntropyLoss()
+
+num_epochs = 5  # Fine-tuning epochs
+for epoch in range(num_epochs):
+    for inputs, labels in train_loader:
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+
+    print(f"Epoch {epoch}: Loss = {loss.item():.4f}")
+
+# Convert to fully quantized model
+model.eval()
+torch.quantization.convert(model, inplace=True)
+
+# Evaluate
+accuracy = evaluate(model, test_loader)
+print(f"Quantized model accuracy: {accuracy:.2f}%")
+</code></pre>
+<p><strong>Fake Quantization</strong>:</p>
+<pre><code class="language-python">class FakeQuantize(torch.nn.Module):
+    """Simulates quantization effects during training"""
+
+    def __init__(self, num_bits=8):
+        super().__init__()
+        self.num_bits = num_bits
+        self.qmin = 0
+        self.qmax = 2**num_bits - 1
+        self.scale = torch.nn.Parameter(torch.ones(1))
+        self.zero_point = torch.nn.Parameter(torch.zeros(1))
+
+    def forward(self, x):
+        # Quantize
+        q = torch.clamp(
+            torch.round(x / self.scale + self.zero_point),
+            self.qmin, self.qmax
+        )
+        # Dequantize
+        x_fake_quant = (q - self.zero_point) * self.scale
+        return x_fake_quant
+</code></pre>
+<h2 id="quantization-granularity"><a class="header" href="#quantization-granularity">Quantization Granularity</a></h2>
+<h3 id="per-tensor-quantization"><a class="header" href="#per-tensor-quantization">Per-Tensor Quantization</a></h3>
+<p>Single scale/zero-point for entire tensor.</p>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Simpler implementation</li>
+<li>Faster computation</li>
+<li>Lower memory overhead</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Less accurate for tensors with wide value ranges</li>
+<li>Outliers affect entire tensor</li>
+</ul>
+<pre><code class="language-python">def per_tensor_quantize(tensor, num_bits=8):
+    """Quantize entire tensor with single scale"""
+    qmin, qmax = 0, 2**num_bits - 1
+    min_val, max_val = tensor.min(), tensor.max()
+    scale = (max_val - min_val) / (qmax - qmin)
+    zero_point = qmin - torch.round(min_val / scale)
+
+    q = torch.clamp(
+        torch.round(tensor / scale + zero_point),
+        qmin, qmax
+    )
+    return q, scale, zero_point
+</code></pre>
+<h3 id="per-channel-quantization"><a class="header" href="#per-channel-quantization">Per-Channel Quantization</a></h3>
+<p>Different scale/zero-point per output channel.</p>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Higher accuracy, especially for convolutional layers</li>
+<li>Handles per-channel variance better</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>More complex</li>
+<li>Requires hardware support</li>
+</ul>
+<p><strong>Applied to</strong>: Weights (not activations, due to hardware constraints)</p>
+<pre><code class="language-python">def per_channel_quantize(weight, num_bits=8):
+    """
+    Quantize per output channel (conv filters)
+    weight shape: [out_channels, in_channels, kernel_h, kernel_w]
+    """
+    out_channels = weight.shape[0]
+    qmin, qmax = -(2**(num_bits-1)), 2**(num_bits-1) - 1
+
+    scales = []
+    zero_points = []
+    q_weight = torch.zeros_like(weight, dtype=torch.int8)
+
+    for ch in range(out_channels):
+        ch_weight = weight[ch]
+        ch_min, ch_max = ch_weight.min(), ch_weight.max()
+
+        # Symmetric quantization per channel
+        scale = max(abs(ch_min), abs(ch_max)) / qmax
+        scales.append(scale)
+        zero_points.append(0)
+
+        q_weight[ch] = torch.clamp(
+            torch.round(ch_weight / scale),
+            qmin, qmax
+        ).to(torch.int8)
+
+    return q_weight, torch.tensor(scales), torch.tensor(zero_points)
+
+# Example
+conv_weight = torch.randn(64, 3, 3, 3)  # 64 filters
+q_weight, scales, zps = per_channel_quantize(conv_weight)
+print(f"Original shape: {conv_weight.shape}")
+print(f"Quantized shape: {q_weight.shape}")
+print(f"Scales per channel: {scales.shape}")
+</code></pre>
+<h3 id="group-quantization"><a class="header" href="#group-quantization">Group Quantization</a></h3>
+<p>Quantize groups of channels together (compromise between per-tensor and per-channel).</p>
+<pre><code class="language-python">def group_quantize(weight, group_size=4, num_bits=4):
+    """Group quantization for weights"""
+    out_channels = weight.shape[0]
+    num_groups = (out_channels + group_size - 1) // group_size
+
+    scales = []
+    q_weight = torch.zeros_like(weight, dtype=torch.int8)
+
+    for g in range(num_groups):
+        start = g * group_size
+        end = min(start + group_size, out_channels)
+        group_weight = weight[start:end]
+
+        scale = group_weight.abs().max() / (2**(num_bits-1) - 1)
+        scales.append(scale)
+
+        q_weight[start:end] = torch.round(group_weight / scale)
+
+    return q_weight, torch.tensor(scales)
+</code></pre>
+<h2 id="advanced-quantization-techniques"><a class="header" href="#advanced-quantization-techniques">Advanced Quantization Techniques</a></h2>
+<h3 id="mixed-precision-quantization"><a class="header" href="#mixed-precision-quantization">Mixed Precision Quantization</a></h3>
+<p>Use different precision for different layers based on sensitivity.</p>
+<p><strong>Strategy</strong>:</p>
+<ol>
+<li>Profile layer sensitivity to quantization</li>
+<li>Keep sensitive layers in higher precision</li>
+<li>Aggressively quantize insensitive layers</li>
+</ol>
+<pre><code class="language-python">def quantize_mixed_precision(model, sensitivity_dict):
+    """
+    Apply different quantization based on layer sensitivity
+    sensitivity_dict: {layer_name: num_bits}
+    """
+    for name, module in model.named_modules():
+        if isinstance(module, torch.nn.Linear):
+            if name in sensitivity_dict:
+                bits = sensitivity_dict[name]
+                if bits == 8:
+                    # Standard INT8 quantization
+                    quantize_layer(module, num_bits=8)
+                elif bits == 4:
+                    # Aggressive INT4 quantization
+                    quantize_layer(module, num_bits=4)
+                else:
+                    # Keep in FP16
+                    module.half()
+
+# Example sensitivity analysis
+def analyze_sensitivity(model, data_loader):
+    """Measure accuracy drop per layer"""
+    baseline_acc = evaluate(model, data_loader)
+    sensitivity = {}
+
+    for name, module in model.named_modules():
+        if isinstance(module, torch.nn.Linear):
+            # Temporarily quantize this layer
+            original_weight = module.weight.data.clone()
+            module.weight.data = quantize_dequantize(original_weight, num_bits=8)
+
+            acc = evaluate(model, data_loader)
+            sensitivity[name] = baseline_acc - acc
+
+            # Restore
+            module.weight.data = original_weight
+
+    return sensitivity
+</code></pre>
+<h3 id="gptq-gpt-quantization"><a class="header" href="#gptq-gpt-quantization">GPTQ (GPT Quantization)</a></h3>
+<p>Advanced post-training quantization for large language models using layer-wise quantization with Hessian information.</p>
+<p><strong>Key Idea</strong>: Minimize reconstruction error layer-by-layer using second-order information.</p>
+<pre><code class="language-python"># Using auto-gptq library
+from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+
+# Configure GPTQ
+quantize_config = BaseQuantizeConfig(
+    bits=4,  # INT4 quantization
+    group_size=128,  # Group size for quantization
+    desc_act=False,  # Activation order
+)
+
+# Load model
+model = AutoGPTQForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b-hf",
+    quantize_config=quantize_config
+)
+
+# Prepare calibration data
+from datasets import load_dataset
+calibration_data = load_dataset("c4", split="train[:1000]")
+
+def prepare_calibration(examples):
+    return tokenizer(examples["text"], truncation=True, max_length=512)
+
+calibration_dataset = calibration_data.map(prepare_calibration)
+
+# Quantize
+model.quantize(calibration_dataset)
+
+# Save quantized model
+model.save_quantized("./llama-7b-gptq-4bit")
+
+# Load and use
+from transformers import AutoTokenizer
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+quantized_model = AutoGPTQForCausalLM.from_quantized("./llama-7b-gptq-4bit")
+
+# Generate
+input_ids = tokenizer("Once upon a time", return_tensors="pt").input_ids
+output = quantized_model.generate(input_ids, max_length=100)
+print(tokenizer.decode(output[0]))
+</code></pre>
+<p><strong>GPTQ Algorithm</strong>:</p>
+<ol>
+<li>Process model layer-by-layer</li>
+<li>For each layer, use Hessian matrix to determine optimal quantization</li>
+<li>Update weights to minimize reconstruction error</li>
+<li>Use Cholesky decomposition for efficient computation</li>
+</ol>
+<h3 id="awq-activation-aware-weight-quantization"><a class="header" href="#awq-activation-aware-weight-quantization">AWQ (Activation-aware Weight Quantization)</a></h3>
+<p>Protects weights corresponding to important activations.</p>
+<p><strong>Key Insight</strong>: Not all weights are equally important. Weights that multiply with large activations are more critical.</p>
+<pre><code class="language-python"># Using AutoAWQ library
+from awq import AutoAWQForCausalLM
+from transformers import AutoTokenizer
+
+# Load model
+model = AutoAWQForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf")
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+
+# Quantize
+quant_config = {
+    "zero_point": True,
+    "q_group_size": 128,
+    "w_bit": 4,
+    "version": "GEMM"
+}
+
+model.quantize(
+    tokenizer,
+    quant_config=quant_config,
+    calib_data="pileval"  # Calibration dataset
+)
+
+# Save
+model.save_quantized("./llama-7b-awq-4bit")
+
+# Load and inference
+from awq import AutoAWQForCausalLM
+model = AutoAWQForCausalLM.from_quantized("./llama-7b-awq-4bit", fuse_layers=True)
+</code></pre>
+<p><strong>AWQ Method</strong>:</p>
+<ol>
+<li>Observe activation distributions</li>
+<li>Scale weights based on activation magnitudes</li>
+<li>Quantize scaled weights</li>
+<li>Adjust scales to maintain equivalence</li>
+</ol>
+<h3 id="smoothquant"><a class="header" href="#smoothquant">SmoothQuant</a></h3>
+<p>Migrates quantization difficulty from activations to weights.</p>
+<p><strong>Problem</strong>: Activations often have larger outliers than weights, making them harder to quantize.</p>
+<p><strong>Solution</strong>: Apply mathematically equivalent transformations to smooth activations.</p>
+<pre><code class="language-python">def smooth_quant(weight, activation, alpha=0.5):
+    """
+    SmoothQuant transformation
+    Y = (Xdiag(s)^(-1)) · (diag(s)W) = X · W
+    where s = max(|X|)^α / max(|W|)^(1-α)
+    """
+    # Calculate smoothing scales
+    activation_absmax = activation.abs().max(dim=0).values
+    weight_absmax = weight.abs().max(dim=0).values
+
+    scales = (activation_absmax ** alpha) / (weight_absmax ** (1 - alpha))
+
+    # Apply smoothing
+    smoothed_weight = weight * scales.unsqueeze(0)
+    smoothed_activation = activation / scales.unsqueeze(0)
+
+    return smoothed_weight, smoothed_activation, scales
+
+# Integration with quantization
+class SmoothQuantLinear(torch.nn.Module):
+    def __init__(self, linear_layer, alpha=0.5):
+        super().__init__()
+        self.alpha = alpha
+        self.scales = None
+        self.quantized_weight = None
+
+    def calibrate(self, activations):
+        """Calibrate smoothing scales"""
+        self.scales = calculate_smooth_scales(
+            self.weight, activations, self.alpha
+        )
+        smoothed_weight = self.weight * self.scales
+        self.quantized_weight = quantize(smoothed_weight)
+
+    def forward(self, x):
+        smoothed_x = x / self.scales
+        return F.linear(smoothed_x, self.quantized_weight)
+</code></pre>
+<h3 id="llmint8"><a class="header" href="#llmint8">LLM.int8()</a></h3>
+<p>Decomposes matrix multiplication into INT8 and FP16 components.</p>
+<p><strong>Key Idea</strong>: Most values can be quantized to INT8, but rare outliers are kept in FP16.</p>
+<pre><code class="language-python">from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+
+# Configure LLM.int8()
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,
+    llm_int8_threshold=6.0,  # Outlier threshold
+    llm_int8_has_fp16_weight=False
+)
+
+# Load model with INT8 quantization
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b-hf",
+    quantization_config=quantization_config,
+    device_map="auto"
+)
+
+# Model automatically uses INT8 for most operations
+# Outliers are processed in FP16
+output = model.generate(input_ids, max_length=100)
+</code></pre>
+<p><strong>How it works</strong>:</p>
+<ol>
+<li>Identify outlier features (magnitude &gt; threshold)</li>
+<li>Separate into two matrix multiplications:
+<ul>
+<li>Regular features: INT8 × INT8</li>
+<li>Outlier features: FP16 × FP16</li>
+</ul>
+</li>
+<li>Combine results</li>
+</ol>
+<h3 id="4-bit-quantization-with-normalfloat-nf4"><a class="header" href="#4-bit-quantization-with-normalfloat-nf4">4-bit Quantization with NormalFloat (NF4)</a></h3>
+<p>Introduced in QLoRA, optimized for normally distributed weights.</p>
+<pre><code class="language-python">from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+
+# Configure 4-bit quantization
+nf4_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",  # NormalFloat 4-bit
+    bnb_4bit_use_double_quant=True,  # Double quantization
+    bnb_4bit_compute_dtype=torch.bfloat16  # Compute in BF16
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-13b-hf",
+    quantization_config=nf4_config,
+    device_map="auto"
+)
+
+# Can even fine-tune in 4-bit with LoRA
+from peft import prepare_model_for_kbit_training, LoraConfig, get_peft_model
+
+model = prepare_model_for_kbit_training(model)
+
+lora_config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type="CAUSAL_LM"
+)
+
+model = get_peft_model(model, lora_config)
+
+# Train with 4-bit base model + 16-bit LoRA adapters
+trainer.train()
+</code></pre>
+<p><strong>NF4 Quantization Bins</strong>: Optimized for Gaussian distributions</p>
+<pre><code class="language-python"># NF4 quantization levels (non-uniform)
+NF4_LEVELS = [
+    -1.0, -0.6961928009986877, -0.5250730514526367,
+    -0.39491748809814453, -0.28444138169288635,
+    -0.18477343022823334, -0.09105003625154495,
+    0.0, 0.07958029955625534, 0.16093020141124725,
+    0.24611230194568634, 0.33791524171829224,
+    0.44070982933044434, 0.5626170039176941,
+    0.7229568362236023, 1.0
+]
+</code></pre>
+<h2 id="quantization-for-different-architectures"><a class="header" href="#quantization-for-different-architectures">Quantization for Different Architectures</a></h2>
+<h3 id="convolutional-neural-networks-cnns"><a class="header" href="#convolutional-neural-networks-cnns">Convolutional Neural Networks (CNNs)</a></h3>
+<p>CNNs are relatively robust to quantization due to:</p>
+<ul>
+<li>Spatial redundancy in image data</li>
+<li>Batch normalization stabilization</li>
+<li>ReLU activations (non-negative, easier to quantize)</li>
+</ul>
+<p><strong>Best Practices</strong>:</p>
+<pre><code class="language-python">def quantize_cnn(model):
+    """Quantize CNN model"""
+    # 1. Fuse operations
+    torch.quantization.fuse_modules(
+        model,
+        [['conv1', 'bn1', 'relu']],
+        inplace=True
+    )
+
+    # 2. Use per-channel quantization for conv layers
+    model.qconfig = torch.quantization.QConfig(
+        activation=torch.quantization.default_observer,
+        weight=torch.quantization.default_per_channel_weight_observer
+    )
+
+    # 3. First and last layers: keep higher precision or use symmetric
+    # model.conv1.qconfig = custom_qconfig_fp16
+    # model.fc.qconfig = custom_qconfig_fp16
+
+    return model
+
+# Layer fusion example
+model = models.resnet18(pretrained=True)
+model.eval()
+
+# Fuse Conv-BN-ReLU
+fused_model = torch.quantization.fuse_modules(
+    model,
+    [
+        ['conv1', 'bn1', 'relu'],
+        ['layer1.0.conv1', 'layer1.0.bn1', 'layer1.0.relu'],
+        # ... more layers
+    ]
+)
+</code></pre>
+<p><strong>Quantization-friendly Architecture</strong>:</p>
+<pre><code class="language-python">class QuantizableMobileNetV2(nn.Module):
+    """MobileNetV2 designed for quantization"""
+
+    def __init__(self):
+        super().__init__()
+        self.quant = torch.quantization.QuantStub()
+        self.dequant = torch.quantization.DeQuantStub()
+
+        # Use quantization-friendly operations
+        self.features = nn.Sequential(
+            # Depthwise separable convolutions
+            nn.Conv2d(3, 32, 3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(32),
+            nn.ReLU6(inplace=True),
+            # ... more layers
+        )
+        self.classifier = nn.Linear(1280, num_classes)
+
+    def forward(self, x):
+        x = self.quant(x)  # Quantize input
+        x = self.features(x)
+        x = self.classifier(x)
+        x = self.dequant(x)  # Dequantize output
+        return x
+</code></pre>
+<h3 id="transformers-and-large-language-models"><a class="header" href="#transformers-and-large-language-models">Transformers and Large Language Models</a></h3>
+<p>Transformers are more sensitive to quantization due to:</p>
+<ul>
+<li>Attention mechanisms with softmax (outliers)</li>
+<li>Layer normalization</li>
+<li>Large embedding tables</li>
+<li>Accumulated errors over many layers</li>
+</ul>
+<p><strong>Challenges</strong>:</p>
+<ol>
+<li><strong>Outlier features</strong>: Some dimensions have extreme values</li>
+<li><strong>Embedding tables</strong>: Large memory footprint</li>
+<li><strong>Attention scores</strong>: Sensitive to precision</li>
+</ol>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-python"># 1. Layer-wise quantization sensitivity
+def quantize_transformer_selective(model):
+    """Selectively quantize transformer components"""
+    for name, module in model.named_modules():
+        if 'attention' in name:
+            # Keep attention in higher precision
+            module.qconfig = get_qconfig_fp16()
+        elif 'mlp' in name or 'feed_forward' in name:
+            # Aggressively quantize feed-forward
+            module.qconfig = get_qconfig_int8()
+        elif 'layernorm' in name:
+            # Keep normalization in FP16
+            module.qconfig = None
+
+# 2. Quantize with outlier handling
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained(
+    "gpt2",
+    load_in_8bit=True,  # Uses LLM.int8()
+    device_map="auto",
+    max_memory={0: "20GB", "cpu": "30GB"}
+)
+
+# 3. K-V cache quantization for faster inference
+class QuantizedAttention(nn.Module):
+    """Attention with quantized K-V cache"""
+
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+        self.kv_bits = 8  # Quantize cached keys/values
+
+    def forward(self, hidden_states, past_key_value=None):
+        # Compute Q, K, V
+        query = self.q_proj(hidden_states)
+        key = self.k_proj(hidden_states)
+        value = self.v_proj(hidden_states)
+
+        # Quantize K, V for caching
+        if self.training:
+            # During training, use FP
+            past_key_value = (key, value)
+        else:
+            # During inference, quantize K-V cache
+            key_q, key_scale = quantize_tensor(key, self.kv_bits)
+            value_q, value_scale = quantize_tensor(value, self.kv_bits)
+            past_key_value = (key_q, key_scale, value_q, value_scale)
+
+        # Attention computation...
+        return output, past_key_value
+</code></pre>
+<p><strong>GPTQ for LLMs</strong>:</p>
+<pre><code class="language-python"># Comprehensive GPTQ quantization
+from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+
+quantize_config = BaseQuantizeConfig(
+    bits=4,
+    group_size=128,
+    damp_percent=0.01,
+    desc_act=True,  # Better accuracy
+    sym=False,  # Asymmetric quantization
+    true_sequential=True,  # Sequential quantization
+    model_name_or_path=None,
+    model_file_base_name="model"
+)
+
+# Quantize
+model.quantize(
+    examples=calibration_data,
+    batch_size=1,
+    use_triton=True,  # Faster with Triton kernels
+    autotune_warmup_after_quantized=True
+)
+</code></pre>
+<h3 id="vision-transformers-vit"><a class="header" href="#vision-transformers-vit">Vision Transformers (ViT)</a></h3>
+<p>Combine challenges of both CNNs and Transformers:</p>
+<pre><code class="language-python">def quantize_vit(model, quantize_attention=False):
+    """Quantize Vision Transformer"""
+    for name, module in model.named_modules():
+        if 'patch_embed' in name:
+            # Patch embedding: keep higher precision
+            module.qconfig = get_qconfig_fp16()
+        elif 'attn' in name and not quantize_attention:
+            # Attention: conditional quantization
+            module.qconfig = None
+        elif 'mlp' in name:
+            # MLP blocks: aggressive INT8
+            module.qconfig = get_qconfig_int8()
+
+    return model
+
+# PTQ for ViT
+def ptq_vision_transformer(model, calibration_loader):
+    model.eval()
+    model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+
+    # Selectively quantize
+    quantize_vit(model, quantize_attention=False)
+
+    # Prepare
+    torch.quantization.prepare(model, inplace=True)
+
+    # Calibrate with image data
+    with torch.no_grad():
+        for images, _ in calibration_loader:
+            model(images)
+
+    # Convert
+    torch.quantization.convert(model, inplace=True)
+    return model
+</code></pre>
+<h3 id="recurrent-neural-networks-rnnslstms"><a class="header" href="#recurrent-neural-networks-rnnslstms">Recurrent Neural Networks (RNNs/LSTMs)</a></h3>
+<p>RNNs benefit significantly from dynamic quantization:</p>
+<pre><code class="language-python"># Dynamic quantization for LSTM
+model = nn.LSTM(input_size=256, hidden_size=512, num_layers=2)
+
+quantized_model = torch.quantization.quantize_dynamic(
+    model,
+    {nn.LSTM, nn.Linear},
+    dtype=torch.qint8
+)
+
+# For static quantization of RNNs (more complex)
+class QuantizableLSTM(nn.Module):
+    def __init__(self, input_size, hidden_size):
+        super().__init__()
+        self.lstm = nn.LSTM(input_size, hidden_size)
+        self.quant = torch.quantization.QuantStub()
+        self.dequant = torch.quantization.DeQuantStub()
+
+    def forward(self, x, hidden=None):
+        x = self.quant(x)
+        output, hidden = self.lstm(x, hidden)
+        output = self.dequant(output)
+        return output, hidden
+</code></pre>
+<h2 id="practical-implementation-examples"><a class="header" href="#practical-implementation-examples">Practical Implementation Examples</a></h2>
+<h3 id="example-1-quantizing-resnet-for-image-classification"><a class="header" href="#example-1-quantizing-resnet-for-image-classification">Example 1: Quantizing ResNet for Image Classification</a></h3>
+<pre><code class="language-python">import torch
+import torchvision.models as models
+from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+
+# 1. Load pre-trained model
+model = models.resnet50(pretrained=True)
+model.eval()
+
+# 2. Prepare data
+transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                       std=[0.229, 0.224, 0.225])
+])
+
+calibration_dataset = datasets.ImageFolder('imagenet/val', transform=transform)
+calibration_loader = DataLoader(
+    calibration_dataset,
+    batch_size=32,
+    shuffle=True,
+    num_workers=4
+)
+
+# 3. Fuse modules
+model.fuse_model()  # Fuse Conv-BN-ReLU
+
+# 4. Set quantization config
+model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+
+# 5. Prepare for calibration
+torch.quantization.prepare(model, inplace=True)
+
+# 6. Calibrate
+print("Calibrating...")
+num_calibration_batches = 100
+with torch.no_grad():
+    for i, (images, _) in enumerate(calibration_loader):
+        if i &gt;= num_calibration_batches:
+            break
+        model(images)
+        if (i + 1) % 10 == 0:
+            print(f"Calibrated {i + 1} batches")
+
+# 7. Convert to quantized model
+torch.quantization.convert(model, inplace=True)
+
+# 8. Evaluate
+def evaluate(model, data_loader, num_batches=None):
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for i, (images, labels) in enumerate(data_loader):
+            if num_batches and i &gt;= num_batches:
+                break
+            outputs = model(images)
+            _, predicted = outputs.max(1)
+            total += labels.size(0)
+            correct += predicted.eq(labels).sum().item()
+    return 100. * correct / total
+
+print("Evaluating quantized model...")
+accuracy = evaluate(model, calibration_loader, num_batches=200)
+print(f"Quantized model accuracy: {accuracy:.2f}%")
+
+# 9. Save quantized model
+torch.save(model.state_dict(), 'resnet50_quantized.pth')
+
+# 10. Compare model sizes
+def print_model_size(model, label):
+    torch.save(model.state_dict(), "temp.pth")
+    size_mb = os.path.getsize("temp.pth") / 1e6
+    print(f"{label}: {size_mb:.2f} MB")
+    os.remove("temp.pth")
+
+original_model = models.resnet50(pretrained=True)
+print_model_size(original_model, "Original FP32")
+print_model_size(model, "Quantized INT8")
+</code></pre>
+<h3 id="example-2-qat-for-custom-model"><a class="header" href="#example-2-qat-for-custom-model">Example 2: QAT for Custom Model</a></h3>
+<pre><code class="language-python">import torch
+import torch.nn as nn
+import torch.quantization
+
+class CustomModel(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.quant = torch.quantization.QuantStub()
+        self.conv1 = nn.Conv2d(3, 32, 3, padding=1)
+        self.bn1 = nn.BatchNorm2d(32)
+        self.relu1 = nn.ReLU()
+        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
+        self.bn2 = nn.BatchNorm2d(64)
+        self.relu2 = nn.ReLU()
+        self.pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(64, num_classes)
+        self.dequant = torch.quantization.DeQuantStub()
+
+    def forward(self, x):
+        x = self.quant(x)
+        x = self.relu1(self.bn1(self.conv1(x)))
+        x = self.relu2(self.bn2(self.conv2(x)))
+        x = self.pool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+        x = self.dequant(x)
+        return x
+
+    def fuse_model(self):
+        torch.quantization.fuse_modules(
+            self,
+            [['conv1', 'bn1', 'relu1'],
+             ['conv2', 'bn2', 'relu2']],
+            inplace=True
+        )
+
+# 1. Train FP32 model first
+model = CustomModel(num_classes=10)
+# ... training code ...
+torch.save(model.state_dict(), 'model_fp32.pth')
+
+# 2. Prepare for QAT
+model.load_state_dict(torch.load('model_fp32.pth'))
+model.train()
+
+# Fuse layers
+model.fuse_model()
+
+# Set QAT config
+model.qconfig = torch.quantization.get_default_qat_qconfig('fbgemm')
+
+# Prepare QAT
+torch.quantization.prepare_qat(model, inplace=True)
+
+# 3. Fine-tune with QAT
+optimizer = torch.optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
+criterion = nn.CrossEntropyLoss()
+
+num_epochs = 3
+for epoch in range(num_epochs):
+    model.train()
+    for batch_idx, (data, target) in enumerate(train_loader):
+        optimizer.zero_grad()
+        output = model(data)
+        loss = criterion(output, target)
+        loss.backward()
+        optimizer.step()
+
+        if batch_idx % 100 == 0:
+            print(f'Epoch {epoch}, Batch {batch_idx}, Loss: {loss.item():.4f}')
+
+    # Validation
+    model.eval()
+    val_acc = evaluate(model, val_loader)
+    print(f'Epoch {epoch}, Validation Accuracy: {val_acc:.2f}%')
+
+# 4. Convert to fully quantized model
+model.eval()
+torch.quantization.convert(model, inplace=True)
+
+# 5. Final evaluation
+test_acc = evaluate(model, test_loader)
+print(f'Quantized model test accuracy: {test_acc:.2f}%')
+
+# 6. Save
+torch.save(model.state_dict(), 'model_qat_int8.pth')
+</code></pre>
+<h3 id="example-3-quantizing-bert-for-nlp"><a class="header" href="#example-3-quantizing-bert-for-nlp">Example 3: Quantizing BERT for NLP</a></h3>
+<pre><code class="language-python">from transformers import BertForSequenceClassification, BertTokenizer
+import torch
+
+# 1. Load model
+model_name = "bert-base-uncased"
+model = BertForSequenceClassification.from_pretrained(
+    model_name,
+    num_labels=2
+)
+tokenizer = BertTokenizer.from_pretrained(model_name)
+
+# 2. Dynamic quantization (easiest for transformers)
+quantized_model = torch.quantization.quantize_dynamic(
+    model,
+    {torch.nn.Linear},  # Quantize linear layers
+    dtype=torch.qint8
+)
+
+# 3. Test inference
+text = "This movie was fantastic! I loved every minute of it."
+inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+
+with torch.no_grad():
+    # Original model
+    output_fp32 = model(**inputs)
+    # Quantized model
+    output_int8 = quantized_model(**inputs)
+
+print("FP32 logits:", output_fp32.logits)
+print("INT8 logits:", output_int8.logits)
+
+# 4. Compare sizes
+def get_model_size(model):
+    torch.save(model.state_dict(), "temp.pth")
+    size = os.path.getsize("temp.pth") / 1e6
+    os.remove("temp.pth")
+    return size
+
+fp32_size = get_model_size(model)
+int8_size = get_model_size(quantized_model)
+
+print(f"FP32 model: {fp32_size:.2f} MB")
+print(f"INT8 model: {int8_size:.2f} MB")
+print(f"Compression ratio: {fp32_size / int8_size:.2f}×")
+
+# 5. Benchmark inference speed
+import time
+
+def benchmark(model, inputs, num_runs=100):
+    # Warmup
+    for _ in range(10):
+        model(**inputs)
+
+    start = time.time()
+    for _ in range(num_runs):
+        with torch.no_grad():
+            model(**inputs)
+    end = time.time()
+
+    return (end - start) / num_runs
+
+fp32_time = benchmark(model, inputs)
+int8_time = benchmark(quantized_model, inputs)
+
+print(f"FP32 inference: {fp32_time*1000:.2f} ms")
+print(f"INT8 inference: {int8_time*1000:.2f} ms")
+print(f"Speedup: {fp32_time / int8_time:.2f}×")
+</code></pre>
+<h3 id="example-4-4-bit-llm-quantization-with-bitsandbytes"><a class="header" href="#example-4-4-bit-llm-quantization-with-bitsandbytes">Example 4: 4-bit LLM Quantization with bitsandbytes</a></h3>
+<pre><code class="language-python">from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+import torch
+
+# 1. Configure 4-bit quantization
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,  # Nested quantization
+    bnb_4bit_quant_type="nf4",  # NormalFloat4
+    bnb_4bit_compute_dtype=torch.bfloat16  # Compute dtype
+)
+
+# 2. Load model in 4-bit
+model_id = "meta-llama/Llama-2-7b-chat-hf"
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    quantization_config=bnb_config,
+    device_map="auto",  # Automatically distribute across GPUs
+    trust_remote_code=True
+)
+
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+# 3. Generate text
+prompt = "Explain quantum computing in simple terms:"
+inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+
+with torch.no_grad():
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=200,
+        temperature=0.7,
+        top_p=0.9,
+        do_sample=True
+    )
+
+response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+print(response)
+
+# 4. Memory usage
+print(f"Model memory footprint: {model.get_memory_footprint() / 1e9:.2f} GB")
+
+# 5. Can even fine-tune with QLoRA
+from peft import prepare_model_for_kbit_training, LoraConfig, get_peft_model
+
+# Prepare for k-bit training
+model.gradient_checkpointing_enable()
+model = prepare_model_for_kbit_training(model)
+
+# Add LoRA adapters
+config = LoraConfig(
+    r=8,
+    lora_alpha=16,
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type="CAUSAL_LM"
+)
+
+model = get_peft_model(model, config)
+print(f"Trainable parameters: {model.print_trainable_parameters()}")
+
+# Now you can fine-tune with standard training loop
+# Only LoRA adapters are trained (in FP32/BF16)
+# Base model stays in 4-bit
+</code></pre>
+<h2 id="performance-analysis-and-benchmarking"><a class="header" href="#performance-analysis-and-benchmarking">Performance Analysis and Benchmarking</a></h2>
+<h3 id="measuring-quantization-impact"><a class="header" href="#measuring-quantization-impact">Measuring Quantization Impact</a></h3>
+<pre><code class="language-python">import torch
+import time
+import numpy as np
+from sklearn.metrics import accuracy_score
+
+class QuantizationBenchmark:
+    """Comprehensive quantization benchmarking"""
+
+    def __init__(self, model_fp32, model_quantized, test_loader):
+        self.model_fp32 = model_fp32
+        self.model_quantized = model_quantized
+        self.test_loader = test_loader
+
+    def measure_accuracy(self, model, num_batches=None):
+        """Measure model accuracy"""
+        model.eval()
+        all_preds = []
+        all_labels = []
+
+        with torch.no_grad():
+            for i, (inputs, labels) in enumerate(self.test_loader):
+                if num_batches and i &gt;= num_batches:
+                    break
+                outputs = model(inputs)
+                preds = outputs.argmax(dim=1)
+                all_preds.extend(preds.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
+
+        return accuracy_score(all_labels, all_preds) * 100
+
+    def measure_latency(self, model, num_runs=100):
+        """Measure inference latency"""
+        model.eval()
+
+        # Get a sample batch
+        sample_input, _ = next(iter(self.test_loader))
+
+        # Warmup
+        with torch.no_grad():
+            for _ in range(10):
+                _ = model(sample_input)
+
+        # Benchmark
+        latencies = []
+        with torch.no_grad():
+            for _ in range(num_runs):
+                start = time.perf_counter()
+                _ = model(sample_input)
+                end = time.perf_counter()
+                latencies.append((end - start) * 1000)  # ms
+
+        return {
+            'mean': np.mean(latencies),
+            'std': np.std(latencies),
+            'p50': np.percentile(latencies, 50),
+            'p95': np.percentile(latencies, 95),
+            'p99': np.percentile(latencies, 99)
+        }
+
+    def measure_throughput(self, model, duration=10):
+        """Measure throughput (samples/sec)"""
+        model.eval()
+        sample_input, _ = next(iter(self.test_loader))
+        batch_size = sample_input.size(0)
+
+        num_batches = 0
+        start = time.time()
+
+        with torch.no_grad():
+            while time.time() - start &lt; duration:
+                _ = model(sample_input)
+                num_batches += 1
+
+        elapsed = time.time() - start
+        throughput = (num_batches * batch_size) / elapsed
+        return throughput
+
+    def measure_model_size(self, model):
+        """Measure model size in MB"""
+        torch.save(model.state_dict(), "temp_model.pth")
+        size_mb = os.path.getsize("temp_model.pth") / 1e6
+        os.remove("temp_model.pth")
+        return size_mb
+
+    def run_full_benchmark(self):
+        """Run complete benchmark suite"""
+        print("=" * 60)
+        print("Quantization Benchmark Results")
+        print("=" * 60)
+
+        # Accuracy
+        print("\n[1] Accuracy")
+        fp32_acc = self.measure_accuracy(self.model_fp32)
+        quant_acc = self.measure_accuracy(self.model_quantized)
+        print(f"  FP32:      {fp32_acc:.2f}%")
+        print(f"  Quantized: {quant_acc:.2f}%")
+        print(f"  Drop:      {fp32_acc - quant_acc:.2f}%")
+
+        # Model Size
+        print("\n[2] Model Size")
+        fp32_size = self.measure_model_size(self.model_fp32)
+        quant_size = self.measure_model_size(self.model_quantized)
+        print(f"  FP32:      {fp32_size:.2f} MB")
+        print(f"  Quantized: {quant_size:.2f} MB")
+        print(f"  Reduction: {fp32_size / quant_size:.2f}×")
+
+        # Latency
+        print("\n[3] Latency (ms)")
+        fp32_latency = self.measure_latency(self.model_fp32)
+        quant_latency = self.measure_latency(self.model_quantized)
+        print(f"  FP32:      {fp32_latency['mean']:.2f} ± {fp32_latency['std']:.2f}")
+        print(f"  Quantized: {quant_latency['mean']:.2f} ± {quant_latency['std']:.2f}")
+        print(f"  Speedup:   {fp32_latency['mean'] / quant_latency['mean']:.2f}×")
+
+        # Throughput
+        print("\n[4] Throughput (samples/sec)")
+        fp32_throughput = self.measure_throughput(self.model_fp32)
+        quant_throughput = self.measure_throughput(self.model_quantized)
+        print(f"  FP32:      {fp32_throughput:.2f}")
+        print(f"  Quantized: {quant_throughput:.2f}")
+        print(f"  Improvement: {quant_throughput / fp32_throughput:.2f}×")
+
+        print("\n" + "=" * 60)
+
+        return {
+            'accuracy': {'fp32': fp32_acc, 'quantized': quant_acc},
+            'size': {'fp32': fp32_size, 'quantized': quant_size},
+            'latency': {'fp32': fp32_latency, 'quantized': quant_latency},
+            'throughput': {'fp32': fp32_throughput, 'quantized': quant_throughput}
+        }
+
+# Usage
+benchmark = QuantizationBenchmark(model_fp32, model_int8, test_loader)
+results = benchmark.run_full_benchmark()
+</code></pre>
+<h3 id="profiling-quantization-errors"><a class="header" href="#profiling-quantization-errors">Profiling Quantization Errors</a></h3>
+<pre><code class="language-python">def analyze_quantization_error(model_fp32, model_quantized, data_loader):
+    """Analyze per-layer quantization errors"""
+
+    # Hook to capture activations
+    activations_fp32 = {}
+    activations_quant = {}
+
+    def get_activation(name, storage):
+        def hook(model, input, output):
+            storage[name] = output.detach()
+        return hook
+
+    # Register hooks
+    for name, module in model_fp32.named_modules():
+        if isinstance(module, (nn.Conv2d, nn.Linear)):
+            module.register_forward_hook(get_activation(name, activations_fp32))
+
+    for name, module in model_quantized.named_modules():
+        if isinstance(module, (nn.quantized.Conv2d, nn.quantized.Linear)):
+            module.register_forward_hook(get_activation(name, activations_quant))
+
+    # Run inference
+    sample_input, _ = next(iter(data_loader))
+    with torch.no_grad():
+        _ = model_fp32(sample_input)
+        _ = model_quantized(sample_input)
+
+    # Compute errors
+    errors = {}
+    for name in activations_fp32:
+        if name in activations_quant:
+            fp32_act = activations_fp32[name]
+            quant_act = activations_quant[name].dequantize() if hasattr(
+                activations_quant[name], 'dequantize'
+            ) else activations_quant[name]
+
+            mse = torch.mean((fp32_act - quant_act) ** 2).item()
+            mae = torch.mean(torch.abs(fp32_act - quant_act)).item()
+            relative_error = mae / (torch.mean(torch.abs(fp32_act)).item() + 1e-8)
+
+            errors[name] = {
+                'mse': mse,
+                'mae': mae,
+                'relative_error': relative_error
+            }
+
+    # Print results
+    print("\nPer-Layer Quantization Error Analysis:")
+    print(f"{'Layer':&lt;40} {'MSE':&lt;15} {'MAE':&lt;15} {'Relative Error'}")
+    print("-" * 80)
+    for name, err in sorted(errors.items(), key=lambda x: x[1]['relative_error'], reverse=True):
+        print(f"{name:&lt;40} {err['mse']:&lt;15.6f} {err['mae']:&lt;15.6f} {err['relative_error']:.4f}")
+
+    return errors
+</code></pre>
+<h2 id="common-challenges-and-solutions"><a class="header" href="#common-challenges-and-solutions">Common Challenges and Solutions</a></h2>
+<h3 id="challenge-1-accuracy-degradation"><a class="header" href="#challenge-1-accuracy-degradation">Challenge 1: Accuracy Degradation</a></h3>
+<p><strong>Problem</strong>: Quantized model has significantly lower accuracy.</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Use QAT instead of PTQ</strong>:</li>
+</ol>
+<pre><code class="language-python"># If PTQ gives poor accuracy, switch to QAT
+model.train()
+torch.quantization.prepare_qat(model, inplace=True)
+# Fine-tune for 3-5 epochs
+</code></pre>
+<ol start="2">
+<li><strong>Increase calibration data</strong>:</li>
+</ol>
+<pre><code class="language-python"># Use more diverse calibration samples
+num_calibration_batches = 1000  # Instead of 100
+</code></pre>
+<ol start="3">
+<li><strong>Mixed precision</strong>:</li>
+</ol>
+<pre><code class="language-python"># Keep sensitive layers in higher precision
+for name, module in model.named_modules():
+    if 'attention' in name or name == 'classifier':
+        module.qconfig = fp16_qconfig
+</code></pre>
+<ol start="4">
+<li><strong>Per-channel quantization</strong>:</li>
+</ol>
+<pre><code class="language-python"># Use per-channel for weights
+model.qconfig = torch.quantization.QConfig(
+    activation=default_observer,
+    weight=per_channel_weight_observer  # More accurate
+)
+</code></pre>
+<h3 id="challenge-2-outliers-in-activations"><a class="header" href="#challenge-2-outliers-in-activations">Challenge 2: Outliers in Activations</a></h3>
+<p><strong>Problem</strong>: Few extreme values dominate quantization range.</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Clip outliers</strong>:</li>
+</ol>
+<pre><code class="language-python">class ClippedObserver(torch.quantization.MinMaxObserver):
+    def __init__(self, percentile=99.9, **kwargs):
+        super().__init__(**kwargs)
+        self.percentile = percentile
+
+    def forward(self, x_orig):
+        x = x_orig.detach()
+        min_val = torch.quantile(x, (100 - self.percentile) / 100)
+        max_val = torch.quantile(x, self.percentile / 100)
+        self.min_val = min_val
+        self.max_val = max_val
+        return x_orig
+</code></pre>
+<ol start="2">
+<li><strong>SmoothQuant approach</strong>:</li>
+</ol>
+<pre><code class="language-python"># Migrate difficulty from activations to weights
+smoothed_weight, smoothed_activation = smooth_quant(
+    weight, activation, alpha=0.5
+)
+</code></pre>
+<ol start="3">
+<li><strong>Mixed INT8/FP16</strong> (LLM.int8()):</li>
+</ol>
+<pre><code class="language-python"># Process outliers separately in FP16
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,
+    llm_int8_threshold=6.0  # Outlier threshold
+)
+</code></pre>
+<h3 id="challenge-3-batch-normalization-issues"><a class="header" href="#challenge-3-batch-normalization-issues">Challenge 3: Batch Normalization Issues</a></h3>
+<p><strong>Problem</strong>: Batch norm statistics change after quantization.</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Fuse BN with Conv</strong>:</li>
+</ol>
+<pre><code class="language-python"># Always fuse before quantization
+torch.quantization.fuse_modules(
+    model,
+    [['conv', 'bn', 'relu']],
+    inplace=True
+)
+</code></pre>
+<ol start="2">
+<li><strong>Recalibrate BN</strong>:</li>
+</ol>
+<pre><code class="language-python">def recalibrate_bn(model, data_loader, num_batches=100):
+    """Recalculate BN statistics after quantization"""
+    model.train()
+    with torch.no_grad():
+        for i, (inputs, _) in enumerate(data_loader):
+            if i &gt;= num_batches:
+                break
+            model(inputs)
+    model.eval()
+    return model
+</code></pre>
+<h3 id="challenge-4-firstlast-layer-sensitivity"><a class="header" href="#challenge-4-firstlast-layer-sensitivity">Challenge 4: First/Last Layer Sensitivity</a></h3>
+<p><strong>Problem</strong>: First and last layers are often more sensitive to quantization.</p>
+<p><strong>Solution</strong>: Keep them in higher precision</p>
+<pre><code class="language-python">def selective_quantization(model):
+    """Quantize all layers except first and last"""
+    # Set default config
+    model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+
+    # Override first layer
+    model.conv1.qconfig = None  # Keep FP32
+
+    # Override last layer
+    model.fc.qconfig = None  # Keep FP32
+
+    return model
+</code></pre>
+<h3 id="challenge-5-hardware-specific-issues"><a class="header" href="#challenge-5-hardware-specific-issues">Challenge 5: Hardware-Specific Issues</a></h3>
+<p><strong>Problem</strong>: Quantized model doesn't run efficiently on target hardware.</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Use appropriate backend</strong>:</li>
+</ol>
+<pre><code class="language-python"># For x86 CPUs
+qconfig = torch.quantization.get_default_qconfig('fbgemm')
+
+# For ARM CPUs
+qconfig = torch.quantization.get_default_qconfig('qnnpack')
+</code></pre>
+<ol start="2">
+<li><strong>Ensure operator support</strong>:</li>
+</ol>
+<pre><code class="language-python"># Check if operator is supported
+from torch.quantization import get_default_qconfig_propagation_list
+supported_ops = get_default_qconfig_propagation_list()
+</code></pre>
+<ol start="3">
+<li><strong>Use framework-specific quantization</strong>:</li>
+</ol>
+<pre><code class="language-python"># For mobile deployment
+from torch.utils.mobile_optimizer import optimize_for_mobile
+
+quantized_model = quantize_dynamic(model)
+scripted_model = torch.jit.script(quantized_model)
+optimized_model = optimize_for_mobile(scripted_model)
+</code></pre>
+<h2 id="hardware-considerations"><a class="header" href="#hardware-considerations">Hardware Considerations</a></h2>
+<h3 id="cpu-quantization"><a class="header" href="#cpu-quantization">CPU Quantization</a></h3>
+<p><strong>x86 CPUs</strong> (Intel/AMD):</p>
+<ul>
+<li>Use <code>fbgemm</code> backend</li>
+<li>INT8 via VNNI (Vector Neural Network Instructions) on modern CPUs</li>
+<li>Best for server deployments</li>
+</ul>
+<pre><code class="language-python"># Configure for x86
+import torch.backends.quantized as quantized_backends
+quantized_backends.engine = 'fbgemm'
+
+qconfig = torch.quantization.get_default_qconfig('fbgemm')
+</code></pre>
+<p><strong>ARM CPUs</strong>:</p>
+<ul>
+<li>Use <code>qnnpack</code> backend</li>
+<li>Optimized for mobile devices</li>
+<li>Supports NEON instructions</li>
+</ul>
+<pre><code class="language-python"># Configure for ARM
+torch.backends.quantized.engine = 'qnnpack'
+
+qconfig = torch.quantization.get_default_qconfig('qnnpack')
+</code></pre>
+<h3 id="gpu-quantization"><a class="header" href="#gpu-quantization">GPU Quantization</a></h3>
+<p><strong>NVIDIA GPUs</strong>:</p>
+<ul>
+<li>Tensor Cores support INT8/INT4</li>
+<li>TensorRT for deployment</li>
+<li>Significant speedup for INT8</li>
+</ul>
+<pre><code class="language-python"># Using TensorRT via torch2trt
+from torch2trt import torch2trt
+
+# Create quantized model
+x = torch.ones((1, 3, 224, 224)).cuda()
+model_trt = torch2trt(
+    model,
+    [x],
+    fp16_mode=False,
+    int8_mode=True,
+    int8_calib_dataset=calibration_dataset
+)
+</code></pre>
+<h3 id="mobileedge-devices"><a class="header" href="#mobileedge-devices">Mobile/Edge Devices</a></h3>
+<p><strong>TensorFlow Lite</strong> for mobile:</p>
+<pre><code class="language-python">import tensorflow as tf
+
+# Convert to TFLite with quantization
+converter = tf.lite.TFLiteConverter.from_saved_model('model')
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+
+# Full integer quantization
+def representative_dataset():
+    for data in calibration_data:
+        yield [data]
+
+converter.representative_dataset = representative_dataset
+converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+converter.inference_input_type = tf.int8
+converter.inference_output_type = tf.int8
+
+tflite_model = converter.convert()
+
+# Save
+with open('model_quantized.tflite', 'wb') as f:
+    f.write(tflite_model)
+</code></pre>
+<p><strong>ONNX Runtime</strong>:</p>
+<pre><code class="language-python">from onnxruntime.quantization import quantize_dynamic, QuantType
+
+model_input = 'model.onnx'
+model_output = 'model_quantized.onnx'
+
+quantize_dynamic(
+    model_input,
+    model_output,
+    weight_type=QuantType.QInt8
+)
+</code></pre>
+<p><strong>CoreML</strong> for iOS:</p>
+<pre><code class="language-python">import coremltools as ct
+
+# Convert PyTorch to CoreML with quantization
+traced_model = torch.jit.trace(model, example_input)
+coreml_model = ct.convert(
+    traced_model,
+    inputs=[ct.TensorType(shape=example_input.shape)],
+    convert_to="neuralnetwork",
+    minimum_deployment_target=ct.target.iOS14
+)
+
+# Quantize to INT8
+model_int8 = ct.quantize_weights(coreml_model, nbits=8)
+model_int8.save("model_quantized.mlmodel")
+</code></pre>
+<h2 id="tools-and-libraries"><a class="header" href="#tools-and-libraries">Tools and Libraries</a></h2>
+<h3 id="pytorch-quantization"><a class="header" href="#pytorch-quantization">PyTorch Quantization</a></h3>
+<pre><code class="language-python">import torch.quantization
+# Built-in, well-integrated with PyTorch ecosystem
+# Supports dynamic, static, and QAT
+</code></pre>
+<h3 id="tensorflowtflite"><a class="header" href="#tensorflowtflite">TensorFlow/TFLite</a></h3>
+<pre><code class="language-python">import tensorflow as tf
+# Excellent mobile support via TFLite
+# Supports post-training and QAT
+</code></pre>
+<h3 id="onnx-runtime"><a class="header" href="#onnx-runtime">ONNX Runtime</a></h3>
+<pre><code class="language-python">from onnxruntime.quantization import quantize_dynamic
+# Framework-agnostic
+# Good for cross-platform deployment
+</code></pre>
+<h3 id="bitsandbytes"><a class="header" href="#bitsandbytes">bitsandbytes</a></h3>
+<pre><code class="language-python">import bitsandbytes as bnb
+# Specialized for LLMs
+# Supports 4-bit, 8-bit quantization
+# LLM.int8() and NF4
+</code></pre>
+<h3 id="auto-gptq"><a class="header" href="#auto-gptq">Auto-GPTQ</a></h3>
+<pre><code class="language-python">from auto_gptq import AutoGPTQForCausalLM
+# State-of-the-art LLM quantization
+# GPTQ algorithm implementation
+</code></pre>
+<h3 id="autoawq"><a class="header" href="#autoawq">AutoAWQ</a></h3>
+<pre><code class="language-python">from awq import AutoAWQForCausalLM
+# Activation-aware quantization
+# Often better than GPTQ for inference
+</code></pre>
+<h3 id="intel-neural-compressor"><a class="header" href="#intel-neural-compressor">Intel Neural Compressor</a></h3>
+<pre><code class="language-python">from neural_compressor import Quantization
+# Comprehensive quantization toolkit
+# Supports multiple frameworks
+</code></pre>
+<h3 id="nvidia-tensorrt"><a class="header" href="#nvidia-tensorrt">NVIDIA TensorRT</a></h3>
+<pre><code class="language-python">import tensorrt as trt
+# High-performance inference
+# INT8/FP16 optimization
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li>
+<p><strong>Start with Dynamic Quantization</strong></p>
+<ul>
+<li>Easiest to implement</li>
+<li>No calibration needed</li>
+<li>Good baseline</li>
+</ul>
+</li>
+<li>
+<p><strong>Calibration Data Quality</strong></p>
+<ul>
+<li>Use representative data</li>
+<li>100-1000 samples usually sufficient</li>
+<li>Diverse coverage of input distribution</li>
+</ul>
+</li>
+<li>
+<p><strong>Layer-wise Sensitivity Analysis</strong></p>
+<ul>
+<li>Identify sensitive layers</li>
+<li>Keep them in higher precision</li>
+<li>Aggressively quantize insensitive layers</li>
+</ul>
+</li>
+<li>
+<p><strong>Fuse Operations</strong></p>
+<ul>
+<li>Always fuse Conv-BN-ReLU</li>
+<li>Reduces quantization error</li>
+<li>Improves performance</li>
+</ul>
+</li>
+<li>
+<p><strong>Measure Everything</strong></p>
+<ul>
+<li>Accuracy</li>
+<li>Latency</li>
+<li>Throughput</li>
+<li>Model size</li>
+<li>Memory usage</li>
+</ul>
+</li>
+<li>
+<p><strong>Target Hardware Matters</strong></p>
+<ul>
+<li>Use appropriate backend (fbgemm/qnnpack)</li>
+<li>Test on actual deployment hardware</li>
+<li>Profile performance</li>
+</ul>
+</li>
+<li>
+<p><strong>Quantization-Aware Architecture</strong></p>
+<ul>
+<li>Avoid operations that don't quantize well</li>
+<li>Use ReLU6 instead of other activations</li>
+<li>Consider architecture during design</li>
+</ul>
+</li>
+<li>
+<p><strong>Version Control Quantized Models</strong></p>
+<ul>
+<li>Track quantization configs</li>
+<li>Document calibration process</li>
+<li>Maintain reproducibility</li>
+</ul>
+</li>
+</ol>
+<h2 id="resources-and-papers"><a class="header" href="#resources-and-papers">Resources and Papers</a></h2>
+<h3 id="foundational-papers"><a class="header" href="#foundational-papers">Foundational Papers</a></h3>
+<ol>
+<li>
+<p><strong>"Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference"</strong></p>
+<ul>
+<li>Jacob et al., 2018</li>
+<li>Introduced per-channel quantization and fake quantization</li>
+</ul>
+</li>
+<li>
+<p><strong>"A Survey of Quantization Methods for Efficient Neural Network Inference"</strong></p>
+<ul>
+<li>Gholami et al., 2021</li>
+<li>Comprehensive overview of quantization techniques</li>
+</ul>
+</li>
+<li>
+<p><strong>"LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale"</strong></p>
+<ul>
+<li>Dettmers et al., 2022</li>
+<li>Outlier-aware quantization for LLMs</li>
+</ul>
+</li>
+<li>
+<p><strong>"GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers"</strong></p>
+<ul>
+<li>Frantar et al., 2023</li>
+<li>State-of-the-art PTQ for LLMs</li>
+</ul>
+</li>
+<li>
+<p><strong>"AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration"</strong></p>
+<ul>
+<li>Lin et al., 2023</li>
+<li>Protects salient weights</li>
+</ul>
+</li>
+<li>
+<p><strong>"SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models"</strong></p>
+<ul>
+<li>Xiao et al., 2023</li>
+<li>Smooths activation outliers</li>
+</ul>
+</li>
+<li>
+<p><strong>"QLoRA: Efficient Finetuning of Quantized LLMs"</strong></p>
+<ul>
+<li>Dettmers et al., 2023</li>
+<li>4-bit quantization with LoRA fine-tuning</li>
+</ul>
+</li>
+</ol>
+<h3 id="tutorials-and-guides"><a class="header" href="#tutorials-and-guides">Tutorials and Guides</a></h3>
+<ul>
+<li><a href="https://pytorch.org/docs/stable/quantization.html">PyTorch Quantization Documentation</a></li>
+<li><a href="https://www.tensorflow.org/lite/performance/post_training_quantization">TensorFlow Lite Quantization Guide</a></li>
+<li><a href="https://huggingface.co/docs/transformers/main/en/quantization">Hugging Face Quantization Guide</a></li>
+<li><a href="https://docs.nvidia.com/deeplearning/tensorrt/">NVIDIA TensorRT Documentation</a></li>
+</ul>
+<h3 id="libraries-and-tools"><a class="header" href="#libraries-and-tools">Libraries and Tools</a></h3>
+<ul>
+<li>PyTorch: <code>torch.quantization</code></li>
+<li>TensorFlow: <code>tf.quantization</code>, TFLite</li>
+<li>ONNX Runtime: <code>onnxruntime.quantization</code></li>
+<li>bitsandbytes: <code>bitsandbytes</code></li>
+<li>Auto-GPTQ: <code>auto-gptq</code></li>
+<li>AutoAWQ: <code>autoawq</code></li>
+<li>Intel Neural Compressor: <code>neural-compressor</code></li>
+</ul>
+<h3 id="datasets-for-calibration"><a class="header" href="#datasets-for-calibration">Datasets for Calibration</a></h3>
+<ul>
+<li>ImageNet (computer vision)</li>
+<li>C4, WikiText (language models)</li>
+<li>COCO (object detection)</li>
+<li>Custom domain-specific data (recommended)</li>
+</ul>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Quantization is an essential technique for deploying neural networks efficiently:</p>
+<ul>
+<li><strong>Reduces model size</strong> by 4-8× (INT8, INT4)</li>
+<li><strong>Increases inference speed</strong> by 2-4× on appropriate hardware</li>
+<li><strong>Enables edge deployment</strong> on resource-constrained devices</li>
+<li><strong>Maintains accuracy</strong> with proper techniques (QAT, calibration)</li>
+</ul>
+<p><strong>Key Takeaways</strong>:</p>
+<ol>
+<li>Choose quantization method based on constraints (time, accuracy, hardware)</li>
+<li>Dynamic quantization: quickest start, good for RNNs/Transformers</li>
+<li>Static quantization: best performance for CNNs</li>
+<li>QAT: highest accuracy for aggressive quantization</li>
+<li>Modern LLMs: GPTQ, AWQ, or bitsandbytes for 4-bit quantization</li>
+<li>Always measure: accuracy, latency, model size, throughput</li>
+<li>Hardware matters: use appropriate backend and test on target device</li>
+</ol>
+<p>Quantization transforms impractical models into deployable solutions, making AI accessible on everything from smartphones to data centers.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../machine_learning/pytorch.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../machine_learning/interesting_papers.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../machine_learning/pytorch.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../machine_learning/interesting_papers.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -4232,74 +4232,713 @@ if __name__ == "__main__":
 
 #### Observer Pattern
 
-The Observer Pattern defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically. This pattern is commonly used in event handling systems.
+**Intent**: Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.
 
-**Example Scenario**: Implementing a publish-subscribe mechanism where multiple subscribers listen to updates from a publisher.
+**Problem**: You need to maintain consistency between related objects without making them tightly coupled. When one object changes, an unknown number of other objects need to be updated.
 
-**Example Implementation in C++:**
+**Solution**: Define Subject (publisher) and Observer (subscriber) interfaces. Subjects maintain a list of observers and notify them automatically of state changes. Observers register/unregister themselves with subjects.
+
+**When to Use**:
+- Change to one object requires changing others, and you don't know how many
+- Object should notify other objects without knowing who they are
+- Need loosely coupled event handling system
+- Implementing distributed event handling (MVC, pub-sub systems)
+
+**Real-World Examples**:
+- Event listeners in GUI frameworks
+- Model-View-Controller (MVC) architecture
+- Social media notifications (followers notified of new posts)
+- Stock market tickers
+- RSS feeds
+- Reactive programming (RxJS, ReactiveX)
+
+**Implementation in C++**:
 
 ```cpp
 #include <iostream>
 #include <vector>
 #include <string>
+#include <memory>
+#include <algorithm>
 
 // Observer interface
 class Observer {
 public:
+    virtual ~Observer() = default;
     virtual void update(const std::string& message) = 0;
+    virtual std::string getName() const = 0;
 };
 
-// Subject class
+// Subject (Observable) interface
 class Subject {
 public:
-    void addObserver(Observer* observer) {
+    virtual ~Subject() = default;
+    virtual void attach(std::shared_ptr<Observer> observer) = 0;
+    virtual void detach(std::shared_ptr<Observer> observer) = 0;
+    virtual void notify(const std::string& message) = 0;
+};
+
+// Concrete Subject - News Agency
+class NewsAgency : public Subject {
+public:
+    void attach(std::shared_ptr<Observer> observer) override {
         observers_.push_back(observer);
+        std::cout << "NewsAgency: Attached observer " << observer->getName() << std::endl;
     }
 
-    void notify(const std::string& message) {
-        for(auto observer : observers_) {
-            observer->update(message);
+    void detach(std::shared_ptr<Observer> observer) override {
+        auto it = std::find(observers_.begin(), observers_.end(), observer);
+        if (it != observers_.end()) {
+            std::cout << "NewsAgency: Detached observer " << observer->getName() << std::endl;
+            observers_.erase(it);
         }
     }
 
+    void notify(const std::string& message) override {
+        std::cout << "\nNewsAgency: Broadcasting news..." << std::endl;
+        for (auto& observer : observers_) {
+            if (auto obs = observer.lock()) {
+                obs->update(message);
+            }
+        }
+    }
+
+    void publishNews(const std::string& news) {
+        news_ = news;
+        notify(news_);
+    }
+
 private:
-    std::vector<Observer*> observers_;
+    std::string news_;
+    std::vector<std::weak_ptr<Observer>> observers_;
 };
 
-// Concrete Observer
-class ConcreteObserver : public Observer {
+// Concrete Observers
+class NewsChannel : public Observer {
 public:
-    ConcreteObserver(const std::string& name) : name_(name) {}
+    NewsChannel(const std::string& name) : name_(name) {}
 
     void update(const std::string& message) override {
-        std::cout << name_ << " received message: " << message << std::endl;
+        std::cout << "NewsChannel [" << name_ << "]: Received news - " << message << std::endl;
+    }
+
+    std::string getName() const override {
+        return name_;
     }
 
 private:
     std::string name_;
 };
 
+class Newspaper : public Observer {
+public:
+    Newspaper(const std::string& name) : name_(name) {}
+
+    void update(const std::string& message) override {
+        std::cout << "Newspaper [" << name_ << "]: Printing news - " << message << std::endl;
+        headlines_.push_back(message);
+    }
+
+    std::string getName() const override {
+        return name_;
+    }
+
+    void printArchive() const {
+        std::cout << "\n" << name_ << " Archive:" << std::endl;
+        for (size_t i = 0; i < headlines_.size(); ++i) {
+            std::cout << "  " << (i + 1) << ". " << headlines_[i] << std::endl;
+        }
+    }
+
+private:
+    std::string name_;
+    std::vector<std::string> headlines_;
+};
+
+// Weather Station example
+class WeatherStation {
+public:
+    void setMeasurements(float temperature, float humidity, float pressure) {
+        temperature_ = temperature;
+        humidity_ = humidity;
+        pressure_ = pressure;
+        measurementsChanged();
+    }
+
+    void attach(std::shared_ptr<Observer> observer) {
+        observers_.push_back(observer);
+    }
+
+    void detach(std::shared_ptr<Observer> observer) {
+        auto it = std::find(observers_.begin(), observers_.end(), observer);
+        if (it != observers_.end()) {
+            observers_.erase(it);
+        }
+    }
+
+private:
+    void measurementsChanged() {
+        std::string data = "Temp: " + std::to_string(temperature_) + "°C, " +
+                          "Humidity: " + std::to_string(humidity_) + "%, " +
+                          "Pressure: " + std::to_string(pressure_) + " hPa";
+
+        for (auto& observer : observers_) {
+            if (auto obs = observer.lock()) {
+                obs->update(data);
+            }
+        }
+    }
+
+    float temperature_ = 0.0f;
+    float humidity_ = 0.0f;
+    float pressure_ = 0.0f;
+    std::vector<std::weak_ptr<Observer>> observers_;
+};
+
+class WeatherDisplay : public Observer {
+public:
+    WeatherDisplay(const std::string& name) : name_(name) {}
+
+    void update(const std::string& message) override {
+        std::cout << "Display [" << name_ << "]: " << message << std::endl;
+    }
+
+    std::string getName() const override {
+        return name_;
+    }
+
+private:
+    std::string name_;
+};
+
+// Usage
 int main() {
-    Subject subject;
+    // News agency example
+    auto newsAgency = std::make_unique<NewsAgency>();
 
-    ConcreteObserver observer1("Observer 1");
-    ConcreteObserver observer2("Observer 2");
+    auto cnn = std::make_shared<NewsChannel>("CNN");
+    auto bbc = std::make_shared<NewsChannel>("BBC");
+    auto nyt = std::make_shared<Newspaper>("New York Times");
 
-    subject.addObserver(&observer1);
-    subject.addObserver(&observer2);
+    newsAgency->attach(cnn);
+    newsAgency->attach(bbc);
+    newsAgency->attach(nyt);
 
-    subject.notify("Event occurred!");
+    newsAgency->publishNews("Breaking: Major tech announcement!");
+
+    std::cout << "\nDetaching CNN..." << std::endl;
+    newsAgency->detach(cnn);
+
+    newsAgency->publishNews("Update: Market reaches new high");
+
+    nyt->printArchive();
+
+    std::cout << "\n---\n\n";
+
+    // Weather station example
+    WeatherStation station;
+
+    auto homeDisplay = std::make_shared<WeatherDisplay>("Home");
+    auto officeDisplay = std::make_shared<WeatherDisplay>("Office");
+    auto mobileDisplay = std::make_shared<WeatherDisplay>("Mobile");
+
+    station.attach(homeDisplay);
+    station.attach(officeDisplay);
+    station.attach(mobileDisplay);
+
+    std::cout << "Weather update 1:" << std::endl;
+    station.setMeasurements(25.5f, 65.0f, 1013.2f);
+
+    std::cout << "\nWeather update 2:" << std::endl;
+    station.setMeasurements(27.0f, 70.0f, 1012.8f);
 
     return 0;
 }
 ```
 
-**Explanation**:
+**Implementation in Python**:
 
-- `Observer` is an interface with an `update` method.
-- `Subject` maintains a list of observers and notifies them of events.
-- `ConcreteObserver` implements the `Observer` interface and reacts to notifications.
-- In `main`, observers are added to the subject, and when `notify` is called, all observers receive the message.
+```python
+from abc import ABC, abstractmethod
+from typing import List
+from weakref import WeakSet
+
+# Observer interface
+class Observer(ABC):
+    @abstractmethod
+    def update(self, message: str) -> None:
+        pass
+
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
+
+# Subject interface
+class Subject(ABC):
+    @abstractmethod
+    def attach(self, observer: Observer) -> None:
+        pass
+
+    @abstractmethod
+    def detach(self, observer: Observer) -> None:
+        pass
+
+    @abstractmethod
+    def notify(self, message: str) -> None:
+        pass
+
+# Concrete Subject
+class NewsAgency(Subject):
+    def __init__(self):
+        self._observers: WeakSet[Observer] = WeakSet()
+        self._news: str = ""
+
+    def attach(self, observer: Observer) -> None:
+        self._observers.add(observer)
+        print(f"NewsAgency: Attached observer {observer.get_name()}")
+
+    def detach(self, observer: Observer) -> None:
+        self._observers.discard(observer)
+        print(f"NewsAgency: Detached observer {observer.get_name()}")
+
+    def notify(self, message: str) -> None:
+        print("\nNewsAgency: Broadcasting news...")
+        for observer in self._observers:
+            observer.update(message)
+
+    def publish_news(self, news: str) -> None:
+        self._news = news
+        self.notify(self._news)
+
+# Concrete Observers
+class NewsChannel(Observer):
+    def __init__(self, name: str):
+        self._name = name
+
+    def update(self, message: str) -> None:
+        print(f"NewsChannel [{self._name}]: Received news - {message}")
+
+    def get_name(self) -> str:
+        return self._name
+
+class Newspaper(Observer):
+    def __init__(self, name: str):
+        self._name = name
+        self._headlines: List[str] = []
+
+    def update(self, message: str) -> None:
+        print(f"Newspaper [{self._name}]: Printing news - {message}")
+        self._headlines.append(message)
+
+    def get_name(self) -> str:
+        return self._name
+
+    def print_archive(self) -> None:
+        print(f"\n{self._name} Archive:")
+        for i, headline in enumerate(self._headlines, 1):
+            print(f"  {i}. {headline}")
+
+# Weather Station example
+class WeatherStation:
+    def __init__(self):
+        self._observers: WeakSet[Observer] = WeakSet()
+        self._temperature: float = 0.0
+        self._humidity: float = 0.0
+        self._pressure: float = 0.0
+
+    def attach(self, observer: Observer) -> None:
+        self._observers.add(observer)
+
+    def detach(self, observer: Observer) -> None:
+        self._observers.discard(observer)
+
+    def set_measurements(self, temperature: float, humidity: float, pressure: float) -> None:
+        self._temperature = temperature
+        self._humidity = humidity
+        self._pressure = pressure
+        self._measurements_changed()
+
+    def _measurements_changed(self) -> None:
+        data = f"Temp: {self._temperature}°C, Humidity: {self._humidity}%, Pressure: {self._pressure} hPa"
+        for observer in self._observers:
+            observer.update(data)
+
+class WeatherDisplay(Observer):
+    def __init__(self, name: str):
+        self._name = name
+
+    def update(self, message: str) -> None:
+        print(f"Display [{self._name}]: {message}")
+
+    def get_name(self) -> str:
+        return self._name
+
+# Usage
+if __name__ == "__main__":
+    # News agency example
+    news_agency = NewsAgency()
+
+    cnn = NewsChannel("CNN")
+    bbc = NewsChannel("BBC")
+    nyt = Newspaper("New York Times")
+
+    news_agency.attach(cnn)
+    news_agency.attach(bbc)
+    news_agency.attach(nyt)
+
+    news_agency.publish_news("Breaking: Major tech announcement!")
+
+    print("\nDetaching CNN...")
+    news_agency.detach(cnn)
+
+    news_agency.publish_news("Update: Market reaches new high")
+
+    nyt.print_archive()
+
+    print("\n---\n")
+
+    # Weather station
+    station = WeatherStation()
+
+    home_display = WeatherDisplay("Home")
+    office_display = WeatherDisplay("Office")
+
+    station.attach(home_display)
+    station.attach(office_display)
+
+    print("Weather update 1:")
+    station.set_measurements(25.5, 65.0, 1013.2)
+
+    print("\nWeather update 2:")
+    station.set_measurements(27.0, 70.0, 1012.8)
+```
+
+**Advantages**:
+- Loose coupling between subject and observers
+- Open/Closed Principle: add new observers without modifying subject
+- Establishes relationships at runtime
+- Supports broadcast communication
+
+**Disadvantages**:
+- Observers notified in random order
+- Memory leaks if observers aren't properly detached
+- Can cause unexpected updates if dependencies are complex
+- Performance issues with many observers
+
+**Related Patterns**:
+- **Mediator**: Both promote loose coupling; Mediator uses centralized communication, Observer uses distributed
+- **Singleton**: Subject often implemented as singleton
+
+---
+
+#### Strategy Pattern
+
+**Intent**: Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from clients that use it.
+
+**Problem**: You have multiple related classes that differ only in their behavior. You need to select an algorithm at runtime, or you have many conditional statements choosing between different variants of the same algorithm.
+
+**Solution**: Extract algorithms into separate classes (strategies) with a common interface. Context class delegates work to a strategy object instead of implementing multiple versions of the algorithm.
+
+**When to Use**:
+- You have many related classes differing only in behavior
+- You need different variants of an algorithm
+- Algorithm uses data clients shouldn't know about
+- Class has massive conditional statements selecting different behaviors
+
+**Real-World Examples**:
+- Payment processing (credit card, PayPal, cryptocurrency)
+- Sorting algorithms (quicksort, mergesort, bubblesort)
+- Compression algorithms (ZIP, RAR, TAR)
+- Route planning (shortest, fastest, scenic)
+- Validation strategies
+
+**Implementation in C++**:
+
+```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+// Strategy interface
+class SortStrategy {
+public:
+    virtual ~SortStrategy() = default;
+    virtual void sort(std::vector<int>& data) = 0;
+    virtual std::string getName() const = 0;
+};
+
+// Concrete Strategies
+class BubbleSort : public SortStrategy {
+public:
+    void sort(std::vector<int>& data) override {
+        std::cout << "Sorting using Bubble Sort" << std::endl;
+        for (size_t i = 0; i < data.size(); ++i) {
+            for (size_t j = 0; j < data.size() - i - 1; ++j) {
+                if (data[j] > data[j + 1]) {
+                    std::swap(data[j], data[j + 1]);
+                }
+            }
+        }
+    }
+
+    std::string getName() const override {
+        return "Bubble Sort";
+    }
+};
+
+class QuickSort : public SortStrategy {
+public:
+    void sort(std::vector<int>& data) override {
+        std::cout << "Sorting using Quick Sort" << std::endl;
+        std::sort(data.begin(), data.end());
+    }
+
+    std::string getName() const override {
+        return "Quick Sort";
+    }
+};
+
+class MergeSort : public SortStrategy {
+public:
+    void sort(std::vector<int>& data) override {
+        std::cout << "Sorting using Merge Sort" << std::endl;
+        std::stable_sort(data.begin(), data.end());
+    }
+
+    std::string getName() const override {
+        return "Merge Sort";
+    }
+};
+
+// Context
+class DataSorter {
+public:
+    void setStrategy(std::unique_ptr<SortStrategy> strategy) {
+        strategy_ = std::move(strategy);
+    }
+
+    void sort(std::vector<int>& data) {
+        if (strategy_) {
+            strategy_->sort(data);
+        } else {
+            std::cout << "No sorting strategy set!" << std::endl;
+        }
+    }
+
+private:
+    std::unique_ptr<SortStrategy> strategy_;
+};
+
+// Payment example
+class PaymentStrategy {
+public:
+    virtual ~PaymentStrategy() = default;
+    virtual void pay(double amount) = 0;
+};
+
+class CreditCardPayment : public PaymentStrategy {
+public:
+    CreditCardPayment(const std::string& number, const std::string& cvv)
+        : cardNumber_(number), cvv_(cvv) {}
+
+    void pay(double amount) override {
+        std::cout << "Paid $" << amount << " using Credit Card ending in "
+                  << cardNumber_.substr(cardNumber_.length() - 4) << std::endl;
+    }
+
+private:
+    std::string cardNumber_;
+    std::string cvv_;
+};
+
+class PayPalPayment : public PaymentStrategy {
+public:
+    PayPalPayment(const std::string& email) : email_(email) {}
+
+    void pay(double amount) override {
+        std::cout << "Paid $" << amount << " using PayPal account " << email_ << std::endl;
+    }
+
+private:
+    std::string email_;
+};
+
+class ShoppingCart {
+public:
+    void setPaymentStrategy(std::unique_ptr<PaymentStrategy> strategy) {
+        paymentStrategy_ = std::move(strategy);
+    }
+
+    void checkout(double amount) {
+        if (paymentStrategy_) {
+            paymentStrategy_->pay(amount);
+        }
+    }
+
+private:
+    std::unique_ptr<PaymentStrategy> paymentStrategy_;
+};
+
+// Usage
+int main() {
+    // Sorting example
+    std::vector<int> data = {64, 34, 25, 12, 22, 11, 90};
+
+    DataSorter sorter;
+
+    sorter.setStrategy(std::make_unique<BubbleSort>());
+    auto data1 = data;
+    sorter.sort(data1);
+
+    sorter.setStrategy(std::make_unique<QuickSort>());
+    auto data2 = data;
+    sorter.sort(data2);
+
+    std::cout << "\n---\n\n";
+
+    // Payment example
+    ShoppingCart cart;
+
+    cart.setPaymentStrategy(std::make_unique<CreditCardPayment>("1234567890123456", "123"));
+    cart.checkout(100.0);
+
+    cart.setPaymentStrategy(std::make_unique<PayPalPayment>("user@example.com"));
+    cart.checkout(50.0);
+
+    return 0;
+}
+```
+
+**Implementation in Python**:
+
+```python
+from abc import ABC, abstractmethod
+from typing import List
+
+# Strategy interface
+class SortStrategy(ABC):
+    @abstractmethod
+    def sort(self, data: List[int]) -> None:
+        pass
+
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
+
+# Concrete Strategies
+class BubbleSort(SortStrategy):
+    def sort(self, data: List[int]) -> None:
+        print("Sorting using Bubble Sort")
+        n = len(data)
+        for i in range(n):
+            for j in range(0, n - i - 1):
+                if data[j] > data[j + 1]:
+                    data[j], data[j + 1] = data[j + 1], data[j]
+
+    def get_name(self) -> str:
+        return "Bubble Sort"
+
+class QuickSort(SortStrategy):
+    def sort(self, data: List[int]) -> None:
+        print("Sorting using Quick Sort")
+        data.sort()
+
+    def get_name(self) -> str:
+        return "Quick Sort"
+
+# Context
+class DataSorter:
+    def __init__(self, strategy: SortStrategy = None):
+        self._strategy = strategy
+
+    def set_strategy(self, strategy: SortStrategy) -> None:
+        self._strategy = strategy
+
+    def sort(self, data: List[int]) -> None:
+        if self._strategy:
+            self._strategy.sort(data)
+        else:
+            print("No sorting strategy set!")
+
+# Payment example
+class PaymentStrategy(ABC):
+    @abstractmethod
+    def pay(self, amount: float) -> None:
+        pass
+
+class CreditCardPayment(PaymentStrategy):
+    def __init__(self, card_number: str, cvv: str):
+        self.card_number = card_number
+        self.cvv = cvv
+
+    def pay(self, amount: float) -> None:
+        print(f"Paid ${amount} using Credit Card ending in {self.card_number[-4:]}")
+
+class PayPalPayment(PaymentStrategy):
+    def __init__(self, email: str):
+        self.email = email
+
+    def pay(self, amount: float) -> None:
+        print(f"Paid ${amount} using PayPal account {self.email}")
+
+class ShoppingCart:
+    def __init__(self):
+        self._payment_strategy: PaymentStrategy = None
+
+    def set_payment_strategy(self, strategy: PaymentStrategy) -> None:
+        self._payment_strategy = strategy
+
+    def checkout(self, amount: float) -> None:
+        if self._payment_strategy:
+            self._payment_strategy.pay(amount)
+
+# Usage
+if __name__ == "__main__":
+    # Sorting
+    data = [64, 34, 25, 12, 22, 11, 90]
+
+    sorter = DataSorter()
+
+    sorter.set_strategy(BubbleSort())
+    data1 = data.copy()
+    sorter.sort(data1)
+
+    sorter.set_strategy(QuickSort())
+    data2 = data.copy()
+    sorter.sort(data2)
+
+    print("\n---\n")
+
+    # Payment
+    cart = ShoppingCart()
+
+    cart.set_payment_strategy(CreditCardPayment("1234567890123456", "123"))
+    cart.checkout(100.0)
+
+    cart.set_payment_strategy(PayPalPayment("user@example.com"))
+    cart.checkout(50.0)
+```
+
+**Advantages**:
+- Families of related algorithms can be reused
+- Open/Closed Principle: introduce new strategies without changing context
+- Runtime algorithm switching
+- Isolates algorithm implementation from code that uses it
+- Eliminates conditional statements
+
+**Disadvantages**:
+- Clients must be aware of different strategies
+- Increases number of objects
+- All strategies must expose same interface (even if some don't use all parameters)
+
+**Related Patterns**:
+- **State**: Both encapsulate behavior; Strategy focuses on algorithm, State on object state
+- **Template Method**: Uses inheritance; Strategy uses composition
+- **Factory Method**: Often used to create appropriate strategy
+
+---
 
 ## Conclusion
 

@@ -126,12 +126,50 @@ def update_fs_operation(summary_file):
     else:
         print("All files referenced in SUMMARY.md exist in directory.")
 
+def remove_from_summary(summary_file, files_to_remove):
+    """Remove file references from SUMMARY.md"""
+    if not files_to_remove:
+        return
+
+    with open(summary_file, "r") as f:
+        lines = f.readlines()
+
+    # Remove lines that reference files that no longer exist
+    modified = False
+    new_lines = []
+    for line in lines:
+        should_keep = True
+        for file in files_to_remove:
+            if f"({file})" in line:
+                should_keep = False
+                print(f"Removed from SUMMARY.md: {file}")
+                modified = True
+                break
+        if should_keep:
+            new_lines.append(line)
+
+    if modified:
+        with open(summary_file, "w") as f:
+            f.writelines(new_lines)
+
 def update_summary_operation(summary_file):
-    """Add unreferenced files to SUMMARY.md"""
+    """Add unreferenced files to SUMMARY.md and remove missing entries"""
     summary_files = set(get_files_from_summary(summary_file))
     directory_files = set(get_files_from_directory("src"))
 
+    missing_in_directory = summary_files - directory_files
     missing_in_summary = directory_files - summary_files
+
+    # Remove entries for files that no longer exist
+    if missing_in_directory:
+        print("Removing missing entries from SUMMARY.md:")
+        remove_from_summary(summary_file, sorted(missing_in_directory))
+    else:
+        print("No missing entries to remove from SUMMARY.md.")
+
+    print()
+
+    # Add unreferenced files
     if missing_in_summary:
         print("Adding unreferenced files to SUMMARY.md:")
         add_to_summary(summary_file, sorted(missing_in_summary))

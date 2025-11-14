@@ -10,5 +10,6 @@ Welcome to the Wifi section of the notes. Here, you will find comprehensive info
 - [Scanning](scanning.md)
 - [Roaming](roaming.md)
 - [QoS Management](qos_management.md)
+- [OFDMA](ofdma.md)
 
 Explore the topics to gain a deeper understanding of Wifi technology and its applications.

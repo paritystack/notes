@@ -129,7 +129,7 @@ Solve problems related to graph structures.
 - Kruskal's Algorithm
 - Prim's Algorithm
 
-See: [Graph Algorithms](graphs.md)
+See: [Graph Algorithms](../data_structures/graphs.md)
 
 ### 4. Tree Algorithms
 
@@ -142,7 +142,7 @@ Operations on tree data structures.
 - Red-Black Tree Operations
 - Trie Operations
 
-See: [Tree Algorithms](trees.md)
+See: [Tree Algorithms](../data_structures/trees.md)
 
 ### 5. Dynamic Programming
 
@@ -489,15 +489,15 @@ Explore detailed guides for specific algorithm types:
 1. [Big O Notation](big_o.md) - Understanding algorithm complexity
 2. [Sorting Algorithms](sorting.md) - Comprehensive sorting guide
 3. [Searching Algorithms](searching.md) - Various search techniques
-4. [Graph Algorithms](graphs.md) - Graph traversal and algorithms
-5. [Tree Algorithms](trees.md) - Tree operations and traversals
+4. [Graph Algorithms](../data_structures/graphs.md) - Graph traversal and algorithms
+5. [Tree Algorithms](../data_structures/trees.md) - Tree operations and traversals
 6. [Dynamic Programming](dynamic_programming.md) - DP patterns and problems
 7. [Greedy Algorithms](greedy_algorithms.md) - Greedy approach and examples
 8. [Divide and Conquer](divide_and_conquer.md) - D&C strategy
 9. [Backtracking](backtracking.md) - Backtracking techniques
 10. [Recursion](recursion.md) - Recursive problem solving
-11. [Heaps](heaps.md) - Heap data structure and algorithms
-12. [Tries](tries.md) - Trie data structure and applications
+11. [Heaps](../data_structures/heaps.md) - Heap data structure and algorithms
+12. [Tries](../data_structures/tries.md) - Trie data structure and applications
 13. [Raft Consensus](raft.md) - Distributed consensus algorithm for replicated logs
 
 ## Quick Reference
@@ -535,7 +535,7 @@ Explore detailed guides for specific algorithm types:
 2. Practice with [Sorting](sorting.md) and [Searching](searching.md)
 3. Master [Recursion](recursion.md) fundamentals
 4. Explore [Dynamic Programming](dynamic_programming.md)
-5. Study [Graph Algorithms](graphs.md) and [Trees](trees.md)
+5. Study [Graph Algorithms](../data_structures/graphs.md) and [Trees](../data_structures/trees.md)
 6. Practice on coding platforms
 7. Participate in coding contests
 8. Review and optimize solutions

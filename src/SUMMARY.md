@@ -24,8 +24,8 @@
     - [SQL](programming/sql.md)
     - [Interview Questions](programming/interview_questions.md)
     - [Design Patterns](programming/design_patterns.md)
-
     - [Kotlin](programming/kotlin.md)
+
 - [Linux](linux/README.md)
     - [Networking](linux/networking.md)
     - [Kernel](linux/kernel.md)
@@ -43,8 +43,8 @@
     - [systemd](linux/systemd.md)
     - [sysctl](linux/sysctl.md)
     - [sysfs](linux/sysfs.md)
-
     - [Rtp](networking/rtp.md)
+
 - [Android](android/README.md)
     - [Android Internals](android/internals.md)
     - [Android Development](android/development.md)
@@ -118,7 +118,6 @@
     - [ComfyUI](ai/comfyui.md)
     - [Fine Tuning](ai/fine_tuning.md)
 
-
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)
     - [Google Cloud](cloud/google_cloud.md)
@@ -167,7 +166,6 @@
     - [Watchdog](embedded/watchdog.md)
     - [Power Management](embedded/power_management.md)
     - [Debugging](embedded/debugging.md)
-
 
 - [Networking](networking/README.md)
     - [OSI Model](networking/osi_model.md)

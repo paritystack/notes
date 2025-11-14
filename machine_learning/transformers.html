@@ -196,18 +196,17 @@
 <h3 id="scaled-dot-product-attention"><a class="header" href="#scaled-dot-product-attention">Scaled Dot-Product Attention</a></h3>
 <p>The fundamental building block of transformer attention is the <strong>Scaled Dot-Product Attention</strong>. Given three matrices:</p>
 <ul>
-<li><strong>Q</strong> (Query): What we're looking for</li>
-<li><strong>K</strong> (Key): What we're matching against</li>
-<li><strong>V</strong> (Value): The actual information we want to retrieve</li>
+<li>$Q$ (Query): What we're looking for</li>
+<li>$K$ (Key): What we're matching against</li>
+<li>$V$ (Value): The actual information we want to retrieve</li>
 </ul>
 <p>The attention mechanism computes:</p>
-<pre><code>Attention(Q, K, V) = softmax(QK^T / √d_k) V
-</code></pre>
+<p>$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V$$</p>
 <p>Where:</p>
 <ul>
-<li><code>d_k</code> is the dimension of the key vectors</li>
-<li>The division by <code>√d_k</code> is scaling to prevent the dot products from growing too large</li>
-<li><code>softmax</code> normalizes the scores to create a probability distribution</li>
+<li>$d_k$ is the dimension of the key vectors</li>
+<li>The division by $\sqrt{d_k}$ is scaling to prevent the dot products from growing too large</li>
+<li>softmax normalizes the scores to create a probability distribution</li>
 </ul>
 <h4 id="pytorch-implementation-scaled-dot-product-attention"><a class="header" href="#pytorch-implementation-scaled-dot-product-attention">PyTorch Implementation: Scaled Dot-Product Attention</a></h4>
 <pre><code class="language-python">import torch
@@ -325,9 +324,9 @@ Final output - Shape: torch.Size([2, 1, 4, 8])
 <p>Let's break down what's happening at each step:</p>
 <ol>
 <li>
-<p><strong>Query-Key Dot Product (Q @ K^T)</strong>:</p>
+<p><strong>Query-Key Dot Product ($QK^T$)</strong>:</p>
 <ul>
-<li>Each query vector (row in Q) is compared against all key vectors (rows in K)</li>
+<li>Each query vector (row in $Q$) is compared against all key vectors (rows in $K$)</li>
 <li>The dot product measures similarity: higher values = more similar</li>
 <li>Shape: <code>(batch, heads, seq_len_q, d_k) @ (batch, heads, d_k, seq_len_k) → (batch, heads, seq_len_q, seq_len_k)</code></li>
 </ul>
@@ -335,7 +334,7 @@ Final output - Shape: torch.Size([2, 1, 4, 8])
 <li>
 <p><strong>Scaling</strong>:</p>
 <ul>
-<li>Dividing by <code>√d_k</code> prevents the dot products from becoming too large</li>
+<li>Dividing by $\sqrt{d_k}$ prevents the dot products from becoming too large</li>
 <li>Large dot products → very small gradients after softmax → slow learning</li>
 <li>This is crucial for stable training</li>
 </ul>
@@ -722,7 +721,8 @@ class FeedForward(nn.Module):
     """
     Position-wise Feed-Forward Network.
     Consists of two linear transformations with ReLU activation.
-    FFN(x) = max(0, xW1 + b1)W2 + b2
+
+    $$\text{FFN}(x) = \max(0, xW_1 + b_1)W_2 + b_2$$
     """
     def __init__(self, d_model, d_ff, dropout=0.1):
         super().__init__()

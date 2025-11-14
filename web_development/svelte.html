@@ -277,14 +277,2303 @@ export const count = writable(0);
   Count: {$count}
 &lt;/button&gt;
 </code></pre>
+<h2 id="component-lifecycle"><a class="header" href="#component-lifecycle">Component Lifecycle</a></h2>
+<h3 id="lifecycle-hooks"><a class="header" href="#lifecycle-hooks">Lifecycle Hooks</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { onMount, onDestroy, beforeUpdate, afterUpdate, tick } from 'svelte';
+
+  // Runs after component is first rendered to DOM
+  onMount(() =&gt; {
+    console.log('Component mounted');
+
+    // Return cleanup function
+    return () =&gt; {
+      console.log('onMount cleanup');
+    };
+  });
+
+  // Runs before component is destroyed
+  onDestroy(() =&gt; {
+    console.log('Component destroyed');
+  });
+
+  // Runs before DOM is updated
+  beforeUpdate(() =&gt; {
+    console.log('Before update');
+  });
+
+  // Runs after DOM is updated
+  afterUpdate(() =&gt; {
+    console.log('After update');
+  });
+
+  // Example: scroll to bottom after update
+  let messages = [];
+  let container;
+
+  async function addMessage(text) {
+    messages = [...messages, text];
+    await tick(); // Wait for DOM to update
+    container.scrollTop = container.scrollHeight;
+  }
+&lt;/script&gt;
+
+&lt;div bind:this={container}&gt;
+  {#each messages as message}
+    &lt;p&gt;{message}&lt;/p&gt;
+  {/each}
+&lt;/div&gt;
+</code></pre>
+<h3 id="async-onmount-pattern"><a class="header" href="#async-onmount-pattern">Async onMount Pattern</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { onMount } from 'svelte';
+
+  let data = null;
+  let loading = true;
+  let error = null;
+
+  onMount(async () =&gt; {
+    try {
+      const response = await fetch('/api/data');
+      if (!response.ok) throw new Error('Failed to fetch');
+      data = await response.json();
+    } catch (e) {
+      error = e.message;
+    } finally {
+      loading = false;
+    }
+  });
+&lt;/script&gt;
+
+{#if loading}
+  &lt;p&gt;Loading...&lt;/p&gt;
+{:else if error}
+  &lt;p&gt;Error: {error}&lt;/p&gt;
+{:else}
+  &lt;pre&gt;{JSON.stringify(data, null, 2)}&lt;/pre&gt;
+{/if}
+</code></pre>
+<h2 id="advanced-reactivity"><a class="header" href="#advanced-reactivity">Advanced Reactivity</a></h2>
+<h3 id="reactive-declarations"><a class="header" href="#reactive-declarations">Reactive Declarations</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let firstName = 'John';
+  let lastName = 'Doe';
+
+  // Reactive declaration - automatically updates
+  $: fullName = `${firstName} ${lastName}`;
+
+  // Multiple dependencies
+  let width = 100;
+  let height = 100;
+  $: area = width * height;
+  $: perimeter = 2 * (width + height);
+
+  // Reactive statements with side effects
+  $: {
+    console.log(`Area: ${area}`);
+    console.log(`Perimeter: ${perimeter}`);
+  }
+
+  // Conditional reactive statements
+  $: if (area &gt; 10000) {
+    console.warn('Area is very large!');
+  }
+&lt;/script&gt;
+</code></pre>
+<h3 id="reactive-arrays-and-objects"><a class="header" href="#reactive-arrays-and-objects">Reactive Arrays and Objects</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let items = [1, 2, 3];
+
+  // ❌ This won't trigger reactivity
+  function addWrong() {
+    items.push(4);
+  }
+
+  // ✅ Correct - create new array
+  function addCorrect() {
+    items = [...items, 4];
+  }
+
+  // ✅ Alternative - reassign
+  function addAlternative() {
+    items.push(4);
+    items = items;
+  }
+
+  let user = { name: 'John', age: 30 };
+
+  // ❌ Won't trigger reactivity
+  function updateWrong() {
+    user.age = 31;
+  }
+
+  // ✅ Create new object
+  function updateCorrect() {
+    user = { ...user, age: 31 };
+  }
+&lt;/script&gt;
+</code></pre>
+<h3 id="complex-reactive-chains"><a class="header" href="#complex-reactive-chains">Complex Reactive Chains</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let numbers = [1, 2, 3, 4, 5];
+
+  // Chain of reactive declarations
+  $: doubled = numbers.map(n =&gt; n * 2);
+  $: filtered = doubled.filter(n =&gt; n &gt; 5);
+  $: sum = filtered.reduce((a, b) =&gt; a + b, 0);
+  $: average = filtered.length ? sum / filtered.length : 0;
+
+  // Reactive with async
+  let query = '';
+  let results = [];
+
+  $: if (query.length &gt; 2) {
+    searchAPI(query);
+  }
+
+  async function searchAPI(q) {
+    const response = await fetch(`/api/search?q=${q}`);
+    results = await response.json();
+  }
+&lt;/script&gt;
+</code></pre>
+<h2 id="bindings"><a class="header" href="#bindings">Bindings</a></h2>
+<h3 id="form-input-bindings"><a class="header" href="#form-input-bindings">Form Input Bindings</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let text = '';
+  let number = 0;
+  let checked = false;
+  let selected = '';
+  let group = [];
+  let value = 50;
+&lt;/script&gt;
+
+&lt;!-- Text input --&gt;
+&lt;input type="text" bind:value={text}&gt;
+&lt;p&gt;Text: {text}&lt;/p&gt;
+
+&lt;!-- Number input --&gt;
+&lt;input type="number" bind:value={number}&gt;
+&lt;p&gt;Number: {number}&lt;/p&gt;
+
+&lt;!-- Checkbox --&gt;
+&lt;input type="checkbox" bind:checked={checked}&gt;
+&lt;p&gt;Checked: {checked}&lt;/p&gt;
+
+&lt;!-- Select --&gt;
+&lt;select bind:value={selected}&gt;
+  &lt;option value="a"&gt;Option A&lt;/option&gt;
+  &lt;option value="b"&gt;Option B&lt;/option&gt;
+  &lt;option value="c"&gt;Option C&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;!-- Radio group --&gt;
+&lt;input type="radio" bind:group={group} value="one"&gt;
+&lt;input type="radio" bind:group={group} value="two"&gt;
+&lt;input type="radio" bind:group={group} value="three"&gt;
+
+&lt;!-- Range --&gt;
+&lt;input type="range" bind:value={value} min="0" max="100"&gt;
+&lt;p&gt;Value: {value}&lt;/p&gt;
+
+&lt;!-- Textarea --&gt;
+&lt;textarea bind:value={text}&gt;&lt;/textarea&gt;
+</code></pre>
+<h3 id="element-bindings"><a class="header" href="#element-bindings">Element Bindings</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let div;
+  let input;
+  let canvas;
+
+  $: if (div) {
+    console.log('Div dimensions:', div.offsetWidth, div.offsetHeight);
+  }
+
+  function focusInput() {
+    input.focus();
+  }
+
+  function getCanvasContext() {
+    const ctx = canvas.getContext('2d');
+    ctx.fillRect(0, 0, 100, 100);
+  }
+
+  // Bind to dimensions
+  let w;
+  let h;
+&lt;/script&gt;
+
+&lt;div bind:this={div} bind:clientWidth={w} bind:clientHeight={h}&gt;
+  Content here - {w}x{h}
+&lt;/div&gt;
+
+&lt;input bind:this={input} type="text"&gt;
+&lt;button on:click={focusInput}&gt;Focus Input&lt;/button&gt;
+
+&lt;canvas bind:this={canvas} width="200" height="200"&gt;&lt;/canvas&gt;
+&lt;button on:click={getCanvasContext}&gt;Draw&lt;/button&gt;
+</code></pre>
+<h3 id="component-bindings"><a class="header" href="#component-bindings">Component Bindings</a></h3>
+<pre><code class="language-svelte">&lt;!-- Child.svelte --&gt;
+&lt;script&gt;
+  export let value = '';
+&lt;/script&gt;
+
+&lt;input type="text" bind:value={value}&gt;
+
+&lt;!-- Parent.svelte --&gt;
+&lt;script&gt;
+  import Child from './Child.svelte';
+  let childValue = '';
+&lt;/script&gt;
+
+&lt;Child bind:value={childValue} /&gt;
+&lt;p&gt;Parent sees: {childValue}&lt;/p&gt;
+</code></pre>
+<h3 id="contenteditable-bindings"><a class="header" href="#contenteditable-bindings">Contenteditable Bindings</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let html = '&lt;p&gt;Edit me!&lt;/p&gt;';
+  let text = 'Plain text';
+&lt;/script&gt;
+
+&lt;div contenteditable="true" bind:innerHTML={html}&gt;&lt;/div&gt;
+&lt;div contenteditable="true" bind:textContent={text}&gt;&lt;/div&gt;
+</code></pre>
+<h2 id="slots"><a class="header" href="#slots">Slots</a></h2>
+<h3 id="default-slots"><a class="header" href="#default-slots">Default Slots</a></h3>
+<pre><code class="language-svelte">&lt;!-- Card.svelte --&gt;
+&lt;div class="card"&gt;
+  &lt;slot&gt;
+    &lt;!-- Fallback content if no slot provided --&gt;
+    &lt;p&gt;No content provided&lt;/p&gt;
+  &lt;/slot&gt;
+&lt;/div&gt;
+
+&lt;!-- Usage --&gt;
+&lt;Card&gt;
+  &lt;h2&gt;My Title&lt;/h2&gt;
+  &lt;p&gt;My content&lt;/p&gt;
+&lt;/Card&gt;
+</code></pre>
+<h3 id="named-slots"><a class="header" href="#named-slots">Named Slots</a></h3>
+<pre><code class="language-svelte">&lt;!-- Layout.svelte --&gt;
+&lt;div class="layout"&gt;
+  &lt;header&gt;
+    &lt;slot name="header"&gt;
+      &lt;h1&gt;Default Header&lt;/h1&gt;
+    &lt;/slot&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/main&gt;
+
+  &lt;footer&gt;
+    &lt;slot name="footer"&gt;
+      &lt;p&gt;Default Footer&lt;/p&gt;
+    &lt;/slot&gt;
+  &lt;/footer&gt;
+&lt;/div&gt;
+
+&lt;!-- Usage --&gt;
+&lt;Layout&gt;
+  &lt;svelte:fragment slot="header"&gt;
+    &lt;h1&gt;Custom Header&lt;/h1&gt;
+  &lt;/svelte:fragment&gt;
+
+  &lt;p&gt;Main content goes here&lt;/p&gt;
+
+  &lt;svelte:fragment slot="footer"&gt;
+    &lt;p&gt;Custom Footer&lt;/p&gt;
+  &lt;/svelte:fragment&gt;
+&lt;/Layout&gt;
+</code></pre>
+<h3 id="slot-props-scoped-slots"><a class="header" href="#slot-props-scoped-slots">Slot Props (Scoped Slots)</a></h3>
+<pre><code class="language-svelte">&lt;!-- List.svelte --&gt;
+&lt;script&gt;
+  export let items = [];
+&lt;/script&gt;
+
+&lt;ul&gt;
+  {#each items as item, index}
+    &lt;li&gt;
+      &lt;slot {item} {index}&gt;
+        &lt;!-- Fallback --&gt;
+        {item}
+      &lt;/slot&gt;
+    &lt;/li&gt;
+  {/each}
+&lt;/ul&gt;
+
+&lt;!-- Usage --&gt;
+&lt;script&gt;
+  import List from './List.svelte';
+  const items = ['Apple', 'Banana', 'Cherry'];
+&lt;/script&gt;
+
+&lt;List {items} let:item let:index&gt;
+  &lt;strong&gt;{index + 1}:&lt;/strong&gt; {item}
+&lt;/List&gt;
+</code></pre>
+<h3 id="advanced-slot-pattern"><a class="header" href="#advanced-slot-pattern">Advanced Slot Pattern</a></h3>
+<pre><code class="language-svelte">&lt;!-- DataTable.svelte --&gt;
+&lt;script&gt;
+  export let data = [];
+  export let columns = [];
+&lt;/script&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      {#each columns as column}
+        &lt;th&gt;
+          &lt;slot name="header" {column}&gt;
+            {column.label}
+          &lt;/slot&gt;
+        &lt;/th&gt;
+      {/each}
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    {#each data as row, rowIndex}
+      &lt;tr&gt;
+        {#each columns as column}
+          &lt;td&gt;
+            &lt;slot name="cell" {row} {column} {rowIndex}&gt;
+              {row[column.key]}
+            &lt;/slot&gt;
+          &lt;/td&gt;
+        {/each}
+      &lt;/tr&gt;
+    {/each}
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;!-- Usage --&gt;
+&lt;DataTable {data} {columns}&gt;
+  &lt;svelte:fragment slot="header" let:column&gt;
+    &lt;strong&gt;{column.label.toUpperCase()}&lt;/strong&gt;
+  &lt;/svelte:fragment&gt;
+
+  &lt;svelte:fragment slot="cell" let:row let:column&gt;
+    {#if column.key === 'email'}
+      &lt;a href="mailto:{row.email}"&gt;{row.email}&lt;/a&gt;
+    {:else}
+      {row[column.key]}
+    {/if}
+  &lt;/svelte:fragment&gt;
+&lt;/DataTable&gt;
+</code></pre>
+<h2 id="context-api"><a class="header" href="#context-api">Context API</a></h2>
+<h3 id="basic-context-usage"><a class="header" href="#basic-context-usage">Basic Context Usage</a></h3>
+<pre><code class="language-svelte">&lt;!-- Parent.svelte --&gt;
+&lt;script&gt;
+  import { setContext } from 'svelte';
+  import Child from './Child.svelte';
+
+  const theme = {
+    primary: '#ff3e00',
+    secondary: '#676778'
+  };
+
+  setContext('theme', theme);
+
+  // Can also set functions
+  setContext('api', {
+    fetchUser: async (id) =&gt; {
+      const res = await fetch(`/api/users/${id}`);
+      return res.json();
+    }
+  });
+&lt;/script&gt;
+
+&lt;Child /&gt;
+
+&lt;!-- Child.svelte --&gt;
+&lt;script&gt;
+  import { getContext } from 'svelte';
+
+  const theme = getContext('theme');
+  const api = getContext('api');
+
+  let user;
+  $: api.fetchUser(1).then(u =&gt; user = u);
+&lt;/script&gt;
+
+&lt;div style="color: {theme.primary}"&gt;
+  {#if user}
+    &lt;p&gt;{user.name}&lt;/p&gt;
+  {/if}
+&lt;/div&gt;
+</code></pre>
+<h3 id="context-with-stores"><a class="header" href="#context-with-stores">Context with Stores</a></h3>
+<pre><code class="language-svelte">&lt;!-- App.svelte --&gt;
+&lt;script&gt;
+  import { setContext } from 'svelte';
+  import { writable } from 'svelte/store';
+
+  const user = writable({ name: 'John', isAdmin: false });
+
+  setContext('user', user);
+&lt;/script&gt;
+
+&lt;!-- AnyChildComponent.svelte --&gt;
+&lt;script&gt;
+  import { getContext } from 'svelte';
+
+  const user = getContext('user');
+&lt;/script&gt;
+
+&lt;p&gt;Hello, {$user.name}!&lt;/p&gt;
+{#if $user.isAdmin}
+  &lt;button&gt;Admin Panel&lt;/button&gt;
+{/if}
+
+&lt;button on:click={() =&gt; $user.name = 'Jane'}&gt;
+  Change Name
+&lt;/button&gt;
+</code></pre>
+<h3 id="context-module-pattern"><a class="header" href="#context-module-pattern">Context Module Pattern</a></h3>
+<pre><code class="language-javascript">// context.js
+import { getContext, setContext } from 'svelte';
+import { writable } from 'svelte/store';
+
+const CONTEXT_KEY = 'myApp';
+
+export function createAppContext() {
+  const state = writable({
+    user: null,
+    theme: 'light'
+  });
+
+  const api = {
+    setUser: (user) =&gt; state.update(s =&gt; ({ ...s, user })),
+    toggleTheme: () =&gt; state.update(s =&gt; ({
+      ...s,
+      theme: s.theme === 'light' ? 'dark' : 'light'
+    }))
+  };
+
+  setContext(CONTEXT_KEY, { state, ...api });
+  return { state, ...api };
+}
+
+export function getAppContext() {
+  return getContext(CONTEXT_KEY);
+}
+</code></pre>
+<pre><code class="language-svelte">&lt;!-- Root.svelte --&gt;
+&lt;script&gt;
+  import { createAppContext } from './context.js';
+  createAppContext();
+&lt;/script&gt;
+
+&lt;!-- AnyDescendant.svelte --&gt;
+&lt;script&gt;
+  import { getAppContext } from './context.js';
+  const { state, setUser, toggleTheme } = getAppContext();
+&lt;/script&gt;
+
+&lt;p&gt;Theme: {$state.theme}&lt;/p&gt;
+&lt;button on:click={toggleTheme}&gt;Toggle Theme&lt;/button&gt;
+</code></pre>
+<h2 id="actions-custom-directives"><a class="header" href="#actions-custom-directives">Actions (Custom Directives)</a></h2>
+<h3 id="basic-action"><a class="header" href="#basic-action">Basic Action</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  function tooltip(node, text) {
+    const tooltip = document.createElement('div');
+    tooltip.textContent = text;
+    tooltip.className = 'tooltip';
+
+    function mouseOver() {
+      document.body.appendChild(tooltip);
+      const rect = node.getBoundingClientRect();
+      tooltip.style.left = rect.left + 'px';
+      tooltip.style.top = (rect.top - tooltip.offsetHeight - 5) + 'px';
+    }
+
+    function mouseOut() {
+      tooltip.remove();
+    }
+
+    node.addEventListener('mouseover', mouseOver);
+    node.addEventListener('mouseout', mouseOut);
+
+    return {
+      destroy() {
+        node.removeEventListener('mouseover', mouseOver);
+        node.removeEventListener('mouseout', mouseOut);
+      }
+    };
+  }
+&lt;/script&gt;
+
+&lt;button use:tooltip="This is a tooltip"&gt;
+  Hover me
+&lt;/button&gt;
+
+&lt;style&gt;
+  :global(.tooltip) {
+    position: absolute;
+    background: black;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+&lt;/style&gt;
+</code></pre>
+<h3 id="action-with-parameters"><a class="header" href="#action-with-parameters">Action with Parameters</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  function longpress(node, duration = 500) {
+    let timer;
+
+    const handleMousedown = () =&gt; {
+      timer = setTimeout(() =&gt; {
+        node.dispatchEvent(new CustomEvent('longpress'));
+      }, duration);
+    };
+
+    const handleMouseup = () =&gt; {
+      clearTimeout(timer);
+    };
+
+    node.addEventListener('mousedown', handleMousedown);
+    node.addEventListener('mouseup', handleMouseup);
+
+    return {
+      update(newDuration) {
+        duration = newDuration;
+      },
+      destroy() {
+        node.removeEventListener('mousedown', handleMousedown);
+        node.removeEventListener('mouseup', handleMouseup);
+      }
+    };
+  }
+&lt;/script&gt;
+
+&lt;button
+  use:longpress={2000}
+  on:longpress={() =&gt; alert('Long pressed!')}
+&gt;
+  Press and hold
+&lt;/button&gt;
+</code></pre>
+<h3 id="practical-actions"><a class="header" href="#practical-actions">Practical Actions</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  // Click outside action
+  function clickOutside(node) {
+    const handleClick = (event) =&gt; {
+      if (!node.contains(event.target)) {
+        node.dispatchEvent(new CustomEvent('outclick'));
+      }
+    };
+
+    document.addEventListener('click', handleClick, true);
+
+    return {
+      destroy() {
+        document.removeEventListener('click', handleClick, true);
+      }
+    };
+  }
+
+  // Auto-resize textarea
+  function autoresize(node) {
+    function resize() {
+      node.style.height = 'auto';
+      node.style.height = node.scrollHeight + 'px';
+    }
+
+    node.addEventListener('input', resize);
+    resize();
+
+    return {
+      destroy() {
+        node.removeEventListener('input', resize);
+      }
+    };
+  }
+
+  let showDropdown = false;
+&lt;/script&gt;
+
+&lt;div
+  class="dropdown"
+  use:clickOutside
+  on:outclick={() =&gt; showDropdown = false}
+&gt;
+  &lt;button on:click={() =&gt; showDropdown = !showDropdown}&gt;
+    Toggle
+  &lt;/button&gt;
+  {#if showDropdown}
+    &lt;div class="menu"&gt;Dropdown content&lt;/div&gt;
+  {/if}
+&lt;/div&gt;
+
+&lt;textarea use:autoresize placeholder="Auto-resizing textarea"&gt;&lt;/textarea&gt;
+</code></pre>
+<h2 id="transitions--animations"><a class="header" href="#transitions--animations">Transitions &amp; Animations</a></h2>
+<h3 id="built-in-transitions"><a class="header" href="#built-in-transitions">Built-in Transitions</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { fade, fly, slide, scale, blur } from 'svelte/transition';
+  import { quintOut } from 'svelte/easing';
+
+  let visible = true;
+&lt;/script&gt;
+
+&lt;button on:click={() =&gt; visible = !visible}&gt;Toggle&lt;/button&gt;
+
+{#if visible}
+  &lt;!-- Fade --&gt;
+  &lt;div transition:fade={{ duration: 300 }}&gt;Fades in and out&lt;/div&gt;
+
+  &lt;!-- Fly --&gt;
+  &lt;div transition:fly={{ y: 200, duration: 500, easing: quintOut }}&gt;
+    Flies in and out
+  &lt;/div&gt;
+
+  &lt;!-- Slide --&gt;
+  &lt;div transition:slide={{ duration: 300 }}&gt;Slides in and out&lt;/div&gt;
+
+  &lt;!-- Scale --&gt;
+  &lt;div transition:scale={{ start: 0.5, duration: 300 }}&gt;
+    Scales in and out
+  &lt;/div&gt;
+
+  &lt;!-- Blur --&gt;
+  &lt;div transition:blur={{ duration: 300 }}&gt;Blurs in and out&lt;/div&gt;
+{/if}
+</code></pre>
+<h3 id="directional-transitions"><a class="header" href="#directional-transitions">Directional Transitions</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { fade, fly } from 'svelte/transition';
+
+  let visible = true;
+&lt;/script&gt;
+
+{#if visible}
+  &lt;!-- Different transitions for in and out --&gt;
+  &lt;div
+    in:fly={{ y: -100, duration: 300 }}
+    out:fade={{ duration: 200 }}
+  &gt;
+    Flies in, fades out
+  &lt;/div&gt;
+{/if}
+</code></pre>
+<h3 id="custom-transitions"><a class="header" href="#custom-transitions">Custom Transitions</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { cubicOut } from 'svelte/easing';
+
+  function typewriter(node, { speed = 1 }) {
+    const valid = node.childNodes.length === 1 &amp;&amp;
+                  node.childNodes[0].nodeType === Node.TEXT_NODE;
+
+    if (!valid) return {};
+
+    const text = node.textContent;
+    const duration = text.length / (speed * 0.01);
+
+    return {
+      duration,
+      tick: t =&gt; {
+        const i = Math.trunc(text.length * t);
+        node.textContent = text.slice(0, i);
+      }
+    };
+  }
+
+  function spin(node, { duration = 1000 }) {
+    return {
+      duration,
+      css: t =&gt; {
+        const eased = cubicOut(t);
+        return `
+          transform: rotate(${eased * 360}deg);
+          opacity: ${t};
+        `;
+      }
+    };
+  }
+
+  let visible = true;
+&lt;/script&gt;
+
+{#if visible}
+  &lt;p transition:typewriter={{ speed: 1 }}&gt;
+    This text will appear letter by letter
+  &lt;/p&gt;
+
+  &lt;div transition:spin={{ duration: 500 }}&gt;
+    Spinning element
+  &lt;/div&gt;
+{/if}
+</code></pre>
+<h3 id="deferred-transitions-crossfade"><a class="header" href="#deferred-transitions-crossfade">Deferred Transitions (Crossfade)</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { quintOut } from 'svelte/easing';
+  import { crossfade } from 'svelte/transition';
+
+  const [send, receive] = crossfade({
+    duration: 300,
+    easing: quintOut
+  });
+
+  let todos = [
+    { id: 1, done: false, text: 'Learn Svelte' },
+    { id: 2, done: false, text: 'Build an app' }
+  ];
+
+  function toggle(id) {
+    todos = todos.map(todo =&gt;
+      todo.id === id ? { ...todo, done: !todo.done } : todo
+    );
+  }
+&lt;/script&gt;
+
+&lt;div class="columns"&gt;
+  &lt;div&gt;
+    &lt;h2&gt;Todo&lt;/h2&gt;
+    {#each todos.filter(t =&gt; !t.done) as todo (todo.id)}
+      &lt;div
+        in:receive={{ key: todo.id }}
+        out:send={{ key: todo.id }}
+        on:click={() =&gt; toggle(todo.id)}
+      &gt;
+        {todo.text}
+      &lt;/div&gt;
+    {/each}
+  &lt;/div&gt;
+
+  &lt;div&gt;
+    &lt;h2&gt;Done&lt;/h2&gt;
+    {#each todos.filter(t =&gt; t.done) as todo (todo.id)}
+      &lt;div
+        in:receive={{ key: todo.id }}
+        out:send={{ key: todo.id }}
+        on:click={() =&gt; toggle(todo.id)}
+      &gt;
+        {todo.text}
+      &lt;/div&gt;
+    {/each}
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3 id="animations-motion"><a class="header" href="#animations-motion">Animations (Motion)</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { flip } from 'svelte/animate';
+  import { quintOut } from 'svelte/easing';
+
+  let items = [1, 2, 3, 4, 5];
+
+  function shuffle() {
+    items = items.sort(() =&gt; Math.random() - 0.5);
+  }
+&lt;/script&gt;
+
+&lt;button on:click={shuffle}&gt;Shuffle&lt;/button&gt;
+
+{#each items as item (item)}
+  &lt;div animate:flip={{ duration: 300, easing: quintOut }}&gt;
+    {item}
+  &lt;/div&gt;
+{/each}
+</code></pre>
+<h2 id="advanced-store-patterns"><a class="header" href="#advanced-store-patterns">Advanced Store Patterns</a></h2>
+<h3 id="derived-stores"><a class="header" href="#derived-stores">Derived Stores</a></h3>
+<pre><code class="language-javascript">// stores.js
+import { writable, derived } from 'svelte/store';
+
+export const firstName = writable('John');
+export const lastName = writable('Doe');
+
+// Derived from single store
+export const fullName = derived(
+  [firstName, lastName],
+  ([$firstName, $lastName]) =&gt; `${$firstName} ${$lastName}`
+);
+
+// Derived with custom logic
+export const items = writable([
+  { id: 1, price: 10, quantity: 2 },
+  { id: 2, price: 20, quantity: 1 }
+]);
+
+export const total = derived(
+  items,
+  ($items) =&gt; $items.reduce((sum, item) =&gt; sum + item.price * item.quantity, 0)
+);
+
+// Async derived store
+export const userId = writable(1);
+
+export const user = derived(
+  userId,
+  ($userId, set) =&gt; {
+    fetch(`/api/users/${$userId}`)
+      .then(res =&gt; res.json())
+      .then(data =&gt; set(data));
+
+    return () =&gt; {
+      // Cleanup function
+    };
+  },
+  null // Initial value
+);
+</code></pre>
+<h3 id="readable-stores"><a class="header" href="#readable-stores">Readable Stores</a></h3>
+<pre><code class="language-javascript">// stores.js
+import { readable } from 'svelte/store';
+
+// Time store
+export const time = readable(new Date(), (set) =&gt; {
+  const interval = setInterval(() =&gt; {
+    set(new Date());
+  }, 1000);
+
+  return () =&gt; clearInterval(interval);
+});
+
+// Mouse position store
+export const mousePosition = readable({ x: 0, y: 0 }, (set) =&gt; {
+  const handleMouseMove = (event) =&gt; {
+    set({ x: event.clientX, y: event.clientY });
+  };
+
+  document.addEventListener('mousemove', handleMouseMove);
+
+  return () =&gt; {
+    document.removeEventListener('mousemove', handleMouseMove);
+  };
+});
+
+// WebSocket store
+export const websocket = readable(null, (set) =&gt; {
+  const ws = new WebSocket('wss://example.com/socket');
+
+  ws.addEventListener('message', (event) =&gt; {
+    set(JSON.parse(event.data));
+  });
+
+  return () =&gt; ws.close();
+});
+</code></pre>
+<h3 id="custom-stores"><a class="header" href="#custom-stores">Custom Stores</a></h3>
+<pre><code class="language-javascript">// stores.js
+import { writable } from 'svelte/store';
+
+// Custom store with methods
+function createCounter() {
+  const { subscribe, set, update } = writable(0);
+
+  return {
+    subscribe,
+    increment: () =&gt; update(n =&gt; n + 1),
+    decrement: () =&gt; update(n =&gt; n - 1),
+    reset: () =&gt; set(0)
+  };
+}
+
+export const counter = createCounter();
+
+// LocalStorage store
+function createLocalStore(key, initial) {
+  const stored = localStorage.getItem(key);
+  const { subscribe, set, update } = writable(
+    stored ? JSON.parse(stored) : initial
+  );
+
+  return {
+    subscribe,
+    set: (value) =&gt; {
+      localStorage.setItem(key, JSON.stringify(value));
+      set(value);
+    },
+    update: (fn) =&gt; {
+      update(value =&gt; {
+        const newValue = fn(value);
+        localStorage.setItem(key, JSON.stringify(newValue));
+        return newValue;
+      });
+    }
+  };
+}
+
+export const preferences = createLocalStore('preferences', {
+  theme: 'light',
+  language: 'en'
+});
+
+// Async store with loading state
+function createAsyncStore(url) {
+  const { subscribe, set } = writable({
+    loading: true,
+    data: null,
+    error: null
+  });
+
+  async function load() {
+    try {
+      set({ loading: true, data: null, error: null });
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Fetch failed');
+      const data = await response.json();
+      set({ loading: false, data, error: null });
+    } catch (error) {
+      set({ loading: false, data: null, error: error.message });
+    }
+  }
+
+  load();
+
+  return {
+    subscribe,
+    reload: load
+  };
+}
+
+export const users = createAsyncStore('/api/users');
+</code></pre>
+<h3 id="store-composition"><a class="header" href="#store-composition">Store Composition</a></h3>
+<pre><code class="language-javascript">// stores.js
+import { writable, derived, get } from 'svelte/store';
+
+// Shopping cart example
+function createCart() {
+  const { subscribe, set, update } = writable([]);
+
+  return {
+    subscribe,
+    addItem: (item) =&gt; update(items =&gt; {
+      const existing = items.find(i =&gt; i.id === item.id);
+      if (existing) {
+        return items.map(i =&gt;
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...items, { ...item, quantity: 1 }];
+    }),
+    removeItem: (id) =&gt; update(items =&gt; items.filter(i =&gt; i.id !== id)),
+    updateQuantity: (id, quantity) =&gt; update(items =&gt;
+      items.map(i =&gt; i.id === id ? { ...i, quantity } : i)
+    ),
+    clear: () =&gt; set([])
+  };
+}
+
+export const cart = createCart();
+
+export const cartTotal = derived(
+  cart,
+  ($cart) =&gt; $cart.reduce((sum, item) =&gt; sum + item.price * item.quantity, 0)
+);
+
+export const cartCount = derived(
+  cart,
+  ($cart) =&gt; $cart.reduce((sum, item) =&gt; sum + item.quantity, 0)
+);
+</code></pre>
+<h2 id="component-communication-patterns"><a class="header" href="#component-communication-patterns">Component Communication Patterns</a></h2>
+<h3 id="props-down-events-up"><a class="header" href="#props-down-events-up">Props Down, Events Up</a></h3>
+<pre><code class="language-svelte">&lt;!-- Parent.svelte --&gt;
+&lt;script&gt;
+  import Child from './Child.svelte';
+
+  let parentValue = 'Hello';
+
+  function handleUpdate(event) {
+    parentValue = event.detail.value;
+  }
+&lt;/script&gt;
+
+&lt;Child value={parentValue} on:update={handleUpdate} /&gt;
+
+&lt;!-- Child.svelte --&gt;
+&lt;script&gt;
+  import { createEventDispatcher } from 'svelte';
+
+  export let value;
+  const dispatch = createEventDispatcher();
+
+  function updateValue() {
+    dispatch('update', { value: 'Updated from child' });
+  }
+&lt;/script&gt;
+
+&lt;button on:click={updateValue}&gt;Update Parent&lt;/button&gt;
+</code></pre>
+<h3 id="event-forwarding"><a class="header" href="#event-forwarding">Event Forwarding</a></h3>
+<pre><code class="language-svelte">&lt;!-- Child.svelte --&gt;
+&lt;button on:click&gt;
+  Click me
+&lt;/button&gt;
+
+&lt;!-- Parent.svelte --&gt;
+&lt;script&gt;
+  import Child from './Child.svelte';
+&lt;/script&gt;
+
+&lt;Child on:click={() =&gt; console.log('Clicked!')} /&gt;
+</code></pre>
+<h3 id="store-based-communication"><a class="header" href="#store-based-communication">Store-based Communication</a></h3>
+<pre><code class="language-javascript">// shared.js
+import { writable } from 'svelte/store';
+
+export const sharedState = writable({ message: 'Hello' });
+</code></pre>
+<pre><code class="language-svelte">&lt;!-- ComponentA.svelte --&gt;
+&lt;script&gt;
+  import { sharedState } from './shared.js';
+&lt;/script&gt;
+
+&lt;input bind:value={$sharedState.message}&gt;
+
+&lt;!-- ComponentB.svelte --&gt;
+&lt;script&gt;
+  import { sharedState } from './shared.js';
+&lt;/script&gt;
+
+&lt;p&gt;{$sharedState.message}&lt;/p&gt;
+</code></pre>
+<h3 id="component-instance-references"><a class="header" href="#component-instance-references">Component Instance References</a></h3>
+<pre><code class="language-svelte">&lt;!-- Modal.svelte --&gt;
+&lt;script&gt;
+  let visible = false;
+
+  export function open() {
+    visible = true;
+  }
+
+  export function close() {
+    visible = false;
+  }
+&lt;/script&gt;
+
+{#if visible}
+  &lt;div class="modal"&gt;
+    &lt;slot {close} /&gt;
+  &lt;/div&gt;
+{/if}
+
+&lt;!-- Parent.svelte --&gt;
+&lt;script&gt;
+  import Modal from './Modal.svelte';
+
+  let modal;
+&lt;/script&gt;
+
+&lt;button on:click={() =&gt; modal.open()}&gt;Open Modal&lt;/button&gt;
+
+&lt;Modal bind:this={modal}&gt;
+  &lt;h2&gt;Modal Title&lt;/h2&gt;
+  &lt;button on:click={() =&gt; modal.close()}&gt;Close&lt;/button&gt;
+&lt;/Modal&gt;
+</code></pre>
+<h2 id="conditional-rendering--logic"><a class="header" href="#conditional-rendering--logic">Conditional Rendering &amp; Logic</a></h2>
+<h3 id="ifelse-blocks"><a class="header" href="#ifelse-blocks">If/Else Blocks</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let user = { loggedIn: false, isAdmin: false };
+&lt;/script&gt;
+
+{#if user.loggedIn}
+  &lt;p&gt;Welcome back!&lt;/p&gt;
+  {#if user.isAdmin}
+    &lt;button&gt;Admin Panel&lt;/button&gt;
+  {:else}
+    &lt;p&gt;Regular user&lt;/p&gt;
+  {/if}
+{:else}
+  &lt;button&gt;Log in&lt;/button&gt;
+{/if}
+
+&lt;!-- Else if --&gt;
+{#if x &gt; 10}
+  &lt;p&gt;x is greater than 10&lt;/p&gt;
+{:else if x &lt; 5}
+  &lt;p&gt;x is less than 5&lt;/p&gt;
+{:else}
+  &lt;p&gt;x is between 5 and 10&lt;/p&gt;
+{/if}
+</code></pre>
+<h3 id="each-blocks"><a class="header" href="#each-blocks">Each Blocks</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let items = [
+    { id: 1, name: 'Apple' },
+    { id: 2, name: 'Banana' },
+    { id: 3, name: 'Cherry' }
+  ];
+&lt;/script&gt;
+
+&lt;!-- Basic each --&gt;
+{#each items as item}
+  &lt;p&gt;{item.name}&lt;/p&gt;
+{/each}
+
+&lt;!-- With index --&gt;
+{#each items as item, index}
+  &lt;p&gt;{index + 1}: {item.name}&lt;/p&gt;
+{/each}
+
+&lt;!-- With key (important for animations and performance) --&gt;
+{#each items as item (item.id)}
+  &lt;p&gt;{item.name}&lt;/p&gt;
+{/each}
+
+&lt;!-- Destructuring --&gt;
+{#each items as { id, name }}
+  &lt;p&gt;{id}: {name}&lt;/p&gt;
+{/each}
+
+&lt;!-- With else --&gt;
+{#each items as item}
+  &lt;p&gt;{item.name}&lt;/p&gt;
+{:else}
+  &lt;p&gt;No items&lt;/p&gt;
+{/each}
+</code></pre>
+<h3 id="await-blocks"><a class="header" href="#await-blocks">Await Blocks</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  async function fetchData() {
+    const response = await fetch('/api/data');
+    if (!response.ok) throw new Error('Failed to fetch');
+    return response.json();
+  }
+
+  let promise = fetchData();
+&lt;/script&gt;
+
+&lt;!-- Basic await --&gt;
+{#await promise}
+  &lt;p&gt;Loading...&lt;/p&gt;
+{:then data}
+  &lt;p&gt;Data: {JSON.stringify(data)}&lt;/p&gt;
+{:catch error}
+  &lt;p&gt;Error: {error.message}&lt;/p&gt;
+{/await}
+
+&lt;!-- Only handle then --&gt;
+{#await promise then data}
+  &lt;p&gt;{data.message}&lt;/p&gt;
+{/await}
+
+&lt;!-- Only handle catch --&gt;
+{#await promise catch error}
+  &lt;p&gt;Error: {error.message}&lt;/p&gt;
+{/await}
+</code></pre>
+<h3 id="key-blocks"><a class="header" href="#key-blocks">Key Blocks</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let value = 0;
+
+  // Component will be destroyed and recreated when value changes
+&lt;/script&gt;
+
+{#key value}
+  &lt;Component {value} /&gt;
+{/key}
+
+&lt;button on:click={() =&gt; value += 1}&gt;Reset Component&lt;/button&gt;
+</code></pre>
+<h2 id="form-handling-patterns"><a class="header" href="#form-handling-patterns">Form Handling Patterns</a></h2>
+<h3 id="basic-form"><a class="header" href="#basic-form">Basic Form</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let formData = {
+    name: '',
+    email: '',
+    age: '',
+    terms: false
+  };
+
+  let errors = {};
+  let submitted = false;
+
+  function validate() {
+    errors = {};
+
+    if (!formData.name) {
+      errors.name = 'Name is required';
+    }
+
+    if (!formData.email) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Invalid email format';
+    }
+
+    if (!formData.age) {
+      errors.age = 'Age is required';
+    } else if (formData.age &lt; 18) {
+      errors.age = 'Must be 18 or older';
+    }
+
+    if (!formData.terms) {
+      errors.terms = 'You must accept the terms';
+    }
+
+    return Object.keys(errors).length === 0;
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    if (validate()) {
+      submitted = true;
+      console.log('Form submitted:', formData);
+    }
+  }
+&lt;/script&gt;
+
+&lt;form on:submit={handleSubmit}&gt;
+  &lt;div&gt;
+    &lt;label for="name"&gt;Name:&lt;/label&gt;
+    &lt;input
+      id="name"
+      type="text"
+      bind:value={formData.name}
+      class:error={errors.name}
+    &gt;
+    {#if errors.name}
+      &lt;span class="error-message"&gt;{errors.name}&lt;/span&gt;
+    {/if}
+  &lt;/div&gt;
+
+  &lt;div&gt;
+    &lt;label for="email"&gt;Email:&lt;/label&gt;
+    &lt;input
+      id="email"
+      type="email"
+      bind:value={formData.email}
+      class:error={errors.email}
+    &gt;
+    {#if errors.email}
+      &lt;span class="error-message"&gt;{errors.email}&lt;/span&gt;
+    {/if}
+  &lt;/div&gt;
+
+  &lt;div&gt;
+    &lt;label for="age"&gt;Age:&lt;/label&gt;
+    &lt;input
+      id="age"
+      type="number"
+      bind:value={formData.age}
+      class:error={errors.age}
+    &gt;
+    {#if errors.age}
+      &lt;span class="error-message"&gt;{errors.age}&lt;/span&gt;
+    {/if}
+  &lt;/div&gt;
+
+  &lt;div&gt;
+    &lt;label&gt;
+      &lt;input type="checkbox" bind:checked={formData.terms}&gt;
+      I accept the terms
+    &lt;/label&gt;
+    {#if errors.terms}
+      &lt;span class="error-message"&gt;{errors.terms}&lt;/span&gt;
+    {/if}
+  &lt;/div&gt;
+
+  &lt;button type="submit"&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+
+{#if submitted}
+  &lt;div class="success"&gt;Form submitted successfully!&lt;/div&gt;
+{/if}
+
+&lt;style&gt;
+  .error {
+    border-color: red;
+  }
+  .error-message {
+    color: red;
+    font-size: 0.875rem;
+  }
+  .success {
+    color: green;
+    margin-top: 1rem;
+  }
+&lt;/style&gt;
+</code></pre>
+<h3 id="form-with-real-time-validation"><a class="header" href="#form-with-real-time-validation">Form with Real-time Validation</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let email = '';
+  let emailError = '';
+  let emailTouched = false;
+
+  $: if (emailTouched) {
+    if (!email) {
+      emailError = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      emailError = 'Invalid email format';
+    } else {
+      emailError = '';
+    }
+  }
+&lt;/script&gt;
+
+&lt;input
+  type="email"
+  bind:value={email}
+  on:blur={() =&gt; emailTouched = true}
+  class:error={emailTouched &amp;&amp; emailError}
+&gt;
+{#if emailTouched &amp;&amp; emailError}
+  &lt;span class="error-message"&gt;{emailError}&lt;/span&gt;
+{/if}
+</code></pre>
+<h3 id="dynamic-form-fields"><a class="header" href="#dynamic-form-fields">Dynamic Form Fields</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let fields = [
+    { id: 1, value: '' }
+  ];
+
+  let nextId = 2;
+
+  function addField() {
+    fields = [...fields, { id: nextId++, value: '' }];
+  }
+
+  function removeField(id) {
+    fields = fields.filter(f =&gt; f.id !== id);
+  }
+&lt;/script&gt;
+
+&lt;form&gt;
+  {#each fields as field, index (field.id)}
+    &lt;div&gt;
+      &lt;input
+        type="text"
+        bind:value={field.value}
+        placeholder="Field {index + 1}"
+      &gt;
+      {#if fields.length &gt; 1}
+        &lt;button type="button" on:click={() =&gt; removeField(field.id)}&gt;
+          Remove
+        &lt;/button&gt;
+      {/if}
+    &lt;/div&gt;
+  {/each}
+
+  &lt;button type="button" on:click={addField}&gt;
+    Add Field
+  &lt;/button&gt;
+&lt;/form&gt;
+</code></pre>
+<h2 id="async-operations--api-integration"><a class="header" href="#async-operations--api-integration">Async Operations &amp; API Integration</a></h2>
+<h3 id="fetch-with-loading-states"><a class="header" href="#fetch-with-loading-states">Fetch with Loading States</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let data = null;
+  let loading = false;
+  let error = null;
+
+  async function fetchData() {
+    loading = true;
+    error = null;
+
+    try {
+      const response = await fetch('/api/data');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      data = await response.json();
+    } catch (e) {
+      error = e.message;
+    } finally {
+      loading = false;
+    }
+  }
+&lt;/script&gt;
+
+&lt;button on:click={fetchData} disabled={loading}&gt;
+  Fetch Data
+&lt;/button&gt;
+
+{#if loading}
+  &lt;div class="spinner"&gt;Loading...&lt;/div&gt;
+{:else if error}
+  &lt;div class="error"&gt;Error: {error}&lt;/div&gt;
+{:else if data}
+  &lt;div class="data"&gt;
+    &lt;pre&gt;{JSON.stringify(data, null, 2)}&lt;/pre&gt;
+  &lt;/div&gt;
+{/if}
+</code></pre>
+<h3 id="api-hook-pattern"><a class="header" href="#api-hook-pattern">API Hook Pattern</a></h3>
+<pre><code class="language-javascript">// hooks.js
+import { writable } from 'svelte/store';
+
+export function useApi(url, options = {}) {
+  const { subscribe, set, update } = writable({
+    data: null,
+    loading: false,
+    error: null
+  });
+
+  async function execute(params = {}) {
+    update(state =&gt; ({ ...state, loading: true, error: null }));
+
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const fullUrl = queryString ? `${url}?${queryString}` : url;
+
+      const response = await fetch(fullUrl, options);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+      set({ data, loading: false, error: null });
+      return data;
+    } catch (error) {
+      set({ data: null, loading: false, error: error.message });
+      throw error;
+    }
+  }
+
+  return {
+    subscribe,
+    execute
+  };
+}
+</code></pre>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { useApi } from './hooks.js';
+
+  const users = useApi('/api/users');
+
+  $: if ($users.data) {
+    console.log('Users loaded:', $users.data);
+  }
+&lt;/script&gt;
+
+&lt;button on:click={() =&gt; users.execute()}&gt;
+  Load Users
+&lt;/button&gt;
+
+{#if $users.loading}
+  &lt;p&gt;Loading...&lt;/p&gt;
+{:else if $users.error}
+  &lt;p&gt;Error: {$users.error}&lt;/p&gt;
+{:else if $users.data}
+  &lt;ul&gt;
+    {#each $users.data as user}
+      &lt;li&gt;{user.name}&lt;/li&gt;
+    {/each}
+  &lt;/ul&gt;
+{/if}
+</code></pre>
+<h3 id="debounced-api-calls"><a class="header" href="#debounced-api-calls">Debounced API Calls</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let query = '';
+  let results = [];
+  let loading = false;
+  let debounceTimer;
+
+  async function search(q) {
+    if (!q) {
+      results = [];
+      return;
+    }
+
+    loading = true;
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      results = await response.json();
+    } catch (error) {
+      console.error('Search failed:', error);
+      results = [];
+    } finally {
+      loading = false;
+    }
+  }
+
+  $: {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() =&gt; {
+      search(query);
+    }, 300);
+  }
+&lt;/script&gt;
+
+&lt;input
+  type="text"
+  bind:value={query}
+  placeholder="Search..."
+&gt;
+
+{#if loading}
+  &lt;p&gt;Searching...&lt;/p&gt;
+{:else if results.length}
+  &lt;ul&gt;
+    {#each results as result}
+      &lt;li&gt;{result.title}&lt;/li&gt;
+    {/each}
+  &lt;/ul&gt;
+{:else if query}
+  &lt;p&gt;No results found&lt;/p&gt;
+{/if}
+</code></pre>
+<h3 id="optimistic-updates"><a class="header" href="#optimistic-updates">Optimistic Updates</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let todos = [];
+  let optimisticTodos = [];
+
+  $: optimisticTodos = todos;
+
+  async function addTodo(text) {
+    const tempId = Date.now();
+    const optimisticTodo = { id: tempId, text, pending: true };
+
+    // Add optimistically
+    optimisticTodos = [...optimisticTodos, optimisticTodo];
+
+    try {
+      const response = await fetch('/api/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+
+      const newTodo = await response.json();
+
+      // Replace optimistic with real
+      todos = [...todos, newTodo];
+      optimisticTodos = todos;
+    } catch (error) {
+      // Rollback on error
+      optimisticTodos = todos;
+      alert('Failed to add todo');
+    }
+  }
+
+  async function deleteTodo(id) {
+    const original = [...todos];
+    todos = todos.filter(t =&gt; t.id !== id);
+
+    try {
+      await fetch(`/api/todos/${id}`, { method: 'DELETE' });
+    } catch (error) {
+      // Rollback
+      todos = original;
+      alert('Failed to delete todo');
+    }
+  }
+&lt;/script&gt;
+
+{#each optimisticTodos as todo (todo.id)}
+  &lt;div class:pending={todo.pending}&gt;
+    {todo.text}
+    &lt;button on:click={() =&gt; deleteTodo(todo.id)}&gt;Delete&lt;/button&gt;
+  &lt;/div&gt;
+{/each}
+</code></pre>
+<h2 id="component-composition-patterns"><a class="header" href="#component-composition-patterns">Component Composition Patterns</a></h2>
+<h3 id="higher-order-component-pattern"><a class="header" href="#higher-order-component-pattern">Higher-Order Component Pattern</a></h3>
+<pre><code class="language-svelte">&lt;!-- WithLoading.svelte --&gt;
+&lt;script&gt;
+  export let loading = false;
+&lt;/script&gt;
+
+{#if loading}
+  &lt;div class="loading"&gt;Loading...&lt;/div&gt;
+{:else}
+  &lt;slot /&gt;
+{/if}
+
+&lt;!-- WithAuth.svelte --&gt;
+&lt;script&gt;
+  export let user = null;
+&lt;/script&gt;
+
+{#if user}
+  &lt;slot {user} /&gt;
+{:else}
+  &lt;p&gt;Please log in&lt;/p&gt;
+{/if}
+
+&lt;!-- Usage --&gt;
+&lt;WithAuth {user} let:user&gt;
+  &lt;WithLoading {loading}&gt;
+    &lt;Dashboard {user} /&gt;
+  &lt;/WithLoading&gt;
+&lt;/WithAuth&gt;
+</code></pre>
+<h3 id="render-props-via-slots"><a class="header" href="#render-props-via-slots">Render Props via Slots</a></h3>
+<pre><code class="language-svelte">&lt;!-- DataProvider.svelte --&gt;
+&lt;script&gt;
+  import { onMount } from 'svelte';
+
+  export let url;
+
+  let data = null;
+  let loading = true;
+  let error = null;
+
+  onMount(async () =&gt; {
+    try {
+      const response = await fetch(url);
+      data = await response.json();
+    } catch (e) {
+      error = e.message;
+    } finally {
+      loading = false;
+    }
+  });
+&lt;/script&gt;
+
+&lt;slot {data} {loading} {error} /&gt;
+
+&lt;!-- Usage --&gt;
+&lt;DataProvider url="/api/users" let:data let:loading let:error&gt;
+  {#if loading}
+    &lt;p&gt;Loading...&lt;/p&gt;
+  {:else if error}
+    &lt;p&gt;Error: {error}&lt;/p&gt;
+  {:else}
+    &lt;ul&gt;
+      {#each data as user}
+        &lt;li&gt;{user.name}&lt;/li&gt;
+      {/each}
+    &lt;/ul&gt;
+  {/if}
+&lt;/DataProvider&gt;
+</code></pre>
+<h3 id="compound-components"><a class="header" href="#compound-components">Compound Components</a></h3>
+<pre><code class="language-svelte">&lt;!-- Tabs.svelte --&gt;
+&lt;script&gt;
+  import { setContext } from 'svelte';
+  import { writable } from 'svelte/store';
+
+  export let active = 0;
+
+  const activeTab = writable(active);
+  setContext('tabs', { activeTab });
+
+  $: activeTab.set(active);
+&lt;/script&gt;
+
+&lt;div class="tabs"&gt;
+  &lt;slot /&gt;
+&lt;/div&gt;
+
+&lt;!-- TabList.svelte --&gt;
+&lt;div class="tab-list"&gt;
+  &lt;slot /&gt;
+&lt;/div&gt;
+
+&lt;!-- Tab.svelte --&gt;
+&lt;script&gt;
+  import { getContext } from 'svelte';
+
+  export let index;
+
+  const { activeTab } = getContext('tabs');
+&lt;/script&gt;
+
+&lt;button
+  class:active={$activeTab === index}
+  on:click={() =&gt; activeTab.set(index)}
+&gt;
+  &lt;slot /&gt;
+&lt;/button&gt;
+
+&lt;!-- TabPanel.svelte --&gt;
+&lt;script&gt;
+  import { getContext } from 'svelte';
+
+  export let index;
+
+  const { activeTab } = getContext('tabs');
+&lt;/script&gt;
+
+{#if $activeTab === index}
+  &lt;div class="tab-panel"&gt;
+    &lt;slot /&gt;
+  &lt;/div&gt;
+{/if}
+
+&lt;!-- Usage --&gt;
+&lt;script&gt;
+  import Tabs from './Tabs.svelte';
+  import TabList from './TabList.svelte';
+  import Tab from './Tab.svelte';
+  import TabPanel from './TabPanel.svelte';
+
+  let active = 0;
+&lt;/script&gt;
+
+&lt;Tabs bind:active&gt;
+  &lt;TabList&gt;
+    &lt;Tab index={0}&gt;Tab 1&lt;/Tab&gt;
+    &lt;Tab index={1}&gt;Tab 2&lt;/Tab&gt;
+    &lt;Tab index={2}&gt;Tab 3&lt;/Tab&gt;
+  &lt;/TabList&gt;
+
+  &lt;TabPanel index={0}&gt;Content 1&lt;/TabPanel&gt;
+  &lt;TabPanel index={1}&gt;Content 2&lt;/TabPanel&gt;
+  &lt;TabPanel index={2}&gt;Content 3&lt;/TabPanel&gt;
+&lt;/Tabs&gt;
+</code></pre>
+<h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
+<h3 id="keyed-each-blocks"><a class="header" href="#keyed-each-blocks">Keyed Each Blocks</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let items = [
+    { id: 1, name: 'Item 1' },
+    { id: 2, name: 'Item 2' },
+    { id: 3, name: 'Item 3' }
+  ];
+
+  function shuffle() {
+    items = items.sort(() =&gt; Math.random() - 0.5);
+  }
+&lt;/script&gt;
+
+&lt;!-- ❌ Without key - components recreated --&gt;
+{#each items as item}
+  &lt;ExpensiveComponent data={item} /&gt;
+{/each}
+
+&lt;!-- ✅ With key - components reused --&gt;
+{#each items as item (item.id)}
+  &lt;ExpensiveComponent data={item} /&gt;
+{/each}
+</code></pre>
+<h3 id="immutable-data-patterns"><a class="header" href="#immutable-data-patterns">Immutable Data Patterns</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  // ❌ Mutating - won't trigger reactivity
+  function badUpdate() {
+    items[0].name = 'Updated';
+  }
+
+  // ✅ Immutable - triggers reactivity
+  function goodUpdate() {
+    items = items.map((item, i) =&gt;
+      i === 0 ? { ...item, name: 'Updated' } : item
+    );
+  }
+
+  // ✅ Array operations
+  function addItem(item) {
+    items = [...items, item];
+  }
+
+  function removeItem(id) {
+    items = items.filter(item =&gt; item.id !== id);
+  }
+
+  function updateItem(id, updates) {
+    items = items.map(item =&gt;
+      item.id === id ? { ...item, ...updates } : item
+    );
+  }
+&lt;/script&gt;
+</code></pre>
+<h3 id="lazy-loading-components"><a class="header" href="#lazy-loading-components">Lazy Loading Components</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let HeavyComponent;
+  let showHeavy = false;
+
+  async function loadHeavy() {
+    if (!HeavyComponent) {
+      HeavyComponent = (await import('./HeavyComponent.svelte')).default;
+    }
+    showHeavy = true;
+  }
+&lt;/script&gt;
+
+&lt;button on:click={loadHeavy}&gt;Load Heavy Component&lt;/button&gt;
+
+{#if showHeavy &amp;&amp; HeavyComponent}
+  &lt;svelte:component this={HeavyComponent} /&gt;
+{/if}
+</code></pre>
+<h3 id="memoization-with-reactive-statements"><a class="header" href="#memoization-with-reactive-statements">Memoization with Reactive Statements</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let numbers = [1, 2, 3, 4, 5];
+  let filter = 'all';
+
+  // Memoized computation - only runs when dependencies change
+  $: filtered = numbers.filter(n =&gt; {
+    console.log('Filtering...');
+    if (filter === 'even') return n % 2 === 0;
+    if (filter === 'odd') return n % 2 === 1;
+    return true;
+  });
+
+  $: sum = filtered.reduce((a, b) =&gt; a + b, 0);
+&lt;/script&gt;
+</code></pre>
+<h3 id="virtual-lists-for-long-lists"><a class="header" href="#virtual-lists-for-long-lists">Virtual Lists for Long Lists</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { onMount, tick } from 'svelte';
+
+  export let items = [];
+  export let itemHeight = 50;
+
+  let viewport;
+  let contents;
+  let viewportHeight = 0;
+  let scrollTop = 0;
+
+  $: visibleItems = Math.ceil(viewportHeight / itemHeight) + 1;
+  $: start = Math.floor(scrollTop / itemHeight);
+  $: end = start + visibleItems;
+  $: visible = items.slice(start, end);
+  $: paddingTop = start * itemHeight;
+  $: paddingBottom = (items.length - end) * itemHeight;
+
+  onMount(() =&gt; {
+    viewportHeight = viewport.offsetHeight;
+  });
+&lt;/script&gt;
+
+&lt;div
+  class="viewport"
+  bind:this={viewport}
+  bind:offsetHeight={viewportHeight}
+  on:scroll={() =&gt; scrollTop = viewport.scrollTop}
+&gt;
+  &lt;div
+    class="contents"
+    style="padding-top: {paddingTop}px; padding-bottom: {paddingBottom}px;"
+  &gt;
+    {#each visible as item (item.id)}
+      &lt;div class="item" style="height: {itemHeight}px;"&gt;
+        {item.name}
+      &lt;/div&gt;
+    {/each}
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+  .viewport {
+    height: 400px;
+    overflow-y: auto;
+  }
+&lt;/style&gt;
+</code></pre>
+<h2 id="typescript-integration"><a class="header" href="#typescript-integration">TypeScript Integration</a></h2>
+<h3 id="typed-component-props"><a class="header" href="#typed-component-props">Typed Component Props</a></h3>
+<pre><code class="language-svelte">&lt;!-- Component.svelte --&gt;
+&lt;script lang="ts"&gt;
+  export let name: string;
+  export let age: number = 0;
+  export let optional?: string;
+  export let callback: (value: string) =&gt; void;
+
+  interface User {
+    id: number;
+    name: string;
+    email: string;
+  }
+
+  export let user: User;
+
+  let count: number = 0;
+
+  function increment(): void {
+    count += 1;
+  }
+&lt;/script&gt;
+
+&lt;button on:click={increment}&gt;
+  {name} ({age}) - Count: {count}
+&lt;/button&gt;
+</code></pre>
+<h3 id="typed-events"><a class="header" href="#typed-events">Typed Events</a></h3>
+<pre><code class="language-svelte">&lt;script lang="ts"&gt;
+  import { createEventDispatcher } from 'svelte';
+
+  interface CustomEvents {
+    submit: { value: string; timestamp: number };
+    cancel: never;
+  }
+
+  const dispatch = createEventDispatcher&lt;CustomEvents&gt;();
+
+  function handleSubmit() {
+    dispatch('submit', {
+      value: 'data',
+      timestamp: Date.now()
+    });
+  }
+
+  function handleCancel() {
+    dispatch('cancel');
+  }
+&lt;/script&gt;
+</code></pre>
+<h3 id="typed-stores"><a class="header" href="#typed-stores">Typed Stores</a></h3>
+<pre><code class="language-typescript">// stores.ts
+import { writable, derived, type Writable, type Readable } from 'svelte/store';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export const user: Writable&lt;User | null&gt; = writable(null);
+
+export const userName: Readable&lt;string&gt; = derived(
+  user,
+  ($user) =&gt; $user?.name ?? 'Guest'
+);
+
+// Custom typed store
+interface CounterStore extends Readable&lt;number&gt; {
+  increment: () =&gt; void;
+  decrement: () =&gt; void;
+  reset: () =&gt; void;
+}
+
+function createCounter(): CounterStore {
+  const { subscribe, set, update } = writable(0);
+
+  return {
+    subscribe,
+    increment: () =&gt; update(n =&gt; n + 1),
+    decrement: () =&gt; update(n =&gt; n - 1),
+    reset: () =&gt; set(0)
+  };
+}
+
+export const counter: CounterStore = createCounter();
+</code></pre>
+<h3 id="generic-components"><a class="header" href="#generic-components">Generic Components</a></h3>
+<pre><code class="language-svelte">&lt;!-- List.svelte --&gt;
+&lt;script lang="ts" generics="T"&gt;
+  export let items: T[];
+  export let getKey: (item: T) =&gt; string | number;
+  export let renderItem: (item: T) =&gt; string;
+&lt;/script&gt;
+
+&lt;ul&gt;
+  {#each items as item (getKey(item))}
+    &lt;li&gt;{renderItem(item)}&lt;/li&gt;
+  {/each}
+&lt;/ul&gt;
+
+&lt;!-- Usage --&gt;
+&lt;script lang="ts"&gt;
+  import List from './List.svelte';
+
+  interface Product {
+    id: number;
+    name: string;
+    price: number;
+  }
+
+  const products: Product[] = [
+    { id: 1, name: 'Apple', price: 1.99 },
+    { id: 2, name: 'Banana', price: 0.99 }
+  ];
+&lt;/script&gt;
+
+&lt;List
+  items={products}
+  getKey={(p) =&gt; p.id}
+  renderItem={(p) =&gt; `${p.name} - $${p.price}`}
+/&gt;
+</code></pre>
+<h2 id="common-patterns--best-practices"><a class="header" href="#common-patterns--best-practices">Common Patterns &amp; Best Practices</a></h2>
+<h3 id="containerpresenter-pattern"><a class="header" href="#containerpresenter-pattern">Container/Presenter Pattern</a></h3>
+<pre><code class="language-svelte">&lt;!-- UserContainer.svelte (Smart Component) --&gt;
+&lt;script&gt;
+  import { onMount } from 'svelte';
+  import UserPresenter from './UserPresenter.svelte';
+
+  let user = null;
+  let loading = true;
+  let error = null;
+
+  onMount(async () =&gt; {
+    try {
+      const response = await fetch('/api/user');
+      user = await response.json();
+    } catch (e) {
+      error = e.message;
+    } finally {
+      loading = false;
+    }
+  });
+
+  function handleUpdate(event) {
+    // Handle update logic
+  }
+&lt;/script&gt;
+
+&lt;UserPresenter
+  {user}
+  {loading}
+  {error}
+  on:update={handleUpdate}
+/&gt;
+
+&lt;!-- UserPresenter.svelte (Dumb Component) --&gt;
+&lt;script&gt;
+  import { createEventDispatcher } from 'svelte';
+
+  export let user;
+  export let loading;
+  export let error;
+
+  const dispatch = createEventDispatcher();
+&lt;/script&gt;
+
+{#if loading}
+  &lt;p&gt;Loading...&lt;/p&gt;
+{:else if error}
+  &lt;p&gt;Error: {error}&lt;/p&gt;
+{:else if user}
+  &lt;div class="user"&gt;
+    &lt;h2&gt;{user.name}&lt;/h2&gt;
+    &lt;p&gt;{user.email}&lt;/p&gt;
+    &lt;button on:click={() =&gt; dispatch('update')}&gt;
+      Update
+    &lt;/button&gt;
+  &lt;/div&gt;
+{/if}
+</code></pre>
+<h3 id="singleton-store-pattern"><a class="header" href="#singleton-store-pattern">Singleton Store Pattern</a></h3>
+<pre><code class="language-javascript">// auth.js
+import { writable } from 'svelte/store';
+
+function createAuth() {
+  const { subscribe, set, update } = writable({
+    user: null,
+    token: null,
+    loading: false
+  });
+
+  return {
+    subscribe,
+    login: async (credentials) =&gt; {
+      update(state =&gt; ({ ...state, loading: true }));
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(credentials)
+        });
+        const data = await response.json();
+        set({ user: data.user, token: data.token, loading: false });
+      } catch (error) {
+        update(state =&gt; ({ ...state, loading: false }));
+        throw error;
+      }
+    },
+    logout: () =&gt; {
+      set({ user: null, token: null, loading: false });
+    }
+  };
+}
+
+export const auth = createAuth();
+</code></pre>
+<h3 id="feature-flags-pattern"><a class="header" href="#feature-flags-pattern">Feature Flags Pattern</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  import { getContext } from 'svelte';
+
+  const features = getContext('features') || {};
+
+  $: hasNewFeature = features.newFeature === true;
+&lt;/script&gt;
+
+{#if hasNewFeature}
+  &lt;NewFeatureComponent /&gt;
+{:else}
+  &lt;OldFeatureComponent /&gt;
+{/if}
+</code></pre>
+<h3 id="error-boundary-pattern"><a class="header" href="#error-boundary-pattern">Error Boundary Pattern</a></h3>
+<pre><code class="language-svelte">&lt;!-- ErrorBoundary.svelte --&gt;
+&lt;script&gt;
+  import { onMount } from 'svelte';
+
+  let error = null;
+
+  onMount(() =&gt; {
+    window.addEventListener('error', handleError);
+    return () =&gt; window.removeEventListener('error', handleError);
+  });
+
+  function handleError(event) {
+    error = event.error;
+  }
+
+  export function reset() {
+    error = null;
+  }
+&lt;/script&gt;
+
+{#if error}
+  &lt;div class="error-boundary"&gt;
+    &lt;h2&gt;Something went wrong&lt;/h2&gt;
+    &lt;p&gt;{error.message}&lt;/p&gt;
+    &lt;button on:click={reset}&gt;Try again&lt;/button&gt;
+  &lt;/div&gt;
+{:else}
+  &lt;slot /&gt;
+{/if}
+</code></pre>
+<h2 id="common-gotchas--troubleshooting"><a class="header" href="#common-gotchas--troubleshooting">Common Gotchas &amp; Troubleshooting</a></h2>
+<h3 id="reactivity-gotchas"><a class="header" href="#reactivity-gotchas">Reactivity Gotchas</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let obj = { count: 0 };
+  let arr = [1, 2, 3];
+
+  // ❌ These won't trigger updates
+  obj.count += 1;
+  arr.push(4);
+  arr[0] = 10;
+
+  // ✅ These will trigger updates
+  obj = { ...obj, count: obj.count + 1 };
+  arr = [...arr, 4];
+  arr = arr.map((v, i) =&gt; i === 0 ? 10 : v);
+
+  // ✅ Or reassign to trigger
+  arr.push(4);
+  arr = arr;
+&lt;/script&gt;
+</code></pre>
+<h3 id="event-modifier-ordering"><a class="header" href="#event-modifier-ordering">Event Modifier Ordering</a></h3>
+<pre><code class="language-svelte">&lt;!-- Order matters! --&gt;
+&lt;button on:click|preventDefault|stopPropagation={handler}&gt;
+  Click
+&lt;/button&gt;
+
+&lt;!-- Common modifiers --&gt;
+&lt;div on:click|preventDefault&gt;...&lt;/div&gt;
+&lt;div on:click|stopPropagation&gt;...&lt;/div&gt;
+&lt;div on:click|capture&gt;...&lt;/div&gt;
+&lt;div on:click|once&gt;...&lt;/div&gt;
+&lt;div on:click|passive&gt;...&lt;/div&gt;
+&lt;div on:click|self&gt;...&lt;/div&gt;
+&lt;div on:click|trusted&gt;...&lt;/div&gt;
+</code></pre>
+<h3 id="binding-lifecycle"><a class="header" href="#binding-lifecycle">Binding Lifecycle</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  let element;
+
+  // ❌ element is undefined here
+  console.log(element);
+
+  // ✅ Use onMount
+  import { onMount } from 'svelte';
+
+  onMount(() =&gt; {
+    console.log(element); // Now it's defined
+  });
+
+  // ✅ Or reactive statement
+  $: if (element) {
+    console.log(element);
+  }
+&lt;/script&gt;
+
+&lt;div bind:this={element}&gt;Content&lt;/div&gt;
+</code></pre>
+<h3 id="style-scoping"><a class="header" href="#style-scoping">Style Scoping</a></h3>
+<pre><code class="language-svelte">&lt;style&gt;
+  /* Scoped to this component */
+  p {
+    color: red;
+  }
+
+  /* Global styles */
+  :global(body) {
+    margin: 0;
+  }
+
+  /* Mixing scoped and global */
+  div :global(.external-class) {
+    color: blue;
+  }
+
+  /* Global modifier */
+  :global(.global-class) p {
+    color: green;
+  }
+&lt;/style&gt;
+</code></pre>
+<h3 id="await-block-pitfalls"><a class="header" href="#await-block-pitfalls">Await Block Pitfalls</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  // ❌ Promise doesn't update
+  let promise = fetch('/api/data');
+
+  function refresh() {
+    fetch('/api/data'); // This doesn't update the promise
+  }
+
+  // ✅ Reassign the promise
+  function refreshCorrect() {
+    promise = fetch('/api/data');
+  }
+&lt;/script&gt;
+
+{#await promise}
+  &lt;p&gt;Loading...&lt;/p&gt;
+{:then data}
+  &lt;p&gt;Data loaded&lt;/p&gt;
+{/await}
+
+&lt;button on:click={refreshCorrect}&gt;Refresh&lt;/button&gt;
+</code></pre>
+<h3 id="component-imports"><a class="header" href="#component-imports">Component Imports</a></h3>
+<pre><code class="language-svelte">&lt;script&gt;
+  // ❌ This won't work for conditional rendering
+  import Component from './Component.svelte';
+  let show = false;
+&lt;/script&gt;
+
+{#if show}
+  &lt;Component /&gt; &lt;!-- Always imported even when hidden --&gt;
+{/if}
+
+&lt;!-- ✅ Use dynamic import for code splitting --&gt;
+&lt;script&gt;
+  let Component;
+  let show = false;
+
+  async function loadComponent() {
+    if (!Component) {
+      Component = (await import('./Component.svelte')).default;
+    }
+    show = true;
+  }
+&lt;/script&gt;
+
+{#if show &amp;&amp; Component}
+  &lt;svelte:component this={Component} /&gt;
+{/if}
+</code></pre>
 <h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
 <div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Syntax</th></tr></thead><tbody>
 <tr><td>Reactive variable</td><td><code>$: value = ...</code></td></tr>
 <tr><td>Event handler</td><td><code>on:click={handler}</code></td></tr>
+<tr><td>Event modifiers</td><td><code>on:click|preventDefault|stopPropagation</code></td></tr>
 <tr><td>Two-way binding</td><td><code>bind:value={variable}</code></td></tr>
-<tr><td>Conditional</td><td><code>{#if condition}...{/if}</code></td></tr>
+<tr><td>Element reference</td><td><code>bind:this={element}</code></td></tr>
+<tr><td>Conditional</td><td><code>{#if condition}...{:else}...{/if}</code></td></tr>
 <tr><td>Loop</td><td><code>{#each items as item}...{/each}</code></td></tr>
-<tr><td>Await</td><td><code>{#await promise}...{/await}</code></td></tr>
+<tr><td>Keyed loop</td><td><code>{#each items as item (item.id)}...{/each}</code></td></tr>
+<tr><td>Await</td><td><code>{#await promise}...{:then data}...{:catch error}...{/await}</code></td></tr>
+<tr><td>Slot</td><td><code>&lt;slot /&gt;</code> or <code>&lt;slot name="header" /&gt;</code></td></tr>
+<tr><td>Slot props</td><td><code>&lt;slot {item} /&gt;</code> / <code>let:item</code></td></tr>
+<tr><td>Store subscription</td><td><code>$storeName</code></td></tr>
+<tr><td>Component binding</td><td><code>&lt;Component bind:prop={value} /&gt;</code></td></tr>
+<tr><td>Dynamic component</td><td><code>&lt;svelte:component this={Component} /&gt;</code></td></tr>
+<tr><td>Self reference</td><td><code>&lt;svelte:self /&gt;</code></td></tr>
+<tr><td>Window events</td><td><code>&lt;svelte:window on:resize={handler} /&gt;</code></td></tr>
+<tr><td>Body events</td><td><code>&lt;svelte:body on:click={handler} /&gt;</code></td></tr>
+<tr><td>Head content</td><td><code>&lt;svelte:head&gt;&lt;title&gt;...&lt;/title&gt;&lt;/svelte:head&gt;</code></td></tr>
+<tr><td>Transition</td><td><code>transition:fade</code> or <code>in:fade out:fly</code></td></tr>
+<tr><td>Animation</td><td><code>animate:flip</code></td></tr>
+<tr><td>Action</td><td><code>use:action</code> or <code>use:action={params}</code></td></tr>
+<tr><td>Class directive</td><td><code>class:active={isActive}</code></td></tr>
+<tr><td>Style directive</td><td><code>style:color={color}</code></td></tr>
 </tbody></table>
 </div>
 <p>Svelte compiles components to highly efficient imperative code, resulting in small bundle sizes and excellent performance.</p>

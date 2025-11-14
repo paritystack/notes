@@ -9,7 +9,7 @@ SR = \frac{R_p - R_f}{\sigma_p}
 $$
 
 Where:
-- \( R_p \) is the return of the portfolio
+- \\( R_p \\) is the return of the portfolio
 - \( R_f \) is the risk-free rate (usually the return of a benchmark like the S&P 500)
 - \( \sigma_p \) is the standard deviation of the portfolio's returns
 

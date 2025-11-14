@@ -9,6 +9,7 @@
     - [Git Commands](git/commands.md)
     - [Git Internals](git/internals.md)
     - [Github](git/github.md)
+    - [Repo](git/repo.md)
 
 - [Programming Languages](programming/README.md)
     - [Python](programming/python.md)
@@ -48,11 +49,13 @@
     - [Namespace](linux/namespace.md)
     - [Selinux](linux/selinux.md)
     - [Udev](linux/udev.md)
+    - [Process](linux/process.md)
 
 - [Android](android/README.md)
     - [Android Internals](android/internals.md)
     - [Binder](android/binder.md)
     - [adb](android/adb.md)
+    - [Platform Dev](android/platform_dev.md)
 
 - [Data Structures](data_structures/README.md)
     - [Arrays](data_structures/arrays.md)
@@ -126,6 +129,7 @@
     - [Deepseek R1](ai/deepseek_r1.md)
     - [Whisper](ai/whisper.md)
     - [Phi](ai/phi.md)
+    - [Vllm](ai/vllm.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)

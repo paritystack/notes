@@ -53,7 +53,7 @@ When you have thousands or millions of data points, you need to condense them in
 
 ```
 Mean = (Sum of all values) / (Number of values)
-¼ = (x + x‚ + ... + x™) / n
+Î¼ = (xâ‚ + xâ‚‚ + ... + xâ‚™) / n
 ```
 
 **Intuition**: The "balance point" of your data. If you put all values on a number line, the mean is where it would balance.
@@ -203,17 +203,17 @@ Even "rare" problems affect thousands of users!
 **The Trade-off**:
 - Higher percentiles (p99.9) = better user experience
 - But harder and more expensive to optimize
-- Diminishing returns: p99 ’ p99.9 much harder than p50 ’ p90
+- Diminishing returns: p99 â†’ p99.9 much harder than p50 â†’ p90
 
 ### Calculating Percentiles
 
 **Method** (simplified):
 1. Sort all values from smallest to largest
-2. Find position: P% × (number of values)
+2. Find position: P% Ã— (number of values)
 3. Take the value at that position
 
 **Example**: 100 response times, p95:
-- Position: 95% × 100 = 95
+- Position: 95% Ã— 100 = 95
 - Take the 95th value when sorted
 
 **In Practice**:
@@ -262,8 +262,8 @@ Even "rare" problems affect thousands of users!
 
 **Formula**:
 ```
-Variance (Ã²) = Average of squared differences from mean
-Ã² = £(xb - ¼)² / n
+Variance (ÏƒÂ²) = Average of squared differences from mean
+ÏƒÂ² = Î£(xáµ¢ - Î¼)Â² / n
 ```
 
 **Intuition**:
@@ -273,30 +273,30 @@ Variance (Ã²) = Average of squared differences from mean
 
 **Why Square?**:
 - Makes all differences positive
-- Penalizes large deviations more (100² = 10,000 vs 10² = 100)
+- Penalizes large deviations more (100Â² = 10,000 vs 10Â² = 100)
 - Mathematically convenient
 
-**Units**: Squared units (if data is in ms, variance is in ms²)
+**Units**: Squared units (if data is in ms, variance is in msÂ²)
 
 ### Standard Deviation
 
 **Formula**:
 ```
-Standard Deviation (Ã) = Variance
-Ã = [£(xb - ¼)² / n]
+Standard Deviation (Ïƒ) = âˆšVariance
+Ïƒ = âˆš[Î£(xáµ¢ - Î¼)Â² / n]
 ```
 
 **Intuition**: The "typical" distance from the mean. It's variance brought back to original units.
 
 **Why Take Square Root?**:
-- Returns to original units (ms, not ms²)
+- Returns to original units (ms, not msÂ²)
 - More interpretable
 - Roughly the "average deviation"
 
 **The 68-95-99.7 Rule** (for normal distributions):
-- 68% of values within 1Ã of mean
-- 95% of values within 2Ã of mean
-- 99.7% of values within 3Ã of mean
+- 68% of values within 1Ïƒ of mean
+- 95% of values within 2Ïƒ of mean
+- 99.7% of values within 3Ïƒ of mean
 
 **Example**:
 
@@ -326,8 +326,8 @@ Test scores:
 **Real-World Application**:
 
 API latency:
-- Service A: mean=50ms, Ã=5ms (very consistent)
-- Service B: mean=50ms, Ã=100ms (wildly unpredictable)
+- Service A: mean=50ms, Ïƒ=5ms (very consistent)
+- Service B: mean=50ms, Ïƒ=100ms (wildly unpredictable)
 
 Both have same mean, but Service B is much worse for users!
 
@@ -346,17 +346,17 @@ Both have same mean, but Service B is much worse for users!
 **Characteristics**:
 - Symmetric, bell-shaped
 - Mean = Median = Mode
-- Defined by mean (¼) and standard deviation (Ã)
+- Defined by mean (Î¼) and standard deviation (Ïƒ)
 
 **Why It's Everywhere**:
-- **Central Limit Theorem**: Average of many independent random variables ’ normal
+- **Central Limit Theorem**: Average of many independent random variables â†’ normal
 - Natural processes often combine many small random effects
 - Height, measurement errors, test scores
 
 **Properties**:
-- 68% within 1Ã
-- 95% within 2Ã
-- 99.7% within 3Ã
+- 68% within 1Ïƒ
+- 95% within 2Ïƒ
+- 99.7% within 3Ïƒ
 
 **Real-World Examples**:
 - Human height
@@ -381,7 +381,7 @@ Both have same mean, but Service B is much worse for users!
 
 **Formula**:
 ```
-P(X > t) = e^(-»t)
+P(X > t) = e^(-Î»t)
 ```
 
 **Intuitive Meaning**: "How long until the next event?"
@@ -407,7 +407,7 @@ P(X > t) = e^(-»t)
 
 **Formula**:
 ```
-P(k events) = (»^k × e^(-»)) / k!
+P(k events) = (Î»^k Ã— e^(-Î»)) / k!
 ```
 
 **Real-World Examples**:
@@ -418,7 +418,7 @@ P(k events) = (»^k × e^(-»)) / k!
 
 **Example**:
 
-Server gets average 5 requests/second (»=5)
+Server gets average 5 requests/second (Î»=5)
 - What's probability of exactly 3 requests in next second?
 - What's probability of 0 requests (downtime)?
 
@@ -473,7 +473,7 @@ P(A or B) = P(A) + P(B) - P(A and B)
 
 **Multiplication Rule** (AND - Independent):
 ```
-P(A and B) = P(A) × P(B)  [if independent]
+P(A and B) = P(A) Ã— P(B)  [if independent]
 ```
 
 **Intuition**: Multiply when events don't affect each other
@@ -481,7 +481,7 @@ P(A and B) = P(A) × P(B)  [if independent]
 **Example**: Flipping heads twice
 - P(first heads) = 1/2
 - P(second heads) = 1/2
-- P(both heads) = 1/2 × 1/2 = 1/4
+- P(both heads) = 1/2 Ã— 1/2 = 1/4
 
 ### Conditional Probability
 
@@ -510,7 +510,7 @@ Why? If you know it's a heart, you're only considering 13 cards, and 1 is a king
 
 **Formula**:
 ```
-P(A|B) = P(B|A) × P(A) / P(B)
+P(A|B) = P(B|A) Ã— P(A) / P(B)
 ```
 
 **Intuition**: Update your beliefs based on evidence
@@ -532,10 +532,10 @@ What's P(disease | positive test)?
 **Naive Answer**: 95% (wrong!)
 
 **Bayesian Answer**:
-- True positives: 1% have disease × 95% test positive = 0.95%
-- False positives: 99% healthy × 5% false positive = 4.95%
+- True positives: 1% have disease Ã— 95% test positive = 0.95%
+- False positives: 99% healthy Ã— 5% false positive = 4.95%
 - Total positives: 0.95% + 4.95% = 5.9%
-- P(disease | positive) = 0.95% / 5.9% H 16%
+- P(disease | positive) = 0.95% / 5.9% â‰ˆ 16%
 
 **Shocking Result**: Even with positive test, only 16% chance of having disease!
 
@@ -555,8 +555,8 @@ What's P(disease | positive test)?
 
 **Formula** (for mean, large sample):
 ```
-CI = sample mean ± (z-score × standard error)
-CI = x ± z × (Ã/n)
+CI = sample mean Â± (z-score Ã— standard error)
+CI = xÌ„ Â± z Ã— (Ïƒ/âˆšn)
 ```
 
 **Interpretation**:
@@ -572,18 +572,18 @@ CI = x ± z × (Ã/n)
 - 95% confidence = your net catches the fish 95% of the time
 - The fish (true mean) doesn't move; your net (interval) does
 
-**Key Insight**: Larger sample ’ narrower interval ’ more precise estimate
+**Key Insight**: Larger sample â†’ narrower interval â†’ more precise estimate
 
 ### Hypothesis Testing
 
 **The Question**: Is what I'm seeing real, or just random chance?
 
-**The Null Hypothesis** (H€): The boring explanation
+**The Null Hypothesis** (Hâ‚€): The boring explanation
 - "No difference"
 - "No effect"
 - "Just randomness"
 
-**Alternative Hypothesis** (H): The interesting claim
+**Alternative Hypothesis** (Hâ‚): The interesting claim
 - "There IS a difference"
 - "Treatment works"
 - "Something happened"
@@ -655,11 +655,11 @@ p-value = 0.03 (3%)
 - r = 0.1: Weak/no relationship
 
 **Real Examples**:
-- Height and weight: r H 0.7 (positive, not perfect)
-- Temperature and heating costs: r H -0.8 (negative)
-- Shoe size and IQ: r H 0 (no correlation)
+- Height and weight: r â‰ˆ 0.7 (positive, not perfect)
+- Temperature and heating costs: r â‰ˆ -0.8 (negative)
+- Shoe size and IQ: r â‰ˆ 0 (no correlation)
 
-### Correlation ` Causation
+### Correlation â‰  Causation
 
 **The Most Important Statistical Lesson**
 
@@ -712,11 +712,11 @@ Y = mx + b
 
 Advertising spend (X) vs Sales (Y):
 - Slope = 2.5
-- Interpretation: Each $1 in ads ’ $2.50 in sales (approximately)
+- Interpretation: Each $1 in ads â†’ $2.50 in sales (approximately)
 
 **Limitations**:
 - Assumes linear relationship
-- Correlation ` causation still applies!
+- Correlation â‰  causation still applies!
 - Extrapolation dangerous
 - Outliers heavily influence line
 
@@ -742,9 +742,9 @@ Scenario: API serving 1M requests/day
 - p99.9: timeout (1,000 users/day broken)
 
 **Action Items**:
-- p99 > 1s ’ investigate
-- p99 increasing ’ system degrading
-- p50 vs p99 ratio > 10 ’ tail latency problem
+- p99 > 1s â†’ investigate
+- p99 increasing â†’ system degrading
+- p50 vs p99 ratio > 10 â†’ tail latency problem
 
 **SLA Design**:
 - Good: "p95 < 100ms, p99 < 500ms"
@@ -761,7 +761,7 @@ Scenario: API serving 1M requests/day
 
 **Common Pitfalls**:
 - p-hacking: Testing until you find p<0.05
-- Multiple testing: 20 tests ’ 1 will be "significant" by chance
+- Multiple testing: 20 tests â†’ 1 will be "significant" by chance
 - Stopping early when winning
 - Ignoring business significance vs statistical significance
 
@@ -789,7 +789,7 @@ Availability = MTBF / (MTBF + MTTR)
 **Example**:
 - MTBF = 100 hours
 - MTTR = 1 hour
-- Availability = 100/101 H 99%
+- Availability = 100/101 â‰ˆ 99%
 
 **Nines of Availability**:
 - 99% (two nines): 3.65 days downtime/year
@@ -817,8 +817,8 @@ Availability = MTBF / (MTBF + MTTR)
 - With headroom: provision for 3000-4000 req/s
 
 **Why Percentiles Matter**:
-- Provisioning for average ’ p99 users suffer
-- Provision for p99 ’ acceptable worst-case
+- Provisioning for average â†’ p99 users suffer
+- Provision for p99 â†’ acceptable worst-case
 
 ---
 
@@ -856,18 +856,18 @@ Availability = MTBF / (MTBF + MTTR)
 
 **Correlation**:
 - Measures relationship (-1 to +1)
-- Correlation ` Causation!
+- Correlation â‰  Causation!
 - Regression: Prediction from relationship
 
 ### Key Lessons
 
-1. **Mean hides outliers** ’ Use percentiles
-2. **p99 matters** ’ 1% of users = thousands of people
-3. **Correlation ` Causation** ’ Always question
-4. **p-values misunderstood** ’ Report CI too
-5. **Variance matters** ’ Same mean, different experience
-6. **Context critical** ’ Numbers meaningless without it
-7. **Long tails everywhere** ’ Normal distribution rare in real world
+1. **Mean hides outliers** â†’ Use percentiles
+2. **p99 matters** â†’ 1% of users = thousands of people
+3. **Correlation â‰  Causation** â†’ Always question
+4. **p-values misunderstood** â†’ Report CI too
+5. **Variance matters** â†’ Same mean, different experience
+6. **Context critical** â†’ Numbers meaningless without it
+7. **Long tails everywhere** â†’ Normal distribution rare in real world
 
 ### Practical Wisdom
 
@@ -877,8 +877,8 @@ Availability = MTBF / (MTBF + MTTR)
 - Use percentiles in SLAs
 
 **For Decision Making**:
-- Larger sample ’ more confidence
-- Statistical significance ` practical significance
+- Larger sample â†’ more confidence
+- Statistical significance â‰  practical significance
 - Always visualize data
 - Question assumptions
 

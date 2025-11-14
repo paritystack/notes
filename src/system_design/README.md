@@ -8,10 +8,10 @@ Designing large-scale distributed systems for performance, scalability, and reli
 - **[Caching](caching.md)**: Cache strategies, invalidation, distributed caching
 - **[RPC](rpc.md)**: Remote Procedure Call frameworks and patterns
 - **[Microservices](microservices.md)**: Microservices architecture patterns, service decomposition, communication patterns
-- **Databases**: SQL vs NoSQL, sharding, replication
-- **Message Queues**: Asynchronous processing, event-driven architecture
-- **Distributed Consensus**: Consistency models, CAP theorem
-- **Design Patterns**: Common solutions for distributed systems
+- **[Databases](databases.md)**: SQL vs NoSQL, sharding, replication
+- **[Message Queues](message_queues.md)**: Asynchronous processing, event-driven architecture
+- **[Distributed Consensus](distributed_consensus.md)**: Consistency models, CAP theorem
+- **[Design Patterns](design_patterns.md)**: Common solutions for distributed systems
 
 ## Key Concepts
 

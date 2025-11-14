@@ -178,61 +178,886 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="sed"><a class="header" href="#sed">sed</a></h1>
-<p>sed is a stream editor that allows you to manipulate text files. It is a powerful tool that can be used to search for and replace text, delete text, and more.</p>
-<h2 id="commonly-used-sed-commands"><a class="header" href="#commonly-used-sed-commands">Commonly Used <code>sed</code> Commands</a></h2>
-<ol>
-<li>
-<p><strong>Replace all occurrences of a string in a file:</strong></p>
-<pre><code class="language-bash">sed -i 's/old_string/new_string/g' filename
+<p>sed (Stream Editor) is a powerful text processing utility that performs editing operations on text streams and files. It reads input line by line, applies commands, and outputs the result. sed is particularly useful for automated text transformations, search and replace operations, and text filtering.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>sed is a non-interactive editor that processes text one line at a time using a simple programming language. It's especially powerful in shell scripts and command pipelines for text manipulation tasks.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Line-by-line stream processing</li>
+<li>Regular expression support</li>
+<li>In-place file editing</li>
+<li>Pattern space and hold space for complex operations</li>
+<li>Branching and looping capabilities</li>
+<li>Minimal memory footprint</li>
+<li>POSIX standard compatibility</li>
+</ul>
+<p><strong>Common Use Cases:</strong></p>
+<ul>
+<li>Search and replace operations</li>
+<li>Text deletion and insertion</li>
+<li>Line filtering and selection</li>
+<li>Text transformation and formatting</li>
+<li>Configuration file manipulation</li>
+<li>Log file processing</li>
+</ul>
+<h2 id="basic-syntax"><a class="header" href="#basic-syntax">Basic Syntax</a></h2>
+<pre><code class="language-bash"># General syntax
+sed [options] 'command' file
+sed [options] -e 'command1' -e 'command2' file
+sed [options] -f script.sed file
+
+# Common options
+sed -n 'command' file      # Suppress automatic output
+sed -i 'command' file      # Edit file in-place
+sed -i.bak 'command' file  # Edit in-place with backup
+sed -e 'cmd1' -e 'cmd2'    # Multiple commands
 </code></pre>
-</li>
-<li>
-<p><strong>Delete lines containing a specific pattern:</strong></p>
-<pre><code class="language-bash">sed -i '/pattern/d' filename
+<h2 id="addressing"><a class="header" href="#addressing">Addressing</a></h2>
+<p>Addresses specify which lines a command applies to. You can use line numbers, patterns, or ranges.</p>
+<h3 id="line-number-addressing"><a class="header" href="#line-number-addressing">Line Number Addressing</a></h3>
+<pre><code class="language-bash"># Single line
+sed '5d' file              # Delete line 5
+sed '3p' file              # Print line 3 (plus all lines)
+sed -n '3p' file           # Print only line 3
+
+# Last line
+sed '$d' file              # Delete last line
+sed -n '$p' file           # Print last line
+
+# Range of lines
+sed '2,5d' file            # Delete lines 2-5
+sed '10,20p' file          # Print lines 10-20
+sed '1,10s/old/new/g' file # Replace in lines 1-10
+
+# From line to end
+sed '5,$d' file            # Delete from line 5 to end
+
+# Every nth line
+sed -n '1~2p' file         # Print odd lines (1, 3, 5, ...)
+sed -n '2~2p' file         # Print even lines (2, 4, 6, ...)
+sed '0~5d' file            # Delete every 5th line
 </code></pre>
-</li>
-<li>
-<p><strong>Print only lines that match a pattern:</strong></p>
-<pre><code class="language-bash">sed -n '/pattern/p' filename
+<h3 id="pattern-addressing"><a class="header" href="#pattern-addressing">Pattern Addressing</a></h3>
+<pre><code class="language-bash"># Single pattern
+sed '/pattern/d' file              # Delete lines matching pattern
+sed '/ERROR/p' file                # Print lines containing ERROR
+sed -n '/^#/p' file                # Print comment lines
+
+# Pattern range
+sed '/start/,/end/d' file          # Delete from start to end pattern
+sed '/BEGIN/,/END/p' file          # Print lines between patterns
+sed '/^$/,/^$/d' file              # Delete blank line groups
+
+# Negation
+sed '/pattern/!d' file             # Delete lines NOT matching pattern
+sed -n '/pattern/!p' file          # Print lines NOT matching pattern
+
+# Multiple patterns
+sed '/pattern1/d; /pattern2/d' file  # Delete lines matching either pattern
 </code></pre>
-</li>
-<li>
-<p><strong>Insert a line after a match:</strong></p>
-<pre><code class="language-bash">sed -i '/pattern/a\new_line' filename
+<h3 id="advanced-addressing"><a class="header" href="#advanced-addressing">Advanced Addressing</a></h3>
+<pre><code class="language-bash"># Line number and pattern
+sed '5,/pattern/d' file            # Delete from line 5 to pattern match
+sed '/pattern/,10d' file           # Delete from pattern to line 10
+
+# Step addressing
+sed -n '1~3p' file                 # Print every 3rd line starting from 1
+sed '2~4d' file                    # Delete every 4th line starting from 2
+
+# Address with offset
+sed '/pattern/,+5d' file           # Delete match and 5 lines after
+sed '10,+3d' file                  # Delete lines 10-13
 </code></pre>
-</li>
-<li>
-<p><strong>Insert a line before a match:</strong></p>
-<pre><code class="language-bash">sed -i '/pattern/i\new_line' filename
+<h2 id="basic-commands"><a class="header" href="#basic-commands">Basic Commands</a></h2>
+<h3 id="substitute-command-s"><a class="header" href="#substitute-command-s">Substitute Command (s)</a></h3>
+<p>The most commonly used sed command for search and replace.</p>
+<pre><code class="language-bash"># Basic substitution
+sed 's/old/new/' file              # Replace first occurrence per line
+sed 's/old/new/g' file             # Replace all occurrences
+sed 's/old/new/2' file             # Replace second occurrence
+sed 's/old/new/2g' file            # Replace from second occurrence onward
+
+# Case-insensitive substitution
+sed 's/old/new/i' file             # Case-insensitive replacement
+sed 's/old/new/gi' file            # Case-insensitive, all occurrences
+
+# Print only changed lines
+sed -n 's/old/new/p' file          # Print only lines where substitution occurred
+
+# Write changes to file
+sed -n 's/old/new/w output.txt' file  # Write changed lines to file
 </code></pre>
-</li>
-<li>
-<p><strong>Replace text on a specific line number:</strong></p>
-<pre><code class="language-bash">sed -i '3s/old_text/new_text/' filename
+<h3 id="delete-command-d"><a class="header" href="#delete-command-d">Delete Command (d)</a></h3>
+<pre><code class="language-bash"># Delete specific lines
+sed '5d' file                      # Delete line 5
+sed '1,3d' file                    # Delete lines 1-3
+sed '$d' file                      # Delete last line
+
+# Delete by pattern
+sed '/pattern/d' file              # Delete lines matching pattern
+sed '/^$/d' file                   # Delete empty lines
+sed '/^#/d' file                   # Delete comment lines
+sed '/^\s*$/d' file                # Delete blank lines (with whitespace)
+
+# Delete ranges
+sed '/start/,/end/d' file          # Delete from start to end pattern
 </code></pre>
-</li>
-<li>
-<p><strong>Delete a specific line number:</strong></p>
-<pre><code class="language-bash">sed -i '5d' filename
+<h3 id="print-command-p"><a class="header" href="#print-command-p">Print Command (p)</a></h3>
+<pre><code class="language-bash"># Print specific lines (use with -n)
+sed -n '5p' file                   # Print line 5 only
+sed -n '1,10p' file                # Print lines 1-10
+sed -n '$p' file                   # Print last line
+
+# Print by pattern
+sed -n '/pattern/p' file           # Print matching lines
+sed -n '/ERROR/p' logfile          # Print error lines
+sed -n '/^[0-9]/p' file            # Print lines starting with digit
+
+# Print with duplicates
+sed '5p' file                      # Print line 5 twice (line + print)
 </code></pre>
-</li>
-<li>
-<p><strong>Replace text between two patterns:</strong></p>
-<pre><code class="language-bash">sed -i '/start_pattern/,/end_pattern/s/old_text/new_text/g' filename
+<h3 id="quit-command-q"><a class="header" href="#quit-command-q">Quit Command (q)</a></h3>
+<pre><code class="language-bash"># Quit after line number
+sed '10q' file                     # Print first 10 lines and quit
+sed -n '1,20p; 20q' file          # Print lines 1-20 then quit
+
+# Quit after pattern
+sed '/pattern/q' file              # Print up to first match and quit
+sed '/ERROR/q' file                # Stop at first ERROR
 </code></pre>
-</li>
-<li>
-<p><strong>Print lines between two patterns:</strong></p>
-<pre><code class="language-bash">sed -n '/start_pattern/,/end_pattern/p' filename
+<h3 id="transform-command-y"><a class="header" href="#transform-command-y">Transform Command (y)</a></h3>
+<pre><code class="language-bash"># Character-by-character replacement
+sed 'y/abc/ABC/' file              # Replace a→A, b→B, c→C
+sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' file  # To uppercase
+sed 'y/0123456789/----------/' file  # Replace digits with dashes
 </code></pre>
-</li>
-<li>
-<p><strong>Append text to the end of each line:</strong></p>
-<pre><code class="language-bash">sed -i 's/$/append_text/' filename
+<h2 id="substitution-in-detail"><a class="header" href="#substitution-in-detail">Substitution in Detail</a></h2>
+<h3 id="regular-expressions"><a class="header" href="#regular-expressions">Regular Expressions</a></h3>
+<pre><code class="language-bash"># Anchors
+sed 's/^#//' file                  # Remove # from line start
+sed 's/;$//' file                  # Remove ; from line end
+sed 's/^/&gt; /' file                 # Add &gt; to line start
+sed 's/$/ END/' file               # Add END to line end
+
+# Character classes
+sed 's/[0-9]/#/g' file             # Replace digits with #
+sed 's/[a-z]/*/g' file             # Replace lowercase with *
+sed 's/[[:space:]]/_/g' file       # Replace whitespace with _
+sed 's/[[:punct:]]//g' file        # Remove punctuation
+
+# Quantifiers
+sed 's/a*/x/' file                 # Replace a* with x
+sed 's/a\+/x/' file                # Replace one or more a with x
+sed 's/a\{3\}/x/' file             # Replace exactly 3 a's with x
+sed 's/a\{2,5\}/x/' file           # Replace 2-5 a's with x
+
+# Groups and backreferences
+sed 's/\(.*\)/[\1]/' file          # Wrap entire line in brackets
+sed 's/\([0-9]*\)\.\([0-9]*\)/\2.\1/' file  # Swap decimal parts
+sed 's/\(.*\):\(.*\)/\2:\1/' file  # Swap colon-separated parts
 </code></pre>
-</li>
-</ol>
-<p>These commands cover a variety of common use cases for the <code>sed</code> command, making it a versatile tool for text manipulation and processing.</p>
+<h3 id="delimiters"><a class="header" href="#delimiters">Delimiters</a></h3>
+<pre><code class="language-bash"># Alternative delimiters (useful for paths)
+sed 's|/old/path|/new/path|g' file          # Using |
+sed 's#/old/path#/new/path#g' file          # Using #
+sed 's@/old/path@/new/path@g' file          # Using @
+sed 's:/old/path:/new/path:g' file          # Using :
+
+# Mixed delimiters
+sed 's|http://|https://|g' file             # Convert HTTP to HTTPS
+</code></pre>
+<h3 id="special-characters-in-replacement"><a class="header" href="#special-characters-in-replacement">Special Characters in Replacement</a></h3>
+<pre><code class="language-bash"># Escaping special characters
+sed 's/\$/DOLLAR/g' file           # Replace $ with DOLLAR
+sed 's/\*/STAR/g' file             # Replace * with STAR
+sed 's/\./DOT/g' file              # Replace . with DOT
+sed 's/\//SLASH/g' file            # Replace / with SLASH
+
+# Using matched pattern (&amp;)
+sed 's/[0-9]\+/(&amp;)/g' file         # Wrap numbers in parentheses
+sed 's/ERROR/*** &amp; ***/g' file     # Wrap ERROR with asterisks
+sed 's/^/Line: &amp;/' file            # Prefix each line with "Line: "
+
+# Newline in replacement
+sed 's/,/,\n/g' file               # Replace comma with comma+newline
+sed 's/;/;\n/g' file               # Split on semicolons
+</code></pre>
+<h2 id="text-manipulation-commands"><a class="header" href="#text-manipulation-commands">Text Manipulation Commands</a></h2>
+<h3 id="append-a"><a class="header" href="#append-a">Append (a)</a></h3>
+<pre><code class="language-bash"># Append after line
+sed '5a\New line text' file        # Append after line 5
+sed '$a\Last line' file            # Append after last line
+
+# Append after pattern
+sed '/pattern/a\Added text' file   # Append after matching lines
+sed '/^Section/a\---' file         # Add separator after sections
+
+# Append multiple lines
+sed '/pattern/a\
+Line 1\
+Line 2\
+Line 3' file
+</code></pre>
+<h3 id="insert-i"><a class="header" href="#insert-i">Insert (i)</a></h3>
+<pre><code class="language-bash"># Insert before line
+sed '1i\Header line' file          # Insert before first line
+sed '5i\New line' file             # Insert before line 5
+
+# Insert before pattern
+sed '/pattern/i\Inserted text' file  # Insert before matching lines
+sed '/^#/i\---' file               # Insert separator before comments
+
+# Insert multiple lines
+sed '1i\
+#!/bin/bash\
+# Script header\
+' file
+</code></pre>
+<h3 id="change-c"><a class="header" href="#change-c">Change (c)</a></h3>
+<pre><code class="language-bash"># Replace entire line
+sed '5c\New line content' file     # Replace line 5
+sed '$c\New last line' file        # Replace last line
+
+# Replace by pattern
+sed '/pattern/c\Replacement line' file  # Replace matching lines
+sed '/ERROR/c\[ERROR REDACTED]' file    # Replace error lines
+
+# Replace range
+sed '10,20c\--- SECTION REMOVED ---' file  # Replace lines 10-20 with one line
+</code></pre>
+<h3 id="next-n-and-nextprint-n"><a class="header" href="#next-n-and-nextprint-n">Next (n) and Next+Print (N)</a></h3>
+<pre><code class="language-bash"># Skip next line
+sed 'n; s/pattern/replacement/' file   # Replace on every other line
+
+# Read next line into pattern space
+sed '/pattern/{N; s/\n/ /}' file       # Join lines after pattern match
+</code></pre>
+<h2 id="pattern-space-and-hold-space"><a class="header" href="#pattern-space-and-hold-space">Pattern Space and Hold Space</a></h2>
+<p>sed maintains two buffers: pattern space (current line) and hold space (temporary storage).</p>
+<h3 id="hold-space-commands"><a class="header" href="#hold-space-commands">Hold Space Commands</a></h3>
+<pre><code class="language-bash"># h - Copy pattern space to hold space
+# H - Append pattern space to hold space
+# g - Copy hold space to pattern space
+# G - Append hold space to pattern space
+# x - Exchange pattern and hold spaces
+
+# Reverse file (using hold space)
+sed -n '1!G; h; $p' file
+
+# Print duplicate lines
+sed -n '/pattern/{h; n; /pattern/{g; p}}' file
+
+# Remove duplicate consecutive lines
+sed '$!N; /^\(.*\)\n\1$/!P; D'
+</code></pre>
+<h3 id="multi-line-operations"><a class="header" href="#multi-line-operations">Multi-line Operations</a></h3>
+<pre><code class="language-bash"># Join lines with pattern
+sed '/pattern/{N; s/\n/ /}' file       # Join pattern line with next
+
+# Join all lines
+sed ':a; N; $!ba; s/\n/ /g' file
+
+# Join lines ending with backslash
+sed -e ':a' -e '/\\$/N; s/\\\n//; ta' file
+
+# Process paragraph at a time (blank line separated)
+sed '/./{H;$!d;}; x; s/PATTERN/REPLACEMENT/g' file
+</code></pre>
+<h2 id="advanced-features"><a class="header" href="#advanced-features">Advanced Features</a></h2>
+<h3 id="labels-and-branching"><a class="header" href="#labels-and-branching">Labels and Branching</a></h3>
+<pre><code class="language-bash"># Label syntax: :label
+# Branch: b label (unconditional)
+# Test: t label (branch if substitution succeeded)
+
+# Remove duplicate consecutive lines
+sed ':a; $!N; s/^\(.*\)\n\1$/\1/; ta; P; D' file
+
+# Loop through replacements
+sed ':a; s/pattern/replacement/; ta' file
+
+# Conditional branching
+sed '/pattern/b skip; s/old/new/; :skip' file
+</code></pre>
+<h3 id="advanced-patterns"><a class="header" href="#advanced-patterns">Advanced Patterns</a></h3>
+<pre><code class="language-bash"># Number lines
+sed = file | sed 'N; s/\n/\t/'
+
+# Number non-blank lines
+sed '/./=' file | sed '/./N; s/\n/ /'
+
+# Double space file
+sed 'G' file
+
+# Double space file (blank lines already present)
+sed '/^$/d; G' file
+
+# Triple space
+sed 'G;G' file
+
+# Reverse line order (tac alternative)
+sed '1!G; h; $!d' file
+
+# Reverse character order in each line
+sed '/\n/!G; s/\(.\)\(.*\n\)/&amp;\2\1/; //D; s/.//' file
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="find-and-replace"><a class="header" href="#find-and-replace">Find and Replace</a></h3>
+<pre><code class="language-bash"># Simple replacement
+sed 's/foo/bar/g' file                 # Replace all foo with bar
+sed -i 's/foo/bar/g' file              # Replace in-place
+
+# Multiple replacements
+sed 's/foo/bar/g; s/baz/qux/g' file
+sed -e 's/foo/bar/g' -e 's/baz/qux/g' file
+
+# Replace only on specific lines
+sed '10,20s/old/new/g' file            # Lines 10-20
+sed '/pattern/s/old/new/g' file        # Lines matching pattern
+
+# Replace whole words only
+sed 's/\bword\b/replacement/g' file
+
+# Replace with special characters
+sed 's/$/\r/' file                     # Add Windows line endings
+sed 's/\t/    /g' file                 # Replace tabs with spaces
+</code></pre>
+<h3 id="line-deletion"><a class="header" href="#line-deletion">Line Deletion</a></h3>
+<pre><code class="language-bash"># Delete empty lines
+sed '/^$/d' file
+sed '/^\s*$/d' file                    # Including whitespace-only lines
+
+# Delete comment lines
+sed '/^#/d' file                       # Shell/Python comments
+sed '/^\/\//d' file                    # C++ style comments
+sed '/^\/\*/,/\*\//d' file             # C style block comments
+
+# Delete lines by pattern
+sed '/pattern/d' file                  # Lines containing pattern
+sed '/^pattern$/d' file                # Lines exactly matching
+sed '/pattern1/d; /pattern2/d' file    # Multiple patterns
+
+# Delete range
+sed '10,20d' file                      # Delete lines 10-20
+sed '/start/,/end/d' file              # Delete from start to end pattern
+</code></pre>
+<h3 id="line-extraction"><a class="header" href="#line-extraction">Line Extraction</a></h3>
+<pre><code class="language-bash"># Extract specific lines
+sed -n '10p' file                      # Line 10
+sed -n '10,20p' file                   # Lines 10-20
+sed -n '1p; 5p; 10p' file              # Multiple specific lines
+
+# Extract by pattern
+sed -n '/pattern/p' file               # Lines matching pattern
+sed -n '/start/,/end/p' file           # Lines between patterns
+sed -n '/ERROR/p' file                 # Error lines
+
+# Extract and modify
+sed -n 's/.*pattern:\(.*\)/\1/p' file  # Extract after pattern:
+sed -n 's/^.*=//p' file                # Extract after =
+</code></pre>
+<h3 id="text-insertion-and-formatting"><a class="header" href="#text-insertion-and-formatting">Text Insertion and Formatting</a></h3>
+<pre><code class="language-bash"># Add line numbers
+sed = file | sed 'N; s/\n/\t/'
+
+# Add prefix/suffix
+sed 's/^/PREFIX: /' file               # Add prefix
+sed 's/$/ [END]/' file                 # Add suffix
+sed 's/.*/&gt;&gt;&gt; &amp; &lt;&lt;&lt;/' file             # Wrap lines
+
+# Add header/footer
+sed '1i\HEADER LINE' file
+sed '$a\FOOTER LINE' file
+
+# Insert blank lines
+sed 'G' file                           # After every line
+sed '/pattern/G' file                  # After pattern matches
+sed '/pattern/{G;G;}' file             # Two blanks after pattern
+</code></pre>
+<h3 id="configuration-file-editing"><a class="header" href="#configuration-file-editing">Configuration File Editing</a></h3>
+<pre><code class="language-bash"># Change configuration value
+sed 's/^DEBUG=.*/DEBUG=true/' config.ini
+sed 's/^\(PORT=\).*/\1 8080/' config
+
+# Comment out lines
+sed 's/^/# /' file                     # Prefix all lines
+sed '/pattern/s/^/# /' file            # Comment lines matching pattern
+sed '10,20s/^/# /' file                # Comment lines 10-20
+
+# Uncomment lines
+sed 's/^# //' file                     # Remove # prefix
+sed '/pattern/s/^# *//' file           # Uncomment pattern matches
+
+# Add configuration if not exists
+sed '/^MAX_CONN/!s/$/\nMAX_CONN=100/' file
+</code></pre>
+<h3 id="log-file-processing"><a class="header" href="#log-file-processing">Log File Processing</a></h3>
+<pre><code class="language-bash"># Extract errors
+sed -n '/ERROR/p' logfile
+sed -n '/ERROR\|FATAL/p' logfile       # ERROR or FATAL
+
+# Filter by timestamp
+sed -n '/2024-01-15/p' logfile
+sed -n '/2024-01-15 09:/,/2024-01-15 10:/p' logfile
+
+# Remove timestamps
+sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} //' logfile
+
+# Anonymize IP addresses
+sed 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/XXX.XXX.XXX.XXX/g' logfile
+
+# Count error types
+sed -n 's/.*ERROR: \([^:]*\).*/\1/p' logfile | sort | uniq -c
+</code></pre>
+<h3 id="csvtsv-processing"><a class="header" href="#csvtsv-processing">CSV/TSV Processing</a></h3>
+<pre><code class="language-bash"># Change delimiter
+sed 's/,/\t/g' file.csv                # CSV to TSV
+sed 's/\t/,/g' file.tsv                # TSV to CSV
+
+# Extract specific columns (simple cases)
+sed 's/^\([^,]*\),\([^,]*\).*/\1,\2/' file.csv  # First two columns
+
+# Remove quotes
+sed 's/"//g' file.csv
+
+# Add quotes to fields
+sed 's/\([^,]*\)/"\1"/g' file.csv
+
+# Remove header
+sed '1d' file.csv
+
+# Add header
+sed '1i\Name,Age,Email' file.csv
+</code></pre>
+<h3 id="urlpath-manipulation"><a class="header" href="#urlpath-manipulation">URL/Path Manipulation</a></h3>
+<pre><code class="language-bash"># Change protocol
+sed 's|http://|https://|g' file
+
+# Extract domain
+sed 's|.*://\([^/]*\).*|\1|' urls.txt
+
+# Extract path
+sed 's|.*://[^/]*/\(.*\)|\1|' urls.txt
+
+# Change file extension
+sed 's/\.txt$/.md/' files.txt
+sed 's/\.[^.]*$/.new/' files.txt       # Any extension to .new
+
+# Convert Windows paths to Unix
+sed 's|\\|/|g' paths.txt
+sed 's|C:|/mnt/c|g' paths.txt
+</code></pre>
+<h2 id="practical-examples"><a class="header" href="#practical-examples">Practical Examples</a></h2>
+<h3 id="example-1-cleanup-and-format-source-code"><a class="header" href="#example-1-cleanup-and-format-source-code">Example 1: Cleanup and Format Source Code</a></h3>
+<pre><code class="language-bash"># Remove trailing whitespace
+sed 's/[[:space:]]*$//' source.cpp
+
+# Convert tabs to spaces
+sed 's/\t/    /g' source.cpp
+
+# Remove C++ comments
+sed 's|//.*||' source.cpp
+
+# Format function definitions
+sed '/^[a-zA-Z].*{$/i\\' source.cpp    # Add blank before {
+</code></pre>
+<h3 id="example-2-process-apache-access-logs"><a class="header" href="#example-2-process-apache-access-logs">Example 2: Process Apache Access Logs</a></h3>
+<pre><code class="language-bash"># Extract IP addresses
+sed 's/^\([0-9.]*\).*/\1/' access.log
+
+# Filter by status code
+sed -n '/ 404 /p' access.log           # 404 errors
+sed -n '/ [45][0-9][0-9] /p' access.log  # All errors
+
+# Extract request paths
+sed 's/.*"\(GET\|POST\) \([^ ]*\).*/\2/' access.log
+
+# Anonymize IPs
+sed 's/\([0-9]\{1,3\}\.\)[0-9]\{1,3\}\.\([0-9]\{1,3\}\.\)[0-9]\{1,3\}/\1XXX.\2XXX/' access.log
+</code></pre>
+<h3 id="example-3-html-processing"><a class="header" href="#example-3-html-processing">Example 3: HTML Processing</a></h3>
+<pre><code class="language-bash"># Remove HTML tags
+sed 's/&lt;[^&gt;]*&gt;//g' page.html
+
+# Extract links
+sed -n 's/.*href="\([^"]*\)".*/\1/p' page.html
+
+# Convert to text entities
+sed 's/&amp;/\&amp;amp;/g; s/&lt;/\&amp;lt;/g; s/&gt;/\&amp;gt;/g' file.txt
+
+# Extract title
+sed -n 's/.*&lt;title&gt;\(.*\)&lt;\/title&gt;.*/\1/p' page.html
+</code></pre>
+<h3 id="example-4-email-processing"><a class="header" href="#example-4-email-processing">Example 4: Email Processing</a></h3>
+<pre><code class="language-bash"># Extract email addresses
+sed -n 's/.*\([a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]*\.[a-zA-Z]\{2,\}\).*/\1/p' file.txt
+
+# Obfuscate emails
+sed 's/@/ [at] /g; s/\./ [dot] /g' emails.txt
+
+# Validate email format (simple)
+sed -n '/^[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,\}$/p' emails.txt
+</code></pre>
+<h3 id="example-5-data-transformation"><a class="header" href="#example-5-data-transformation">Example 5: Data Transformation</a></h3>
+<pre><code class="language-bash"># Uppercase/lowercase
+sed 's/.*/\U&amp;/' file                   # Convert to uppercase
+sed 's/.*/\L&amp;/' file                   # Convert to lowercase
+sed 's/\b\(.\)/\U\1/g' file            # Capitalize words
+
+# Format phone numbers
+sed 's/\([0-9]\{3\}\)\([0-9]\{3\}\)\([0-9]\{4\}\)/(\1) \2-\3/' phones.txt
+
+# Format dates
+sed 's|\([0-9]\{2\}\)/\([0-9]\{2\}\)/\([0-9]\{4\}\)|\3-\1-\2|' dates.txt
+
+# Add thousand separators
+sed ':a; s/\([0-9]\)\([0-9]\{3\}\)\($\|,\)/\1,\2\3/; ta' numbers.txt
+</code></pre>
+<h3 id="example-6-script-generation"><a class="header" href="#example-6-script-generation">Example 6: Script Generation</a></h3>
+<pre><code class="language-bash"># Generate SQL INSERT statements
+sed 's/\(.*\),\(.*\),\(.*\)/INSERT INTO users VALUES ("\1", "\2", "\3");/' data.csv
+
+# Generate test cases
+sed 's/\(.*\)/test("\1", function() { ... });/' testcases.txt
+
+# Generate markdown list
+sed 's/^/- /' items.txt
+sed 's/^\(.*\)$/- [\1](\1.md)/' files.txt
+</code></pre>
+<h2 id="sed-scripts"><a class="header" href="#sed-scripts">sed Scripts</a></h2>
+<p>For complex operations, use sed script files:</p>
+<pre><code class="language-bash"># script.sed
+/^#/d                    # Remove comments
+/^$/d                    # Remove empty lines
+s/  */ /g                # Collapse spaces
+s/^ //                   # Remove leading space
+s/ $//                   # Remove trailing space
+</code></pre>
+<pre><code class="language-bash"># Run script
+sed -f script.sed input.txt
+
+# Combine script with commands
+sed -f script.sed -e 's/extra/replacement/' input.txt
+</code></pre>
+<h3 id="complex-script-example"><a class="header" href="#complex-script-example">Complex Script Example</a></h3>
+<pre><code class="language-bash"># format-code.sed - Format C code
+# Remove trailing whitespace
+s/[[:space:]]*$//
+
+# Convert tabs to 4 spaces
+s/\t/    /g
+
+# Add space after keywords
+s/\(if\|for\|while\)(/\1 (/g
+
+# Format braces
+/^[[:space:]]*{/i\
+
+# Remove multiple blank lines
+/^$/{
+    N
+    /^\n$/D
+}
+</code></pre>
+<h2 id="in-place-editing"><a class="header" href="#in-place-editing">In-Place Editing</a></h2>
+<h3 id="basic-in-place-editing"><a class="header" href="#basic-in-place-editing">Basic In-Place Editing</a></h3>
+<pre><code class="language-bash"># Edit file directly
+sed -i 's/old/new/g' file.txt
+
+# Create backup with extension
+sed -i.bak 's/old/new/g' file.txt      # Creates file.txt.bak
+sed -i.backup 's/old/new/g' file.txt   # Creates file.txt.backup
+
+# Edit multiple files
+sed -i 's/old/new/g' *.txt
+
+# Edit with backup (BSD/macOS)
+sed -i '' 's/old/new/g' file.txt       # No backup
+sed -i '.bak' 's/old/new/g' file.txt   # With backup
+</code></pre>
+<h3 id="safe-in-place-editing"><a class="header" href="#safe-in-place-editing">Safe In-Place Editing</a></h3>
+<pre><code class="language-bash"># Test before applying
+sed 's/old/new/g' file.txt | diff file.txt -
+
+# Conditional in-place edit
+if sed 's/old/new/g' file.txt &gt; temp.txt; then
+    mv temp.txt file.txt
+else
+    rm temp.txt
+    echo "sed failed"
+fi
+
+# Atomic replacement
+sed 's/old/new/g' file.txt &gt; file.txt.tmp &amp;&amp; mv file.txt.tmp file.txt
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-quote-your-patterns"><a class="header" href="#1-quote-your-patterns">1. Quote Your Patterns</a></h3>
+<pre><code class="language-bash"># Good
+sed 's/pattern/replacement/' file
+
+# Bad (can cause issues with special characters)
+sed s/pattern/replacement/ file
+</code></pre>
+<h3 id="2-use-appropriate-delimiters"><a class="header" href="#2-use-appropriate-delimiters">2. Use Appropriate Delimiters</a></h3>
+<pre><code class="language-bash"># Hard to read
+sed 's/\/usr\/local\/bin/\/opt\/bin/g' file
+
+# Better
+sed 's|/usr/local/bin|/opt/bin|g' file
+</code></pre>
+<h3 id="3-test-before-in-place-edit"><a class="header" href="#3-test-before-in-place-edit">3. Test Before In-Place Edit</a></h3>
+<pre><code class="language-bash"># Test output first
+sed 's/old/new/g' file.txt
+
+# Then apply in-place
+sed -i 's/old/new/g' file.txt
+</code></pre>
+<h3 id="4-use--n-with-p-for-filtering"><a class="header" href="#4-use--n-with-p-for-filtering">4. Use -n with p for Filtering</a></h3>
+<pre><code class="language-bash"># Wrong (prints lines twice)
+sed '/pattern/p' file
+
+# Correct
+sed -n '/pattern/p' file
+</code></pre>
+<h3 id="5-escape-special-characters"><a class="header" href="#5-escape-special-characters">5. Escape Special Characters</a></h3>
+<pre><code class="language-bash"># Literal dot
+sed 's/\./DOT/g' file
+
+# Literal asterisk
+sed 's/\*/STAR/g' file
+
+# Variables (use double quotes)
+VAR="value"
+sed "s/pattern/$VAR/" file
+</code></pre>
+<h3 id="6-use-extended-regex-when-needed"><a class="header" href="#6-use-extended-regex-when-needed">6. Use Extended Regex When Needed</a></h3>
+<pre><code class="language-bash"># Basic regex (need to escape +, ?, |, etc.)
+sed 's/a\+/x/' file
+
+# Extended regex (GNU sed)
+sed -r 's/a+/x/' file
+sed -E 's/a+/x/' file        # POSIX/BSD compatible
+</code></pre>
+<h3 id="7-process-large-files-efficiently"><a class="header" href="#7-process-large-files-efficiently">7. Process Large Files Efficiently</a></h3>
+<pre><code class="language-bash"># Stop after first match
+sed '/pattern/q' large-file.txt
+
+# Process specific range only
+sed -n '1000,2000p' large-file.txt
+
+# Use quit to limit processing
+sed '1000q' large-file.txt
+</code></pre>
+<h2 id="common-gotchas"><a class="header" href="#common-gotchas">Common Gotchas</a></h2>
+<h3 id="1-greedy-matching"><a class="header" href="#1-greedy-matching">1. Greedy Matching</a></h3>
+<pre><code class="language-bash"># Problem: Greedy matching
+echo "abc123def456" | sed 's/.*[0-9]/X/'    # Returns: X6
+
+# Solution: Non-greedy (use multiple steps)
+echo "abc123def456" | sed 's/[0-9]\+/X/g'   # Returns: abcXdefX
+</code></pre>
+<h3 id="2-line-endings"><a class="header" href="#2-line-endings">2. Line Endings</a></h3>
+<pre><code class="language-bash"># DOS to Unix
+sed 's/\r$//' dosfile.txt
+
+# Unix to DOS
+sed 's/$/\r/' unixfile.txt
+</code></pre>
+<h3 id="3-backreferences"><a class="header" href="#3-backreferences">3. Backreferences</a></h3>
+<pre><code class="language-bash"># GNU sed uses \1, \2, etc.
+sed 's/\(.*\):\(.*\)/\2:\1/' file
+
+# Some versions use &amp;, \&amp;
+</code></pre>
+<h3 id="4-in-place-editing-differences"><a class="header" href="#4-in-place-editing-differences">4. In-Place Editing Differences</a></h3>
+<pre><code class="language-bash"># GNU sed
+sed -i 's/old/new/' file           # No backup
+sed -i.bak 's/old/new/' file       # With backup
+
+# BSD/macOS sed
+sed -i '' 's/old/new/' file        # No backup
+sed -i '.bak' 's/old/new/' file    # With backup
+</code></pre>
+<h3 id="5-empty-pattern-space"><a class="header" href="#5-empty-pattern-space">5. Empty Pattern Space</a></h3>
+<pre><code class="language-bash"># Problem: Can't delete all lines and add new content
+sed 'd; a\new text' file           # Won't work
+
+# Solution: Use c to change
+sed 'c\new text' file
+</code></pre>
+<h2 id="sed-versions-and-compatibility"><a class="header" href="#sed-versions-and-compatibility">sed Versions and Compatibility</a></h2>
+<h3 id="gnu-sed-vs-bsd-sed"><a class="header" href="#gnu-sed-vs-bsd-sed">GNU sed vs BSD sed</a></h3>
+<pre><code class="language-bash"># Extended regex
+sed -r 's/pattern/replacement/' file    # GNU
+sed -E 's/pattern/replacement/' file    # BSD/POSIX
+
+# In-place editing
+sed -i 's/pattern/replacement/' file    # GNU
+sed -i '' 's/pattern/replacement/' file # BSD
+
+# Address ranges
+sed '1~2d' file                         # GNU (every other line)
+# BSD requires different approach
+</code></pre>
+<h3 id="portable-sed-scripts"><a class="header" href="#portable-sed-scripts">Portable sed Scripts</a></h3>
+<pre><code class="language-bash"># Use POSIX features only
+# Avoid GNU-specific features:
+# - Extended regex (-r)
+# - In-place editing without extension
+# - Address stepping (1~2)
+# - \U, \L for case conversion
+
+# Test on multiple platforms
+# Use sed -i.bak for portability
+# Avoid relying on GNU-specific escapes
+</code></pre>
+<h2 id="performance-tips"><a class="header" href="#performance-tips">Performance Tips</a></h2>
+<h3 id="1-early-exit"><a class="header" href="#1-early-exit">1. Early Exit</a></h3>
+<pre><code class="language-bash"># Stop processing after finding first match
+sed '/pattern/q' large-file.txt
+
+# Process only needed range
+sed -n '100,200p' large-file.txt
+</code></pre>
+<h3 id="2-combine-multiple-edits"><a class="header" href="#2-combine-multiple-edits">2. Combine Multiple Edits</a></h3>
+<pre><code class="language-bash"># Less efficient
+sed 's/foo/bar/' file | sed 's/baz/qux/'
+
+# More efficient
+sed 's/foo/bar/; s/baz/qux/' file
+</code></pre>
+<h3 id="3-use-specific-addresses"><a class="header" href="#3-use-specific-addresses">3. Use Specific Addresses</a></h3>
+<pre><code class="language-bash"># Less efficient (checks all lines)
+sed 's/pattern/replacement/g' file
+
+# More efficient (only specific range)
+sed '10,1000s/pattern/replacement/g' file
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>s/pattern/replacement/</code></td><td>Substitute</td></tr>
+<tr><td><code>d</code></td><td>Delete</td></tr>
+<tr><td><code>p</code></td><td>Print</td></tr>
+<tr><td><code>n</code></td><td>Next line</td></tr>
+<tr><td><code>N</code></td><td>Append next line</td></tr>
+<tr><td><code>a\text</code></td><td>Append after</td></tr>
+<tr><td><code>i\text</code></td><td>Insert before</td></tr>
+<tr><td><code>c\text</code></td><td>Change (replace)</td></tr>
+<tr><td><code>q</code></td><td>Quit</td></tr>
+<tr><td><code>r file</code></td><td>Read file</td></tr>
+<tr><td><code>w file</code></td><td>Write to file</td></tr>
+<tr><td><code>y/src/dst/</code></td><td>Transform</td></tr>
+<tr><td><code>h</code></td><td>Copy to hold space</td></tr>
+<tr><td><code>H</code></td><td>Append to hold space</td></tr>
+<tr><td><code>g</code></td><td>Get from hold space</td></tr>
+<tr><td><code>G</code></td><td>Append from hold space</td></tr>
+<tr><td><code>x</code></td><td>Exchange spaces</td></tr>
+<tr><td><code>=</code></td><td>Print line number</td></tr>
+</tbody></table>
+</div>
+<h3 id="flags"><a class="header" href="#flags">Flags</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Flag</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>g</code></td><td>Global (all occurrences)</td></tr>
+<tr><td><code>i</code></td><td>Case-insensitive</td></tr>
+<tr><td><code>p</code></td><td>Print</td></tr>
+<tr><td><code>w file</code></td><td>Write to file</td></tr>
+<tr><td><code>1,2,3...</code></td><td>Nth occurrence</td></tr>
+</tbody></table>
+</div>
+<h3 id="options"><a class="header" href="#options">Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>-n</code></td><td>Suppress automatic output</td></tr>
+<tr><td><code>-i[ext]</code></td><td>In-place editing</td></tr>
+<tr><td><code>-e cmd</code></td><td>Add command</td></tr>
+<tr><td><code>-f file</code></td><td>Read commands from file</td></tr>
+<tr><td><code>-r</code></td><td>Extended regex (GNU)</td></tr>
+<tr><td><code>-E</code></td><td>Extended regex (POSIX/BSD)</td></tr>
+<tr><td><code>--debug</code></td><td>Print program with annotations</td></tr>
+</tbody></table>
+</div>
+<h3 id="regular-expression-syntax"><a class="header" href="#regular-expression-syntax">Regular Expression Syntax</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Pattern</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>.</code></td><td>Any character</td></tr>
+<tr><td><code>^</code></td><td>Start of line</td></tr>
+<tr><td><code>$</code></td><td>End of line</td></tr>
+<tr><td><code>*</code></td><td>Zero or more</td></tr>
+<tr><td><code>\+</code></td><td>One or more</td></tr>
+<tr><td><code>\?</code></td><td>Zero or one</td></tr>
+<tr><td><code>\{n\}</code></td><td>Exactly n</td></tr>
+<tr><td><code>\{n,\}</code></td><td>n or more</td></tr>
+<tr><td><code>\{n,m\}</code></td><td>Between n and m</td></tr>
+<tr><td><code>[...]</code></td><td>Character class</td></tr>
+<tr><td><code>[^...]</code></td><td>Negated class</td></tr>
+<tr><td><code>\(</code> ... <code>\)</code></td><td>Grouping</td></tr>
+<tr><td><code>\1</code>, <code>\2</code></td><td>Backreferences</td></tr>
+<tr><td><code>|</code></td><td>Alternation</td></tr>
+<tr><td><code>\&lt;</code>, <code>\&gt;</code></td><td>Word boundaries</td></tr>
+<tr><td><code>\b</code></td><td>Word boundary (GNU)</td></tr>
+</tbody></table>
+</div>
+<h3 id="common-patterns-1"><a class="header" href="#common-patterns-1">Common Patterns</a></h3>
+<pre><code class="language-bash"># Replace
+sed 's/old/new/g' file
+
+# Delete
+sed '/pattern/d' file
+
+# Print matching
+sed -n '/pattern/p' file
+
+# Insert
+sed '1i\text' file
+
+# Append
+sed '$a\text' file
+
+# Extract lines
+sed -n '10,20p' file
+
+# In-place edit
+sed -i 's/old/new/g' file
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="debug-your-sed-commands"><a class="header" href="#debug-your-sed-commands">Debug Your sed Commands</a></h3>
+<pre><code class="language-bash"># Print what sed is doing (GNU sed)
+sed --debug 's/pattern/replacement/' file
+
+# Trace execution
+sed -n 'l' file                    # Show special characters
+
+# Test patterns separately
+sed -n '/pattern/=' file           # Print line numbers of matches
+</code></pre>
+<h3 id="common-error-messages"><a class="header" href="#common-error-messages">Common Error Messages</a></h3>
+<pre><code class="language-bash"># "unterminated `s' command"
+# Forgot closing delimiter
+sed 's/pattern/replacement' file   # Wrong
+sed 's/pattern/replacement/' file  # Correct
+
+# "invalid reference \1 on `s' command's RHS"
+# No capturing group in pattern
+sed 's/pattern/\1/' file           # Wrong
+sed 's/\(pattern\)/\1/' file       # Correct
+
+# "extra characters after command"
+# Missing semicolon between commands
+sed 's/a/b/ s/c/d/' file           # Wrong
+sed 's/a/b/; s/c/d/' file          # Correct
+</code></pre>
+<h3 id="testing-and-validation"><a class="header" href="#testing-and-validation">Testing and Validation</a></h3>
+<pre><code class="language-bash"># Dry run - see changes before applying
+sed 's/old/new/g' file &gt; /dev/null &amp;&amp; echo "Syntax OK"
+
+# Compare before/after
+diff &lt;(cat original.txt) &lt;(sed 's/old/new/' original.txt)
+
+# Count changes
+sed -n 's/old/new/p' file | wc -l
+
+# Validate regex pattern
+echo "test" | sed '/pattern/!d'
+</code></pre>
+<p>sed is an essential tool for text processing and manipulation. Master these patterns and techniques to efficiently handle automated text transformations, configuration management, and data processing tasks.</p>
 
                     </main>
 

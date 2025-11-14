@@ -186,6 +186,7 @@
 <li><a href="#percentiles-and-quantiles">Percentiles and Quantiles</a></li>
 <li><a href="#variance-and-standard-deviation">Variance and Standard Deviation</a></li>
 <li><a href="#probability-distributions">Probability Distributions</a></li>
+<li><a href="#ccdf-complementary-cumulative-distribution-function">CCDF: Complementary Cumulative Distribution Function</a></li>
 <li><a href="#probability-basics">Probability Basics</a></li>
 <li><a href="#statistical-inference">Statistical Inference</a></li>
 <li><a href="#correlation-and-regression">Correlation and Regression</a></li>
@@ -608,6 +609,1193 @@
 <li>But 1% can be 100x slower</li>
 <li>Those slow requests kill user experience</li>
 </ul>
+<hr />
+<h2 id="ccdf-complementary-cumulative-distribution-function"><a class="header" href="#ccdf-complementary-cumulative-distribution-function">CCDF: Complementary Cumulative Distribution Function</a></h2>
+<h3 id="intuition-understanding-the-tail"><a class="header" href="#intuition-understanding-the-tail">Intuition: Understanding the Tail</a></h3>
+<p><strong>The Core Question</strong>: What fraction of values are GREATER than a threshold?</p>
+<p>While the CDF (Cumulative Distribution Function) tells you "what percentage is below x?", the CCDF answers the complementary question: "what percentage is above x?"</p>
+<p><strong>Why This Matters</strong>:</p>
+<ul>
+<li>Tail analysis: Understanding rare, extreme events</li>
+<li>Reliability: "What fraction of systems survive past time t?"</li>
+<li>Performance: "What fraction of requests are slower than x ms?"</li>
+<li>Risk assessment: "What fraction of values exceed our safety threshold?"</li>
+</ul>
+<p><strong>The Fundamental Insight</strong>: For many real-world problems, we care more about the tail (the outliers, the extremes, the rare events) than the typical values. CCDF puts the focus exactly where it matters most.</p>
+<h3 id="mathematical-foundation"><a class="header" href="#mathematical-foundation">Mathematical Foundation</a></h3>
+<p><strong>Definition</strong>:</p>
+<pre><code>CCDF(x) = P(X &gt; x) = 1 - CDF(x)
+</code></pre>
+<p><strong>Read as</strong>: "The probability that X is strictly greater than x"</p>
+<p><strong>Relationship to CDF</strong>:</p>
+<ul>
+<li>CDF(x) = P(X ≤ x) = "cumulative probability up to x"</li>
+<li>CCDF(x) = P(X &gt; x) = "probability exceeding x"</li>
+<li>CCDF(x) + P(X ≤ x) = 1</li>
+</ul>
+<p><strong>Relationship to PDF</strong> (Probability Density Function):</p>
+<pre><code>CCDF(x) = ∫[x to ∞] PDF(t) dt
+</code></pre>
+<p><strong>Key Properties</strong>:</p>
+<ul>
+<li>Monotonically decreasing: as x increases, CCDF(x) decreases</li>
+<li>CCDF(-∞) = 1 (everything exceeds negative infinity)</li>
+<li>CCDF(+∞) = 0 (nothing exceeds positive infinity)</li>
+<li>0 ≤ CCDF(x) ≤ 1 for all x</li>
+<li>Right-continuous</li>
+</ul>
+<p><strong>Alternative Names</strong>:</p>
+<ul>
+<li>Survival function (reliability engineering)</li>
+<li>Tail distribution function</li>
+<li>Exceedance probability function</li>
+<li>Reliability function R(t)</li>
+</ul>
+<h3 id="why-ccdf-is-critical"><a class="header" href="#why-ccdf-is-critical">Why CCDF is Critical</a></h3>
+<h4 id="1-tail-analysis-made-visible"><a class="header" href="#1-tail-analysis-made-visible">1. Tail Analysis Made Visible</a></h4>
+<p><strong>The Problem with CDF</strong>: In the tail, CDF approaches 1 and changes become invisible.</p>
+<p><strong>Example</strong>:</p>
+<ul>
+<li>CDF at p95: 0.95</li>
+<li>CDF at p99: 0.99</li>
+<li>CDF at p99.9: 0.999</li>
+</ul>
+<p>Hard to see the difference! They all look like "basically 1" on a normal plot.</p>
+<p><strong>CCDF Makes Tails Visible</strong>:</p>
+<ul>
+<li>CCDF at p95: 0.05 (5%)</li>
+<li>CCDF at p99: 0.01 (1%)</li>
+<li>CCDF at p99.9: 0.001 (0.1%)</li>
+</ul>
+<p><strong>Much clearer differentiation!</strong> Especially on log scale.</p>
+<h4 id="2-heavy-tailed-distributions"><a class="header" href="#2-heavy-tailed-distributions">2. Heavy-Tailed Distributions</a></h4>
+<p><strong>Power Laws Are Linear on Log-Log CCDF Plots</strong>:</p>
+<p>For power-law distribution: <code>P(X &gt; x) ~ x^(-α)</code></p>
+<p>Taking log of both sides: <code>log(CCDF) = -α × log(x) + constant</code></p>
+<p><strong>This is a straight line on log-log plot!</strong></p>
+<p><strong>Exponential Distributions Are Linear on Log-Linear Plots</strong>:</p>
+<p>For exponential: <code>P(X &gt; x) = e^(-λx)</code></p>
+<p>Taking log: <code>log(CCDF) = -λx</code></p>
+<p><strong>Straight line on semi-log plot!</strong></p>
+<p><strong>The Power</strong>: Identify distribution type just by looking at CCDF plot shape.</p>
+<h4 id="3-reliability-and-survival-analysis"><a class="header" href="#3-reliability-and-survival-analysis">3. Reliability and Survival Analysis</a></h4>
+<p><strong>Survival Function S(t)</strong>:</p>
+<pre><code>S(t) = P(T &gt; t) = CCDF(t)
+</code></pre>
+<p><strong>Interpretation</strong>: Probability a system survives beyond time t</p>
+<p><strong>Real-World Applications</strong>:</p>
+<ul>
+<li>Component reliability: S(t) = fraction of components still working at time t</li>
+<li>Patient survival: S(t) = fraction of patients alive after t months</li>
+<li>Customer churn: S(t) = fraction of customers retained after t days</li>
+<li>Session duration: S(t) = fraction of sessions lasting longer than t minutes</li>
+</ul>
+<p><strong>Hazard Rate</strong> (related concept):</p>
+<pre><code>h(t) = -d[log(S(t))]/dt = PDF(t) / CCDF(t)
+</code></pre>
+<p>Instantaneous failure rate at time t, given survival to time t.</p>
+<h4 id="4-performance-engineering"><a class="header" href="#4-performance-engineering">4. Performance Engineering</a></h4>
+<p><strong>Tail Latency Visualization</strong>:</p>
+<p>CCDF answers: "What fraction of requests exceed latency x?"</p>
+<p><strong>Example</strong>:</p>
+<ul>
+<li>CCDF(10ms) = 0.80 → 80% of requests take &gt; 10ms</li>
+<li>CCDF(50ms) = 0.50 → 50% of requests take &gt; 50ms (median)</li>
+<li>CCDF(100ms) = 0.10 → 10% of requests take &gt; 100ms (p90)</li>
+<li>CCDF(500ms) = 0.01 → 1% of requests take &gt; 500ms (p99)</li>
+</ul>
+<p><strong>Immediate insights</strong>:</p>
+<ul>
+<li>Where's the knee of the curve? (transition from typical to tail)</li>
+<li>How heavy is the tail? (steep vs shallow decline)</li>
+<li>What's the worst case? (where CCDF approaches zero)</li>
+</ul>
+<h3 id="ccdf-vs-cdf-vs-pdf"><a class="header" href="#ccdf-vs-cdf-vs-pdf">CCDF vs CDF vs PDF</a></h3>
+<p><strong>When to Use Each</strong>:</p>
+<div class="table-wrapper"><table><thead><tr><th>Representation</th><th>Best For</th><th>Answers</th></tr></thead><tbody>
+<tr><td><strong>PDF</strong></td><td>Understanding shape, finding mode</td><td>"What values are most common?"</td></tr>
+<tr><td><strong>CDF</strong></td><td>Finding percentiles, median</td><td>"What fraction is below x?"</td></tr>
+<tr><td><strong>CCDF</strong></td><td>Tail analysis, reliability, SLAs</td><td>"What fraction exceeds x?"</td></tr>
+</tbody></table>
+</div>
+<p><strong>Visualization Advantages</strong>:</p>
+<p><strong>PDF</strong>:</p>
+<ul>
+<li>Shows distribution shape clearly</li>
+<li>Identifies peaks (modes)</li>
+<li>BUT: Hard to read tail probabilities</li>
+</ul>
+<p><strong>CDF</strong>:</p>
+<ul>
+<li>Percentiles directly readable</li>
+<li>Smooth, monotonic</li>
+<li>BUT: Tail gets compressed near 1</li>
+</ul>
+<p><strong>CCDF</strong>:</p>
+<ul>
+<li>Tail probabilities clearly visible</li>
+<li>Heavy tails immediately obvious</li>
+<li>Power laws become straight lines (log-log)</li>
+<li>BUT: Typical values compressed near 1</li>
+</ul>
+<p><strong>The Rule</strong>: Use CCDF when you care about exceedance probabilities, tails, or reliability.</p>
+<h3 id="common-patterns-and-shapes"><a class="header" href="#common-patterns-and-shapes">Common Patterns and Shapes</a></h3>
+<p>The shape of the CCDF reveals the underlying distribution type.</p>
+<h4 id="linear-linear-scale"><a class="header" href="#linear-linear-scale">Linear-Linear Scale</a></h4>
+<p><strong>Exponential Distribution</strong>:</p>
+<ul>
+<li>Rapid drop near zero</li>
+<li>Long tail</li>
+<li>Convex curve</li>
+</ul>
+<p><strong>Normal Distribution</strong>:</p>
+<ul>
+<li>S-shaped curve</li>
+<li>Symmetric around median (when looking at both tails)</li>
+<li>Rapid drop in tails</li>
+</ul>
+<p><strong>Power Law</strong>:</p>
+<ul>
+<li>Very heavy tail</li>
+<li>Slow, gradual decline</li>
+</ul>
+<h4 id="semi-log-scale-log-ccdf-vs-linear-x"><a class="header" href="#semi-log-scale-log-ccdf-vs-linear-x">Semi-Log Scale (Log CCDF vs Linear x)</a></h4>
+<p><strong>Exponential Distribution</strong>:</p>
+<pre><code>log(CCDF) = -λx
+</code></pre>
+<ul>
+<li><strong>Straight line</strong> with negative slope</li>
+<li>Slope = -λ (rate parameter)</li>
+<li>Most common in practice!</li>
+</ul>
+<p><strong>Normal Distribution</strong>:</p>
+<ul>
+<li>Downward curving (concave)</li>
+<li>Accelerating decline</li>
+<li>Looks parabolic (actually related to x²)</li>
+</ul>
+<p><strong>Power Law</strong>:</p>
+<ul>
+<li>Upward curving (convex)</li>
+<li>Slower than exponential decline</li>
+</ul>
+<p><strong>How to Interpret</strong>:</p>
+<ul>
+<li>Straight → Exponential</li>
+<li>Curves down faster → Sub-exponential (normal, log-normal)</li>
+<li>Curves down slower → Super-exponential or heavy-tailed</li>
+</ul>
+<h4 id="log-log-scale-log-ccdf-vs-log-x"><a class="header" href="#log-log-scale-log-ccdf-vs-log-x">Log-Log Scale (Log CCDF vs Log x)</a></h4>
+<p><strong>Power Law Distribution</strong>:</p>
+<pre><code>P(X &gt; x) = C × x^(-α)
+log(CCDF) = log(C) - α × log(x)
+</code></pre>
+<ul>
+<li><strong>Straight line</strong> with negative slope</li>
+<li>Slope = -α (power law exponent)</li>
+<li>Heavy tail indicator!</li>
+</ul>
+<p><strong>Exponential Distribution</strong>:</p>
+<ul>
+<li>Downward curving (concave)</li>
+<li>Exponential drop is faster than any power law</li>
+</ul>
+<p><strong>Log-Normal Distribution</strong>:</p>
+<ul>
+<li>Initially looks like power law (straight)</li>
+<li>Eventually curves down (exponential tail)</li>
+<li>Transition point reveals parameters</li>
+</ul>
+<p><strong>How to Identify</strong>:</p>
+<ul>
+<li>Straight line on log-log → Power law</li>
+<li>Straight then curves down → Log-normal</li>
+<li>Consistently curved → Exponential or normal</li>
+</ul>
+<p><strong>Critical Insight</strong>: If your data shows a straight line on log-log CCDF plot, you have a heavy-tailed (power-law) distribution. This changes everything about how you should handle it!</p>
+<h3 id="ccdf-for-common-distributions"><a class="header" href="#ccdf-for-common-distributions">CCDF for Common Distributions</a></h3>
+<h4 id="exponential-distribution-1"><a class="header" href="#exponential-distribution-1">Exponential Distribution</a></h4>
+<p><strong>CCDF Formula</strong>:</p>
+<pre><code>CCDF(x) = P(X &gt; x) = e^(-λx)  for x ≥ 0
+</code></pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li>λ: rate parameter (λ &gt; 0)</li>
+<li>Mean = 1/λ</li>
+</ul>
+<p><strong>Log CCDF</strong>:</p>
+<pre><code>log(CCDF) = -λx
+</code></pre>
+<p>Straight line on semi-log plot with slope -λ</p>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Time between independent events (server requests, radioactive decay)</li>
+<li>Time until failure (memoryless components)</li>
+<li>Service times (simple queue systems)</li>
+</ul>
+<p><strong>Key Property - Memoryless</strong>:</p>
+<pre><code>P(X &gt; s+t | X &gt; s) = P(X &gt; t)
+</code></pre>
+<p>Past doesn't affect future! If it hasn't happened by time s, probability of happening in next t is unchanged.</p>
+<p><strong>Example</strong>: Component with λ = 0.01/hour</p>
+<ul>
+<li>CCDF(100h) = e^(-0.01×100) = e^(-1) ≈ 0.368</li>
+<li>36.8% survive beyond 100 hours</li>
+<li>Mean lifetime = 1/0.01 = 100 hours</li>
+</ul>
+<h4 id="power-law-pareto-distribution"><a class="header" href="#power-law-pareto-distribution">Power Law (Pareto) Distribution</a></h4>
+<p><strong>CCDF Formula</strong>:</p>
+<pre><code>CCDF(x) = P(X &gt; x) = (x_min/x)^α  for x ≥ x_min
+</code></pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li>α: power law exponent (α &gt; 0)</li>
+<li>x_min: minimum value</li>
+<li>Larger α → lighter tail</li>
+</ul>
+<p><strong>Log-Log Form</strong>:</p>
+<pre><code>log(CCDF) = α × log(x_min) - α × log(x)
+</code></pre>
+<p>Straight line on log-log plot with slope -α</p>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Wealth distribution (α ≈ 1.5-2)</li>
+<li>City populations (α ≈ 2-3)</li>
+<li>Web page views (α ≈ 2)</li>
+<li>File sizes (α ≈ 1-2)</li>
+<li>Network traffic (α ≈ 1.5-2.5)</li>
+</ul>
+<p><strong>The 80-20 Rule</strong>: When α ≈ 1.16, top 20% accounts for 80%</p>
+<p><strong>Heavy Tail Implications</strong>:</p>
+<ul>
+<li>Mean may be undefined or infinite (α ≤ 1)</li>
+<li>Variance often infinite (α ≤ 2)</li>
+<li>Extreme events dominate</li>
+<li>Sample mean unreliable</li>
+<li>Traditional statistics fail!</li>
+</ul>
+<p><strong>Example</strong>: Web traffic with α = 2, x_min = 1</p>
+<ul>
+<li>CCDF(10) = (1/10)^2 = 0.01 → 1% exceed 10x minimum</li>
+<li>CCDF(100) = (1/100)^2 = 0.0001 → 0.01% exceed 100x minimum</li>
+<li>Long tail: some pages get 100x average traffic</li>
+</ul>
+<h4 id="normal-gaussian-distribution"><a class="header" href="#normal-gaussian-distribution">Normal (Gaussian) Distribution</a></h4>
+<p><strong>No Closed-Form CCDF</strong>:</p>
+<pre><code>CCDF(x) = P(X &gt; x) = 1 - Φ((x-μ)/σ)
+</code></pre>
+<p>Where Φ is the standard normal CDF (requires numerical integration or tables).</p>
+<p><strong>Approximations</strong>:</p>
+<p>For standard normal (μ=0, σ=1), large x:</p>
+<pre><code>CCDF(x) ≈ φ(x)/x = (1/√(2π)) × e^(-x²/2) / x
+</code></pre>
+<p><strong>Characteristics</strong>:</p>
+<ul>
+<li>Light tail (faster than exponential for large x)</li>
+<li>Symmetric around mean</li>
+<li>68-95-99.7 rule:
+<ul>
+<li>CCDF(μ + σ) ≈ 0.16 (16% exceed mean+1σ)</li>
+<li>CCDF(μ + 2σ) ≈ 0.025 (2.5% exceed mean+2σ)</li>
+<li>CCDF(μ + 3σ) ≈ 0.0015 (0.15% exceed mean+3σ)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Log Scale Behavior</strong>:</p>
+<pre><code>log(CCDF) ≈ -x²/(2σ²)
+</code></pre>
+<p>Parabolic on semi-log plot (curves down faster than exponential)</p>
+<p><strong>Real-World</strong>: Heights, measurement errors, IQ scores</p>
+<p><strong>Example</strong>: IQ scores (μ=100, σ=15)</p>
+<ul>
+<li>CCDF(115) ≈ 0.16 → 16% have IQ &gt; 115</li>
+<li>CCDF(130) ≈ 0.025 → 2.5% have IQ &gt; 130 ("gifted")</li>
+<li>CCDF(145) ≈ 0.0015 → 0.15% have IQ &gt; 145 ("highly gifted")</li>
+</ul>
+<h4 id="log-normal-distribution"><a class="header" href="#log-normal-distribution">Log-Normal Distribution</a></h4>
+<p><strong>CCDF Formula</strong>:</p>
+<pre><code>If log(X) ~ Normal(μ, σ²), then:
+CCDF(x) = 1 - Φ((log(x) - μ)/σ)
+</code></pre>
+<p><strong>Characteristics</strong>:</p>
+<ul>
+<li>Always positive (x &gt; 0)</li>
+<li>Right-skewed</li>
+<li>Initially looks like power law</li>
+<li>Eventually has exponential tail</li>
+<li>Heavier than exponential, lighter than power law</li>
+</ul>
+<p><strong>Log-Log Behavior</strong>:</p>
+<ul>
+<li>Initially approximately straight (looks like power law)</li>
+<li>Curves down at large x</li>
+<li>Transition reveals parameters</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Latencies (when many multiplicative factors combine)</li>
+<li>Income distributions</li>
+<li>File sizes</li>
+<li>City populations (alternative to power law)</li>
+<li>Asset prices</li>
+</ul>
+<p><strong>Why Log-Normal Appears</strong>:</p>
+<ul>
+<li>Central Limit Theorem for products (not sums)</li>
+<li>When many multiplicative factors combine</li>
+<li>Growth processes with proportional random variations</li>
+</ul>
+<p><strong>Example</strong>: Network latency</p>
+<ul>
+<li>μ = 3 (log-scale), σ = 1</li>
+<li>CCDF(e³) = 0.5 → median ≈ 20ms</li>
+<li>CCDF(e⁴) ≈ 0.16 → 16% exceed ≈ 55ms</li>
+<li>CCDF(e⁵) ≈ 0.025 → 2.5% exceed ≈ 148ms</li>
+</ul>
+<h4 id="weibull-distribution"><a class="header" href="#weibull-distribution">Weibull Distribution</a></h4>
+<p><strong>CCDF Formula</strong>:</p>
+<pre><code>CCDF(x) = e^(-(x/λ)^k)  for x ≥ 0
+</code></pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li>k: shape parameter</li>
+<li>λ: scale parameter</li>
+</ul>
+<p><strong>Special Cases</strong>:</p>
+<ul>
+<li>k = 1: Exponential distribution</li>
+<li>k &lt; 1: Decreasing hazard rate (infant mortality)</li>
+<li>k &gt; 1: Increasing hazard rate (wear-out failures)</li>
+<li>k ≈ 3.5: Approximates normal distribution</li>
+</ul>
+<p><strong>Log Transformation</strong>:</p>
+<pre><code>log(-log(CCDF)) = k × log(x) - k × log(λ)
+</code></pre>
+<p>Straight line on Weibull plot!</p>
+<p><strong>Real-World Applications</strong>:</p>
+<ul>
+<li>Reliability engineering (lifetime analysis)</li>
+<li>Failure analysis with aging</li>
+<li>Wind speed distributions</li>
+<li>Material strength</li>
+</ul>
+<p><strong>Hazard Rate</strong>:</p>
+<pre><code>h(t) = (k/λ) × (t/λ)^(k-1)
+</code></pre>
+<ul>
+<li>k &lt; 1: Decreasing (early failures decline)</li>
+<li>k = 1: Constant (random failures)</li>
+<li>k &gt; 1: Increasing (wear-out)</li>
+</ul>
+<p><strong>Example</strong>: Hard drive failures (k=1.5, λ=10 years)</p>
+<ul>
+<li>CCDF(5y) = e^(-(5/10)^1.5) = e^(-0.354) ≈ 0.70 → 70% survive</li>
+<li>CCDF(10y) = e^(-1) ≈ 0.37 → 37% survive</li>
+<li>Increasing failure rate (wear-out)</li>
+</ul>
+<h3 id="operations-and-calculations"><a class="header" href="#operations-and-calculations">Operations and Calculations</a></h3>
+<h4 id="computing-empirical-ccdf-from-data"><a class="header" href="#computing-empirical-ccdf-from-data">Computing Empirical CCDF from Data</a></h4>
+<p><strong>Method 1: Direct Calculation</strong></p>
+<p>Given n data points sorted: x₁ ≤ x₂ ≤ ... ≤ xₙ</p>
+<pre><code>CCDF(x) = (number of points &gt; x) / n
+</code></pre>
+<p><strong>Algorithm</strong>:</p>
+<ol>
+<li>Sort data ascending</li>
+<li>For each unique value xᵢ:
+<ul>
+<li>Count points &gt; xᵢ</li>
+<li>CCDF(xᵢ) = count / n</li>
+</ul>
+</li>
+</ol>
+<p><strong>Example</strong>: Data = [10, 20, 20, 30, 50, 100]</p>
+<ul>
+<li>CCDF(10) = 5/6 ≈ 0.833</li>
+<li>CCDF(20) = 3/6 = 0.5</li>
+<li>CCDF(30) = 2/6 ≈ 0.333</li>
+<li>CCDF(50) = 1/6 ≈ 0.167</li>
+<li>CCDF(100) = 0/6 = 0</li>
+</ul>
+<p><strong>Method 2: From Sorted Data (Efficient)</strong></p>
+<p>If data sorted, compute rank:</p>
+<pre><code>CCDF(xᵢ) = (n - i + 1) / n
+</code></pre>
+<p>Where i is the rank (position) of xᵢ in sorted order.</p>
+<p><strong>Method 3: Using Histogram/Binning</strong></p>
+<p>For large datasets:</p>
+<ol>
+<li>Create histogram with bins</li>
+<li>Compute bin counts</li>
+<li>CCDF(x) = (sum of counts for bins &gt; x) / total_count</li>
+</ol>
+<p><strong>Advantage</strong>: Memory efficient for massive datasets
+<strong>Disadvantage</strong>: Resolution limited by bin size</p>
+<h4 id="smoothing-techniques"><a class="header" href="#smoothing-techniques">Smoothing Techniques</a></h4>
+<p><strong>Problem</strong>: Empirical CCDF is step function, noisy in tails</p>
+<p><strong>Kernel Density Estimation (KDE)</strong>:</p>
+<ul>
+<li>Smooth PDF first using KDE</li>
+<li>Integrate to get smooth CCDF</li>
+<li>Bandwidth selection critical</li>
+</ul>
+<p><strong>Moving Average</strong>:</p>
+<ul>
+<li>Local averaging in log-space</li>
+<li>Reduces noise</li>
+<li>Can blur important features</li>
+</ul>
+<p><strong>Parametric Fitting</strong>:</p>
+<ul>
+<li>Fit known distribution (exponential, power-law, etc.)</li>
+<li>Use theoretical CCDF formula</li>
+<li>Best for known distribution families</li>
+</ul>
+<p><strong>When to Smooth</strong>:</p>
+<ul>
+<li>Large datasets: less necessary</li>
+<li>Tail analysis: be careful (can hide important rare events)</li>
+<li>Visualization: helps readability</li>
+<li>Statistical inference: use with caution</li>
+</ul>
+<h4 id="dealing-with-sample-size-in-the-tail"><a class="header" href="#dealing-with-sample-size-in-the-tail">Dealing with Sample Size in the Tail</a></h4>
+<p><strong>The Problem</strong>: Fewer samples in tail → higher uncertainty</p>
+<p><strong>Example</strong>: 10,000 samples</p>
+<ul>
+<li>CCDF(median): ~5,000 samples inform estimate</li>
+<li>CCDF(p99): ~100 samples inform estimate</li>
+<li>CCDF(p99.9): ~10 samples inform estimate</li>
+<li>CCDF(p99.99): ~1 sample (very unreliable!)</li>
+</ul>
+<p><strong>Confidence Intervals</strong>:</p>
+<p>For empirical CCDF at x with k samples exceeding x:</p>
+<pre><code>Binomial confidence interval: k/n ± z × √[(k/n)(1-k/n)/n]
+</code></pre>
+<p><strong>Rules of Thumb</strong>:</p>
+<ul>
+<li>Need ~100 samples to reliably estimate CCDF value</li>
+<li>p99: Need 10,000+ total samples</li>
+<li>p99.9: Need 100,000+ total samples</li>
+<li>Tail extrapolation always risky!</li>
+</ul>
+<p><strong>Strategies</strong>:</p>
+<ol>
+<li><strong>Collect more data</strong> (best approach)</li>
+<li><strong>Parametric fitting</strong>: Fit distribution to bulk, extrapolate to tail</li>
+<li><strong>Extreme Value Theory</strong>: Special methods for tail estimation</li>
+<li><strong>Report uncertainty</strong>: Show confidence bands</li>
+</ol>
+<h3 id="plotting-and-visualization"><a class="header" href="#plotting-and-visualization">Plotting and Visualization</a></h3>
+<h4 id="log-linear-plots-semi-log"><a class="header" href="#log-linear-plots-semi-log">Log-Linear Plots (Semi-Log)</a></h4>
+<p><strong>Axes</strong>:</p>
+<ul>
+<li>X: Linear scale (values)</li>
+<li>Y: Log scale (CCDF)</li>
+</ul>
+<p><strong>Best For</strong>:</p>
+<ul>
+<li>Exponential distributions</li>
+<li>Identifying exponential behavior</li>
+<li>Wide range of probabilities (10⁻⁶ to 1)</li>
+</ul>
+<p><strong>What to Look For</strong>:</p>
+<ul>
+<li><strong>Straight line</strong> → Exponential distribution</li>
+<li><strong>Slope</strong> → rate parameter λ</li>
+<li><strong>Curves down</strong> → Sub-exponential (normal, log-normal)</li>
+<li><strong>Curves up</strong> → Heavy tail (power law)</li>
+</ul>
+<p><strong>Example Interpretation</strong>:</p>
+<p>Latency CCDF on semi-log plot:</p>
+<ul>
+<li>Straight line from 10ms to 100ms → exponential behavior in bulk</li>
+<li>Curves up after 100ms → heavy tail at p99+</li>
+<li><strong>Conclusion</strong>: Mixture of exponential (normal) + heavy-tail (problems)</li>
+</ul>
+<p><strong>Practical Use</strong>:</p>
+<pre><code>If log(CCDF) vs x is straight:
+  slope = -λ
+  mean = 1/λ
+  median = log(2)/λ ≈ 0.693/λ
+</code></pre>
+<h4 id="log-log-plots"><a class="header" href="#log-log-plots">Log-Log Plots</a></h4>
+<p><strong>Axes</strong>:</p>
+<ul>
+<li>X: Log scale (values)</li>
+<li>Y: Log scale (CCDF)</li>
+</ul>
+<p><strong>Best For</strong>:</p>
+<ul>
+<li>Power-law distributions</li>
+<li>Heavy-tail analysis</li>
+<li>Spanning many orders of magnitude</li>
+</ul>
+<p><strong>What to Look For</strong>:</p>
+<ul>
+<li><strong>Straight line</strong> → Power law distribution</li>
+<li><strong>Slope</strong> → power law exponent -α</li>
+<li><strong>Curves down</strong> → Exponential tail (lighter than power law)</li>
+<li><strong>Multiple regimes</strong> → Mixture or transition</li>
+</ul>
+<p><strong>Power Law Detection</strong>:</p>
+<pre><code>If log(CCDF) vs log(x) is straight:
+  slope = -α
+  CCDF(x) ∝ x^(-α)
+  Heavy tail if α &lt; 3
+  Infinite variance if α ≤ 2
+  Infinite mean if α ≤ 1
+</code></pre>
+<p><strong>Example</strong>: Web traffic CCDF on log-log plot</p>
+<ul>
+<li>Straight line with slope -2</li>
+<li><strong>Interpretation</strong>: P(traffic &gt; x) ∝ x^(-2)</li>
+<li>Power law with α = 2</li>
+<li>80-20 rule likely applies</li>
+<li>Rare pages get enormous traffic</li>
+</ul>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li><strong>Spurious power laws</strong>: Short linear region might be chance</li>
+<li><strong>Cutoffs</strong>: Power law may only apply in specific range</li>
+<li><strong>Need multiple decades</strong>: At least 2-3 orders of magnitude for confidence</li>
+</ul>
+<h4 id="choosing-the-right-plot"><a class="header" href="#choosing-the-right-plot">Choosing the Right Plot</a></h4>
+<div class="table-wrapper"><table><thead><tr><th>Distribution Type</th><th>Best Plot</th><th>What You See</th></tr></thead><tbody>
+<tr><td>Exponential</td><td>Semi-log (log-linear)</td><td>Straight line</td></tr>
+<tr><td>Power Law</td><td>Log-log</td><td>Straight line</td></tr>
+<tr><td>Normal</td><td>Linear or semi-log</td><td>Bell curve / Parabola</td></tr>
+<tr><td>Log-Normal</td><td>Log-log</td><td>Straight then curves down</td></tr>
+<tr><td>Weibull</td><td>Weibull plot*</td><td>Straight line</td></tr>
+<tr><td>Unknown</td><td>Try all three</td><td>Pattern matching</td></tr>
+</tbody></table>
+</div>
+<p>*Weibull plot: log(-log(CCDF)) vs log(x)</p>
+<p><strong>General Strategy</strong>:</p>
+<ol>
+<li>Start with log-linear (most common)</li>
+<li>If curves up (heavy tail) → try log-log</li>
+<li>If curves down → likely normal/log-normal</li>
+<li>Always plot multiple scales to confirm</li>
+</ol>
+<h4 id="interpreting-slopes-and-shapes"><a class="header" href="#interpreting-slopes-and-shapes">Interpreting Slopes and Shapes</a></h4>
+<p><strong>Semi-Log Plot Slope</strong>:</p>
+<pre><code>slope = -λ
+Steeper slope → faster decay → lighter tail
+</code></pre>
+<p><strong>Log-Log Plot Slope</strong>:</p>
+<pre><code>slope = -α
+Shallower slope → heavier tail → more extreme events
+α &lt; 2 → beware! Unstable statistics
+</code></pre>
+<p><strong>Knee in the Curve</strong>:</p>
+<ul>
+<li>Transition from typical to tail</li>
+<li>Often around p90-p95</li>
+<li>Design systems for performance before knee</li>
+</ul>
+<p><strong>Multiple Linear Regimes</strong>:</p>
+<ul>
+<li>Different behaviors in different ranges</li>
+<li>Example: Normal operation (exponential) + failure mode (power law)</li>
+<li>Mixture distributions or phase transitions</li>
+</ul>
+<h3 id="relationship-to-percentiles"><a class="header" href="#relationship-to-percentiles">Relationship to Percentiles</a></h3>
+<h4 id="converting-percentiles-to-ccdf"><a class="header" href="#converting-percentiles-to-ccdf">Converting Percentiles to CCDF</a></h4>
+<p><strong>Percentile Definition</strong>: pth percentile = value x where p% of data ≤ x</p>
+<p><strong>CCDF Relationship</strong>:</p>
+<pre><code>If x is the pth percentile:
+  CCDF(x) = 1 - p/100
+</code></pre>
+<p><strong>Examples</strong>:</p>
+<ul>
+<li>Median (p50) → CCDF(x) = 0.5</li>
+<li>p90 → CCDF(x) = 0.10</li>
+<li>p95 → CCDF(x) = 0.05</li>
+<li>p99 → CCDF(x) = 0.01</li>
+<li>p99.9 → CCDF(x) = 0.001</li>
+</ul>
+<p><strong>Reading from Plot</strong>:</p>
+<ul>
+<li>Find your percentile: p95 means CCDF = 0.05</li>
+<li>Draw horizontal line at y = 0.05</li>
+<li>Where it crosses CCDF curve, read x value</li>
+<li>That's your p95 value!</li>
+</ul>
+<h4 id="converting-ccdf-to-percentiles"><a class="header" href="#converting-ccdf-to-percentiles">Converting CCDF to Percentiles</a></h4>
+<p><strong>Given CCDF value c at x</strong>:</p>
+<pre><code>c = CCDF(x) = 1 - (percentile/100)
+percentile = (1 - c) × 100
+</code></pre>
+<p><strong>Example</strong>: CCDF(150ms) = 0.02</p>
+<ul>
+<li>c = 0.02 = 2%</li>
+<li>percentile = (1 - 0.02) × 100 = 98</li>
+<li><strong>150ms is the p98 value</strong></li>
+</ul>
+<h4 id="why-ccdf-shows-the-full-picture"><a class="header" href="#why-ccdf-shows-the-full-picture">Why CCDF Shows the Full Picture</a></h4>
+<p><strong>Percentiles Give Points</strong>:</p>
+<ul>
+<li>p50 = 10ms</li>
+<li>p90 = 50ms</li>
+<li>p99 = 200ms</li>
+<li>p99.9 = 1000ms</li>
+</ul>
+<p><strong>Limited View</strong>: Only 4 data points!</p>
+<p><strong>CCDF Gives Complete Distribution</strong>:</p>
+<ul>
+<li>Continuous curve showing ALL thresholds</li>
+<li>See exactly where tail begins</li>
+<li>Identify distribution type</li>
+<li>Spot anomalies and outliers</li>
+<li>Understand full range, not just specific percentiles</li>
+</ul>
+<p><strong>Example Power</strong>:</p>
+<p>API latency percentiles:</p>
+<ul>
+<li>p50 = 10ms, p99 = 100ms → is p99.9 around 200ms or 10,000ms?</li>
+<li>Can't tell from percentiles alone!</li>
+</ul>
+<p>CCDF plot reveals:</p>
+<ul>
+<li>Exponential tail → p99.9 ≈ 200ms (predictable)</li>
+<li>Power law tail → p99.9 could be 10,000ms (scary!)</li>
+</ul>
+<p><strong>The Rule</strong>: Percentiles for SLAs and reporting, CCDF for understanding and debugging.</p>
+<h3 id="practical-applications"><a class="header" href="#practical-applications">Practical Applications</a></h3>
+<h4 id="tail-latency-analysis"><a class="header" href="#tail-latency-analysis">Tail Latency Analysis</a></h4>
+<p><strong>Problem</strong>: Why are some requests slow?</p>
+<p><strong>CCDF Approach</strong>:</p>
+<ol>
+<li><strong>Plot latency CCDF</strong> on log-linear scale</li>
+<li><strong>Identify distribution</strong>:
+<ul>
+<li>Straight → Exponential (normal operation)</li>
+<li>Curves up → Heavy tail (problem!)</li>
+</ul>
+</li>
+<li><strong>Find the knee</strong>: Where behavior changes</li>
+<li><strong>Measure tail weight</strong>: How heavy?</li>
+</ol>
+<p><strong>Example Analysis</strong>:</p>
+<pre><code>CCDF plot shows:
+- 0-50ms: Straight line (exponential, slope -0.02)
+- 50-500ms: Still straight (exponential, slope -0.01)
+- 500ms+: Curves up (heavy tail)
+
+Interpretation:
+- Normal operation: exponential ~20ms median
+- Degraded operation: exponential ~70ms median
+- Failure mode: heavy tail beyond 500ms
+
+Action items:
+- 99% served in &lt;500ms (good)
+- 1% hitting failure mode (investigate!)
+- Likely bimodal: normal + pathological
+</code></pre>
+<p><strong>Root Cause Strategies</strong>:</p>
+<ul>
+<li>Stratify CCDF by endpoint, server, time-of-day</li>
+<li>Different shapes → different root causes</li>
+<li>Power law → contention, queueing, cascading failures</li>
+<li>Bimodal → cache hits vs. misses</li>
+</ul>
+<h4 id="reliability-and-survival-analysis"><a class="header" href="#reliability-and-survival-analysis">Reliability and Survival Analysis</a></h4>
+<p><strong>Survival Function S(t) = CCDF(t)</strong>:</p>
+<p>Probability that component survives beyond time t.</p>
+<p><strong>Key Metrics</strong>:</p>
+<p><strong>Mean Time to Failure (MTTF)</strong>:</p>
+<pre><code>MTTF = ∫[0 to ∞] S(t) dt = ∫[0 to ∞] CCDF(t) dt
+</code></pre>
+<p>Area under CCDF curve!</p>
+<p><strong>Median Lifetime</strong>: t₅₀ where CCDF(t₅₀) = 0.5</p>
+<p><strong>Reliability at time t</strong>: CCDF(t) directly!</p>
+<p><strong>Example</strong>: Hard drive reliability</p>
+<p>Given 1000 drives, measured failures:</p>
+<pre><code>t (months)    Surviving    CCDF(t)
+0             1000         1.000
+12            980          0.980
+24            940          0.940
+36            880          0.880
+48            800          0.800
+60            700          0.700
+</code></pre>
+<p><strong>Analysis</strong>:</p>
+<ul>
+<li>CCDF(60) = 0.70 → 70% survive 5 years</li>
+<li>Plot log(CCDF) vs t → is it linear? (exponential)</li>
+<li>Or log(CCDF) vs log(t)? (power law)</li>
+<li>Fit Weibull to determine if aging effects present</li>
+</ul>
+<p><strong>Hazard Rate</strong>:</p>
+<pre><code>h(t) = -d[log(CCDF(t))]/dt
+</code></pre>
+<p>Slope of log(CCDF) plot!</p>
+<ul>
+<li>Constant slope → constant hazard (exponential, memoryless)</li>
+<li>Increasing slope → wear-out (Weibull k&gt;1)</li>
+<li>Decreasing slope → infant mortality (Weibull k&lt;1)</li>
+</ul>
+<h4 id="capacity-planning-and-resource-sizing"><a class="header" href="#capacity-planning-and-resource-sizing">Capacity Planning and Resource Sizing</a></h4>
+<p><strong>Question</strong>: How much capacity needed for p99 performance?</p>
+<p><strong>CCDF Approach</strong>:</p>
+<ol>
+<li><strong>Measure current load distribution</strong> (requests/second)</li>
+<li><strong>Plot CCDF of load</strong></li>
+<li><strong>Identify p99, p99.9 values</strong></li>
+<li><strong>Provision for tail + headroom</strong></li>
+</ol>
+<p><strong>Example</strong>:</p>
+<p>Web service load (requests/second):</p>
+<pre><code>p50: 1000 req/s
+p90: 2000 req/s
+p99: 5000 req/s
+p99.9: 10,000 req/s
+</code></pre>
+<p><strong>Naive provisioning</strong>: 1000 req/s (mean)</p>
+<ul>
+<li>Result: p50 users suffer!</li>
+</ul>
+<p><strong>Better provisioning</strong>: 2000 req/s (p90)</p>
+<ul>
+<li>Result: 10% of time, service degraded</li>
+</ul>
+<p><strong>Good provisioning</strong>: 5000 req/s (p99)</p>
+<ul>
+<li>Result: 99% of time, good performance</li>
+<li>1% of time, degraded but functional</li>
+</ul>
+<p><strong>Conservative provisioning</strong>: 10,000 req/s (p99.9)</p>
+<ul>
+<li>Result: 99.9% of time, good performance</li>
+<li>Expensive but reliable</li>
+</ul>
+<p><strong>With headroom (2x)</strong>: 10,000-20,000 req/s</p>
+<ul>
+<li>Handles p99 comfortably</li>
+<li>Room for traffic spikes</li>
+<li>Cost vs. reliability tradeoff</li>
+</ul>
+<p><strong>CCDF Plot Reveals</strong>:</p>
+<ul>
+<li>Is tail exponential? (Predictable capacity needs)</li>
+<li>Is tail power-law? (Need huge overhead for tail events!)</li>
+<li>Where's the knee? (Provision just above)</li>
+</ul>
+<h4 id="sla-compliance-analysis"><a class="header" href="#sla-compliance-analysis">SLA Compliance Analysis</a></h4>
+<p><strong>SLA Example</strong>: "99% of requests complete in &lt; 100ms"</p>
+<p><strong>CCDF Analysis</strong>:</p>
+<ol>
+<li><strong>Plot latency CCDF</strong></li>
+<li><strong>Find CCDF(100ms)</strong></li>
+<li><strong>Check if CCDF(100ms) ≤ 0.01</strong></li>
+</ol>
+<p>If CCDF(100ms) = 0.015 → SLA violated (1.5% exceed, need &lt;1%)</p>
+<p><strong>Continuous Monitoring</strong>:</p>
+<pre><code>Alert if: CCDF(SLA_threshold) &gt; (1 - SLA_percentile)
+</code></pre>
+<p><strong>Example alerts</strong>:</p>
+<ul>
+<li>CCDF(100ms) &gt; 0.01 → p99 SLA breach</li>
+<li>CCDF(50ms) &gt; 0.05 → p95 SLA breach</li>
+</ul>
+<p><strong>Multiple SLA Tiers</strong>:</p>
+<ul>
+<li>Gold: p99 &lt; 50ms → CCDF(50ms) ≤ 0.01</li>
+<li>Silver: p95 &lt; 100ms → CCDF(100ms) ≤ 0.05</li>
+<li>Bronze: p90 &lt; 200ms → CCDF(200ms) ≤ 0.10</li>
+</ul>
+<p><strong>CCDF advantages over percentile monitoring</strong>:</p>
+<ul>
+<li>See full distribution, not just threshold</li>
+<li>Detect shifts in distribution early</li>
+<li>Understand how close to SLA boundary</li>
+<li>Identify root cause from shape changes</li>
+</ul>
+<h4 id="anomaly-detection"><a class="header" href="#anomaly-detection">Anomaly Detection</a></h4>
+<p><strong>Normal behavior</strong>: Stable CCDF shape over time</p>
+<p><strong>Anomalies show as</strong>:</p>
+<ul>
+<li><strong>Shift right</strong>: Everything slower (capacity issue)</li>
+<li><strong>Shift up</strong>: More values in tail (quality degradation)</li>
+<li><strong>Shape change</strong>: Different failure mode</li>
+<li><strong>Bimodal</strong>: New pathological path</li>
+</ul>
+<p><strong>Detection Method</strong>:</p>
+<ol>
+<li><strong>Baseline CCDF</strong> from normal operation</li>
+<li><strong>Current CCDF</strong> from recent data</li>
+<li><strong>Compare</strong>:
+<ul>
+<li>KL divergence</li>
+<li>Maximum vertical distance</li>
+<li>Area between curves</li>
+</ul>
+</li>
+</ol>
+<p><strong>Example</strong>:</p>
+<p>Normal: CCDF is exponential, slope -0.02
+Anomaly: CCDF curves up (power law) beyond p95</p>
+<p><strong>Interpretation</strong>: New failure mode affecting tail!</p>
+<p><strong>Stratified Analysis</strong>:</p>
+<ul>
+<li>CCDF per server → find outlier servers</li>
+<li>CCDF per endpoint → find slow endpoints</li>
+<li>CCDF per customer → find problem customers</li>
+<li>CCDF per hour → find peak-time issues</li>
+</ul>
+<h3 id="common-pitfalls-and-how-to-avoid-them"><a class="header" href="#common-pitfalls-and-how-to-avoid-them">Common Pitfalls and How to Avoid Them</a></h3>
+<h4 id="1-insufficient-sample-size-in-tail"><a class="header" href="#1-insufficient-sample-size-in-tail">1. Insufficient Sample Size in Tail</a></h4>
+<p><strong>Problem</strong>: Estimating p99.9 from 100 samples</p>
+<ul>
+<li>Only 0.1 samples on average exceed p99.9!</li>
+<li>Estimate is essentially random</li>
+</ul>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li><strong>Rule of thumb</strong>: Need 100/(1-p) samples for percentile p</li>
+<li>p99: Need 10,000 samples</li>
+<li>p99.9: Need 100,000 samples</li>
+<li>p99.99: Need 1,000,000 samples</li>
+</ul>
+<p><strong>If you don't have enough data</strong>:</p>
+<ul>
+<li>Parametric fitting (fit distribution to bulk, extrapolate)</li>
+<li>Report uncertainty (confidence intervals)</li>
+<li>Don't over-interpret tail</li>
+<li>Collect more data!</li>
+</ul>
+<h4 id="2-binning-artifacts"><a class="header" href="#2-binning-artifacts">2. Binning Artifacts</a></h4>
+<p><strong>Problem</strong>: Using too-coarse bins distorts CCDF</p>
+<p><strong>Example</strong>: 1ms bins for microsecond-precision data</p>
+<ul>
+<li>All values round to bin centers</li>
+<li>Staircase artifacts</li>
+<li>False plateaus</li>
+</ul>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li>Use finer bins (but not too fine!)</li>
+<li>For plots: 50-200 bins usually good</li>
+<li>Log-spaced bins for log-scale plots</li>
+<li>Or use continuous empirical CCDF (no bins)</li>
+</ul>
+<h4 id="3-log-scale-misinterpretation"><a class="header" href="#3-log-scale-misinterpretation">3. Log Scale Misinterpretation</a></h4>
+<p><strong>Problem</strong>: "Looks close on log scale" = orders of magnitude different!</p>
+<p><strong>Example</strong>: On log-log plot:</p>
+<ul>
+<li>Point A: (100, 0.01) → 1% exceed 100</li>
+<li>Point B: (1000, 0.01) → 1% exceed 1000</li>
+</ul>
+<p>Points look close, but 10x difference in threshold!</p>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li>Always check actual values, not just visual proximity</li>
+<li>Use log grid to read values accurately</li>
+<li>Report values numerically, not just plots</li>
+</ul>
+<h4 id="4-spurious-power-laws"><a class="header" href="#4-spurious-power-laws">4. Spurious Power Laws</a></h4>
+<p><strong>Problem</strong>: Seeing power law where there isn't one</p>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Short linear region by chance</li>
+<li>Mixture of distributions</li>
+<li>Confirmation bias</li>
+</ul>
+<p><strong>Example</strong>:</p>
+<ul>
+<li>Data exponential</li>
+<li>Plot log-log over limited range</li>
+<li>Looks linear! "It's a power law!"</li>
+<li>But extend range → curves down</li>
+</ul>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li><strong>Test multiple hypotheses</strong>: Compare power law vs. exponential vs. log-normal</li>
+<li><strong>Goodness of fit tests</strong>: Kolmogorov-Smirnov, likelihood ratio</li>
+<li><strong>Need at least 2-3 decades</strong> (orders of magnitude) of linear behavior</li>
+<li><strong>Check residuals</strong>: Fit should be good, not just "looks straight"</li>
+<li>Use statistical tests (Clauset et al. methodology)</li>
+</ul>
+<h4 id="5-extrapolation-beyond-data"><a class="header" href="#5-extrapolation-beyond-data">5. Extrapolation Beyond Data</a></h4>
+<p><strong>Problem</strong>: Using fitted CCDF to predict beyond observed range</p>
+<p><strong>Example</strong>:</p>
+<ul>
+<li>Observed: 10ms to 1000ms</li>
+<li>Fitted exponential: CCDF(x) = e^(-0.01x)</li>
+<li>Predict: CCDF(10000ms) = e^(-100) ≈ 10^(-43)</li>
+</ul>
+<p><strong>Insanely small probability!</strong> But is it real?</p>
+<p><strong>Reality</strong>: Distribution may change beyond observed range</p>
+<ul>
+<li>Heavy tail kicks in</li>
+<li>Different failure modes</li>
+<li>Physical limits</li>
+</ul>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li><strong>Never extrapolate beyond data</strong></li>
+<li>Report uncertainty: "Based on data from X to Y"</li>
+<li>If you must extrapolate, use extreme value theory</li>
+<li>Consider worst-case separately</li>
+</ul>
+<h4 id="6-ignoring-censored-data"><a class="header" href="#6-ignoring-censored-data">6. Ignoring Censored Data</a></h4>
+<p><strong>Problem</strong>: Missing data on extreme values</p>
+<p><strong>Example</strong>: Timeouts</p>
+<ul>
+<li>Measure latencies up to 5s timeout</li>
+<li>All requests &gt;5s recorded as "timeout"</li>
+<li>CCDF(5s) looks like it drops to zero</li>
+<li>But reality: some are 10s, 100s, or even stuck!</li>
+</ul>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li><strong>Right-censored data</strong>: Use survival analysis methods</li>
+<li>Report: "CCDF(5s) ≥ 0.01" (at least 1% exceed)</li>
+<li>Fit distributions accounting for censoring</li>
+<li>Investigate timeouts separately</li>
+</ul>
+<h4 id="7-temporal-aggregation-bias"><a class="header" href="#7-temporal-aggregation-bias">7. Temporal Aggregation Bias</a></h4>
+<p><strong>Problem</strong>: Aggregating CCDF over different conditions</p>
+<p><strong>Example</strong>: CCDF of latency over 24 hours</p>
+<ul>
+<li>Night: Fast (exponential, 10ms median)</li>
+<li>Peak: Slow (heavy tail, 50ms median)</li>
+<li>Aggregate CCDF: Bimodal mixture</li>
+</ul>
+<p><strong>Looks like</strong>: Two different failure modes
+<strong>Reality</strong>: Just day vs. night</p>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li>Stratify by relevant variables (time, load, etc.)</li>
+<li>Plot CCDF per stratum</li>
+<li>Only aggregate if distributions similar</li>
+</ul>
+<h3 id="real-world-examples"><a class="header" href="#real-world-examples">Real-World Examples</a></h3>
+<h4 id="example-1-api-latency-analysis"><a class="header" href="#example-1-api-latency-analysis">Example 1: API Latency Analysis</a></h4>
+<p><strong>Scenario</strong>: Microservice API serving 1M requests/day</p>
+<p><strong>Data</strong>: Measured latencies for 24 hours</p>
+<p><strong>Analysis</strong>:</p>
+<ol>
+<li><strong>Compute empirical CCDF</strong>:</li>
+</ol>
+<pre><code>Value (ms)    CCDF (fraction exceeding)
+1             0.99
+5             0.80
+10            0.50    (median)
+20            0.20    (p80)
+50            0.10    (p90)
+100           0.05    (p95)
+200           0.02    (p98)
+500           0.01    (p99)
+1000          0.005   (p99.5)
+2000          0.002   (p99.8)
+5000          0.0005  (p99.95)
+</code></pre>
+<ol start="2">
+<li>
+<p><strong>Plot semi-log (log CCDF vs linear latency)</strong>:</p>
+<ul>
+<li>1-100ms: Straight line, slope ≈ -0.02</li>
+<li>100-500ms: Straight line, slope ≈ -0.005</li>
+<li>500ms+: Curves upward</li>
+</ul>
+</li>
+<li>
+<p><strong>Interpretation</strong>:</p>
+<ul>
+<li><strong>Bulk (1-100ms)</strong>: Exponential, λ=0.02, mean=50ms</li>
+<li><strong>Degraded (100-500ms)</strong>: Exponential, λ=0.005, mean=200ms</li>
+<li><strong>Failure mode (500ms+)</strong>: Heavy tail (power law or long-tail events)</li>
+</ul>
+</li>
+<li>
+<p><strong>Insights</strong>:</p>
+<ul>
+<li>80% of requests: fast path (cache hits, local data)</li>
+<li>19% of requests: slow path (DB queries, network calls)</li>
+<li>1% of requests: pathological (timeouts, retries, cascading failures)</li>
+</ul>
+</li>
+<li>
+<p><strong>Action Items</strong>:</p>
+<ul>
+<li>Investigate p99+ behavior (10,000 requests/day affected!)</li>
+<li>Stratify by endpoint → find which endpoints contribute to tail</li>
+<li>Add caching or optimize slow path</li>
+<li>Set SLA: p99 &lt; 500ms (before failure mode)</li>
+</ul>
+</li>
+</ol>
+<h4 id="example-2-hard-drive-failure-analysis"><a class="header" href="#example-2-hard-drive-failure-analysis">Example 2: Hard Drive Failure Analysis</a></h4>
+<p><strong>Scenario</strong>: Data center with 10,000 hard drives, tracked for 5 years</p>
+<p><strong>Data</strong>: Failure times (months since deployment)</p>
+<p><strong>Analysis</strong>:</p>
+<ol>
+<li><strong>Compute survival function S(t) = CCDF(t)</strong>:</li>
+</ol>
+<pre><code>Time (months)    Failed    Surviving    CCDF(t)
+0                0         10000        1.000
+12               150       9850         0.985
+24               420       9580         0.958
+36               780       9220         0.922
+48               1250      8750         0.875
+60               1820      8180         0.818
+</code></pre>
+<ol start="2">
+<li>
+<p><strong>Plot log(CCDF) vs log(t)</strong> and log(CCDF) vs t:</p>
+<ul>
+<li>Log-log: Slight downward curve (not power law)</li>
+<li>Semi-log: Slight upward curve (not exponential)</li>
+<li>Suggests: Weibull distribution</li>
+</ul>
+</li>
+<li>
+<p><strong>Fit Weibull</strong>: CCDF(t) = exp(-(t/λ)^k)</p>
+<ul>
+<li>Using log transformation: log(-log(CCDF)) vs log(t)</li>
+<li>Fitted parameters: k ≈ 1.4, λ ≈ 80 months</li>
+</ul>
+</li>
+<li>
+<p><strong>Interpretation</strong>:</p>
+<ul>
+<li>k &gt; 1 → increasing hazard rate (wear-out)</li>
+<li>λ = 80 months → characteristic lifetime</li>
+<li>MTTF = λ × Γ(1 + 1/k) ≈ 80 × 0.9 ≈ 72 months</li>
+</ul>
+</li>
+<li>
+<p><strong>Predictions</strong>:</p>
+<ul>
+<li>CCDF(60 months) ≈ 0.82 → 82% survive 5 years</li>
+<li>CCDF(72 months) ≈ 0.75 → 75% survive 6 years</li>
+<li>CCDF(96 months) ≈ 0.63 → 63% survive 8 years</li>
+</ul>
+</li>
+<li>
+<p><strong>Business Impact</strong>:</p>
+<ul>
+<li>Plan replacements at ~60 months (before rapid wear-out)</li>
+<li>Budget for 18% replacement rate at 5 years</li>
+<li>Warranty should be &lt; 60 months</li>
+</ul>
+</li>
+</ol>
+<h4 id="example-3-network-traffic-distribution"><a class="header" href="#example-3-network-traffic-distribution">Example 3: Network Traffic Distribution</a></h4>
+<p><strong>Scenario</strong>: Web server, analyzing bytes per request</p>
+<p><strong>Data</strong>: 1 million HTTP requests, measuring response sizes</p>
+<p><strong>Analysis</strong>:</p>
+<ol>
+<li>
+<p><strong>Plot CCDF on log-log scale</strong>:</p>
+<ul>
+<li>Shows straight line from 1KB to 1MB</li>
+<li>Slope ≈ -1.8</li>
+</ul>
+</li>
+<li>
+<p><strong>Interpretation</strong>: Power law!</p>
+<ul>
+<li>P(size &gt; x) ∝ x^(-1.8)</li>
+<li>α = 1.8 &lt; 2 → <strong>infinite variance!</strong></li>
+<li>Heavy tail: Some requests 1000x larger than median</li>
+</ul>
+</li>
+<li>
+<p><strong>Implications</strong>:</p>
+</li>
+</ol>
+<pre><code>CCDF(1KB) = 1.0      → 100% exceed 1KB (minimum)
+CCDF(10KB) = 0.15    → 15% exceed 10KB
+CCDF(100KB) = 0.023  → 2.3% exceed 100KB
+CCDF(1MB) = 0.0035   → 0.35% exceed 1MB
+CCDF(10MB) = 0.0005  → 0.05% exceed 10MB
+
+3500 requests/day &gt; 1MB
+500 requests/day &gt; 10MB
+</code></pre>
+<ol start="4">
+<li>
+<p><strong>Bandwidth Planning</strong>:</p>
+<ul>
+<li>Median: 5KB × 1M req/day = 5GB/day</li>
+<li>But top 1%: avg ~500KB × 10K req = 5GB/day</li>
+<li><strong>Tail uses as much bandwidth as the median!</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Optimization Strategy</strong>:</p>
+<ul>
+<li>Can't use mean (dominated by tail)</li>
+<li>Use percentile-based SLAs</li>
+<li>CDN/caching critical for tail</li>
+<li>Rate limiting on large responses</li>
+<li>Separate capacity planning for bulk data</li>
+</ul>
+</li>
+<li>
+<p><strong>80-20 Rule Check</strong>:</p>
+<ul>
+<li>With α=1.8, theory predicts ~80-20</li>
+<li>Top 20% of requests by size ≈ ~75% of bandwidth</li>
+<li>Confirmed by data!</li>
+</ul>
+</li>
+</ol>
+<h4 id="example-4-session-duration-analysis"><a class="header" href="#example-4-session-duration-analysis">Example 4: Session Duration Analysis</a></h4>
+<p><strong>Scenario</strong>: Mobile app, analyzing session lengths</p>
+<p><strong>Data</strong>: 100,000 sessions over 1 week</p>
+<p><strong>Analysis</strong>:</p>
+<ol>
+<li>
+<p><strong>Plot CCDF semi-log</strong>:</p>
+<ul>
+<li>0-60 seconds: Straight line, slope -0.02</li>
+<li>60-600 seconds: Curves down (faster decay)</li>
+</ul>
+</li>
+<li>
+<p><strong>Plot CCDF log-log</strong>:</p>
+<ul>
+<li>60-3600 seconds: Approximately straight, slope ≈ -2.5</li>
+</ul>
+</li>
+<li>
+<p><strong>Interpretation</strong>: Mixture distribution!</p>
+<ul>
+<li>0-60s: Exponential (λ=0.02, mean=50s) - "bounce" users</li>
+<li>60s+: Power law (α=2.5) - "engaged" users</li>
+</ul>
+</li>
+<li>
+<p><strong>Stratification</strong>:</p>
+</li>
+</ol>
+<pre><code>CCDF(60s) ≈ 0.30 → 30% of sessions exceed 1 minute
+  Of these engaged users:
+  CCDF(600s | &gt;60s) ≈ 0.10 → 10% exceed 10 min
+  CCDF(3600s | &gt;60s) ≈ 0.02 → 2% exceed 1 hour
+</code></pre>
+<ol start="5">
+<li>
+<p><strong>Business Insights</strong>:</p>
+<ul>
+<li>70% "bounce" (exponential, median 30s)</li>
+<li>30% "engaged" (power-law, long sessions)</li>
+<li>Top 2% × 30% = 0.6% overall spend &gt;1 hour</li>
+<li>600 power users in sample!</li>
+</ul>
+</li>
+<li>
+<p><strong>Product Strategy</strong>:</p>
+<ul>
+<li>Reduce bounce rate (improve first 60s experience)</li>
+<li>Engage power users (they drive value)</li>
+<li>Don't optimize for average (bimodal!)</li>
+</ul>
+</li>
+</ol>
 <hr />
 <h2 id="probability-basics"><a class="header" href="#probability-basics">Probability Basics</a></h2>
 <h3 id="intuition-quantifying-uncertainty"><a class="header" href="#intuition-quantifying-uncertainty">Intuition: Quantifying Uncertainty</a></h3>

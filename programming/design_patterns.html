@@ -269,163 +269,5201 @@
 </ol>
 <h3 id="creational-patterns-1"><a class="header" href="#creational-patterns-1">Creational Patterns</a></h3>
 <h4 id="singleton-pattern"><a class="header" href="#singleton-pattern">Singleton Pattern</a></h4>
-<p>The Singleton Pattern ensures that a class has only one instance and provides a global point of access to it. This is useful when exactly one object is needed to coordinate actions across the system.</p>
-<p><strong>Example Scenario</strong>: Implementing a logger where a single instance manages all logging operations.</p>
-<p><strong>Example Implementation in C++:</strong></p>
+<p><strong>Intent</strong>: Ensure a class has only one instance and provide a global point of access to it.</p>
+<p><strong>Problem</strong>: Sometimes you need exactly one instance of a class (e.g., database connection pool, thread pool, cache, configuration manager). Creating multiple instances wastes resources and can cause inconsistent state.</p>
+<p><strong>Solution</strong>: Make the class responsible for keeping track of its sole instance. The class can ensure that no other instance can be created (by intercepting requests to create new objects) and provide a way to access the instance.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>Exactly one instance of a class is required</li>
+<li>Controlled access to the sole instance is needed</li>
+<li>The instance should be extensible by subclassing</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Database connection managers</li>
+<li>Logger systems</li>
+<li>Configuration managers</li>
+<li>Thread pools</li>
+<li>Cache systems</li>
+<li>Device drivers</li>
+</ul>
+<p><strong>Implementation in C++ (Thread-Safe)</strong>:</p>
 <pre><code class="language-cpp">#include &lt;iostream&gt;
 #include &lt;mutex&gt;
+#include &lt;memory&gt;
 
-class Logger {
+class DatabaseConnection {
 public:
-    // Static method to get the single instance
-    static Logger&amp; getInstance() {
-        static Logger instance; // Guaranteed to be destroyed and instantiated on first use
+    // Get the singleton instance
+    static DatabaseConnection&amp; getInstance() {
+        // C++11 guarantees thread-safe initialization of static local variables
+        static DatabaseConnection instance;
         return instance;
     }
 
-    // Delete copy constructor and assignment operator to prevent copies
-    Logger(const Logger&amp;) = delete;
-    Logger&amp; operator=(const Logger&amp;) = delete;
+    // Delete copy constructor and assignment operator
+    DatabaseConnection(const DatabaseConnection&amp;) = delete;
+    DatabaseConnection&amp; operator=(const DatabaseConnection&amp;) = delete;
 
-    // Public method to log messages
-    void log(const std::string&amp; message) {
+    void connect(const std::string&amp; connectionString) {
         std::lock_guard&lt;std::mutex&gt; lock(mutex_);
-        std::cout &lt;&lt; "Log: " &lt;&lt; message &lt;&lt; std::endl;
+        if (!connected_) {
+            std::cout &lt;&lt; "Connecting to database: " &lt;&lt; connectionString &lt;&lt; std::endl;
+            connected_ = true;
+        }
     }
 
-private:
-    Logger() {} // Private constructor
-    std::mutex mutex_;
-};
-
-int main() {
-    Logger::getInstance().log("Application started.");
-    Logger::getInstance().log("An error occurred.");
-    return 0;
-}
-</code></pre>
-<p><strong>Explanation</strong>:</p>
-<ul>
-<li>The <code>Logger</code> class has a private constructor to prevent direct instantiation.</li>
-<li>The static method <code>getInstance()</code> returns a reference to the single <code>Logger</code> instance.</li>
-<li>Copy constructor and assignment operator are deleted to prevent creating additional instances.</li>
-<li>A mutex is used to ensure thread-safe logging operations.</li>
-</ul>
-<h3 id="structural-patterns-1"><a class="header" href="#structural-patterns-1">Structural Patterns</a></h3>
-<h4 id="adapter-pattern"><a class="header" href="#adapter-pattern">Adapter Pattern</a></h4>
-<p>The Adapter Pattern allows incompatible interfaces to work together. It acts as a bridge between two incompatible interfaces, enabling classes to collaborate without modifying their existing code.</p>
-<p><strong>Example Scenario</strong>: Integrating a new payment system into an existing application that expects a different payment interface.</p>
-<p><strong>Example Implementation in C++:</strong></p>
-<pre><code class="language-cpp">#include &lt;iostream&gt;
-
-// Existing interface expected by the application
-class PaymentProcessor {
-public:
-    virtual void pay(int amount) = 0;
-};
-
-// New payment system with a different interface
-class NewPaymentSystem {
-public:
-    void makePayment(int amount) {
-        std::cout &lt;&lt; "Processing payment of $" &lt;&lt; amount &lt;&lt; " through the new system." &lt;&lt; std::endl;
-    }
-};
-
-// Adapter to make NewPaymentSystem compatible with PaymentProcessor
-class PaymentAdapter : public PaymentProcessor {
-public:
-    PaymentAdapter(NewPaymentSystem* newPaymentSystem) : newPaymentSystem_(newPaymentSystem) {}
-
-    void pay(int amount) override {
-        newPaymentSystem_-&gt;makePayment(amount);
-    }
-
-private:
-    NewPaymentSystem* newPaymentSystem_;
-};
-
-int main() {
-    NewPaymentSystem newSystem;
-    PaymentAdapter adapter(&amp;newSystem);
-    adapter.pay(100); // Output: Processing payment of $100 through the new system.
-    return 0;
-}
-</code></pre>
-<p><strong>Explanation</strong>:</p>
-<ul>
-<li><code>PaymentProcessor</code> is the existing interface that the application expects.</li>
-<li><code>NewPaymentSystem</code> is the new class with an incompatible interface (<code>makePayment</code> method).</li>
-<li><code>PaymentAdapter</code> implements <code>PaymentProcessor</code> and internally uses an instance of <code>NewPaymentSystem</code> to fulfill the <code>pay</code> request.</li>
-</ul>
-<h3 id="behavioral-patterns-1"><a class="header" href="#behavioral-patterns-1">Behavioral Patterns</a></h3>
-<h4 id="observer-pattern"><a class="header" href="#observer-pattern">Observer Pattern</a></h4>
-<p>The Observer Pattern defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically. This pattern is commonly used in event handling systems.</p>
-<p><strong>Example Scenario</strong>: Implementing a publish-subscribe mechanism where multiple subscribers listen to updates from a publisher.</p>
-<p><strong>Example Implementation in C++:</strong></p>
-<pre><code class="language-cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-
-// Observer interface
-class Observer {
-public:
-    virtual void update(const std::string&amp; message) = 0;
-};
-
-// Subject class
-class Subject {
-public:
-    void addObserver(Observer* observer) {
-        observers_.push_back(observer);
-    }
-
-    void notify(const std::string&amp; message) {
-        for(auto observer : observers_) {
-            observer-&gt;update(message);
+    void query(const std::string&amp; sql) {
+        std::lock_guard&lt;std::mutex&gt; lock(mutex_);
+        if (connected_) {
+            std::cout &lt;&lt; "Executing: " &lt;&lt; sql &lt;&lt; std::endl;
+        } else {
+            std::cout &lt;&lt; "Not connected!" &lt;&lt; std::endl;
         }
     }
 
 private:
-    std::vector&lt;Observer*&gt; observers_;
+    DatabaseConnection() : connected_(false) {
+        std::cout &lt;&lt; "DatabaseConnection instance created" &lt;&lt; std::endl;
+    }
+
+    ~DatabaseConnection() {
+        std::cout &lt;&lt; "DatabaseConnection instance destroyed" &lt;&lt; std::endl;
+    }
+
+    bool connected_;
+    std::mutex mutex_;
 };
 
-// Concrete Observer
-class ConcreteObserver : public Observer {
+// Usage
+int main() {
+    // All these calls return the same instance
+    DatabaseConnection::getInstance().connect("server=localhost;db=mydb");
+    DatabaseConnection::getInstance().query("SELECT * FROM users");
+
+    DatabaseConnection&amp; db1 = DatabaseConnection::getInstance();
+    DatabaseConnection&amp; db2 = DatabaseConnection::getInstance();
+
+    std::cout &lt;&lt; "Same instance? " &lt;&lt; (&amp;db1 == &amp;db2 ? "Yes" : "No") &lt;&lt; std::endl;
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">import threading
+
+class DatabaseConnection:
+    """Thread-safe singleton using double-checked locking"""
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                # Double-checked locking
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self):
+        if not self._initialized:
+            self.connected = False
+            self._initialized = True
+            print("DatabaseConnection instance created")
+
+    def connect(self, connection_string):
+        if not self.connected:
+            print(f"Connecting to database: {connection_string}")
+            self.connected = True
+
+    def query(self, sql):
+        if self.connected:
+            print(f"Executing: {sql}")
+        else:
+            print("Not connected!")
+
+# Python decorator approach (cleaner)
+def singleton(cls):
+    instances = {}
+    lock = threading.Lock()
+
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            with lock:
+                if cls not in instances:
+                    instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+
+@singleton
+class Logger:
+    def __init__(self):
+        self.log_file = "app.log"
+        print("Logger initialized")
+
+    def log(self, message):
+        print(f"[LOG] {message}")
+
+# Usage
+db1 = DatabaseConnection()
+db2 = DatabaseConnection()
+print(f"Same instance? {db1 is db2}")  # True
+
+logger1 = Logger()
+logger2 = Logger()
+print(f"Same logger? {logger1 is logger2}")  # True
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Controlled access to sole instance</li>
+<li>Reduced memory footprint</li>
+<li>Permits refinement of operations and representation</li>
+<li>Lazy initialization possible</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Can be difficult to test (global state)</li>
+<li>Violates Single Responsibility Principle</li>
+<li>Can mask bad design (tight coupling)</li>
+<li>Requires special treatment in multi-threaded environments</li>
+</ul>
+<hr />
+<h4 id="factory-method-pattern"><a class="header" href="#factory-method-pattern">Factory Method Pattern</a></h4>
+<p><strong>Intent</strong>: Define an interface for creating an object, but let subclasses decide which class to instantiate.</p>
+<p><strong>Problem</strong>: A framework needs to standardize the architectural model for a range of applications, but allow for individual applications to define their own domain objects and provide for their instantiation.</p>
+<p><strong>Solution</strong>: Define a factory method that returns objects of a common interface. Subclasses implement the factory method to create specific product types.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>A class can't anticipate the class of objects it must create</li>
+<li>A class wants its subclasses to specify the objects it creates</li>
+<li>Classes delegate responsibility to one of several helper subclasses</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>GUI frameworks creating platform-specific buttons/windows</li>
+<li>Document editors creating different document types</li>
+<li>Logistics apps creating different transport types</li>
+<li>Database connectors for different DBMS systems</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+
+// Product interface
+class Transport {
 public:
-    ConcreteObserver(const std::string&amp; name) : name_(name) {}
+    virtual ~Transport() = default;
+    virtual void deliver() = 0;
+    virtual std::string getType() const = 0;
+};
+
+// Concrete Products
+class Truck : public Transport {
+public:
+    void deliver() override {
+        std::cout &lt;&lt; "Delivering by land in a box" &lt;&lt; std::endl;
+    }
+
+    std::string getType() const override {
+        return "Truck";
+    }
+};
+
+class Ship : public Transport {
+public:
+    void deliver() override {
+        std::cout &lt;&lt; "Delivering by sea in a container" &lt;&lt; std::endl;
+    }
+
+    std::string getType() const override {
+        return "Ship";
+    }
+};
+
+class Airplane : public Transport {
+public:
+    void deliver() override {
+        std::cout &lt;&lt; "Delivering by air in a cargo hold" &lt;&lt; std::endl;
+    }
+
+    std::string getType() const override {
+        return "Airplane";
+    }
+};
+
+// Creator (Factory)
+class Logistics {
+public:
+    virtual ~Logistics() = default;
+
+    // Factory method
+    virtual std::unique_ptr&lt;Transport&gt; createTransport() = 0;
+
+    void planDelivery() {
+        auto transport = createTransport();
+        std::cout &lt;&lt; "Planning delivery using " &lt;&lt; transport-&gt;getType() &lt;&lt; std::endl;
+        transport-&gt;deliver();
+    }
+};
+
+// Concrete Creators
+class RoadLogistics : public Logistics {
+public:
+    std::unique_ptr&lt;Transport&gt; createTransport() override {
+        return std::make_unique&lt;Truck&gt;();
+    }
+};
+
+class SeaLogistics : public Logistics {
+public:
+    std::unique_ptr&lt;Transport&gt; createTransport() override {
+        return std::make_unique&lt;Ship&gt;();
+    }
+};
+
+class AirLogistics : public Logistics {
+public:
+    std::unique_ptr&lt;Transport&gt; createTransport() override {
+        return std::make_unique&lt;Airplane&gt;();
+    }
+};
+
+// Usage
+int main() {
+    std::unique_ptr&lt;Logistics&gt; logistics;
+
+    logistics = std::make_unique&lt;RoadLogistics&gt;();
+    logistics-&gt;planDelivery();
+
+    logistics = std::make_unique&lt;SeaLogistics&gt;();
+    logistics-&gt;planDelivery();
+
+    logistics = std::make_unique&lt;AirLogistics&gt;();
+    logistics-&gt;planDelivery();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import Protocol
+
+# Product interface
+class Transport(ABC):
+    @abstractmethod
+    def deliver(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def get_type(self) -&gt; str:
+        pass
+
+# Concrete Products
+class Truck(Transport):
+    def deliver(self) -&gt; None:
+        print("Delivering by land in a box")
+
+    def get_type(self) -&gt; str:
+        return "Truck"
+
+class Ship(Transport):
+    def deliver(self) -&gt; None:
+        print("Delivering by sea in a container")
+
+    def get_type(self) -&gt; str:
+        return "Ship"
+
+class Airplane(Transport):
+    def deliver(self) -&gt; None:
+        print("Delivering by air in a cargo hold")
+
+    def get_type(self) -&gt; str:
+        return "Airplane"
+
+# Creator (Factory)
+class Logistics(ABC):
+    @abstractmethod
+    def create_transport(self) -&gt; Transport:
+        """Factory method"""
+        pass
+
+    def plan_delivery(self) -&gt; None:
+        transport = self.create_transport()
+        print(f"Planning delivery using {transport.get_type()}")
+        transport.deliver()
+
+# Concrete Creators
+class RoadLogistics(Logistics):
+    def create_transport(self) -&gt; Transport:
+        return Truck()
+
+class SeaLogistics(Logistics):
+    def create_transport(self) -&gt; Transport:
+        return Ship()
+
+class AirLogistics(Logistics):
+    def create_transport(self) -&gt; Transport:
+        return Airplane()
+
+# Usage
+if __name__ == "__main__":
+    logistics = RoadLogistics()
+    logistics.plan_delivery()
+
+    logistics = SeaLogistics()
+    logistics.plan_delivery()
+
+    logistics = AirLogistics()
+    logistics.plan_delivery()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Avoids tight coupling between creator and concrete products</li>
+<li>Single Responsibility Principle: product creation code in one place</li>
+<li>Open/Closed Principle: introduce new product types without breaking existing code</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Code can become more complicated with many new subclasses</li>
+<li>Requires subclassing just to create objects</li>
+</ul>
+<hr />
+<h4 id="abstract-factory-pattern"><a class="header" href="#abstract-factory-pattern">Abstract Factory Pattern</a></h4>
+<p><strong>Intent</strong>: Provide an interface for creating families of related or dependent objects without specifying their concrete classes.</p>
+<p><strong>Problem</strong>: You need to create families of related objects that must be used together, and you want to ensure compatibility between these objects.</p>
+<p><strong>Solution</strong>: Declare interfaces for creating each distinct product. Then create concrete factory classes that implement these interfaces for each product variant.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>System should be independent of how its products are created</li>
+<li>System should be configured with one of multiple families of products</li>
+<li>Family of related product objects must be used together</li>
+<li>You want to provide a class library of products without revealing implementations</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>GUI toolkits with different themes (Windows, Mac, Linux)</li>
+<li>Cross-platform UI libraries</li>
+<li>Database access libraries for different DBMS</li>
+<li>Document converters for different formats</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+
+// Abstract Products
+class Button {
+public:
+    virtual ~Button() = default;
+    virtual void paint() = 0;
+    virtual std::string getStyle() const = 0;
+};
+
+class Checkbox {
+public:
+    virtual ~Checkbox() = default;
+    virtual void paint() = 0;
+    virtual std::string getStyle() const = 0;
+};
+
+class TextField {
+public:
+    virtual ~TextField() = default;
+    virtual void paint() = 0;
+    virtual std::string getStyle() const = 0;
+};
+
+// Windows Products
+class WindowsButton : public Button {
+public:
+    void paint() override {
+        std::cout &lt;&lt; "Rendering Windows-style button" &lt;&lt; std::endl;
+    }
+
+    std::string getStyle() const override {
+        return "Windows";
+    }
+};
+
+class WindowsCheckbox : public Checkbox {
+public:
+    void paint() override {
+        std::cout &lt;&lt; "Rendering Windows-style checkbox" &lt;&lt; std::endl;
+    }
+
+    std::string getStyle() const override {
+        return "Windows";
+    }
+};
+
+class WindowsTextField : public TextField {
+public:
+    void paint() override {
+        std::cout &lt;&lt; "Rendering Windows-style text field" &lt;&lt; std::endl;
+    }
+
+    std::string getStyle() const override {
+        return "Windows";
+    }
+};
+
+// Mac Products
+class MacButton : public Button {
+public:
+    void paint() override {
+        std::cout &lt;&lt; "Rendering Mac-style button" &lt;&lt; std::endl;
+    }
+
+    std::string getStyle() const override {
+        return "Mac";
+    }
+};
+
+class MacCheckbox : public Checkbox {
+public:
+    void paint() override {
+        std::cout &lt;&lt; "Rendering Mac-style checkbox" &lt;&lt; std::endl;
+    }
+
+    std::string getStyle() const override {
+        return "Mac";
+    }
+};
+
+class MacTextField : public TextField {
+public:
+    void paint() override {
+        std::cout &lt;&lt; "Rendering Mac-style text field" &lt;&lt; std::endl;
+    }
+
+    std::string getStyle() const override {
+        return "Mac";
+    }
+};
+
+// Abstract Factory
+class GUIFactory {
+public:
+    virtual ~GUIFactory() = default;
+    virtual std::unique_ptr&lt;Button&gt; createButton() = 0;
+    virtual std::unique_ptr&lt;Checkbox&gt; createCheckbox() = 0;
+    virtual std::unique_ptr&lt;TextField&gt; createTextField() = 0;
+};
+
+// Concrete Factories
+class WindowsFactory : public GUIFactory {
+public:
+    std::unique_ptr&lt;Button&gt; createButton() override {
+        return std::make_unique&lt;WindowsButton&gt;();
+    }
+
+    std::unique_ptr&lt;Checkbox&gt; createCheckbox() override {
+        return std::make_unique&lt;WindowsCheckbox&gt;();
+    }
+
+    std::unique_ptr&lt;TextField&gt; createTextField() override {
+        return std::make_unique&lt;WindowsTextField&gt;();
+    }
+};
+
+class MacFactory : public GUIFactory {
+public:
+    std::unique_ptr&lt;Button&gt; createButton() override {
+        return std::make_unique&lt;MacButton&gt;();
+    }
+
+    std::unique_ptr&lt;Checkbox&gt; createCheckbox() override {
+        return std::make_unique&lt;MacCheckbox&gt;();
+    }
+
+    std::unique_ptr&lt;TextField&gt; createTextField() override {
+        return std::make_unique&lt;MacTextField&gt;();
+    }
+};
+
+// Client code
+class Application {
+public:
+    Application(std::unique_ptr&lt;GUIFactory&gt; factory)
+        : factory_(std::move(factory)) {}
+
+    void createUI() {
+        button_ = factory_-&gt;createButton();
+        checkbox_ = factory_-&gt;createCheckbox();
+        textField_ = factory_-&gt;createTextField();
+    }
+
+    void paint() {
+        button_-&gt;paint();
+        checkbox_-&gt;paint();
+        textField_-&gt;paint();
+    }
+
+private:
+    std::unique_ptr&lt;GUIFactory&gt; factory_;
+    std::unique_ptr&lt;Button&gt; button_;
+    std::unique_ptr&lt;Checkbox&gt; checkbox_;
+    std::unique_ptr&lt;TextField&gt; textField_;
+};
+
+// Usage
+int main() {
+    std::string osType = "Windows"; // Could be detected at runtime
+
+    std::unique_ptr&lt;GUIFactory&gt; factory;
+
+    if (osType == "Windows") {
+        factory = std::make_unique&lt;WindowsFactory&gt;();
+    } else {
+        factory = std::make_unique&lt;MacFactory&gt;();
+    }
+
+    Application app(std::move(factory));
+    app.createUI();
+    app.paint();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Abstract Products
+class Button(ABC):
+    @abstractmethod
+    def paint(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def get_style(self) -&gt; str:
+        pass
+
+class Checkbox(ABC):
+    @abstractmethod
+    def paint(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def get_style(self) -&gt; str:
+        pass
+
+class TextField(ABC):
+    @abstractmethod
+    def paint(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def get_style(self) -&gt; str:
+        pass
+
+# Windows Products
+class WindowsButton(Button):
+    def paint(self) -&gt; None:
+        print("Rendering Windows-style button")
+
+    def get_style(self) -&gt; str:
+        return "Windows"
+
+class WindowsCheckbox(Checkbox):
+    def paint(self) -&gt; None:
+        print("Rendering Windows-style checkbox")
+
+    def get_style(self) -&gt; str:
+        return "Windows"
+
+class WindowsTextField(TextField):
+    def paint(self) -&gt; None:
+        print("Rendering Windows-style text field")
+
+    def get_style(self) -&gt; str:
+        return "Windows"
+
+# Mac Products
+class MacButton(Button):
+    def paint(self) -&gt; None:
+        print("Rendering Mac-style button")
+
+    def get_style(self) -&gt; str:
+        return "Mac"
+
+class MacCheckbox(Checkbox):
+    def paint(self) -&gt; None:
+        print("Rendering Mac-style checkbox")
+
+    def get_style(self) -&gt; str:
+        return "Mac"
+
+class MacTextField(TextField):
+    def paint(self) -&gt; None:
+        print("Rendering Mac-style text field")
+
+    def get_style(self) -&gt; str:
+        return "Mac"
+
+# Abstract Factory
+class GUIFactory(ABC):
+    @abstractmethod
+    def create_button(self) -&gt; Button:
+        pass
+
+    @abstractmethod
+    def create_checkbox(self) -&gt; Checkbox:
+        pass
+
+    @abstractmethod
+    def create_text_field(self) -&gt; TextField:
+        pass
+
+# Concrete Factories
+class WindowsFactory(GUIFactory):
+    def create_button(self) -&gt; Button:
+        return WindowsButton()
+
+    def create_checkbox(self) -&gt; Checkbox:
+        return WindowsCheckbox()
+
+    def create_text_field(self) -&gt; TextField:
+        return WindowsTextField()
+
+class MacFactory(GUIFactory):
+    def create_button(self) -&gt; Button:
+        return MacButton()
+
+    def create_checkbox(self) -&gt; Checkbox:
+        return MacCheckbox()
+
+    def create_text_field(self) -&gt; TextField:
+        return MacTextField()
+
+# Client code
+class Application:
+    def __init__(self, factory: GUIFactory):
+        self.factory = factory
+        self.button = None
+        self.checkbox = None
+        self.text_field = None
+
+    def create_ui(self) -&gt; None:
+        self.button = self.factory.create_button()
+        self.checkbox = self.factory.create_checkbox()
+        self.text_field = self.factory.create_text_field()
+
+    def paint(self) -&gt; None:
+        self.button.paint()
+        self.checkbox.paint()
+        self.text_field.paint()
+
+# Usage
+if __name__ == "__main__":
+    import platform
+
+    os_type = platform.system()
+
+    if os_type == "Windows":
+        factory = WindowsFactory()
+    else:
+        factory = MacFactory()
+
+    app = Application(factory)
+    app.create_ui()
+    app.paint()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Ensures compatibility between products from the same family</li>
+<li>Avoids tight coupling between concrete products and client code</li>
+<li>Single Responsibility Principle: product creation in one place</li>
+<li>Open/Closed Principle: introduce new variants without breaking existing code</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Code becomes more complicated due to many new interfaces and classes</li>
+<li>Adding new product types requires extending all factories</li>
+</ul>
+<hr />
+<h4 id="builder-pattern"><a class="header" href="#builder-pattern">Builder Pattern</a></h4>
+<p><strong>Intent</strong>: Separate the construction of a complex object from its representation, allowing the same construction process to create different representations.</p>
+<p><strong>Problem</strong>: Creating complex objects with many optional components or configuration options leads to constructor pollution (too many constructor parameters) or many constructors.</p>
+<p><strong>Solution</strong>: Extract object construction code out of its own class and move it to separate objects called builders. The pattern organizes object construction into a set of steps.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>Algorithm for creating a complex object should be independent of the parts</li>
+<li>Construction process must allow different representations</li>
+<li>Object has many optional parameters (telescoping constructor problem)</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Building complex documents (HTML, PDF)</li>
+<li>Creating database queries</li>
+<li>Building HTTP requests</li>
+<li>Constructing meals at restaurants</li>
+<li>Building cars with various options</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;memory&gt;
+
+// Product
+class Pizza {
+public:
+    void setDough(const std::string&amp; dough) { dough_ = dough; }
+    void setSauce(const std::string&amp; sauce) { sauce_ = sauce; }
+    void setCheese(const std::string&amp; cheese) { cheese_ = cheese; }
+    void addTopping(const std::string&amp; topping) { toppings_.push_back(topping); }
+    void setSize(const std::string&amp; size) { size_ = size; }
+    void setCrust(const std::string&amp; crust) { crust_ = crust; }
+
+    void describe() const {
+        std::cout &lt;&lt; "Pizza:" &lt;&lt; std::endl;
+        std::cout &lt;&lt; "  Size: " &lt;&lt; size_ &lt;&lt; std::endl;
+        std::cout &lt;&lt; "  Dough: " &lt;&lt; dough_ &lt;&lt; std::endl;
+        std::cout &lt;&lt; "  Crust: " &lt;&lt; crust_ &lt;&lt; std::endl;
+        std::cout &lt;&lt; "  Sauce: " &lt;&lt; sauce_ &lt;&lt; std::endl;
+        std::cout &lt;&lt; "  Cheese: " &lt;&lt; cheese_ &lt;&lt; std::endl;
+        std::cout &lt;&lt; "  Toppings: ";
+        for (const auto&amp; topping : toppings_) {
+            std::cout &lt;&lt; topping &lt;&lt; " ";
+        }
+        std::cout &lt;&lt; std::endl;
+    }
+
+private:
+    std::string dough_;
+    std::string sauce_;
+    std::string cheese_;
+    std::vector&lt;std::string&gt; toppings_;
+    std::string size_;
+    std::string crust_;
+};
+
+// Abstract Builder
+class PizzaBuilder {
+public:
+    virtual ~PizzaBuilder() = default;
+
+    virtual void buildDough() = 0;
+    virtual void buildSauce() = 0;
+    virtual void buildCheese() = 0;
+    virtual void buildToppings() = 0;
+    virtual void buildSize() = 0;
+    virtual void buildCrust() = 0;
+
+    std::unique_ptr&lt;Pizza&gt; getPizza() { return std::move(pizza_); }
+
+    void reset() { pizza_ = std::make_unique&lt;Pizza&gt;(); }
+
+protected:
+    std::unique_ptr&lt;Pizza&gt; pizza_;
+};
+
+// Concrete Builder 1
+class MargheritaPizzaBuilder : public PizzaBuilder {
+public:
+    MargheritaPizzaBuilder() { reset(); }
+
+    void buildDough() override {
+        pizza_-&gt;setDough("Thin crust dough");
+    }
+
+    void buildSauce() override {
+        pizza_-&gt;setSauce("Tomato sauce");
+    }
+
+    void buildCheese() override {
+        pizza_-&gt;setCheese("Mozzarella");
+    }
+
+    void buildToppings() override {
+        pizza_-&gt;addTopping("Fresh basil");
+        pizza_-&gt;addTopping("Tomato slices");
+    }
+
+    void buildSize() override {
+        pizza_-&gt;setSize("Medium");
+    }
+
+    void buildCrust() override {
+        pizza_-&gt;setCrust("Regular");
+    }
+};
+
+// Concrete Builder 2
+class PepperoniPizzaBuilder : public PizzaBuilder {
+public:
+    PepperoniPizzaBuilder() { reset(); }
+
+    void buildDough() override {
+        pizza_-&gt;setDough("Thick crust dough");
+    }
+
+    void buildSauce() override {
+        pizza_-&gt;setSauce("Spicy tomato sauce");
+    }
+
+    void buildCheese() override {
+        pizza_-&gt;setCheese("Extra mozzarella");
+    }
+
+    void buildToppings() override {
+        pizza_-&gt;addTopping("Pepperoni");
+        pizza_-&gt;addTopping("Mushrooms");
+        pizza_-&gt;addTopping("Olives");
+    }
+
+    void buildSize() override {
+        pizza_-&gt;setSize("Large");
+    }
+
+    void buildCrust() override {
+        pizza_-&gt;setCrust("Stuffed");
+    }
+};
+
+// Director (optional but useful for complex builds)
+class PizzaDirector {
+public:
+    void setBuilder(PizzaBuilder* builder) {
+        builder_ = builder;
+    }
+
+    void makePizza() {
+        builder_-&gt;buildSize();
+        builder_-&gt;buildDough();
+        builder_-&gt;buildCrust();
+        builder_-&gt;buildSauce();
+        builder_-&gt;buildCheese();
+        builder_-&gt;buildToppings();
+    }
+
+private:
+    PizzaBuilder* builder_;
+};
+
+// Fluent Builder Interface (Modern C++ approach)
+class FluentPizzaBuilder {
+public:
+    FluentPizzaBuilder() : pizza_(std::make_unique&lt;Pizza&gt;()) {}
+
+    FluentPizzaBuilder&amp; setSize(const std::string&amp; size) {
+        pizza_-&gt;setSize(size);
+        return *this;
+    }
+
+    FluentPizzaBuilder&amp; setDough(const std::string&amp; dough) {
+        pizza_-&gt;setDough(dough);
+        return *this;
+    }
+
+    FluentPizzaBuilder&amp; setCrust(const std::string&amp; crust) {
+        pizza_-&gt;setCrust(crust);
+        return *this;
+    }
+
+    FluentPizzaBuilder&amp; setSauce(const std::string&amp; sauce) {
+        pizza_-&gt;setSauce(sauce);
+        return *this;
+    }
+
+    FluentPizzaBuilder&amp; setCheese(const std::string&amp; cheese) {
+        pizza_-&gt;setCheese(cheese);
+        return *this;
+    }
+
+    FluentPizzaBuilder&amp; addTopping(const std::string&amp; topping) {
+        pizza_-&gt;addTopping(topping);
+        return *this;
+    }
+
+    std::unique_ptr&lt;Pizza&gt; build() {
+        return std::move(pizza_);
+    }
+
+private:
+    std::unique_ptr&lt;Pizza&gt; pizza_;
+};
+
+// Usage
+int main() {
+    // Traditional approach with director
+    PizzaDirector director;
+
+    MargheritaPizzaBuilder margheritaBuilder;
+    director.setBuilder(&amp;margheritaBuilder);
+    director.makePizza();
+    auto margherita = margheritaBuilder.getPizza();
+    margherita-&gt;describe();
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    PepperoniPizzaBuilder pepperoniBuilder;
+    director.setBuilder(&amp;pepperoniBuilder);
+    director.makePizza();
+    auto pepperoni = pepperoniBuilder.getPizza();
+    pepperoni-&gt;describe();
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Fluent interface approach
+    auto customPizza = FluentPizzaBuilder()
+        .setSize("Extra Large")
+        .setDough("Whole wheat")
+        .setCrust("Thin")
+        .setSauce("BBQ sauce")
+        .setCheese("Cheddar")
+        .addTopping("Chicken")
+        .addTopping("Onions")
+        .addTopping("Peppers")
+        .build();
+
+    customPizza-&gt;describe();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from typing import List
+from abc import ABC, abstractmethod
+
+# Product
+class Pizza:
+    def __init__(self):
+        self.dough = ""
+        self.sauce = ""
+        self.cheese = ""
+        self.toppings: List[str] = []
+        self.size = ""
+        self.crust = ""
+
+    def describe(self) -&gt; None:
+        print("Pizza:")
+        print(f"  Size: {self.size}")
+        print(f"  Dough: {self.dough}")
+        print(f"  Crust: {self.crust}")
+        print(f"  Sauce: {self.sauce}")
+        print(f"  Cheese: {self.cheese}")
+        print(f"  Toppings: {', '.join(self.toppings)}")
+
+# Abstract Builder
+class PizzaBuilder(ABC):
+    def __init__(self):
+        self.reset()
+
+    def reset(self) -&gt; None:
+        self._pizza = Pizza()
+
+    @abstractmethod
+    def build_dough(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def build_sauce(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def build_cheese(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def build_toppings(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def build_size(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def build_crust(self) -&gt; None:
+        pass
+
+    def get_pizza(self) -&gt; Pizza:
+        pizza = self._pizza
+        self.reset()
+        return pizza
+
+# Concrete Builders
+class MargheritaPizzaBuilder(PizzaBuilder):
+    def build_dough(self) -&gt; None:
+        self._pizza.dough = "Thin crust dough"
+
+    def build_sauce(self) -&gt; None:
+        self._pizza.sauce = "Tomato sauce"
+
+    def build_cheese(self) -&gt; None:
+        self._pizza.cheese = "Mozzarella"
+
+    def build_toppings(self) -&gt; None:
+        self._pizza.toppings = ["Fresh basil", "Tomato slices"]
+
+    def build_size(self) -&gt; None:
+        self._pizza.size = "Medium"
+
+    def build_crust(self) -&gt; None:
+        self._pizza.crust = "Regular"
+
+class PepperoniPizzaBuilder(PizzaBuilder):
+    def build_dough(self) -&gt; None:
+        self._pizza.dough = "Thick crust dough"
+
+    def build_sauce(self) -&gt; None:
+        self._pizza.sauce = "Spicy tomato sauce"
+
+    def build_cheese(self) -&gt; None:
+        self._pizza.cheese = "Extra mozzarella"
+
+    def build_toppings(self) -&gt; None:
+        self._pizza.toppings = ["Pepperoni", "Mushrooms", "Olives"]
+
+    def build_size(self) -&gt; None:
+        self._pizza.size = "Large"
+
+    def build_crust(self) -&gt; None:
+        self._pizza.crust = "Stuffed"
+
+# Director
+class PizzaDirector:
+    def __init__(self, builder: PizzaBuilder = None):
+        self._builder = builder
+
+    def set_builder(self, builder: PizzaBuilder) -&gt; None:
+        self._builder = builder
+
+    def make_pizza(self) -&gt; None:
+        self._builder.build_size()
+        self._builder.build_dough()
+        self._builder.build_crust()
+        self._builder.build_sauce()
+        self._builder.build_cheese()
+        self._builder.build_toppings()
+
+# Fluent Builder (Pythonic approach)
+class FluentPizzaBuilder:
+    def __init__(self):
+        self._pizza = Pizza()
+
+    def set_size(self, size: str):
+        self._pizza.size = size
+        return self
+
+    def set_dough(self, dough: str):
+        self._pizza.dough = dough
+        return self
+
+    def set_crust(self, crust: str):
+        self._pizza.crust = crust
+        return self
+
+    def set_sauce(self, sauce: str):
+        self._pizza.sauce = sauce
+        return self
+
+    def set_cheese(self, cheese: str):
+        self._pizza.cheese = cheese
+        return self
+
+    def add_topping(self, topping: str):
+        self._pizza.toppings.append(topping)
+        return self
+
+    def build(self) -&gt; Pizza:
+        return self._pizza
+
+# Usage
+if __name__ == "__main__":
+    # Traditional approach with director
+    director = PizzaDirector()
+
+    margherita_builder = MargheritaPizzaBuilder()
+    director.set_builder(margherita_builder)
+    director.make_pizza()
+    margherita = margherita_builder.get_pizza()
+    margherita.describe()
+
+    print("\n---\n")
+
+    pepperoni_builder = PepperoniPizzaBuilder()
+    director.set_builder(pepperoni_builder)
+    director.make_pizza()
+    pepperoni = pepperoni_builder.get_pizza()
+    pepperoni.describe()
+
+    print("\n---\n")
+
+    # Fluent interface approach
+    custom_pizza = (FluentPizzaBuilder()
+        .set_size("Extra Large")
+        .set_dough("Whole wheat")
+        .set_crust("Thin")
+        .set_sauce("BBQ sauce")
+        .set_cheese("Cheddar")
+        .add_topping("Chicken")
+        .add_topping("Onions")
+        .add_topping("Peppers")
+        .build())
+
+    custom_pizza.describe()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Allows construction of complex objects step by step</li>
+<li>Can reuse same construction code for different representations</li>
+<li>Single Responsibility Principle: isolates complex construction code</li>
+<li>Telescoping constructor problem solved</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Overall complexity increases (many new classes)</li>
+<li>Clients are tied to concrete builder classes</li>
+</ul>
+<hr />
+<h4 id="prototype-pattern"><a class="header" href="#prototype-pattern">Prototype Pattern</a></h4>
+<p><strong>Intent</strong>: Specify the kinds of objects to create using a prototypical instance, and create new objects by copying this prototype.</p>
+<p><strong>Problem</strong>: Creating objects is expensive (database queries, network calls, complex initialization), and you need many similar objects.</p>
+<p><strong>Solution</strong>: Delegate the cloning process to the actual objects being cloned. Declare a common interface for all objects that support cloning.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>Object creation is expensive</li>
+<li>Avoid subclasses of object creator (Factory Method alternative)</li>
+<li>Number of possible object states is limited</li>
+<li>Classes to instantiate are specified at runtime</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Cell mitosis in biology</li>
+<li>Copying documents/files</li>
+<li>Cloning game objects with different skins</li>
+<li>Creating test data</li>
+<li>Undo/redo operations</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;unordered_map&gt;
+
+// Prototype interface
+class Shape {
+public:
+    virtual ~Shape() = default;
+    virtual std::unique_ptr&lt;Shape&gt; clone() const = 0;
+    virtual void draw() const = 0;
+    virtual std::string getType() const = 0;
+
+    // Common properties
+    int x_, y_;
+    std::string color_;
+
+protected:
+    Shape() : x_(0), y_(0), color_("black") {}
+    Shape(int x, int y, const std::string&amp; color)
+        : x_(x), y_(y), color_(color) {}
+};
+
+// Concrete Prototype 1
+class Circle : public Shape {
+public:
+    int radius_;
+
+    Circle() : Shape(), radius_(10) {}
+
+    Circle(int x, int y, const std::string&amp; color, int radius)
+        : Shape(x, y, color), radius_(radius) {}
+
+    // Copy constructor
+    Circle(const Circle&amp; other)
+        : Shape(other.x_, other.y_, other.color_), radius_(other.radius_) {
+        std::cout &lt;&lt; "Circle copied" &lt;&lt; std::endl;
+    }
+
+    std::unique_ptr&lt;Shape&gt; clone() const override {
+        return std::make_unique&lt;Circle&gt;(*this);
+    }
+
+    void draw() const override {
+        std::cout &lt;&lt; "Circle at (" &lt;&lt; x_ &lt;&lt; "," &lt;&lt; y_ &lt;&lt; ") "
+                  &lt;&lt; "with radius " &lt;&lt; radius_
+                  &lt;&lt; " and color " &lt;&lt; color_ &lt;&lt; std::endl;
+    }
+
+    std::string getType() const override {
+        return "Circle";
+    }
+};
+
+// Concrete Prototype 2
+class Rectangle : public Shape {
+public:
+    int width_, height_;
+
+    Rectangle() : Shape(), width_(20), height_(10) {}
+
+    Rectangle(int x, int y, const std::string&amp; color, int width, int height)
+        : Shape(x, y, color), width_(width), height_(height) {}
+
+    // Copy constructor
+    Rectangle(const Rectangle&amp; other)
+        : Shape(other.x_, other.y_, other.color_),
+          width_(other.width_), height_(other.height_) {
+        std::cout &lt;&lt; "Rectangle copied" &lt;&lt; std::endl;
+    }
+
+    std::unique_ptr&lt;Shape&gt; clone() const override {
+        return std::make_unique&lt;Rectangle&gt;(*this);
+    }
+
+    void draw() const override {
+        std::cout &lt;&lt; "Rectangle at (" &lt;&lt; x_ &lt;&lt; "," &lt;&lt; y_ &lt;&lt; ") "
+                  &lt;&lt; "with size " &lt;&lt; width_ &lt;&lt; "x" &lt;&lt; height_
+                  &lt;&lt; " and color " &lt;&lt; color_ &lt;&lt; std::endl;
+    }
+
+    std::string getType() const override {
+        return "Rectangle";
+    }
+};
+
+// Prototype Registry (Prototype Manager)
+class ShapeCache {
+public:
+    static ShapeCache&amp; getInstance() {
+        static ShapeCache instance;
+        return instance;
+    }
+
+    void loadCache() {
+        auto circle = std::make_unique&lt;Circle&gt;(0, 0, "red", 15);
+        prototypes_["red_circle"] = std::move(circle);
+
+        auto rectangle = std::make_unique&lt;Rectangle&gt;(0, 0, "blue", 30, 20);
+        prototypes_["blue_rectangle"] = std::move(rectangle);
+
+        auto smallCircle = std::make_unique&lt;Circle&gt;(0, 0, "green", 5);
+        prototypes_["small_green_circle"] = std::move(smallCircle);
+    }
+
+    std::unique_ptr&lt;Shape&gt; getShape(const std::string&amp; type) {
+        auto it = prototypes_.find(type);
+        if (it != prototypes_.end()) {
+            return it-&gt;second-&gt;clone();
+        }
+        return nullptr;
+    }
+
+    void addShape(const std::string&amp; key, std::unique_ptr&lt;Shape&gt; shape) {
+        prototypes_[key] = std::move(shape);
+    }
+
+private:
+    ShapeCache() = default;
+    std::unordered_map&lt;std::string, std::unique_ptr&lt;Shape&gt;&gt; prototypes_;
+};
+
+// Usage
+int main() {
+    // Load predefined prototypes
+    ShapeCache::getInstance().loadCache();
+
+    // Clone shapes from cache
+    auto shape1 = ShapeCache::getInstance().getShape("red_circle");
+    shape1-&gt;x_ = 10;
+    shape1-&gt;y_ = 20;
+    shape1-&gt;draw();
+
+    auto shape2 = ShapeCache::getInstance().getShape("red_circle");
+    shape2-&gt;x_ = 50;
+    shape2-&gt;y_ = 60;
+    shape2-&gt;draw();
+
+    auto shape3 = ShapeCache::getInstance().getShape("blue_rectangle");
+    shape3-&gt;x_ = 100;
+    shape3-&gt;y_ = 100;
+    shape3-&gt;draw();
+
+    // Add custom prototype
+    auto customCircle = std::make_unique&lt;Circle&gt;(0, 0, "yellow", 25);
+    ShapeCache::getInstance().addShape("custom_yellow", std::move(customCircle));
+
+    auto shape4 = ShapeCache::getInstance().getShape("custom_yellow");
+    shape4-&gt;draw();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">import copy
+from abc import ABC, abstractmethod
+from typing import Dict
+
+# Prototype interface
+class Shape(ABC):
+    def __init__(self, x: int = 0, y: int = 0, color: str = "black"):
+        self.x = x
+        self.y = y
+        self.color = color
+
+    @abstractmethod
+    def clone(self):
+        """Return a deep copy of the object"""
+        pass
+
+    @abstractmethod
+    def draw(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def get_type(self) -&gt; str:
+        pass
+
+# Concrete Prototype 1
+class Circle(Shape):
+    def __init__(self, x: int = 0, y: int = 0, color: str = "black", radius: int = 10):
+        super().__init__(x, y, color)
+        self.radius = radius
+
+    def clone(self):
+        """Deep copy using copy module"""
+        print("Circle copied")
+        return copy.deepcopy(self)
+
+    def draw(self) -&gt; None:
+        print(f"Circle at ({self.x},{self.y}) with radius {self.radius} and color {self.color}")
+
+    def get_type(self) -&gt; str:
+        return "Circle"
+
+# Concrete Prototype 2
+class Rectangle(Shape):
+    def __init__(self, x: int = 0, y: int = 0, color: str = "black",
+                 width: int = 20, height: int = 10):
+        super().__init__(x, y, color)
+        self.width = width
+        self.height = height
+
+    def clone(self):
+        """Deep copy using copy module"""
+        print("Rectangle copied")
+        return copy.deepcopy(self)
+
+    def draw(self) -&gt; None:
+        print(f"Rectangle at ({self.x},{self.y}) with size {self.width}x{self.height} and color {self.color}")
+
+    def get_type(self) -&gt; str:
+        return "Rectangle"
+
+# Prototype Registry
+class ShapeCache:
+    _instance = None
+    _prototypes: Dict[str, Shape] = {}
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def load_cache(self) -&gt; None:
+        """Load predefined prototypes"""
+        self._prototypes["red_circle"] = Circle(0, 0, "red", 15)
+        self._prototypes["blue_rectangle"] = Rectangle(0, 0, "blue", 30, 20)
+        self._prototypes["small_green_circle"] = Circle(0, 0, "green", 5)
+
+    def get_shape(self, shape_type: str) -&gt; Shape:
+        """Clone a shape from the cache"""
+        prototype = self._prototypes.get(shape_type)
+        if prototype:
+            return prototype.clone()
+        raise ValueError(f"Shape type '{shape_type}' not found in cache")
+
+    def add_shape(self, key: str, shape: Shape) -&gt; None:
+        """Add a new prototype to the cache"""
+        self._prototypes[key] = shape
+
+# Usage
+if __name__ == "__main__":
+    # Load predefined prototypes
+    cache = ShapeCache()
+    cache.load_cache()
+
+    # Clone shapes from cache
+    shape1 = cache.get_shape("red_circle")
+    shape1.x, shape1.y = 10, 20
+    shape1.draw()
+
+    shape2 = cache.get_shape("red_circle")
+    shape2.x, shape2.y = 50, 60
+    shape2.draw()
+
+    shape3 = cache.get_shape("blue_rectangle")
+    shape3.x, shape3.y = 100, 100
+    shape3.draw()
+
+    # Add custom prototype
+    custom_circle = Circle(0, 0, "yellow", 25)
+    cache.add_shape("custom_yellow", custom_circle)
+
+    shape4 = cache.get_shape("custom_yellow")
+    shape4.draw()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Reduces cost of creating complex objects</li>
+<li>Hides complexity of creating new instances</li>
+<li>Allows adding/removing products at runtime</li>
+<li>Configures application with classes dynamically</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Cloning complex objects with circular references can be tricky</li>
+<li>Deep vs shallow copy considerations</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li>Often used with Composite and Decorator patterns</li>
+<li>Designs that use Factory Method can use Prototype instead</li>
+</ul>
+<h3 id="structural-patterns-1"><a class="header" href="#structural-patterns-1">Structural Patterns</a></h3>
+<h4 id="adapter-pattern"><a class="header" href="#adapter-pattern">Adapter Pattern</a></h4>
+<p><strong>Intent</strong>: Convert the interface of a class into another interface that clients expect. Adapter lets classes work together that couldn't otherwise because of incompatible interfaces.</p>
+<p><strong>Problem</strong>: You want to use an existing class, but its interface doesn't match the one you need. You can't modify the existing class (third-party library, legacy code, or you want to keep it unchanged).</p>
+<p><strong>Solution</strong>: Create an adapter class that wraps the incompatible object and translates calls from the expected interface to the adaptee's interface. There are two main approaches: class adapter (using multiple inheritance) and object adapter (using composition).</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>You want to use an existing class with an incompatible interface</li>
+<li>You need to create a reusable class that cooperates with unrelated classes</li>
+<li>You need to use several existing subclasses, but it's impractical to adapt their interface by subclassing each one (use object adapter)</li>
+<li>Integrating legacy code with new systems</li>
+<li>Working with third-party libraries</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Power adapters (110V to 220V conversion)</li>
+<li>Card readers for different memory card formats</li>
+<li>Media player supporting multiple audio formats</li>
+<li>Database drivers adapting different database APIs</li>
+<li>XML to JSON converters</li>
+<li>Legacy system integration</li>
+</ul>
+<p><strong>Implementation in C++ (Object Adapter)</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;cmath&gt;
+
+// Target interface - What the client expects
+class MediaPlayer {
+public:
+    virtual ~MediaPlayer() = default;
+    virtual void play(const std::string&amp; audioType, const std::string&amp; fileName) = 0;
+};
+
+// Adaptee 1 - Advanced MP4 player with incompatible interface
+class AdvancedMP4Player {
+public:
+    void playMP4(const std::string&amp; fileName) {
+        std::cout &lt;&lt; "Playing MP4 file: " &lt;&lt; fileName &lt;&lt; std::endl;
+    }
+};
+
+// Adaptee 2 - VLC player with incompatible interface
+class VLCPlayer {
+public:
+    void playVLC(const std::string&amp; fileName) {
+        std::cout &lt;&lt; "Playing VLC file: " &lt;&lt; fileName &lt;&lt; std::endl;
+    }
+};
+
+// Adapter - Adapts AdvancedMP4Player and VLCPlayer to MediaPlayer interface
+class MediaAdapter : public MediaPlayer {
+public:
+    MediaAdapter(const std::string&amp; audioType) {
+        if (audioType == "mp4") {
+            mp4Player_ = std::make_unique&lt;AdvancedMP4Player&gt;();
+        } else if (audioType == "vlc") {
+            vlcPlayer_ = std::make_unique&lt;VLCPlayer&gt;();
+        }
+    }
+
+    void play(const std::string&amp; audioType, const std::string&amp; fileName) override {
+        if (audioType == "mp4") {
+            mp4Player_-&gt;playMP4(fileName);
+        } else if (audioType == "vlc") {
+            vlcPlayer_-&gt;playVLC(fileName);
+        }
+    }
+
+private:
+    std::unique_ptr&lt;AdvancedMP4Player&gt; mp4Player_;
+    std::unique_ptr&lt;VLCPlayer&gt; vlcPlayer_;
+};
+
+// Concrete implementation of target interface
+class AudioPlayer : public MediaPlayer {
+public:
+    void play(const std::string&amp; audioType, const std::string&amp; fileName) override {
+        // Built-in support for mp3
+        if (audioType == "mp3") {
+            std::cout &lt;&lt; "Playing MP3 file: " &lt;&lt; fileName &lt;&lt; std::endl;
+        }
+        // Use adapter for other formats
+        else if (audioType == "mp4" || audioType == "vlc") {
+            auto adapter = std::make_unique&lt;MediaAdapter&gt;(audioType);
+            adapter-&gt;play(audioType, fileName);
+        } else {
+            std::cout &lt;&lt; "Invalid media type: " &lt;&lt; audioType &lt;&lt; std::endl;
+        }
+    }
+};
+
+// Real-world example: Shape compatibility (legacy square to new rectangle interface)
+class LegacyRectangle {
+public:
+    void draw(int x1, int y1, int x2, int y2) {
+        std::cout &lt;&lt; "Legacy Rectangle from (" &lt;&lt; x1 &lt;&lt; "," &lt;&lt; y1
+                  &lt;&lt; ") to (" &lt;&lt; x2 &lt;&lt; "," &lt;&lt; y2 &lt;&lt; ")" &lt;&lt; std::endl;
+    }
+};
+
+// New shape interface
+class Shape {
+public:
+    virtual ~Shape() = default;
+    virtual void draw() = 0;
+    virtual void resize(int percentage) = 0;
+};
+
+// Adapter for legacy rectangle
+class RectangleAdapter : public Shape {
+public:
+    RectangleAdapter(int x, int y, int width, int height)
+        : x_(x), y_(y), width_(width), height_(height) {
+        legacyRect_ = std::make_unique&lt;LegacyRectangle&gt;();
+    }
+
+    void draw() override {
+        legacyRect_-&gt;draw(x_, y_, x_ + width_, y_ + height_);
+    }
+
+    void resize(int percentage) override {
+        width_ = static_cast&lt;int&gt;(width_ * percentage / 100.0);
+        height_ = static_cast&lt;int&gt;(height_ * percentage / 100.0);
+        std::cout &lt;&lt; "Resized to " &lt;&lt; width_ &lt;&lt; "x" &lt;&lt; height_ &lt;&lt; std::endl;
+    }
+
+private:
+    std::unique_ptr&lt;LegacyRectangle&gt; legacyRect_;
+    int x_, y_, width_, height_;
+};
+</code></pre>
+<p><strong>Class Adapter Example (Using Multiple Inheritance)</strong>:</p>
+<pre><code class="language-cpp">// Class adapter - inherits from both target and adaptee
+class ClassMediaAdapter : public MediaPlayer, private AdvancedMP4Player {
+public:
+    void play(const std::string&amp; audioType, const std::string&amp; fileName) override {
+        if (audioType == "mp4") {
+            playMP4(fileName);  // Direct call to inherited method
+        }
+    }
+};
+
+// Usage
+int main() {
+    // Object adapter example
+    AudioPlayer player;
+    player.play("mp3", "song.mp3");
+    player.play("mp4", "video.mp4");
+    player.play("vlc", "movie.vlc");
+    player.play("avi", "movie.avi");
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Shape adapter example
+    RectangleAdapter rect(10, 20, 100, 50);
+    rect.draw();
+    rect.resize(150);
+    rect.draw();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Target interface
+class MediaPlayer(ABC):
+    @abstractmethod
+    def play(self, audio_type: str, file_name: str) -&gt; None:
+        pass
+
+# Adaptee 1
+class AdvancedMP4Player:
+    def play_mp4(self, file_name: str) -&gt; None:
+        print(f"Playing MP4 file: {file_name}")
+
+# Adaptee 2
+class VLCPlayer:
+    def play_vlc(self, file_name: str) -&gt; None:
+        print(f"Playing VLC file: {file_name}")
+
+# Adapter
+class MediaAdapter(MediaPlayer):
+    def __init__(self, audio_type: str):
+        self.audio_type = audio_type
+        if audio_type == "mp4":
+            self.advanced_player = AdvancedMP4Player()
+        elif audio_type == "vlc":
+            self.advanced_player = VLCPlayer()
+
+    def play(self, audio_type: str, file_name: str) -&gt; None:
+        if audio_type == "mp4":
+            self.advanced_player.play_mp4(file_name)
+        elif audio_type == "vlc":
+            self.advanced_player.play_vlc(file_name)
+
+# Concrete target
+class AudioPlayer(MediaPlayer):
+    def play(self, audio_type: str, file_name: str) -&gt; None:
+        # Built-in support for mp3
+        if audio_type == "mp3":
+            print(f"Playing MP3 file: {file_name}")
+        # Use adapter for other formats
+        elif audio_type in ["mp4", "vlc"]:
+            adapter = MediaAdapter(audio_type)
+            adapter.play(audio_type, file_name)
+        else:
+            print(f"Invalid media type: {audio_type}")
+
+# Legacy system adapter example
+class LegacyRectangle:
+    def draw(self, x1: int, y1: int, x2: int, y2: int) -&gt; None:
+        print(f"Legacy Rectangle from ({x1},{y1}) to ({x2},{y2})")
+
+class Shape(ABC):
+    @abstractmethod
+    def draw(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def resize(self, percentage: int) -&gt; None:
+        pass
+
+class RectangleAdapter(Shape):
+    def __init__(self, x: int, y: int, width: int, height: int):
+        self.legacy_rect = LegacyRectangle()
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+    def draw(self) -&gt; None:
+        self.legacy_rect.draw(self.x, self.y, self.x + self.width, self.y + self.height)
+
+    def resize(self, percentage: int) -&gt; None:
+        self.width = int(self.width * percentage / 100)
+        self.height = int(self.height * percentage / 100)
+        print(f"Resized to {self.width}x{self.height}")
+
+# Usage
+if __name__ == "__main__":
+    player = AudioPlayer()
+    player.play("mp3", "song.mp3")
+    player.play("mp4", "video.mp4")
+    player.play("vlc", "movie.vlc")
+    player.play("avi", "movie.avi")
+
+    print("\n---\n")
+
+    rect = RectangleAdapter(10, 20, 100, 50)
+    rect.draw()
+    rect.resize(150)
+    rect.draw()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Single Responsibility Principle: separate interface conversion from business logic</li>
+<li>Open/Closed Principle: introduce new adapters without changing existing code</li>
+<li>Flexibility in adapting multiple incompatible interfaces</li>
+<li>Reuses existing functionality without modification</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Overall complexity increases due to new interfaces and classes</li>
+<li>Sometimes it's simpler to just change the service class to match the rest of your code</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Bridge</strong>: Separates interface from implementation (designed upfront), whereas Adapter makes existing classes work together (retrofitted)</li>
+<li><strong>Decorator</strong>: Enhances object without changing interface; Adapter changes the interface</li>
+<li><strong>Proxy</strong>: Provides same interface; Adapter provides different interface</li>
+</ul>
+<hr />
+<h4 id="bridge-pattern"><a class="header" href="#bridge-pattern">Bridge Pattern</a></h4>
+<p><strong>Intent</strong>: Decouple an abstraction from its implementation so that the two can vary independently.</p>
+<p><strong>Problem</strong>: When an abstraction can have multiple implementations and you want to avoid a permanent binding between them. Without Bridge, you end up with a combinatorial explosion of subclasses (e.g., Shape → CircleShape, SquareShape; Renderer → OpenGLRenderer, DirectXRenderer → OpenGLCircle, DirectXCircle, OpenGLSquare, DirectXSquare).</p>
+<p><strong>Solution</strong>: Separate the abstraction hierarchy from the implementation hierarchy. The abstraction contains a reference to the implementation and delegates the actual work to it.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>You want to avoid permanent binding between abstraction and implementation</li>
+<li>Both abstraction and implementation should be extensible by subclassing</li>
+<li>Changes in implementation shouldn't affect client code</li>
+<li>You want to share implementation among multiple objects (copy-on-write)</li>
+<li>You have a proliferation of classes from a coupled interface/implementation</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Graphics rendering across different platforms (OpenGL, DirectX, Vulkan)</li>
+<li>Database drivers (abstract DB operations vs specific database implementations)</li>
+<li>GUI frameworks across operating systems</li>
+<li>Remote controls and devices (abstraction: remote, implementation: TV, radio, etc.)</li>
+<li>Payment processing across different payment gateways</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+
+// Implementation hierarchy
+class Renderer {
+public:
+    virtual ~Renderer() = default;
+    virtual void renderCircle(float radius) = 0;
+    virtual void renderSquare(float side) = 0;
+    virtual std::string getName() const = 0;
+};
+
+class OpenGLRenderer : public Renderer {
+public:
+    void renderCircle(float radius) override {
+        std::cout &lt;&lt; "[OpenGL] Drawing circle with radius " &lt;&lt; radius &lt;&lt; std::endl;
+    }
+
+    void renderSquare(float side) override {
+        std::cout &lt;&lt; "[OpenGL] Drawing square with side " &lt;&lt; side &lt;&lt; std::endl;
+    }
+
+    std::string getName() const override {
+        return "OpenGL";
+    }
+};
+
+class DirectXRenderer : public Renderer {
+public:
+    void renderCircle(float radius) override {
+        std::cout &lt;&lt; "[DirectX] Rendering circle with radius " &lt;&lt; radius &lt;&lt; std::endl;
+    }
+
+    void renderSquare(float side) override {
+        std::cout &lt;&lt; "[DirectX] Rendering square with side " &lt;&lt; side &lt;&lt; std::endl;
+    }
+
+    std::string getName() const override {
+        return "DirectX";
+    }
+};
+
+class VulkanRenderer : public Renderer {
+public:
+    void renderCircle(float radius) override {
+        std::cout &lt;&lt; "[Vulkan] Rendering circle with radius " &lt;&lt; radius &lt;&lt; std::endl;
+    }
+
+    void renderSquare(float side) override {
+        std::cout &lt;&lt; "[Vulkan] Rendering square with side " &lt;&lt; side &lt;&lt; std::endl;
+    }
+
+    std::string getName() const override {
+        return "Vulkan";
+    }
+};
+
+// Abstraction hierarchy
+class Shape {
+public:
+    virtual ~Shape() = default;
+
+    Shape(std::unique_ptr&lt;Renderer&gt; renderer)
+        : renderer_(std::move(renderer)) {}
+
+    virtual void draw() = 0;
+    virtual void resize(float factor) = 0;
+
+protected:
+    std::unique_ptr&lt;Renderer&gt; renderer_;
+};
+
+class Circle : public Shape {
+public:
+    Circle(std::unique_ptr&lt;Renderer&gt; renderer, float radius)
+        : Shape(std::move(renderer)), radius_(radius) {}
+
+    void draw() override {
+        std::cout &lt;&lt; "Circle: ";
+        renderer_-&gt;renderCircle(radius_);
+    }
+
+    void resize(float factor) override {
+        radius_ *= factor;
+        std::cout &lt;&lt; "Circle resized to radius " &lt;&lt; radius_ &lt;&lt; std::endl;
+    }
+
+private:
+    float radius_;
+};
+
+class Square : public Shape {
+public:
+    Square(std::unique_ptr&lt;Renderer&gt; renderer, float side)
+        : Shape(std::move(renderer)), side_(side) {}
+
+    void draw() override {
+        std::cout &lt;&lt; "Square: ";
+        renderer_-&gt;renderSquare(side_);
+    }
+
+    void resize(float factor) override {
+        side_ *= factor;
+        std::cout &lt;&lt; "Square resized to side " &lt;&lt; side_ &lt;&lt; std::endl;
+    }
+
+private:
+    float side_;
+};
+
+// Real-world example: Remote control and devices
+class Device {
+public:
+    virtual ~Device() = default;
+    virtual void powerOn() = 0;
+    virtual void powerOff() = 0;
+    virtual void setVolume(int volume) = 0;
+    virtual void setChannel(int channel) = 0;
+};
+
+class TV : public Device {
+public:
+    void powerOn() override {
+        std::cout &lt;&lt; "TV: Power ON" &lt;&lt; std::endl;
+    }
+
+    void powerOff() override {
+        std::cout &lt;&lt; "TV: Power OFF" &lt;&lt; std::endl;
+    }
+
+    void setVolume(int volume) override {
+        std::cout &lt;&lt; "TV: Setting volume to " &lt;&lt; volume &lt;&lt; std::endl;
+    }
+
+    void setChannel(int channel) override {
+        std::cout &lt;&lt; "TV: Switching to channel " &lt;&lt; channel &lt;&lt; std::endl;
+    }
+};
+
+class Radio : public Device {
+public:
+    void powerOn() override {
+        std::cout &lt;&lt; "Radio: Power ON" &lt;&lt; std::endl;
+    }
+
+    void powerOff() override {
+        std::cout &lt;&lt; "Radio: Power OFF" &lt;&lt; std::endl;
+    }
+
+    void setVolume(int volume) override {
+        std::cout &lt;&lt; "Radio: Setting volume to " &lt;&lt; volume &lt;&lt; std::endl;
+    }
+
+    void setChannel(int channel) override {
+        std::cout &lt;&lt; "Radio: Tuning to station " &lt;&lt; channel &lt;&lt; " MHz" &lt;&lt; std::endl;
+    }
+};
+
+class RemoteControl {
+public:
+    RemoteControl(std::shared_ptr&lt;Device&gt; device)
+        : device_(device) {}
+
+    virtual ~RemoteControl() = default;
+
+    void togglePower() {
+        if (isOn_) {
+            device_-&gt;powerOff();
+            isOn_ = false;
+        } else {
+            device_-&gt;powerOn();
+            isOn_ = true;
+        }
+    }
+
+    void volumeUp() {
+        volume_ = std::min(volume_ + 10, 100);
+        device_-&gt;setVolume(volume_);
+    }
+
+    void volumeDown() {
+        volume_ = std::max(volume_ - 10, 0);
+        device_-&gt;setVolume(volume_);
+    }
+
+    void channelUp() {
+        channel_++;
+        device_-&gt;setChannel(channel_);
+    }
+
+    void channelDown() {
+        channel_--;
+        device_-&gt;setChannel(channel_);
+    }
+
+protected:
+    std::shared_ptr&lt;Device&gt; device_;
+    bool isOn_ = false;
+    int volume_ = 50;
+    int channel_ = 1;
+};
+
+class AdvancedRemoteControl : public RemoteControl {
+public:
+    using RemoteControl::RemoteControl;
+
+    void mute() {
+        device_-&gt;setVolume(0);
+        std::cout &lt;&lt; "Device muted" &lt;&lt; std::endl;
+    }
+};
+
+// Usage
+int main() {
+    // Bridge pattern with shapes and renderers
+    auto circle1 = std::make_unique&lt;Circle&gt;(std::make_unique&lt;OpenGLRenderer&gt;(), 5.0f);
+    circle1-&gt;draw();
+    circle1-&gt;resize(1.5f);
+    circle1-&gt;draw();
+
+    std::cout &lt;&lt; "\n";
+
+    auto square1 = std::make_unique&lt;Square&gt;(std::make_unique&lt;DirectXRenderer&gt;(), 10.0f);
+    square1-&gt;draw();
+
+    std::cout &lt;&lt; "\n";
+
+    auto circle2 = std::make_unique&lt;Circle&gt;(std::make_unique&lt;VulkanRenderer&gt;(), 7.0f);
+    circle2-&gt;draw();
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Remote control example
+    auto tv = std::make_shared&lt;TV&gt;();
+    RemoteControl tvRemote(tv);
+    tvRemote.togglePower();
+    tvRemote.volumeUp();
+    tvRemote.channelUp();
+
+    std::cout &lt;&lt; "\n";
+
+    auto radio = std::make_shared&lt;Radio&gt;();
+    AdvancedRemoteControl radioRemote(radio);
+    radioRemote.togglePower();
+    radioRemote.volumeUp();
+    radioRemote.mute();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import Protocol
+
+# Implementation hierarchy
+class Renderer(ABC):
+    @abstractmethod
+    def render_circle(self, radius: float) -&gt; None:
+        pass
+
+    @abstractmethod
+    def render_square(self, side: float) -&gt; None:
+        pass
+
+    @abstractmethod
+    def get_name(self) -&gt; str:
+        pass
+
+class OpenGLRenderer(Renderer):
+    def render_circle(self, radius: float) -&gt; None:
+        print(f"[OpenGL] Drawing circle with radius {radius}")
+
+    def render_square(self, side: float) -&gt; None:
+        print(f"[OpenGL] Drawing square with side {side}")
+
+    def get_name(self) -&gt; str:
+        return "OpenGL"
+
+class DirectXRenderer(Renderer):
+    def render_circle(self, radius: float) -&gt; None:
+        print(f"[DirectX] Rendering circle with radius {radius}")
+
+    def render_square(self, side: float) -&gt; None:
+        print(f"[DirectX] Rendering square with side {side}")
+
+    def get_name(self) -&gt; str:
+        return "DirectX"
+
+# Abstraction hierarchy
+class Shape(ABC):
+    def __init__(self, renderer: Renderer):
+        self.renderer = renderer
+
+    @abstractmethod
+    def draw(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def resize(self, factor: float) -&gt; None:
+        pass
+
+class Circle(Shape):
+    def __init__(self, renderer: Renderer, radius: float):
+        super().__init__(renderer)
+        self.radius = radius
+
+    def draw(self) -&gt; None:
+        print("Circle: ", end="")
+        self.renderer.render_circle(self.radius)
+
+    def resize(self, factor: float) -&gt; None:
+        self.radius *= factor
+        print(f"Circle resized to radius {self.radius}")
+
+class Square(Shape):
+    def __init__(self, renderer: Renderer, side: float):
+        super().__init__(renderer)
+        self.side = side
+
+    def draw(self) -&gt; None:
+        print("Square: ", end="")
+        self.renderer.render_square(self.side)
+
+    def resize(self, factor: float) -&gt; None:
+        self.side *= factor
+        print(f"Square resized to side {self.side}")
+
+# Device example
+class Device(ABC):
+    @abstractmethod
+    def power_on(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def power_off(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def set_volume(self, volume: int) -&gt; None:
+        pass
+
+    @abstractmethod
+    def set_channel(self, channel: int) -&gt; None:
+        pass
+
+class TV(Device):
+    def power_on(self) -&gt; None:
+        print("TV: Power ON")
+
+    def power_off(self) -&gt; None:
+        print("TV: Power OFF")
+
+    def set_volume(self, volume: int) -&gt; None:
+        print(f"TV: Setting volume to {volume}")
+
+    def set_channel(self, channel: int) -&gt; None:
+        print(f"TV: Switching to channel {channel}")
+
+class RemoteControl:
+    def __init__(self, device: Device):
+        self.device = device
+        self.is_on = False
+        self.volume = 50
+        self.channel = 1
+
+    def toggle_power(self) -&gt; None:
+        if self.is_on:
+            self.device.power_off()
+            self.is_on = False
+        else:
+            self.device.power_on()
+            self.is_on = True
+
+    def volume_up(self) -&gt; None:
+        self.volume = min(self.volume + 10, 100)
+        self.device.set_volume(self.volume)
+
+    def channel_up(self) -&gt; None:
+        self.channel += 1
+        self.device.set_channel(self.channel)
+
+# Usage
+if __name__ == "__main__":
+    circle1 = Circle(OpenGLRenderer(), 5.0)
+    circle1.draw()
+    circle1.resize(1.5)
+    circle1.draw()
+
+    print()
+
+    square1 = Square(DirectXRenderer(), 10.0)
+    square1.draw()
+
+    print("\n---\n")
+
+    tv = TV()
+    remote = RemoteControl(tv)
+    remote.toggle_power()
+    remote.volume_up()
+    remote.channel_up()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Decouples interface from implementation</li>
+<li>Improves extensibility (extend abstraction and implementation independently)</li>
+<li>Hides implementation details from client</li>
+<li>Allows switching implementations at runtime</li>
+<li>Reduces number of subclasses in hierarchies</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Increases complexity with additional layers of indirection</li>
+<li>Can be harder to understand initially</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Abstract Factory</strong>: Can create and configure a particular Bridge</li>
+<li><strong>Adapter</strong>: Makes unrelated classes work together (retrofitted); Bridge separates abstraction from implementation (designed upfront)</li>
+</ul>
+<hr />
+<h4 id="composite-pattern"><a class="header" href="#composite-pattern">Composite Pattern</a></h4>
+<p><strong>Intent</strong>: Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.</p>
+<p><strong>Problem</strong>: You need to represent a hierarchy of objects where individual objects and groups of objects should be treated uniformly. Without Composite, clients must differentiate between leaf nodes and branches.</p>
+<p><strong>Solution</strong>: Define a common interface for both simple (leaf) and complex (composite) objects. Composite objects delegate operations to their children.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>You want to represent part-whole hierarchies</li>
+<li>You want clients to ignore the difference between compositions and individual objects</li>
+<li>You have tree-structured data (file systems, GUI components, organization charts)</li>
+<li>You need recursive composition</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>File systems (files and directories)</li>
+<li>GUI component hierarchies (panels containing buttons, labels, other panels)</li>
+<li>Organization charts (departments containing employees and sub-departments)</li>
+<li>Graphics scenes (shapes containing other shapes)</li>
+<li>Menu systems (menus containing menu items and submenus)</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+
+// Component - Common interface for leaves and composites
+class FileSystemComponent {
+public:
+    virtual ~FileSystemComponent() = default;
+
+    virtual std::string getName() const = 0;
+    virtual int getSize() const = 0;
+    virtual void display(int depth = 0) const = 0;
+
+    // Composite methods (default implementations)
+    virtual void add(std::shared_ptr&lt;FileSystemComponent&gt; component) {
+        throw std::runtime_error("Operation not supported");
+    }
+
+    virtual void remove(std::shared_ptr&lt;FileSystemComponent&gt; component) {
+        throw std::runtime_error("Operation not supported");
+    }
+
+    virtual std::shared_ptr&lt;FileSystemComponent&gt; getChild(int index) {
+        throw std::runtime_error("Operation not supported");
+    }
+};
+
+// Leaf - File
+class File : public FileSystemComponent {
+public:
+    File(const std::string&amp; name, int size)
+        : name_(name), size_(size) {}
+
+    std::string getName() const override {
+        return name_;
+    }
+
+    int getSize() const override {
+        return size_;
+    }
+
+    void display(int depth = 0) const override {
+        std::string indent(depth * 2, ' ');
+        std::cout &lt;&lt; indent &lt;&lt; "📄 " &lt;&lt; name_ &lt;&lt; " (" &lt;&lt; size_ &lt;&lt; " KB)" &lt;&lt; std::endl;
+    }
+
+private:
+    std::string name_;
+    int size_;
+};
+
+// Composite - Directory
+class Directory : public FileSystemComponent {
+public:
+    Directory(const std::string&amp; name)
+        : name_(name) {}
+
+    std::string getName() const override {
+        return name_;
+    }
+
+    int getSize() const override {
+        int totalSize = 0;
+        for (const auto&amp; child : children_) {
+            totalSize += child-&gt;getSize();
+        }
+        return totalSize;
+    }
+
+    void display(int depth = 0) const override {
+        std::string indent(depth * 2, ' ');
+        std::cout &lt;&lt; indent &lt;&lt; "📁 " &lt;&lt; name_ &lt;&lt; " (" &lt;&lt; getSize() &lt;&lt; " KB total)" &lt;&lt; std::endl;
+        for (const auto&amp; child : children_) {
+            child-&gt;display(depth + 1);
+        }
+    }
+
+    void add(std::shared_ptr&lt;FileSystemComponent&gt; component) override {
+        children_.push_back(component);
+    }
+
+    void remove(std::shared_ptr&lt;FileSystemComponent&gt; component) override {
+        auto it = std::find(children_.begin(), children_.end(), component);
+        if (it != children_.end()) {
+            children_.erase(it);
+        }
+    }
+
+    std::shared_ptr&lt;FileSystemComponent&gt; getChild(int index) override {
+        if (index &gt;= 0 &amp;&amp; index &lt; children_.size()) {
+            return children_[index];
+        }
+        return nullptr;
+    }
+
+private:
+    std::string name_;
+    std::vector&lt;std::shared_ptr&lt;FileSystemComponent&gt;&gt; children_;
+};
+
+// Another example: Graphics
+class Graphic {
+public:
+    virtual ~Graphic() = default;
+    virtual void draw() const = 0;
+    virtual void move(int x, int y) = 0;
+};
+
+class Circle : public Graphic {
+public:
+    Circle(int x, int y, int radius)
+        : x_(x), y_(y), radius_(radius) {}
+
+    void draw() const override {
+        std::cout &lt;&lt; "Circle at (" &lt;&lt; x_ &lt;&lt; "," &lt;&lt; y_ &lt;&lt; ") with radius " &lt;&lt; radius_ &lt;&lt; std::endl;
+    }
+
+    void move(int x, int y) override {
+        x_ += x;
+        y_ += y;
+    }
+
+private:
+    int x_, y_, radius_;
+};
+
+class Rectangle : public Graphic {
+public:
+    Rectangle(int x, int y, int width, int height)
+        : x_(x), y_(y), width_(width), height_(height) {}
+
+    void draw() const override {
+        std::cout &lt;&lt; "Rectangle at (" &lt;&lt; x_ &lt;&lt; "," &lt;&lt; y_ &lt;&lt; ") "
+                  &lt;&lt; width_ &lt;&lt; "x" &lt;&lt; height_ &lt;&lt; std::endl;
+    }
+
+    void move(int x, int y) override {
+        x_ += x;
+        y_ += y;
+    }
+
+private:
+    int x_, y_, width_, height_;
+};
+
+class CompositeGraphic : public Graphic {
+public:
+    void draw() const override {
+        std::cout &lt;&lt; "Composite graphic containing:" &lt;&lt; std::endl;
+        for (const auto&amp; graphic : graphics_) {
+            graphic-&gt;draw();
+        }
+    }
+
+    void move(int x, int y) override {
+        for (auto&amp; graphic : graphics_) {
+            graphic-&gt;move(x, y);
+        }
+    }
+
+    void add(std::shared_ptr&lt;Graphic&gt; graphic) {
+        graphics_.push_back(graphic);
+    }
+
+    void remove(std::shared_ptr&lt;Graphic&gt; graphic) {
+        auto it = std::find(graphics_.begin(), graphics_.end(), graphic);
+        if (it != graphics_.end()) {
+            graphics_.erase(it);
+        }
+    }
+
+private:
+    std::vector&lt;std::shared_ptr&lt;Graphic&gt;&gt; graphics_;
+};
+
+// Usage
+int main() {
+    // File system example
+    auto root = std::make_shared&lt;Directory&gt;("root");
+
+    auto home = std::make_shared&lt;Directory&gt;("home");
+    auto documents = std::make_shared&lt;Directory&gt;("documents");
+
+    auto file1 = std::make_shared&lt;File&gt;("resume.pdf", 150);
+    auto file2 = std::make_shared&lt;File&gt;("photo.jpg", 2500);
+    auto file3 = std::make_shared&lt;File&gt;("notes.txt", 45);
+
+    documents-&gt;add(file1);
+    documents-&gt;add(file3);
+    home-&gt;add(documents);
+    home-&gt;add(file2);
+
+    auto usr = std::make_shared&lt;Directory&gt;("usr");
+    auto bin = std::make_shared&lt;Directory&gt;("bin");
+    auto lib = std::make_shared&lt;Directory&gt;("lib");
+
+    auto file4 = std::make_shared&lt;File&gt;("bash", 1200);
+    auto file5 = std::make_shared&lt;File&gt;("python", 4500);
+
+    bin-&gt;add(file4);
+    bin-&gt;add(file5);
+    usr-&gt;add(bin);
+    usr-&gt;add(lib);
+
+    root-&gt;add(home);
+    root-&gt;add(usr);
+
+    root-&gt;display();
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Graphics example
+    auto allGraphics = std::make_shared&lt;CompositeGraphic&gt;();
+
+    auto circle1 = std::make_shared&lt;Circle&gt;(10, 10, 5);
+    auto circle2 = std::make_shared&lt;Circle&gt;(20, 20, 10);
+    auto rect1 = std::make_shared&lt;Rectangle&gt;(5, 5, 15, 20);
+
+    auto group1 = std::make_shared&lt;CompositeGraphic&gt;();
+    group1-&gt;add(circle1);
+    group1-&gt;add(circle2);
+
+    allGraphics-&gt;add(group1);
+    allGraphics-&gt;add(rect1);
+
+    std::cout &lt;&lt; "Drawing all graphics:" &lt;&lt; std::endl;
+    allGraphics-&gt;draw();
+
+    std::cout &lt;&lt; "\nMoving all graphics by (5, 5):" &lt;&lt; std::endl;
+    allGraphics-&gt;move(5, 5);
+    allGraphics-&gt;draw();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import List
+
+# Component
+class FileSystemComponent(ABC):
+    @abstractmethod
+    def get_name(self) -&gt; str:
+        pass
+
+    @abstractmethod
+    def get_size(self) -&gt; int:
+        pass
+
+    @abstractmethod
+    def display(self, depth: int = 0) -&gt; None:
+        pass
+
+    def add(self, component: 'FileSystemComponent') -&gt; None:
+        raise NotImplementedError("Operation not supported")
+
+    def remove(self, component: 'FileSystemComponent') -&gt; None:
+        raise NotImplementedError("Operation not supported")
+
+# Leaf
+class File(FileSystemComponent):
+    def __init__(self, name: str, size: int):
+        self._name = name
+        self._size = size
+
+    def get_name(self) -&gt; str:
+        return self._name
+
+    def get_size(self) -&gt; int:
+        return self._size
+
+    def display(self, depth: int = 0) -&gt; None:
+        indent = "  " * depth
+        print(f"{indent}📄 {self._name} ({self._size} KB)")
+
+# Composite
+class Directory(FileSystemComponent):
+    def __init__(self, name: str):
+        self._name = name
+        self._children: List[FileSystemComponent] = []
+
+    def get_name(self) -&gt; str:
+        return self._name
+
+    def get_size(self) -&gt; int:
+        return sum(child.get_size() for child in self._children)
+
+    def display(self, depth: int = 0) -&gt; None:
+        indent = "  " * depth
+        print(f"{indent}📁 {self._name} ({self.get_size()} KB total)")
+        for child in self._children:
+            child.display(depth + 1)
+
+    def add(self, component: FileSystemComponent) -&gt; None:
+        self._children.append(component)
+
+    def remove(self, component: FileSystemComponent) -&gt; None:
+        self._children.remove(component)
+
+# Graphics example
+class Graphic(ABC):
+    @abstractmethod
+    def draw(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def move(self, x: int, y: int) -&gt; None:
+        pass
+
+class Circle(Graphic):
+    def __init__(self, x: int, y: int, radius: int):
+        self.x = x
+        self.y = y
+        self.radius = radius
+
+    def draw(self) -&gt; None:
+        print(f"Circle at ({self.x},{self.y}) with radius {self.radius}")
+
+    def move(self, x: int, y: int) -&gt; None:
+        self.x += x
+        self.y += y
+
+class CompositeGraphic(Graphic):
+    def __init__(self):
+        self.graphics: List[Graphic] = []
+
+    def draw(self) -&gt; None:
+        print("Composite graphic containing:")
+        for graphic in self.graphics:
+            graphic.draw()
+
+    def move(self, x: int, y: int) -&gt; None:
+        for graphic in self.graphics:
+            graphic.move(x, y)
+
+    def add(self, graphic: Graphic) -&gt; None:
+        self.graphics.append(graphic)
+
+# Usage
+if __name__ == "__main__":
+    root = Directory("root")
+    home = Directory("home")
+    documents = Directory("documents")
+
+    file1 = File("resume.pdf", 150)
+    file2 = File("photo.jpg", 2500)
+    file3 = File("notes.txt", 45)
+
+    documents.add(file1)
+    documents.add(file3)
+    home.add(documents)
+    home.add(file2)
+
+    root.add(home)
+    root.display()
+
+    print("\n---\n")
+
+    # Graphics
+    all_graphics = CompositeGraphic()
+    circle1 = Circle(10, 10, 5)
+    circle2 = Circle(20, 20, 10)
+
+    group1 = CompositeGraphic()
+    group1.add(circle1)
+    group1.add(circle2)
+
+    all_graphics.add(group1)
+
+    print("Drawing all graphics:")
+    all_graphics.draw()
+
+    print("\nMoving all by (5, 5):")
+    all_graphics.move(5, 5)
+    all_graphics.draw()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Simplifies client code (treats individual and composite objects uniformly)</li>
+<li>Makes it easier to add new component types</li>
+<li>Supports recursive composition naturally</li>
+<li>Open/Closed Principle: can introduce new elements without breaking existing code</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Can make design overly general</li>
+<li>Can be difficult to restrict components of a composite</li>
+<li>Type safety: hard to enforce that composite contains only certain types</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Iterator</strong>: Often used to traverse composites</li>
+<li><strong>Visitor</strong>: Can apply operations across composite structure</li>
+<li><strong>Decorator</strong>: Often used together with Composite</li>
+</ul>
+<hr />
+<h4 id="decorator-pattern"><a class="header" href="#decorator-pattern">Decorator Pattern</a></h4>
+<p><strong>Intent</strong>: Attach additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.</p>
+<p><strong>Problem</strong>: You need to add responsibilities to individual objects without affecting other objects or using subclassing (which is static and affects all instances).</p>
+<p><strong>Solution</strong>: Create decorator classes that wrap the original object. Each decorator implements the same interface as the wrapped object and adds its own behavior before/after delegating to the wrapped object.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>You need to add responsibilities to objects dynamically and transparently</li>
+<li>Extension by subclassing is impractical (class is final, or leads to many subclasses)</li>
+<li>Responsibilities can be withdrawn</li>
+<li>You want to add features to objects without changing their interface</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Coffee shop beverages with add-ons (milk, sugar, whipped cream)</li>
+<li>Text formatting (bold, italic, underline combinations)</li>
+<li>GUI components with borders, scrollbars</li>
+<li>Stream processing (buffered, compressed, encrypted)</li>
+<li>Middleware in web frameworks</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+
+// Component interface
+class Coffee {
+public:
+    virtual ~Coffee() = default;
+    virtual std::string getDescription() const = 0;
+    virtual double getCost() const = 0;
+};
+
+// Concrete Component
+class SimpleCoffee : public Coffee {
+public:
+    std::string getDescription() const override {
+        return "Simple Coffee";
+    }
+
+    double getCost() const override {
+        return 2.0;
+    }
+};
+
+// Base Decorator
+class CoffeeDecorator : public Coffee {
+public:
+    CoffeeDecorator(std::unique_ptr&lt;Coffee&gt; coffee)
+        : coffee_(std::move(coffee)) {}
+
+protected:
+    std::unique_ptr&lt;Coffee&gt; coffee_;
+};
+
+// Concrete Decorators
+class MilkDecorator : public CoffeeDecorator {
+public:
+    using CoffeeDecorator::CoffeeDecorator;
+
+    std::string getDescription() const override {
+        return coffee_-&gt;getDescription() + ", Milk";
+    }
+
+    double getCost() const override {
+        return coffee_-&gt;getCost() + 0.5;
+    }
+};
+
+class SugarDecorator : public CoffeeDecorator {
+public:
+    using CoffeeDecorator::CoffeeDecorator;
+
+    std::string getDescription() const override {
+        return coffee_-&gt;getDescription() + ", Sugar";
+    }
+
+    double getCost() const override {
+        return coffee_-&gt;getCost() + 0.2;
+    }
+};
+
+class WhippedCreamDecorator : public CoffeeDecorator {
+public:
+    using CoffeeDecorator::CoffeeDecorator;
+
+    std::string getDescription() const override {
+        return coffee_-&gt;getDescription() + ", Whipped Cream";
+    }
+
+    double getCost() const override {
+        return coffee_-&gt;getCost() + 0.7;
+    }
+};
+
+class CaramelDecorator : public CoffeeDecorator {
+public:
+    using CoffeeDecorator::CoffeeDecorator;
+
+    std::string getDescription() const override {
+        return coffee_-&gt;getDescription() + ", Caramel";
+    }
+
+    double getCost() const override {
+        return coffee_-&gt;getCost() + 0.6;
+    }
+};
+
+// Another example: Text formatting
+class Text {
+public:
+    virtual ~Text() = default;
+    virtual std::string render() const = 0;
+};
+
+class PlainText : public Text {
+public:
+    PlainText(const std::string&amp; content) : content_(content) {}
+
+    std::string render() const override {
+        return content_;
+    }
+
+private:
+    std::string content_;
+};
+
+class TextDecorator : public Text {
+public:
+    TextDecorator(std::unique_ptr&lt;Text&gt; text)
+        : text_(std::move(text)) {}
+
+protected:
+    std::unique_ptr&lt;Text&gt; text_;
+};
+
+class BoldDecorator : public TextDecorator {
+public:
+    using TextDecorator::TextDecorator;
+
+    std::string render() const override {
+        return "&lt;b&gt;" + text_-&gt;render() + "&lt;/b&gt;";
+    }
+};
+
+class ItalicDecorator : public TextDecorator {
+public:
+    using TextDecorator::TextDecorator;
+
+    std::string render() const override {
+        return "&lt;i&gt;" + text_-&gt;render() + "&lt;/i&gt;";
+    }
+};
+
+class UnderlineDecorator : public TextDecorator {
+public:
+    using TextDecorator::TextDecorator;
+
+    std::string render() const override {
+        return "&lt;u&gt;" + text_-&gt;render() + "&lt;/u&gt;";
+    }
+};
+
+// Data stream example
+class DataSource {
+public:
+    virtual ~DataSource() = default;
+    virtual void writeData(const std::string&amp; data) = 0;
+    virtual std::string readData() = 0;
+};
+
+class FileDataSource : public DataSource {
+public:
+    FileDataSource(const std::string&amp; filename)
+        : filename_(filename) {}
+
+    void writeData(const std::string&amp; data) override {
+        std::cout &lt;&lt; "Writing to file '" &lt;&lt; filename_ &lt;&lt; "': " &lt;&lt; data &lt;&lt; std::endl;
+        data_ = data;
+    }
+
+    std::string readData() override {
+        std::cout &lt;&lt; "Reading from file '" &lt;&lt; filename_ &lt;&lt; "'" &lt;&lt; std::endl;
+        return data_;
+    }
+
+private:
+    std::string filename_;
+    std::string data_;
+};
+
+class DataSourceDecorator : public DataSource {
+public:
+    DataSourceDecorator(std::unique_ptr&lt;DataSource&gt; source)
+        : wrappee_(std::move(source)) {}
+
+protected:
+    std::unique_ptr&lt;DataSource&gt; wrappee_;
+};
+
+class EncryptionDecorator : public DataSourceDecorator {
+public:
+    using DataSourceDecorator::DataSourceDecorator;
+
+    void writeData(const std::string&amp; data) override {
+        std::string encrypted = encrypt(data);
+        wrappee_-&gt;writeData(encrypted);
+    }
+
+    std::string readData() override {
+        std::string data = wrappee_-&gt;readData();
+        return decrypt(data);
+    }
+
+private:
+    std::string encrypt(const std::string&amp; data) {
+        std::cout &lt;&lt; "Encrypting data..." &lt;&lt; std::endl;
+        return "[ENCRYPTED]" + data + "[/ENCRYPTED]";
+    }
+
+    std::string decrypt(const std::string&amp; data) {
+        std::cout &lt;&lt; "Decrypting data..." &lt;&lt; std::endl;
+        // Simple decryption simulation
+        if (data.find("[ENCRYPTED]") == 0) {
+            return data.substr(11, data.length() - 23);
+        }
+        return data;
+    }
+};
+
+class CompressionDecorator : public DataSourceDecorator {
+public:
+    using DataSourceDecorator::DataSourceDecorator;
+
+    void writeData(const std::string&amp; data) override {
+        std::string compressed = compress(data);
+        wrappee_-&gt;writeData(compressed);
+    }
+
+    std::string readData() override {
+        std::string data = wrappee_-&gt;readData();
+        return decompress(data);
+    }
+
+private:
+    std::string compress(const std::string&amp; data) {
+        std::cout &lt;&lt; "Compressing data..." &lt;&lt; std::endl;
+        return "[COMPRESSED]" + data + "[/COMPRESSED]";
+    }
+
+    std::string decompress(const std::string&amp; data) {
+        std::cout &lt;&lt; "Decompressing data..." &lt;&lt; std::endl;
+        if (data.find("[COMPRESSED]") == 0) {
+            return data.substr(12, data.length() - 26);
+        }
+        return data;
+    }
+};
+
+// Usage
+int main() {
+    // Coffee example
+    std::unique_ptr&lt;Coffee&gt; myCoffee = std::make_unique&lt;SimpleCoffee&gt;();
+    std::cout &lt;&lt; myCoffee-&gt;getDescription() &lt;&lt; " - $" &lt;&lt; myCoffee-&gt;getCost() &lt;&lt; std::endl;
+
+    myCoffee = std::make_unique&lt;MilkDecorator&gt;(std::move(myCoffee));
+    std::cout &lt;&lt; myCoffee-&gt;getDescription() &lt;&lt; " - $" &lt;&lt; myCoffee-&gt;getCost() &lt;&lt; std::endl;
+
+    myCoffee = std::make_unique&lt;SugarDecorator&gt;(std::move(myCoffee));
+    std::cout &lt;&lt; myCoffee-&gt;getDescription() &lt;&lt; " - $" &lt;&lt; myCoffee-&gt;getCost() &lt;&lt; std::endl;
+
+    myCoffee = std::make_unique&lt;WhippedCreamDecorator&gt;(std::move(myCoffee));
+    std::cout &lt;&lt; myCoffee-&gt;getDescription() &lt;&lt; " - $" &lt;&lt; myCoffee-&gt;getCost() &lt;&lt; std::endl;
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Text formatting example
+    auto text = std::make_unique&lt;PlainText&gt;("Hello World");
+    std::cout &lt;&lt; text-&gt;render() &lt;&lt; std::endl;
+
+    text = std::make_unique&lt;BoldDecorator&gt;(std::move(text));
+    std::cout &lt;&lt; text-&gt;render() &lt;&lt; std::endl;
+
+    text = std::make_unique&lt;ItalicDecorator&gt;(std::move(text));
+    std::cout &lt;&lt; text-&gt;render() &lt;&lt; std::endl;
+
+    text = std::make_unique&lt;UnderlineDecorator&gt;(std::move(text));
+    std::cout &lt;&lt; text-&gt;render() &lt;&lt; std::endl;
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Data stream example - combining compression and encryption
+    auto source = std::make_unique&lt;FileDataSource&gt;("data.txt");
+    source = std::make_unique&lt;CompressionDecorator&gt;(std::move(source));
+    source = std::make_unique&lt;EncryptionDecorator&gt;(std::move(source));
+
+    source-&gt;writeData("Sensitive information");
+    std::cout &lt;&lt; "\nReading back:" &lt;&lt; std::endl;
+    std::string data = source-&gt;readData();
+    std::cout &lt;&lt; "Final data: " &lt;&lt; data &lt;&lt; std::endl;
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Component
+class Coffee(ABC):
+    @abstractmethod
+    def get_description(self) -&gt; str:
+        pass
+
+    @abstractmethod
+    def get_cost(self) -&gt; float:
+        pass
+
+# Concrete Component
+class SimpleCoffee(Coffee):
+    def get_description(self) -&gt; str:
+        return "Simple Coffee"
+
+    def get_cost(self) -&gt; float:
+        return 2.0
+
+# Base Decorator
+class CoffeeDecorator(Coffee):
+    def __init__(self, coffee: Coffee):
+        self._coffee = coffee
+
+# Concrete Decorators
+class MilkDecorator(CoffeeDecorator):
+    def get_description(self) -&gt; str:
+        return self._coffee.get_description() + ", Milk"
+
+    def get_cost(self) -&gt; float:
+        return self._coffee.get_cost() + 0.5
+
+class SugarDecorator(CoffeeDecorator):
+    def get_description(self) -&gt; str:
+        return self._coffee.get_description() + ", Sugar"
+
+    def get_cost(self) -&gt; float:
+        return self._coffee.get_cost() + 0.2
+
+class WhippedCreamDecorator(CoffeeDecorator):
+    def get_description(self) -&gt; str:
+        return self._coffee.get_description() + ", Whipped Cream"
+
+    def get_cost(self) -&gt; float:
+        return self._coffee.get_cost() + 0.7
+
+# Text formatting
+class Text(ABC):
+    @abstractmethod
+    def render(self) -&gt; str:
+        pass
+
+class PlainText(Text):
+    def __init__(self, content: str):
+        self.content = content
+
+    def render(self) -&gt; str:
+        return self.content
+
+class TextDecorator(Text):
+    def __init__(self, text: Text):
+        self._text = text
+
+class BoldDecorator(TextDecorator):
+    def render(self) -&gt; str:
+        return f"&lt;b&gt;{self._text.render()}&lt;/b&gt;"
+
+class ItalicDecorator(TextDecorator):
+    def render(self) -&gt; str:
+        return f"&lt;i&gt;{self._text.render()}&lt;/i&gt;"
+
+# Usage
+if __name__ == "__main__":
+    coffee = SimpleCoffee()
+    print(f"{coffee.get_description()} - ${coffee.get_cost()}")
+
+    coffee = MilkDecorator(coffee)
+    print(f"{coffee.get_description()} - ${coffee.get_cost()}")
+
+    coffee = SugarDecorator(coffee)
+    print(f"{coffee.get_description()} - ${coffee.get_cost()}")
+
+    coffee = WhippedCreamDecorator(coffee)
+    print(f"{coffee.get_description()} - ${coffee.get_cost()}")
+
+    print("\n---\n")
+
+    text = PlainText("Hello World")
+    print(text.render())
+
+    text = BoldDecorator(text)
+    print(text.render())
+
+    text = ItalicDecorator(text)
+    print(text.render())
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>More flexible than static inheritance</li>
+<li>Responsibilities can be added/removed at runtime</li>
+<li>Avoids feature-laden classes high up in the hierarchy</li>
+<li>Single Responsibility Principle: divide functionality into classes</li>
+<li>Open/Closed Principle: extend behavior without modifying existing code</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Can result in many small objects (complexity)</li>
+<li>Decorators and their component aren't identical</li>
+<li>Hard to remove a specific decorator from the wrapper stack</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Adapter</strong>: Changes interface; Decorator enhances responsibilities</li>
+<li><strong>Composite</strong>: Decorator can be viewed as degenerate composite with only one component</li>
+<li><strong>Strategy</strong>: Decorator changes object's skin; Strategy changes object's guts</li>
+</ul>
+<hr />
+<h4 id="facade-pattern"><a class="header" href="#facade-pattern">Facade Pattern</a></h4>
+<p><strong>Intent</strong>: Provide a unified interface to a set of interfaces in a subsystem. Facade defines a higher-level interface that makes the subsystem easier to use.</p>
+<p><strong>Problem</strong>: A complex subsystem with many interdependent classes requires substantial knowledge to use effectively. Clients shouldn't need to know about subsystem implementation details.</p>
+<p><strong>Solution</strong>: Create a facade class that provides simple methods for client interactions with the subsystem, delegating to appropriate subsystem objects.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>You want to provide a simple interface to a complex subsystem</li>
+<li>There are many dependencies between clients and implementation classes</li>
+<li>You want to layer your subsystems</li>
+<li>You need to decouple subsystem from clients and other subsystems</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Computer startup (facade hides CPU, memory, hard drive interactions)</li>
+<li>Home theater system (one button to start movie: turn on projector, sound system, DVD player, etc.)</li>
+<li>Online shopping checkout (facade over payment, inventory, shipping systems)</li>
+<li>REST API wrapping multiple microservices</li>
+<li>Compiler facade over lexer, parser, code generator</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+
+// Subsystem classes - Complex components
+class CPU {
+public:
+    void freeze() {
+        std::cout &lt;&lt; "CPU: Freezing processor" &lt;&lt; std::endl;
+    }
+
+    void jump(long address) {
+        std::cout &lt;&lt; "CPU: Jumping to address " &lt;&lt; address &lt;&lt; std::endl;
+    }
+
+    void execute() {
+        std::cout &lt;&lt; "CPU: Executing instructions" &lt;&lt; std::endl;
+    }
+};
+
+class Memory {
+public:
+    void load(long position, const std::string&amp; data) {
+        std::cout &lt;&lt; "Memory: Loading data '" &lt;&lt; data
+                  &lt;&lt; "' at position " &lt;&lt; position &lt;&lt; std::endl;
+    }
+};
+
+class HardDrive {
+public:
+    std::string read(long lba, int size) {
+        std::cout &lt;&lt; "HardDrive: Reading " &lt;&lt; size
+                  &lt;&lt; " bytes from sector " &lt;&lt; lba &lt;&lt; std::endl;
+        return "BOOT_DATA";
+    }
+};
+
+// Facade
+class ComputerFacade {
+public:
+    ComputerFacade()
+        : cpu_(std::make_unique&lt;CPU&gt;()),
+          memory_(std::make_unique&lt;Memory&gt;()),
+          hardDrive_(std::make_unique&lt;HardDrive&gt;()) {}
+
+    void start() {
+        std::cout &lt;&lt; "Computer starting up..." &lt;&lt; std::endl;
+        cpu_-&gt;freeze();
+        memory_-&gt;load(0, hardDrive_-&gt;read(0, 1024));
+        cpu_-&gt;jump(0);
+        cpu_-&gt;execute();
+        std::cout &lt;&lt; "Computer started successfully!" &lt;&lt; std::endl;
+    }
+
+private:
+    std::unique_ptr&lt;CPU&gt; cpu_;
+    std::unique_ptr&lt;Memory&gt; memory_;
+    std::unique_ptr&lt;HardDrive&gt; hardDrive_;
+};
+
+// Home Theater example
+class Amplifier {
+public:
+    void on() { std::cout &lt;&lt; "Amplifier: ON" &lt;&lt; std::endl; }
+    void setVolume(int level) {
+        std::cout &lt;&lt; "Amplifier: Setting volume to " &lt;&lt; level &lt;&lt; std::endl;
+    }
+    void off() { std::cout &lt;&lt; "Amplifier: OFF" &lt;&lt; std::endl; }
+};
+
+class DvdPlayer {
+public:
+    void on() { std::cout &lt;&lt; "DVD Player: ON" &lt;&lt; std::endl; }
+    void play(const std::string&amp; movie) {
+        std::cout &lt;&lt; "DVD Player: Playing '" &lt;&lt; movie &lt;&lt; "'" &lt;&lt; std::endl;
+    }
+    void stop() { std::cout &lt;&lt; "DVD Player: Stopped" &lt;&lt; std::endl; }
+    void off() { std::cout &lt;&lt; "DVD Player: OFF" &lt;&lt; std::endl; }
+};
+
+class Projector {
+public:
+    void on() { std::cout &lt;&lt; "Projector: ON" &lt;&lt; std::endl; }
+    void wideScreenMode() { std::cout &lt;&lt; "Projector: Widescreen mode" &lt;&lt; std::endl; }
+    void off() { std::cout &lt;&lt; "Projector: OFF" &lt;&lt; std::endl; }
+};
+
+class TheaterLights {
+public:
+    void dim(int level) {
+        std::cout &lt;&lt; "Theater Lights: Dimming to " &lt;&lt; level &lt;&lt; "%" &lt;&lt; std::endl;
+    }
+    void on() { std::cout &lt;&lt; "Theater Lights: ON" &lt;&lt; std::endl; }
+};
+
+class Screen {
+public:
+    void down() { std::cout &lt;&lt; "Screen: Going down" &lt;&lt; std::endl; }
+    void up() { std::cout &lt;&lt; "Screen: Going up" &lt;&lt; std::endl; }
+};
+
+// Home Theater Facade
+class HomeTheaterFacade {
+public:
+    HomeTheaterFacade(
+        std::shared_ptr&lt;Amplifier&gt; amp,
+        std::shared_ptr&lt;DvdPlayer&gt; dvd,
+        std::shared_ptr&lt;Projector&gt; projector,
+        std::shared_ptr&lt;Screen&gt; screen,
+        std::shared_ptr&lt;TheaterLights&gt; lights)
+        : amp_(amp), dvd_(dvd), projector_(projector),
+          screen_(screen), lights_(lights) {}
+
+    void watchMovie(const std::string&amp; movie) {
+        std::cout &lt;&lt; "\nGet ready to watch a movie..." &lt;&lt; std::endl;
+        lights_-&gt;dim(10);
+        screen_-&gt;down();
+        projector_-&gt;on();
+        projector_-&gt;wideScreenMode();
+        amp_-&gt;on();
+        amp_-&gt;setVolume(5);
+        dvd_-&gt;on();
+        dvd_-&gt;play(movie);
+    }
+
+    void endMovie() {
+        std::cout &lt;&lt; "\nShutting down movie theater..." &lt;&lt; std::endl;
+        dvd_-&gt;stop();
+        dvd_-&gt;off();
+        amp_-&gt;off();
+        projector_-&gt;off();
+        screen_-&gt;up();
+        lights_-&gt;on();
+    }
+
+private:
+    std::shared_ptr&lt;Amplifier&gt; amp_;
+    std::shared_ptr&lt;DvdPlayer&gt; dvd_;
+    std::shared_ptr&lt;Projector&gt; projector_;
+    std::shared_ptr&lt;Screen&gt; screen_;
+    std::shared_ptr&lt;TheaterLights&gt; lights_;
+};
+
+// Usage
+int main() {
+    // Computer facade example
+    ComputerFacade computer;
+    computer.start();
+
+    std::cout &lt;&lt; "\n---\n";
+
+    // Home theater facade example
+    auto amp = std::make_shared&lt;Amplifier&gt;();
+    auto dvd = std::make_shared&lt;DvdPlayer&gt;();
+    auto projector = std::make_shared&lt;Projector&gt;();
+    auto screen = std::make_shared&lt;Screen&gt;();
+    auto lights = std::make_shared&lt;TheaterLights&gt;();
+
+    HomeTheaterFacade homeTheater(amp, dvd, projector, screen, lights);
+    homeTheater.watchMovie("Inception");
+    homeTheater.endMovie();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python"># Subsystem classes
+class CPU:
+    def freeze(self) -&gt; None:
+        print("CPU: Freezing processor")
+
+    def jump(self, address: int) -&gt; None:
+        print(f"CPU: Jumping to address {address}")
+
+    def execute(self) -&gt; None:
+        print("CPU: Executing instructions")
+
+class Memory:
+    def load(self, position: int, data: str) -&gt; None:
+        print(f"Memory: Loading data '{data}' at position {position}")
+
+class HardDrive:
+    def read(self, lba: int, size: int) -&gt; str:
+        print(f"HardDrive: Reading {size} bytes from sector {lba}")
+        return "BOOT_DATA"
+
+# Facade
+class ComputerFacade:
+    def __init__(self):
+        self.cpu = CPU()
+        self.memory = Memory()
+        self.hard_drive = HardDrive()
+
+    def start(self) -&gt; None:
+        print("Computer starting up...")
+        self.cpu.freeze()
+        self.memory.load(0, self.hard_drive.read(0, 1024))
+        self.cpu.jump(0)
+        self.cpu.execute()
+        print("Computer started successfully!")
+
+# Home Theater classes
+class Amplifier:
+    def on(self) -&gt; None:
+        print("Amplifier: ON")
+
+    def set_volume(self, level: int) -&gt; None:
+        print(f"Amplifier: Setting volume to {level}")
+
+    def off(self) -&gt; None:
+        print("Amplifier: OFF")
+
+class DvdPlayer:
+    def on(self) -&gt; None:
+        print("DVD Player: ON")
+
+    def play(self, movie: str) -&gt; None:
+        print(f"DVD Player: Playing '{movie}'")
+
+    def stop(self) -&gt; None:
+        print("DVD Player: Stopped")
+
+    def off(self) -&gt; None:
+        print("DVD Player: OFF")
+
+class Projector:
+    def on(self) -&gt; None:
+        print("Projector: ON")
+
+    def wide_screen_mode(self) -&gt; None:
+        print("Projector: Widescreen mode")
+
+    def off(self) -&gt; None:
+        print("Projector: OFF")
+
+class HomeTheaterFacade:
+    def __init__(self, amp: Amplifier, dvd: DvdPlayer, projector: Projector):
+        self.amp = amp
+        self.dvd = dvd
+        self.projector = projector
+
+    def watch_movie(self, movie: str) -&gt; None:
+        print("\nGet ready to watch a movie...")
+        self.projector.on()
+        self.projector.wide_screen_mode()
+        self.amp.on()
+        self.amp.set_volume(5)
+        self.dvd.on()
+        self.dvd.play(movie)
+
+    def end_movie(self) -&gt; None:
+        print("\nShutting down movie theater...")
+        self.dvd.stop()
+        self.dvd.off()
+        self.amp.off()
+        self.projector.off()
+
+# Usage
+if __name__ == "__main__":
+    computer = ComputerFacade()
+    computer.start()
+
+    print("\n---\n")
+
+    amp = Amplifier()
+    dvd = DvdPlayer()
+    projector = Projector()
+
+    home_theater = HomeTheaterFacade(amp, dvd, projector)
+    home_theater.watch_movie("Inception")
+    home_theater.end_movie()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Simplifies complex subsystems for clients</li>
+<li>Reduces coupling between subsystems and clients</li>
+<li>Promotes weak coupling between subsystems</li>
+<li>Provides a simple default view while allowing access to lower-level features</li>
+<li>Makes libraries easier to use and test</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Facade can become a god object coupled to all classes of an application</li>
+<li>May introduce additional abstraction layer</li>
+<li>Can limit functionality if not designed to expose all subsystem features</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Abstract Factory</strong>: Can be used with Facade to hide platform-specific classes</li>
+<li><strong>Mediator</strong>: Similar to Facade but abstracts communication between subsystem objects (bidirectional vs. unidirectional)</li>
+<li><strong>Singleton</strong>: Facade objects are often singletons</li>
+</ul>
+<hr />
+<h4 id="flyweight-pattern"><a class="header" href="#flyweight-pattern">Flyweight Pattern</a></h4>
+<p><strong>Intent</strong>: Use sharing to support large numbers of fine-grained objects efficiently by sharing common state.</p>
+<p><strong>Problem</strong>: Creating a large number of similar objects consumes too much memory. Many objects share common data that doesn't need to be duplicated.</p>
+<p><strong>Solution</strong>: Separate intrinsic state (shared) from extrinsic state (unique). Store intrinsic state in flyweight objects that can be shared; pass extrinsic state to flyweight methods as parameters.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>Application uses large numbers of objects</li>
+<li>Storage costs are high because of the quantity of objects</li>
+<li>Most object state can be made extrinsic</li>
+<li>Many groups of objects may be replaced by relatively few shared objects</li>
+<li>Application doesn't depend on object identity</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Text editors (character objects sharing font data)</li>
+<li>Game development (particles, trees, grass instances)</li>
+<li>String interning in programming languages</li>
+<li>Connection pools</li>
+<li>Thread pools</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;unordered_map&gt;
+#include &lt;vector&gt;
+
+// Flyweight - Shared character data
+class CharacterStyle {
+public:
+    CharacterStyle(const std::string&amp; font, int size, const std::string&amp; color)
+        : font_(font), size_(size), color_(color) {
+        std::cout &lt;&lt; "Creating CharacterStyle: " &lt;&lt; font &lt;&lt; " " &lt;&lt; size
+                  &lt;&lt; "pt " &lt;&lt; color &lt;&lt; std::endl;
+    }
+
+    void display(char symbol, int row, int column) const {
+        std::cout &lt;&lt; "Character '" &lt;&lt; symbol &lt;&lt; "' at (" &lt;&lt; row &lt;&lt; "," &lt;&lt; column
+                  &lt;&lt; ") - Font: " &lt;&lt; font_ &lt;&lt; " " &lt;&lt; size_ &lt;&lt; "pt " &lt;&lt; color_
+                  &lt;&lt; std::endl;
+    }
+
+    std::string getKey() const {
+        return font_ + "_" + std::to_string(size_) + "_" + color_;
+    }
+
+private:
+    std::string font_;  // Intrinsic state (shared)
+    int size_;          // Intrinsic state (shared)
+    std::string color_; // Intrinsic state (shared)
+};
+
+// Flyweight Factory
+class CharacterStyleFactory {
+public:
+    std::shared_ptr&lt;CharacterStyle&gt; getStyle(
+        const std::string&amp; font, int size, const std::string&amp; color) {
+
+        std::string key = font + "_" + std::to_string(size) + "_" + color;
+
+        auto it = styles_.find(key);
+        if (it != styles_.end()) {
+            std::cout &lt;&lt; "Reusing existing style: " &lt;&lt; key &lt;&lt; std::endl;
+            return it-&gt;second;
+        }
+
+        auto newStyle = std::make_shared&lt;CharacterStyle&gt;(font, size, color);
+        styles_[key] = newStyle;
+        return newStyle;
+    }
+
+    size_t getStyleCount() const {
+        return styles_.size();
+    }
+
+private:
+    std::unordered_map&lt;std::string, std::shared_ptr&lt;CharacterStyle&gt;&gt; styles_;
+};
+
+// Context - Character with position (extrinsic state)
+class Character {
+public:
+    Character(char symbol, int row, int column,
+              std::shared_ptr&lt;CharacterStyle&gt; style)
+        : symbol_(symbol), row_(row), column_(column), style_(style) {}
+
+    void display() const {
+        style_-&gt;display(symbol_, row_, column_);
+    }
+
+private:
+    char symbol_;                           // Extrinsic state (unique)
+    int row_, column_;                      // Extrinsic state (unique)
+    std::shared_ptr&lt;CharacterStyle&gt; style_; // Reference to flyweight
+};
+
+// Game example - Trees in a forest
+class TreeType {
+public:
+    TreeType(const std::string&amp; name, const std::string&amp; color, const std::string&amp; texture)
+        : name_(name), color_(color), texture_(texture) {
+        std::cout &lt;&lt; "Creating tree type: " &lt;&lt; name &lt;&lt; std::endl;
+    }
+
+    void draw(int x, int y) const {
+        std::cout &lt;&lt; name_ &lt;&lt; " tree (color: " &lt;&lt; color_ &lt;&lt; ", texture: " &lt;&lt; texture_
+                  &lt;&lt; ") at (" &lt;&lt; x &lt;&lt; "," &lt;&lt; y &lt;&lt; ")" &lt;&lt; std::endl;
+    }
+
+private:
+    std::string name_;    // Intrinsic
+    std::string color_;   // Intrinsic
+    std::string texture_; // Intrinsic
+};
+
+class TreeFactory {
+public:
+    std::shared_ptr&lt;TreeType&gt; getTreeType(
+        const std::string&amp; name, const std::string&amp; color, const std::string&amp; texture) {
+
+        std::string key = name + "_" + color + "_" + texture;
+
+        auto it = treeTypes_.find(key);
+        if (it != treeTypes_.end()) {
+            return it-&gt;second;
+        }
+
+        auto newType = std::make_shared&lt;TreeType&gt;(name, color, texture);
+        treeTypes_[key] = newType;
+        return newType;
+    }
+
+    size_t getTypeCount() const {
+        return treeTypes_.size();
+    }
+
+private:
+    std::unordered_map&lt;std::string, std::shared_ptr&lt;TreeType&gt;&gt; treeTypes_;
+};
+
+class Tree {
+public:
+    Tree(int x, int y, std::shared_ptr&lt;TreeType&gt; type)
+        : x_(x), y_(y), type_(type) {}
+
+    void draw() const {
+        type_-&gt;draw(x_, y_);
+    }
+
+private:
+    int x_, y_;                      // Extrinsic state (unique per tree)
+    std::shared_ptr&lt;TreeType&gt; type_; // Intrinsic state (shared)
+};
+
+class Forest {
+public:
+    void plantTree(int x, int y, const std::string&amp; name,
+                   const std::string&amp; color, const std::string&amp; texture) {
+        auto type = treeFactory_.getTreeType(name, color, texture);
+        trees_.push_back(std::make_unique&lt;Tree&gt;(x, y, type));
+    }
+
+    void draw() const {
+        for (const auto&amp; tree : trees_) {
+            tree-&gt;draw();
+        }
+        std::cout &lt;&lt; "\nTotal trees: " &lt;&lt; trees_.size()
+                  &lt;&lt; ", Unique tree types: " &lt;&lt; treeFactory_.getTypeCount()
+                  &lt;&lt; std::endl;
+    }
+
+private:
+    TreeFactory treeFactory_;
+    std::vector&lt;std::unique_ptr&lt;Tree&gt;&gt; trees_;
+};
+
+// Usage
+int main() {
+    // Text editor example
+    CharacterStyleFactory styleFactory;
+
+    auto arial12Black = styleFactory.getStyle("Arial", 12, "Black");
+    auto arial12Red = styleFactory.getStyle("Arial", 12, "Red");
+    auto arial14Black = styleFactory.getStyle("Arial", 14, "Black");
+    auto arial12Black2 = styleFactory.getStyle("Arial", 12, "Black"); // Reuses
+
+    std::vector&lt;Character&gt; document;
+    document.emplace_back('H', 0, 0, arial14Black);
+    document.emplace_back('e', 0, 1, arial12Black);
+    document.emplace_back('l', 0, 2, arial12Black);
+    document.emplace_back('l', 0, 3, arial12Red);
+    document.emplace_back('o', 0, 4, arial12Black);
+
+    std::cout &lt;&lt; "\nDocument with " &lt;&lt; document.size() &lt;&lt; " characters:" &lt;&lt; std::endl;
+    for (const auto&amp; ch : document) {
+        ch.display();
+    }
+
+    std::cout &lt;&lt; "\nTotal unique styles created: "
+              &lt;&lt; styleFactory.getStyleCount() &lt;&lt; std::endl;
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Forest example
+    Forest forest;
+    forest.plantTree(10, 20, "Oak", "Green", "OakTexture");
+    forest.plantTree(50, 30, "Pine", "DarkGreen", "PineTexture");
+    forest.plantTree(80, 40, "Oak", "Green", "OakTexture");  // Reuses Oak type
+    forest.plantTree(120, 50, "Pine", "DarkGreen", "PineTexture"); // Reuses Pine
+    forest.plantTree(150, 60, "Birch", "White", "BirchTexture");
+    forest.plantTree(200, 70, "Oak", "Green", "OakTexture");  // Reuses Oak type
+
+    std::cout &lt;&lt; "\nDrawing forest:" &lt;&lt; std::endl;
+    forest.draw();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from typing import Dict
+
+# Flyweight
+class CharacterStyle:
+    def __init__(self, font: str, size: int, color: str):
+        self.font = font
+        self.size = size
+        self.color = color
+        print(f"Creating CharacterStyle: {font} {size}pt {color}")
+
+    def display(self, symbol: str, row: int, column: int) -&gt; None:
+        print(f"Character '{symbol}' at ({row},{column}) - "
+              f"Font: {self.font} {self.size}pt {self.color}")
+
+# Flyweight Factory
+class CharacterStyleFactory:
+    def __init__(self):
+        self._styles: Dict[str, CharacterStyle] = {}
+
+    def get_style(self, font: str, size: int, color: str) -&gt; CharacterStyle:
+        key = f"{font}_{size}_{color}"
+
+        if key in self._styles:
+            print(f"Reusing existing style: {key}")
+            return self._styles[key]
+
+        new_style = CharacterStyle(font, size, color)
+        self._styles[key] = new_style
+        return new_style
+
+    def get_style_count(self) -&gt; int:
+        return len(self._styles)
+
+# Context
+class Character:
+    def __init__(self, symbol: str, row: int, column: int, style: CharacterStyle):
+        self.symbol = symbol      # Extrinsic
+        self.row = row           # Extrinsic
+        self.column = column     # Extrinsic
+        self.style = style       # Intrinsic (shared)
+
+    def display(self) -&gt; None:
+        self.style.display(self.symbol, self.row, self.column)
+
+# Tree example
+class TreeType:
+    def __init__(self, name: str, color: str, texture: str):
+        self.name = name
+        self.color = color
+        self.texture = texture
+        print(f"Creating tree type: {name}")
+
+    def draw(self, x: int, y: int) -&gt; None:
+        print(f"{self.name} tree (color: {self.color}, texture: {self.texture}) "
+              f"at ({x},{y})")
+
+class TreeFactory:
+    def __init__(self):
+        self._tree_types: Dict[str, TreeType] = {}
+
+    def get_tree_type(self, name: str, color: str, texture: str) -&gt; TreeType:
+        key = f"{name}_{color}_{texture}"
+
+        if key in self._tree_types:
+            return self._tree_types[key]
+
+        new_type = TreeType(name, color, texture)
+        self._tree_types[key] = new_type
+        return new_type
+
+    def get_type_count(self) -&gt; int:
+        return len(self._tree_types)
+
+class Tree:
+    def __init__(self, x: int, y: int, tree_type: TreeType):
+        self.x = x               # Extrinsic
+        self.y = y               # Extrinsic
+        self.type = tree_type    # Intrinsic (shared)
+
+    def draw(self) -&gt; None:
+        self.type.draw(self.x, self.y)
+
+class Forest:
+    def __init__(self):
+        self.tree_factory = TreeFactory()
+        self.trees = []
+
+    def plant_tree(self, x: int, y: int, name: str, color: str, texture: str) -&gt; None:
+        tree_type = self.tree_factory.get_tree_type(name, color, texture)
+        self.trees.append(Tree(x, y, tree_type))
+
+    def draw(self) -&gt; None:
+        for tree in self.trees:
+            tree.draw()
+        print(f"\nTotal trees: {len(self.trees)}, "
+              f"Unique tree types: {self.tree_factory.get_type_count()}")
+
+# Usage
+if __name__ == "__main__":
+    # Text editor
+    factory = CharacterStyleFactory()
+
+    arial_12_black = factory.get_style("Arial", 12, "Black")
+    arial_12_red = factory.get_style("Arial", 12, "Red")
+    arial_12_black_2 = factory.get_style("Arial", 12, "Black")  # Reuses
+
+    document = [
+        Character('H', 0, 0, arial_12_black),
+        Character('e', 0, 1, arial_12_black),
+        Character('l', 0, 2, arial_12_red),
+        Character('l', 0, 3, arial_12_black),
+        Character('o', 0, 4, arial_12_black),
+    ]
+
+    print(f"\nDocument with {len(document)} characters:")
+    for ch in document:
+        ch.display()
+
+    print(f"\nTotal unique styles: {factory.get_style_count()}")
+
+    print("\n---\n")
+
+    # Forest
+    forest = Forest()
+    forest.plant_tree(10, 20, "Oak", "Green", "OakTexture")
+    forest.plant_tree(50, 30, "Pine", "DarkGreen", "PineTexture")
+    forest.plant_tree(80, 40, "Oak", "Green", "OakTexture")  # Reuses
+    forest.plant_tree(120, 50, "Birch", "White", "BirchTexture")
+
+    print("\nDrawing forest:")
+    forest.draw()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Reduces memory consumption significantly</li>
+<li>Reduces total number of objects</li>
+<li>Can improve performance by reducing memory allocation overhead</li>
+<li>Centralizes state management for shared data</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>More complex code (intrinsic vs. extrinsic state separation)</li>
+<li>Runtime costs for computing extrinsic state</li>
+<li>Can make design less intuitive</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Composite</strong>: Often combined with Flyweight to implement shared leaf nodes</li>
+<li><strong>State and Strategy</strong>: Can be implemented as flyweights</li>
+<li><strong>Singleton</strong>: Flyweight factories are often singletons</li>
+</ul>
+<hr />
+<h4 id="proxy-pattern"><a class="header" href="#proxy-pattern">Proxy Pattern</a></h4>
+<p><strong>Intent</strong>: Provide a surrogate or placeholder for another object to control access to it.</p>
+<p><strong>Problem</strong>: You need to control access to an object for various reasons: expensive creation, remote access, access control, logging, lazy initialization, etc.</p>
+<p><strong>Solution</strong>: Create a proxy object with the same interface as the real object. The proxy controls access to the real object and can perform additional operations before/after forwarding requests.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li><strong>Virtual Proxy</strong>: Lazy initialization of expensive objects</li>
+<li><strong>Remote Proxy</strong>: Local representative for remote objects</li>
+<li><strong>Protection Proxy</strong>: Access control based on permissions</li>
+<li><strong>Smart Reference</strong>: Additional actions when object is accessed (reference counting, locking, lazy loading)</li>
+<li><strong>Caching Proxy</strong>: Cache results of expensive operations</li>
+<li><strong>Logging Proxy</strong>: Log requests before forwarding</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Image proxies in web browsers (placeholder until loaded)</li>
+<li>Network proxies and VPNs</li>
+<li>Smart pointers in C++</li>
+<li>Lazy-loaded ORM entities</li>
+<li>Access control in security systems</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;unordered_map&gt;
+
+// Subject interface
+class Image {
+public:
+    virtual ~Image() = default;
+    virtual void display() = 0;
+    virtual std::string getName() const = 0;
+};
+
+// Real Subject - Expensive object
+class RealImage : public Image {
+public:
+    RealImage(const std::string&amp; filename)
+        : filename_(filename) {
+        loadFromDisk();
+    }
+
+    void display() override {
+        std::cout &lt;&lt; "Displaying " &lt;&lt; filename_ &lt;&lt; std::endl;
+    }
+
+    std::string getName() const override {
+        return filename_;
+    }
+
+private:
+    void loadFromDisk() {
+        std::cout &lt;&lt; "Loading " &lt;&lt; filename_ &lt;&lt; " from disk (expensive operation)..."
+                  &lt;&lt; std::endl;
+    }
+
+    std::string filename_;
+};
+
+// Virtual Proxy - Lazy initialization
+class ImageProxy : public Image {
+public:
+    ImageProxy(const std::string&amp; filename)
+        : filename_(filename), realImage_(nullptr) {}
+
+    void display() override {
+        if (!realImage_) {
+            std::cout &lt;&lt; "Proxy: First access, loading real image..." &lt;&lt; std::endl;
+            realImage_ = std::make_unique&lt;RealImage&gt;(filename_);
+        }
+        realImage_-&gt;display();
+    }
+
+    std::string getName() const override {
+        return filename_;
+    }
+
+private:
+    std::string filename_;
+    std::unique_ptr&lt;RealImage&gt; realImage_;
+};
+
+// Protection Proxy example
+class Document {
+public:
+    virtual ~Document() = default;
+    virtual void displayContent() = 0;
+    virtual void editContent(const std::string&amp; newContent) = 0;
+};
+
+class RealDocument : public Document {
+public:
+    RealDocument(const std::string&amp; content)
+        : content_(content) {}
+
+    void displayContent() override {
+        std::cout &lt;&lt; "Document content: " &lt;&lt; content_ &lt;&lt; std::endl;
+    }
+
+    void editContent(const std::string&amp; newContent) override {
+        content_ = newContent;
+        std::cout &lt;&lt; "Document updated to: " &lt;&lt; content_ &lt;&lt; std::endl;
+    }
+
+private:
+    std::string content_;
+};
+
+class DocumentProxy : public Document {
+public:
+    DocumentProxy(std::unique_ptr&lt;RealDocument&gt; doc, const std::string&amp; userRole)
+        : document_(std::move(doc)), userRole_(userRole) {}
+
+    void displayContent() override {
+        std::cout &lt;&lt; "Proxy: Checking read permissions for " &lt;&lt; userRole_ &lt;&lt; "..." &lt;&lt; std::endl;
+        document_-&gt;displayContent();
+    }
+
+    void editContent(const std::string&amp; newContent) override {
+        if (userRole_ == "admin" || userRole_ == "editor") {
+            std::cout &lt;&lt; "Proxy: " &lt;&lt; userRole_ &lt;&lt; " has write permission" &lt;&lt; std::endl;
+            document_-&gt;editContent(newContent);
+        } else {
+            std::cout &lt;&lt; "Proxy: Access denied! " &lt;&lt; userRole_
+                      &lt;&lt; " doesn't have write permission" &lt;&lt; std::endl;
+        }
+    }
+
+private:
+    std::unique_ptr&lt;RealDocument&gt; document_;
+    std::string userRole_;
+};
+
+// Caching Proxy example
+class DataService {
+public:
+    virtual ~DataService() = default;
+    virtual std::string getData(const std::string&amp; key) = 0;
+};
+
+class RealDataService : public DataService {
+public:
+    std::string getData(const std::string&amp; key) override {
+        std::cout &lt;&lt; "RealDataService: Fetching '" &lt;&lt; key
+                  &lt;&lt; "' from database (expensive)..." &lt;&lt; std::endl;
+        return "Data for " + key;
+    }
+};
+
+class CachingDataServiceProxy : public DataService {
+public:
+    CachingDataServiceProxy(std::unique_ptr&lt;RealDataService&gt; service)
+        : service_(std::move(service)) {}
+
+    std::string getData(const std::string&amp; key) override {
+        auto it = cache_.find(key);
+        if (it != cache_.end()) {
+            std::cout &lt;&lt; "CachingProxy: Returning cached data for '" &lt;&lt; key &lt;&lt; "'"
+                      &lt;&lt; std::endl;
+            return it-&gt;second;
+        }
+
+        std::cout &lt;&lt; "CachingProxy: Cache miss, fetching from real service..."
+                  &lt;&lt; std::endl;
+        std::string data = service_-&gt;getData(key);
+        cache_[key] = data;
+        return data;
+    }
+
+private:
+    std::unique_ptr&lt;RealDataService&gt; service_;
+    std::unordered_map&lt;std::string, std::string&gt; cache_;
+};
+
+// Usage
+int main() {
+    // Virtual Proxy - Lazy loading
+    std::cout &lt;&lt; "=== Virtual Proxy Example ===" &lt;&lt; std::endl;
+    auto image1 = std::make_unique&lt;ImageProxy&gt;("photo1.jpg");
+    auto image2 = std::make_unique&lt;ImageProxy&gt;("photo2.jpg");
+
+    std::cout &lt;&lt; "\nImages created (not loaded yet)\n" &lt;&lt; std::endl;
+
+    image1-&gt;display();  // Loads and displays
+    image1-&gt;display();  // Just displays (already loaded)
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Protection Proxy
+    std::cout &lt;&lt; "=== Protection Proxy Example ===" &lt;&lt; std::endl;
+    auto adminDoc = std::make_unique&lt;DocumentProxy&gt;(
+        std::make_unique&lt;RealDocument&gt;("Secret Document"),
+        "admin"
+    );
+
+    auto viewerDoc = std::make_unique&lt;DocumentProxy&gt;(
+        std::make_unique&lt;RealDocument&gt;("Public Document"),
+        "viewer"
+    );
+
+    adminDoc-&gt;displayContent();
+    adminDoc-&gt;editContent("Updated Secret Document");
+
+    std::cout &lt;&lt; std::endl;
+
+    viewerDoc-&gt;displayContent();
+    viewerDoc-&gt;editContent("Trying to update");  // Denied
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Caching Proxy
+    std::cout &lt;&lt; "=== Caching Proxy Example ===" &lt;&lt; std::endl;
+    auto dataService = std::make_unique&lt;CachingDataServiceProxy&gt;(
+        std::make_unique&lt;RealDataService&gt;()
+    );
+
+    std::cout &lt;&lt; dataService-&gt;getData("user:123") &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    std::cout &lt;&lt; dataService-&gt;getData("user:123") &lt;&lt; std::endl;  // From cache
+    std::cout &lt;&lt; std::endl;
+    std::cout &lt;&lt; dataService-&gt;getData("user:456") &lt;&lt; std::endl;
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import Dict, Optional
+
+# Virtual Proxy
+class Image(ABC):
+    @abstractmethod
+    def display(self) -&gt; None:
+        pass
+
+class RealImage(Image):
+    def __init__(self, filename: str):
+        self.filename = filename
+        self._load_from_disk()
+
+    def _load_from_disk(self) -&gt; None:
+        print(f"Loading {self.filename} from disk (expensive operation)...")
+
+    def display(self) -&gt; None:
+        print(f"Displaying {self.filename}")
+
+class ImageProxy(Image):
+    def __init__(self, filename: str):
+        self.filename = filename
+        self._real_image: Optional[RealImage] = None
+
+    def display(self) -&gt; None:
+        if self._real_image is None:
+            print("Proxy: First access, loading real image...")
+            self._real_image = RealImage(self.filename)
+        self._real_image.display()
+
+# Protection Proxy
+class Document(ABC):
+    @abstractmethod
+    def display_content(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def edit_content(self, new_content: str) -&gt; None:
+        pass
+
+class RealDocument(Document):
+    def __init__(self, content: str):
+        self.content = content
+
+    def display_content(self) -&gt; None:
+        print(f"Document content: {self.content}")
+
+    def edit_content(self, new_content: str) -&gt; None:
+        self.content = new_content
+        print(f"Document updated to: {self.content}")
+
+class DocumentProxy(Document):
+    def __init__(self, document: RealDocument, user_role: str):
+        self.document = document
+        self.user_role = user_role
+
+    def display_content(self) -&gt; None:
+        print(f"Proxy: Checking read permissions for {self.user_role}...")
+        self.document.display_content()
+
+    def edit_content(self, new_content: str) -&gt; None:
+        if self.user_role in ["admin", "editor"]:
+            print(f"Proxy: {self.user_role} has write permission")
+            self.document.edit_content(new_content)
+        else:
+            print(f"Proxy: Access denied! {self.user_role} doesn't have write permission")
+
+# Caching Proxy
+class DataService(ABC):
+    @abstractmethod
+    def get_data(self, key: str) -&gt; str:
+        pass
+
+class RealDataService(DataService):
+    def get_data(self, key: str) -&gt; str:
+        print(f"RealDataService: Fetching '{key}' from database (expensive)...")
+        return f"Data for {key}"
+
+class CachingDataServiceProxy(DataService):
+    def __init__(self, service: RealDataService):
+        self.service = service
+        self.cache: Dict[str, str] = {}
+
+    def get_data(self, key: str) -&gt; str:
+        if key in self.cache:
+            print(f"CachingProxy: Returning cached data for '{key}'")
+            return self.cache[key]
+
+        print("CachingProxy: Cache miss, fetching from real service...")
+        data = self.service.get_data(key)
+        self.cache[key] = data
+        return data
+
+# Usage
+if __name__ == "__main__":
+    # Virtual Proxy
+    print("=== Virtual Proxy Example ===")
+    image1 = ImageProxy("photo1.jpg")
+    image2 = ImageProxy("photo2.jpg")
+
+    print("\nImages created (not loaded yet)\n")
+
+    image1.display()  # Loads and displays
+    image1.display()  # Just displays
+
+    print("\n---\n")
+
+    # Protection Proxy
+    print("=== Protection Proxy Example ===")
+    admin_doc = DocumentProxy(RealDocument("Secret Document"), "admin")
+    viewer_doc = DocumentProxy(RealDocument("Public Document"), "viewer")
+
+    admin_doc.display_content()
+    admin_doc.edit_content("Updated Secret Document")
+
+    print()
+
+    viewer_doc.display_content()
+    viewer_doc.edit_content("Trying to update")  # Denied
+
+    print("\n---\n")
+
+    # Caching Proxy
+    print("=== Caching Proxy Example ===")
+    data_service = CachingDataServiceProxy(RealDataService())
+
+    print(data_service.get_data("user:123"))
+    print()
+    print(data_service.get_data("user:123"))  # From cache
+    print()
+    print(data_service.get_data("user:456"))
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Controls access to the real object</li>
+<li>Can add functionality transparently (logging, caching, lazy loading)</li>
+<li>Open/Closed Principle: introduce new proxies without changing the service</li>
+<li>Can manage lifecycle of service object</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Code may become more complicated (many new classes)</li>
+<li>Response from service might be delayed</li>
+<li>Additional layer of indirection</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Adapter</strong>: Provides different interface; Proxy provides same interface</li>
+<li><strong>Decorator</strong>: Similar structure but different intent (enhancement vs. access control)</li>
+<li><strong>Facade</strong>: Provides simplified interface; Proxy provides same interface</li>
+</ul>
+<hr />
+<h3 id="behavioral-patterns-1"><a class="header" href="#behavioral-patterns-1">Behavioral Patterns</a></h3>
+<h4 id="observer-pattern"><a class="header" href="#observer-pattern">Observer Pattern</a></h4>
+<p><strong>Intent</strong>: Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.</p>
+<p><strong>Problem</strong>: You need to maintain consistency between related objects without making them tightly coupled. When one object changes, an unknown number of other objects need to be updated.</p>
+<p><strong>Solution</strong>: Define Subject (publisher) and Observer (subscriber) interfaces. Subjects maintain a list of observers and notify them automatically of state changes. Observers register/unregister themselves with subjects.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>Change to one object requires changing others, and you don't know how many</li>
+<li>Object should notify other objects without knowing who they are</li>
+<li>Need loosely coupled event handling system</li>
+<li>Implementing distributed event handling (MVC, pub-sub systems)</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Event listeners in GUI frameworks</li>
+<li>Model-View-Controller (MVC) architecture</li>
+<li>Social media notifications (followers notified of new posts)</li>
+<li>Stock market tickers</li>
+<li>RSS feeds</li>
+<li>Reactive programming (RxJS, ReactiveX)</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+#include &lt;algorithm&gt;
+
+// Observer interface
+class Observer {
+public:
+    virtual ~Observer() = default;
+    virtual void update(const std::string&amp; message) = 0;
+    virtual std::string getName() const = 0;
+};
+
+// Subject (Observable) interface
+class Subject {
+public:
+    virtual ~Subject() = default;
+    virtual void attach(std::shared_ptr&lt;Observer&gt; observer) = 0;
+    virtual void detach(std::shared_ptr&lt;Observer&gt; observer) = 0;
+    virtual void notify(const std::string&amp; message) = 0;
+};
+
+// Concrete Subject - News Agency
+class NewsAgency : public Subject {
+public:
+    void attach(std::shared_ptr&lt;Observer&gt; observer) override {
+        observers_.push_back(observer);
+        std::cout &lt;&lt; "NewsAgency: Attached observer " &lt;&lt; observer-&gt;getName() &lt;&lt; std::endl;
+    }
+
+    void detach(std::shared_ptr&lt;Observer&gt; observer) override {
+        auto it = std::find(observers_.begin(), observers_.end(), observer);
+        if (it != observers_.end()) {
+            std::cout &lt;&lt; "NewsAgency: Detached observer " &lt;&lt; observer-&gt;getName() &lt;&lt; std::endl;
+            observers_.erase(it);
+        }
+    }
+
+    void notify(const std::string&amp; message) override {
+        std::cout &lt;&lt; "\nNewsAgency: Broadcasting news..." &lt;&lt; std::endl;
+        for (auto&amp; observer : observers_) {
+            if (auto obs = observer.lock()) {
+                obs-&gt;update(message);
+            }
+        }
+    }
+
+    void publishNews(const std::string&amp; news) {
+        news_ = news;
+        notify(news_);
+    }
+
+private:
+    std::string news_;
+    std::vector&lt;std::weak_ptr&lt;Observer&gt;&gt; observers_;
+};
+
+// Concrete Observers
+class NewsChannel : public Observer {
+public:
+    NewsChannel(const std::string&amp; name) : name_(name) {}
 
     void update(const std::string&amp; message) override {
-        std::cout &lt;&lt; name_ &lt;&lt; " received message: " &lt;&lt; message &lt;&lt; std::endl;
+        std::cout &lt;&lt; "NewsChannel [" &lt;&lt; name_ &lt;&lt; "]: Received news - " &lt;&lt; message &lt;&lt; std::endl;
+    }
+
+    std::string getName() const override {
+        return name_;
     }
 
 private:
     std::string name_;
 };
 
+class Newspaper : public Observer {
+public:
+    Newspaper(const std::string&amp; name) : name_(name) {}
+
+    void update(const std::string&amp; message) override {
+        std::cout &lt;&lt; "Newspaper [" &lt;&lt; name_ &lt;&lt; "]: Printing news - " &lt;&lt; message &lt;&lt; std::endl;
+        headlines_.push_back(message);
+    }
+
+    std::string getName() const override {
+        return name_;
+    }
+
+    void printArchive() const {
+        std::cout &lt;&lt; "\n" &lt;&lt; name_ &lt;&lt; " Archive:" &lt;&lt; std::endl;
+        for (size_t i = 0; i &lt; headlines_.size(); ++i) {
+            std::cout &lt;&lt; "  " &lt;&lt; (i + 1) &lt;&lt; ". " &lt;&lt; headlines_[i] &lt;&lt; std::endl;
+        }
+    }
+
+private:
+    std::string name_;
+    std::vector&lt;std::string&gt; headlines_;
+};
+
+// Weather Station example
+class WeatherStation {
+public:
+    void setMeasurements(float temperature, float humidity, float pressure) {
+        temperature_ = temperature;
+        humidity_ = humidity;
+        pressure_ = pressure;
+        measurementsChanged();
+    }
+
+    void attach(std::shared_ptr&lt;Observer&gt; observer) {
+        observers_.push_back(observer);
+    }
+
+    void detach(std::shared_ptr&lt;Observer&gt; observer) {
+        auto it = std::find(observers_.begin(), observers_.end(), observer);
+        if (it != observers_.end()) {
+            observers_.erase(it);
+        }
+    }
+
+private:
+    void measurementsChanged() {
+        std::string data = "Temp: " + std::to_string(temperature_) + "°C, " +
+                          "Humidity: " + std::to_string(humidity_) + "%, " +
+                          "Pressure: " + std::to_string(pressure_) + " hPa";
+
+        for (auto&amp; observer : observers_) {
+            if (auto obs = observer.lock()) {
+                obs-&gt;update(data);
+            }
+        }
+    }
+
+    float temperature_ = 0.0f;
+    float humidity_ = 0.0f;
+    float pressure_ = 0.0f;
+    std::vector&lt;std::weak_ptr&lt;Observer&gt;&gt; observers_;
+};
+
+class WeatherDisplay : public Observer {
+public:
+    WeatherDisplay(const std::string&amp; name) : name_(name) {}
+
+    void update(const std::string&amp; message) override {
+        std::cout &lt;&lt; "Display [" &lt;&lt; name_ &lt;&lt; "]: " &lt;&lt; message &lt;&lt; std::endl;
+    }
+
+    std::string getName() const override {
+        return name_;
+    }
+
+private:
+    std::string name_;
+};
+
+// Usage
 int main() {
-    Subject subject;
+    // News agency example
+    auto newsAgency = std::make_unique&lt;NewsAgency&gt;();
 
-    ConcreteObserver observer1("Observer 1");
-    ConcreteObserver observer2("Observer 2");
+    auto cnn = std::make_shared&lt;NewsChannel&gt;("CNN");
+    auto bbc = std::make_shared&lt;NewsChannel&gt;("BBC");
+    auto nyt = std::make_shared&lt;Newspaper&gt;("New York Times");
 
-    subject.addObserver(&amp;observer1);
-    subject.addObserver(&amp;observer2);
+    newsAgency-&gt;attach(cnn);
+    newsAgency-&gt;attach(bbc);
+    newsAgency-&gt;attach(nyt);
 
-    subject.notify("Event occurred!");
+    newsAgency-&gt;publishNews("Breaking: Major tech announcement!");
+
+    std::cout &lt;&lt; "\nDetaching CNN..." &lt;&lt; std::endl;
+    newsAgency-&gt;detach(cnn);
+
+    newsAgency-&gt;publishNews("Update: Market reaches new high");
+
+    nyt-&gt;printArchive();
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Weather station example
+    WeatherStation station;
+
+    auto homeDisplay = std::make_shared&lt;WeatherDisplay&gt;("Home");
+    auto officeDisplay = std::make_shared&lt;WeatherDisplay&gt;("Office");
+    auto mobileDisplay = std::make_shared&lt;WeatherDisplay&gt;("Mobile");
+
+    station.attach(homeDisplay);
+    station.attach(officeDisplay);
+    station.attach(mobileDisplay);
+
+    std::cout &lt;&lt; "Weather update 1:" &lt;&lt; std::endl;
+    station.setMeasurements(25.5f, 65.0f, 1013.2f);
+
+    std::cout &lt;&lt; "\nWeather update 2:" &lt;&lt; std::endl;
+    station.setMeasurements(27.0f, 70.0f, 1012.8f);
 
     return 0;
 }
 </code></pre>
-<p><strong>Explanation</strong>:</p>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import List
+from weakref import WeakSet
+
+# Observer interface
+class Observer(ABC):
+    @abstractmethod
+    def update(self, message: str) -&gt; None:
+        pass
+
+    @abstractmethod
+    def get_name(self) -&gt; str:
+        pass
+
+# Subject interface
+class Subject(ABC):
+    @abstractmethod
+    def attach(self, observer: Observer) -&gt; None:
+        pass
+
+    @abstractmethod
+    def detach(self, observer: Observer) -&gt; None:
+        pass
+
+    @abstractmethod
+    def notify(self, message: str) -&gt; None:
+        pass
+
+# Concrete Subject
+class NewsAgency(Subject):
+    def __init__(self):
+        self._observers: WeakSet[Observer] = WeakSet()
+        self._news: str = ""
+
+    def attach(self, observer: Observer) -&gt; None:
+        self._observers.add(observer)
+        print(f"NewsAgency: Attached observer {observer.get_name()}")
+
+    def detach(self, observer: Observer) -&gt; None:
+        self._observers.discard(observer)
+        print(f"NewsAgency: Detached observer {observer.get_name()}")
+
+    def notify(self, message: str) -&gt; None:
+        print("\nNewsAgency: Broadcasting news...")
+        for observer in self._observers:
+            observer.update(message)
+
+    def publish_news(self, news: str) -&gt; None:
+        self._news = news
+        self.notify(self._news)
+
+# Concrete Observers
+class NewsChannel(Observer):
+    def __init__(self, name: str):
+        self._name = name
+
+    def update(self, message: str) -&gt; None:
+        print(f"NewsChannel [{self._name}]: Received news - {message}")
+
+    def get_name(self) -&gt; str:
+        return self._name
+
+class Newspaper(Observer):
+    def __init__(self, name: str):
+        self._name = name
+        self._headlines: List[str] = []
+
+    def update(self, message: str) -&gt; None:
+        print(f"Newspaper [{self._name}]: Printing news - {message}")
+        self._headlines.append(message)
+
+    def get_name(self) -&gt; str:
+        return self._name
+
+    def print_archive(self) -&gt; None:
+        print(f"\n{self._name} Archive:")
+        for i, headline in enumerate(self._headlines, 1):
+            print(f"  {i}. {headline}")
+
+# Weather Station example
+class WeatherStation:
+    def __init__(self):
+        self._observers: WeakSet[Observer] = WeakSet()
+        self._temperature: float = 0.0
+        self._humidity: float = 0.0
+        self._pressure: float = 0.0
+
+    def attach(self, observer: Observer) -&gt; None:
+        self._observers.add(observer)
+
+    def detach(self, observer: Observer) -&gt; None:
+        self._observers.discard(observer)
+
+    def set_measurements(self, temperature: float, humidity: float, pressure: float) -&gt; None:
+        self._temperature = temperature
+        self._humidity = humidity
+        self._pressure = pressure
+        self._measurements_changed()
+
+    def _measurements_changed(self) -&gt; None:
+        data = f"Temp: {self._temperature}°C, Humidity: {self._humidity}%, Pressure: {self._pressure} hPa"
+        for observer in self._observers:
+            observer.update(data)
+
+class WeatherDisplay(Observer):
+    def __init__(self, name: str):
+        self._name = name
+
+    def update(self, message: str) -&gt; None:
+        print(f"Display [{self._name}]: {message}")
+
+    def get_name(self) -&gt; str:
+        return self._name
+
+# Usage
+if __name__ == "__main__":
+    # News agency example
+    news_agency = NewsAgency()
+
+    cnn = NewsChannel("CNN")
+    bbc = NewsChannel("BBC")
+    nyt = Newspaper("New York Times")
+
+    news_agency.attach(cnn)
+    news_agency.attach(bbc)
+    news_agency.attach(nyt)
+
+    news_agency.publish_news("Breaking: Major tech announcement!")
+
+    print("\nDetaching CNN...")
+    news_agency.detach(cnn)
+
+    news_agency.publish_news("Update: Market reaches new high")
+
+    nyt.print_archive()
+
+    print("\n---\n")
+
+    # Weather station
+    station = WeatherStation()
+
+    home_display = WeatherDisplay("Home")
+    office_display = WeatherDisplay("Office")
+
+    station.attach(home_display)
+    station.attach(office_display)
+
+    print("Weather update 1:")
+    station.set_measurements(25.5, 65.0, 1013.2)
+
+    print("\nWeather update 2:")
+    station.set_measurements(27.0, 70.0, 1012.8)
+</code></pre>
+<p><strong>Advantages</strong>:</p>
 <ul>
-<li><code>Observer</code> is an interface with an <code>update</code> method.</li>
-<li><code>Subject</code> maintains a list of observers and notifies them of events.</li>
-<li><code>ConcreteObserver</code> implements the <code>Observer</code> interface and reacts to notifications.</li>
-<li>In <code>main</code>, observers are added to the subject, and when <code>notify</code> is called, all observers receive the message.</li>
+<li>Loose coupling between subject and observers</li>
+<li>Open/Closed Principle: add new observers without modifying subject</li>
+<li>Establishes relationships at runtime</li>
+<li>Supports broadcast communication</li>
 </ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Observers notified in random order</li>
+<li>Memory leaks if observers aren't properly detached</li>
+<li>Can cause unexpected updates if dependencies are complex</li>
+<li>Performance issues with many observers</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Mediator</strong>: Both promote loose coupling; Mediator uses centralized communication, Observer uses distributed</li>
+<li><strong>Singleton</strong>: Subject often implemented as singleton</li>
+</ul>
+<hr />
+<h4 id="strategy-pattern"><a class="header" href="#strategy-pattern">Strategy Pattern</a></h4>
+<p><strong>Intent</strong>: Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from clients that use it.</p>
+<p><strong>Problem</strong>: You have multiple related classes that differ only in their behavior. You need to select an algorithm at runtime, or you have many conditional statements choosing between different variants of the same algorithm.</p>
+<p><strong>Solution</strong>: Extract algorithms into separate classes (strategies) with a common interface. Context class delegates work to a strategy object instead of implementing multiple versions of the algorithm.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>You have many related classes differing only in behavior</li>
+<li>You need different variants of an algorithm</li>
+<li>Algorithm uses data clients shouldn't know about</li>
+<li>Class has massive conditional statements selecting different behaviors</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>Payment processing (credit card, PayPal, cryptocurrency)</li>
+<li>Sorting algorithms (quicksort, mergesort, bubblesort)</li>
+<li>Compression algorithms (ZIP, RAR, TAR)</li>
+<li>Route planning (shortest, fastest, scenic)</li>
+<li>Validation strategies</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+
+// Strategy interface
+class SortStrategy {
+public:
+    virtual ~SortStrategy() = default;
+    virtual void sort(std::vector&lt;int&gt;&amp; data) = 0;
+    virtual std::string getName() const = 0;
+};
+
+// Concrete Strategies
+class BubbleSort : public SortStrategy {
+public:
+    void sort(std::vector&lt;int&gt;&amp; data) override {
+        std::cout &lt;&lt; "Sorting using Bubble Sort" &lt;&lt; std::endl;
+        for (size_t i = 0; i &lt; data.size(); ++i) {
+            for (size_t j = 0; j &lt; data.size() - i - 1; ++j) {
+                if (data[j] &gt; data[j + 1]) {
+                    std::swap(data[j], data[j + 1]);
+                }
+            }
+        }
+    }
+
+    std::string getName() const override {
+        return "Bubble Sort";
+    }
+};
+
+class QuickSort : public SortStrategy {
+public:
+    void sort(std::vector&lt;int&gt;&amp; data) override {
+        std::cout &lt;&lt; "Sorting using Quick Sort" &lt;&lt; std::endl;
+        std::sort(data.begin(), data.end());
+    }
+
+    std::string getName() const override {
+        return "Quick Sort";
+    }
+};
+
+class MergeSort : public SortStrategy {
+public:
+    void sort(std::vector&lt;int&gt;&amp; data) override {
+        std::cout &lt;&lt; "Sorting using Merge Sort" &lt;&lt; std::endl;
+        std::stable_sort(data.begin(), data.end());
+    }
+
+    std::string getName() const override {
+        return "Merge Sort";
+    }
+};
+
+// Context
+class DataSorter {
+public:
+    void setStrategy(std::unique_ptr&lt;SortStrategy&gt; strategy) {
+        strategy_ = std::move(strategy);
+    }
+
+    void sort(std::vector&lt;int&gt;&amp; data) {
+        if (strategy_) {
+            strategy_-&gt;sort(data);
+        } else {
+            std::cout &lt;&lt; "No sorting strategy set!" &lt;&lt; std::endl;
+        }
+    }
+
+private:
+    std::unique_ptr&lt;SortStrategy&gt; strategy_;
+};
+
+// Payment example
+class PaymentStrategy {
+public:
+    virtual ~PaymentStrategy() = default;
+    virtual void pay(double amount) = 0;
+};
+
+class CreditCardPayment : public PaymentStrategy {
+public:
+    CreditCardPayment(const std::string&amp; number, const std::string&amp; cvv)
+        : cardNumber_(number), cvv_(cvv) {}
+
+    void pay(double amount) override {
+        std::cout &lt;&lt; "Paid $" &lt;&lt; amount &lt;&lt; " using Credit Card ending in "
+                  &lt;&lt; cardNumber_.substr(cardNumber_.length() - 4) &lt;&lt; std::endl;
+    }
+
+private:
+    std::string cardNumber_;
+    std::string cvv_;
+};
+
+class PayPalPayment : public PaymentStrategy {
+public:
+    PayPalPayment(const std::string&amp; email) : email_(email) {}
+
+    void pay(double amount) override {
+        std::cout &lt;&lt; "Paid $" &lt;&lt; amount &lt;&lt; " using PayPal account " &lt;&lt; email_ &lt;&lt; std::endl;
+    }
+
+private:
+    std::string email_;
+};
+
+class ShoppingCart {
+public:
+    void setPaymentStrategy(std::unique_ptr&lt;PaymentStrategy&gt; strategy) {
+        paymentStrategy_ = std::move(strategy);
+    }
+
+    void checkout(double amount) {
+        if (paymentStrategy_) {
+            paymentStrategy_-&gt;pay(amount);
+        }
+    }
+
+private:
+    std::unique_ptr&lt;PaymentStrategy&gt; paymentStrategy_;
+};
+
+// Usage
+int main() {
+    // Sorting example
+    std::vector&lt;int&gt; data = {64, 34, 25, 12, 22, 11, 90};
+
+    DataSorter sorter;
+
+    sorter.setStrategy(std::make_unique&lt;BubbleSort&gt;());
+    auto data1 = data;
+    sorter.sort(data1);
+
+    sorter.setStrategy(std::make_unique&lt;QuickSort&gt;());
+    auto data2 = data;
+    sorter.sort(data2);
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Payment example
+    ShoppingCart cart;
+
+    cart.setPaymentStrategy(std::make_unique&lt;CreditCardPayment&gt;("1234567890123456", "123"));
+    cart.checkout(100.0);
+
+    cart.setPaymentStrategy(std::make_unique&lt;PayPalPayment&gt;("user@example.com"));
+    cart.checkout(50.0);
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import List
+
+# Strategy interface
+class SortStrategy(ABC):
+    @abstractmethod
+    def sort(self, data: List[int]) -&gt; None:
+        pass
+
+    @abstractmethod
+    def get_name(self) -&gt; str:
+        pass
+
+# Concrete Strategies
+class BubbleSort(SortStrategy):
+    def sort(self, data: List[int]) -&gt; None:
+        print("Sorting using Bubble Sort")
+        n = len(data)
+        for i in range(n):
+            for j in range(0, n - i - 1):
+                if data[j] &gt; data[j + 1]:
+                    data[j], data[j + 1] = data[j + 1], data[j]
+
+    def get_name(self) -&gt; str:
+        return "Bubble Sort"
+
+class QuickSort(SortStrategy):
+    def sort(self, data: List[int]) -&gt; None:
+        print("Sorting using Quick Sort")
+        data.sort()
+
+    def get_name(self) -&gt; str:
+        return "Quick Sort"
+
+# Context
+class DataSorter:
+    def __init__(self, strategy: SortStrategy = None):
+        self._strategy = strategy
+
+    def set_strategy(self, strategy: SortStrategy) -&gt; None:
+        self._strategy = strategy
+
+    def sort(self, data: List[int]) -&gt; None:
+        if self._strategy:
+            self._strategy.sort(data)
+        else:
+            print("No sorting strategy set!")
+
+# Payment example
+class PaymentStrategy(ABC):
+    @abstractmethod
+    def pay(self, amount: float) -&gt; None:
+        pass
+
+class CreditCardPayment(PaymentStrategy):
+    def __init__(self, card_number: str, cvv: str):
+        self.card_number = card_number
+        self.cvv = cvv
+
+    def pay(self, amount: float) -&gt; None:
+        print(f"Paid ${amount} using Credit Card ending in {self.card_number[-4:]}")
+
+class PayPalPayment(PaymentStrategy):
+    def __init__(self, email: str):
+        self.email = email
+
+    def pay(self, amount: float) -&gt; None:
+        print(f"Paid ${amount} using PayPal account {self.email}")
+
+class ShoppingCart:
+    def __init__(self):
+        self._payment_strategy: PaymentStrategy = None
+
+    def set_payment_strategy(self, strategy: PaymentStrategy) -&gt; None:
+        self._payment_strategy = strategy
+
+    def checkout(self, amount: float) -&gt; None:
+        if self._payment_strategy:
+            self._payment_strategy.pay(amount)
+
+# Usage
+if __name__ == "__main__":
+    # Sorting
+    data = [64, 34, 25, 12, 22, 11, 90]
+
+    sorter = DataSorter()
+
+    sorter.set_strategy(BubbleSort())
+    data1 = data.copy()
+    sorter.sort(data1)
+
+    sorter.set_strategy(QuickSort())
+    data2 = data.copy()
+    sorter.sort(data2)
+
+    print("\n---\n")
+
+    # Payment
+    cart = ShoppingCart()
+
+    cart.set_payment_strategy(CreditCardPayment("1234567890123456", "123"))
+    cart.checkout(100.0)
+
+    cart.set_payment_strategy(PayPalPayment("user@example.com"))
+    cart.checkout(50.0)
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Families of related algorithms can be reused</li>
+<li>Open/Closed Principle: introduce new strategies without changing context</li>
+<li>Runtime algorithm switching</li>
+<li>Isolates algorithm implementation from code that uses it</li>
+<li>Eliminates conditional statements</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Clients must be aware of different strategies</li>
+<li>Increases number of objects</li>
+<li>All strategies must expose same interface (even if some don't use all parameters)</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>State</strong>: Both encapsulate behavior; Strategy focuses on algorithm, State on object state</li>
+<li><strong>Template Method</strong>: Uses inheritance; Strategy uses composition</li>
+<li><strong>Factory Method</strong>: Often used to create appropriate strategy</li>
+</ul>
+<hr />
+<h4 id="command-pattern"><a class="header" href="#command-pattern">Command Pattern</a></h4>
+<p><strong>Intent</strong>: Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable operations.</p>
+<p><strong>Problem</strong>: You need to issue requests to objects without knowing anything about the operation being requested or the receiver of the request. You want to support undo/redo, queuing, or logging of operations.</p>
+<p><strong>Solution</strong>: Create command objects that encapsulate all information needed to perform an action or trigger an event. Commands have an execute() method and optionally an undo() method.</p>
+<p><strong>When to Use</strong>:</p>
+<ul>
+<li>Parameterize objects by an action to perform</li>
+<li>Queue operations, schedule their execution, or execute them remotely</li>
+<li>Support undo/redo functionality</li>
+<li>Structure system around high-level operations built on primitive operations</li>
+<li>Support logging changes for crash recovery</li>
+</ul>
+<p><strong>Real-World Examples</strong>:</p>
+<ul>
+<li>GUI buttons and menu items</li>
+<li>Macro recording in applications</li>
+<li>Transaction-based systems</li>
+<li>Task scheduling systems</li>
+<li>Undo/redo in text editors</li>
+<li>Remote control systems</li>
+</ul>
+<p><strong>Implementation in C++</strong>:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;stack&gt;
+
+// Receiver
+class Light {
+public:
+    void on() {
+        isOn_ = true;
+        std::cout &lt;&lt; "Light is ON" &lt;&lt; std::endl;
+    }
+
+    void off() {
+        isOn_ = false;
+        std::cout &lt;&lt; "Light is OFF" &lt;&lt; std::endl;
+    }
+
+    bool isOn() const { return isOn_; }
+
+private:
+    bool isOn_ = false;
+};
+
+// Command interface
+class Command {
+public:
+    virtual ~Command() = default;
+    virtual void execute() = 0;
+    virtual void undo() = 0;
+};
+
+// Concrete Commands
+class LightOnCommand : public Command {
+public:
+    LightOnCommand(std::shared_ptr&lt;Light&gt; light) : light_(light) {}
+
+    void execute() override {
+        light_-&gt;on();
+    }
+
+    void undo() override {
+        light_-&gt;off();
+    }
+
+private:
+    std::shared_ptr&lt;Light&gt; light_;
+};
+
+class LightOffCommand : public Command {
+public:
+    LightOffCommand(std::shared_ptr&lt;Light&gt; light) : light_(light) {}
+
+    void execute() override {
+        light_-&gt;off();
+    }
+
+    void undo() override {
+        light_-&gt;on();
+    }
+
+private:
+    std::shared_ptr&lt;Light&gt; light_;
+};
+
+// Text editor example
+class TextEditor {
+public:
+    void insertText(const std::string&amp; text) {
+        content_ += text;
+        std::cout &lt;&lt; "Inserted: " &lt;&lt; text &lt;&lt; std::endl;
+    }
+
+    void deleteText(size_t length) {
+        if (length &lt;= content_.length()) {
+            deletedText_ = content_.substr(content_.length() - length);
+            content_ = content_.substr(0, content_.length() - length);
+            std::cout &lt;&lt; "Deleted: " &lt;&lt; deletedText_ &lt;&lt; std::endl;
+        }
+    }
+
+    std::string getDeletedText() const { return deletedText_; }
+    std::string getContent() const { return content_; }
+
+    void print() const {
+        std::cout &lt;&lt; "Content: \"" &lt;&lt; content_ &lt;&lt; "\"" &lt;&lt; std::endl;
+    }
+
+private:
+    std::string content_;
+    std::string deletedText_;
+};
+
+class InsertCommand : public Command {
+public:
+    InsertCommand(std::shared_ptr&lt;TextEditor&gt; editor, const std::string&amp; text)
+        : editor_(editor), text_(text) {}
+
+    void execute() override {
+        editor_-&gt;insertText(text_);
+    }
+
+    void undo() override {
+        editor_-&gt;deleteText(text_.length());
+    }
+
+private:
+    std::shared_ptr&lt;TextEditor&gt; editor_;
+    std::string text_;
+};
+
+class DeleteCommand : public Command {
+public:
+    DeleteCommand(std::shared_ptr&lt;TextEditor&gt; editor, size_t length)
+        : editor_(editor), length_(length) {}
+
+    void execute() override {
+        editor_-&gt;deleteText(length_);
+        deletedText_ = editor_-&gt;getDeletedText();
+    }
+
+    void undo() override {
+        editor_-&gt;insertText(deletedText_);
+    }
+
+private:
+    std::shared_ptr&lt;TextEditor&gt; editor_;
+    size_t length_;
+    std::string deletedText_;
+};
+
+// Invoker
+class RemoteControl {
+public:
+    void setCommand(std::shared_ptr&lt;Command&gt; command) {
+        command_ = command;
+    }
+
+    void pressButton() {
+        if (command_) {
+            command_-&gt;execute();
+            history_.push(command_);
+        }
+    }
+
+    void pressUndo() {
+        if (!history_.empty()) {
+            auto command = history_.top();
+            command-&gt;undo();
+            history_.pop();
+        }
+    }
+
+private:
+    std::shared_ptr&lt;Command&gt; command_;
+    std::stack&lt;std::shared_ptr&lt;Command&gt;&gt; history_;
+};
+
+// Usage
+int main() {
+    // Light control example
+    auto livingRoomLight = std::make_shared&lt;Light&gt;();
+
+    auto lightOn = std::make_shared&lt;LightOnCommand&gt;(livingRoomLight);
+    auto lightOff = std::make_shared&lt;LightOffCommand&gt;(livingRoomLight);
+
+    RemoteControl remote;
+
+    remote.setCommand(lightOn);
+    remote.pressButton();
+
+    remote.setCommand(lightOff);
+    remote.pressButton();
+
+    remote.pressUndo();  // Undo last command
+
+    std::cout &lt;&lt; "\n---\n\n";
+
+    // Text editor example
+    auto editor = std::make_shared&lt;TextEditor&gt;();
+
+    std::stack&lt;std::shared_ptr&lt;Command&gt;&gt; commandHistory;
+
+    auto insertHello = std::make_shared&lt;InsertCommand&gt;(editor, "Hello ");
+    insertHello-&gt;execute();
+    commandHistory.push(insertHello);
+
+    auto insertWorld = std::make_shared&lt;InsertCommand&gt;(editor, "World!");
+    insertWorld-&gt;execute();
+    commandHistory.push(insertWorld);
+
+    editor-&gt;print();
+
+    // Undo last two commands
+    while (!commandHistory.empty()) {
+        commandHistory.top()-&gt;undo();
+        commandHistory.pop();
+    }
+
+    editor-&gt;print();
+
+    return 0;
+}
+</code></pre>
+<p><strong>Implementation in Python</strong>:</p>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import List
+
+# Receiver
+class Light:
+    def __init__(self):
+        self._is_on = False
+
+    def on(self) -&gt; None:
+        self._is_on = True
+        print("Light is ON")
+
+    def off(self) -&gt; None:
+        self._is_on = False
+        print("Light is OFF")
+
+    def is_on(self) -&gt; bool:
+        return self._is_on
+
+# Command interface
+class Command(ABC):
+    @abstractmethod
+    def execute(self) -&gt; None:
+        pass
+
+    @abstractmethod
+    def undo(self) -&gt; None:
+        pass
+
+# Concrete Commands
+class LightOnCommand(Command):
+    def __init__(self, light: Light):
+        self.light = light
+
+    def execute(self) -&gt; None:
+        self.light.on()
+
+    def undo(self) -&gt; None:
+        self.light.off()
+
+class LightOffCommand(Command):
+    def __init__(self, light: Light):
+        self.light = light
+
+    def execute(self) -&gt; None:
+        self.light.off()
+
+    def undo(self) -&gt; None:
+        self.light.on()
+
+# Text editor
+class TextEditor:
+    def __init__(self):
+        self._content = ""
+        self._deleted_text = ""
+
+    def insert_text(self, text: str) -&gt; None:
+        self._content += text
+        print(f"Inserted: {text}")
+
+    def delete_text(self, length: int) -&gt; None:
+        if length &lt;= len(self._content):
+            self._deleted_text = self._content[-length:]
+            self._content = self._content[:-length]
+            print(f"Deleted: {self._deleted_text}")
+
+    def get_deleted_text(self) -&gt; str:
+        return self._deleted_text
+
+    def get_content(self) -&gt; str:
+        return self._content
+
+    def print_content(self) -&gt; None:
+        print(f"Content: \"{self._content}\"")
+
+class InsertCommand(Command):
+    def __init__(self, editor: TextEditor, text: str):
+        self.editor = editor
+        self.text = text
+
+    def execute(self) -&gt; None:
+        self.editor.insert_text(self.text)
+
+    def undo(self) -&gt; None:
+        self.editor.delete_text(len(self.text))
+
+# Invoker
+class RemoteControl:
+    def __init__(self):
+        self._command: Command = None
+        self._history: List[Command] = []
+
+    def set_command(self, command: Command) -&gt; None:
+        self._command = command
+
+    def press_button(self) -&gt; None:
+        if self._command:
+            self._command.execute()
+            self._history.append(self._command)
+
+    def press_undo(self) -&gt; None:
+        if self._history:
+            command = self._history.pop()
+            command.undo()
+
+# Usage
+if __name__ == "__main__":
+    # Light control
+    living_room_light = Light()
+
+    light_on = LightOnCommand(living_room_light)
+    light_off = LightOffCommand(living_room_light)
+
+    remote = RemoteControl()
+
+    remote.set_command(light_on)
+    remote.press_button()
+
+    remote.set_command(light_off)
+    remote.press_button()
+
+    remote.press_undo()  # Undo
+
+    print("\n---\n")
+
+    # Text editor
+    editor = TextEditor()
+    command_history = []
+
+    insert_hello = InsertCommand(editor, "Hello ")
+    insert_hello.execute()
+    command_history.append(insert_hello)
+
+    insert_world = InsertCommand(editor, "World!")
+    insert_world.execute()
+    command_history.append(insert_world)
+
+    editor.print_content()
+
+    # Undo
+    while command_history:
+        command_history.pop().undo()
+
+    editor.print_content()
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Decouples object that invokes operation from one that knows how to perform it</li>
+<li>Commands are first-class objects (can be manipulated and extended)</li>
+<li>Can assemble commands into composite commands (macro commands)</li>
+<li>Easy to add new commands (Open/Closed Principle)</li>
+<li>Supports undo/redo</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Increases number of classes for each individual command</li>
+<li>Can become complex with many commands</li>
+</ul>
+<p><strong>Related Patterns</strong>:</p>
+<ul>
+<li><strong>Memento</strong>: Can be used to keep state for undo</li>
+<li><strong>Composite</strong>: Can be used to implement macro commands</li>
+<li><strong>Prototype</strong>: Commands that must be copied before being placed on history list</li>
+</ul>
+<hr />
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
 <p>Design patterns are invaluable tools for software developers, providing standardized solutions to recurring design problems. By understanding and applying appropriate design patterns, developers can create more flexible, reusable, and maintainable codebases.</p>
+<p><strong>Key Takeaways</strong>:</p>
+<ol>
+<li>
+<p><strong>Choose the Right Pattern</strong>: Not every problem requires a design pattern. Use patterns when they genuinely simplify your design.</p>
+</li>
+<li>
+<p><strong>Understand the Trade-offs</strong>: Each pattern has advantages and disadvantages. Consider the complexity vs. flexibility trade-off.</p>
+</li>
+<li>
+<p><strong>Patterns Work Together</strong>: Many real-world applications combine multiple patterns. For example, MVC uses Observer, Strategy, and Composite patterns.</p>
+</li>
+<li>
+<p><strong>Start Simple</strong>: Don't over-engineer. Refactor towards patterns when the need becomes clear.</p>
+</li>
+<li>
+<p><strong>Language Matters</strong>: Some patterns are more natural in certain programming languages. For instance, Strategy pattern is trivial in languages with first-class functions.</p>
+</li>
+</ol>
+<p><strong>Common Pattern Categories</strong>:</p>
+<ul>
+<li><strong>Creational</strong> (Singleton, Factory Method, Abstract Factory, Builder, Prototype): Object creation mechanisms</li>
+<li><strong>Structural</strong> (Adapter, Bridge, Composite, Decorator, Facade, Flyweight, Proxy): Object composition and relationships</li>
+<li><strong>Behavioral</strong> (Observer, Strategy, Command, and others): Communication between objects</li>
+</ul>
+<p>This guide has covered the most fundamental and widely-used design patterns with comprehensive examples in both C++ and Python. Each pattern includes practical implementations, real-world use cases, and guidance on when to apply them. By mastering these patterns, you'll be better equipped to design robust, maintainable, and scalable software systems.</p>
 
                     </main>
 

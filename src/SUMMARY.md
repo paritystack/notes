@@ -44,10 +44,13 @@
     - [sysctl](linux/sysctl.md)
     - [sysfs](linux/sysfs.md)
     - [Rtp](networking/rtp.md)
+    - [Filesystems](linux/filesystems.md)
+    - [Namespace](linux/namespace.md)
+    - [Selinux](linux/selinux.md)
+    - [Udev](linux/udev.md)
 
 - [Android](android/README.md)
     - [Android Internals](android/internals.md)
-    - [Android Development](android/development.md)
     - [Binder](android/binder.md)
     - [adb](android/adb.md)
 
@@ -107,6 +110,7 @@
     - [NumPy](machine_learning/numpy.md)
     - [Quantization](machine_learning/quantization.md)
     - [Interesting Papers](machine_learning/interesting_papers.md)
+    - [Lora](machine_learning/lora.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)
@@ -117,6 +121,8 @@
     - [Fluxdev](ai/fluxdev.md)
     - [ComfyUI](ai/comfyui.md)
     - [Fine Tuning](ai/fine_tuning.md)
+    - [Deepseek R1](ai/deepseek_r1.md)
+    - [Whisper](ai/whisper.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)
@@ -145,6 +151,12 @@
     - [Nmap](tools/nmap.md)
     - [Tshark](tools/tshark.md)
     - [Wireshark](tools/wireshark.md)
+    - [Bazel](tools/bazel.md)
+    - [Clang](tools/clang.md)
+    - [Gcc](tools/gcc.md)
+    - [Ninja](tools/ninja.md)
+    - [Ripgrep](tools/ripgrep.md)
+    - [Tcpdump](tools/tcpdump.md)
 
 - [Embedded](embedded/README.md)
     - [AVR](embedded/avr.md)
@@ -231,6 +243,11 @@
     - [Docker](devops/docker.md)
     - [Kubernetes](devops/kubernetes.md)
     - [CI/CD](devops/cicd.md)
+    - [Cloud-Deployment](devops/cloud-deployment.md)
+    - [Github-Actions](devops/github-actions.md)
+    - [Infrastructure](devops/infrastructure.md)
+    - [Monitoring](devops/monitoring.md)
+    - [Terraform](devops/terraform.md)
 
 - [System Design](system_design/README.md)
     - [Scalability](system_design/scalability.md)
@@ -246,6 +263,7 @@
     - [React Native](mobile_development/react_native.md)
     - [Flutter](mobile_development/flutter.md)
 
+    - [Android Dev](mobile_development/android_dev.md)
 - [Testing](testing/README.md)
     - [Unit Testing](testing/unit_testing.md)
     - [Integration Testing](testing/integration.md)
@@ -262,8 +280,8 @@
     - [Mathematics](misc/math.md)
     - [Statistics](misc/statistics.md)
     - [Matplotlib](misc/matplotlib.md)
-
     - [Pandas](misc/pandas.md)
+
 - [RTOS](rtos/README.md)
     - [FreeRTOS](rtos/freertos.md)
     - [ThreadX](rtos/threadx.md)

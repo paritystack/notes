@@ -1,0 +1,2387 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Nmap - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="nmap"><a class="header" href="#nmap">Nmap</a></h1>
+<p>Nmap (Network Mapper) is a free and open-source network discovery and security auditing tool. It is one of the most powerful and widely-used tools for network exploration, security scanning, and vulnerability assessment.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Nmap was created by Gordon Lyon (Fyodor) and has been actively developed since 1997. It uses raw IP packets to determine what hosts are available on a network, what services those hosts are offering, what operating systems they are running, what type of packet filters/firewalls are in use, and dozens of other characteristics.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Host discovery (identify devices on a network)</li>
+<li>Port scanning (enumerate open ports)</li>
+<li>Version detection (determine application name and version)</li>
+<li>OS detection (identify operating systems and hardware)</li>
+<li>Scriptable interaction with the target (NSE - Nmap Scripting Engine)</li>
+<li>Flexible target and port specification</li>
+<li>Support for IPv6</li>
+<li>Multiple output formats (normal, XML, grepable, script kiddie)</li>
+<li>Fast scanning (parallel scanning)</li>
+<li>Advanced techniques (idle scan, OS fingerprinting, firewall evasion)</li>
+</ul>
+<p><strong>Common Use Cases:</strong></p>
+<ul>
+<li>Network inventory and asset management</li>
+<li>Security auditing and penetration testing</li>
+<li>Compliance validation</li>
+<li>Service upgrade monitoring</li>
+<li>Network troubleshooting</li>
+<li>Vulnerability assessment</li>
+<li>Identifying unauthorized devices or services</li>
+</ul>
+<h2 id="legal-and-ethical-considerations"><a class="header" href="#legal-and-ethical-considerations">Legal and Ethical Considerations</a></h2>
+<p><strong>IMPORTANT:</strong> Only scan networks and systems you own or have explicit written permission to test. Unauthorized port scanning may be illegal in your jurisdiction and can be considered a precursor to hacking.</p>
+<p><strong>Best Practices:</strong></p>
+<ul>
+<li>Always obtain written authorization before scanning</li>
+<li>Document the scope and limitations of your testing</li>
+<li>Be mindful of scan intensity on production systems</li>
+<li>Follow responsible disclosure practices for vulnerabilities</li>
+<li>Check local laws regarding network scanning</li>
+<li>Use appropriate timing to minimize network impact</li>
+<li>Inform network administrators of your activities</li>
+</ul>
+<h2 id="basic-concepts"><a class="header" href="#basic-concepts">Basic Concepts</a></h2>
+<h3 id="how-nmap-works"><a class="header" href="#how-nmap-works">How Nmap Works</a></h3>
+<p>Nmap operates in several phases:</p>
+<ol>
+<li><strong>Target enumeration</strong> - Parse target specifications</li>
+<li><strong>Host discovery</strong> - Determine which hosts are up</li>
+<li><strong>Reverse DNS resolution</strong> - Look up hostnames</li>
+<li><strong>Port scanning</strong> - Determine port states</li>
+<li><strong>Version detection</strong> - Identify services and versions</li>
+<li><strong>OS detection</strong> - Fingerprint operating systems</li>
+<li><strong>Traceroute</strong> - Map network path to hosts</li>
+<li><strong>Script scanning</strong> - Run NSE scripts</li>
+<li><strong>Output</strong> - Format and display results</li>
+</ol>
+<h3 id="port-states"><a class="header" href="#port-states">Port States</a></h3>
+<p>Nmap classifies ports into six states:</p>
+<ul>
+<li><strong>open</strong> - Application actively accepting connections</li>
+<li><strong>closed</strong> - Port accessible (receives/responds to probes) but no application listening</li>
+<li><strong>filtered</strong> - Cannot determine if open (packet filtering prevents probes from reaching port)</li>
+<li><strong>unfiltered</strong> - Port accessible but cannot determine if open or closed</li>
+<li><strong>open|filtered</strong> - Cannot determine if open or filtered</li>
+<li><strong>closed|filtered</strong> - Cannot determine if closed or filtered</li>
+</ul>
+<h3 id="packet-types"><a class="header" href="#packet-types">Packet Types</a></h3>
+<p>Understanding packet types helps interpret scan results:</p>
+<ul>
+<li><strong>SYN (Synchronize)</strong> - Initiate connection</li>
+<li><strong>ACK (Acknowledge)</strong> - Confirm receipt</li>
+<li><strong>RST (Reset)</strong> - Abort connection</li>
+<li><strong>FIN (Finish)</strong> - Close connection</li>
+<li><strong>PSH (Push)</strong> - Send data immediately</li>
+<li><strong>URG (Urgent)</strong> - Prioritize data</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># Debian/Ubuntu
+sudo apt update
+sudo apt install nmap
+
+# RHEL/CentOS/Fedora
+sudo yum install nmap
+# or
+sudo dnf install nmap
+
+# macOS
+brew install nmap
+
+# Verify installation
+nmap --version
+</code></pre>
+<h2 id="target-specification"><a class="header" href="#target-specification">Target Specification</a></h2>
+<p>Nmap is flexible in how you specify targets.</p>
+<h3 id="single-host"><a class="header" href="#single-host">Single Host</a></h3>
+<pre><code class="language-bash"># Scan single IP
+nmap 192.168.1.1
+
+# Scan hostname
+nmap scanme.nmap.org
+
+# Scan domain
+nmap example.com
+</code></pre>
+<h3 id="multiple-hosts"><a class="header" href="#multiple-hosts">Multiple Hosts</a></h3>
+<pre><code class="language-bash"># Multiple IPs
+nmap 192.168.1.1 192.168.1.2 192.168.1.3
+
+# Space-separated list
+nmap 192.168.1.1 192.168.1.5 192.168.1.10
+
+# Multiple hostnames
+nmap host1.example.com host2.example.com
+</code></pre>
+<h3 id="ip-ranges"><a class="header" href="#ip-ranges">IP Ranges</a></h3>
+<pre><code class="language-bash"># CIDR notation (most common)
+nmap 192.168.1.0/24        # Entire /24 subnet (256 addresses)
+nmap 192.168.1.0/25        # Half subnet (128 addresses)
+nmap 10.0.0.0/8            # Entire class A network
+
+# Hyphen range
+nmap 192.168.1.1-20        # Scan .1 through .20
+nmap 192.168.1-3.1         # Scan 192.168.1.1, 192.168.2.1, 192.168.3.1
+
+# Wildcard (not CIDR, but convenient)
+nmap 192.168.1.*           # Entire /24 subnet
+nmap 192.168.*.1           # .1 address of all /16 subnets
+
+# Octet ranges
+nmap 192.168.1.1-254       # Skip .0 and .255
+nmap 192.168.1,2,3.1       # Multiple specific octets
+</code></pre>
+<h3 id="excluding-targets"><a class="header" href="#excluding-targets">Excluding Targets</a></h3>
+<pre><code class="language-bash"># Exclude single host
+nmap 192.168.1.0/24 --exclude 192.168.1.1
+
+# Exclude multiple hosts
+nmap 192.168.1.0/24 --exclude 192.168.1.1,192.168.1.5
+
+# Exclude range
+nmap 192.168.1.0/24 --exclude 192.168.1.1-10
+
+# Exclude from file
+nmap 192.168.1.0/24 --excludefile exclude.txt
+</code></pre>
+<h3 id="input-from-file"><a class="header" href="#input-from-file">Input from File</a></h3>
+<pre><code class="language-bash"># Read targets from file (one per line)
+nmap -iL targets.txt
+
+# Example targets.txt:
+# 192.168.1.1
+# 192.168.1.0/24
+# example.com
+# 10.0.0.1-50
+</code></pre>
+<h3 id="random-targets"><a class="header" href="#random-targets">Random Targets</a></h3>
+<pre><code class="language-bash"># Scan random IPs
+nmap -iR 100               # Scan 100 random IPs
+nmap -iR 0                 # Scan random IPs forever (Ctrl+C to stop)
+
+# Exclude private ranges when using random
+nmap -iR 100 --exclude 192.168.0.0/16,10.0.0.0/8,172.16.0.0/12
+</code></pre>
+<h2 id="host-discovery-ping-scanning"><a class="header" href="#host-discovery-ping-scanning">Host Discovery (Ping Scanning)</a></h2>
+<p>Before port scanning, Nmap determines which hosts are online. This is called "host discovery" or "ping scanning."</p>
+<h3 id="default-discovery"><a class="header" href="#default-discovery">Default Discovery</a></h3>
+<pre><code class="language-bash"># Default scan (ping scan + port scan)
+nmap 192.168.1.0/24
+
+# By default, Nmap sends:
+# - ICMP echo request
+# - TCP SYN to port 443
+# - TCP ACK to port 80
+# - ICMP timestamp request
+</code></pre>
+<h3 id="list-scan-no-discovery"><a class="header" href="#list-scan-no-discovery">List Scan (No Discovery)</a></h3>
+<pre><code class="language-bash"># Just list targets, don't scan
+nmap -sL 192.168.1.0/24
+
+# Useful for:
+# - Verifying target list
+# - Performing reverse DNS lookups
+# - Understanding scan scope
+</code></pre>
+<h3 id="ping-scan-only"><a class="header" href="#ping-scan-only">Ping Scan Only</a></h3>
+<pre><code class="language-bash"># Only determine which hosts are up (no port scan)
+nmap -sn 192.168.1.0/24
+# Formerly known as -sP (deprecated)
+
+# Fast way to:
+# - Find live hosts
+# - Create inventory
+# - Map network
+</code></pre>
+<h3 id="skip-host-discovery"><a class="header" href="#skip-host-discovery">Skip Host Discovery</a></h3>
+<pre><code class="language-bash"># Treat all hosts as online (skip ping)
+nmap -Pn 192.168.1.1
+
+# Useful when:
+# - Firewall blocks pings
+# - You know host is up
+# - Scanning single host
+# - Behind aggressive firewall
+</code></pre>
+<h3 id="tcp-syn-ping"><a class="header" href="#tcp-syn-ping">TCP SYN Ping</a></h3>
+<pre><code class="language-bash"># TCP SYN ping to specific port
+nmap -PS 192.168.1.1       # Default ports: 80,443
+nmap -PS22 192.168.1.1     # Port 22
+nmap -PS22,80,443 192.168.1.1  # Multiple ports
+nmap -PS1-1000 192.168.1.1     # Port range
+</code></pre>
+<h3 id="tcp-ack-ping"><a class="header" href="#tcp-ack-ping">TCP ACK Ping</a></h3>
+<pre><code class="language-bash"># TCP ACK ping (useful for firewalls that block SYN)
+nmap -PA 192.168.1.1       # Default ports: 80,443
+nmap -PA22 192.168.1.1     # Port 22
+nmap -PA80,443 192.168.1.1 # Multiple ports
+</code></pre>
+<h3 id="udp-ping"><a class="header" href="#udp-ping">UDP Ping</a></h3>
+<pre><code class="language-bash"># UDP ping to specific port
+nmap -PU 192.168.1.1       # Default port: 40125
+nmap -PU53 192.168.1.1     # Port 53 (DNS)
+nmap -PU161 192.168.1.1    # Port 161 (SNMP)
+
+# Useful for UDP-only devices
+</code></pre>
+<h3 id="icmp-ping-types"><a class="header" href="#icmp-ping-types">ICMP Ping Types</a></h3>
+<pre><code class="language-bash"># ICMP echo request (standard ping)
+nmap -PE 192.168.1.1
+
+# ICMP timestamp request
+nmap -PP 192.168.1.1
+
+# ICMP address mask request
+nmap -PM 192.168.1.1
+
+# Combine multiple ICMP types
+nmap -PE -PP -PM 192.168.1.1
+</code></pre>
+<h3 id="arp-ping"><a class="header" href="#arp-ping">ARP Ping</a></h3>
+<pre><code class="language-bash"># ARP discovery (automatic on local network)
+nmap -PR 192.168.1.0/24
+
+# Most reliable on local Ethernet
+# Bypasses IP-level filtering
+# Automatic when scanning local subnet
+</code></pre>
+<h3 id="disable-dns-resolution"><a class="header" href="#disable-dns-resolution">Disable DNS Resolution</a></h3>
+<pre><code class="language-bash"># Skip DNS resolution (faster)
+nmap -n 192.168.1.0/24
+
+# Force DNS resolution (even for unresponsive hosts)
+nmap -R 192.168.1.0/24
+
+# Custom DNS servers
+nmap --dns-servers 8.8.8.8,8.8.4.4 192.168.1.1
+</code></pre>
+<h3 id="combined-discovery"><a class="header" href="#combined-discovery">Combined Discovery</a></h3>
+<pre><code class="language-bash"># Multiple discovery methods for reliability
+nmap -PE -PS22,80,443 -PA80,443 -PU53 192.168.1.0/24
+
+# Aggressive discovery (uses multiple techniques)
+nmap -A 192.168.1.1  # Includes host discovery, OS detection, version detection, traceroute
+</code></pre>
+<h2 id="port-scanning-techniques"><a class="header" href="#port-scanning-techniques">Port Scanning Techniques</a></h2>
+<p>The core functionality of Nmap is port scanning. Different scan types have different strengths and weaknesses.</p>
+<h3 id="tcp-syn-scan-stealth-scan"><a class="header" href="#tcp-syn-scan-stealth-scan">TCP SYN Scan (Stealth Scan)</a></h3>
+<pre><code class="language-bash"># Default scan type (requires root/admin)
+nmap -sS 192.168.1.1
+# Or simply:
+sudo nmap 192.168.1.1
+
+# How it works:
+# 1. Send SYN packet
+# 2. If SYN/ACK received -&gt; port open
+# 3. If RST received -&gt; port closed
+# 4. If no response -&gt; port filtered
+# 5. Send RST (don't complete handshake)
+
+# Advantages:
+# - Fast and efficient
+# - Stealthy (doesn't complete TCP handshake)
+# - Accurate results
+# - Works against most targets
+
+# Disadvantages:
+# - Requires root/admin privileges
+# - Still logged by many IDS/IPS systems
+</code></pre>
+<h3 id="tcp-connect-scan"><a class="header" href="#tcp-connect-scan">TCP Connect Scan</a></h3>
+<pre><code class="language-bash"># Full TCP connection (no root required)
+nmap -sT 192.168.1.1
+
+# How it works:
+# 1. Complete full TCP 3-way handshake
+# 2. If connection succeeds -&gt; port open
+# 3. If RST received -&gt; port closed
+# 4. If no response/timeout -&gt; filtered
+
+# Advantages:
+# - No special privileges required
+# - Works through certain firewalls
+# - Reliable results
+
+# Disadvantages:
+# - Slower than SYN scan
+# - More easily detected (logged)
+# - Uses more network resources
+</code></pre>
+<h3 id="udp-scan"><a class="header" href="#udp-scan">UDP Scan</a></h3>
+<pre><code class="language-bash"># UDP port scan
+nmap -sU 192.168.1.1
+
+# Common UDP ports
+nmap -sU -p 53,67,68,69,123,161,162,137,138,139 192.168.1.1
+
+# Combined TCP and UDP scan
+nmap -sS -sU -p U:53,161,T:21-25,80,443 192.168.1.1
+
+# How it works:
+# 1. Send UDP packet to port
+# 2. If UDP response received -&gt; port open
+# 3. If ICMP port unreachable -&gt; port closed
+# 4. If no response -&gt; port open|filtered
+
+# Important notes:
+# - UDP scans are SLOW (be patient)
+# - Many UDP services don't respond to empty packets
+# - Version detection (-sV) helps identify UDP services
+# - Use --version-intensity for better UDP detection
+
+# Speed up UDP scans:
+nmap -sU --top-ports 20 192.168.1.1     # Scan only top 20 UDP ports
+nmap -sU --host-timeout 30s 192.168.1.1 # Set timeout
+nmap -sU -T4 192.168.1.1                # Aggressive timing
+</code></pre>
+<h3 id="tcp-ack-scan"><a class="header" href="#tcp-ack-scan">TCP ACK Scan</a></h3>
+<pre><code class="language-bash"># ACK scan (firewall rule mapping)
+nmap -sA 192.168.1.1
+
+# How it works:
+# 1. Send ACK packet
+# 2. If RST received -&gt; port unfiltered
+# 3. If no response -&gt; port filtered
+
+# Purpose:
+# - Map firewall rulesets
+# - Determine if firewall is stateful
+# - Identify filtered ports
+# - Does NOT determine open/closed
+</code></pre>
+<h3 id="tcp-window-scan"><a class="header" href="#tcp-window-scan">TCP Window Scan</a></h3>
+<pre><code class="language-bash"># Window scan (like ACK but checks TCP window)
+nmap -sW 192.168.1.1
+
+# How it works:
+# - Similar to ACK scan
+# - Examines TCP window field in RST packets
+# - Some systems report positive window for open ports
+
+# Less reliable than other scans
+# System-dependent behavior
+</code></pre>
+<h3 id="tcp-maimon-scan"><a class="header" href="#tcp-maimon-scan">TCP Maimon Scan</a></h3>
+<pre><code class="language-bash"># Maimon scan (FIN/ACK probe)
+nmap -sM 192.168.1.1
+
+# How it works:
+# - Sends FIN/ACK packet
+# - Open and closed ports should respond with RST
+# - Some systems drop packets for open ports
+
+# Rarely useful in modern networks
+# Named after Uriel Maimon
+</code></pre>
+<h3 id="tcp-null-fin-and-xmas-scans"><a class="header" href="#tcp-null-fin-and-xmas-scans">TCP NULL, FIN, and Xmas Scans</a></h3>
+<pre><code class="language-bash"># NULL scan (no flags set)
+nmap -sN 192.168.1.1
+
+# FIN scan (only FIN flag)
+nmap -sF 192.168.1.1
+
+# Xmas scan (FIN, PSH, URG flags - "lit up like Christmas tree")
+nmap -sX 192.168.1.1
+
+# How they work:
+# - If RST received -&gt; port closed
+# - If no response -&gt; port open|filtered
+# - If ICMP unreachable -&gt; port filtered
+
+# Based on RFC 793 behavior:
+# - Closed ports should respond with RST
+# - Open ports should drop the packet
+
+# Advantages:
+# - Can bypass some non-stateful firewalls
+# - May evade simple IDS
+
+# Disadvantages:
+# - Don't work against Windows (RFC non-compliant)
+# - Unreliable results
+# - Many modern systems don't follow RFC exactly
+# - Not useful for most modern networks
+</code></pre>
+<h3 id="custom-tcp-scan"><a class="header" href="#custom-tcp-scan">Custom TCP Scan</a></h3>
+<pre><code class="language-bash"># Set custom TCP flags
+nmap --scanflags URGACKPSHRSTSYNFIN 192.168.1.1
+
+# Common flag combinations:
+nmap --scanflags SYN 192.168.1.1        # Equivalent to -sS
+nmap --scanflags ACK 192.168.1.1        # Equivalent to -sA
+nmap --scanflags FIN 192.168.1.1        # Equivalent to -sF
+
+# Combine with scan type:
+nmap -sF --scanflags FIN,PSH,URG 192.168.1.1
+</code></pre>
+<h3 id="idlezombie-scan"><a class="header" href="#idlezombie-scan">Idle/Zombie Scan</a></h3>
+<pre><code class="language-bash"># Idle scan using zombie host
+nmap -sI zombie.example.com target.example.com
+nmap -sI 192.168.1.50 192.168.1.1
+
+# How it works:
+# 1. Find idle host with predictable IP ID sequence
+# 2. Use zombie to scan target
+# 3. Your IP never contacts target
+# 4. Extremely stealthy
+
+# Requirements:
+# - Find suitable zombie host
+# - Zombie must be truly idle
+# - Zombie must have predictable IP ID
+
+# Finding zombie candidates:
+nmap --script ipidseq 192.168.1.0/24
+
+# Advantages:
+# - Ultimate stealth (your IP hidden)
+# - Bypass IP-based filters
+
+# Disadvantages:
+# - Difficult to find good zombie
+# - Slow
+# - Requires specific conditions
+# - Complex to set up
+</code></pre>
+<h3 id="ip-protocol-scan"><a class="header" href="#ip-protocol-scan">IP Protocol Scan</a></h3>
+<pre><code class="language-bash"># Scan for supported IP protocols
+nmap -sO 192.168.1.1
+
+# Determines which IP protocols are supported:
+# - ICMP (1)
+# - IGMP (2)
+# - TCP (6)
+# - UDP (17)
+# - etc.
+
+# Useful for:
+# - Identifying protocol support
+# - Firewall testing
+# - Security auditing
+</code></pre>
+<h3 id="ftp-bounce-scan"><a class="header" href="#ftp-bounce-scan">FTP Bounce Scan</a></h3>
+<pre><code class="language-bash"># FTP bounce attack scan
+nmap -b username:password@ftp.server.com target.example.com
+
+# How it works:
+# - Uses FTP server as proxy
+# - Exploits FTP PORT command
+# - Scans appear to come from FTP server
+
+# Note:
+# - Most FTP servers have patched this
+# - Rarely works on modern systems
+# - Mostly of historical interest
+</code></pre>
+<h3 id="sctp-init-scan"><a class="header" href="#sctp-init-scan">SCTP INIT Scan</a></h3>
+<pre><code class="language-bash"># SCTP INIT scan
+nmap -sY 192.168.1.1
+
+# SCTP equivalent of TCP SYN scan
+# Used for SCTP protocol (Stream Control Transmission Protocol)
+# Common in telecom/VoIP systems
+</code></pre>
+<h3 id="sctp-cookie-echo-scan"><a class="header" href="#sctp-cookie-echo-scan">SCTP COOKIE ECHO Scan</a></h3>
+<pre><code class="language-bash"># SCTP COOKIE ECHO scan
+nmap -sZ 192.168.1.1
+
+# More stealthy than INIT scan
+# May bypass some firewalls
+</code></pre>
+<h2 id="port-specification"><a class="header" href="#port-specification">Port Specification</a></h2>
+<p>Control which ports to scan.</p>
+<h3 id="default-ports"><a class="header" href="#default-ports">Default Ports</a></h3>
+<pre><code class="language-bash"># Default: scan 1000 most common ports
+nmap 192.168.1.1
+
+# View which ports are scanned by default:
+nmap --top-ports 10 -v 192.168.1.1
+</code></pre>
+<h3 id="specific-ports"><a class="header" href="#specific-ports">Specific Ports</a></h3>
+<pre><code class="language-bash"># Single port
+nmap -p 22 192.168.1.1
+
+# Multiple ports (comma-separated)
+nmap -p 22,80,443 192.168.1.1
+
+# Port range
+nmap -p 1-100 192.168.1.1
+nmap -p 20-25,80,443,8000-8100 192.168.1.1
+
+# All ports (1-65535)
+nmap -p- 192.168.1.1
+nmap -p 1-65535 192.168.1.1
+
+# Named ports
+nmap -p http,https,ssh 192.168.1.1
+</code></pre>
+<h3 id="port-range-shortcuts"><a class="header" href="#port-range-shortcuts">Port Range Shortcuts</a></h3>
+<pre><code class="language-bash"># Ports from 1 to 1024
+nmap -p -1024 192.168.1.1
+
+# Ports from 1024 to 65535
+nmap -p 1024- 192.168.1.1
+
+# Port 80 and above
+nmap -p 80- 192.168.1.1
+</code></pre>
+<h3 id="protocol-specific-ports"><a class="header" href="#protocol-specific-ports">Protocol-Specific Ports</a></h3>
+<pre><code class="language-bash"># TCP ports only
+nmap -p T:80,443 192.168.1.1
+
+# UDP ports only
+nmap -p U:53,161 192.168.1.1
+
+# Mixed TCP and UDP
+nmap -p U:53,161,T:21-25,80 192.168.1.1
+
+# All TCP ports
+nmap -p T:- 192.168.1.1
+
+# All UDP ports
+nmap -sU -p U:- 192.168.1.1
+</code></pre>
+<h3 id="top-ports"><a class="header" href="#top-ports">Top Ports</a></h3>
+<pre><code class="language-bash"># Scan top N most common ports
+nmap --top-ports 10 192.168.1.1    # Top 10
+nmap --top-ports 100 192.168.1.1   # Top 100
+nmap --top-ports 1000 192.168.1.1  # Top 1000
+
+# Based on nmap-services frequency data
+# Fast way to scan most likely ports
+</code></pre>
+<h3 id="port-ratio"><a class="header" href="#port-ratio">Port Ratio</a></h3>
+<pre><code class="language-bash"># Scan ports with ratio above threshold
+nmap --port-ratio 0.1 192.168.1.1
+
+# Ratio range: 0.0 to 1.0
+# 0.1 = top 10% most common ports
+# Higher ratio = fewer ports scanned
+</code></pre>
+<h3 id="fast-scan"><a class="header" href="#fast-scan">Fast Scan</a></h3>
+<pre><code class="language-bash"># Fast mode: scan fewer ports than default
+nmap -F 192.168.1.1
+
+# Scans only 100 most common ports
+# Much faster than default 1000 ports
+# Good for quick reconnaissance
+</code></pre>
+<h3 id="exclude-ports"><a class="header" href="#exclude-ports">Exclude Ports</a></h3>
+<pre><code class="language-bash"># Scan all ports except specified
+nmap -p- --exclude-ports 22,80,443 192.168.1.1
+
+# Exclude port range
+nmap -p 1-1000 --exclude-ports 100-200 192.168.1.1
+</code></pre>
+<h3 id="sequential-port-scanning"><a class="header" href="#sequential-port-scanning">Sequential Port Scanning</a></h3>
+<pre><code class="language-bash"># Scan ports in order (not randomized)
+nmap -r 192.168.1.1
+
+# By default, nmap randomizes port order
+# -r scans in numerical order
+# Useful for troubleshooting
+</code></pre>
+<h2 id="service-and-version-detection"><a class="header" href="#service-and-version-detection">Service and Version Detection</a></h2>
+<p>Identify services and their versions running on open ports.</p>
+<h3 id="version-detection"><a class="header" href="#version-detection">Version Detection</a></h3>
+<pre><code class="language-bash"># Enable version detection
+nmap -sV 192.168.1.1
+
+# How it works:
+# 1. Connect to open ports
+# 2. Send probes
+# 3. Analyze responses
+# 4. Match against signature database
+# 5. Report service name and version
+
+# Example output:
+# PORT    STATE SERVICE VERSION
+# 22/tcp  open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5
+# 80/tcp  open  http    Apache httpd 2.4.41
+# 443/tcp open  https   nginx 1.18.0
+</code></pre>
+<h3 id="version-intensity"><a class="header" href="#version-intensity">Version Intensity</a></h3>
+<pre><code class="language-bash"># Default intensity (7)
+nmap -sV 192.168.1.1
+
+# Light version detection (2) - faster, less comprehensive
+nmap -sV --version-intensity 2 192.168.1.1
+nmap -sV --version-light 192.168.1.1
+
+# All probes (9) - slower, most comprehensive
+nmap -sV --version-intensity 9 192.168.1.1
+nmap -sV --version-all 192.168.1.1
+
+# Custom intensity (0-9)
+nmap -sV --version-intensity 5 192.168.1.1
+
+# Intensity levels:
+# 0 - Fastest, least accurate
+# 2 - Light (--version-light)
+# 7 - Default
+# 9 - All probes (--version-all)
+</code></pre>
+<h3 id="version-scan-trace"><a class="header" href="#version-scan-trace">Version Scan Trace</a></h3>
+<pre><code class="language-bash"># Debug version detection
+nmap -sV --version-trace 192.168.1.1
+
+# Shows:
+# - Probes sent
+# - Responses received
+# - Matching process
+# - Useful for troubleshooting
+</code></pre>
+<h3 id="rpc-information"><a class="header" href="#rpc-information">RPC Information</a></h3>
+<pre><code class="language-bash"># Get RPC info
+nmap -sR 192.168.1.1
+
+# Determines RPC program and version
+# Used with -sV for RPC services
+</code></pre>
+<h2 id="os-detection"><a class="header" href="#os-detection">OS Detection</a></h2>
+<p>Identify operating system and hardware characteristics.</p>
+<h3 id="basic-os-detection"><a class="header" href="#basic-os-detection">Basic OS Detection</a></h3>
+<pre><code class="language-bash"># Enable OS detection
+nmap -O 192.168.1.1
+
+# Requires at least one open and one closed port
+# Uses TCP/IP stack fingerprinting
+# Compares responses to signature database
+
+# Example output:
+# Running: Linux 4.X|5.X
+# OS CPE: cpe:/o:linux:linux_kernel:4 cpe:/o:linux:linux_kernel:5
+# OS details: Linux 4.15 - 5.6
+</code></pre>
+<h3 id="aggressive-os-detection"><a class="header" href="#aggressive-os-detection">Aggressive OS Detection</a></h3>
+<pre><code class="language-bash"># More aggressive OS detection
+nmap -O --osscan-guess 192.168.1.1
+nmap -O --fuzzy 192.168.1.1
+
+# Makes best guess even with less confidence
+# Useful when standard detection inconclusive
+</code></pre>
+<h3 id="os-scan-limits"><a class="header" href="#os-scan-limits">OS Scan Limits</a></h3>
+<pre><code class="language-bash"># Only scan hosts with at least one open and one closed port
+nmap -O --osscan-limit 192.168.1.0/24
+
+# Skip OS detection if requirements not met
+# Speeds up large scans
+</code></pre>
+<h3 id="maximum-retries"><a class="header" href="#maximum-retries">Maximum Retries</a></h3>
+<pre><code class="language-bash"># Set max OS detection retries
+nmap -O --max-os-tries 2 192.168.1.1
+
+# Default: 5
+# Lower = faster but less accurate
+# Higher = more accurate but slower
+</code></pre>
+<h2 id="aggressive-scanning"><a class="header" href="#aggressive-scanning">Aggressive Scanning</a></h2>
+<p>Combine multiple detection methods.</p>
+<h3 id="aggressive-scan"><a class="header" href="#aggressive-scan">Aggressive Scan</a></h3>
+<pre><code class="language-bash"># Enable OS detection, version detection, script scanning, and traceroute
+nmap -A 192.168.1.1
+
+# Equivalent to:
+nmap -O -sV -sC --traceroute 192.168.1.1
+
+# Provides comprehensive information
+# Slower and more intrusive
+# Good for detailed single-host scans
+</code></pre>
+<h3 id="traceroute"><a class="header" href="#traceroute">Traceroute</a></h3>
+<pre><code class="language-bash"># Enable traceroute
+nmap --traceroute 192.168.1.1
+
+# Shows network path to host
+# Useful for understanding routing
+# Combined with topology mapping
+
+# Example output:
+# TRACEROUTE (using port 80/tcp)
+# HOP RTT      ADDRESS
+# 1   1.00 ms  192.168.1.254
+# 2   5.00 ms  10.0.0.1
+# 3   15.00 ms example.com (93.184.216.34)
+</code></pre>
+<h2 id="timing-and-performance"><a class="header" href="#timing-and-performance">Timing and Performance</a></h2>
+<p>Control scan speed and resource usage.</p>
+<h3 id="timing-templates"><a class="header" href="#timing-templates">Timing Templates</a></h3>
+<pre><code class="language-bash"># T0 - Paranoid (IDS evasion)
+nmap -T0 192.168.1.1
+# - One port at a time
+# - 5 minutes between probes
+# - Extremely slow
+# - Maximum stealth
+
+# T1 - Sneaky (IDS evasion)
+nmap -T1 192.168.1.1
+# - Serial scanning
+# - 15 seconds between probes
+# - Very slow
+# - Reduced chance of detection
+
+# T2 - Polite (slow scan, less bandwidth)
+nmap -T2 192.168.1.1
+# - Throttled to use less bandwidth
+# - 0.4 seconds between probes
+# - Slower than default
+# - Reduced network load
+
+# T3 - Normal (default)
+nmap -T3 192.168.1.1
+nmap 192.168.1.1
+# - Default timing
+# - Balanced speed and accuracy
+# - Suitable for most networks
+
+# T4 - Aggressive (fast networks)
+nmap -T4 192.168.1.1
+# - Assumes fast and reliable network
+# - 10-minute timeout per host
+# - Fast scanning
+# - Recommended for modern networks
+
+# T5 - Insane (very fast networks)
+nmap -T5 192.168.1.1
+# - Assumes extraordinarily fast network
+# - 5-minute timeout per host
+# - Extremely fast
+# - May miss hosts/ports
+# - Sacrifice accuracy for speed
+</code></pre>
+<h3 id="fine-grained-timing-control"><a class="header" href="#fine-grained-timing-control">Fine-Grained Timing Control</a></h3>
+<pre><code class="language-bash"># Minimum packets per second
+nmap --min-rate 100 192.168.1.1
+
+# Maximum packets per second
+nmap --max-rate 1000 192.168.1.1
+
+# Combine for precise control
+nmap --min-rate 50 --max-rate 500 192.168.1.1
+
+# Host timeout
+nmap --host-timeout 30m 192.168.1.1    # 30 minutes
+nmap --host-timeout 10s 192.168.1.1    # 10 seconds
+
+# Scan delay (pause between probes)
+nmap --scan-delay 1s 192.168.1.1       # 1 second delay
+nmap --max-scan-delay 2s 192.168.1.1   # Maximum 2 seconds
+
+# Initial RTT timeout
+nmap --initial-rtt-timeout 100ms 192.168.1.1
+
+# Minimum RTT timeout
+nmap --min-rtt-timeout 50ms 192.168.1.1
+
+# Maximum RTT timeout
+nmap --max-rtt-timeout 500ms 192.168.1.1
+</code></pre>
+<h3 id="parallelism"><a class="header" href="#parallelism">Parallelism</a></h3>
+<pre><code class="language-bash"># Minimum parallel operations
+nmap --min-parallelism 10 192.168.1.0/24
+
+# Maximum parallel operations
+nmap --max-parallelism 100 192.168.1.0/24
+
+# Disable parallel operations (serial)
+nmap --max-parallelism 1 192.168.1.0/24
+
+# Host group sizes
+nmap --min-hostgroup 50 192.168.1.0/24
+nmap --max-hostgroup 100 192.168.1.0/24
+</code></pre>
+<h3 id="maximum-retries-1"><a class="header" href="#maximum-retries-1">Maximum Retries</a></h3>
+<pre><code class="language-bash"># Set maximum retries for port scanning
+nmap --max-retries 2 192.168.1.1
+
+# Default: 10
+# Lower = faster but may miss ports
+# Higher = more thorough but slower
+</code></pre>
+<h3 id="timing-examples"><a class="header" href="#timing-examples">Timing Examples</a></h3>
+<pre><code class="language-bash"># Fast scan of web servers
+nmap -T4 -F -p 80,443,8080,8443 192.168.1.0/24
+
+# Slow stealth scan
+nmap -T1 -sS -p- 192.168.1.1
+
+# Very fast scan sacrificing accuracy
+nmap -T5 --max-retries 1 --max-scan-delay 10ms 192.168.1.0/24
+
+# Rate-limited scan (100 packets/sec)
+nmap --max-rate 100 192.168.1.0/24
+
+# Patient comprehensive scan
+nmap -T2 -p- -sV -O --version-all 192.168.1.1
+</code></pre>
+<h2 id="firewallids-evasion-and-spoofing"><a class="header" href="#firewallids-evasion-and-spoofing">Firewall/IDS Evasion and Spoofing</a></h2>
+<p>Techniques to bypass firewalls and avoid detection.</p>
+<p><strong>Warning:</strong> These techniques may be detected by modern security systems. Use only on networks you're authorized to test.</p>
+<h3 id="packet-fragmentation"><a class="header" href="#packet-fragmentation">Packet Fragmentation</a></h3>
+<pre><code class="language-bash"># Fragment packets
+nmap -f 192.168.1.1
+
+# Use 8-byte fragments (or smaller)
+nmap -f -f 192.168.1.1
+
+# Set custom MTU (must be multiple of 8)
+nmap --mtu 16 192.168.1.1
+nmap --mtu 24 192.168.1.1
+nmap --mtu 32 192.168.1.1
+
+# How it works:
+# - Splits packets into fragments
+# - May bypass simple packet filters
+# - Some IDS can't handle fragments
+# - Modern systems often reassemble correctly
+</code></pre>
+<h3 id="decoy-scanning"><a class="header" href="#decoy-scanning">Decoy Scanning</a></h3>
+<pre><code class="language-bash"># Use decoy IP addresses
+nmap -D RND:10 192.168.1.1        # 10 random decoys
+nmap -D decoy1,decoy2,decoy3 192.168.1.1
+
+# Include your real IP in specific position
+nmap -D decoy1,ME,decoy2 192.168.1.1
+
+# Random decoys (specify count)
+nmap -D RND:5 192.168.1.1
+
+# How it works:
+# - Nmap spoofs packets from decoy IPs
+# - Target sees scans from multiple sources
+# - Harder to identify real scanner
+# - Your IP is still in the mix
+
+# Best practices:
+# - Use live IPs as decoys
+# - Don't use too many (performance)
+# - Combine with other evasion techniques
+</code></pre>
+<h3 id="idlezombie-host"><a class="header" href="#idlezombie-host">Idle/Zombie Host</a></h3>
+<pre><code class="language-bash"># Use zombie host for scanning
+nmap -sI zombie.example.com 192.168.1.1
+
+# Your IP never contacts target
+# Target sees scans from zombie
+# Ultimate stealth technique
+</code></pre>
+<h3 id="source-ip-spoofing"><a class="header" href="#source-ip-spoofing">Source IP Spoofing</a></h3>
+<pre><code class="language-bash"># Spoof source IP address
+nmap -S 192.168.1.50 192.168.1.1
+
+# Important notes:
+# - Response goes to spoofed IP, not you
+# - Only useful for specific scenarios
+# - Requires raw packet privileges
+# - May not work through most networks
+# - Often blocked by ISPs
+
+# Specify network interface
+nmap -S 192.168.1.50 -e eth0 192.168.1.1
+</code></pre>
+<h3 id="source-port-manipulation"><a class="header" href="#source-port-manipulation">Source Port Manipulation</a></h3>
+<pre><code class="language-bash"># Use specific source port
+nmap --source-port 53 192.168.1.1
+nmap -g 53 192.168.1.1
+
+# Common privileged ports:
+nmap --source-port 20 192.168.1.1  # FTP data
+nmap --source-port 53 192.168.1.1  # DNS
+nmap --source-port 67 192.168.1.1  # DHCP
+
+# How it works:
+# - Some firewalls allow traffic from specific ports
+# - DNS (53) and FTP (20) commonly allowed
+# - May bypass simple firewall rules
+# - Less effective on modern stateful firewalls
+</code></pre>
+<h3 id="append-random-data"><a class="header" href="#append-random-data">Append Random Data</a></h3>
+<pre><code class="language-bash"># Append random data to packets
+nmap --data-length 25 192.168.1.1
+
+# Pads packets with random data
+# Changes packet size
+# May evade signature-based detection
+# Size in bytes (0-65535)
+</code></pre>
+<h3 id="ip-options"><a class="header" href="#ip-options">IP Options</a></h3>
+<pre><code class="language-bash"># Set IP options
+nmap --ip-options "L 192.168.1.5 192.168.1.10" 192.168.1.1
+
+# Loose source routing (L)
+nmap --ip-options "L" 192.168.1.1
+
+# Strict source routing (S)
+nmap --ip-options "S" 192.168.1.1
+
+# Record route (R)
+nmap --ip-options "R" 192.168.1.1
+
+# Timestamp (T)
+nmap --ip-options "T" 192.168.1.1
+
+# Rarely useful on modern networks
+# Most routers ignore or strip IP options
+</code></pre>
+<h3 id="invalid-checksums"><a class="header" href="#invalid-checksums">Invalid Checksums</a></h3>
+<pre><code class="language-bash"># Send packets with bogus checksums
+nmap --badsum 192.168.1.1
+
+# How it works:
+# - Real systems will drop invalid packets
+# - Firewalls/IDS might not check checksums
+# - If you get responses, firewall isn't checking
+
+# Use case:
+# - Firewall/IDS detection
+# - Should not get responses from real hosts
+</code></pre>
+<h3 id="randomize-targets"><a class="header" href="#randomize-targets">Randomize Targets</a></h3>
+<pre><code class="language-bash"># Randomize target order
+nmap --randomize-hosts 192.168.1.0/24
+
+# Prevents detection patterns
+# Target hosts scanned in random order
+# Harder to correlate as single scan
+</code></pre>
+<h3 id="mac-address-spoofing"><a class="header" href="#mac-address-spoofing">MAC Address Spoofing</a></h3>
+<pre><code class="language-bash"># Spoof MAC address (requires raw packets)
+nmap --spoof-mac 0 192.168.1.1          # Random MAC
+nmap --spoof-mac Apple 192.168.1.1      # Apple vendor
+nmap --spoof-mac Dell 192.168.1.1       # Dell vendor
+nmap --spoof-mac 00:11:22:33:44:55 192.168.1.1  # Specific MAC
+
+# Vendors: Cisco, Apple, Dell, HP, etc.
+# Only works on same network segment
+# Useful for MAC-based filtering
+</code></pre>
+<h3 id="combined-evasion"><a class="header" href="#combined-evasion">Combined Evasion</a></h3>
+<pre><code class="language-bash"># Multiple evasion techniques
+nmap -f -T2 -D RND:10 --source-port 53 --data-length 25 192.168.1.1
+
+# Fragment + slow timing + decoys + source port + random data
+# Maximum evasion attempt
+# Very slow but stealthy
+
+# IDS evasion scan
+nmap -T1 -f --mtu 16 -D RND:5 --randomize-hosts 192.168.1.0/24
+</code></pre>
+<h2 id="nse-nmap-scripting-engine"><a class="header" href="#nse-nmap-scripting-engine">NSE (Nmap Scripting Engine)</a></h2>
+<p>The Nmap Scripting Engine (NSE) is one of Nmap's most powerful features, allowing for vulnerability detection, exploitation, advanced discovery, and more.</p>
+<h3 id="script-categories"><a class="header" href="#script-categories">Script Categories</a></h3>
+<p>NSE scripts are organized into categories:</p>
+<ul>
+<li><strong>auth</strong> - Authentication and credentials</li>
+<li><strong>broadcast</strong> - Broadcast discovery</li>
+<li><strong>brute</strong> - Brute force attacks</li>
+<li><strong>default</strong> - Default safe scripts (run with -sC)</li>
+<li><strong>discovery</strong> - Network and service discovery</li>
+<li><strong>dos</strong> - Denial of service (use carefully!)</li>
+<li><strong>exploit</strong> - Active exploitation (dangerous!)</li>
+<li><strong>external</strong> - External resources (whois, GeoIP, etc.)</li>
+<li><strong>fuzzer</strong> - Fuzzing tests</li>
+<li><strong>intrusive</strong> - Intrusive scripts (may crash services)</li>
+<li><strong>malware</strong> - Malware detection</li>
+<li><strong>safe</strong> - Safe scripts (unlikely to crash or alert)</li>
+<li><strong>version</strong> - Enhanced version detection</li>
+<li><strong>vuln</strong> - Vulnerability detection</li>
+</ul>
+<h3 id="running-scripts"><a class="header" href="#running-scripts">Running Scripts</a></h3>
+<pre><code class="language-bash"># Run default scripts
+nmap -sC 192.168.1.1
+nmap --script=default 192.168.1.1
+
+# Run specific script
+nmap --script=http-title 192.168.1.1
+
+# Run multiple scripts (comma-separated)
+nmap --script=http-title,http-headers 192.168.1.1
+
+# Run script category
+nmap --script=vuln 192.168.1.1
+nmap --script=safe 192.168.1.1
+nmap --script=discovery 192.168.1.1
+
+# Run multiple categories
+nmap --script=vuln,exploit 192.168.1.1
+
+# Boolean expressions
+nmap --script "default or safe" 192.168.1.1
+nmap --script "default and safe" 192.168.1.1
+nmap --script "not intrusive" 192.168.1.1
+nmap --script "(default or safe or intrusive) and not http-*" 192.168.1.1
+
+# Wildcard patterns
+nmap --script "http-*" 192.168.1.1
+nmap --script "ssh-*" 192.168.1.1
+nmap --script "smb-*" 192.168.1.1
+
+# All scripts (not recommended - very slow)
+nmap --script=all 192.168.1.1
+</code></pre>
+<h3 id="script-arguments"><a class="header" href="#script-arguments">Script Arguments</a></h3>
+<pre><code class="language-bash"># Pass arguments to scripts
+nmap --script=http-title --script-args http.useragent="Mozilla/5.0" 192.168.1.1
+
+# Multiple arguments
+nmap --script=mysql-brute --script-args userdb=users.txt,passdb=passwords.txt 192.168.1.1
+
+# Arguments from file
+nmap --script=http-form-brute --script-args-file args.txt 192.168.1.1
+</code></pre>
+<h3 id="script-help"><a class="header" href="#script-help">Script Help</a></h3>
+<pre><code class="language-bash"># View script documentation
+nmap --script-help http-title
+nmap --script-help "http-*"
+nmap --script-help all
+
+# Update script database
+nmap --script-updatedb
+</code></pre>
+<h3 id="common-useful-scripts"><a class="header" href="#common-useful-scripts">Common Useful Scripts</a></h3>
+<h4 id="http-scripts"><a class="header" href="#http-scripts">HTTP Scripts</a></h4>
+<pre><code class="language-bash"># HTTP title
+nmap --script=http-title 192.168.1.1
+
+# HTTP headers
+nmap --script=http-headers 192.168.1.1
+
+# HTTP methods
+nmap --script=http-methods 192.168.1.1
+
+# Find robots.txt
+nmap --script=http-robots.txt 192.168.1.1
+
+# Enumerate directories
+nmap --script=http-enum 192.168.1.1
+
+# Find backup files
+nmap --script=http-backup-finder 192.168.1.1
+
+# WordPress vulnerabilities
+nmap --script=http-wordpress-enum 192.168.1.1
+
+# SQL injection detection
+nmap --script=http-sql-injection 192.168.1.1
+
+# Cross-site scripting
+nmap --script=http-xssed 192.168.1.1
+
+# Web application firewall detection
+nmap --script=http-waf-detect 192.168.1.1
+
+# SSL/TLS information
+nmap --script=ssl-cert,ssl-enum-ciphers -p 443 192.168.1.1
+
+# Heartbleed vulnerability
+nmap --script=ssl-heartbleed -p 443 192.168.1.1
+</code></pre>
+<h4 id="smb-scripts"><a class="header" href="#smb-scripts">SMB Scripts</a></h4>
+<pre><code class="language-bash"># SMB OS discovery
+nmap --script=smb-os-discovery 192.168.1.1
+
+# SMB vulnerabilities
+nmap --script=smb-vuln-* 192.168.1.1
+
+# MS17-010 (EternalBlue)
+nmap --script=smb-vuln-ms17-010 192.168.1.1
+
+# Enumerate shares
+nmap --script=smb-enum-shares 192.168.1.1
+
+# Enumerate users
+nmap --script=smb-enum-users 192.168.1.1
+
+# SMB security mode
+nmap --script=smb-security-mode 192.168.1.1
+
+# SMB protocols
+nmap --script=smb-protocols 192.168.1.1
+</code></pre>
+<h4 id="ssh-scripts"><a class="header" href="#ssh-scripts">SSH Scripts</a></h4>
+<pre><code class="language-bash"># SSH host key
+nmap --script=ssh-hostkey -p 22 192.168.1.1
+
+# SSH authentication methods
+nmap --script=ssh-auth-methods -p 22 192.168.1.1
+
+# SSH2 protocol
+nmap --script=ssh2-enum-algos -p 22 192.168.1.1
+
+# SSH brute force (use carefully!)
+nmap --script=ssh-brute -p 22 192.168.1.1
+</code></pre>
+<h4 id="dns-scripts"><a class="header" href="#dns-scripts">DNS Scripts</a></h4>
+<pre><code class="language-bash"># DNS brute force subdomains
+nmap --script=dns-brute example.com
+
+# DNS zone transfer
+nmap --script=dns-zone-transfer --script-args dns-zone-transfer.domain=example.com -p 53 192.168.1.1
+
+# DNS recursion
+nmap --script=dns-recursion -p 53 192.168.1.1
+
+# DNS service discovery
+nmap --script=dns-service-discovery -p 53 192.168.1.1
+</code></pre>
+<h4 id="ftp-scripts"><a class="header" href="#ftp-scripts">FTP Scripts</a></h4>
+<pre><code class="language-bash"># FTP anonymous login
+nmap --script=ftp-anon -p 21 192.168.1.1
+
+# FTP bounce
+nmap --script=ftp-bounce -p 21 192.168.1.1
+
+# FTP vulnerabilities
+nmap --script=ftp-vuln-* -p 21 192.168.1.1
+
+# FTP brute force
+nmap --script=ftp-brute -p 21 192.168.1.1
+</code></pre>
+<h4 id="mysql-scripts"><a class="header" href="#mysql-scripts">MySQL Scripts</a></h4>
+<pre><code class="language-bash"># MySQL information
+nmap --script=mysql-info -p 3306 192.168.1.1
+
+# MySQL empty password
+nmap --script=mysql-empty-password -p 3306 192.168.1.1
+
+# MySQL users
+nmap --script=mysql-users -p 3306 192.168.1.1
+
+# MySQL databases
+nmap --script=mysql-databases -p 3306 192.168.1.1
+
+# MySQL brute force
+nmap --script=mysql-brute -p 3306 192.168.1.1
+</code></pre>
+<h4 id="mongodb-scripts"><a class="header" href="#mongodb-scripts">MongoDB Scripts</a></h4>
+<pre><code class="language-bash"># MongoDB info
+nmap --script=mongodb-info -p 27017 192.168.1.1
+
+# MongoDB databases
+nmap --script=mongodb-databases -p 27017 192.168.1.1
+
+# MongoDB brute force
+nmap --script=mongodb-brute -p 27017 192.168.1.1
+</code></pre>
+<h4 id="vulnerability-detection"><a class="header" href="#vulnerability-detection">Vulnerability Detection</a></h4>
+<pre><code class="language-bash"># All vulnerability scripts
+nmap --script=vuln 192.168.1.1
+
+# Specific vulnerability checks
+nmap --script=vuln -p 80,443 192.168.1.1
+
+# Common vulnerabilities
+nmap --script=vulners 192.168.1.1  # Check against Vulners database
+
+# Vulscan (requires installation)
+nmap --script=vulscan 192.168.1.1
+</code></pre>
+<h4 id="malware-detection"><a class="header" href="#malware-detection">Malware Detection</a></h4>
+<pre><code class="language-bash"># Check for backdoors
+nmap --script=backdoor-check 192.168.1.1
+
+# Check for malware
+nmap --script=malware 192.168.1.1
+</code></pre>
+<h4 id="broadcast-scripts"><a class="header" href="#broadcast-scripts">Broadcast Scripts</a></h4>
+<pre><code class="language-bash"># Discover DHCP servers
+nmap --script=broadcast-dhcp-discover
+
+# Discover DNS servers
+nmap --script=broadcast-dns-service-discovery
+
+# Discover NetBIOS
+nmap --script=broadcast-netbios-master-browser
+
+# Discover ping
+nmap --script=broadcast-ping
+
+# Multiple broadcast scripts
+nmap --script=broadcast
+</code></pre>
+<h3 id="script-output"><a class="header" href="#script-output">Script Output</a></h3>
+<pre><code class="language-bash"># Verbose script output
+nmap --script=http-title -v 192.168.1.1
+
+# Debug script execution
+nmap --script=http-title -d 192.168.1.1
+
+# Script trace
+nmap --script=http-title --script-trace 192.168.1.1
+
+# Shows:
+# - Script execution details
+# - Network communication
+# - Useful for debugging scripts
+</code></pre>
+<h3 id="custom-scripts"><a class="header" href="#custom-scripts">Custom Scripts</a></h3>
+<p>NSE scripts are located in <code>/usr/share/nmap/scripts/</code> or similar.</p>
+<pre><code class="language-bash"># List all scripts
+ls /usr/share/nmap/scripts/
+
+# View script contents
+cat /usr/share/nmap/scripts/http-title.nse
+
+# Create custom script (basic example)
+# Save as my-custom-script.nse
+
+-- Script metadata
+description = [[
+Custom script description
+]]
+
+author = "Your Name"
+license = "Same as Nmap"
+categories = {"safe", "discovery"}
+
+-- Dependencies
+local shortport = require "shortport"
+local http = require "http"
+
+-- Port rule
+portrule = shortport.http
+
+-- Script action
+action = function(host, port)
+  local response = http.get(host, port, "/")
+  return response.status
+end
+</code></pre>
+<h2 id="output-options"><a class="header" href="#output-options">Output Options</a></h2>
+<p>Control how Nmap displays and saves results.</p>
+<h3 id="normal-output"><a class="header" href="#normal-output">Normal Output</a></h3>
+<pre><code class="language-bash"># Default output (to screen)
+nmap 192.168.1.1
+
+# Save normal output to file
+nmap -oN scan.txt 192.168.1.1
+nmap -oN results/scan.txt 192.168.1.1
+
+# Human-readable format
+# Similar to screen output
+</code></pre>
+<h3 id="xml-output"><a class="header" href="#xml-output">XML Output</a></h3>
+<pre><code class="language-bash"># Save as XML
+nmap -oX scan.xml 192.168.1.1
+
+# Machine-parseable format
+# Best for processing with other tools
+# Used by many Nmap GUIs
+
+# Parse XML with xmllint
+xmllint --format scan.xml
+
+# Convert to HTML
+xsltproc scan.xml -o scan.html
+</code></pre>
+<h3 id="grepable-output"><a class="header" href="#grepable-output">Grepable Output</a></h3>
+<pre><code class="language-bash"># Save grepable output
+nmap -oG scan.gnmap 192.168.1.1
+
+# Easy to parse with grep, awk, sed
+# One line per host
+# Useful for scripting
+
+# Example parsing:
+grep "open" scan.gnmap
+grep "80/open" scan.gnmap | awk '{print $2}'
+</code></pre>
+<h3 id="script-kiddie-output"><a class="header" href="#script-kiddie-output">Script Kiddie Output</a></h3>
+<pre><code class="language-bash"># Leet speak output (for fun)
+nmap -oS scan.txt 192.168.1.1
+
+# Example: "Port" becomes "P0rt"
+# Not useful for serious work
+# Entertainment value only
+</code></pre>
+<h3 id="all-formats"><a class="header" href="#all-formats">All Formats</a></h3>
+<pre><code class="language-bash"># Save in all formats at once
+nmap -oA scan 192.168.1.1
+
+# Creates three files:
+# - scan.nmap (normal)
+# - scan.xml (XML)
+# - scan.gnmap (grepable)
+
+# Recommended for important scans
+</code></pre>
+<h3 id="append-to-file"><a class="header" href="#append-to-file">Append to File</a></h3>
+<pre><code class="language-bash"># Append to existing file (don't overwrite)
+nmap -oN scan.txt --append-output 192.168.1.1
+
+# Useful for:
+# - Incremental scanning
+# - Combining multiple scan results
+# - Continuous monitoring
+</code></pre>
+<h3 id="verbosity"><a class="header" href="#verbosity">Verbosity</a></h3>
+<pre><code class="language-bash"># Verbose output (more details)
+nmap -v 192.168.1.1
+
+# Very verbose (even more details)
+nmap -vv 192.168.1.1
+
+# Shows progress and additional information:
+# - Open ports discovered as found
+# - Scan statistics
+# - Timing information
+# - Estimated completion time
+
+# Recommended for:
+# - Long-running scans
+# - Troubleshooting
+# - Understanding scan progress
+</code></pre>
+<h3 id="debugging"><a class="header" href="#debugging">Debugging</a></h3>
+<pre><code class="language-bash"># Debug output
+nmap -d 192.168.1.1
+
+# More debug output
+nmap -dd 192.168.1.1
+
+# Maximum debug (overwhelming detail)
+nmap -ddd 192.168.1.1
+
+# Shows:
+# - Packet details
+# - Timing calculations
+# - Internal decisions
+# - Useful for troubleshooting problems
+</code></pre>
+<h3 id="packet-trace"><a class="header" href="#packet-trace">Packet Trace</a></h3>
+<pre><code class="language-bash"># Show all packets sent and received
+nmap --packet-trace 192.168.1.1
+
+# Example output:
+# SENT (0.0010s) TCP 192.168.1.100:54321 &gt; 192.168.1.1:80 S
+# RCVD (0.0015s) TCP 192.168.1.1:80 &gt; 192.168.1.100:54321 SA
+
+# Useful for:
+# - Understanding scan behavior
+# - Troubleshooting firewall issues
+# - Learning network protocols
+</code></pre>
+<h3 id="open-port-output"><a class="header" href="#open-port-output">Open Port Output</a></h3>
+<pre><code class="language-bash"># Only show open ports
+nmap --open 192.168.1.1
+
+# Filters output to open ports only
+# Cleaner results for large scans
+# Recommended for most scans
+</code></pre>
+<h3 id="reason-output"><a class="header" href="#reason-output">Reason Output</a></h3>
+<pre><code class="language-bash"># Show reason for port state
+nmap --reason 192.168.1.1
+
+# Example:
+# 22/tcp  open     ssh        syn-ack ttl 64
+# 80/tcp  closed   http       reset ttl 64
+# 443/tcp filtered https      no-response
+
+# Shows why Nmap determined each state
+# Useful for understanding results
+</code></pre>
+<h3 id="statistics"><a class="header" href="#statistics">Statistics</a></h3>
+<pre><code class="language-bash"># Show periodic timing statistics
+nmap --stats-every 10s 192.168.1.0/24
+
+# Displays progress every 10 seconds
+# Shows:
+# - Time elapsed
+# - Percent complete
+# - Estimated completion time
+
+# Interactive statistics:
+# Press 'v' during scan for verbose mode
+# Press 'd' during scan for debug mode
+# Press 'p' during scan to pause
+# Press '?' for help
+</code></pre>
+<h3 id="resume-scans"><a class="header" href="#resume-scans">Resume Scans</a></h3>
+<pre><code class="language-bash"># Save scan state periodically
+nmap -oA scan --stats-every 5m 192.168.1.0/16
+
+# If scan interrupted, resume with:
+nmap --resume scan.nmap
+
+# Continues from where it left off
+# Useful for:
+# - Long-running scans
+# - Unstable connections
+# - Interrupted scans
+</code></pre>
+<h3 id="iflist"><a class="header" href="#iflist">Iflist</a></h3>
+<pre><code class="language-bash"># Show network interfaces and routes
+nmap --iflist
+
+# Displays:
+# - Network interfaces
+# - IP addresses
+# - Routing table
+# - Useful for understanding scan source
+</code></pre>
+<h2 id="common-patterns-and-use-cases"><a class="header" href="#common-patterns-and-use-cases">Common Patterns and Use Cases</a></h2>
+<p>Practical examples for common scanning scenarios.</p>
+<h3 id="quick-network-discovery"><a class="header" href="#quick-network-discovery">Quick Network Discovery</a></h3>
+<pre><code class="language-bash"># Fast ping sweep
+nmap -sn 192.168.1.0/24
+
+# Quick port scan with version detection
+nmap -T4 -F 192.168.1.0/24
+
+# Find all web servers
+nmap -p 80,443,8080,8443 --open 192.168.1.0/24
+
+# Quick scan with service detection
+nmap -T4 -A -F 192.168.1.0/24
+</code></pre>
+<h3 id="comprehensive-single-host-scan"><a class="header" href="#comprehensive-single-host-scan">Comprehensive Single Host Scan</a></h3>
+<pre><code class="language-bash"># Full comprehensive scan
+nmap -sS -sU -T4 -A -v -p 1-65535 192.168.1.1
+
+# Break down:
+# -sS: SYN scan
+# -sU: UDP scan
+# -T4: Aggressive timing
+# -A: OS detection, version detection, script scanning, traceroute
+# -v: Verbose output
+# -p 1-65535: All ports
+
+# Aggressive scan with all NSE scripts
+nmap -T4 -A -v --script=all 192.168.1.1
+
+# Thorough but patient scan
+nmap -sS -sU -T2 -A -v -p- --version-all 192.168.1.1
+</code></pre>
+<h3 id="service-enumeration"><a class="header" href="#service-enumeration">Service Enumeration</a></h3>
+<pre><code class="language-bash"># Enumerate web servers
+nmap -sV -p 80,443,8080,8443 --script=http-* 192.168.1.0/24
+
+# Enumerate SMB/Windows hosts
+nmap -sV -p 139,445 --script=smb-* 192.168.1.0/24
+
+# Enumerate databases
+nmap -sV -p 3306,5432,1433,27017 --script=*-info,*-databases 192.168.1.0/24
+
+# Enumerate mail servers
+nmap -sV -p 25,110,143,465,587,993,995 192.168.1.0/24
+
+# Enumerate DNS servers
+nmap -sV -p 53 --script=dns-* 192.168.1.0/24
+
+# Enumerate SSH servers
+nmap -sV -p 22 --script=ssh-* 192.168.1.0/24
+</code></pre>
+<h3 id="vulnerability-assessment"><a class="header" href="#vulnerability-assessment">Vulnerability Assessment</a></h3>
+<pre><code class="language-bash"># Basic vulnerability scan
+nmap -sV --script=vuln 192.168.1.1
+
+# Web application vulnerabilities
+nmap -sV -p 80,443 --script=http-vuln-* 192.168.1.1
+
+# SMB vulnerabilities (EternalBlue, etc.)
+nmap -sV -p 445 --script=smb-vuln-* 192.168.1.0/24
+
+# SSL/TLS vulnerabilities
+nmap -sV -p 443 --script=ssl-* 192.168.1.1
+
+# Comprehensive vulnerability scan
+nmap -sV -p- --script=vuln,exploit 192.168.1.1
+</code></pre>
+<h3 id="network-inventory"><a class="header" href="#network-inventory">Network Inventory</a></h3>
+<pre><code class="language-bash"># Basic inventory
+nmap -sn -oA inventory 192.168.1.0/24
+
+# Detailed inventory
+nmap -sS -sV -O -oA detailed-inventory 192.168.1.0/24
+
+# Inventory with hostnames
+nmap -sn -R -oA inventory-with-hostnames 192.168.1.0/24
+
+# Extract IPs from inventory
+grep "Up" inventory.gnmap | awk '{print $2}'
+
+# Extract open ports
+grep "open" inventory.gnmap | awk '{print $2, $4}'
+</code></pre>
+<h3 id="large-network-scanning"><a class="header" href="#large-network-scanning">Large Network Scanning</a></h3>
+<pre><code class="language-bash"># Fast sweep of large network
+nmap -sn -T4 -oA sweep 10.0.0.0/8
+
+# Top 100 ports on large network
+nmap -T4 --top-ports 100 --open -oA top100 10.0.0.0/16
+
+# Distributed scanning (split network)
+nmap -T4 10.0.0.0/17 -oA scan1 &amp;
+nmap -T4 10.0.128.0/17 -oA scan2 &amp;
+
+# Rate-limited scan to avoid overload
+nmap --max-rate 100 10.0.0.0/16
+
+# Parallel scanning with GNU parallel
+seq 1 254 | parallel -j 10 nmap -T4 -F 192.168.1.{}
+</code></pre>
+<h3 id="stealth-reconnaissance"><a class="header" href="#stealth-reconnaissance">Stealth Reconnaissance</a></h3>
+<pre><code class="language-bash"># Stealthy SYN scan with decoys
+nmap -sS -T2 -f -D RND:10 192.168.1.1
+
+# Extremely stealthy scan
+nmap -sS -T0 -f --randomize-hosts --data-length 25 192.168.1.0/24
+
+# Fragment packets with slow timing
+nmap -sS -T1 -f --mtu 16 192.168.1.1
+
+# Idle scan (most stealthy)
+# First, find zombie host:
+nmap --script=ipidseq 192.168.1.0/24
+# Then use zombie:
+nmap -sI zombie-host target-host
+</code></pre>
+<h3 id="firewall-testing"><a class="header" href="#firewall-testing">Firewall Testing</a></h3>
+<pre><code class="language-bash"># Test firewall rules
+nmap -sA 192.168.1.1
+
+# Check which ports are filtered
+nmap -sS -p- --reason 192.168.1.1 | grep filtered
+
+# Test with different source ports
+nmap -sS --source-port 53 192.168.1.1    # DNS
+nmap -sS --source-port 20 192.168.1.1    # FTP data
+
+# Fragment scan
+nmap -sS -f 192.168.1.1
+
+# Test with bad checksums
+nmap --badsum 192.168.1.1
+</code></pre>
+<h3 id="web-server-analysis"><a class="header" href="#web-server-analysis">Web Server Analysis</a></h3>
+<pre><code class="language-bash"># Basic web server scan
+nmap -sV -p 80,443 --script=http-title,http-headers 192.168.1.1
+
+# Comprehensive web scan
+nmap -sV -p 80,443,8080,8443 \
+  --script=http-enum,http-headers,http-methods,http-robots.txt,http-title,http-vuln-* \
+  192.168.1.1
+
+# SSL/TLS analysis
+nmap -sV -p 443 \
+  --script=ssl-cert,ssl-enum-ciphers,ssl-heartbleed,ssl-known-key \
+  192.168.1.1
+
+# Web application fingerprinting
+nmap -sV -p 80,443 \
+  --script=http-wordpress-enum,http-drupal-enum,http-joomla-brute \
+  192.168.1.1
+</code></pre>
+<h3 id="windowssmb-scanning"><a class="header" href="#windowssmb-scanning">Windows/SMB Scanning</a></h3>
+<pre><code class="language-bash"># Basic SMB enumeration
+nmap -sV -p 445 --script=smb-os-discovery 192.168.1.0/24
+
+# Comprehensive SMB scan
+nmap -sV -p 139,445 \
+  --script=smb-os-discovery,smb-enum-shares,smb-enum-users,smb-security-mode \
+  192.168.1.1
+
+# Check for MS17-010 (EternalBlue)
+nmap -sV -p 445 --script=smb-vuln-ms17-010 192.168.1.0/24
+
+# All SMB vulnerabilities
+nmap -sV -p 445 --script=smb-vuln-* 192.168.1.0/24
+
+# Windows enumeration
+nmap -sV -p 135,139,445,3389 \
+  --script=smb-os-discovery,smb-security-mode,rdp-enum-encryption \
+  192.168.1.0/24
+</code></pre>
+<h3 id="database-scanning"><a class="header" href="#database-scanning">Database Scanning</a></h3>
+<pre><code class="language-bash"># MySQL enumeration
+nmap -sV -p 3306 \
+  --script=mysql-info,mysql-databases,mysql-users,mysql-empty-password \
+  192.168.1.0/24
+
+# PostgreSQL enumeration
+nmap -sV -p 5432 \
+  --script=pgsql-brute 192.168.1.0/24
+
+# MSSQL enumeration
+nmap -sV -p 1433 \
+  --script=ms-sql-info,ms-sql-ntlm-info,ms-sql-empty-password \
+  192.168.1.0/24
+
+# MongoDB enumeration
+nmap -sV -p 27017 \
+  --script=mongodb-info,mongodb-databases \
+  192.168.1.0/24
+
+# Redis enumeration
+nmap -sV -p 6379 \
+  --script=redis-info 192.168.1.0/24
+</code></pre>
+<h3 id="email-server-scanning"><a class="header" href="#email-server-scanning">Email Server Scanning</a></h3>
+<pre><code class="language-bash"># SMTP enumeration
+nmap -sV -p 25,465,587 \
+  --script=smtp-commands,smtp-enum-users,smtp-open-relay \
+  192.168.1.1
+
+# IMAP enumeration
+nmap -sV -p 143,993 \
+  --script=imap-capabilities 192.168.1.1
+
+# POP3 enumeration
+nmap -sV -p 110,995 \
+  --script=pop3-capabilities 192.168.1.1
+
+# Comprehensive mail server scan
+nmap -sV -p 25,110,143,465,587,993,995 \
+  --script=smtp-*,imap-*,pop3-* \
+  192.168.1.1
+</code></pre>
+<h3 id="iot-and-embedded-device-scanning"><a class="header" href="#iot-and-embedded-device-scanning">IoT and Embedded Device Scanning</a></h3>
+<pre><code class="language-bash"># Common IoT ports
+nmap -sS -p 23,80,443,1883,5683,8080,8883 192.168.1.0/24
+
+# MQTT (IoT messaging)
+nmap -sV -p 1883,8883 192.168.1.0/24
+
+# CoAP (IoT protocol)
+nmap -sU -p 5683 192.168.1.0/24
+
+# UPnP discovery
+nmap -sU -p 1900 --script=upnp-info 192.168.1.0/24
+
+# Cameras and NVR
+nmap -sV -p 554,8000,8080,8081 192.168.1.0/24
+</code></pre>
+<h3 id="voip-scanning"><a class="header" href="#voip-scanning">VoIP Scanning</a></h3>
+<pre><code class="language-bash"># SIP scanning
+nmap -sU -p 5060 --script=sip-methods 192.168.1.0/24
+
+# SIP enumeration
+nmap -sU -p 5060,5061 \
+  --script=sip-methods,sip-enum-users \
+  192.168.1.0/24
+
+# RTP ports
+nmap -sU -p 10000-20000 192.168.1.1
+</code></pre>
+<h3 id="ipv6-scanning"><a class="header" href="#ipv6-scanning">IPv6 Scanning</a></h3>
+<pre><code class="language-bash"># IPv6 ping scan
+nmap -6 -sn fe80::1-ff
+
+# IPv6 port scan
+nmap -6 2001:db8::1
+
+# IPv6 with version detection
+nmap -6 -sV 2001:db8::1
+
+# Local IPv6 discovery
+nmap -6 -sn --script=targets-ipv6-multicast-* fe80::/64
+</code></pre>
+<h2 id="advanced-techniques"><a class="header" href="#advanced-techniques">Advanced Techniques</a></h2>
+<h3 id="combining-scan-types"><a class="header" href="#combining-scan-types">Combining Scan Types</a></h3>
+<pre><code class="language-bash"># TCP SYN and UDP scan together
+nmap -sS -sU -p T:1-1000,U:53,161 192.168.1.1
+
+# Multiple discovery methods
+nmap -PE -PS22,80,443 -PA80,443 -PU53,161 192.168.1.0/24
+
+# Comprehensive scan with all techniques
+nmap -sS -sU -sV -O -A --script=default,vuln -p- 192.168.1.1
+</code></pre>
+<h3 id="custom-tcp-flags"><a class="header" href="#custom-tcp-flags">Custom TCP Flags</a></h3>
+<pre><code class="language-bash"># Custom flag combinations
+nmap --scanflags SYNURG -p 80 192.168.1.1
+nmap --scanflags SYNPSH -p 80 192.168.1.1
+
+# Unusual flag combinations for firewall testing
+nmap --scanflags URGPSHFIN -p 1-1000 192.168.1.1
+</code></pre>
+<h3 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h3>
+<pre><code class="language-bash"># Optimize for fast reliable network
+nmap -T4 --min-rate 100 --max-retries 2 192.168.1.0/24
+
+# Optimize for slow unreliable network
+nmap -T2 --max-retries 5 --host-timeout 30m 192.168.1.0/24
+
+# Balance speed and accuracy
+nmap -T3 --max-retries 3 --max-scan-delay 500ms 192.168.1.0/24
+
+# Maximum speed (sacrifice accuracy)
+nmap -T5 --min-rate 1000 --max-retries 1 --host-timeout 5m 192.168.1.0/24
+</code></pre>
+<h3 id="script-chaining"><a class="header" href="#script-chaining">Script Chaining</a></h3>
+<pre><code class="language-bash"># Multiple script categories
+nmap --script "default or safe or discovery" 192.168.1.1
+
+# Exclude intrusive scripts
+nmap --script "default and not intrusive" 192.168.1.1
+
+# Specific script pattern
+nmap --script "http-* and not http-brute" 192.168.1.1
+
+# Complex boolean logic
+nmap --script "(http-* or ssh-*) and not (brute or dos)" 192.168.1.1
+</code></pre>
+<h3 id="output-processing"><a class="header" href="#output-processing">Output Processing</a></h3>
+<pre><code class="language-bash"># Extract open ports from grepable output
+grep "open" scan.gnmap | awk '{print $2, $3, $4}' &gt; open-ports.txt
+
+# Extract IPs with specific port open
+grep "22/open" scan.gnmap | awk '{print $2}' &gt; ssh-hosts.txt
+
+# Count hosts by OS
+grep "OS:" scan.nmap | sort | uniq -c
+
+# Parse XML with grep
+grep -oP '(?&lt;=&lt;port protocol="tcp" portid=")[^"]*' scan.xml
+
+# Convert XML to CSV (with xsltproc)
+xsltproc nmap-csv.xsl scan.xml &gt; scan.csv
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="legal-and-ethical"><a class="header" href="#legal-and-ethical">Legal and Ethical</a></h3>
+<ol>
+<li>
+<p><strong>Always get authorization</strong></p>
+<ul>
+<li>Written permission for all scans</li>
+<li>Define scope clearly</li>
+<li>Document authorization</li>
+</ul>
+</li>
+<li>
+<p><strong>Follow responsible disclosure</strong></p>
+<ul>
+<li>Report vulnerabilities properly</li>
+<li>Give vendors time to fix</li>
+<li>Coordinate publication</li>
+</ul>
+</li>
+<li>
+<p><strong>Minimize impact</strong></p>
+<ul>
+<li>Use appropriate timing</li>
+<li>Avoid DOS conditions</li>
+<li>Test during maintenance windows</li>
+</ul>
+</li>
+<li>
+<p><strong>Document everything</strong></p>
+<ul>
+<li>Keep scan logs</li>
+<li>Document findings</li>
+<li>Track remediation</li>
+</ul>
+</li>
+</ol>
+<h3 id="technical-best-practices"><a class="header" href="#technical-best-practices">Technical Best Practices</a></h3>
+<ol>
+<li>
+<p><strong>Start with discovery</strong></p>
+<pre><code class="language-bash"># First, find live hosts
+nmap -sn 192.168.1.0/24 -oA discovery
+
+# Then scan live hosts
+nmap -iL live-hosts.txt -sV -oA detailed-scan
+</code></pre>
+</li>
+<li>
+<p><strong>Use appropriate timing</strong></p>
+<pre><code class="language-bash"># Production networks: use T2 or T3
+nmap -T2 192.168.1.0/24
+
+# Lab networks: use T4
+nmap -T4 192.168.1.0/24
+</code></pre>
+</li>
+<li>
+<p><strong>Save all output formats</strong></p>
+<pre><code class="language-bash"># Always use -oA for important scans
+nmap -sV -oA scan-$(date +%Y%m%d) 192.168.1.0/24
+</code></pre>
+</li>
+<li>
+<p><strong>Use version detection</strong></p>
+<pre><code class="language-bash"># Version detection provides valuable context
+nmap -sV 192.168.1.1
+</code></pre>
+</li>
+<li>
+<p><strong>Scan in stages</strong></p>
+<pre><code class="language-bash"># Stage 1: Discovery
+nmap -sn 192.168.1.0/24 -oA stage1-discovery
+
+# Stage 2: Port scan
+nmap -iL live-hosts.txt -F -oA stage2-ports
+
+# Stage 3: Detailed scan
+nmap -iL interesting-hosts.txt -sV -A -oA stage3-detailed
+</code></pre>
+</li>
+<li>
+<p><strong>Use NSE effectively</strong></p>
+<pre><code class="language-bash"># Start with safe scripts
+nmap --script=safe 192.168.1.1
+
+# Progress to specific categories
+nmap --script=vuln 192.168.1.1
+</code></pre>
+</li>
+<li>
+<p><strong>Combine techniques</strong></p>
+<pre><code class="language-bash"># TCP and UDP
+nmap -sS -sU -p T:80,443,U:53,161 192.168.1.1
+
+# Multiple discovery methods
+nmap -PE -PS -PA -PU 192.168.1.0/24
+</code></pre>
+</li>
+<li>
+<p><strong>Handle false positives</strong></p>
+<pre><code class="language-bash"># Verify open ports
+nmap -sV -p 80 192.168.1.1
+
+# Increase version detection intensity
+nmap -sV --version-all -p 80 192.168.1.1
+</code></pre>
+</li>
+</ol>
+<h3 id="scan-strategy"><a class="header" href="#scan-strategy">Scan Strategy</a></h3>
+<ol>
+<li>
+<p><strong>Network mapping</strong></p>
+<ul>
+<li>Start with broad discovery</li>
+<li>Identify subnets and segments</li>
+<li>Map network topology</li>
+</ul>
+</li>
+<li>
+<p><strong>Progressive scanning</strong></p>
+<ul>
+<li>Quick scans first (ping sweep, top ports)</li>
+<li>Detailed scans on interesting hosts</li>
+<li>Comprehensive scans on critical targets</li>
+</ul>
+</li>
+<li>
+<p><strong>Prioritization</strong></p>
+<ul>
+<li>Scan critical assets first</li>
+<li>Focus on internet-facing systems</li>
+<li>Identify high-risk services</li>
+</ul>
+</li>
+<li>
+<p><strong>Regular scanning</strong></p>
+<ul>
+<li>Schedule periodic scans</li>
+<li>Compare results over time</li>
+<li>Track new services/hosts</li>
+</ul>
+</li>
+</ol>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="permission-issues"><a class="header" href="#permission-issues">Permission Issues</a></h3>
+<pre><code class="language-bash"># Error: "You requested a scan type which requires root privileges"
+# Solution: Use sudo
+sudo nmap -sS 192.168.1.1
+
+# Alternative: Use non-privileged scan
+nmap -sT 192.168.1.1  # TCP connect scan
+
+# Check Nmap capabilities (Linux)
+getcap $(which nmap)
+
+# Set capabilities (alternative to root)
+sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap)
+</code></pre>
+<h3 id="no-results-or-timeouts"><a class="header" href="#no-results-or-timeouts">No Results or Timeouts</a></h3>
+<pre><code class="language-bash"># Increase timeout
+nmap --host-timeout 10m 192.168.1.1
+
+# Skip host discovery (if firewall blocks pings)
+nmap -Pn 192.168.1.1
+
+# Increase retries
+nmap --max-retries 5 192.168.1.1
+
+# Use slower timing
+nmap -T2 192.168.1.1
+
+# Check network connectivity
+ping 192.168.1.1
+traceroute 192.168.1.1
+</code></pre>
+<h3 id="slow-scans"><a class="header" href="#slow-scans">Slow Scans</a></h3>
+<pre><code class="language-bash"># Use faster timing template
+nmap -T4 192.168.1.0/24
+
+# Scan fewer ports
+nmap -F 192.168.1.0/24
+nmap --top-ports 100 192.168.1.0/24
+
+# Disable version detection
+nmap -sS 192.168.1.0/24  # Without -sV
+
+# Disable OS detection
+nmap -sS 192.168.1.0/24  # Without -O
+
+# Increase minimum rate
+nmap --min-rate 100 192.168.1.0/24
+
+# Reduce retries
+nmap --max-retries 1 192.168.1.0/24
+</code></pre>
+<h3 id="firewall-blocking"><a class="header" href="#firewall-blocking">Firewall Blocking</a></h3>
+<pre><code class="language-bash"># Skip ping
+nmap -Pn 192.168.1.1
+
+# Try different scan types
+nmap -sT 192.168.1.1  # Connect scan
+nmap -sA 192.168.1.1  # ACK scan
+
+# Use different source port
+nmap --source-port 53 192.168.1.1
+nmap --source-port 20 192.168.1.1
+
+# Fragment packets
+nmap -f 192.168.1.1
+
+# Check what's being blocked
+nmap --packet-trace -p 80 192.168.1.1
+</code></pre>
+<h3 id="accuracy-issues"><a class="header" href="#accuracy-issues">Accuracy Issues</a></h3>
+<pre><code class="language-bash"># Increase version detection intensity
+nmap -sV --version-intensity 9 192.168.1.1
+
+# Enable aggressive detection
+nmap -A 192.168.1.1
+
+# Disable ping (if causing issues)
+nmap -Pn 192.168.1.1
+
+# Use more probes
+nmap --max-retries 5 192.168.1.1
+
+# Verify with different scan types
+nmap -sS -p 80 192.168.1.1
+nmap -sT -p 80 192.168.1.1
+nmap -sV -p 80 192.168.1.1
+</code></pre>
+<h3 id="script-errors"><a class="header" href="#script-errors">Script Errors</a></h3>
+<pre><code class="language-bash"># Update script database
+nmap --script-updatedb
+
+# Debug script execution
+nmap --script=http-title --script-trace 192.168.1.1
+
+# Check script help
+nmap --script-help http-title
+
+# Verify script exists
+ls /usr/share/nmap/scripts/http-title.nse
+
+# Run with debug
+nmap --script=http-title -d 192.168.1.1
+</code></pre>
+<h3 id="dns-issues"><a class="header" href="#dns-issues">DNS Issues</a></h3>
+<pre><code class="language-bash"># Disable DNS resolution
+nmap -n 192.168.1.1
+
+# Use custom DNS servers
+nmap --dns-servers 8.8.8.8,8.8.4.4 192.168.1.1
+
+# Force DNS resolution
+nmap -R 192.168.1.1
+</code></pre>
+<h3 id="network-interface-issues"><a class="header" href="#network-interface-issues">Network Interface Issues</a></h3>
+<pre><code class="language-bash"># List interfaces
+nmap --iflist
+
+# Specify interface
+nmap -e eth0 192.168.1.1
+
+# Specify source IP
+nmap -S 192.168.1.100 -e eth0 192.168.1.1
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="essential-commands"><a class="header" href="#essential-commands">Essential Commands</a></h3>
+<pre><code class="language-bash"># Basic scan
+nmap 192.168.1.1
+
+# Scan subnet
+nmap 192.168.1.0/24
+
+# Ping scan (no port scan)
+nmap -sn 192.168.1.0/24
+
+# Fast scan
+nmap -F 192.168.1.1
+
+# Scan specific ports
+nmap -p 22,80,443 192.168.1.1
+
+# Scan all ports
+nmap -p- 192.168.1.1
+
+# Version detection
+nmap -sV 192.168.1.1
+
+# OS detection
+nmap -O 192.168.1.1
+
+# Aggressive scan
+nmap -A 192.168.1.1
+
+# Script scan
+nmap -sC 192.168.1.1
+nmap --script=vuln 192.168.1.1
+
+# Skip host discovery
+nmap -Pn 192.168.1.1
+
+# Save output
+nmap -oA scan 192.168.1.1
+
+# Verbose
+nmap -v 192.168.1.1
+</code></pre>
+<h3 id="common-options-table"><a class="header" href="#common-options-table">Common Options Table</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>-sS</code></td><td>TCP SYN scan (default)</td></tr>
+<tr><td><code>-sT</code></td><td>TCP connect scan</td></tr>
+<tr><td><code>-sU</code></td><td>UDP scan</td></tr>
+<tr><td><code>-sV</code></td><td>Version detection</td></tr>
+<tr><td><code>-O</code></td><td>OS detection</td></tr>
+<tr><td><code>-A</code></td><td>Aggressive (OS, version, scripts, traceroute)</td></tr>
+<tr><td><code>-T0-T5</code></td><td>Timing template (0=paranoid, 5=insane)</td></tr>
+<tr><td><code>-p</code></td><td>Port specification</td></tr>
+<tr><td><code>-p-</code></td><td>All ports</td></tr>
+<tr><td><code>-F</code></td><td>Fast (100 ports)</td></tr>
+<tr><td><code>--top-ports N</code></td><td>Scan top N ports</td></tr>
+<tr><td><code>-Pn</code></td><td>Skip host discovery</td></tr>
+<tr><td><code>-sn</code></td><td>Ping scan only (no port scan)</td></tr>
+<tr><td><code>-n</code></td><td>No DNS resolution</td></tr>
+<tr><td><code>-R</code></td><td>Always resolve DNS</td></tr>
+<tr><td><code>-v</code></td><td>Verbose</td></tr>
+<tr><td><code>-d</code></td><td>Debug</td></tr>
+<tr><td><code>-oN</code></td><td>Normal output</td></tr>
+<tr><td><code>-oX</code></td><td>XML output</td></tr>
+<tr><td><code>-oG</code></td><td>Grepable output</td></tr>
+<tr><td><code>-oA</code></td><td>All output formats</td></tr>
+<tr><td><code>--script</code></td><td>Run NSE scripts</td></tr>
+<tr><td><code>--script-help</code></td><td>Show script help</td></tr>
+<tr><td><code>--open</code></td><td>Show only open ports</td></tr>
+<tr><td><code>--reason</code></td><td>Show reason for port state</td></tr>
+<tr><td><code>--packet-trace</code></td><td>Show packets sent/received</td></tr>
+</tbody></table>
+</div>
+<h3 id="port-states-1"><a class="header" href="#port-states-1">Port States</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>State</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>open</code></td><td>Application accepting connections</td></tr>
+<tr><td><code>closed</code></td><td>Port accessible but no application</td></tr>
+<tr><td><code>filtered</code></td><td>Packet filtering prevents determination</td></tr>
+<tr><td><code>unfiltered</code></td><td>Accessible but state unknown</td></tr>
+<tr><td><code>open|filtered</code></td><td>Open or filtered (cannot determine)</td></tr>
+<tr><td><code>closed|filtered</code></td><td>Closed or filtered (cannot determine)</td></tr>
+</tbody></table>
+</div>
+<h3 id="timing-templates-1"><a class="header" href="#timing-templates-1">Timing Templates</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Template</th><th>Name</th><th>Use Case</th></tr></thead><tbody>
+<tr><td><code>-T0</code></td><td>Paranoid</td><td>IDS evasion</td></tr>
+<tr><td><code>-T1</code></td><td>Sneaky</td><td>IDS evasion</td></tr>
+<tr><td><code>-T2</code></td><td>Polite</td><td>Low bandwidth</td></tr>
+<tr><td><code>-T3</code></td><td>Normal</td><td>Default</td></tr>
+<tr><td><code>-T4</code></td><td>Aggressive</td><td>Fast networks</td></tr>
+<tr><td><code>-T5</code></td><td>Insane</td><td>Very fast networks</td></tr>
+</tbody></table>
+</div>
+<h3 id="common-nse-script-categories"><a class="header" href="#common-nse-script-categories">Common NSE Script Categories</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Category</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>auth</code></td><td>Authentication testing</td></tr>
+<tr><td><code>broadcast</code></td><td>Network discovery</td></tr>
+<tr><td><code>brute</code></td><td>Brute force attacks</td></tr>
+<tr><td><code>default</code></td><td>Default scripts</td></tr>
+<tr><td><code>discovery</code></td><td>Service discovery</td></tr>
+<tr><td><code>dos</code></td><td>Denial of service</td></tr>
+<tr><td><code>exploit</code></td><td>Exploitation</td></tr>
+<tr><td><code>external</code></td><td>External resources</td></tr>
+<tr><td><code>intrusive</code></td><td>Intrusive tests</td></tr>
+<tr><td><code>malware</code></td><td>Malware detection</td></tr>
+<tr><td><code>safe</code></td><td>Safe scripts</td></tr>
+<tr><td><code>vuln</code></td><td>Vulnerability detection</td></tr>
+</tbody></table>
+</div>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Nmap is an incredibly powerful and versatile network scanning tool. Mastering it requires understanding:</p>
+<ol>
+<li><strong>Target specification</strong> - Flexible ways to define what to scan</li>
+<li><strong>Host discovery</strong> - Determining which hosts are alive</li>
+<li><strong>Port scanning</strong> - Various techniques for different scenarios</li>
+<li><strong>Service detection</strong> - Identifying versions and configurations</li>
+<li><strong>OS fingerprinting</strong> - Determining operating systems</li>
+<li><strong>NSE scripts</strong> - Extending functionality for specific tasks</li>
+<li><strong>Timing and performance</strong> - Balancing speed and accuracy</li>
+<li><strong>Output formats</strong> - Processing and analyzing results</li>
+</ol>
+<p><strong>Key Takeaways:</strong></p>
+<ul>
+<li>Always obtain proper authorization before scanning</li>
+<li>Start with discovery, then detailed scanning</li>
+<li>Use appropriate timing for the network</li>
+<li>Save output in multiple formats (-oA)</li>
+<li>Combine techniques for comprehensive results</li>
+<li>Understand what each scan type reveals</li>
+<li>Use NSE scripts for specific tasks</li>
+<li>Interpret results in context</li>
+<li>Verify findings with multiple methods</li>
+<li>Document everything for reporting</li>
+</ul>
+<p><strong>Learning Path:</strong></p>
+<ol>
+<li><strong>Week 1</strong>: Basic scanning (-sn, -sS, -p, -sV)</li>
+<li><strong>Week 2</strong>: Output formats, timing templates</li>
+<li><strong>Week 3</strong>: OS detection, aggressive scanning</li>
+<li><strong>Week 4</strong>: NSE scripts, common use cases</li>
+<li><strong>Month 2</strong>: Advanced techniques, evasion, optimization</li>
+<li><strong>Month 3+</strong>: Custom scripts, integration, automation</li>
+</ol>
+<p>Nmap is an essential tool for network administrators, security professionals, and penetration testers. The more you practice with it, the more valuable it becomes for understanding and securing networks.</p>
+<p><strong>Resources:</strong></p>
+<ul>
+<li>Official Nmap documentation: https://nmap.org/docs.html</li>
+<li>Nmap book: https://nmap.org/book/</li>
+<li>NSE script documentation: https://nmap.org/nsedoc/</li>
+<li>Practice safely on authorized networks only</li>
+</ul>
+<p>Happy scanning!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../tools/hostapd.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../tools/tshark.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../tools/hostapd.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../tools/tshark.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

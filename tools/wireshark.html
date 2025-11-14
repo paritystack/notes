@@ -1,0 +1,3918 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Wireshark - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="wireshark"><a class="header" href="#wireshark">Wireshark</a></h1>
+<p>Wireshark is the world's foremost and most widely-used network protocol analyzer. It allows you to see what's happening on your network at a microscopic level and is the de facto (and often de jure) standard across many commercial and non-profit enterprises, government agencies, and educational institutions.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Wireshark was originally developed as Ethereal by Gerald Combs in 1998. The project was renamed to Wireshark in 2006 and continues to be actively developed by a large community of networking experts. It provides a graphical user interface (GUI) for deep inspection of hundreds of protocols, with more being added all the time.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Live packet capture from network interfaces</li>
+<li>Deep inspection of 3000+ protocols with rich dissection</li>
+<li>Powerful display filter language for precise analysis</li>
+<li>VoIP analysis and playback capabilities</li>
+<li>Read/write support for many capture file formats</li>
+<li>Decryption support for many protocols (WEP, WPA/WPA2, SSL/TLS, IPsec)</li>
+<li>Export capabilities (XML, PostScript, CSV, plain text)</li>
+<li>Coloring rules for quick visual analysis</li>
+<li>Rich statistical analysis and graphing</li>
+<li>Multi-platform support (Windows, Linux, macOS, BSD)</li>
+<li>Command-line equivalents (TShark) for automation</li>
+<li>Lua scripting support for custom dissectors</li>
+<li>Expert information system for problem detection</li>
+<li>Follow TCP/UDP/HTTP/TLS streams</li>
+<li>Protocol hierarchy statistics</li>
+<li>Conversation and endpoint analysis</li>
+<li>IO graphs and flow visualization</li>
+<li>Time-sequence graphs (Stevens, tcptrace, throughput)</li>
+<li>Regular expression and binary pattern matching</li>
+</ul>
+<p><strong>Common Use Cases:</strong></p>
+<ul>
+<li>Network troubleshooting and diagnostics</li>
+<li>Protocol development and analysis</li>
+<li>Network security analysis and forensics</li>
+<li>Educational purposes and learning</li>
+<li>Quality assurance and testing</li>
+<li>Malware analysis and reverse engineering</li>
+<li>VoIP call quality analysis</li>
+<li>Application performance monitoring</li>
+<li>Compliance validation and auditing</li>
+<li>Wireless network analysis (802.11, Bluetooth, Zigbee)</li>
+</ul>
+<h2 id="legal-and-ethical-considerations"><a class="header" href="#legal-and-ethical-considerations">Legal and Ethical Considerations</a></h2>
+<p><strong>CRITICAL:</strong> Capturing and analyzing network traffic has serious legal and privacy implications. Unauthorized packet capture may violate wiretapping laws, privacy regulations, and organizational policies.</p>
+<p><strong>Legal Requirements:</strong></p>
+<ul>
+<li><strong>Authorization</strong>: Always obtain explicit written permission before capturing network traffic</li>
+<li><strong>Jurisdiction</strong>: Understand local, state, and federal laws regarding network monitoring</li>
+<li><strong>Privacy Laws</strong>: Comply with GDPR, HIPAA, CCPA, and other privacy regulations</li>
+<li><strong>Workplace Policies</strong>: Follow organizational security and acceptable use policies</li>
+<li><strong>Consent</strong>: Some jurisdictions require consent from parties being monitored</li>
+<li><strong>Data Protection</strong>: Implement appropriate controls for captured data</li>
+</ul>
+<p><strong>Best Practices:</strong></p>
+<ul>
+<li>Only capture on networks you own or have written authorization to monitor</li>
+<li>Define clear scope and boundaries for monitoring activities</li>
+<li>Minimize captured data to what is necessary</li>
+<li>Secure capture files with encryption and access controls</li>
+<li>Implement data retention and destruction policies</li>
+<li>Redact sensitive information before sharing captures</li>
+<li>Document authorization and justification for captures</li>
+<li>Use encrypted connections when transferring capture files</li>
+<li>Be aware captures may contain passwords, personal data, trade secrets</li>
+<li>Follow responsible disclosure for security vulnerabilities</li>
+</ul>
+<p><strong>Ethical Considerations:</strong></p>
+<ul>
+<li>Respect privacy even when technically feasible to monitor</li>
+<li>Use capabilities only for legitimate purposes</li>
+<li>Minimize impact on network and systems</li>
+<li>Protect confidentiality of discovered information</li>
+<li>Consider consent and notification requirements</li>
+</ul>
+<h2 id="basic-concepts"><a class="header" href="#basic-concepts">Basic Concepts</a></h2>
+<h3 id="how-wireshark-works"><a class="header" href="#how-wireshark-works">How Wireshark Works</a></h3>
+<p>Wireshark captures packets from network interfaces and provides detailed analysis through several layers:</p>
+<ol>
+<li><strong>Packet Capture</strong> - Uses libpcap (Unix/Linux) or WinPcap/Npcap (Windows) to capture raw packets</li>
+<li><strong>Protocol Dissection</strong> - Analyzes packet structure and decodes protocol layers</li>
+<li><strong>Display Filtering</strong> - Applies user-defined filters to show relevant packets</li>
+<li><strong>Analysis</strong> - Provides statistics, graphs, and expert information</li>
+<li><strong>Export</strong> - Saves data in various formats for further processing</li>
+</ol>
+<h3 id="capture-vs-display-filters"><a class="header" href="#capture-vs-display-filters">Capture vs Display Filters</a></h3>
+<p>Understanding the distinction is crucial:</p>
+<p><strong>Capture Filters (BPF - Berkeley Packet Filter):</strong></p>
+<ul>
+<li>Applied during packet capture</li>
+<li>Determine which packets to capture</li>
+<li>Cannot be changed after capture starts</li>
+<li>More efficient (reduces storage and memory)</li>
+<li>Limited syntax (tcpdump-style)</li>
+<li>Cannot filter on dissected protocol fields</li>
+<li>Examples: <code>tcp port 80</code>, <code>host 192.168.1.1</code></li>
+</ul>
+<p><strong>Display Filters:</strong></p>
+<ul>
+<li>Applied after packets are captured</li>
+<li>Determine which packets to display</li>
+<li>Can be changed anytime</li>
+<li>Rich, powerful syntax</li>
+<li>Can filter on any dissected field</li>
+<li>All packets remain in capture file</li>
+<li>Examples: <code>http.request.method == "POST"</code>, <code>tcp.analysis.retransmission</code></li>
+</ul>
+<h3 id="protocol-dissectors"><a class="header" href="#protocol-dissectors">Protocol Dissectors</a></h3>
+<p>Wireshark's strength lies in its protocol dissectors:</p>
+<ul>
+<li><strong>3000+ protocol dissectors</strong> covering virtually all network protocols</li>
+<li><strong>Hierarchical dissection</strong> from Layer 2 through Layer 7</li>
+<li><strong>Automatic protocol detection</strong> based on ports and heuristics</li>
+<li><strong>Extensible</strong> via Lua scripts and C plugins</li>
+<li><strong>Contextual decoding</strong> based on conversation state</li>
+<li><strong>Reassembly</strong> of fragmented packets and TCP streams</li>
+</ul>
+<h3 id="packet-structure"><a class="header" href="#packet-structure">Packet Structure</a></h3>
+<p>Wireshark displays packets in hierarchical layers:</p>
+<ol>
+<li><strong>Frame</strong> - Physical layer information (interface, time, length)</li>
+<li><strong>Data Link Layer</strong> - Ethernet, Wi-Fi, PPP, etc.</li>
+<li><strong>Network Layer</strong> - IP, IPv6, ARP, ICMP</li>
+<li><strong>Transport Layer</strong> - TCP, UDP, SCTP</li>
+<li><strong>Application Layer</strong> - HTTP, DNS, TLS, SMB, etc.</li>
+</ol>
+<h3 id="expert-information"><a class="header" href="#expert-information">Expert Information</a></h3>
+<p>Wireshark's expert system automatically detects:</p>
+<ul>
+<li><strong>Errors</strong> - Malformed packets, checksum failures</li>
+<li><strong>Warnings</strong> - Retransmissions, duplicate ACKs</li>
+<li><strong>Notes</strong> - Unusual but valid occurrences</li>
+<li><strong>Chats</strong> - Normal workflow information</li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<h3 id="windows"><a class="header" href="#windows">Windows</a></h3>
+<pre><code class="language-plaintext">1. Download from https://www.wireshark.org/download.html
+2. Choose Windows Installer (.exe)
+3. Run installer as Administrator
+4. Select components:
+   - Wireshark (GUI)
+   - TShark (CLI)
+   - Plugins/Extensions
+   - Tools (editcap, mergecap, etc.)
+5. Install Npcap when prompted (required for packet capture)
+   ☑ Install Npcap in WinPcap API-compatible mode
+   ☑ Support raw 802.11 traffic (for wireless)
+6. Complete installation
+7. Reboot if required
+
+Note: Npcap is the modern replacement for WinPcap
+</code></pre>
+<h3 id="macos"><a class="header" href="#macos">macOS</a></h3>
+<pre><code class="language-bash"># Option 1: Download from website
+# Visit https://www.wireshark.org/download.html
+# Download macOS .dmg file
+# Open DMG and drag to Applications
+# Install ChmodBPF (included) for packet capture
+
+# Option 2: Homebrew
+brew install wireshark
+
+# Grant capture permissions
+# ChmodBPF is installed automatically
+# Verify: sudo launchctl list | grep chmod
+
+# Add your user to access_bpf group
+sudo dseditgroup -o edit -a $USER -t user access_bpf
+
+# Launch Wireshark
+open -a Wireshark
+
+# Or from terminal
+wireshark
+</code></pre>
+<h3 id="linux-debianubuntu"><a class="header" href="#linux-debianubuntu">Linux (Debian/Ubuntu)</a></h3>
+<pre><code class="language-bash"># Install Wireshark
+sudo apt update
+sudo apt install wireshark
+
+# During installation, select "Yes" to allow non-root users to capture packets
+
+# Add your user to wireshark group
+sudo usermod -a -G wireshark $USER
+
+# Log out and back in, or activate group in current session
+newgrp wireshark
+
+# Verify permissions
+groups | grep wireshark
+
+# Alternative: reconfigure permissions
+sudo dpkg-reconfigure wireshark-common
+sudo usermod -a -G wireshark $USER
+
+# Launch Wireshark
+wireshark
+
+# Or launch as root (not recommended)
+sudo wireshark
+</code></pre>
+<h3 id="linux-rhelcentosfedora"><a class="header" href="#linux-rhelcentosfedora">Linux (RHEL/CentOS/Fedora)</a></h3>
+<pre><code class="language-bash"># Fedora/Recent CentOS
+sudo dnf install wireshark
+
+# Older RHEL/CentOS
+sudo yum install wireshark
+
+# Permissions
+sudo usermod -a -G wireshark $USER
+
+# Set capabilities
+sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
+
+# Launch
+wireshark
+</code></pre>
+<h3 id="build-from-source"><a class="header" href="#build-from-source">Build from Source</a></h3>
+<pre><code class="language-bash"># Install dependencies (Debian/Ubuntu)
+sudo apt install build-essential cmake libglib2.0-dev \
+  libpcap-dev qtbase5-dev qttools5-dev-tools libqt5svg5-dev \
+  qtmultimedia5-dev flex bison libssl-dev
+
+# Download source
+wget https://www.wireshark.org/download/src/wireshark-latest.tar.xz
+tar xf wireshark-latest.tar.xz
+cd wireshark-*
+
+# Build
+cmake -G Ninja ..
+ninja
+
+# Install
+sudo ninja install
+
+# Update library cache
+sudo ldconfig
+</code></pre>
+<h3 id="verify-installation"><a class="header" href="#verify-installation">Verify Installation</a></h3>
+<pre><code class="language-bash"># Check version
+wireshark --version
+
+# List interfaces
+tshark -D
+
+# Test capture (requires permissions)
+tshark -i eth0 -c 5
+</code></pre>
+<h2 id="user-interface"><a class="header" href="#user-interface">User Interface</a></h2>
+<p>Wireshark's interface consists of several key components:</p>
+<h3 id="main-window-layout"><a class="header" href="#main-window-layout">Main Window Layout</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│ Menu Bar: File, Edit, View, Go, Capture, Analyze, etc. │
+├─────────────────────────────────────────────────────────┤
+│ Main Toolbar: Start/Stop, Open, Save, Filter, etc.     │
+├─────────────────────────────────────────────────────────┤
+│ Filter Toolbar: [Display Filter Input] [Bookmarks]     │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│ Packet List Pane (Top)                                 │
+│ No. Time    Source      Destination   Protocol  Info   │
+│ ─────────────────────────────────────────────────────  │
+│  1  0.000   192.168.1.1 192.168.1.100 TCP      [SYN]   │
+│  2  0.001   192.168.1.100 192.168.1.1 TCP    [SYN,ACK] │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│ Packet Details Pane (Middle)                           │
+│ ▼ Frame 1: 74 bytes on wire                            │
+│ ▼ Ethernet II                                          │
+│   ▶ Internet Protocol Version 4                        │
+│   ▶ Transmission Control Protocol                      │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│ Packet Bytes Pane (Bottom)                             │
+│ 0000  00 11 22 33 44 55 66 77 88 99 aa bb 08 00 45 00  │
+│ 0010  00 3c 1c 46 40 00 40 06 b1 e6 c0 a8 01 01 c0 a8  │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│ Status Bar: Packets: 1234 Displayed: 567 Marked: 3     │
+└─────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="packet-list-pane"><a class="header" href="#packet-list-pane">Packet List Pane</a></h3>
+<p>The top pane shows a summary of each packet:</p>
+<ul>
+<li><strong>No.</strong> - Packet number in capture</li>
+<li><strong>Time</strong> - Timestamp (various formats available)</li>
+<li><strong>Source</strong> - Source address (IP, MAC, etc.)</li>
+<li><strong>Destination</strong> - Destination address</li>
+<li><strong>Protocol</strong> - Highest-level protocol detected</li>
+<li><strong>Length</strong> - Packet length</li>
+<li><strong>Info</strong> - Protocol-specific information</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Click column header to sort</li>
+<li>Right-click for context menu</li>
+<li>Double-click to expand in details pane</li>
+<li>Color-coded based on coloring rules</li>
+<li>Customizable columns</li>
+</ul>
+<h3 id="packet-details-pane"><a class="header" href="#packet-details-pane">Packet Details Pane</a></h3>
+<p>The middle pane shows hierarchical packet structure:</p>
+<ul>
+<li>Expandable tree view of protocol layers</li>
+<li>Click ▶ to expand, ▼ to collapse</li>
+<li>Shows field names and values</li>
+<li>Highlights selected field in bytes pane</li>
+<li>Right-click for various actions</li>
+<li>Can apply filters from selected fields</li>
+</ul>
+<h3 id="packet-bytes-pane"><a class="header" href="#packet-bytes-pane">Packet Bytes Pane</a></h3>
+<p>The bottom pane shows raw packet data:</p>
+<ul>
+<li>Hexadecimal view on left</li>
+<li>ASCII representation on right</li>
+<li>Highlights correspond to selection in details pane</li>
+<li>Can be displayed as hex, bits, or decimal</li>
+<li>Useful for low-level analysis</li>
+</ul>
+<h3 id="menu-bar"><a class="header" href="#menu-bar">Menu Bar</a></h3>
+<p><strong>File Menu:</strong></p>
+<ul>
+<li>Open, Save, Export</li>
+<li>Merge capture files</li>
+<li>Import from hex dump</li>
+<li>Print packets</li>
+<li>Quit</li>
+</ul>
+<p><strong>Edit Menu:</strong></p>
+<ul>
+<li>Find packets</li>
+<li>Mark/unmark packets</li>
+<li>Time reference</li>
+<li>Ignore packets</li>
+<li>Configuration profiles</li>
+<li>Preferences</li>
+</ul>
+<p><strong>View Menu:</strong></p>
+<ul>
+<li>Zoom in/out</li>
+<li>Expand/collapse all</li>
+<li>Colorize packets</li>
+<li>Show/hide panes</li>
+<li>Time display format</li>
+<li>Name resolution</li>
+<li>Reload capture</li>
+</ul>
+<p><strong>Go Menu:</strong></p>
+<ul>
+<li>Go to packet</li>
+<li>Next/previous packet</li>
+<li>First/last packet</li>
+<li>Go to conversation</li>
+</ul>
+<p><strong>Capture Menu:</strong></p>
+<ul>
+<li>Start/stop capture</li>
+<li>Restart capture</li>
+<li>Capture options</li>
+<li>Capture interfaces</li>
+<li>Refresh interfaces</li>
+</ul>
+<p><strong>Analyze Menu:</strong></p>
+<ul>
+<li>Display filters</li>
+<li>Display filter macros</li>
+<li>Apply as filter</li>
+<li>Prepare as filter</li>
+<li>Enabled protocols</li>
+<li>Decode as</li>
+<li>Follow stream</li>
+<li>Expert information</li>
+<li>Conversation filter</li>
+</ul>
+<p><strong>Statistics Menu:</strong></p>
+<ul>
+<li>Capture file properties</li>
+<li>Protocol hierarchy</li>
+<li>Conversations</li>
+<li>Endpoints</li>
+<li>Packet lengths</li>
+<li>IO graphs</li>
+<li>Service response time</li>
+<li>Flow graphs</li>
+<li>HTTP, DNS statistics</li>
+<li>Much more...</li>
+</ul>
+<p><strong>Telephony Menu:</strong></p>
+<ul>
+<li>VoIP calls</li>
+<li>RTP analysis</li>
+<li>RTP player</li>
+<li>SCTP analysis</li>
+<li>LTE MAC/RLC analysis</li>
+<li>GSM/UMTS analysis</li>
+</ul>
+<p><strong>Wireless Menu:</strong></p>
+<ul>
+<li>Bluetooth</li>
+<li>WLAN traffic</li>
+</ul>
+<p><strong>Tools Menu:</strong></p>
+<ul>
+<li>Firewall ACL rules</li>
+<li>Credentials</li>
+<li>Lua</li>
+<li>Dissector tables</li>
+</ul>
+<p><strong>Help Menu:</strong></p>
+<ul>
+<li>Contents</li>
+<li>Manual pages</li>
+<li>Website</li>
+<li>FAQ</li>
+<li>About</li>
+</ul>
+<h3 id="toolbars"><a class="header" href="#toolbars">Toolbars</a></h3>
+<p><strong>Main Toolbar:</strong></p>
+<ul>
+<li>Start/Stop capture</li>
+<li>Restart capture</li>
+<li>Capture options</li>
+<li>Open file</li>
+<li>Save</li>
+<li>Close</li>
+<li>Reload</li>
+<li>Find packet</li>
+<li>Go to packet</li>
+<li>Go back/forward</li>
+<li>Auto-scroll</li>
+<li>Colorize</li>
+<li>Zoom in/out</li>
+<li>Resize columns</li>
+</ul>
+<p><strong>Filter Toolbar:</strong></p>
+<ul>
+<li>Display filter input field</li>
+<li>Filter expression button</li>
+<li>Clear filter</li>
+<li>Apply filter</li>
+<li>Recent filters dropdown</li>
+<li>Filter bookmarks</li>
+<li>Save filter</li>
+<li>Add expression</li>
+</ul>
+<h3 id="status-bar"><a class="header" href="#status-bar">Status Bar</a></h3>
+<p>Shows real-time information:</p>
+<p><strong>Left Side:</strong></p>
+<ul>
+<li>Capture status</li>
+<li>File name</li>
+<li>Profile name</li>
+</ul>
+<p><strong>Middle:</strong></p>
+<ul>
+<li>Expert information summary (color-coded)</li>
+<li>Errors (red)</li>
+<li>Warnings (yellow)</li>
+<li>Notes (cyan)</li>
+<li>Chats (blue)</li>
+</ul>
+<p><strong>Right Side:</strong></p>
+<ul>
+<li>Packet statistics:
+<ul>
+<li>Packets: total captured</li>
+<li>Displayed: matching current filter</li>
+<li>Marked: manually marked packets</li>
+<li>Dropped: packets lost during capture</li>
+<li>Load time: file loading duration</li>
+</ul>
+</li>
+</ul>
+<h2 id="basic-operations"><a class="header" href="#basic-operations">Basic Operations</a></h2>
+<h3 id="starting-a-capture"><a class="header" href="#starting-a-capture">Starting a Capture</a></h3>
+<p><strong>Method 1: Quick Start</strong></p>
+<ol>
+<li>Launch Wireshark</li>
+<li>Double-click interface on welcome screen</li>
+<li>Capture starts immediately</li>
+</ol>
+<p><strong>Method 2: Capture Options</strong></p>
+<ol>
+<li>Click Capture → Options (or Ctrl+K)</li>
+<li>Select interface(s)</li>
+<li>Set capture filter (optional)</li>
+<li>Configure options:
+<ul>
+<li>Promiscuous mode</li>
+<li>Snapshot length</li>
+<li>Buffer size</li>
+<li>Capture file options</li>
+</ul>
+</li>
+<li>Click Start</li>
+</ol>
+<p><strong>Capture Options Dialog:</strong></p>
+<pre><code>Input:
+☑ Promiscuous mode
+  Capture all packets (not just those destined for this interface)
+
+☑ Monitor mode (for wireless)
+  Capture all wireless traffic including management frames
+
+Snapshot length: [automatic]
+  Limit bytes captured per packet
+  0 or blank = unlimited
+  Common: 65535 (full packets), 96 (headers only)
+
+Buffer size: [2] MB
+  Kernel buffer for packet capture
+  Increase for high-traffic networks
+
+Capture filter: [tcp port 80]
+  BPF syntax filter applied during capture
+
+Output:
+File: [browse...]
+  Save directly to file
+
+Create new file:
+☐ Every [1000000] kilobytes
+☐ Every [60] seconds
+☐ After [1000] packets
+
+Use ring buffer:
+☑ Number of files: [10]
+  Keep only N most recent files
+
+Options:
+☐ Stop capture after:
+  ☐ [1000] packets
+  ☐ [1000] kilobytes
+  ☐ [60] seconds
+  ☐ [10] files
+
+☐ Update list of packets in real-time
+☐ Automatically scroll during live capture
+</code></pre>
+<h3 id="stopping-a-capture"><a class="header" href="#stopping-a-capture">Stopping a Capture</a></h3>
+<ul>
+<li>Click red square Stop button</li>
+<li>Capture → Stop (Ctrl+E)</li>
+<li>Set automatic stop conditions in Capture Options</li>
+</ul>
+<h3 id="opening-capture-files"><a class="header" href="#opening-capture-files">Opening Capture Files</a></h3>
+<p><strong>Open File:</strong></p>
+<ol>
+<li>File → Open (Ctrl+O)</li>
+<li>Browse to file</li>
+<li>Select file</li>
+<li>Click Open</li>
+</ol>
+<p><strong>Supported Formats:</strong></p>
+<ul>
+<li>pcap, pcapng (Wireshark native)</li>
+<li>snoop (Sun)</li>
+<li>LANalyzer</li>
+<li>Network Monitor (Microsoft)</li>
+<li>tcpdump</li>
+<li>Visual Networks</li>
+<li>Numerous others...</li>
+</ul>
+<p><strong>Open Recent:</strong></p>
+<ul>
+<li>File → Open Recent</li>
+<li>Shows recently opened files</li>
+</ul>
+<p><strong>Drag and Drop:</strong></p>
+<ul>
+<li>Drag .pcap/.pcapng file to Wireshark window</li>
+</ul>
+<h3 id="saving-captures"><a class="header" href="#saving-captures">Saving Captures</a></h3>
+<p><strong>Save As:</strong></p>
+<ol>
+<li>File → Save As (Ctrl+Shift+S)</li>
+<li>Choose location and filename</li>
+<li>Select file format (pcap, pcapng)</li>
+<li>Choose what to save:
+<ul>
+<li>All packets</li>
+<li>Displayed packets (matching filter)</li>
+<li>Marked packets</li>
+<li>Range of packets</li>
+</ul>
+</li>
+<li>Click Save</li>
+</ol>
+<p><strong>Quick Save:</strong></p>
+<ul>
+<li>File → Save (Ctrl+S)</li>
+<li>Saves in current format</li>
+</ul>
+<p><strong>File Formats:</strong></p>
+<ul>
+<li><strong>pcapng</strong> - Wireshark native, supports:
+<ul>
+<li>Multiple interfaces</li>
+<li>Interface descriptions</li>
+<li>Name resolution</li>
+<li>Capture comments</li>
+<li>Custom options</li>
+</ul>
+</li>
+<li><strong>pcap</strong> - Traditional format, maximum compatibility</li>
+</ul>
+<h3 id="merging-captures"><a class="header" href="#merging-captures">Merging Captures</a></h3>
+<p><strong>Merge Files:</strong></p>
+<ol>
+<li>File → Merge</li>
+<li>Select file to merge</li>
+<li>Choose merge method:
+<ul>
+<li>Chronologically</li>
+<li>Append to end</li>
+<li>Prepend to beginning</li>
+</ul>
+</li>
+<li>Click OK</li>
+</ol>
+<p><strong>Command Line (mergecap):</strong></p>
+<pre><code class="language-bash"># Merge multiple files chronologically
+mergecap -w output.pcap file1.pcap file2.pcap file3.pcap
+
+# Merge with specific snaplen
+mergecap -w output.pcap -s 65535 file1.pcap file2.pcap
+</code></pre>
+<h3 id="exporting-data"><a class="header" href="#exporting-data">Exporting Data</a></h3>
+<p><strong>Export Specified Packets:</strong></p>
+<ul>
+<li>File → Export Specified Packets</li>
+<li>Save subset based on current display filter</li>
+</ul>
+<p><strong>Export Packet Dissections:</strong></p>
+<ul>
+<li>File → Export Packet Dissections</li>
+<li>Formats: plain text, CSV, JSON, C arrays</li>
+</ul>
+<p><strong>Export Objects:</strong></p>
+<ul>
+<li>File → Export Objects → HTTP/DICOM/SMB/TFTP</li>
+<li>Extract files transferred over these protocols</li>
+<li>Shows list of files</li>
+<li>Select and save</li>
+</ul>
+<p><strong>Export as C Arrays:</strong></p>
+<ul>
+<li>File → Export Packet Dissections → As "C" Arrays</li>
+<li>Useful for test data in development</li>
+</ul>
+<h2 id="capture-filters-bpf-syntax"><a class="header" href="#capture-filters-bpf-syntax">Capture Filters (BPF Syntax)</a></h2>
+<p>Capture filters use Berkeley Packet Filter syntax, identical to tcpdump.</p>
+<h3 id="basic-syntax"><a class="header" href="#basic-syntax">Basic Syntax</a></h3>
+<pre><code>Qualifier:
+  Type:      host, net, port, portrange
+  Direction: src, dst, src or dst, src and dst
+  Protocol:  ether, ip, ip6, arp, tcp, udp, icmp
+
+Examples:
+  host 192.168.1.1
+  src host 192.168.1.1
+  dst net 192.168.0.0/16
+  tcp port 80
+  udp port 53
+</code></pre>
+<h3 id="host-filters"><a class="header" href="#host-filters">Host Filters</a></h3>
+<pre><code># Specific host (src or dst)
+host 192.168.1.1
+host www.example.com
+
+# Source host
+src host 192.168.1.1
+
+# Destination host
+dst host 192.168.1.1
+
+# Multiple hosts
+host 192.168.1.1 or host 192.168.1.2
+
+# Exclude host
+not host 192.168.1.1
+</code></pre>
+<h3 id="network-filters"><a class="header" href="#network-filters">Network Filters</a></h3>
+<pre><code># Network range (CIDR)
+net 192.168.1.0/24
+net 10.0.0.0/8
+
+# Source network
+src net 192.168.0.0/16
+
+# Destination network
+dst net 10.0.0.0/8
+
+# Exclude network
+not net 192.168.1.0/24
+</code></pre>
+<h3 id="port-filters"><a class="header" href="#port-filters">Port Filters</a></h3>
+<pre><code># Specific port (TCP or UDP)
+port 80
+port 443
+
+# Source port
+src port 80
+
+# Destination port
+dst port 443
+
+# Port range
+portrange 8000-9000
+
+# Multiple ports
+port 80 or port 443 or port 8080
+
+# Exclude port
+not port 22
+</code></pre>
+<h3 id="protocol-filters"><a class="header" href="#protocol-filters">Protocol Filters</a></h3>
+<pre><code># TCP only
+tcp
+
+# UDP only
+udp
+
+# ICMP
+icmp
+
+# ARP
+arp
+
+# IPv4
+ip
+
+# IPv6
+ip6
+
+# Specific protocol and port
+tcp port 80
+udp port 53
+
+# Multiple protocols
+tcp or udp
+icmp or arp
+</code></pre>
+<h3 id="tcp-flags"><a class="header" href="#tcp-flags">TCP Flags</a></h3>
+<pre><code># TCP SYN packets
+tcp[tcpflags] &amp; tcp-syn != 0
+tcp[13] &amp; 2 != 0
+
+# TCP SYN-ACK
+tcp[tcpflags] &amp; (tcp-syn|tcp-ack) == (tcp-syn|tcp-ack)
+
+# TCP RST
+tcp[tcpflags] &amp; tcp-rst != 0
+
+# TCP FIN
+tcp[tcpflags] &amp; tcp-fin != 0
+
+# TCP PSH
+tcp[tcpflags] &amp; tcp-push != 0
+
+# No flags (NULL scan)
+tcp[tcpflags] == 0
+
+# Xmas scan (FIN, PSH, URG)
+tcp[tcpflags] &amp; (tcp-fin|tcp-push|tcp-urg) != 0
+</code></pre>
+<h3 id="ethernetmac-filters"><a class="header" href="#ethernetmac-filters">Ethernet/MAC Filters</a></h3>
+<pre><code># Specific MAC address
+ether host 00:11:22:33:44:55
+
+# Source MAC
+ether src 00:11:22:33:44:55
+
+# Destination MAC
+ether dst 00:11:22:33:44:55
+
+# Broadcast
+ether broadcast
+
+# Multicast
+ether multicast
+
+# EtherType
+ether proto 0x0800  # IPv4
+ether proto 0x0806  # ARP
+ether proto 0x86dd  # IPv6
+</code></pre>
+<h3 id="vlan-filters"><a class="header" href="#vlan-filters">VLAN Filters</a></h3>
+<pre><code># VLAN traffic
+vlan
+
+# Specific VLAN ID
+vlan 100
+
+# VLAN and protocol
+vlan and tcp
+vlan 100 and host 192.168.1.1
+</code></pre>
+<h3 id="complex-filters"><a class="header" href="#complex-filters">Complex Filters</a></h3>
+<pre><code># Combine host and port
+host 192.168.1.1 and port 80
+
+# Protocol and network
+tcp and net 192.168.1.0/24
+
+# Multiple conditions (AND)
+host 192.168.1.1 and tcp and port 443
+
+# Multiple conditions (OR)
+host 192.168.1.1 or host 192.168.1.2
+
+# Complex boolean logic
+(host 192.168.1.1 or host 192.168.1.2) and port 80
+
+# Exclude traffic
+not host 192.168.1.1 and not port 22
+
+# HTTP and HTTPS
+tcp port 80 or tcp port 443
+
+# DNS (TCP and UDP)
+port 53
+tcp port 53 or udp port 53
+
+# Everything except SSH
+not port 22
+
+# Specific host on multiple ports
+host 192.168.1.1 and (port 80 or port 443)
+
+# Non-local traffic
+not net 127.0.0.0/8
+</code></pre>
+<h3 id="packet-size-filters"><a class="header" href="#packet-size-filters">Packet Size Filters</a></h3>
+<pre><code># Less than size
+less 128
+
+# Greater than size
+greater 1000
+
+# Specific length
+len == 64
+
+# Range
+greater 100 and less 500
+</code></pre>
+<h2 id="display-filters"><a class="header" href="#display-filters">Display Filters</a></h2>
+<p>Display filters use Wireshark's powerful filtering language.</p>
+<h3 id="basic-syntax-1"><a class="header" href="#basic-syntax-1">Basic Syntax</a></h3>
+<pre><code>General format:
+  protocol.field operator value
+
+Operators:
+  ==  (equal)
+  !=  (not equal)
+  &gt;   (greater than)
+  &lt;   (less than)
+  &gt;=  (greater than or equal)
+  &lt;=  (less than or equal)
+  contains
+  matches (regex)
+  in (set membership)
+
+Logical:
+  and (or &amp;&amp;)
+  or  (or ||)
+  not (or !)
+  xor
+
+Parentheses for grouping:
+  (expression1) and (expression2)
+</code></pre>
+<h3 id="creating-filters"><a class="header" href="#creating-filters">Creating Filters</a></h3>
+<p><strong>Method 1: Type in Filter Toolbar</strong></p>
+<ul>
+<li>Click filter input field</li>
+<li>Type filter expression</li>
+<li>Press Enter or click Apply</li>
+<li>Background colors:
+<ul>
+<li>Green: valid syntax</li>
+<li>Red: invalid syntax</li>
+<li>Yellow: valid but unusual</li>
+</ul>
+</li>
+</ul>
+<p><strong>Method 2: Right-Click in Packet Details</strong></p>
+<ul>
+<li>Right-click on field</li>
+<li>"Apply as Filter" →
+<ul>
+<li>Selected</li>
+<li>Not Selected</li>
+<li>... and Selected</li>
+<li>... or Selected</li>
+<li>... and not Selected</li>
+<li>... or not Selected</li>
+</ul>
+</li>
+</ul>
+<p><strong>Method 3: Expression Builder</strong></p>
+<ul>
+<li>Click "Expression..." button in filter toolbar</li>
+<li>Browse field hierarchy</li>
+<li>Select field</li>
+<li>Choose relation</li>
+<li>Enter value</li>
+<li>Click OK</li>
+</ul>
+<p><strong>Method 4: Filter Bookmarks</strong></p>
+<ul>
+<li>Create frequently used filters</li>
+<li>Save with descriptive names</li>
+<li>Quick access from dropdown</li>
+</ul>
+<h3 id="ip-filters"><a class="header" href="#ip-filters">IP Filters</a></h3>
+<pre><code># Any IP (source or destination)
+ip.addr == 192.168.1.1
+
+# Source IP
+ip.src == 192.168.1.1
+
+# Destination IP
+ip.dst == 192.168.1.1
+
+# IP subnet
+ip.addr == 192.168.1.0/24
+ip.src == 10.0.0.0/8
+
+# Multiple IPs
+ip.addr == 192.168.1.1 or ip.addr == 192.168.1.2
+
+# IP in set
+ip.addr in {192.168.1.1 192.168.1.2 192.168.1.3}
+
+# IPv4 only
+ip
+
+# IPv6 only
+ipv6
+
+# Specific IPv6
+ipv6.addr == 2001:db8::1
+
+# IP TTL
+ip.ttl &lt; 10
+ip.ttl == 64
+
+# IP fragmentation
+ip.flags.mf == 1      # More fragments
+ip.frag_offset &gt; 0    # Fragmented
+
+# IP protocol
+ip.proto == 6         # TCP
+ip.proto == 17        # UDP
+ip.proto == 1         # ICMP
+</code></pre>
+<h3 id="tcp-filters"><a class="header" href="#tcp-filters">TCP Filters</a></h3>
+<pre><code># TCP port (source or destination)
+tcp.port == 80
+
+# TCP source port
+tcp.srcport == 80
+
+# TCP destination port
+tcp.dstport == 443
+
+# Port range
+tcp.port &gt;= 8000 and tcp.port &lt;= 9000
+
+# TCP flags
+tcp.flags.syn == 1              # SYN
+tcp.flags.ack == 1              # ACK
+tcp.flags.fin == 1              # FIN
+tcp.flags.reset == 1            # RST
+tcp.flags.push == 1             # PSH
+tcp.flags.urg == 1              # URG
+
+# SYN-ACK packets
+tcp.flags.syn == 1 and tcp.flags.ack == 1
+
+# SYN only (connection initiation)
+tcp.flags.syn == 1 and tcp.flags.ack == 0
+
+# TCP window size
+tcp.window_size &lt; 1000
+tcp.window_size_scalefactor &gt; 0
+
+# TCP sequence and ack numbers
+tcp.seq == 0
+tcp.ack == 1
+
+# TCP stream index
+tcp.stream == 0              # First TCP stream
+tcp.stream == 5              # Sixth TCP stream
+
+# TCP analysis (expert info)
+tcp.analysis.retransmission         # Retransmissions
+tcp.analysis.duplicate_ack          # Duplicate ACKs
+tcp.analysis.duplicate_ack_num &gt; 2  # More than 2 dup ACKs
+tcp.analysis.lost_segment           # Lost segments
+tcp.analysis.fast_retransmission    # Fast retransmissions
+tcp.analysis.zero_window            # Zero window
+tcp.analysis.window_full            # Window full
+tcp.analysis.out_of_order           # Out of order
+tcp.analysis.reused_ports           # Reused ports
+
+# TCP options
+tcp.options.mss                     # MSS option present
+tcp.options.wscale                  # Window scale
+tcp.options.sack_perm               # SACK permitted
+tcp.options.timestamp               # Timestamp
+
+# TCP payload
+tcp.payload                         # Has payload
+tcp.len &gt; 0                         # Has data
+tcp.len &gt; 1000                      # Large segments
+</code></pre>
+<h3 id="udp-filters"><a class="header" href="#udp-filters">UDP Filters</a></h3>
+<pre><code># UDP port
+udp.port == 53
+
+# UDP source port
+udp.srcport == 5353
+
+# UDP destination port
+udp.dstport == 161
+
+# UDP length
+udp.length &lt; 100
+udp.length &gt; 1000
+
+# UDP stream
+udp.stream == 0
+
+# UDP checksum
+udp.checksum_bad == 1
+</code></pre>
+<h3 id="http-filters"><a class="header" href="#http-filters">HTTP Filters</a></h3>
+<pre><code># Any HTTP
+http
+
+# HTTP requests
+http.request
+
+# HTTP responses
+http.response
+
+# HTTP methods
+http.request.method == "GET"
+http.request.method == "POST"
+http.request.method == "PUT"
+http.request.method == "DELETE"
+http.request.method == "HEAD"
+
+# HTTP URI
+http.request.uri == "/index.html"
+http.request.uri contains "/api/"
+http.request.uri matches "\\.(jpg|png|gif)$"
+
+# HTTP full URI
+http.request.full_uri contains "example.com"
+
+# HTTP host
+http.host == "www.example.com"
+http.host contains "example"
+
+# HTTP user agent
+http.user_agent contains "Mozilla"
+http.user_agent contains "curl"
+http.user_agent contains "bot"
+
+# HTTP referer
+http.referer contains "google"
+
+# HTTP response codes
+http.response.code == 200
+http.response.code == 404
+http.response.code == 500
+http.response.code &gt;= 400               # Errors
+http.response.code &gt;= 400 and http.response.code &lt; 500  # Client errors
+http.response.code &gt;= 500               # Server errors
+
+# HTTP content type
+http.content_type contains "application/json"
+http.content_type contains "text/html"
+http.content_type contains "image/"
+
+# HTTP content length
+http.content_length &gt; 1000000
+http.content_length &lt; 100
+
+# HTTP cookies
+http.cookie
+http.set_cookie
+
+# HTTP authorization
+http.authorization
+
+# HTTP request headers
+http.request.line contains "Accept-Language"
+
+# HTTP response headers
+http.server contains "Apache"
+http.server contains "nginx"
+
+# HTTP version
+http.request.version == "HTTP/1.1"
+http.request.version == "HTTP/2"
+
+# HTTP with specific header
+http.header contains "X-Custom-Header"
+
+# HTTP file data
+http.file_data contains "password"
+
+# HTTP response time
+http.time &gt; 1.0                # Responses slower than 1 second
+</code></pre>
+<h3 id="dns-filters"><a class="header" href="#dns-filters">DNS Filters</a></h3>
+<pre><code># Any DNS
+dns
+
+# DNS queries
+dns.flags.response == 0
+
+# DNS responses
+dns.flags.response == 1
+
+# DNS query name
+dns.qry.name == "www.example.com"
+dns.qry.name contains "example"
+dns.qry.name matches ".*\\.com$"
+
+# DNS query type
+dns.qry.type == 1              # A record
+dns.qry.type == 28             # AAAA record
+dns.qry.type == 5              # CNAME
+dns.qry.type == 15             # MX
+dns.qry.type == 16             # TXT
+dns.qry.type == 2              # NS
+dns.qry.type == 6              # SOA
+dns.qry.type == 12             # PTR
+
+# DNS response code
+dns.flags.rcode == 0           # No error
+dns.flags.rcode == 3           # NXDOMAIN (name error)
+dns.flags.rcode == 2           # Server failure
+
+# DNS answers
+dns.a                          # A record in answer
+dns.aaaa                       # AAAA record
+dns.cname                      # CNAME
+
+# Specific IP in DNS answer
+dns.a == 192.168.1.1
+dns.aaaa == 2001:db8::1
+
+# DNS flags
+dns.flags.authoritative == 1
+dns.flags.truncated == 1
+dns.flags.recdesired == 1
+dns.flags.recavail == 1
+
+# DNS answer count
+dns.count.answers &gt; 5
+dns.count.answers == 0
+
+# DNS response time
+dns.time &gt; 0.1
+
+# DNS over TCP (unusual)
+dns and tcp
+
+# Long DNS queries (possible tunneling)
+dns.qry.name.len &gt; 50
+</code></pre>
+<h3 id="tlsssl-filters"><a class="header" href="#tlsssl-filters">TLS/SSL Filters</a></h3>
+<pre><code># Any TLS
+tls
+ssl   # Older captures
+
+# TLS handshake
+tls.handshake
+ssl.handshake
+
+# TLS handshake types
+tls.handshake.type == 1        # Client Hello
+tls.handshake.type == 2        # Server Hello
+tls.handshake.type == 11       # Certificate
+tls.handshake.type == 12       # Server Key Exchange
+tls.handshake.type == 14       # Server Hello Done
+tls.handshake.type == 16       # Client Key Exchange
+tls.handshake.type == 20       # Finished
+
+# TLS SNI (Server Name Indication)
+tls.handshake.extensions_server_name == "www.example.com"
+tls.handshake.extensions_server_name contains "example"
+
+# TLS version
+tls.record.version == 0x0303   # TLS 1.2
+tls.record.version == 0x0304   # TLS 1.3
+tls.handshake.version == 0x0303
+
+# TLS cipher suites
+tls.handshake.ciphersuite
+tls.handshake.ciphersuite == 0xc02f  # TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+
+# TLS cipher suite in Client Hello
+tls.handshake.ciphersuites
+
+# TLS certificate
+tls.handshake.certificate
+
+# TLS application data
+tls.app_data
+
+# TLS alerts
+tls.alert_message
+tls.alert_message.level == 2   # Fatal
+tls.alert_message.desc == 40   # Handshake failure
+
+# TLS extensions
+tls.handshake.extension.type == 0  # Server name
+tls.handshake.extension.type == 10 # Supported groups
+tls.handshake.extension.type == 13 # Signature algorithms
+
+# Weak/old SSL
+ssl.record.version &lt; 0x0303    # Older than TLS 1.2
+
+# Certificate details
+x509sat.uTF8String
+x509sat.printableString
+x509ce.dNSName
+</code></pre>
+<h3 id="icmp-filters"><a class="header" href="#icmp-filters">ICMP Filters</a></h3>
+<pre><code># All ICMP
+icmp
+
+# ICMP type
+icmp.type == 8                 # Echo request (ping)
+icmp.type == 0                 # Echo reply
+icmp.type == 3                 # Destination unreachable
+icmp.type == 5                 # Redirect
+icmp.type == 11                # Time exceeded
+
+# ICMP code
+icmp.code == 0
+icmp.code == 3                 # Port unreachable
+
+# ICMPv6
+icmpv6
+icmpv6.type == 128             # Echo request
+icmpv6.type == 129             # Echo reply
+
+# ICMP echo request/reply pairs
+icmp.type == 8 or icmp.type == 0
+
+# ICMP response time
+icmp.resptime
+icmp.resptime &gt; 0.1
+</code></pre>
+<h3 id="arp-filters"><a class="header" href="#arp-filters">ARP Filters</a></h3>
+<pre><code># All ARP
+arp
+
+# ARP request
+arp.opcode == 1
+
+# ARP reply
+arp.opcode == 2
+
+# ARP for specific IP
+arp.dst.proto_ipv4 == 192.168.1.1
+arp.src.proto_ipv4 == 192.168.1.1
+
+# ARP with specific MAC
+arp.src.hw_mac == 00:11:22:33:44:55
+arp.dst.hw_mac == 00:11:22:33:44:55
+
+# Gratuitous ARP
+arp.opcode == 1 and arp.src.proto_ipv4 == arp.dst.proto_ipv4
+
+# ARP duplicate address detection
+arp.duplicate-address-detected
+arp.duplicate-address-frame
+</code></pre>
+<h3 id="dhcp-filters"><a class="header" href="#dhcp-filters">DHCP Filters</a></h3>
+<pre><code># All DHCP
+dhcp
+bootp  # Alternative
+
+# DHCP message types
+dhcp.option.dhcp == 1          # Discover
+dhcp.option.dhcp == 2          # Offer
+dhcp.option.dhcp == 3          # Request
+dhcp.option.dhcp == 5          # ACK
+dhcp.option.dhcp == 6          # NAK
+dhcp.option.dhcp == 7          # Release
+dhcp.option.dhcp == 8          # Inform
+
+# DHCP for specific MAC
+dhcp.hw.mac_addr == 00:11:22:33:44:55
+
+# DHCP assigned IP
+dhcp.ip.your == 192.168.1.100
+
+# DHCP server
+dhcp.option.dhcp_server_id == 192.168.1.1
+
+# DHCP hostname
+dhcp.option.hostname contains "laptop"
+
+# DHCP lease time
+dhcp.option.dhcp_lease_time
+dhcp.option.dhcp_lease_time &gt; 86400
+
+# DHCP domain name
+dhcp.option.domain_name
+</code></pre>
+<h3 id="smb-filters"><a class="header" href="#smb-filters">SMB Filters</a></h3>
+<pre><code># All SMB
+smb or smb2
+
+# SMB version 1
+smb
+
+# SMB version 2/3
+smb2
+
+# SMB commands (SMB2)
+smb2.cmd == 0                  # Negotiate
+smb2.cmd == 1                  # Session Setup
+smb2.cmd == 3                  # Tree Connect
+smb2.cmd == 5                  # Create
+smb2.cmd == 8                  # Read
+smb2.cmd == 9                  # Write
+smb2.cmd == 6                  # Close
+
+# SMB filename
+smb2.filename contains "document"
+smb.file contains "document"
+
+# SMB tree (share)
+smb2.tree
+
+# SMB NT status
+smb2.nt_status != 0x00000000   # Errors
+smb2.nt_status == 0xc0000022   # Access denied
+
+# NTLMSSP (authentication)
+ntlmssp
+ntlmssp.auth.username
+ntlmssp.auth.domain
+</code></pre>
+<h3 id="ftp-filters"><a class="header" href="#ftp-filters">FTP Filters</a></h3>
+<pre><code># FTP control
+ftp
+
+# FTP commands
+ftp.request.command == "USER"
+ftp.request.command == "PASS"
+ftp.request.command == "RETR"
+ftp.request.command == "STOR"
+ftp.request.command == "LIST"
+
+# FTP responses
+ftp.response.code == 220       # Welcome
+ftp.response.code == 230       # Login successful
+ftp.response.code == 530       # Not logged in
+
+# FTP data
+ftp-data
+
+# FTP arguments
+ftp.request.arg
+</code></pre>
+<h3 id="smtp-filters"><a class="header" href="#smtp-filters">SMTP Filters</a></h3>
+<pre><code># SMTP
+smtp
+
+# SMTP commands
+smtp.req.command == "MAIL"
+smtp.req.command == "RCPT"
+smtp.req.command == "DATA"
+smtp.req.command == "HELO"
+smtp.req.command == "EHLO"
+
+# SMTP responses
+smtp.response.code == 250
+smtp.response.code == 550
+
+# Email addresses
+smtp.req.parameter contains "@example.com"
+
+# IMF (email message)
+imf
+imf.from contains "example.com"
+imf.to contains "user@example.com"
+imf.subject contains "urgent"
+</code></pre>
+<h3 id="database-filters"><a class="header" href="#database-filters">Database Filters</a></h3>
+<pre><code># MySQL
+mysql
+mysql.query
+mysql.command == 3             # Query
+mysql.query contains "SELECT"
+
+# PostgreSQL
+pgsql
+pgsql.query
+
+# MongoDB
+mongo
+mongo.op == 2004               # Query
+
+# Redis
+redis
+redis.command
+</code></pre>
+<h3 id="string-matching"><a class="header" href="#string-matching">String Matching</a></h3>
+<pre><code># Contains
+http.host contains "example"
+dns.qry.name contains "google"
+
+# Matches (regex)
+http.host matches "^www\\..*\\.com$"
+dns.qry.name matches ".*\\.(tk|ml|ga|cf)$"
+
+# Case sensitivity (always case-insensitive)
+http.host contains "EXAMPLE"  # Matches "example.com"
+
+# Equals
+http.host == "www.example.com"
+
+# In set
+http.host in {"example.com" "test.com" "demo.com"}
+ip.addr in {192.168.1.1 192.168.1.2}
+</code></pre>
+<h3 id="comparison-operators"><a class="header" href="#comparison-operators">Comparison Operators</a></h3>
+<pre><code># Equals
+tcp.port == 80
+
+# Not equals
+tcp.port != 22
+
+# Greater than
+frame.len &gt; 1000
+tcp.window_size &gt; 65535
+
+# Less than
+ip.ttl &lt; 10
+http.time &lt; 0.01
+
+# Greater than or equal
+tcp.port &gt;= 8000
+
+# Less than or equal
+tcp.port &lt;= 9000
+
+# Range
+tcp.port &gt;= 8000 and tcp.port &lt;= 9000
+frame.len &gt; 100 and frame.len &lt; 1500
+</code></pre>
+<h3 id="framepacket-filters"><a class="header" href="#framepacket-filters">Frame/Packet Filters</a></h3>
+<pre><code># Frame number
+frame.number == 100
+frame.number &gt; 1000
+frame.number &gt;= 100 and frame.number &lt;= 200
+
+# Frame time
+frame.time &gt;= "2024-01-01 00:00:00"
+frame.time &lt;= "2024-12-31 23:59:59"
+
+# Time relative to first packet
+frame.time_relative &gt; 10
+
+# Time delta (since previous packet)
+frame.time_delta &gt; 1.0
+frame.time_delta_displayed &gt; 0.5
+
+# Frame length
+frame.len &gt; 1000
+frame.len &lt; 100
+frame.len == 54
+
+# Marked packets
+frame.marked == 1
+
+# Ignored packets
+frame.ignored == 1
+
+# Interface
+frame.interface_name == "eth0"
+</code></pre>
+<h3 id="expert-info-filters"><a class="header" href="#expert-info-filters">Expert Info Filters</a></h3>
+<pre><code># Any expert info
+expert
+
+# By severity
+expert.severity == "error"
+expert.severity == "warn"
+expert.severity == "note"
+expert.severity == "chat"
+
+# By group
+expert.group == "Checksum"
+expert.group == "Sequence"
+expert.group == "Malformed"
+expert.group == "Protocol"
+
+# Expert message
+expert.message contains "Retransmission"
+</code></pre>
+<h3 id="logical-operators"><a class="header" href="#logical-operators">Logical Operators</a></h3>
+<pre><code># AND (both conditions must be true)
+ip.addr == 192.168.1.1 and tcp.port == 80
+ip.addr == 192.168.1.1 &amp;&amp; tcp.port == 80
+
+# OR (either condition can be true)
+tcp.port == 80 or tcp.port == 443
+tcp.port == 80 || tcp.port == 443
+
+# NOT (condition must be false)
+not icmp
+!icmp
+!(tcp.port == 22)
+
+# XOR (exclusive or)
+tcp xor udp
+
+# Parentheses for grouping
+(ip.src == 192.168.1.1 or ip.src == 192.168.1.2) and tcp.port == 80
+</code></pre>
+<h3 id="advanced-filter-examples"><a class="header" href="#advanced-filter-examples">Advanced Filter Examples</a></h3>
+<pre><code># HTTP POST requests to specific host
+http.request.method == "POST" and http.host == "api.example.com"
+
+# Failed HTTP requests
+http.response.code &gt;= 400
+
+# Large HTTP responses
+http.response and frame.len &gt; 10000
+
+# TCP retransmissions to specific IP
+tcp.analysis.retransmission and ip.dst == 192.168.1.1
+
+# TLS connections to specific domains
+tls.handshake.type == 1 and tls.handshake.extensions_server_name contains "example"
+
+# Non-standard HTTP ports
+http and tcp.port != 80 and tcp.port != 443
+
+# Broadcast and multicast
+eth.dst.ig == 1
+
+# IPv6 traffic on subnet
+ipv6.src == 2001:db8::/32
+
+# Suspicious DNS (many answers)
+dns.flags.response == 1 and dns.count.answers &gt; 10
+
+# Slow DNS responses
+dns.time &gt; 0.5
+
+# Zero window condition
+tcp.analysis.zero_window
+
+# Out of order packets
+tcp.analysis.out_of_order
+
+# SYN flood detection pattern
+tcp.flags.syn == 1 and tcp.flags.ack == 0
+
+# Fragmented IP packets
+ip.frag_offset &gt; 0 or ip.flags.mf == 1
+</code></pre>
+<h3 id="filter-macros"><a class="header" href="#filter-macros">Filter Macros</a></h3>
+<p>Create reusable filter expressions:</p>
+<ol>
+<li>Analyze → Display Filter Macros</li>
+<li>Click "+"</li>
+<li>Name: <code>mynetwork</code></li>
+<li>Text: <code>ip.addr == 192.168.1.0/24</code></li>
+<li>Use in filters: <code>${mynetwork} and http</code></li>
+</ol>
+<h2 id="packet-analysis-features"><a class="header" href="#packet-analysis-features">Packet Analysis Features</a></h2>
+<h3 id="following-streams"><a class="header" href="#following-streams">Following Streams</a></h3>
+<p><strong>Follow TCP Stream:</strong></p>
+<ol>
+<li>Right-click on TCP packet</li>
+<li>Follow → TCP Stream</li>
+<li>New window shows conversation</li>
+<li>Options:
+<ul>
+<li>ASCII</li>
+<li>EBCDIC</li>
+<li>Hex Dump</li>
+<li>C Arrays</li>
+<li>Raw</li>
+</ul>
+</li>
+<li>Filter automatically applied: <code>tcp.stream eq N</code></li>
+<li>Can save stream as file</li>
+</ol>
+<p><strong>Follow UDP Stream:</strong></p>
+<ul>
+<li>Same as TCP stream</li>
+<li>Right-click UDP packet → Follow → UDP Stream</li>
+</ul>
+<p><strong>Follow HTTP Stream:</strong></p>
+<ul>
+<li>Right-click HTTP packet → Follow → HTTP Stream</li>
+<li>Shows formatted HTTP request/response</li>
+</ul>
+<p><strong>Follow TLS Stream:</strong></p>
+<ul>
+<li>Right-click TLS packet → Follow → TLS Stream</li>
+<li>Shows encrypted data (unless keys provided)</li>
+<li>With keys: shows decrypted data</li>
+</ul>
+<p><strong>Stream Features:</strong></p>
+<ul>
+<li>Red text: client → server</li>
+<li>Blue text: server → client</li>
+<li>Find within stream</li>
+<li>Filter on current stream</li>
+<li>Save stream data</li>
+</ul>
+<h3 id="protocol-hierarchy"><a class="header" href="#protocol-hierarchy">Protocol Hierarchy</a></h3>
+<p><strong>View Protocol Breakdown:</strong></p>
+<ul>
+<li>Statistics → Protocol Hierarchy</li>
+<li>Shows:
+<ul>
+<li>Packet count per protocol</li>
+<li>Percentage of total</li>
+<li>Bytes per protocol</li>
+<li>Hierarchical view</li>
+</ul>
+</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Click to apply filter</li>
+<li>See protocol distribution</li>
+<li>Identify unusual protocols</li>
+<li>Export as text/CSV</li>
+</ul>
+<h3 id="conversations"><a class="header" href="#conversations">Conversations</a></h3>
+<p><strong>View Conversations:</strong></p>
+<ul>
+<li>Statistics → Conversations</li>
+<li>Tabs for different layers:
+<ul>
+<li>Ethernet</li>
+<li>IPv4/IPv6</li>
+<li>TCP</li>
+<li>UDP</li>
+</ul>
+</li>
+<li>Shows:
+<ul>
+<li>Address A ↔ Address B</li>
+<li>Packets</li>
+<li>Bytes</li>
+<li>Bits/sec</li>
+<li>Duration</li>
+</ul>
+</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Sort by any column</li>
+<li>Follow stream from here</li>
+<li>Apply as filter</li>
+<li>Color packets</li>
+<li>Copy to clipboard</li>
+<li>Export data</li>
+</ul>
+<h3 id="endpoints"><a class="header" href="#endpoints">Endpoints</a></h3>
+<p><strong>View Endpoints:</strong></p>
+<ul>
+<li>Statistics → Endpoints</li>
+<li>Tabs for layers:
+<ul>
+<li>Ethernet</li>
+<li>IPv4/IPv6</li>
+<li>TCP</li>
+<li>UDP</li>
+</ul>
+</li>
+<li>Shows statistics per endpoint:
+<ul>
+<li>Packets</li>
+<li>Bytes</li>
+<li>Tx packets/bytes</li>
+<li>Rx packets/bytes</li>
+</ul>
+</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Map endpoint (GeoIP)</li>
+<li>Apply as filter</li>
+<li>Export data</li>
+</ul>
+<h3 id="io-graphs"><a class="header" href="#io-graphs">IO Graphs</a></h3>
+<p><strong>Create IO Graphs:</strong></p>
+<ul>
+<li>Statistics → IO Graph</li>
+<li>Default: packets per second over time</li>
+<li>Multiple graphs (up to 5)</li>
+<li>Per-graph options:
+<ul>
+<li>Display filter</li>
+<li>Color</li>
+<li>Style (Line, Impulse, Bar, etc.)</li>
+<li>Y-axis metric:
+<ul>
+<li>Packets/Bytes/Bits per tick</li>
+<li>Advanced (SUM, MIN, MAX, AVG)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Visualize traffic patterns</li>
+<li>Identify traffic spikes</li>
+<li>Compare protocols</li>
+<li>Analyze trends</li>
+</ul>
+<p><strong>Example Graphs:</strong></p>
+<pre><code>Graph 1: All traffic (no filter)
+Graph 2: tcp, color=blue
+Graph 3: udp, color=green
+Graph 4: http, color=red
+Graph 5: dns, color=purple
+</code></pre>
+<h3 id="expert-information-1"><a class="header" href="#expert-information-1">Expert Information</a></h3>
+<p><strong>View Expert Info:</strong></p>
+<ul>
+<li>Analyze → Expert Information</li>
+<li>Categorized by severity:
+<ul>
+<li>Errors (red)</li>
+<li>Warnings (yellow)</li>
+<li>Notes (cyan)</li>
+<li>Chats (blue)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Common Expert Info:</strong></p>
+<p><strong>Errors:</strong></p>
+<ul>
+<li>Malformed packets</li>
+<li>Checksum errors</li>
+<li>Bad TCP</li>
+</ul>
+<p><strong>Warnings:</strong></p>
+<ul>
+<li>TCP retransmissions</li>
+<li>TCP duplicate ACK</li>
+<li>TCP zero window</li>
+<li>TCP previous segment not captured</li>
+<li>HTTP response code ≥ 400</li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>TCP fast retransmission</li>
+<li>TCP keep-alive</li>
+<li>HTTP compressed response</li>
+</ul>
+<p><strong>Chats:</strong></p>
+<ul>
+<li>Connection establish/close</li>
+<li>Sequence number errors</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Click to navigate to packet</li>
+<li>Group by summary</li>
+<li>Apply as filter</li>
+<li>Export data</li>
+</ul>
+<h3 id="time-display-formats"><a class="header" href="#time-display-formats">Time Display Formats</a></h3>
+<p><strong>Change Time Display:</strong></p>
+<ul>
+<li>View → Time Display Format</li>
+</ul>
+<p><strong>Options:</strong></p>
+<ul>
+<li>Date and Time of Day</li>
+<li>Time of Day</li>
+<li>Seconds Since Beginning of Capture</li>
+<li>Seconds Since Previous Captured Packet</li>
+<li>Seconds Since Previous Displayed Packet</li>
+<li>Seconds Since Epoch (1970-01-01)</li>
+<li>UTC Date and Time of Day</li>
+<li>UTC Time of Day</li>
+</ul>
+<p><strong>Precision:</strong></p>
+<ul>
+<li>Automatic</li>
+<li>Seconds</li>
+<li>Deciseconds</li>
+<li>Centiseconds</li>
+<li>Milliseconds</li>
+<li>Microseconds</li>
+<li>Nanoseconds</li>
+</ul>
+<h3 id="name-resolution"><a class="header" href="#name-resolution">Name Resolution</a></h3>
+<p><strong>Enable/Disable Resolution:</strong></p>
+<ul>
+<li>View → Name Resolution</li>
+</ul>
+<p><strong>Types:</strong></p>
+<ul>
+<li>Resolve MAC Addresses</li>
+<li>Resolve Transport Names (ports)</li>
+<li>Resolve Network Addresses (DNS)</li>
+<li>Use Captured DNS Packets</li>
+<li>Use External Resolvers</li>
+</ul>
+<p><strong>Configure:</strong></p>
+<ul>
+<li>Edit → Preferences → Name Resolution</li>
+<li>Enable concurrent DNS lookups</li>
+<li>Maximum concurrent requests</li>
+<li>Custom hosts file</li>
+<li>Custom SMI MIB paths</li>
+</ul>
+<h3 id="time-references"><a class="header" href="#time-references">Time References</a></h3>
+<p><strong>Set Time Reference:</strong></p>
+<ul>
+<li>Right-click packet → Set/Unset Time Reference</li>
+<li>Packet marked with <code>*REF*</code></li>
+<li>Relative times calculated from reference</li>
+<li>Multiple references allowed</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Measure time between events</li>
+<li>Align multiple captures</li>
+<li>Focus on specific time periods</li>
+</ul>
+<h3 id="packet-marking"><a class="header" href="#packet-marking">Packet Marking</a></h3>
+<p><strong>Mark Packets:</strong></p>
+<ul>
+<li>Right-click → Mark/Unmark Packet (Ctrl+M)</li>
+<li>Marked packets shown with black background</li>
+<li>Mark all displayed: Edit → Mark All Displayed</li>
+<li>Unmark all: Edit → Unmark All Packets</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Flag interesting packets</li>
+<li>Export only marked packets</li>
+<li>Navigate between important packets</li>
+</ul>
+<h3 id="ignoring-packets"><a class="header" href="#ignoring-packets">Ignoring Packets</a></h3>
+<p><strong>Ignore Packets:</strong></p>
+<ul>
+<li>Right-click → Ignore/Unignore Packet</li>
+<li>Ignored packets grayed out</li>
+<li>Hidden from statistics</li>
+<li>Can still be displayed</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Exclude noise</li>
+<li>Focus on specific conversation</li>
+<li>Remove known-good traffic</li>
+</ul>
+<h3 id="packet-comments"><a class="header" href="#packet-comments">Packet Comments</a></h3>
+<p><strong>Add Comments:</strong></p>
+<ul>
+<li>Right-click → Packet Comment</li>
+<li>Add notes to specific packets</li>
+<li>Comments saved in pcapng format</li>
+<li>Comments shown in packet list</li>
+</ul>
+<p><strong>Capture Comments:</strong></p>
+<ul>
+<li>Statistics → Capture File Properties</li>
+<li>Add overall capture comments</li>
+<li>Useful for documentation</li>
+</ul>
+<h2 id="coloring-rules"><a class="header" href="#coloring-rules">Coloring Rules</a></h2>
+<p>Wireshark uses coloring rules for visual packet identification.</p>
+<h3 id="default-coloring-rules"><a class="header" href="#default-coloring-rules">Default Coloring Rules</a></h3>
+<ul>
+<li><strong>Light purple</strong>: Bad TCP (errors, retransmissions)</li>
+<li><strong>Light green</strong>: HTTP</li>
+<li><strong>Light blue</strong>: UDP</li>
+<li><strong>Light yellow</strong>: Routing protocols</li>
+<li><strong>Pink</strong>: ICMP</li>
+<li><strong>Dark gray</strong>: TCP</li>
+<li><strong>Light gray</strong>: UDP</li>
+<li><strong>Black</strong>: TCP packets with problems</li>
+<li><strong>Red text</strong>: TCP errors</li>
+<li><strong>Yellow</strong>: SMB</li>
+<li><strong>White</strong>: Other traffic</li>
+</ul>
+<h3 id="viewing-coloring-rules"><a class="header" href="#viewing-coloring-rules">Viewing Coloring Rules</a></h3>
+<p><strong>Access:</strong></p>
+<ul>
+<li>View → Coloring Rules</li>
+</ul>
+<p><strong>Rule Structure:</strong></p>
+<ul>
+<li>Name</li>
+<li>Filter expression</li>
+<li>Foreground color</li>
+<li>Background color</li>
+<li>Enabled checkbox</li>
+</ul>
+<p><strong>Order Matters:</strong></p>
+<ul>
+<li>Rules evaluated top to bottom</li>
+<li>First matching rule wins</li>
+<li>Can reorder with buttons</li>
+</ul>
+<h3 id="creating-custom-coloring-rules"><a class="header" href="#creating-custom-coloring-rules">Creating Custom Coloring Rules</a></h3>
+<p><strong>Add New Rule:</strong></p>
+<ol>
+<li>View → Coloring Rules</li>
+<li>Click "+" button</li>
+<li>Set name: "My Important Traffic"</li>
+<li>Set filter: <code>ip.addr == 192.168.1.1</code></li>
+<li>Choose foreground color</li>
+<li>Choose background color</li>
+<li>Click OK</li>
+</ol>
+<p><strong>Example Rules:</strong></p>
+<pre><code>Name: SSH Traffic
+Filter: tcp.port == 22
+Foreground: White
+Background: Dark Blue
+
+Name: DNS Errors
+Filter: dns.flags.rcode != 0
+Foreground: White
+Background: Red
+
+Name: Slow HTTP
+Filter: http.time &gt; 1.0
+Foreground: Black
+Background: Orange
+
+Name: My Network
+Filter: ip.src == 192.168.1.0/24 or ip.dst == 192.168.1.0/24
+Foreground: Black
+Background: Light Cyan
+</code></pre>
+<h3 id="temporary-coloring"><a class="header" href="#temporary-coloring">Temporary Coloring</a></h3>
+<p><strong>Quick Colorize:</strong></p>
+<ul>
+<li>Right-click packet</li>
+<li>Colorize Conversation →
+<ul>
+<li>Ethernet</li>
+<li>IPv4</li>
+<li>TCP</li>
+<li>UDP</li>
+</ul>
+</li>
+<li>Automatically applies color to conversation</li>
+<li>Temporary (not saved)</li>
+</ul>
+<p><strong>Reset Coloring:</strong></p>
+<ul>
+<li>View → Reset Coloring 1-10</li>
+<li>View → Colorize Packet List (toggle on/off)</li>
+</ul>
+<h3 id="exportingimporting-rules"><a class="header" href="#exportingimporting-rules">Exporting/Importing Rules</a></h3>
+<p><strong>Export Rules:</strong></p>
+<ul>
+<li>View → Coloring Rules</li>
+<li>Export button</li>
+<li>Save as text file</li>
+</ul>
+<p><strong>Import Rules:</strong></p>
+<ul>
+<li>View → Coloring Rules</li>
+<li>Import button</li>
+<li>Select saved rules file</li>
+</ul>
+<h2 id="statistics-windows"><a class="header" href="#statistics-windows">Statistics Windows</a></h2>
+<h3 id="capture-file-properties"><a class="header" href="#capture-file-properties">Capture File Properties</a></h3>
+<p><strong>View Properties:</strong></p>
+<ul>
+<li>Statistics → Capture File Properties</li>
+</ul>
+<p><strong>Information Shown:</strong></p>
+<ul>
+<li>File name and path</li>
+<li>File format</li>
+<li>File size</li>
+<li>Packet size limits</li>
+<li>Time span</li>
+<li>Packet counts</li>
+<li>Data rate</li>
+<li>Interface information</li>
+<li>Comments</li>
+</ul>
+<h3 id="resolved-addresses"><a class="header" href="#resolved-addresses">Resolved Addresses</a></h3>
+<p><strong>View Resolved Names:</strong></p>
+<ul>
+<li>Statistics → Resolved Addresses</li>
+</ul>
+<p><strong>Shows:</strong></p>
+<ul>
+<li>Ethernet (MAC) addresses</li>
+<li>IPv4/IPv6 addresses</li>
+<li>TCP/UDP ports</li>
+<li>From captured DNS responses</li>
+<li>From system resolution</li>
+</ul>
+<p><strong>Export:</strong></p>
+<ul>
+<li>Can save as CSV or text</li>
+</ul>
+<h3 id="protocol-hierarchy-advanced"><a class="header" href="#protocol-hierarchy-advanced">Protocol Hierarchy Advanced</a></h3>
+<p><strong>Detailed Analysis:</strong></p>
+<ul>
+<li>Statistics → Protocol Hierarchy</li>
+<li>Shows nested protocols</li>
+<li>Percentage calculations</li>
+<li>Byte counts per protocol</li>
+</ul>
+<p><strong>Apply as Filter:</strong></p>
+<ul>
+<li>Right-click protocol</li>
+<li>Apply as Filter</li>
+<li>Automatically filters display</li>
+</ul>
+<h3 id="packet-lengths"><a class="header" href="#packet-lengths">Packet Lengths</a></h3>
+<p><strong>Distribution:</strong></p>
+<ul>
+<li>Statistics → Packet Lengths</li>
+</ul>
+<p><strong>Shows:</strong></p>
+<ul>
+<li>Packet size ranges</li>
+<li>Count per range</li>
+<li>Percentage</li>
+<li>Cumulative percentage</li>
+</ul>
+<p><strong>Useful For:</strong></p>
+<ul>
+<li>Identifying traffic patterns</li>
+<li>Finding fragmentation</li>
+<li>Detecting anomalies</li>
+</ul>
+<h3 id="http-statistics"><a class="header" href="#http-statistics">HTTP Statistics</a></h3>
+<p><strong>HTTP Request/Response:</strong></p>
+<ul>
+<li>Statistics → HTTP → Requests</li>
+<li>Statistics → HTTP → Load Distribution</li>
+<li>Statistics → HTTP → Request Sequences</li>
+</ul>
+<p><strong>Shows:</strong></p>
+<ul>
+<li>Request methods</li>
+<li>Status codes</li>
+<li>Hosts</li>
+<li>URIs</li>
+<li>Response times</li>
+</ul>
+<h3 id="dns-statistics"><a class="header" href="#dns-statistics">DNS Statistics</a></h3>
+<p><strong>DNS Analysis:</strong></p>
+<ul>
+<li>Statistics → DNS</li>
+</ul>
+<p><strong>Shows:</strong></p>
+<ul>
+<li>Query types</li>
+<li>Response codes</li>
+<li>Top talkers</li>
+<li>Service response times</li>
+</ul>
+<h3 id="service-response-time"><a class="header" href="#service-response-time">Service Response Time</a></h3>
+<p><strong>Measure Performance:</strong></p>
+<ul>
+<li>Statistics → Service Response Time</li>
+</ul>
+<p><strong>Protocols:</strong></p>
+<ul>
+<li>DNS</li>
+<li>HTTP</li>
+<li>SMB</li>
+<li>NFS</li>
+<li>iSCSI</li>
+</ul>
+<p><strong>Metrics:</strong></p>
+<ul>
+<li>Min/Max/Average response time</li>
+<li>Request/Response pairs</li>
+<li>Distribution graphs</li>
+</ul>
+<h3 id="flow-graphs"><a class="header" href="#flow-graphs">Flow Graphs</a></h3>
+<p><strong>TCP Flow Graph:</strong></p>
+<ul>
+<li>Statistics → Flow Graph</li>
+<li>Shows TCP conversation flow</li>
+<li>Time sequence diagram</li>
+<li>Visualizes handshakes, data transfer, termination</li>
+</ul>
+<p><strong>Options:</strong></p>
+<ul>
+<li>General flow graph (all flows)</li>
+<li>TCP flow graph (specific stream)</li>
+<li>Limit to displayed packets</li>
+<li>Show comment</li>
+</ul>
+<h3 id="tcp-stream-graphs"><a class="header" href="#tcp-stream-graphs">TCP Stream Graphs</a></h3>
+<p><strong>Advanced TCP Analysis:</strong></p>
+<ul>
+<li>Statistics → TCP Stream Graphs</li>
+</ul>
+<p><strong>Graph Types:</strong></p>
+<p><strong>1. Stevens Graph:</strong></p>
+<ul>
+<li>Sequence number vs. time</li>
+<li>Shows retransmissions</li>
+<li>Identifies packet loss</li>
+<li>Standard tcpdump-style</li>
+</ul>
+<p><strong>2. tcptrace Graph:</strong></p>
+<ul>
+<li>Time sequence (tcptrace)</li>
+<li>Outstanding bytes</li>
+<li>Shows window scaling</li>
+</ul>
+<p><strong>3. Throughput Graph:</strong></p>
+<ul>
+<li>Goodput over time</li>
+<li>Effective data transfer rate</li>
+</ul>
+<p><strong>4. Round Trip Time Graph:</strong></p>
+<ul>
+<li>RTT vs. sequence number</li>
+<li>Latency analysis</li>
+</ul>
+<p><strong>5. Window Scaling Graph:</strong></p>
+<ul>
+<li>Window size over time</li>
+<li>Congestion control visualization</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Zoom in/out</li>
+<li>Pan graph</li>
+<li>Switch between graphs</li>
+<li>Export as image</li>
+</ul>
+<h3 id="multicast-statistics"><a class="header" href="#multicast-statistics">Multicast Statistics</a></h3>
+<p><strong>Multicast Streams:</strong></p>
+<ul>
+<li>Statistics → Multicast Streams</li>
+</ul>
+<p><strong>Shows:</strong></p>
+<ul>
+<li>Source address</li>
+<li>Multicast group</li>
+<li>Packets</li>
+<li>Bursts</li>
+<li>Max/Average burst rates</li>
+</ul>
+<h2 id="decryption"><a class="header" href="#decryption">Decryption</a></h2>
+<h3 id="tlsssl-decryption"><a class="header" href="#tlsssl-decryption">TLS/SSL Decryption</a></h3>
+<p><strong>Using Pre-Master Secret Log:</strong></p>
+<ol>
+<li>
+<p><strong>Configure Browser/Application:</strong></p>
+<pre><code class="language-bash"># Set environment variable (Firefox, Chrome, etc.)
+export SSLKEYLOGFILE=~/sslkeys.log
+
+# Windows
+set SSLKEYLOGFILE=%USERPROFILE%\sslkeys.log
+
+# macOS
+export SSLKEYLOGFILE=~/sslkeys.log
+</code></pre>
+</li>
+<li>
+<p><strong>Configure Wireshark:</strong></p>
+<ul>
+<li>Edit → Preferences</li>
+<li>Protocols → TLS (or SSL)</li>
+<li>(Pre)-Master-Secret log filename: [browse to sslkeys.log]</li>
+<li>Click OK</li>
+</ul>
+</li>
+<li>
+<p><strong>Capture Traffic:</strong></p>
+<ul>
+<li>Start browser/application</li>
+<li>Generate HTTPS traffic</li>
+<li>Keys automatically logged</li>
+</ul>
+</li>
+<li>
+<p><strong>View Decrypted:</strong></p>
+<ul>
+<li>HTTP traffic now visible</li>
+<li>Follow HTTP stream shows decrypted data</li>
+<li>Export HTTP objects works</li>
+</ul>
+</li>
+</ol>
+<p><strong>Using RSA Private Key:</strong></p>
+<ol>
+<li>
+<p><strong>Requirements:</strong></p>
+<ul>
+<li>Server's private key file</li>
+<li>RSA key exchange (not DHE/ECDHE)</li>
+<li>Key not password-protected</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure:</strong></p>
+<ul>
+<li>Edit → Preferences → Protocols → TLS</li>
+<li>RSA keys list → Edit</li>
+<li>Add entry:
+<ul>
+<li>IP address: 192.168.1.1</li>
+<li>Port: 443</li>
+<li>Protocol: http</li>
+<li>Key File: [path to private key]</li>
+<li>Password: [if protected]</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>Only works with RSA key exchange</li>
+<li>Doesn't work with Forward Secrecy (DHE/ECDHE)</li>
+<li>Need private key from server</li>
+</ul>
+</li>
+</ol>
+<h3 id="wpawpa2-decryption"><a class="header" href="#wpawpa2-decryption">WPA/WPA2 Decryption</a></h3>
+<p><strong>Decrypt Wireless:</strong></p>
+<ol>
+<li>
+<p><strong>Requirements:</strong></p>
+<ul>
+<li>Capture must include 4-way handshake</li>
+<li>Know the PSK (pre-shared key / password)</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure:</strong></p>
+<ul>
+<li>Edit → Preferences</li>
+<li>Protocols → IEEE 802.11</li>
+<li>Enable decryption</li>
+<li>Decryption keys → Edit</li>
+<li>Add key:
+<ul>
+<li>Type: wpa-pwd</li>
+<li>Key: password:SSID</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Example:</strong></p>
+<pre><code>Key type: wpa-pwd
+Key: MyPassword123:MyWiFiNetwork
+</code></pre>
+</li>
+<li>
+<p><strong>Capture 4-Way Handshake:</strong></p>
+<ul>
+<li>Must capture client connecting</li>
+<li>Or deauthenticate client to force reconnect</li>
+<li>Wireshark shows "EAPOL" packets</li>
+</ul>
+</li>
+<li>
+<p><strong>Verify Decryption:</strong></p>
+<ul>
+<li>Should see decrypted data frames</li>
+<li>IP, TCP, HTTP traffic visible</li>
+</ul>
+</li>
+</ol>
+<h3 id="ipsec-decryption"><a class="header" href="#ipsec-decryption">IPsec Decryption</a></h3>
+<p><strong>Configure IPsec:</strong></p>
+<ol>
+<li>
+<p><strong>Edit → Preferences → Protocols → ESP</strong></p>
+</li>
+<li>
+<p><strong>Add SA (Security Association):</strong></p>
+<ul>
+<li>Protocol: ESP</li>
+<li>SPI: [hex value]</li>
+<li>Encryption algorithm</li>
+<li>Encryption key</li>
+<li>Authentication algorithm</li>
+<li>Authentication key</li>
+</ul>
+</li>
+<li>
+<p><strong>Obtain Keys:</strong></p>
+<ul>
+<li>From IKE negotiation</li>
+<li>From manual configuration</li>
+<li>From IPsec logs</li>
+</ul>
+</li>
+</ol>
+<h3 id="kerberos-decryption"><a class="header" href="#kerberos-decryption">Kerberos Decryption</a></h3>
+<p><strong>Decrypt Kerberos:</strong></p>
+<ol>
+<li>
+<p><strong>Requirements:</strong></p>
+<ul>
+<li>Kerberos keytab file</li>
+<li>Or specific keys</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure:</strong></p>
+<ul>
+<li>Edit → Preferences → Protocols → KRB5</li>
+<li>Kerberos keytab file: [path]</li>
+</ul>
+</li>
+<li>
+<p><strong>Use:</strong></p>
+<ul>
+<li>Decrypts Kerberos tickets</li>
+<li>Shows encrypted payloads</li>
+</ul>
+</li>
+</ol>
+<h2 id="exporting-and-reporting"><a class="header" href="#exporting-and-reporting">Exporting and Reporting</a></h2>
+<h3 id="export-packet-dissections"><a class="header" href="#export-packet-dissections">Export Packet Dissections</a></h3>
+<p><strong>Export Formats:</strong></p>
+<ul>
+<li>File → Export Packet Dissections</li>
+</ul>
+<p><strong>Formats Available:</strong></p>
+<p><strong>1. Plain Text:</strong></p>
+<ul>
+<li>Human-readable</li>
+<li>Similar to screen output</li>
+<li>Options:
+<ul>
+<li>Packet summary line</li>
+<li>Packet details</li>
+<li>Packet bytes</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. CSV:</strong></p>
+<ul>
+<li>Comma-separated values</li>
+<li>Specify fields to export</li>
+<li>Easy to import to Excel/database</li>
+</ul>
+<p><strong>3. JSON:</strong></p>
+<ul>
+<li>Machine-readable</li>
+<li>Structured data</li>
+<li>All packet details</li>
+</ul>
+<p><strong>4. C Arrays:</strong></p>
+<ul>
+<li>For test data in code</li>
+<li>Hex arrays</li>
+</ul>
+<p><strong>5. PSML (XML):</strong></p>
+<ul>
+<li>Packet summary</li>
+<li>Structured XML</li>
+</ul>
+<p><strong>6. PDML (XML):</strong></p>
+<ul>
+<li>Packet details</li>
+<li>Complete dissection</li>
+</ul>
+<h3 id="export-objects"><a class="header" href="#export-objects">Export Objects</a></h3>
+<p><strong>Extract Files:</strong></p>
+<ul>
+<li>File → Export Objects</li>
+</ul>
+<p><strong>Protocols Supported:</strong></p>
+<ul>
+<li>HTTP/HTTPS</li>
+<li>SMB/SMB2</li>
+<li>TFTP</li>
+<li>DICOM</li>
+<li>IMF (Email)</li>
+</ul>
+<p><strong>HTTP Export:</strong></p>
+<ol>
+<li>File → Export Objects → HTTP</li>
+<li>Window shows all HTTP objects:
+<ul>
+<li>Packet number</li>
+<li>Hostname</li>
+<li>Content type</li>
+<li>Size</li>
+<li>Filename</li>
+</ul>
+</li>
+<li>Select object(s)</li>
+<li>Click "Save" or "Save All"</li>
+</ol>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Extract downloaded files</li>
+<li>Analyze transferred data</li>
+<li>Forensic investigation</li>
+<li>Malware analysis</li>
+</ul>
+<h3 id="export-specified-packets"><a class="header" href="#export-specified-packets">Export Specified Packets</a></h3>
+<p><strong>Save Subset:</strong></p>
+<ol>
+<li>File → Export Specified Packets</li>
+<li>Choose:
+<ul>
+<li>All packets</li>
+<li>Selected packet</li>
+<li>Marked packets</li>
+<li>First to last marked</li>
+<li>Range</li>
+<li>Displayed packets (current filter)</li>
+<li>Captured packets (all)</li>
+</ul>
+</li>
+<li>Select format (pcap, pcapng)</li>
+<li>Save</li>
+</ol>
+<p><strong>Common Uses:</strong></p>
+<ul>
+<li>Share specific traffic</li>
+<li>Reduce file size</li>
+<li>Create test cases</li>
+</ul>
+<h3 id="export-bytes"><a class="header" href="#export-bytes">Export Bytes</a></h3>
+<p><strong>Export Packet Bytes:</strong></p>
+<ol>
+<li>Select packet</li>
+<li>Right-click in Packet Bytes pane</li>
+<li>Export Packet Bytes</li>
+<li>Save as binary file</li>
+</ol>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Extract payloads</li>
+<li>Save file fragments</li>
+<li>Binary analysis</li>
+</ul>
+<h3 id="print-packets"><a class="header" href="#print-packets">Print Packets</a></h3>
+<p><strong>Print Options:</strong></p>
+<ol>
+<li>File → Print</li>
+<li>Choose:
+<ul>
+<li>Packet format:
+<ul>
+<li>Summary line only</li>
+<li>Details (with summary line)</li>
+<li>Bytes and summary</li>
+<li>Details and bytes</li>
+</ul>
+</li>
+<li>Packet range</li>
+</ul>
+</li>
+<li>Print to:
+<ul>
+<li>Printer</li>
+<li>File (PostScript, PDF)</li>
+</ul>
+</li>
+</ol>
+<h3 id="statistics-export"><a class="header" href="#statistics-export">Statistics Export</a></h3>
+<p>Most statistics windows have export options:</p>
+<ul>
+<li>Copy to clipboard</li>
+<li>Save as CSV</li>
+<li>Save as plain text</li>
+<li>Save as XML</li>
+</ul>
+<h2 id="command-line-tools"><a class="header" href="#command-line-tools">Command-Line Tools</a></h2>
+<p>Wireshark includes several command-line tools.</p>
+<h3 id="tshark"><a class="header" href="#tshark">TShark</a></h3>
+<p>Command-line packet analyzer:</p>
+<pre><code class="language-bash"># Live capture
+tshark -i eth0
+
+# Read file
+tshark -r capture.pcap
+
+# With display filter
+tshark -r capture.pcap -Y "http"
+
+# Extract fields
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst
+
+# See tshark.md for comprehensive documentation
+</code></pre>
+<h3 id="editcap"><a class="header" href="#editcap">Editcap</a></h3>
+<p>Packet file editor:</p>
+<pre><code class="language-bash"># Split by packet count
+editcap -c 1000 input.pcap output.pcap
+# Creates output_00000.pcap, output_00001.pcap, etc.
+
+# Split by time
+editcap -i 60 input.pcap output.pcap
+# New file every 60 seconds
+
+# Extract packet range
+editcap -r input.pcap output.pcap 100-200
+
+# Remove duplicates
+editcap -d input.pcap output.pcap
+editcap -D 5 input.pcap output.pcap  # Duplicate window of 5
+
+# Change timestamp
+editcap -t +3600 input.pcap output.pcap  # Add 1 hour
+
+# Adjust snaplen
+editcap -s 96 input.pcap output.pcap  # Truncate to 96 bytes
+
+# Extract only displayed packets (with filter)
+tshark -r input.pcap -Y "http" -w output.pcap
+
+# Change file format
+editcap -F pcap input.pcapng output.pcap
+
+# Anonymize IP addresses
+editcap -a 192.168.1.0/24:10.0.0.0/24 input.pcap output.pcap
+</code></pre>
+<h3 id="mergecap"><a class="header" href="#mergecap">Mergecap</a></h3>
+<p>Merge multiple capture files:</p>
+<pre><code class="language-bash"># Basic merge (chronological)
+mergecap -w output.pcap file1.pcap file2.pcap file3.pcap
+
+# Merge all files in directory
+mergecap -w output.pcap *.pcap
+
+# Append (don't sort)
+mergecap -a -w output.pcap file1.pcap file2.pcap
+
+# Set snapshot length
+mergecap -s 65535 -w output.pcap file1.pcap file2.pcap
+
+# Change output format
+mergecap -F pcapng -w output.pcapng file1.pcap file2.pcap
+
+# Verbose output
+mergecap -v -w output.pcap file1.pcap file2.pcap
+</code></pre>
+<h3 id="capinfos"><a class="header" href="#capinfos">Capinfos</a></h3>
+<p>Display capture file information:</p>
+<pre><code class="language-bash"># Basic info
+capinfos capture.pcap
+
+# Detailed info
+capinfos -d capture.pcap
+
+# Statistics
+capinfos -s capture.pcap
+
+# All info
+capinfos -a capture.pcap
+
+# Table format
+capinfos -T capture.pcap
+
+# Specific fields
+capinfos -t -c -u capture.pcap
+# -t: time
+# -c: packet count
+# -u: packet size
+
+# Machine-readable
+capinfos -M capture.pcap
+
+# Multiple files
+capinfos file1.pcap file2.pcap file3.pcap
+</code></pre>
+<p><strong>Output Example:</strong></p>
+<pre><code>File name:           capture.pcap
+File type:           Wireshark/tcpdump/... - pcap
+File encapsulation:  Ethernet
+Packet size limit:   file hdr: 65535 bytes
+Number of packets:   1234
+File size:           567890 bytes
+Data size:           554321 bytes
+Capture duration:    123.456 seconds
+Start time:          Mon Jan 1 12:00:00 2024
+End time:            Mon Jan 1 12:02:03 2024
+Data byte rate:      4491 bytes/s
+Data bit rate:       35928 bits/s
+Average packet size: 449.21 bytes
+Average packet rate: 10 packets/s
+</code></pre>
+<h3 id="text2pcap"><a class="header" href="#text2pcap">Text2pcap</a></h3>
+<p>Convert hex dump to pcap:</p>
+<pre><code class="language-bash"># Basic conversion
+text2pcap hexdump.txt output.pcap
+
+# Specify Ethernet encapsulation
+text2pcap -e 0x0800 hexdump.txt output.pcap
+
+# Add dummy Ethernet header
+text2pcap -e 0x0800 -l 1 hexdump.txt output.pcap
+
+# UDP encapsulation
+text2pcap -u 1234,5678 hexdump.txt output.pcap
+# Source port 1234, destination port 5678
+
+# TCP encapsulation
+text2pcap -T 1234,5678 hexdump.txt output.pcap
+
+# With timestamp
+text2pcap -t "%Y-%m-%d %H:%M:%S." hexdump.txt output.pcap
+</code></pre>
+<p><strong>Input Format:</strong></p>
+<pre><code>000000 00 11 22 33 44 55 66 77 88 99 aa bb 08 00 45 00
+000010 00 3c 1c 46 40 00 40 06 b1 e6 c0 a8 01 01 c0 a8
+</code></pre>
+<h3 id="dumpcap"><a class="header" href="#dumpcap">Dumpcap</a></h3>
+<p>Efficient packet capture (no GUI):</p>
+<pre><code class="language-bash"># List interfaces
+dumpcap -D
+
+# Capture on interface
+dumpcap -i eth0 -w capture.pcap
+
+# Capture with autostop
+dumpcap -i eth0 -w capture.pcap -a duration:60
+
+# Ring buffer
+dumpcap -i eth0 -w capture.pcap -b filesize:10000 -b files:5
+
+# With capture filter
+dumpcap -i eth0 -f "tcp port 80" -w capture.pcap
+
+# Multiple interfaces
+dumpcap -i eth0 -i wlan0 -w capture.pcap
+
+# Quiet mode
+dumpcap -i eth0 -w capture.pcap -q
+</code></pre>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Lower overhead than Wireshark</li>
+<li>No GUI processing</li>
+<li>Minimal packet loss</li>
+<li>Better for high-speed capture</li>
+</ul>
+<h3 id="rawshark"><a class="header" href="#rawshark">Rawshark</a></h3>
+<p>Read and analyze packets from stdin:</p>
+<pre><code class="language-bash"># Read from pipe
+tcpdump -i eth0 -w - | rawshark -r -
+
+# With fields
+rawshark -r capture.pcap -d proto:http -F http.request.uri
+
+# Process live capture
+dumpcap -i eth0 -w - | rawshark -r -
+</code></pre>
+<h2 id="configuration-profiles"><a class="header" href="#configuration-profiles">Configuration Profiles</a></h2>
+<p>Profiles allow different Wireshark configurations.</p>
+<h3 id="using-profiles"><a class="header" href="#using-profiles">Using Profiles</a></h3>
+<p><strong>Built-in Profiles:</strong></p>
+<ul>
+<li>Default</li>
+<li>Bluetooth</li>
+<li>Classic (old Wireshark look)</li>
+</ul>
+<p><strong>Current Profile:</strong></p>
+<ul>
+<li>Shown in status bar (bottom right)</li>
+<li>Click to switch</li>
+</ul>
+<h3 id="creating-profiles"><a class="header" href="#creating-profiles">Creating Profiles</a></h3>
+<p><strong>Create New:</strong></p>
+<ol>
+<li>Edit → Configuration Profiles</li>
+<li>Click "+" button</li>
+<li>Name: "Web Development"</li>
+<li>Click OK</li>
+</ol>
+<p><strong>Configure Profile:</strong></p>
+<ol>
+<li>Switch to profile</li>
+<li>Configure:
+<ul>
+<li>Columns</li>
+<li>Coloring rules</li>
+<li>Preferences</li>
+<li>Display filters</li>
+<li>Capture filters</li>
+</ul>
+</li>
+<li>Settings saved to profile</li>
+</ol>
+<h3 id="profile-specific-settings"><a class="header" href="#profile-specific-settings">Profile-Specific Settings</a></h3>
+<p>Each profile saves:</p>
+<ul>
+<li>Preferences</li>
+<li>Capture filter history</li>
+<li>Display filter history</li>
+<li>Coloring rules</li>
+<li>Disabled protocols</li>
+<li>Column settings</li>
+<li>Recent files</li>
+<li>Filter bookmarks</li>
+</ul>
+<h3 id="managing-profiles"><a class="header" href="#managing-profiles">Managing Profiles</a></h3>
+<p><strong>Import/Export:</strong></p>
+<ol>
+<li>Configuration Profiles</li>
+<li>Select profile</li>
+<li>Copy or Delete buttons</li>
+<li>Export/Import from directory:
+<pre><code class="language-bash"># Linux/macOS
+~/.config/wireshark/profiles/
+
+# Windows
+%APPDATA%\Wireshark\profiles\
+</code></pre>
+</li>
+</ol>
+<h3 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h3>
+<p><strong>Example Profiles:</strong></p>
+<p><strong>1. Web Development:</strong></p>
+<ul>
+<li>HTTP/HTTPS focused</li>
+<li>Custom columns: http.request.method, http.host, http.response.code</li>
+<li>Coloring: HTTP errors in red</li>
+<li>Common filters saved</li>
+</ul>
+<p><strong>2. VoIP Analysis:</strong></p>
+<ul>
+<li>SIP/RTP focused</li>
+<li>Telephony windows accessible</li>
+<li>RTP stream analysis</li>
+<li>Custom columns for VoIP</li>
+</ul>
+<p><strong>3. Security Analysis:</strong></p>
+<ul>
+<li>Expert info prominent</li>
+<li>Suspicious traffic colored</li>
+<li>Filters for common attacks</li>
+<li>Malware indicators</li>
+</ul>
+<p><strong>4. Wireless:</strong></p>
+<ul>
+<li>802.11 decryption configured</li>
+<li>WPA keys saved</li>
+<li>Wireless-specific filters</li>
+<li>Channel/signal columns</li>
+</ul>
+<h2 id="common-use-cases-and-patterns"><a class="header" href="#common-use-cases-and-patterns">Common Use Cases and Patterns</a></h2>
+<h3 id="network-troubleshooting"><a class="header" href="#network-troubleshooting">Network Troubleshooting</a></h3>
+<p><strong>Connection Issues:</strong></p>
+<pre><code>1. Verify connectivity:
+   - Filter: ip.addr == [target]
+   - Check for responses
+
+2. Check TCP handshake:
+   - Filter: tcp.flags.syn == 1
+   - Look for SYN, SYN-ACK, ACK
+
+3. Identify failures:
+   - Filter: tcp.flags.reset == 1 or icmp.type == 3
+</code></pre>
+<p><strong>Slow Network:</strong></p>
+<pre><code>1. Find retransmissions:
+   - Filter: tcp.analysis.retransmission
+   - Check percentage
+
+2. Check TCP window:
+   - Filter: tcp.analysis.zero_window
+   - Indicates receiver overwhelmed
+
+3. Analyze response times:
+   - Statistics → Service Response Time
+   - Identify slow services
+</code></pre>
+<p><strong>DNS Problems:</strong></p>
+<pre><code>1. Check DNS queries:
+   - Filter: dns.flags.response == 0
+
+2. Find errors:
+   - Filter: dns.flags.rcode != 0
+   - Look for NXDOMAIN, SERVFAIL
+
+3. Slow resolution:
+   - Filter: dns.time &gt; 1.0
+   - Check response times
+</code></pre>
+<h3 id="security-analysis"><a class="header" href="#security-analysis">Security Analysis</a></h3>
+<p><strong>Port Scanning Detection:</strong></p>
+<pre><code>1. Many SYN packets:
+   - Filter: tcp.flags.syn == 1 and tcp.flags.ack == 0
+   - Statistics → Conversations
+   - Look for one source, many destinations
+
+2. Identify scanner:
+   - Check source IP
+   - Note targeted ports
+   - Document scan pattern
+</code></pre>
+<p><strong>Malware Traffic:</strong></p>
+<pre><code>1. Suspicious connections:
+   - Filter: http.request
+   - Look for unusual user agents
+   - Check for encoded data
+
+2. DNS tunneling:
+   - Filter: dns.qry.name.len &gt; 50
+   - Look for long random-looking domains
+
+3. C2 beaconing:
+   - Statistics → IO Graph
+   - Look for regular intervals
+   - Consistent packet sizes
+</code></pre>
+<p><strong>Credential Theft:</strong></p>
+<pre><code>1. Clear text passwords:
+   - Filter: http.authorization
+   - Follow → TCP Stream
+
+2. FTP credentials:
+   - Filter: ftp.request.command == "USER" or ftp.request.command == "PASS"
+
+3. NTLM hashes:
+   - Filter: ntlmssp.auth
+</code></pre>
+<h3 id="application-debugging"><a class="header" href="#application-debugging">Application Debugging</a></h3>
+<p><strong>HTTP API Issues:</strong></p>
+<pre><code>1. Find failed requests:
+   - Filter: http.response.code &gt;= 400
+
+2. Check specific endpoint:
+   - Filter: http.request.uri contains "/api/users"
+
+3. Analyze timing:
+   - Filter: http.time &gt; 1.0
+   - Find slow requests
+</code></pre>
+<p><strong>Database Queries:</strong></p>
+<pre><code>1. MySQL slow queries:
+   - Filter: mysql.query
+   - Check query content
+
+2. Failed connections:
+   - Filter: mysql.error_message
+</code></pre>
+<p><strong>WebSocket Debugging:</strong></p>
+<pre><code>1. Find WebSocket traffic:
+   - Filter: websocket
+
+2. Check messages:
+   - Filter: websocket.payload
+   - Follow → TCP Stream
+</code></pre>
+<h3 id="voip-analysis"><a class="header" href="#voip-analysis">VoIP Analysis</a></h3>
+<p><strong>SIP Call Analysis:</strong></p>
+<pre><code>1. View all calls:
+   - Telephony → VoIP Calls
+   - Shows all SIP sessions
+
+2. Analyze specific call:
+   - Select call
+   - Click "Flow Sequence"
+   - See call setup/teardown
+
+3. Check RTP quality:
+   - Telephony → RTP → Stream Analysis
+   - Check packet loss, jitter, MOS
+</code></pre>
+<p><strong>Audio Playback:</strong></p>
+<pre><code>1. Telephony → RTP → RTP Player
+2. Select streams
+3. Click "Play"
+4. Listen to audio quality
+</code></pre>
+<h3 id="performance-analysis"><a class="header" href="#performance-analysis">Performance Analysis</a></h3>
+<p><strong>Identify Bandwidth Hogs:</strong></p>
+<pre><code>1. Statistics → Conversations → IPv4
+2. Sort by "Bytes"
+3. Identify top talkers
+4. Apply as filter to investigate
+</code></pre>
+<p><strong>Protocol Distribution:</strong></p>
+<pre><code>1. Statistics → Protocol Hierarchy
+2. See percentage breakdown
+3. Identify unexpected protocols
+</code></pre>
+<p><strong>Traffic Over Time:</strong></p>
+<pre><code>1. Statistics → IO Graph
+2. View packets/bytes per second
+3. Identify spikes
+4. Correlate with issues
+</code></pre>
+<h3 id="wireless-analysis"><a class="header" href="#wireless-analysis">Wireless Analysis</a></h3>
+<p><strong>Find Networks:</strong></p>
+<pre><code>1. Filter: wlan.fc.type_subtype == 8
+   (Beacon frames)
+2. Statistics → WLAN Traffic
+3. See all SSIDs
+</code></pre>
+<p><strong>Capture Handshake:</strong></p>
+<pre><code>1. Start wireless capture in monitor mode
+2. Filter: eapol
+3. Look for 4-way handshake (4 EAPOL packets)
+4. Save for password cracking or decryption
+</code></pre>
+<p><strong>Analyze Performance:</strong></p>
+<pre><code>1. Check retries:
+   - Filter: wlan.fc.retry == 1
+
+2. Check signal:
+   - Add column: radiotap.dbm_antsignal
+
+3. Check channel utilization:
+   - Statistics → WLAN Traffic
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="capture-best-practices"><a class="header" href="#capture-best-practices">Capture Best Practices</a></h3>
+<p><strong>1. Use Capture Filters:</strong></p>
+<ul>
+<li>Filter at capture time to reduce data</li>
+<li>Save disk space and memory</li>
+<li>Improve performance</li>
+</ul>
+<pre><code>Examples:
+host 192.168.1.1
+tcp port 80 or tcp port 443
+not port 22
+</code></pre>
+<p><strong>2. Set Appropriate Snapshot Length:</strong></p>
+<ul>
+<li>Full packets (default): 0 or 65535</li>
+<li>Headers only: 96 bytes</li>
+<li>Conservative: 256 bytes</li>
+</ul>
+<pre><code>Capture Options → Snapshot length: 96
+</code></pre>
+<p><strong>3. Use Ring Buffers:</strong></p>
+<ul>
+<li>Prevent disk fill</li>
+<li>Continuous monitoring</li>
+<li>Automatic rotation</li>
+</ul>
+<pre><code>Capture Options → Output:
+☑ Create new file every 100000 kilobytes
+☑ Use ring buffer: 10 files
+</code></pre>
+<p><strong>4. Name Files Descriptively:</strong></p>
+<pre><code>Good:
+  2024-01-15_web-server-issue_eth0.pcapng
+  prod-db-slowness-2024-01-15.pcap
+
+Bad:
+  capture1.pcap
+  test.pcap
+  new.pcap
+</code></pre>
+<p><strong>5. Document Captures:</strong></p>
+<pre><code>Statistics → Capture File Properties → Edit
+Add comments:
+  "Captured during reported slowness at 14:30
+   Server: 192.168.1.50
+   Client: 192.168.1.100
+   Symptom: 5-second page load times"
+</code></pre>
+<h3 id="analysis-best-practices"><a class="header" href="#analysis-best-practices">Analysis Best Practices</a></h3>
+<p><strong>1. Start with Statistics:</strong></p>
+<pre><code>Before diving into packets:
+- Statistics → Protocol Hierarchy (what protocols?)
+- Statistics → Conversations (who's talking?)
+- Statistics → Endpoints (top talkers?)
+- Analyze → Expert Information (problems?)
+</code></pre>
+<p><strong>2. Use Display Filters Progressively:</strong></p>
+<pre><code>Start broad, narrow down:
+1. http
+2. http and ip.addr == 192.168.1.1
+3. http and ip.addr == 192.168.1.1 and http.response.code &gt;= 400
+</code></pre>
+<p><strong>3. Follow Streams:</strong></p>
+<pre><code>For application-level analysis:
+- Right-click → Follow → TCP/UDP/HTTP Stream
+- See complete conversation
+- Understand context
+</code></pre>
+<p><strong>4. Use Time References:</strong></p>
+<pre><code>Mark key events:
+- Right-click → Set Time Reference
+- Measure time between events
+- Correlate with logs
+</code></pre>
+<p><strong>5. Apply Coloring Rules:</strong></p>
+<pre><code>Visual identification:
+- Color errors in red
+- Color important traffic
+- Quick pattern recognition
+</code></pre>
+<p><strong>6. Save Work:</strong></p>
+<pre><code>Save display filters:
+- Filter toolbar → Bookmark button
+- Name filters descriptively
+- Organize into categories
+</code></pre>
+<h3 id="privacy-and-security"><a class="header" href="#privacy-and-security">Privacy and Security</a></h3>
+<p><strong>1. Minimize Capture Scope:</strong></p>
+<ul>
+<li>Only capture necessary traffic</li>
+<li>Use specific capture filters</li>
+<li>Limit to required interfaces</li>
+</ul>
+<p><strong>2. Secure Capture Files:</strong></p>
+<pre><code class="language-bash"># Set restrictive permissions
+chmod 600 capture.pcap
+
+# Encrypt sensitive captures
+gpg -c capture.pcap
+
+# Secure transfer
+scp capture.pcap user@secure-host:/encrypted/volume/
+</code></pre>
+<p><strong>3. Sanitize Before Sharing:</strong></p>
+<ul>
+<li>Remove sensitive data</li>
+<li>Anonymize IP addresses with editcap</li>
+<li>Redact passwords and credentials</li>
+<li>Filter to only relevant packets</li>
+</ul>
+<p><strong>4. Data Retention:</strong></p>
+<ul>
+<li>Delete captures when no longer needed</li>
+<li>Follow organizational policies</li>
+<li>Don't keep captures indefinitely</li>
+</ul>
+<p><strong>5. Access Control:</strong></p>
+<ul>
+<li>Limit who can capture traffic</li>
+<li>Audit packet capture activity</li>
+<li>Use separate profiles for different roles</li>
+</ul>
+<h3 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h3>
+<p><strong>1. Display Filter Performance:</strong></p>
+<pre><code>Fast filters:
+- ip.addr == 192.168.1.1
+- tcp.port == 80
+- frame.number &gt;= 100
+
+Slow filters (avoid on large captures):
+- matches (regex) operations
+- complex string operations
+- contains on large fields
+</code></pre>
+<p><strong>2. Large Capture Files:</strong></p>
+<pre><code>Strategies:
+1. Split into smaller files (editcap)
+2. Use command-line tshark for statistics
+3. Filter and save subset
+4. Increase system memory
+5. Use faster storage (SSD)
+</code></pre>
+<p><strong>3. Disable Unnecessary Dissection:</strong></p>
+<pre><code>Analyze → Enabled Protocols
+Disable protocols you don't need:
+- Speeds up loading
+- Reduces memory
+- Faster filtering
+</code></pre>
+<p><strong>4. Limit Real-Time Updates:</strong></p>
+<pre><code>During capture:
+☐ Update list of packets in real-time
+☐ Automatically scroll during live capture
+
+Enable only when needed for monitoring
+</code></pre>
+<h3 id="file-management"><a class="header" href="#file-management">File Management</a></h3>
+<p><strong>1. Organize Captures:</strong></p>
+<pre><code>Directory structure:
+~/captures/
+  ├── 2024-01/
+  │   ├── web-server/
+  │   ├── database/
+  │   └── network/
+  ├── 2024-02/
+  └── current/
+</code></pre>
+<p><strong>2. Use Consistent Naming:</strong></p>
+<pre><code>Format: YYYY-MM-DD_description_interface.ext
+Examples:
+  2024-01-15_slow-http_eth0.pcapng
+  2024-01-15_dns-issues_any.pcap
+</code></pre>
+<p><strong>3. Document Investigations:</strong></p>
+<pre><code>Keep alongside capture:
+  capture.pcapng
+  capture_notes.txt
+  capture_analysis.pdf
+</code></pre>
+<p><strong>4. Backup Important Captures:</strong></p>
+<ul>
+<li>Critical investigations</li>
+<li>Compliance evidence</li>
+<li>Security incidents</li>
+<li>Training examples</li>
+</ul>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="permission-issues"><a class="header" href="#permission-issues">Permission Issues</a></h3>
+<p><strong>Problem:</strong> Can't capture packets</p>
+<p><strong>Linux:</strong></p>
+<pre><code class="language-bash"># Check groups
+groups
+
+# Add to wireshark group
+sudo usermod -a -G wireshark $USER
+newgrp wireshark
+
+# Set capabilities
+sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
+
+# Verify
+getcap /usr/bin/dumpcap
+</code></pre>
+<p><strong>macOS:</strong></p>
+<pre><code class="language-bash"># Check ChmodBPF
+sudo launchctl list | grep chmod
+
+# Reinstall if needed
+# Run Wireshark installer's "Install ChmodBPF" package
+
+# Check permissions
+ls -la /dev/bpf*
+
+# Add to access_bpf group
+sudo dseditgroup -o edit -a $USER -t user access_bpf
+</code></pre>
+<p><strong>Windows:</strong></p>
+<pre><code class="language-plaintext">1. Run as Administrator
+2. Reinstall Npcap
+3. Check firewall settings
+4. Verify Npcap service running:
+   services.msc → Npcap Packet Driver (npf)
+</code></pre>
+<h3 id="no-interfaces-available"><a class="header" href="#no-interfaces-available">No Interfaces Available</a></h3>
+<p><strong>Problem:</strong> No interfaces shown</p>
+<p><strong>Solutions:</strong></p>
+<pre><code class="language-bash"># Refresh interfaces
+Capture → Refresh Interfaces (Ctrl+Shift+R)
+
+# Check with dumpcap
+dumpcap -D
+
+# Check with tshark
+tshark -D
+
+# Check system interfaces
+ip link show        # Linux
+ifconfig           # macOS/BSD
+ipconfig           # Windows
+
+# Restart Wireshark
+# Reboot system
+</code></pre>
+<h3 id="slow-performance"><a class="header" href="#slow-performance">Slow Performance</a></h3>
+<p><strong>Problem:</strong> Wireshark slow or freezing</p>
+<p><strong>Solutions:</strong></p>
+<p><strong>1. Large Capture File:</strong></p>
+<pre><code class="language-bash"># Split file
+editcap -c 10000 large.pcap small.pcap
+# Creates small_00000.pcap, small_00001.pcap, etc.
+
+# Filter and save subset
+tshark -r large.pcap -Y "http" -w http-only.pcap
+
+# Use tshark for statistics
+tshark -r large.pcap -q -z io,phs
+</code></pre>
+<p><strong>2. Disable Name Resolution:</strong></p>
+<pre><code>View → Name Resolution → Uncheck all
+Or: Edit → Preferences → Name Resolution → Uncheck all
+</code></pre>
+<p><strong>3. Disable Protocols:</strong></p>
+<pre><code>Analyze → Enabled Protocols
+Disable unused protocols
+</code></pre>
+<p><strong>4. Limit Real-Time Updates:</strong></p>
+<pre><code>Edit → Preferences → Capture
+☐ Update list of packets in real-time
+</code></pre>
+<p><strong>5. Increase Memory:</strong></p>
+<ul>
+<li>Close other applications</li>
+<li>Add system RAM</li>
+<li>Use 64-bit Wireshark</li>
+</ul>
+<h3 id="display-issues"><a class="header" href="#display-issues">Display Issues</a></h3>
+<p><strong>Problem:</strong> Packets not displayed correctly</p>
+<p><strong>Solutions:</strong></p>
+<p><strong>1. Wrong Dissector:</strong></p>
+<pre><code>Right-click packet → Decode As
+Select correct protocol
+</code></pre>
+<p><strong>2. Missing Preferences:</strong></p>
+<pre><code>Edit → Preferences → Protocols → [Protocol]
+Configure ports, options
+</code></pre>
+<p><strong>3. Corrupted Profile:</strong></p>
+<pre><code>Create new profile:
+Edit → Configuration Profiles → New
+</code></pre>
+<p><strong>4. Reset Preferences:</strong></p>
+<pre><code>Close Wireshark
+
+# Linux/macOS
+rm -rf ~/.config/wireshark/preferences
+rm -rf ~/.wireshark/preferences
+
+# Windows
+del %APPDATA%\Wireshark\preferences
+
+Restart Wireshark
+</code></pre>
+<h3 id="decryption-not-working"><a class="header" href="#decryption-not-working">Decryption Not Working</a></h3>
+<p><strong>Problem:</strong> TLS/SSL not decrypting</p>
+<p><strong>Check:</strong></p>
+<p><strong>1. SSLKEYLOGFILE:</strong></p>
+<pre><code class="language-bash"># Verify environment variable set
+echo $SSLKEYLOGFILE     # Linux/macOS
+echo %SSLKEYLOGFILE%   # Windows
+
+# Check file exists and has data
+cat ~/sslkeys.log
+
+# Verify configured in Wireshark
+Edit → Preferences → Protocols → TLS
+Check (Pre)-Master-Secret log filename
+</code></pre>
+<p><strong>2. Key Exchange:</strong></p>
+<pre><code>Check TLS handshake:
+Filter: tls.handshake.type == 2
+
+Look at Server Hello:
+- Cipher suite used
+- If DHE/ECDHE: forward secrecy (can't decrypt without keys)
+- If RSA: can decrypt with private key
+</code></pre>
+<p><strong>3. Capture Complete Handshake:</strong></p>
+<pre><code>Must capture from beginning:
+- Client Hello
+- Server Hello
+- Key exchange
+- Finished messages
+
+If missing: restart capture and regenerate traffic
+</code></pre>
+<p><strong>Problem:</strong> WPA/WPA2 not decrypting</p>
+<p><strong>Check:</strong></p>
+<p><strong>1. 4-Way Handshake:</strong></p>
+<pre><code>Filter: eapol
+Should see 4 EAPOL packets
+If missing: deauth client to force reconnect
+</code></pre>
+<p><strong>2. Correct Password:</strong></p>
+<pre><code>Edit → Preferences → Protocols → IEEE 802.11
+Decryption keys → Edit
+Format: wpa-pwd
+Key: password:SSID
+</code></pre>
+<p><strong>3. Key Format:</strong></p>
+<pre><code>Correct: MyPassword:MySSID
+Wrong: MyPassword
+Wrong: MySSID:MyPassword
+</code></pre>
+<h3 id="capture-issues"><a class="header" href="#capture-issues">Capture Issues</a></h3>
+<p><strong>Problem:</strong> Packets dropped during capture</p>
+<p><strong>Solutions:</strong></p>
+<p><strong>1. Increase Buffer:</strong></p>
+<pre><code>Capture Options → Input
+Buffer size: 512 MB
+</code></pre>
+<p><strong>2. Use Dumpcap:</strong></p>
+<pre><code class="language-bash"># Lower overhead
+dumpcap -i eth0 -w capture.pcap
+</code></pre>
+<p><strong>3. Faster Storage:</strong></p>
+<pre><code class="language-bash"># Write to SSD or RAM disk
+dumpcap -i eth0 -w /dev/shm/capture.pcap
+</code></pre>
+<p><strong>4. Use Capture Filter:</strong></p>
+<pre><code>Reduce captured traffic:
+tcp port 80 or tcp port 443
+</code></pre>
+<p><strong>5. Disable Display:</strong></p>
+<pre><code>Capture Options:
+☐ Update list of packets in real-time
+</code></pre>
+<h3 id="filter-syntax-errors"><a class="header" href="#filter-syntax-errors">Filter Syntax Errors</a></h3>
+<p><strong>Problem:</strong> Display filter not working</p>
+<p><strong>Common Errors:</strong></p>
+<p><strong>1. Wrong Operator:</strong></p>
+<pre><code>Wrong: ip.addr = 192.168.1.1
+Right: ip.addr == 192.168.1.1
+
+Wrong: tcp.port = 80
+Right: tcp.port == 80
+</code></pre>
+<p><strong>2. Missing Quotes:</strong></p>
+<pre><code>Wrong: http.host == www.example.com
+Right: http.host == "www.example.com"
+
+Wrong: http.request.method == POST
+Right: http.request.method == "POST"
+</code></pre>
+<p><strong>3. Field Name:</strong></p>
+<pre><code>Wrong: http.response == 404
+Right: http.response.code == 404
+
+Wrong: ip.source == 192.168.1.1
+Right: ip.src == 192.168.1.1
+</code></pre>
+<p><strong>Find Correct Field:</strong></p>
+<pre><code>1. Right-click field in packet details
+2. Copy → Field Name
+3. Paste in filter
+</code></pre>
+<p><strong>4. Boolean Logic:</strong></p>
+<pre><code>Wrong: ip.addr == 192.168.1.1 or 192.168.1.2
+Right: ip.addr == 192.168.1.1 or ip.addr == 192.168.1.2
+
+Wrong: tcp.port == 80 and 443
+Right: tcp.port == 80 or tcp.port == 443
+</code></pre>
+<p><strong>Test Filter:</strong></p>
+<ul>
+<li>Type in filter toolbar</li>
+<li>Green background = valid</li>
+<li>Red background = invalid</li>
+<li>Yellow = unusual but valid</li>
+</ul>
+<h2 id="keyboard-shortcuts"><a class="header" href="#keyboard-shortcuts">Keyboard Shortcuts</a></h2>
+<h3 id="navigation"><a class="header" href="#navigation">Navigation</a></h3>
+<ul>
+<li><strong>Ctrl+Home</strong> - First packet</li>
+<li><strong>Ctrl+End</strong> - Last packet</li>
+<li><strong>Ctrl+Up</strong> - Previous packet</li>
+<li><strong>Ctrl+Down</strong> - Next packet</li>
+<li><strong>Ctrl+.</strong> - Next packet in conversation</li>
+<li><strong>Ctrl+,</strong> - Previous packet in conversation</li>
+<li><strong>Ctrl+G</strong> - Go to packet</li>
+<li><strong>Ctrl+Left</strong> - Go back in packet history</li>
+<li><strong>Ctrl+Right</strong> - Go forward in packet history</li>
+</ul>
+<h3 id="capture"><a class="header" href="#capture">Capture</a></h3>
+<ul>
+<li><strong>Ctrl+E</strong> - Start/stop capture</li>
+<li><strong>Ctrl+R</strong> - Restart capture</li>
+<li><strong>Ctrl+K</strong> - Capture options</li>
+</ul>
+<h3 id="files"><a class="header" href="#files">Files</a></h3>
+<ul>
+<li><strong>Ctrl+O</strong> - Open file</li>
+<li><strong>Ctrl+S</strong> - Save</li>
+<li><strong>Ctrl+Shift+S</strong> - Save as</li>
+<li><strong>Ctrl+W</strong> - Close file</li>
+<li><strong>Ctrl+Q</strong> - Quit</li>
+</ul>
+<h3 id="display"><a class="header" href="#display">Display</a></h3>
+<ul>
+<li><strong>Ctrl+M</strong> - Mark/unmark packet</li>
+<li><strong>Ctrl+Shift+M</strong> - Mark all displayed</li>
+<li><strong>Ctrl+Alt+M</strong> - Unmark all</li>
+<li><strong>Ctrl+T</strong> - Set/unset time reference</li>
+<li><strong>Ctrl+Alt+T</strong> - Unset all time references</li>
+<li><strong>Ctrl+D</strong> - Ignore/unignore packet</li>
+</ul>
+<h3 id="find"><a class="header" href="#find">Find</a></h3>
+<ul>
+<li><strong>Ctrl+F</strong> - Find packet</li>
+<li><strong>Ctrl+N</strong> - Find next</li>
+<li><strong>Ctrl+B</strong> - Find previous</li>
+</ul>
+<h3 id="view"><a class="header" href="#view">View</a></h3>
+<ul>
+<li><strong>Ctrl++</strong> - Zoom in</li>
+<li><strong>Ctrl+-</strong> - Zoom out</li>
+<li><strong>Ctrl+0</strong> - Normal size</li>
+<li><strong>Ctrl+Shift+Z</strong> - Zoom to fit</li>
+<li><strong>F5</strong> - Reload</li>
+<li><strong>F8</strong> - Toggle packet bytes pane</li>
+<li><strong>F9</strong> - Toggle packet list pane</li>
+<li><strong>F10</strong> - Toggle packet details pane</li>
+</ul>
+<h3 id="filtering"><a class="header" href="#filtering">Filtering</a></h3>
+<ul>
+<li><strong>Ctrl+Slash</strong> - Apply display filter</li>
+<li><strong>Ctrl+Backslash</strong> - Clear display filter</li>
+<li><strong>/</strong> - Jump to filter toolbar</li>
+</ul>
+<h3 id="misc"><a class="header" href="#misc">Misc</a></h3>
+<ul>
+<li><strong>Ctrl+I</strong> - Capture interfaces</li>
+<li><strong>Ctrl+Shift+P</strong> - Preferences</li>
+<li><strong>Space</strong> - Toggle expand/collapse packet details</li>
+<li><strong>Tab</strong> - Move between panes</li>
+<li><strong>Ctrl+C</strong> - Copy (selected text or packet info)</li>
+</ul>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="common-display-filters"><a class="header" href="#common-display-filters">Common Display Filters</a></h3>
+<pre><code># IP addresses
+ip.addr == 192.168.1.1
+ip.src == 192.168.1.1
+ip.dst == 192.168.1.1
+
+# Ports
+tcp.port == 80
+udp.port == 53
+tcp.srcport == 443
+tcp.dstport == 8080
+
+# Protocols
+http
+dns
+tls or ssl
+icmp
+arp
+
+# HTTP
+http.request
+http.response
+http.request.method == "GET"
+http.response.code == 404
+http.host == "example.com"
+
+# DNS
+dns.qry.name contains "example"
+dns.flags.rcode != 0
+
+# TCP analysis
+tcp.analysis.retransmission
+tcp.analysis.duplicate_ack
+tcp.analysis.zero_window
+tcp.stream == 0
+
+# Combinations
+http and ip.addr == 192.168.1.1
+tcp.port == 443 and tcp.flags.syn == 1
+dns and not dns.flags.response
+</code></pre>
+<h3 id="common-capture-filters"><a class="header" href="#common-capture-filters">Common Capture Filters</a></h3>
+<pre><code># Host
+host 192.168.1.1
+src host 192.168.1.1
+dst host 192.168.1.1
+
+# Network
+net 192.168.1.0/24
+src net 192.168.1.0/24
+
+# Port
+port 80
+tcp port 443
+udp port 53
+portrange 8000-9000
+
+# Protocol
+tcp
+udp
+icmp
+arp
+
+# Combinations
+host 192.168.1.1 and port 80
+tcp and not port 22
+net 192.168.1.0/24 and udp
+</code></pre>
+<h3 id="color-meaning"><a class="header" href="#color-meaning">Color Meaning</a></h3>
+<ul>
+<li><strong>Light Purple</strong> - Bad TCP</li>
+<li><strong>Light Green</strong> - HTTP</li>
+<li><strong>Light Blue</strong> - UDP</li>
+<li><strong>Pink</strong> - ICMP</li>
+<li><strong>Dark Gray</strong> - TCP</li>
+<li><strong>Yellow</strong> - Routing, SMB</li>
+<li><strong>Black Background</strong> - Marked packets</li>
+<li><strong>Red Text</strong> - Errors</li>
+</ul>
+<h3 id="statistics-locations"><a class="header" href="#statistics-locations">Statistics Locations</a></h3>
+<ul>
+<li><strong>Protocol Hierarchy</strong> - Statistics → Protocol Hierarchy</li>
+<li><strong>Conversations</strong> - Statistics → Conversations</li>
+<li><strong>Endpoints</strong> - Statistics → Endpoints</li>
+<li><strong>IO Graph</strong> - Statistics → IO Graph</li>
+<li><strong>Flow Graph</strong> - Statistics → Flow Graph</li>
+<li><strong>HTTP</strong> - Statistics → HTTP</li>
+<li><strong>DNS</strong> - Statistics → DNS</li>
+</ul>
+<h3 id="expert-info-severity"><a class="header" href="#expert-info-severity">Expert Info Severity</a></h3>
+<ul>
+<li><strong>🔴 Errors</strong> - Malformed, checksums, etc.</li>
+<li><strong>🟡 Warnings</strong> - Retransmissions, dup ACKs</li>
+<li><strong>🔵 Notes</strong> - Unusual but valid</li>
+<li><strong>⚪ Chats</strong> - Normal workflow</li>
+</ul>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Wireshark is an incredibly powerful and comprehensive network analysis tool. Mastering it requires understanding both the technical aspects of network protocols and the features of the tool itself.</p>
+<p><strong>Key Takeaways:</strong></p>
+<p><strong>1. Authorization First:</strong></p>
+<ul>
+<li>Always get permission before capturing</li>
+<li>Understand legal implications</li>
+<li>Follow privacy requirements</li>
+<li>Document scope and purpose</li>
+</ul>
+<p><strong>2. Capture Efficiently:</strong></p>
+<ul>
+<li>Use capture filters to reduce data</li>
+<li>Set appropriate snapshot lengths</li>
+<li>Use ring buffers for long-term monitoring</li>
+<li>Document captures with comments</li>
+</ul>
+<p><strong>3. Analyze Methodically:</strong></p>
+<ul>
+<li>Start with statistics</li>
+<li>Use display filters progressively</li>
+<li>Follow streams for context</li>
+<li>Leverage expert information</li>
+</ul>
+<p><strong>4. Master the Filters:</strong></p>
+<ul>
+<li>Understand capture vs display filters</li>
+<li>Learn the filter syntax</li>
+<li>Save common filters</li>
+<li>Use filter macros for complex expressions</li>
+</ul>
+<p><strong>5. Use Visual Aids:</strong></p>
+<ul>
+<li>Apply coloring rules</li>
+<li>Use IO graphs</li>
+<li>View flow diagrams</li>
+<li>Check TCP stream graphs</li>
+</ul>
+<p><strong>6. Protect Privacy:</strong></p>
+<ul>
+<li>Minimize capture scope</li>
+<li>Secure capture files</li>
+<li>Sanitize before sharing</li>
+<li>Follow data retention policies</li>
+</ul>
+<p><strong>7. Stay Organized:</strong></p>
+<ul>
+<li>Use configuration profiles</li>
+<li>Name files descriptively</li>
+<li>Organize by project/date</li>
+<li>Document findings</li>
+</ul>
+<p><strong>Learning Path:</strong></p>
+<p><strong>Week 1-2: Basics</strong></p>
+<ul>
+<li>Install and configure</li>
+<li>Understand interface</li>
+<li>Capture and save packets</li>
+<li>Basic display filters</li>
+<li>Follow streams</li>
+</ul>
+<p><strong>Week 3-4: Filtering</strong></p>
+<ul>
+<li>Master display filter syntax</li>
+<li>Create custom filters</li>
+<li>Use filter bookmarks</li>
+<li>Apply capture filters</li>
+<li>Boolean logic</li>
+</ul>
+<p><strong>Month 2: Analysis</strong></p>
+<ul>
+<li>Protocol hierarchy</li>
+<li>Conversations and endpoints</li>
+<li>Expert information</li>
+<li>IO graphs</li>
+<li>TCP analysis</li>
+</ul>
+<p><strong>Month 3: Advanced</strong></p>
+<ul>
+<li>Decryption (TLS, WPA)</li>
+<li>Custom coloring rules</li>
+<li>Statistics windows</li>
+<li>Stream graphs</li>
+<li>Configuration profiles</li>
+</ul>
+<p><strong>Month 4+: Specialized</strong></p>
+<ul>
+<li>VoIP analysis</li>
+<li>Wireless troubleshooting</li>
+<li>Security analysis</li>
+<li>Performance tuning</li>
+<li>Automation with tshark</li>
+</ul>
+<p><strong>Common Workflows:</strong></p>
+<p><strong>Network Troubleshooting:</strong></p>
+<ol>
+<li>Capture during problem</li>
+<li>Check expert information</li>
+<li>Find retransmissions</li>
+<li>Analyze response times</li>
+<li>Identify bottlenecks</li>
+</ol>
+<p><strong>Security Analysis:</strong></p>
+<ol>
+<li>Baseline normal traffic</li>
+<li>Look for anomalies</li>
+<li>Check for known patterns</li>
+<li>Investigate suspicious IPs</li>
+<li>Document findings</li>
+</ol>
+<p><strong>Application Debugging:</strong></p>
+<ol>
+<li>Filter to application</li>
+<li>Follow relevant streams</li>
+<li>Check error responses</li>
+<li>Measure timing</li>
+<li>Correlate with logs</li>
+</ol>
+<p><strong>Resources:</strong></p>
+<p><strong>Official:</strong></p>
+<ul>
+<li>Wireshark website: https://www.wireshark.org/</li>
+<li>User Guide: https://www.wireshark.org/docs/wsug_html_chunked/</li>
+<li>Wiki: https://wiki.wireshark.org/</li>
+<li>Display filter reference: https://www.wireshark.org/docs/dfref/</li>
+<li>Sample captures: https://wiki.wireshark.org/SampleCaptures</li>
+</ul>
+<p><strong>Community:</strong></p>
+<ul>
+<li>Wireshark Q&amp;A: https://ask.wireshark.org/</li>
+<li>Mailing lists: https://www.wireshark.org/lists/</li>
+<li>Bug tracker: https://bugs.wireshark.org/</li>
+</ul>
+<p><strong>Training:</strong></p>
+<ul>
+<li>Wireshark University: https://www.wiresharktraining.com/</li>
+<li>Official training: https://www.wireshark.org/training/</li>
+<li>YouTube channel: Wireshark official channel</li>
+<li>Books: "Wireshark Network Analysis" by Laura Chappell</li>
+</ul>
+<p><strong>Practice:</strong></p>
+<ul>
+<li>Use sample captures from wiki</li>
+<li>Capture your own traffic (with permission)</li>
+<li>Analyze different protocols</li>
+<li>Solve capture challenges</li>
+<li>CTF competitions</li>
+</ul>
+<p><strong>Best Practices Summary:</strong></p>
+<ol>
+<li><strong>Always authorize</strong> your captures</li>
+<li><strong>Use capture filters</strong> to minimize data</li>
+<li><strong>Start with statistics</strong> before diving in</li>
+<li><strong>Filter progressively</strong> from broad to specific</li>
+<li><strong>Follow streams</strong> for application context</li>
+<li><strong>Color packets</strong> for visual identification</li>
+<li><strong>Save work</strong> with profiles and bookmarks</li>
+<li><strong>Secure captures</strong> with appropriate controls</li>
+<li><strong>Document everything</strong> for future reference</li>
+<li><strong>Keep learning</strong> - protocols and features</li>
+</ol>
+<p>Wireshark is an essential tool for anyone working with networks. Whether you're troubleshooting connectivity issues, analyzing application behavior, investigating security incidents, or learning about network protocols, Wireshark provides the visibility and tools you need.</p>
+<p>The more you use Wireshark, the more proficient you'll become at quickly identifying and resolving network issues. Practice on real traffic (with authorization), study different protocols, and gradually explore advanced features.</p>
+<p>Remember: With great power comes great responsibility. Use Wireshark ethically, legally, and with proper authorization.</p>
+<p>Happy analyzing!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../tools/tshark.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../embedded/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../tools/tshark.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../embedded/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

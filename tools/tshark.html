@@ -1,0 +1,2597 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Tshark - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="tshark"><a class="header" href="#tshark">TShark</a></h1>
+<p>TShark is the command-line version of Wireshark, the world's most popular network protocol analyzer. It provides powerful packet capture and analysis capabilities directly from the terminal, making it ideal for remote systems, scripting, automation, and situations where a GUI is unavailable or impractical.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>TShark was developed as part of the Wireshark project (formerly Ethereal) and shares the same robust protocol dissectors and analysis engine. It captures packets from network interfaces or reads saved capture files, providing detailed protocol information and statistics.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Capture live network traffic from interfaces</li>
+<li>Read and analyze pcap/pcapng files</li>
+<li>Rich protocol dissection (supports 3000+ protocols)</li>
+<li>Flexible filtering (capture and display filters)</li>
+<li>Multiple output formats (text, JSON, XML, CSV, PDML, PS)</li>
+<li>Statistical analysis and summaries</li>
+<li>Expert information system</li>
+<li>Follow TCP/UDP/HTTP/TLS streams</li>
+<li>Conversation and endpoint analysis</li>
+<li>Protocol hierarchy statistics</li>
+<li>Scripting and automation friendly</li>
+<li>Remote capture capabilities</li>
+<li>Ring buffer and conditional capture</li>
+<li>Name resolution (MAC, network, transport)</li>
+</ul>
+<p><strong>Common Use Cases:</strong></p>
+<ul>
+<li>Network troubleshooting and diagnostics</li>
+<li>Security analysis and incident response</li>
+<li>Application protocol debugging</li>
+<li>Performance analysis and optimization</li>
+<li>Compliance and audit logging</li>
+<li>Malware traffic analysis</li>
+<li>VoIP quality monitoring</li>
+<li>IoT device communication analysis</li>
+<li>API debugging and testing</li>
+<li>Network forensics</li>
+</ul>
+<h2 id="legal-and-ethical-considerations"><a class="header" href="#legal-and-ethical-considerations">Legal and Ethical Considerations</a></h2>
+<p><strong>IMPORTANT:</strong> Capturing network traffic requires proper authorization and raises privacy concerns. Unauthorized packet capture may be illegal in your jurisdiction and violate privacy laws.</p>
+<p><strong>Best Practices:</strong></p>
+<ul>
+<li>Only capture traffic on networks you own or have explicit written permission to monitor</li>
+<li>Understand and comply with local privacy and wiretapping laws</li>
+<li>Inform users when monitoring may occur (where required by law)</li>
+<li>Minimize captured data to what's necessary</li>
+<li>Secure captured files (they may contain sensitive data)</li>
+<li>Use encryption when transferring capture files</li>
+<li>Implement data retention policies</li>
+<li>Redact sensitive information before sharing captures</li>
+<li>Follow your organization's security and privacy policies</li>
+<li>Be aware that packets may contain passwords, personal data, and confidential information</li>
+</ul>
+<h2 id="basic-concepts"><a class="header" href="#basic-concepts">Basic Concepts</a></h2>
+<h3 id="how-tshark-works"><a class="header" href="#how-tshark-works">How TShark Works</a></h3>
+<p>TShark operates in several modes:</p>
+<ol>
+<li><strong>Live Capture Mode</strong> - Captures packets from network interfaces in real-time</li>
+<li><strong>File Read Mode</strong> - Reads and analyzes previously saved capture files</li>
+<li><strong>Pass-through Mode</strong> - Reads from stdin or writes to stdout for piping</li>
+<li><strong>Statistics Mode</strong> - Generates statistics without detailed packet display</li>
+</ol>
+<h3 id="capture-process"><a class="header" href="#capture-process">Capture Process</a></h3>
+<p>The typical capture process:</p>
+<ol>
+<li><strong>Interface Selection</strong> - Choose network interface(s) to monitor</li>
+<li><strong>Filter Application</strong> - Apply capture filter (BPF) to reduce captured packets</li>
+<li><strong>Packet Capture</strong> - Capture packets via libpcap/WinPcap</li>
+<li><strong>Protocol Dissection</strong> - Analyze and decode protocol layers</li>
+<li><strong>Display Filtering</strong> - Apply display filter to captured packets</li>
+<li><strong>Output Generation</strong> - Format and display/save results</li>
+</ol>
+<h3 id="capture-filters-vs-display-filters"><a class="header" href="#capture-filters-vs-display-filters">Capture Filters vs Display Filters</a></h3>
+<p>Understanding the difference is crucial:</p>
+<p><strong>Capture Filters (BPF - Berkeley Packet Filter):</strong></p>
+<ul>
+<li>Applied during packet capture</li>
+<li>Filter before packets are saved</li>
+<li>More efficient (reduces storage and memory)</li>
+<li>Limited syntax (traditional tcpdump syntax)</li>
+<li>Cannot filter on dissected protocol fields</li>
+<li>Examples: <code>tcp port 80</code>, <code>host 192.168.1.1</code></li>
+</ul>
+<p><strong>Display Filters:</strong></p>
+<ul>
+<li>Applied after packets are captured</li>
+<li>Filter for display/analysis only</li>
+<li>All packets still captured (unless capture filter used)</li>
+<li>Rich syntax (Wireshark filter language)</li>
+<li>Can filter on any dissected field</li>
+<li>Examples: <code>http.request.method == "POST"</code>, <code>tcp.analysis.retransmission</code></li>
+</ul>
+<h3 id="protocol-dissectors"><a class="header" href="#protocol-dissectors">Protocol Dissectors</a></h3>
+<p>TShark uses protocol dissectors to decode packets:</p>
+<ul>
+<li>Automatically detects protocols</li>
+<li>Hierarchical dissection (Layer 2 → Layer 7)</li>
+<li>Over 3000 protocol dissectors</li>
+<li>Extensible via Lua plugins</li>
+<li>Heuristic dissectors for ambiguous protocols</li>
+</ul>
+<h3 id="network-interfaces"><a class="header" href="#network-interfaces">Network Interfaces</a></h3>
+<p>Interface types TShark can capture from:</p>
+<ul>
+<li><strong>Physical interfaces</strong> - Ethernet, Wi-Fi, etc.</li>
+<li><strong>Virtual interfaces</strong> - VPNs, bridges, tunnels</li>
+<li><strong>Loopback</strong> - Local traffic (lo, lo0)</li>
+<li><strong>USB</strong> - USB network devices</li>
+<li><strong>Bluetooth</strong> - Bluetooth interfaces</li>
+<li><strong>Pipe interfaces</strong> - Named pipes for remote capture</li>
+<li><strong>Stdin</strong> - For piped input</li>
+</ul>
+<h3 id="packet-structure"><a class="header" href="#packet-structure">Packet Structure</a></h3>
+<p>Typical packet layers TShark dissects:</p>
+<ol>
+<li><strong>Frame</strong> - Physical layer information</li>
+<li><strong>Link Layer</strong> - Ethernet, Wi-Fi, PPP, etc.</li>
+<li><strong>Network Layer</strong> - IP, IPv6, ARP, ICMP</li>
+<li><strong>Transport Layer</strong> - TCP, UDP, SCTP</li>
+<li><strong>Application Layer</strong> - HTTP, DNS, TLS, SMB, etc.</li>
+</ol>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># Debian/Ubuntu
+sudo apt update
+sudo apt install tshark
+
+# During installation, allow non-root users to capture packets
+# Add your user to wireshark group
+sudo usermod -a -G wireshark $USER
+# Log out and back in for group changes to take effect
+
+# RHEL/CentOS/Fedora
+sudo yum install wireshark
+# or
+sudo dnf install wireshark
+
+# macOS
+brew install wireshark
+# This installs both Wireshark GUI and tshark
+
+# Or download from official site
+# https://www.wireshark.org/download.html
+
+# Verify installation
+tshark --version
+
+# Check available interfaces
+tshark -D
+
+# Test capture (requires permissions)
+sudo tshark -i eth0 -c 10
+</code></pre>
+<h3 id="permission-setup"><a class="header" href="#permission-setup">Permission Setup</a></h3>
+<pre><code class="language-bash"># Linux: Grant capture permissions to non-root users
+
+# Method 1: Add user to wireshark group (Debian/Ubuntu)
+sudo dpkg-reconfigure wireshark-common  # Select "Yes"
+sudo usermod -a -G wireshark $USER
+newgrp wireshark  # Activate group in current session
+
+# Method 2: Set capabilities on dumpcap
+sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
+
+# Method 3: Use sudo (less secure)
+sudo tshark -i eth0
+
+# Verify permissions
+tshark -D  # Should list interfaces without error
+
+# macOS: Install ChmodBPF (happens during Wireshark installation)
+# Check if ChmodBPF is loaded
+sudo launchctl list | grep chmod
+
+# Windows: Run as Administrator or install with packet capture privileges
+</code></pre>
+<h2 id="basic-operations"><a class="header" href="#basic-operations">Basic Operations</a></h2>
+<h3 id="listing-interfaces"><a class="header" href="#listing-interfaces">Listing Interfaces</a></h3>
+<pre><code class="language-bash"># List all available interfaces
+tshark -D
+
+# Example output:
+# 1. eth0
+# 2. wlan0
+# 3. any (Pseudo-device that captures on all interfaces)
+# 4. lo (Loopback)
+
+# List interfaces with details
+tshark -D --list-interfaces
+
+# List data link types for an interface
+tshark -i eth0 -L
+
+# List all interfaces (verbose)
+tshark -D -v
+</code></pre>
+<h3 id="basic-capture"><a class="header" href="#basic-capture">Basic Capture</a></h3>
+<pre><code class="language-bash"># Capture on default interface
+tshark
+
+# Capture on specific interface
+tshark -i eth0
+tshark -i wlan0
+
+# Capture on all interfaces
+tshark -i any
+
+# Capture N packets and stop
+tshark -i eth0 -c 10      # Capture 10 packets
+tshark -i eth0 -c 100     # Capture 100 packets
+
+# Capture for specific duration
+tshark -i eth0 -a duration:60     # Capture for 60 seconds
+tshark -i eth0 -a duration:300    # Capture for 5 minutes
+
+# Capture until file size reached
+tshark -i eth0 -a filesize:10000  # Stop at ~10MB
+
+# Capture to file
+tshark -i eth0 -w capture.pcap
+tshark -i eth0 -w capture.pcapng
+
+# Capture to file with packet count limit
+tshark -i eth0 -c 1000 -w capture.pcap
+
+# Capture without displaying (quiet mode)
+tshark -i eth0 -w capture.pcap -q
+
+# Capture with snapshot length (truncate packets)
+tshark -i eth0 -s 128         # Capture only first 128 bytes
+tshark -i eth0 -s 0           # Capture full packets (default)
+</code></pre>
+<h3 id="reading-capture-files"><a class="header" href="#reading-capture-files">Reading Capture Files</a></h3>
+<pre><code class="language-bash"># Read from pcap file
+tshark -r capture.pcap
+
+# Read first N packets
+tshark -r capture.pcap -c 10
+
+# Read specific packet range
+tshark -r capture.pcap -c 10   # First 10 packets
+
+# Read and apply display filter
+tshark -r capture.pcap -Y "http"
+tshark -r capture.pcap -Y "tcp.port == 443"
+
+# Read and get statistics
+tshark -r capture.pcap -q -z io,phs
+
+# Read from stdin
+cat capture.pcap | tshark -r -
+
+# Read from gzipped file
+zcat capture.pcap.gz | tshark -r -
+</code></pre>
+<h3 id="basic-display-options"><a class="header" href="#basic-display-options">Basic Display Options</a></h3>
+<pre><code class="language-bash"># Verbose output
+tshark -i eth0 -V
+
+# Print packet summary (one line per packet)
+tshark -i eth0
+
+# Print full packet details
+tshark -i eth0 -V
+
+# Print specific fields only
+tshark -i eth0 -T fields -e ip.src -e ip.dst -e tcp.port
+
+# Print packet hex dump
+tshark -i eth0 -x
+
+# Print packet hex and ASCII
+tshark -i eth0 -x -V
+
+# Quiet mode (no output, useful with -w)
+tshark -i eth0 -w capture.pcap -q
+</code></pre>
+<h2 id="capture-filters-bpf-syntax"><a class="header" href="#capture-filters-bpf-syntax">Capture Filters (BPF Syntax)</a></h2>
+<p>Capture filters use Berkeley Packet Filter (BPF) syntax, the same as tcpdump.</p>
+<h3 id="host-filters"><a class="header" href="#host-filters">Host Filters</a></h3>
+<pre><code class="language-bash"># Capture traffic to/from specific host
+tshark -i eth0 -f "host 192.168.1.1"
+
+# Capture traffic FROM specific host
+tshark -i eth0 -f "src host 192.168.1.1"
+
+# Capture traffic TO specific host
+tshark -i eth0 -f "dst host 192.168.1.1"
+
+# Capture traffic to/from hostname
+tshark -i eth0 -f "host www.example.com"
+
+# Multiple hosts
+tshark -i eth0 -f "host 192.168.1.1 or host 192.168.1.2"
+
+# Exclude host
+tshark -i eth0 -f "not host 192.168.1.1"
+</code></pre>
+<h3 id="network-filters"><a class="header" href="#network-filters">Network Filters</a></h3>
+<pre><code class="language-bash"># Capture traffic from/to network
+tshark -i eth0 -f "net 192.168.1.0/24"
+tshark -i eth0 -f "net 10.0.0.0/8"
+
+# Source network
+tshark -i eth0 -f "src net 192.168.0.0/16"
+
+# Destination network
+tshark -i eth0 -f "dst net 10.0.0.0/8"
+
+# Exclude network
+tshark -i eth0 -f "not net 192.168.1.0/24"
+</code></pre>
+<h3 id="port-filters"><a class="header" href="#port-filters">Port Filters</a></h3>
+<pre><code class="language-bash"># Capture specific port
+tshark -i eth0 -f "port 80"
+tshark -i eth0 -f "port 443"
+
+# Source port
+tshark -i eth0 -f "src port 80"
+
+# Destination port
+tshark -i eth0 -f "dst port 443"
+
+# Port range
+tshark -i eth0 -f "portrange 8000-9000"
+
+# Multiple ports
+tshark -i eth0 -f "port 80 or port 443"
+tshark -i eth0 -f "port 80 or port 443 or port 8080"
+
+# Exclude port
+tshark -i eth0 -f "not port 22"
+</code></pre>
+<h3 id="protocol-filters"><a class="header" href="#protocol-filters">Protocol Filters</a></h3>
+<pre><code class="language-bash"># TCP traffic only
+tshark -i eth0 -f "tcp"
+
+# UDP traffic only
+tshark -i eth0 -f "udp"
+
+# ICMP traffic only
+tshark -i eth0 -f "icmp"
+
+# ARP traffic
+tshark -i eth0 -f "arp"
+
+# IP traffic (IPv4)
+tshark -i eth0 -f "ip"
+
+# IPv6 traffic
+tshark -i eth0 -f "ip6"
+
+# Specific protocol with port
+tshark -i eth0 -f "tcp port 80"
+tshark -i eth0 -f "udp port 53"
+
+# Multiple protocols
+tshark -i eth0 -f "tcp or udp"
+tshark -i eth0 -f "icmp or arp"
+</code></pre>
+<h3 id="tcp-flags"><a class="header" href="#tcp-flags">TCP Flags</a></h3>
+<pre><code class="language-bash"># TCP SYN packets
+tshark -i eth0 -f "tcp[tcpflags] &amp; tcp-syn != 0"
+
+# TCP SYN-ACK packets
+tshark -i eth0 -f "tcp[tcpflags] &amp; (tcp-syn|tcp-ack) == (tcp-syn|tcp-ack)"
+
+# TCP RST packets
+tshark -i eth0 -f "tcp[tcpflags] &amp; tcp-rst != 0"
+
+# TCP FIN packets
+tshark -i eth0 -f "tcp[tcpflags] &amp; tcp-fin != 0"
+
+# TCP PSH packets
+tshark -i eth0 -f "tcp[tcpflags] &amp; tcp-push != 0"
+
+# TCP with no flags (NULL scan)
+tshark -i eth0 -f "tcp[tcpflags] == 0"
+
+# TCP with FIN, PSH, URG (Xmas scan)
+tshark -i eth0 -f "tcp[tcpflags] &amp; (tcp-fin|tcp-push|tcp-urg) != 0"
+</code></pre>
+<h3 id="complex-filters"><a class="header" href="#complex-filters">Complex Filters</a></h3>
+<pre><code class="language-bash"># Combine host and port
+tshark -i eth0 -f "host 192.168.1.1 and port 80"
+
+# Combine protocol and network
+tshark -i eth0 -f "tcp and net 192.168.1.0/24"
+
+# Multiple conditions with AND
+tshark -i eth0 -f "host 192.168.1.1 and tcp and port 443"
+
+# Multiple conditions with OR
+tshark -i eth0 -f "host 192.168.1.1 or host 192.168.1.2"
+
+# Complex boolean logic
+tshark -i eth0 -f "(host 192.168.1.1 or host 192.168.1.2) and port 80"
+
+# Exclude traffic
+tshark -i eth0 -f "not host 192.168.1.1 and not port 22"
+
+# HTTP and HTTPS traffic
+tshark -i eth0 -f "tcp port 80 or tcp port 443"
+
+# DNS traffic (TCP and UDP)
+tshark -i eth0 -f "port 53"
+tshark -i eth0 -f "tcp port 53 or udp port 53"
+
+# Capture everything except SSH
+tshark -i eth0 -f "not port 22"
+
+# Specific host on specific ports
+tshark -i eth0 -f "host 192.168.1.1 and (port 80 or port 443)"
+
+# Non-local traffic only
+tshark -i eth0 -f "not net 127.0.0.0/8"
+</code></pre>
+<h3 id="ethernet-and-mac-filters"><a class="header" href="#ethernet-and-mac-filters">Ethernet and MAC Filters</a></h3>
+<pre><code class="language-bash"># Capture by MAC address
+tshark -i eth0 -f "ether host 00:11:22:33:44:55"
+
+# Source MAC
+tshark -i eth0 -f "ether src 00:11:22:33:44:55"
+
+# Destination MAC
+tshark -i eth0 -f "ether dst 00:11:22:33:44:55"
+
+# Broadcast traffic
+tshark -i eth0 -f "ether broadcast"
+
+# Multicast traffic
+tshark -i eth0 -f "ether multicast"
+
+# Specific EtherType
+tshark -i eth0 -f "ether proto 0x0800"  # IPv4
+tshark -i eth0 -f "ether proto 0x0806"  # ARP
+tshark -i eth0 -f "ether proto 0x86dd"  # IPv6
+</code></pre>
+<h3 id="packet-size-filters"><a class="header" href="#packet-size-filters">Packet Size Filters</a></h3>
+<pre><code class="language-bash"># Packets less than size
+tshark -i eth0 -f "less 128"
+
+# Packets greater than size
+tshark -i eth0 -f "greater 1000"
+
+# Packets of specific size
+tshark -i eth0 -f "len == 64"
+
+# Packets in size range (using boolean logic)
+tshark -i eth0 -f "greater 100 and less 500"
+
+# Large packets (potential performance issues)
+tshark -i eth0 -f "greater 1500"
+</code></pre>
+<h3 id="vlan-filters"><a class="header" href="#vlan-filters">VLAN Filters</a></h3>
+<pre><code class="language-bash"># Capture VLAN traffic
+tshark -i eth0 -f "vlan"
+
+# Specific VLAN ID
+tshark -i eth0 -f "vlan 100"
+
+# VLAN and protocol
+tshark -i eth0 -f "vlan and tcp"
+
+# VLAN with specific traffic
+tshark -i eth0 -f "vlan 100 and host 192.168.1.1"
+</code></pre>
+<h2 id="display-filters-wireshark-syntax"><a class="header" href="#display-filters-wireshark-syntax">Display Filters (Wireshark Syntax)</a></h2>
+<p>Display filters use Wireshark's powerful filter language for detailed protocol analysis.</p>
+<h3 id="basic-syntax"><a class="header" href="#basic-syntax">Basic Syntax</a></h3>
+<pre><code class="language-bash"># General syntax: protocol.field operator value
+
+# Equals
+tshark -r capture.pcap -Y "ip.src == 192.168.1.1"
+
+# Not equals
+tshark -r capture.pcap -Y "ip.src != 192.168.1.1"
+
+# Logical AND
+tshark -r capture.pcap -Y "ip.src == 192.168.1.1 and tcp.port == 80"
+
+# Logical OR
+tshark -r capture.pcap -Y "tcp.port == 80 or tcp.port == 443"
+
+# Logical NOT
+tshark -r capture.pcap -Y "not icmp"
+tshark -r capture.pcap -Y "!(tcp.port == 22)"
+
+# Parentheses for grouping
+tshark -r capture.pcap -Y "(ip.src == 192.168.1.1 or ip.src == 192.168.1.2) and tcp.port == 80"
+</code></pre>
+<h3 id="ip-filters"><a class="header" href="#ip-filters">IP Filters</a></h3>
+<pre><code class="language-bash"># Source IP
+tshark -Y "ip.src == 192.168.1.1"
+
+# Destination IP
+tshark -Y "ip.dst == 192.168.1.1"
+
+# Source or destination IP (address)
+tshark -Y "ip.addr == 192.168.1.1"
+
+# IP subnet
+tshark -Y "ip.src == 192.168.1.0/24"
+tshark -Y "ip.addr == 10.0.0.0/8"
+
+# Multiple IP addresses
+tshark -Y "ip.src == 192.168.1.1 or ip.src == 192.168.1.2"
+
+# IP address in set
+tshark -Y "ip.addr in {192.168.1.1 192.168.1.2 192.168.1.3}"
+
+# IPv4 only
+tshark -Y "ip"
+
+# IPv6 only
+tshark -Y "ipv6"
+
+# IP TTL
+tshark -Y "ip.ttl &lt; 10"
+tshark -Y "ip.ttl == 64"
+
+# IP fragmentation
+tshark -Y "ip.flags.mf == 1"       # More fragments
+tshark -Y "ip.frag_offset &gt; 0"     # Fragmented packets
+</code></pre>
+<h3 id="tcp-filters"><a class="header" href="#tcp-filters">TCP Filters</a></h3>
+<pre><code class="language-bash"># TCP port (source or destination)
+tshark -Y "tcp.port == 80"
+
+# TCP source port
+tshark -Y "tcp.srcport == 80"
+
+# TCP destination port
+tshark -Y "tcp.dstport == 443"
+
+# TCP port range
+tshark -Y "tcp.port &gt;= 8000 and tcp.port &lt;= 9000"
+
+# TCP flags
+tshark -Y "tcp.flags.syn == 1"              # SYN flag set
+tshark -Y "tcp.flags.ack == 1"              # ACK flag set
+tshark -Y "tcp.flags.fin == 1"              # FIN flag set
+tshark -Y "tcp.flags.reset == 1"            # RST flag set
+tshark -Y "tcp.flags.push == 1"             # PSH flag set
+tshark -Y "tcp.flags.urg == 1"              # URG flag set
+
+# SYN-ACK packets
+tshark -Y "tcp.flags.syn == 1 and tcp.flags.ack == 1"
+
+# TCP SYN only (connection initiation)
+tshark -Y "tcp.flags.syn == 1 and tcp.flags.ack == 0"
+
+# TCP RST packets
+tshark -Y "tcp.flags.reset == 1"
+
+# TCP window size
+tshark -Y "tcp.window_size &lt; 1000"
+
+# TCP sequence number
+tshark -Y "tcp.seq == 1"
+
+# TCP acknowledgment number
+tshark -Y "tcp.ack == 1"
+
+# TCP analysis flags
+tshark -Y "tcp.analysis.retransmission"     # Retransmissions
+tshark -Y "tcp.analysis.duplicate_ack"      # Duplicate ACKs
+tshark -Y "tcp.analysis.lost_segment"       # Lost segments
+tshark -Y "tcp.analysis.fast_retransmission" # Fast retransmissions
+tshark -Y "tcp.analysis.zero_window"        # Zero window
+tshark -Y "tcp.analysis.window_full"        # Window full
+tshark -Y "tcp.analysis.out_of_order"       # Out of order packets
+
+# TCP stream
+tshark -Y "tcp.stream == 0"                 # First TCP stream
+tshark -Y "tcp.stream == 5"                 # Sixth TCP stream
+</code></pre>
+<h3 id="udp-filters"><a class="header" href="#udp-filters">UDP Filters</a></h3>
+<pre><code class="language-bash"># UDP port
+tshark -Y "udp.port == 53"
+
+# UDP source port
+tshark -Y "udp.srcport == 5353"
+
+# UDP destination port
+tshark -Y "udp.dstport == 161"
+
+# UDP length
+tshark -Y "udp.length &lt; 100"
+tshark -Y "udp.length &gt; 1000"
+
+# UDP stream
+tshark -Y "udp.stream == 0"
+</code></pre>
+<h3 id="http-filters"><a class="header" href="#http-filters">HTTP Filters</a></h3>
+<pre><code class="language-bash"># All HTTP traffic
+tshark -Y "http"
+
+# HTTP requests only
+tshark -Y "http.request"
+
+# HTTP responses only
+tshark -Y "http.response"
+
+# HTTP request methods
+tshark -Y "http.request.method == GET"
+tshark -Y "http.request.method == POST"
+tshark -Y "http.request.method == PUT"
+tshark -Y "http.request.method == DELETE"
+
+# HTTP request URI
+tshark -Y "http.request.uri contains \"/api/\""
+tshark -Y "http.request.uri == \"/index.html\""
+
+# HTTP host
+tshark -Y "http.host == \"www.example.com\""
+tshark -Y "http.host contains \"example\""
+
+# HTTP user agent
+tshark -Y "http.user_agent contains \"Mozilla\""
+tshark -Y "http.user_agent contains \"curl\""
+
+# HTTP response codes
+tshark -Y "http.response.code == 200"
+tshark -Y "http.response.code == 404"
+tshark -Y "http.response.code == 500"
+tshark -Y "http.response.code &gt;= 400"        # Client/server errors
+
+# HTTP response code categories
+tshark -Y "http.response.code &gt;= 200 and http.response.code &lt; 300"  # Success
+tshark -Y "http.response.code &gt;= 300 and http.response.code &lt; 400"  # Redirects
+tshark -Y "http.response.code &gt;= 400 and http.response.code &lt; 500"  # Client errors
+tshark -Y "http.response.code &gt;= 500"                                # Server errors
+
+# HTTP content type
+tshark -Y "http.content_type contains \"application/json\""
+tshark -Y "http.content_type contains \"text/html\""
+
+# HTTP cookies
+tshark -Y "http.cookie"
+tshark -Y "http.set_cookie"
+
+# HTTP authorization
+tshark -Y "http.authorization"
+
+# HTTP referer
+tshark -Y "http.referer contains \"google\""
+
+# HTTP with specific header
+tshark -Y "http.header contains \"X-Custom-Header\""
+</code></pre>
+<h3 id="dns-filters"><a class="header" href="#dns-filters">DNS Filters</a></h3>
+<pre><code class="language-bash"># All DNS traffic
+tshark -Y "dns"
+
+# DNS queries only
+tshark -Y "dns.flags.response == 0"
+
+# DNS responses only
+tshark -Y "dns.flags.response == 1"
+
+# DNS query for specific name
+tshark -Y "dns.qry.name == \"www.example.com\""
+tshark -Y "dns.qry.name contains \"example\""
+
+# DNS query type
+tshark -Y "dns.qry.type == 1"              # A record
+tshark -Y "dns.qry.type == 28"             # AAAA record
+tshark -Y "dns.qry.type == 15"             # MX record
+tshark -Y "dns.qry.type == 5"              # CNAME record
+tshark -Y "dns.qry.type == 16"             # TXT record
+
+# DNS response code
+tshark -Y "dns.flags.rcode == 0"           # No error
+tshark -Y "dns.flags.rcode == 3"           # NXDOMAIN (name error)
+
+# DNS answer
+tshark -Y "dns.a"                          # A record in answer
+tshark -Y "dns.aaaa"                       # AAAA record in answer
+
+# DNS with specific IP in answer
+tshark -Y "dns.a == 192.168.1.1"
+
+# DNS recursion desired
+tshark -Y "dns.flags.recdesired == 1"
+</code></pre>
+<h3 id="tlsssl-filters"><a class="header" href="#tlsssl-filters">TLS/SSL Filters</a></h3>
+<pre><code class="language-bash"># All TLS traffic
+tshark -Y "tls"
+# (or "ssl" for older captures/versions)
+
+# TLS handshake
+tshark -Y "tls.handshake"
+
+# TLS Client Hello
+tshark -Y "tls.handshake.type == 1"
+
+# TLS Server Hello
+tshark -Y "tls.handshake.type == 2"
+
+# TLS Certificate
+tshark -Y "tls.handshake.type == 11"
+
+# TLS handshake with specific SNI
+tshark -Y "tls.handshake.extensions_server_name == \"www.example.com\""
+tshark -Y "tls.handshake.extensions_server_name contains \"example\""
+
+# TLS version
+tshark -Y "tls.record.version == 0x0303"   # TLS 1.2
+tshark -Y "tls.record.version == 0x0304"   # TLS 1.3
+
+# TLS cipher suite
+tshark -Y "tls.handshake.ciphersuite"
+
+# TLS alert
+tshark -Y "tls.alert_message"
+
+# TLS application data
+tshark -Y "tls.app_data"
+</code></pre>
+<h3 id="icmp-filters"><a class="header" href="#icmp-filters">ICMP Filters</a></h3>
+<pre><code class="language-bash"># All ICMP traffic
+tshark -Y "icmp"
+
+# ICMP echo request (ping)
+tshark -Y "icmp.type == 8"
+
+# ICMP echo reply
+tshark -Y "icmp.type == 0"
+
+# ICMP destination unreachable
+tshark -Y "icmp.type == 3"
+
+# ICMP time exceeded
+tshark -Y "icmp.type == 11"
+
+# ICMPv6
+tshark -Y "icmpv6"
+</code></pre>
+<h3 id="arp-filters"><a class="header" href="#arp-filters">ARP Filters</a></h3>
+<pre><code class="language-bash"># All ARP traffic
+tshark -Y "arp"
+
+# ARP request
+tshark -Y "arp.opcode == 1"
+
+# ARP reply
+tshark -Y "arp.opcode == 2"
+
+# ARP for specific IP
+tshark -Y "arp.dst.proto_ipv4 == 192.168.1.1"
+tshark -Y "arp.src.proto_ipv4 == 192.168.1.1"
+
+# Gratuitous ARP
+tshark -Y "arp.opcode == 1 and arp.src.proto_ipv4 == arp.dst.proto_ipv4"
+</code></pre>
+<h3 id="dhcp-filters"><a class="header" href="#dhcp-filters">DHCP Filters</a></h3>
+<pre><code class="language-bash"># All DHCP traffic
+tshark -Y "dhcp"
+
+# DHCP Discover
+tshark -Y "dhcp.option.dhcp == 1"
+
+# DHCP Offer
+tshark -Y "dhcp.option.dhcp == 2"
+
+# DHCP Request
+tshark -Y "dhcp.option.dhcp == 3"
+
+# DHCP ACK
+tshark -Y "dhcp.option.dhcp == 5"
+
+# DHCP NAK
+tshark -Y "dhcp.option.dhcp == 6"
+
+# DHCP Release
+tshark -Y "dhcp.option.dhcp == 7"
+</code></pre>
+<h3 id="smb-filters"><a class="header" href="#smb-filters">SMB Filters</a></h3>
+<pre><code class="language-bash"># All SMB traffic
+tshark -Y "smb or smb2"
+
+# SMB version 1
+tshark -Y "smb"
+
+# SMB version 2/3
+tshark -Y "smb2"
+
+# SMB commands
+tshark -Y "smb2.cmd == 0"                  # Negotiate
+tshark -Y "smb2.cmd == 1"                  # Session Setup
+tshark -Y "smb2.cmd == 3"                  # Tree Connect
+tshark -Y "smb2.cmd == 5"                  # Create
+tshark -Y "smb2.cmd == 8"                  # Read
+tshark -Y "smb2.cmd == 9"                  # Write
+
+# SMB filename
+tshark -Y "smb.file contains \"document\""
+tshark -Y "smb2.filename contains \"document\""
+</code></pre>
+<h3 id="string-matching"><a class="header" href="#string-matching">String Matching</a></h3>
+<pre><code class="language-bash"># Contains string
+tshark -Y "http.host contains \"example\""
+
+# Matches regex (use matches operator)
+tshark -Y "http.host matches \"^www\\..*\\.com$\""
+
+# Case-insensitive contains
+tshark -Y "http.host contains \"EXAMPLE\""  # Already case-insensitive
+
+# String equals
+tshark -Y "http.host == \"www.example.com\""
+
+# String in set
+tshark -Y "http.host in {\"example.com\" \"test.com\" \"demo.com\"}"
+</code></pre>
+<h3 id="comparison-operators"><a class="header" href="#comparison-operators">Comparison Operators</a></h3>
+<pre><code class="language-bash"># Equals
+tshark -Y "tcp.port == 80"
+
+# Not equals
+tshark -Y "tcp.port != 22"
+
+# Greater than
+tshark -Y "frame.len &gt; 1000"
+
+# Less than
+tshark -Y "ip.ttl &lt; 10"
+
+# Greater than or equal
+tshark -Y "tcp.port &gt;= 8000"
+
+# Less than or equal
+tshark -Y "tcp.port &lt;= 9000"
+
+# In range
+tshark -Y "tcp.port &gt;= 8000 and tcp.port &lt;= 9000"
+</code></pre>
+<h3 id="time-based-filters"><a class="header" href="#time-based-filters">Time-based Filters</a></h3>
+<pre><code class="language-bash"># Frame time
+tshark -Y "frame.time &gt;= \"2024-01-01 00:00:00\""
+tshark -Y "frame.time &lt;= \"2024-12-31 23:59:59\""
+
+# Time range
+tshark -Y "frame.time &gt;= \"2024-01-01 00:00:00\" and frame.time &lt;= \"2024-01-01 23:59:59\""
+
+# Frame time relative
+tshark -Y "frame.time_relative &gt; 10"        # More than 10 seconds into capture
+
+# Frame time delta
+tshark -Y "frame.time_delta &gt; 1"            # More than 1 second since previous packet
+</code></pre>
+<h3 id="packet-size-filters-1"><a class="header" href="#packet-size-filters-1">Packet Size Filters</a></h3>
+<pre><code class="language-bash"># Frame length
+tshark -Y "frame.len &gt; 1000"
+tshark -Y "frame.len &lt; 100"
+tshark -Y "frame.len == 54"
+
+# Frame length range
+tshark -Y "frame.len &gt;= 100 and frame.len &lt;= 500"
+
+# IP length
+tshark -Y "ip.len &gt; 1400"
+</code></pre>
+<h3 id="expert-information-filters"><a class="header" href="#expert-information-filters">Expert Information Filters</a></h3>
+<pre><code class="language-bash"># Warnings
+tshark -Y "expert.severity == warning"
+
+# Errors
+tshark -Y "expert.severity == error"
+
+# Notes
+tshark -Y "expert.severity == note"
+
+# All expert info
+tshark -Y "expert"
+
+# TCP expert info
+tshark -Y "tcp.analysis.flags"
+</code></pre>
+<h3 id="complex-display-filters"><a class="header" href="#complex-display-filters">Complex Display Filters</a></h3>
+<pre><code class="language-bash"># HTTP POST requests to specific host
+tshark -Y "http.request.method == POST and http.host == \"api.example.com\""
+
+# Failed HTTP requests
+tshark -Y "http.response.code &gt;= 400"
+
+# Large HTTP responses
+tshark -Y "http.response and frame.len &gt; 10000"
+
+# DNS queries without responses (potential issues)
+tshark -Y "dns.flags.response == 0 and not dns.flags.response == 1"
+
+# TCP retransmissions to specific IP
+tshark -Y "tcp.analysis.retransmission and ip.dst == 192.168.1.1"
+
+# TLS connections to specific domains
+tshark -Y "tls.handshake.type == 1 and tls.handshake.extensions_server_name contains \"example\""
+
+# Non-standard HTTP ports
+tshark -Y "http and tcp.port != 80 and tcp.port != 443"
+
+# Broadcast and multicast traffic
+tshark -Y "eth.dst.ig == 1"  # Broadcast/multicast bit set
+
+# IPv6 traffic on specific subnet
+tshark -Y "ipv6.src == 2001:db8::/32"
+
+# Suspicious DNS (queries to multiple IPs)
+tshark -Y "dns.flags.response == 1 and dns.count.answers &gt; 5"
+</code></pre>
+<h2 id="output-formats-and-field-extraction"><a class="header" href="#output-formats-and-field-extraction">Output Formats and Field Extraction</a></h2>
+<h3 id="output-format-options"><a class="header" href="#output-format-options">Output Format Options</a></h3>
+<pre><code class="language-bash"># Default text output (one line per packet summary)
+tshark -r capture.pcap
+
+# Verbose/detailed output (full packet dissection)
+tshark -r capture.pcap -V
+
+# PDML (Packet Details Markup Language - XML)
+tshark -r capture.pcap -T pdml
+
+# PSML (Packet Summary Markup Language - XML)
+tshark -r capture.pcap -T psml
+
+# JSON output
+tshark -r capture.pcap -T json
+
+# JSON with raw hex
+tshark -r capture.pcap -T jsonraw
+
+# EK (Elasticsearch-friendly JSON)
+tshark -r capture.pcap -T ek
+
+# Fields (custom column output)
+tshark -r capture.pcap -T fields -e frame.number -e ip.src -e ip.dst
+
+# PS (PostScript - for printing)
+tshark -r capture.pcap -T ps
+
+# Text output with specific columns
+tshark -r capture.pcap -T text
+</code></pre>
+<h3 id="field-extraction"><a class="header" href="#field-extraction">Field Extraction</a></h3>
+<pre><code class="language-bash"># Extract specific fields
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst -e tcp.port
+
+# Multiple fields with delimiter
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst -E separator=,
+
+# Custom field separator (CSV format)
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst -e tcp.port -E separator=, -E quote=d
+
+# Include header row
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst -E header=y
+
+# Aggregate fields (only unique values)
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst | sort | uniq
+
+# Extract HTTP fields
+tshark -r capture.pcap -Y "http.request" -T fields \
+  -e frame.time -e ip.src -e http.request.method -e http.host -e http.request.uri
+
+# Extract DNS queries
+tshark -r capture.pcap -Y "dns.flags.response == 0" -T fields \
+  -e frame.time -e ip.src -e dns.qry.name -e dns.qry.type
+
+# Extract TLS SNI
+tshark -r capture.pcap -Y "tls.handshake.type == 1" -T fields \
+  -e frame.time -e ip.src -e ip.dst -e tls.handshake.extensions_server_name
+
+# Extract specific TCP fields
+tshark -r capture.pcap -Y "tcp" -T fields \
+  -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e tcp.flags
+</code></pre>
+<h3 id="json-output-examples"><a class="header" href="#json-output-examples">JSON Output Examples</a></h3>
+<pre><code class="language-bash"># JSON output (pretty-printed)
+tshark -r capture.pcap -T json | jq '.'
+
+# JSON with specific packets
+tshark -r capture.pcap -c 10 -T json
+
+# JSON with display filter
+tshark -r capture.pcap -Y "http" -T json
+
+# Extract specific JSON fields
+tshark -r capture.pcap -T json | jq '.[] | .layers.ip."ip.src"'
+
+# JSON output to file
+tshark -r capture.pcap -T json &gt; output.json
+
+# EK format for Elasticsearch
+tshark -r capture.pcap -T ek
+
+# EK with bulk format for Elasticsearch ingestion
+tshark -r capture.pcap -T ek | while read line; do echo '{"index":{}}'; echo "$line"; done
+</code></pre>
+<h3 id="csv-output"><a class="header" href="#csv-output">CSV Output</a></h3>
+<pre><code class="language-bash"># Basic CSV output
+tshark -r capture.pcap -T fields \
+  -e frame.number -e frame.time -e ip.src -e ip.dst -e frame.len \
+  -E header=y -E separator=, -E quote=d
+
+# CSV with HTTP data
+tshark -r capture.pcap -Y "http" -T fields \
+  -e frame.time -e ip.src -e ip.dst \
+  -e http.request.method -e http.host -e http.request.uri -e http.response.code \
+  -E header=y -E separator=, -E quote=d -E occurrence=f
+
+# Save to CSV file
+tshark -r capture.pcap -T fields \
+  -e frame.time -e ip.src -e ip.dst -e tcp.port \
+  -E header=y -E separator=, -E quote=d &gt; output.csv
+</code></pre>
+<h3 id="custom-output-columns"><a class="header" href="#custom-output-columns">Custom Output Columns</a></h3>
+<pre><code class="language-bash"># Print specific columns
+tshark -r capture.pcap -T fields \
+  -e frame.number \
+  -e frame.time_relative \
+  -e ip.src \
+  -e ip.dst \
+  -e _ws.col.Protocol \
+  -e frame.len
+
+# With better formatting using column
+tshark -r capture.pcap -T fields \
+  -e frame.number -e ip.src -e ip.dst \
+  -E separator=/s | column -t
+
+# Custom time format
+tshark -r capture.pcap -t ad -T fields -e frame.time
+
+# Time format options:
+# -t r  : relative to first packet
+# -t a  : absolute time
+# -t ad : absolute with date
+# -t d  : delta time (since previous packet)
+# -t e  : epoch time
+</code></pre>
+<h2 id="advanced-capture-techniques"><a class="header" href="#advanced-capture-techniques">Advanced Capture Techniques</a></h2>
+<h3 id="ring-buffer-captures"><a class="header" href="#ring-buffer-captures">Ring Buffer Captures</a></h3>
+<pre><code class="language-bash"># Ring buffer with file count limit
+tshark -i eth0 -w capture.pcap -b files:10 -b filesize:10000
+# Creates capture_00001.pcap, capture_00002.pcap, ... capture_00010.pcap
+# Overwrites oldest file when limit reached
+
+# Ring buffer with duration
+tshark -i eth0 -w capture.pcap -b duration:60 -b files:24
+# New file every 60 seconds, keep 24 files (24 hours of 1-minute captures)
+
+# Ring buffer with file size
+tshark -i eth0 -w capture.pcap -b filesize:100000 -b files:5
+# New file when size reaches ~100MB, keep 5 files
+
+# Combine multiple conditions
+tshark -i eth0 -w capture.pcap -b filesize:50000 -b duration:300 -b files:10
+# New file every 5 minutes OR 50MB, keep 10 files
+</code></pre>
+<h3 id="conditional-captures"><a class="header" href="#conditional-captures">Conditional Captures</a></h3>
+<pre><code class="language-bash"># Stop after N packets
+tshark -i eth0 -c 1000 -w capture.pcap
+
+# Stop after duration
+tshark -i eth0 -a duration:3600 -w capture.pcap  # 1 hour
+
+# Stop after file size
+tshark -i eth0 -a filesize:100000 -w capture.pcap  # ~100MB
+
+# Stop after N files
+tshark -i eth0 -w capture.pcap -b files:5 -a files:5
+
+# Multiple stop conditions (first met wins)
+tshark -i eth0 -w capture.pcap -a duration:3600 -a filesize:100000
+</code></pre>
+<h3 id="multiple-interface-capture"><a class="header" href="#multiple-interface-capture">Multiple Interface Capture</a></h3>
+<pre><code class="language-bash"># Capture on multiple interfaces
+tshark -i eth0 -i wlan0 -w capture.pcap
+
+# Capture on all interfaces
+tshark -i any -w capture.pcap
+
+# Capture with interface in output
+tshark -i eth0 -i wlan0 -T fields -e frame.interface_name -e ip.src -e ip.dst
+</code></pre>
+<h3 id="snapshot-length-packet-truncation"><a class="header" href="#snapshot-length-packet-truncation">Snapshot Length (Packet Truncation)</a></h3>
+<pre><code class="language-bash"># Capture only headers (first 128 bytes)
+tshark -i eth0 -s 128 -w capture.pcap
+
+# Capture full packets (default)
+tshark -i eth0 -s 0 -w capture.pcap
+
+# Minimal capture (Ethernet + IP + TCP headers)
+tshark -i eth0 -s 54 -w capture.pcap
+
+# Common snapshot lengths:
+# 54-68: Headers only (Ethernet + IP + TCP/UDP)
+# 128: Headers + some payload
+# 256: Headers + moderate payload
+# 1514: Full Ethernet frame
+# 0: No limit (capture full packets)
+</code></pre>
+<h3 id="buffer-size"><a class="header" href="#buffer-size">Buffer Size</a></h3>
+<pre><code class="language-bash"># Set capture buffer size (in MB)
+tshark -i eth0 -B 100 -w capture.pcap  # 100MB buffer
+
+# Larger buffer for high-traffic capture
+tshark -i eth0 -B 512 -w capture.pcap  # 512MB buffer
+
+# Helps prevent packet loss on busy networks
+</code></pre>
+<h3 id="name-resolution"><a class="header" href="#name-resolution">Name Resolution</a></h3>
+<pre><code class="language-bash"># Disable all name resolution (faster)
+tshark -n -r capture.pcap
+
+# Enable MAC name resolution
+tshark -N m -r capture.pcap
+
+# Enable network name resolution (DNS)
+tshark -N n -r capture.pcap
+
+# Enable transport name resolution (port names)
+tshark -N t -r capture.pcap
+
+# Enable all name resolution
+tshark -N mnt -r capture.pcap
+
+# Disable name resolution during capture
+tshark -i eth0 -n -w capture.pcap
+</code></pre>
+<h3 id="monitor-mode-wi-fi"><a class="header" href="#monitor-mode-wi-fi">Monitor Mode (Wi-Fi)</a></h3>
+<pre><code class="language-bash"># Enable monitor mode on Wi-Fi interface
+sudo ip link set wlan0 down
+sudo iw wlan0 set monitor control
+sudo ip link set wlan0 up
+
+# Capture in monitor mode
+sudo tshark -i wlan0 -w wifi-capture.pcap
+
+# Capture specific channel
+sudo iw wlan0 set channel 6
+sudo tshark -i wlan0 -w wifi-channel6.pcap
+
+# Capture with radiotap headers
+sudo tshark -i wlan0 -I -w wifi-monitor.pcap
+</code></pre>
+<h3 id="remote-capture"><a class="header" href="#remote-capture">Remote Capture</a></h3>
+<pre><code class="language-bash"># Capture on remote host via SSH and save locally
+ssh user@remote-host "tshark -i eth0 -w -" &gt; local-capture.pcap
+
+# Capture on remote host and analyze locally in real-time
+ssh user@remote-host "tshark -i eth0 -w -" | tshark -r - -Y "http"
+
+# Remote capture with compression
+ssh user@remote-host "tshark -i eth0 -w - | gzip -c" | gunzip -c &gt; capture.pcap
+
+# Using tcpdump on remote host
+ssh user@remote-host "tcpdump -i eth0 -w -" | tshark -r -
+</code></pre>
+<h2 id="statistics-and-analysis"><a class="header" href="#statistics-and-analysis">Statistics and Analysis</a></h2>
+<h3 id="protocol-hierarchy-statistics"><a class="header" href="#protocol-hierarchy-statistics">Protocol Hierarchy Statistics</a></h3>
+<pre><code class="language-bash"># Protocol hierarchy
+tshark -r capture.pcap -q -z io,phs
+
+# Shows percentage breakdown of protocols
+# Example output:
+# eth                                      100.00%
+#   ip                                      95.00%
+#     tcp                                   70.00%
+#       http                                30.00%
+#       tls                                 25.00%
+#     udp                                   25.00%
+#       dns                                 15.00%
+</code></pre>
+<h3 id="conversation-statistics"><a class="header" href="#conversation-statistics">Conversation Statistics</a></h3>
+<pre><code class="language-bash"># TCP conversations
+tshark -r capture.pcap -q -z conv,tcp
+
+# UDP conversations
+tshark -r capture.pcap -q -z conv,udp
+
+# IP conversations
+tshark -r capture.pcap -q -z conv,ip
+
+# Ethernet conversations
+tshark -r capture.pcap -q -z conv,eth
+
+# All conversations
+tshark -r capture.pcap -q -z conv,tcp -z conv,udp
+</code></pre>
+<h3 id="endpoint-statistics"><a class="header" href="#endpoint-statistics">Endpoint Statistics</a></h3>
+<pre><code class="language-bash"># TCP endpoints
+tshark -r capture.pcap -q -z endpoints,tcp
+
+# UDP endpoints
+tshark -r capture.pcap -q -z endpoints,udp
+
+# IP endpoints
+tshark -r capture.pcap -q -z endpoints,ip
+
+# Ethernet endpoints
+tshark -r capture.pcap -q -z endpoints,eth
+</code></pre>
+<h3 id="io-statistics"><a class="header" href="#io-statistics">I/O Statistics</a></h3>
+<pre><code class="language-bash"># I/O graph (packets per interval)
+tshark -r capture.pcap -q -z io,stat,1  # 1 second intervals
+
+# I/O stats with filters
+tshark -r capture.pcap -q -z "io,stat,1,tcp,udp,icmp"
+
+# I/O stats for specific filter
+tshark -r capture.pcap -q -z "io,stat,1,http"
+
+# Multiple interval types
+tshark -r capture.pcap -q -z io,stat,1  # 1 second
+tshark -r capture.pcap -q -z io,stat,60 # 1 minute
+</code></pre>
+<h3 id="http-statistics"><a class="header" href="#http-statistics">HTTP Statistics</a></h3>
+<pre><code class="language-bash"># HTTP requests by host
+tshark -r capture.pcap -q -z http,tree
+
+# HTTP request/response statistics
+tshark -r capture.pcap -q -z http_req,tree
+
+# HTTP response codes
+tshark -r capture.pcap -q -z http_srv,tree
+
+# HTTP request methods
+tshark -r capture.pcap -Y "http.request" -T fields -e http.request.method | sort | uniq -c
+
+# HTTP hosts
+tshark -r capture.pcap -Y "http.request" -T fields -e http.host | sort | uniq -c
+
+# HTTP user agents
+tshark -r capture.pcap -Y "http.request" -T fields -e http.user_agent | sort | uniq
+</code></pre>
+<h3 id="dns-statistics"><a class="header" href="#dns-statistics">DNS Statistics</a></h3>
+<pre><code class="language-bash"># DNS statistics
+tshark -r capture.pcap -q -z dns,tree
+
+# DNS queries
+tshark -r capture.pcap -Y "dns.flags.response == 0" -T fields -e dns.qry.name | sort | uniq -c
+
+# DNS query types
+tshark -r capture.pcap -Y "dns.flags.response == 0" -T fields -e dns.qry.type | sort | uniq -c
+
+# DNS servers queried
+tshark -r capture.pcap -Y "dns.flags.response == 0" -T fields -e ip.dst | sort | uniq -c
+
+# DNS response times
+tshark -r capture.pcap -Y "dns.flags.response == 1" -T fields -e dns.time
+</code></pre>
+<h3 id="tlsssl-statistics"><a class="header" href="#tlsssl-statistics">TLS/SSL Statistics</a></h3>
+<pre><code class="language-bash"># TLS handshake statistics
+tshark -r capture.pcap -Y "tls.handshake" -q -z "io,stat,0,tls.handshake.type==1"
+
+# TLS versions
+tshark -r capture.pcap -Y "tls.handshake.version" -T fields -e tls.handshake.version | sort | uniq -c
+
+# TLS SNI (Server Name Indication)
+tshark -r capture.pcap -Y "tls.handshake.type == 1" -T fields \
+  -e tls.handshake.extensions_server_name | sort | uniq -c
+
+# TLS cipher suites
+tshark -r capture.pcap -Y "tls.handshake.type == 2" -T fields \
+  -e tls.handshake.ciphersuite | sort | uniq -c
+</code></pre>
+<h3 id="tcp-analysis-statistics"><a class="header" href="#tcp-analysis-statistics">TCP Analysis Statistics</a></h3>
+<pre><code class="language-bash"># TCP retransmissions
+tshark -r capture.pcap -Y "tcp.analysis.retransmission" -q -z io,stat,0
+
+# TCP duplicate ACKs
+tshark -r capture.pcap -Y "tcp.analysis.duplicate_ack" -q -z io,stat,0
+
+# TCP zero windows
+tshark -r capture.pcap -Y "tcp.analysis.zero_window" -q -z io,stat,0
+
+# TCP reset connections
+tshark -r capture.pcap -Y "tcp.flags.reset == 1" -q -z io,stat,0
+
+# TCP SYN/SYN-ACK/ACK statistics
+tshark -r capture.pcap -q -z "io,stat,0,tcp.flags.syn==1 and tcp.flags.ack==0,tcp.flags.syn==1 and tcp.flags.ack==1"
+</code></pre>
+<h3 id="service-response-time"><a class="header" href="#service-response-time">Service Response Time</a></h3>
+<pre><code class="language-bash"># DNS response time
+tshark -r capture.pcap -q -z "srt,dns"
+
+# HTTP response time
+tshark -r capture.pcap -q -z "srt,http"
+
+# SMB response time
+tshark -r capture.pcap -q -z "srt,smb"
+</code></pre>
+<h3 id="expert-information"><a class="header" href="#expert-information">Expert Information</a></h3>
+<pre><code class="language-bash"># All expert information
+tshark -r capture.pcap -q -z expert
+
+# Expert info summary
+tshark -r capture.pcap -Y "expert" -T fields -e expert.message -e expert.severity
+
+# Warnings only
+tshark -r capture.pcap -Y "expert.severity == warning"
+
+# Errors only
+tshark -r capture.pcap -Y "expert.severity == error"
+</code></pre>
+<h3 id="custom-statistics"><a class="header" href="#custom-statistics">Custom Statistics</a></h3>
+<pre><code class="language-bash"># Count packets by source IP
+tshark -r capture.pcap -T fields -e ip.src | sort | uniq -c | sort -rn
+
+# Count packets by destination port
+tshark -r capture.pcap -T fields -e tcp.dstport | sort | uniq -c | sort -rn
+
+# Total bytes by IP address
+tshark -r capture.pcap -T fields -e ip.src -e frame.len | \
+  awk '{sum[$1]+=$2} END {for (ip in sum) print ip, sum[ip]}' | sort -k2 -rn
+
+# Average packet size
+tshark -r capture.pcap -T fields -e frame.len | \
+  awk '{sum+=$1; count++} END {print sum/count}'
+
+# Packets per second
+tshark -r capture.pcap -T fields -e frame.time_epoch | \
+  awk -F. '{print $1}' | uniq -c
+</code></pre>
+<h2 id="following-streams"><a class="header" href="#following-streams">Following Streams</a></h2>
+<h3 id="tcp-stream-following"><a class="header" href="#tcp-stream-following">TCP Stream Following</a></h3>
+<pre><code class="language-bash"># Follow first TCP stream (stream 0)
+tshark -r capture.pcap -q -z follow,tcp,ascii,0
+
+# Follow specific TCP stream by number
+tshark -r capture.pcap -q -z follow,tcp,ascii,5
+
+# Follow TCP stream in hex
+tshark -r capture.pcap -q -z follow,tcp,hex,0
+
+# Follow TCP stream in raw format
+tshark -r capture.pcap -q -z follow,tcp,raw,0
+
+# Find stream number for specific connection
+tshark -r capture.pcap -Y "ip.src == 192.168.1.1 and tcp.port == 80" -T fields -e tcp.stream | head -1
+
+# Follow that stream
+STREAM=$(tshark -r capture.pcap -Y "ip.src == 192.168.1.1 and tcp.port == 80" -T fields -e tcp.stream | head -1)
+tshark -r capture.pcap -q -z follow,tcp,ascii,$STREAM
+</code></pre>
+<h3 id="udp-stream-following"><a class="header" href="#udp-stream-following">UDP Stream Following</a></h3>
+<pre><code class="language-bash"># Follow UDP stream
+tshark -r capture.pcap -q -z follow,udp,ascii,0
+
+# Follow specific UDP stream
+tshark -r capture.pcap -q -z follow,udp,ascii,3
+</code></pre>
+<h3 id="http-stream-following"><a class="header" href="#http-stream-following">HTTP Stream Following</a></h3>
+<pre><code class="language-bash"># Follow HTTP stream
+tshark -r capture.pcap -q -z follow,http,ascii,0
+
+# Extract HTTP objects (files)
+tshark -r capture.pcap --export-objects http,./exported-http-objects/
+
+# List HTTP objects
+tshark -r capture.pcap -q -z http,tree
+</code></pre>
+<h3 id="tls-stream-following"><a class="header" href="#tls-stream-following">TLS Stream Following</a></h3>
+<pre><code class="language-bash"># Follow TLS stream (shows encrypted data)
+tshark -r capture.pcap -q -z follow,tls,ascii,0
+
+# Decrypt TLS with key log file
+tshark -r capture.pcap -o tls.keylog_file:sslkeys.log -q -z follow,tls,ascii,0
+
+# Export TLS objects (if decrypted)
+tshark -r capture.pcap -o tls.keylog_file:sslkeys.log --export-objects http,./exported/
+</code></pre>
+<h2 id="protocol-specific-analysis"><a class="header" href="#protocol-specific-analysis">Protocol-Specific Analysis</a></h2>
+<h3 id="http-analysis"><a class="header" href="#http-analysis">HTTP Analysis</a></h3>
+<pre><code class="language-bash"># HTTP request summary
+tshark -r capture.pcap -Y "http.request" -T fields \
+  -e frame.number -e ip.src -e http.request.method -e http.host -e http.request.uri
+
+# HTTP response summary
+tshark -r capture.pcap -Y "http.response" -T fields \
+  -e frame.number -e ip.src -e http.response.code -e http.content_length
+
+# HTTP POST data
+tshark -r capture.pcap -Y "http.request.method == POST" -T fields \
+  -e http.host -e http.request.uri -e http.file_data
+
+# HTTP cookies
+tshark -r capture.pcap -Y "http.cookie" -T fields -e http.cookie
+
+# HTTP with response time
+tshark -r capture.pcap -Y "http.time" -T fields \
+  -e http.request.full_uri -e http.response.code -e http.time
+
+# Extract HTTP files
+tshark -r capture.pcap --export-objects http,./http-exports/
+</code></pre>
+<h3 id="dns-analysis"><a class="header" href="#dns-analysis">DNS Analysis</a></h3>
+<pre><code class="language-bash"># DNS query-response pairs
+tshark -r capture.pcap -Y "dns" -T fields \
+  -e frame.time -e ip.src -e dns.qry.name -e dns.a -e dns.aaaa
+
+# DNS query performance
+tshark -r capture.pcap -Y "dns.flags.response == 1" -T fields \
+  -e dns.qry.name -e dns.time | awk '{sum+=$2; count++} END {print sum/count}'
+
+# DNS servers used
+tshark -r capture.pcap -Y "dns.flags.response == 0" -T fields -e ip.dst | sort | uniq -c
+
+# DNS NXDOMAINs
+tshark -r capture.pcap -Y "dns.flags.rcode == 3" -T fields -e dns.qry.name
+
+# DNS query types distribution
+tshark -r capture.pcap -Y "dns.flags.response == 0" -T fields -e dns.qry.type | \
+  awk '{types[$1]++} END {for (t in types) print t, types[t]}'
+
+# Potential DNS tunneling (unusual query patterns)
+tshark -r capture.pcap -Y "dns.qry.name.len &gt; 50" -T fields -e dns.qry.name
+</code></pre>
+<h3 id="tlsssl-analysis"><a class="header" href="#tlsssl-analysis">TLS/SSL Analysis</a></h3>
+<pre><code class="language-bash"># TLS handshakes
+tshark -r capture.pcap -Y "tls.handshake.type == 1" -T fields \
+  -e frame.time -e ip.src -e ip.dst -e tls.handshake.extensions_server_name
+
+# TLS versions in use
+tshark -r capture.pcap -Y "tls.handshake.version" -T fields \
+  -e tls.handshake.extensions_server_name -e tls.handshake.version
+
+# TLS cipher suites offered
+tshark -r capture.pcap -Y "tls.handshake.type == 1" -T fields \
+  -e tls.handshake.ciphersuite
+
+# TLS cipher suite selected
+tshark -r capture.pcap -Y "tls.handshake.type == 2" -T fields \
+  -e tls.handshake.extensions_server_name -e tls.handshake.ciphersuite
+
+# TLS certificate details
+tshark -r capture.pcap -Y "tls.handshake.type == 11" -T fields \
+  -e x509sat.printableString -e x509ce.dNSName
+
+# TLS alerts
+tshark -r capture.pcap -Y "tls.alert_message" -T fields \
+  -e frame.time -e ip.src -e ip.dst -e tls.alert_message.level -e tls.alert_message.desc
+
+# Weak TLS versions
+tshark -r capture.pcap -Y "tls.record.version &lt; 0x0303"  # Older than TLS 1.2
+</code></pre>
+<h3 id="tcp-analysis"><a class="header" href="#tcp-analysis">TCP Analysis</a></h3>
+<pre><code class="language-bash"># TCP connection establishment (3-way handshake)
+tshark -r capture.pcap -Y "tcp.flags.syn == 1"
+
+# TCP connection completions
+tshark -r capture.pcap -Y "tcp.flags.fin == 1 or tcp.flags.reset == 1"
+
+# TCP retransmissions by host
+tshark -r capture.pcap -Y "tcp.analysis.retransmission" -T fields -e ip.src | sort | uniq -c
+
+# TCP window size issues
+tshark -r capture.pcap -Y "tcp.analysis.zero_window or tcp.analysis.window_full"
+
+# TCP reset connections
+tshark -r capture.pcap -Y "tcp.flags.reset == 1" -T fields \
+  -e frame.time -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport
+
+# TCP duplicate ACKs
+tshark -r capture.pcap -Y "tcp.analysis.duplicate_ack"
+
+# TCP out-of-order packets
+tshark -r capture.pcap -Y "tcp.analysis.out_of_order"
+
+# TCP connections by port
+tshark -r capture.pcap -Y "tcp.flags.syn == 1 and tcp.flags.ack == 0" -T fields \
+  -e tcp.dstport | sort | uniq -c | sort -rn
+
+# TCP handshake time (SYN to SYN-ACK)
+tshark -r capture.pcap -Y "tcp.flags.syn == 1 and tcp.flags.ack == 1" -T fields \
+  -e tcp.time_relative
+</code></pre>
+<h3 id="icmp-analysis"><a class="header" href="#icmp-analysis">ICMP Analysis</a></h3>
+<pre><code class="language-bash"># ICMP echo requests/replies (ping)
+tshark -r capture.pcap -Y "icmp.type == 8 or icmp.type == 0" -T fields \
+  -e frame.time -e ip.src -e ip.dst -e icmp.type -e icmp.seq
+
+# ICMP unreachable messages
+tshark -r capture.pcap -Y "icmp.type == 3" -T fields \
+  -e frame.time -e ip.src -e ip.dst -e icmp.code
+
+# ICMP time exceeded (traceroute)
+tshark -r capture.pcap -Y "icmp.type == 11"
+
+# Ping response times
+tshark -r capture.pcap -Y "icmp.type == 0" -T fields -e icmp.resptime
+</code></pre>
+<h3 id="dhcp-analysis"><a class="header" href="#dhcp-analysis">DHCP Analysis</a></h3>
+<pre><code class="language-bash"># DHCP transactions
+tshark -r capture.pcap -Y "dhcp" -T fields \
+  -e frame.time -e dhcp.option.dhcp -e dhcp.ip.your -e dhcp.option.hostname
+
+# DHCP discover/offer/request/ack flow
+tshark -r capture.pcap -Y "dhcp" -T fields \
+  -e frame.time -e dhcp.option.dhcp -e dhcp.hw.mac_addr -e dhcp.ip.your
+
+# DHCP servers
+tshark -r capture.pcap -Y "dhcp.option.dhcp == 2" -T fields -e ip.src | sort -u
+
+# DHCP assigned IPs
+tshark -r capture.pcap -Y "dhcp.option.dhcp == 5" -T fields \
+  -e dhcp.hw.mac_addr -e dhcp.ip.your
+
+# DHCP lease times
+tshark -r capture.pcap -Y "dhcp" -T fields -e dhcp.option.dhcp_lease_time
+</code></pre>
+<h3 id="arp-analysis"><a class="header" href="#arp-analysis">ARP Analysis</a></h3>
+<pre><code class="language-bash"># ARP requests and replies
+tshark -r capture.pcap -Y "arp" -T fields \
+  -e frame.time -e arp.opcode -e arp.src.hw_mac -e arp.src.proto_ipv4 \
+  -e arp.dst.hw_mac -e arp.dst.proto_ipv4
+
+# ARP table building
+tshark -r capture.pcap -Y "arp.opcode == 2" -T fields \
+  -e arp.src.proto_ipv4 -e arp.src.hw_mac | sort -u
+
+# Gratuitous ARP
+tshark -r capture.pcap -Y "arp.opcode == 1 and arp.src.proto_ipv4 == arp.dst.proto_ipv4"
+
+# ARP scans (many requests from one source)
+tshark -r capture.pcap -Y "arp.opcode == 1" -T fields -e arp.src.proto_ipv4 | sort | uniq -c | sort -rn
+
+# Potential ARP spoofing (duplicate IPs with different MACs)
+tshark -r capture.pcap -Y "arp.opcode == 2" -T fields \
+  -e arp.src.proto_ipv4 -e arp.src.hw_mac | sort | uniq
+</code></pre>
+<h3 id="smb-analysis"><a class="header" href="#smb-analysis">SMB Analysis</a></h3>
+<pre><code class="language-bash"># SMB file access
+tshark -r capture.pcap -Y "smb2.cmd == 5" -T fields \
+  -e frame.time -e ip.src -e smb2.filename
+
+# SMB file reads/writes
+tshark -r capture.pcap -Y "smb2.cmd == 8 or smb2.cmd == 9" -T fields \
+  -e frame.time -e ip.src -e smb2.cmd -e smb2.filename
+
+# SMB authentication
+tshark -r capture.pcap -Y "smb2.cmd == 1" -T fields \
+  -e frame.time -e ip.src -e ntlmssp.auth.username
+
+# SMB shares accessed
+tshark -r capture.pcap -Y "smb2.cmd == 3" -T fields -e smb2.tree | sort -u
+
+# SMB errors
+tshark -r capture.pcap -Y "smb2.nt_status != 0x00000000" -T fields \
+  -e frame.time -e ip.src -e smb2.cmd -e smb2.nt_status
+</code></pre>
+<h2 id="performance-and-optimization"><a class="header" href="#performance-and-optimization">Performance and Optimization</a></h2>
+<h3 id="capture-performance"><a class="header" href="#capture-performance">Capture Performance</a></h3>
+<pre><code class="language-bash"># Minimize packet loss with large buffer
+tshark -i eth0 -B 512 -w capture.pcap
+
+# Use capture filter to reduce load
+tshark -i eth0 -f "tcp port 80" -w capture.pcap
+
+# Disable name resolution for speed
+tshark -i eth0 -n -w capture.pcap
+
+# Truncate packets to reduce storage
+tshark -i eth0 -s 128 -w capture.pcap
+
+# Write directly to fast storage
+tshark -i eth0 -w /dev/shm/capture.pcap
+
+# Use multiple smaller files
+tshark -i eth0 -w capture.pcap -b filesize:100000 -b files:10
+
+# Disable display during capture
+tshark -i eth0 -w capture.pcap -q
+</code></pre>
+<h3 id="analysis-performance"><a class="header" href="#analysis-performance">Analysis Performance</a></h3>
+<pre><code class="language-bash"># Use capture filter when possible (faster than display filter)
+tshark -i eth0 -f "tcp port 80"    # Fast (capture filter)
+# vs
+tshark -i eth0 -Y "tcp.port == 80"  # Slower (display filter)
+
+# Disable protocol dissection not needed
+tshark -r capture.pcap -Y "ip.addr == 192.168.1.1" -d tcp.port==8080,http
+
+# Read specific packet range
+tshark -r capture.pcap -c 1000     # Read first 1000 packets
+
+# Skip packets at beginning
+tshark -r capture.pcap -Y "frame.number &gt; 10000"
+
+# Use two-pass filtering
+# First pass: filter to smaller file
+tshark -r large.pcap -Y "http" -w http-only.pcap
+# Second pass: detailed analysis
+tshark -r http-only.pcap -V
+
+# Disable name resolution
+tshark -r capture.pcap -n -Y "ip"
+
+# Use fields instead of full dissection
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst  # Fast
+# vs
+tshark -r capture.pcap -V                             # Slow
+</code></pre>
+<h3 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h3>
+<pre><code class="language-bash"># Limit memory usage with ring buffer
+tshark -i eth0 -w capture.pcap -b files:5 -b filesize:10000
+
+# Process in chunks
+for i in {1..10}; do
+  tshark -r large.pcap -Y "frame.number &gt;= $((($i-1)*10000)) and frame.number &lt; $(($i*10000))"
+done
+
+# Stream processing (don't load all into memory)
+tshark -r capture.pcap -T fields -e ip.src | sort | uniq -c
+</code></pre>
+<h2 id="common-use-cases-and-patterns"><a class="header" href="#common-use-cases-and-patterns">Common Use Cases and Patterns</a></h2>
+<h3 id="network-troubleshooting"><a class="header" href="#network-troubleshooting">Network Troubleshooting</a></h3>
+<pre><code class="language-bash"># Verify connectivity between hosts
+tshark -i eth0 -f "host 192.168.1.1 and host 192.168.1.2"
+
+# Check if traffic reaches interface
+tshark -i eth0 -f "host 8.8.8.8" -c 10
+
+# Analyze TCP retransmissions (poor connection quality)
+tshark -r capture.pcap -Y "tcp.analysis.retransmission" -q -z io,stat,1
+
+# Check DNS resolution issues
+tshark -i eth0 -Y "dns" -T fields -e frame.time -e dns.qry.name -e dns.flags.rcode
+
+# Verify routing (ICMP redirects)
+tshark -i eth0 -Y "icmp.type == 5"
+
+# Identify packet loss
+tshark -i eth0 -Y "tcp.analysis.lost_segment"
+
+# Monitor bandwidth usage
+tshark -i eth0 -q -z io,stat,1
+
+# Check for duplicate IP addresses (ARP conflicts)
+tshark -i eth0 -Y "arp.duplicate-address-detected"
+</code></pre>
+<h3 id="security-analysis"><a class="header" href="#security-analysis">Security Analysis</a></h3>
+<pre><code class="language-bash"># Detect port scanning
+tshark -r capture.pcap -Y "tcp.flags.syn == 1 and tcp.flags.ack == 0" -T fields \
+  -e ip.src -e tcp.dstport | awk '{print $1}' | sort | uniq -c | sort -rn
+
+# Identify suspicious DNS queries (DGA domains, tunneling)
+tshark -r capture.pcap -Y "dns.qry.name.len &gt; 50 or dns.qry.name matches \"[a-z]{20,}\""
+
+# Detect ARP spoofing
+tshark -r capture.pcap -Y "arp" -T fields -e arp.src.proto_ipv4 -e arp.src.hw_mac | \
+  sort | uniq -d
+
+# Find unencrypted HTTP credentials
+tshark -r capture.pcap -Y "http.authorization or http.cookie" -T fields \
+  -e http.authorization -e http.cookie
+
+# Detect SQL injection attempts
+tshark -r capture.pcap -Y "http.request.uri contains \"union select\" or \
+  http.request.uri contains \"1=1\""
+
+# Identify malware C2 beaconing (regular intervals)
+tshark -r capture.pcap -T fields -e ip.dst -e frame.time_epoch | \
+  awk '{print $1, int($2)}' | uniq -c
+
+# Find SMB null sessions
+tshark -r capture.pcap -Y "smb2.cmd == 1 and ntlmssp.auth.username == \"\""
+
+# Detect TLS downgrade attacks
+tshark -r capture.pcap -Y "tls.record.version &lt; 0x0303"
+
+# Identify password spraying
+tshark -r capture.pcap -Y "ntlmssp or kerberos" -T fields \
+  -e ip.src -e ntlmssp.auth.username | sort | uniq -c
+</code></pre>
+<h3 id="application-debugging"><a class="header" href="#application-debugging">Application Debugging</a></h3>
+<pre><code class="language-bash"># Debug HTTP API calls
+tshark -i eth0 -Y "http.host == \"api.example.com\"" -V
+
+# Monitor database queries (MySQL example)
+tshark -i eth0 -Y "mysql.query" -T fields -e mysql.query
+
+# Debug web application errors
+tshark -r capture.pcap -Y "http.response.code &gt;= 500" -T fields \
+  -e http.request.full_uri -e http.response.code
+
+# Analyze SOAP/XML traffic
+tshark -i eth0 -Y "http.content_type contains \"xml\"" -T fields -e http.file_data
+
+# Debug REST API responses
+tshark -i eth0 -Y "http and json" -T fields \
+  -e http.request.full_uri -e http.response.code -e json.value.string
+
+# Monitor application performance (HTTP response times)
+tshark -r capture.pcap -Y "http.time" -T fields \
+  -e http.request.full_uri -e http.time | \
+  awk '{sum+=$2; count++} END {print "Average:", sum/count}'
+
+# Debug WebSocket connections
+tshark -i eth0 -Y "websocket" -T fields -e websocket.payload
+</code></pre>
+<h3 id="performance-analysis"><a class="header" href="#performance-analysis">Performance Analysis</a></h3>
+<pre><code class="language-bash"># Identify slow DNS responses
+tshark -r capture.pcap -Y "dns.time &gt; 0.1" -T fields \
+  -e dns.qry.name -e dns.time -e ip.dst
+
+# Find large HTTP responses
+tshark -r capture.pcap -Y "http.content_length &gt; 10000000" -T fields \
+  -e http.request.uri -e http.content_length
+
+# Analyze TCP window scaling issues
+tshark -r capture.pcap -Y "tcp.window_size &lt; 1000"
+
+# Identify network congestion (TCP analysis)
+tshark -r capture.pcap -Y "tcp.analysis.duplicate_ack or tcp.analysis.fast_retransmission"
+
+# Monitor database query performance
+tshark -r capture.pcap -Y "mysql" -T fields -e mysql.query -e mysql.response_time
+
+# Analyze TLS handshake time
+tshark -r capture.pcap -Y "tls.handshake.type == 2" -T fields \
+  -e frame.time_relative -e tls.handshake.extensions_server_name
+
+# Check for bandwidth-heavy hosts
+tshark -r capture.pcap -T fields -e ip.src -e frame.len | \
+  awk '{bytes[$1]+=$2} END {for(ip in bytes) print ip, bytes[ip]}' | sort -k2 -rn
+
+# Identify chatty protocols
+tshark -r capture.pcap -T fields -e _ws.col.Protocol | sort | uniq -c | sort -rn
+</code></pre>
+<h3 id="voip-analysis"><a class="header" href="#voip-analysis">VoIP Analysis</a></h3>
+<pre><code class="language-bash"># SIP call analysis
+tshark -r capture.pcap -Y "sip" -T fields \
+  -e sip.Method -e sip.from.user -e sip.to.user -e sip.Status-Line
+
+# RTP stream statistics
+tshark -r capture.pcap -q -z rtp,streams
+
+# Analyze VoIP quality
+tshark -r capture.pcap -q -z voip,stat
+
+# Extract audio from RTP
+tshark -r capture.pcap -Y "rtp" --export-objects rtp,./rtp-audio/
+
+# Monitor SIP registration
+tshark -i eth0 -Y "sip.Method == REGISTER"
+
+# Track SIP calls
+tshark -i eth0 -Y "sip.Method == INVITE or sip.Method == BYE"
+</code></pre>
+<h3 id="iot-device-monitoring"><a class="header" href="#iot-device-monitoring">IoT Device Monitoring</a></h3>
+<pre><code class="language-bash"># Monitor MQTT messages
+tshark -i eth0 -Y "mqtt" -T fields -e mqtt.topic -e mqtt.msg
+
+# CoAP requests
+tshark -i eth0 -Y "coap" -T fields -e coap.opt.uri_path
+
+# Zigbee analysis
+tshark -i wpan0 -Y "zbee_aps"
+
+# BLE (Bluetooth Low Energy) advertising
+tshark -i bluetooth0 -Y "btle.advertising_address"
+
+# UPnP device discovery
+tshark -i eth0 -Y "ssdp" -T fields -e ssdp.server -e ssdp.location
+</code></pre>
+<h2 id="automation-and-scripting"><a class="header" href="#automation-and-scripting">Automation and Scripting</a></h2>
+<h3 id="bash-scripts"><a class="header" href="#bash-scripts">Bash Scripts</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# Capture HTTP traffic for 5 minutes and generate report
+
+IFACE="eth0"
+DURATION=300
+OUTFILE="http-capture-$(date +%Y%m%d-%H%M%S).pcap"
+REPORT="http-report-$(date +%Y%m%d-%H%M%S).txt"
+
+# Capture
+echo "Capturing HTTP traffic for $DURATION seconds..."
+timeout $DURATION tshark -i $IFACE -f "tcp port 80 or tcp port 443" -w $OUTFILE -q
+
+# Analyze
+echo "Generating report..."
+echo "HTTP Statistics" &gt; $REPORT
+echo "===============" &gt;&gt; $REPORT
+echo "" &gt;&gt; $REPORT
+
+echo "Top 10 Hosts:" &gt;&gt; $REPORT
+tshark -r $OUTFILE -Y "http" -T fields -e http.host | sort | uniq -c | sort -rn | head -10 &gt;&gt; $REPORT
+
+echo "" &gt;&gt; $REPORT
+echo "HTTP Methods:" &gt;&gt; $REPORT
+tshark -r $OUTFILE -Y "http.request" -T fields -e http.request.method | sort | uniq -c &gt;&gt; $REPORT
+
+echo "" &gt;&gt; $REPORT
+echo "Response Codes:" &gt;&gt; $REPORT
+tshark -r $OUTFILE -Y "http.response" -T fields -e http.response.code | sort | uniq -c | sort -rn &gt;&gt; $REPORT
+
+echo "Report saved to $REPORT"
+</code></pre>
+<h3 id="continuous-monitoring"><a class="header" href="#continuous-monitoring">Continuous Monitoring</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# Monitor for suspicious DNS queries
+
+IFACE="eth0"
+ALERT_FILE="dns-alerts.log"
+
+tshark -i $IFACE -Y "dns" -T fields -e frame.time -e ip.src -e dns.qry.name | \
+while read timestamp src query; do
+    # Alert on long domain names (potential DGA/tunneling)
+    if [ ${#query} -gt 50 ]; then
+        echo "$timestamp ALERT: Suspicious long DNS query from $src: $query" &gt;&gt; $ALERT_FILE
+        echo "ALERT: Suspicious DNS query detected!"
+    fi
+
+    # Alert on queries to suspicious TLDs
+    if [[ $query =~ \.(tk|ml|ga|cf)$ ]]; then
+        echo "$timestamp ALERT: Query to suspicious TLD from $src: $query" &gt;&gt; $ALERT_FILE
+    fi
+done
+</code></pre>
+<h3 id="python-integration"><a class="header" href="#python-integration">Python Integration</a></h3>
+<pre><code class="language-python">#!/usr/bin/env python3
+import subprocess
+import json
+
+def get_http_hosts(pcap_file):
+    """Extract unique HTTP hosts from pcap file"""
+    cmd = [
+        'tshark',
+        '-r', pcap_file,
+        '-Y', 'http.request',
+        '-T', 'fields',
+        '-e', 'http.host'
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    hosts = set(result.stdout.strip().split('\n'))
+    return hosts
+
+def get_dns_queries(pcap_file):
+    """Get DNS queries as JSON"""
+    cmd = [
+        'tshark',
+        '-r', pcap_file,
+        '-Y', 'dns.flags.response == 0',
+        '-T', 'json',
+        '-e', 'frame.time',
+        '-e', 'ip.src',
+        '-e', 'dns.qry.name'
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return json.loads(result.stdout)
+
+def monitor_interface(interface):
+    """Monitor interface in real-time"""
+    cmd = [
+        'tshark',
+        '-i', interface,
+        '-Y', 'http',
+        '-T', 'fields',
+        '-e', 'ip.src',
+        '-e', 'http.host',
+        '-e', 'http.request.uri'
+    ]
+
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True)
+
+    for line in process.stdout:
+        fields = line.strip().split('\t')
+        if len(fields) &gt;= 3:
+            src_ip, host, uri = fields[0], fields[1], fields[2]
+            print(f"HTTP Request: {src_ip} -&gt; {host}{uri}")
+
+if __name__ == '__main__':
+    # Example usage
+    hosts = get_http_hosts('capture.pcap')
+    print(f"Found {len(hosts)} unique HTTP hosts")
+
+    # Monitor eth0
+    # monitor_interface('eth0')
+</code></pre>
+<h2 id="tshark-with-other-tools"><a class="header" href="#tshark-with-other-tools">TShark with Other Tools</a></h2>
+<h3 id="with-tcpdump"><a class="header" href="#with-tcpdump">With tcpdump</a></h3>
+<pre><code class="language-bash"># Capture with tcpdump, analyze with tshark
+tcpdump -i eth0 -w - | tshark -r - -Y "http"
+
+# Convert tcpdump filter to capture file
+tcpdump -i eth0 -w capture.pcap "tcp port 80"
+tshark -r capture.pcap -Y "http"
+</code></pre>
+<h3 id="with-ngrep"><a class="header" href="#with-ngrep">With ngrep</a></h3>
+<pre><code class="language-bash"># Combine ngrep for quick text search with tshark for detailed analysis
+ngrep -q "password" tcp port 80
+tshark -i eth0 -Y "http contains \"password\""
+</code></pre>
+<h3 id="with-scapy"><a class="header" href="#with-scapy">With Scapy</a></h3>
+<pre><code class="language-python"># Generate packets with Scapy, capture with tshark
+from scapy.all import *
+
+# In terminal: sudo tshark -i lo -f "icmp"
+# Then in Python:
+send(IP(dst="127.0.0.1")/ICMP())
+</code></pre>
+<h3 id="with-zeek-bro"><a class="header" href="#with-zeek-bro">With Zeek (Bro)</a></h3>
+<pre><code class="language-bash"># Use tshark for packet capture, Zeek for analysis
+tshark -i eth0 -w capture.pcap
+zeek -r capture.pcap
+
+# Or pipe directly
+tshark -i eth0 -w - | zeek -r -
+</code></pre>
+<h3 id="with-elasticsearch"><a class="header" href="#with-elasticsearch">With Elasticsearch</a></h3>
+<pre><code class="language-bash"># Send tshark output to Elasticsearch
+tshark -r capture.pcap -T ek | \
+while read line; do
+    curl -X POST "localhost:9200/packets/_doc" \
+         -H 'Content-Type: application/json' \
+         -d "$line"
+done
+
+# Or use Filebeat/Logstash for better ingestion
+</code></pre>
+<h3 id="with-splunk"><a class="header" href="#with-splunk">With Splunk</a></h3>
+<pre><code class="language-bash"># Generate splunk-friendly format
+tshark -r capture.pcap -T fields \
+  -E header=y -E separator=, -E quote=d \
+  -e frame.time -e ip.src -e ip.dst -e _ws.col.Protocol -e frame.len \
+  &gt; splunk-import.csv
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="permission-issues"><a class="header" href="#permission-issues">Permission Issues</a></h3>
+<pre><code class="language-bash"># Error: "Couldn't run /usr/bin/dumpcap in child process: Permission denied"
+
+# Solution 1: Add user to wireshark group (Debian/Ubuntu)
+sudo usermod -a -G wireshark $USER
+newgrp wireshark
+
+# Solution 2: Run as root (less secure)
+sudo tshark -i eth0
+
+# Solution 3: Set capabilities
+sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
+
+# Verify permissions
+ls -l /usr/bin/dumpcap
+getcap /usr/bin/dumpcap
+</code></pre>
+<h3 id="interface-issues"><a class="header" href="#interface-issues">Interface Issues</a></h3>
+<pre><code class="language-bash"># Error: "Capture interface not found"
+
+# List interfaces
+tshark -D
+ip link show
+
+# Check interface status
+ip link show eth0
+
+# Bring interface up
+sudo ip link set eth0 up
+
+# Check if interface supports capture
+sudo tshark -i eth0 -c 1
+
+# Try with "any" interface
+sudo tshark -i any
+</code></pre>
+<h3 id="capture-issues"><a class="header" href="#capture-issues">Capture Issues</a></h3>
+<pre><code class="language-bash"># No packets captured
+
+# Check capture filter syntax
+tshark -i eth0 -f "tcp port 80" -c 10
+
+# Remove capture filter to see all traffic
+tshark -i eth0 -c 10
+
+# Check if traffic exists
+sudo tcpdump -i eth0 -c 10
+
+# Increase buffer size
+tshark -i eth0 -B 512
+
+# Check for packet drops
+tshark -i eth0 -q -z io,stat,1
+</code></pre>
+<h3 id="display-filter-errors"><a class="header" href="#display-filter-errors">Display Filter Errors</a></h3>
+<pre><code class="language-bash"># Error: "tshark: display filter syntax error"
+
+# Test filter syntax
+tshark -r capture.pcap -Y "tcp.port == 80" -c 1
+
+# Use quotes around filter
+tshark -r capture.pcap -Y "http.request.method == \"GET\""
+
+# Check field names
+tshark -G fields | grep -i "http.request"
+
+# Validate filter
+tshark -Y "tcp.port == 80" -c 0
+</code></pre>
+<h3 id="performance-issues"><a class="header" href="#performance-issues">Performance Issues</a></h3>
+<pre><code class="language-bash"># Slow capture or packet loss
+
+# Use capture filter (not display filter)
+tshark -i eth0 -f "tcp port 80"  # Fast
+# instead of
+tshark -i eth0 -Y "tcp.port == 80"  # Slow
+
+# Increase buffer size
+tshark -i eth0 -B 512
+
+# Reduce packet size
+tshark -i eth0 -s 128
+
+# Disable name resolution
+tshark -i eth0 -n
+
+# Write to fast storage
+tshark -i eth0 -w /dev/shm/capture.pcap
+
+# Use ring buffer
+tshark -i eth0 -w capture.pcap -b files:5 -b filesize:100000
+</code></pre>
+<h3 id="file-reading-issues"><a class="header" href="#file-reading-issues">File Reading Issues</a></h3>
+<pre><code class="language-bash"># Error: "tshark: The file is not a capture file"
+
+# Check file type
+file capture.pcap
+
+# Try reading with -F option
+tshark -r capture.pcap -F pcap
+
+# Convert format if needed
+tshark -r old-capture -F pcapng -w new-capture.pcapng
+
+# Check file integrity
+tshark -r capture.pcap -c 1 -V
+</code></pre>
+<h3 id="memory-issues"><a class="header" href="#memory-issues">Memory Issues</a></h3>
+<pre><code class="language-bash"># Out of memory errors
+
+# Use ring buffer for large captures
+tshark -i eth0 -w capture.pcap -b files:10 -b filesize:100000
+
+# Process in chunks
+tshark -r large.pcap -c 10000 &gt; chunk1.txt
+
+# Use streaming processing
+tshark -r large.pcap -T fields -e ip.src | sort | uniq -c
+
+# Limit output
+tshark -r large.pcap -c 1000
+</code></pre>
+<h3 id="name-resolution-issues"><a class="header" href="#name-resolution-issues">Name Resolution Issues</a></h3>
+<pre><code class="language-bash"># Slow performance due to DNS lookups
+
+# Disable all name resolution
+tshark -n -r capture.pcap
+
+# Disable specific resolution types
+tshark -N n -r capture.pcap  # Disable network name resolution only
+
+# Use custom hosts file
+# Edit /etc/hosts then:
+tshark -r capture.pcap
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="capture-best-practices"><a class="header" href="#capture-best-practices">Capture Best Practices</a></h3>
+<ol>
+<li>
+<p><strong>Use appropriate capture filters</strong></p>
+<pre><code class="language-bash"># Filter at capture time, not display time
+tshark -i eth0 -f "tcp port 80"  # Good
+tshark -i eth0 -w all.pcap       # Then filter later - Bad for large captures
+</code></pre>
+</li>
+<li>
+<p><strong>Set proper ring buffer limits</strong></p>
+<pre><code class="language-bash"># Prevent filling disk
+tshark -i eth0 -w capture.pcap -b files:10 -b filesize:100000
+</code></pre>
+</li>
+<li>
+<p><strong>Truncate packets when appropriate</strong></p>
+<pre><code class="language-bash"># Save storage when full payload not needed
+tshark -i eth0 -s 128 -w headers.pcap
+</code></pre>
+</li>
+<li>
+<p><strong>Use quiet mode when writing files</strong></p>
+<pre><code class="language-bash"># Reduce CPU usage
+tshark -i eth0 -w capture.pcap -q
+</code></pre>
+</li>
+<li>
+<p><strong>Monitor for packet loss</strong></p>
+<pre><code class="language-bash"># Check capture statistics
+tshark -i eth0 -q -z io,stat,1
+</code></pre>
+</li>
+</ol>
+<h3 id="analysis-best-practices"><a class="header" href="#analysis-best-practices">Analysis Best Practices</a></h3>
+<ol>
+<li>
+<p><strong>Start with statistics</strong></p>
+<pre><code class="language-bash"># Get overview before detailed analysis
+tshark -r capture.pcap -q -z io,phs
+tshark -r capture.pcap -q -z conv,tcp
+</code></pre>
+</li>
+<li>
+<p><strong>Use appropriate filters</strong></p>
+<pre><code class="language-bash"># Narrow down before detailed inspection
+tshark -r capture.pcap -Y "tcp.stream == 0" -V
+</code></pre>
+</li>
+<li>
+<p><strong>Extract relevant data only</strong></p>
+<pre><code class="language-bash"># Don't dump everything
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst
+</code></pre>
+</li>
+<li>
+<p><strong>Disable unnecessary dissection</strong></p>
+<pre><code class="language-bash"># Faster analysis
+tshark -r capture.pcap -Y "frame.number &lt; 100"
+</code></pre>
+</li>
+<li>
+<p><strong>Use two-pass analysis</strong></p>
+<pre><code class="language-bash"># First pass: identify interesting streams
+tshark -r capture.pcap -Y "http.response.code &gt;= 400" -T fields -e tcp.stream
+# Second pass: analyze specific streams
+tshark -r capture.pcap -Y "tcp.stream == 42" -V
+</code></pre>
+</li>
+</ol>
+<h3 id="privacy-best-practices"><a class="header" href="#privacy-best-practices">Privacy Best Practices</a></h3>
+<ol>
+<li>
+<p><strong>Minimize capture scope</strong></p>
+<pre><code class="language-bash"># Only capture what you need
+tshark -i eth0 -f "host 192.168.1.1 and port 80"
+</code></pre>
+</li>
+<li>
+<p><strong>Truncate packets to headers only</strong></p>
+<pre><code class="language-bash"># Don't capture sensitive payload
+tshark -i eth0 -s 68 -w headers-only.pcap
+</code></pre>
+</li>
+<li>
+<p><strong>Secure capture files</strong></p>
+<pre><code class="language-bash"># Set restrictive permissions
+tshark -i eth0 -w capture.pcap
+chmod 600 capture.pcap
+</code></pre>
+</li>
+<li>
+<p><strong>Anonymize IP addresses</strong></p>
+<pre><code class="language-bash"># Use editcap for anonymization
+editcap -a 192.168.1.0/24:1.2.3.0/24 original.pcap anonymized.pcap
+</code></pre>
+</li>
+<li>
+<p><strong>Delete captures when done</strong></p>
+<pre><code class="language-bash"># Don't keep captures longer than necessary
+find /captures -name "*.pcap" -mtime +7 -delete
+</code></pre>
+</li>
+</ol>
+<h3 id="security-best-practices"><a class="header" href="#security-best-practices">Security Best Practices</a></h3>
+<ol>
+<li>
+<p><strong>Follow authorization requirements</strong></p>
+<ul>
+<li>Get written permission before capturing</li>
+<li>Document scope and limitations</li>
+<li>Follow organizational policies</li>
+</ul>
+</li>
+<li>
+<p><strong>Be aware of legal implications</strong></p>
+<ul>
+<li>Understand local wiretapping laws</li>
+<li>Know privacy regulations (GDPR, etc.)</li>
+<li>Consider consent requirements</li>
+</ul>
+</li>
+<li>
+<p><strong>Protect captured data</strong></p>
+<ul>
+<li>Encrypt sensitive captures</li>
+<li>Use secure transfer methods</li>
+<li>Implement access controls</li>
+</ul>
+</li>
+<li>
+<p><strong>Sanitize before sharing</strong></p>
+<ul>
+<li>Remove sensitive information</li>
+<li>Anonymize as appropriate</li>
+<li>Redact confidential data</li>
+</ul>
+</li>
+</ol>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="essential-commands"><a class="header" href="#essential-commands">Essential Commands</a></h3>
+<pre><code class="language-bash"># List interfaces
+tshark -D
+
+# Capture live traffic
+tshark -i eth0
+
+# Capture to file
+tshark -i eth0 -w capture.pcap
+
+# Read from file
+tshark -r capture.pcap
+
+# Capture with filter
+tshark -i eth0 -f "tcp port 80"
+
+# Display with filter
+tshark -r capture.pcap -Y "http"
+
+# Verbose output
+tshark -r capture.pcap -V
+
+# Extract fields
+tshark -r capture.pcap -T fields -e ip.src -e ip.dst
+
+# JSON output
+tshark -r capture.pcap -T json
+
+# Statistics
+tshark -r capture.pcap -q -z io,phs
+
+# Follow TCP stream
+tshark -r capture.pcap -q -z follow,tcp,ascii,0
+
+# Quiet mode
+tshark -i eth0 -w capture.pcap -q
+
+# Capture N packets
+tshark -i eth0 -c 100
+
+# Ring buffer
+tshark -i eth0 -w capture.pcap -b files:5 -b filesize:10000
+</code></pre>
+<h3 id="common-capture-filters-bpf"><a class="header" href="#common-capture-filters-bpf">Common Capture Filters (BPF)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Filter</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>host 192.168.1.1</code></td><td>Traffic to/from host</td></tr>
+<tr><td><code>net 192.168.1.0/24</code></td><td>Traffic to/from network</td></tr>
+<tr><td><code>port 80</code></td><td>Traffic on port 80</td></tr>
+<tr><td><code>tcp</code></td><td>TCP traffic only</td></tr>
+<tr><td><code>udp</code></td><td>UDP traffic only</td></tr>
+<tr><td><code>icmp</code></td><td>ICMP traffic only</td></tr>
+<tr><td><code>tcp port 80</code></td><td>TCP traffic on port 80</td></tr>
+<tr><td><code>src host 192.168.1.1</code></td><td>Traffic from specific host</td></tr>
+<tr><td><code>dst port 443</code></td><td>Traffic to port 443</td></tr>
+<tr><td><code>not port 22</code></td><td>Exclude port 22</td></tr>
+<tr><td><code>tcp[tcpflags] &amp; tcp-syn != 0</code></td><td>TCP SYN packets</td></tr>
+<tr><td><code>portrange 8000-9000</code></td><td>Port range</td></tr>
+<tr><td><code>ether host 00:11:22:33:44:55</code></td><td>Specific MAC address</td></tr>
+</tbody></table>
+</div>
+<h3 id="common-display-filters"><a class="header" href="#common-display-filters">Common Display Filters</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Filter</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>ip.addr == 192.168.1.1</code></td><td>IP address (src or dst)</td></tr>
+<tr><td><code>tcp.port == 80</code></td><td>TCP port (src or dst)</td></tr>
+<tr><td><code>http</code></td><td>HTTP traffic</td></tr>
+<tr><td><code>http.request</code></td><td>HTTP requests only</td></tr>
+<tr><td><code>http.response.code == 404</code></td><td>HTTP 404 responses</td></tr>
+<tr><td><code>dns</code></td><td>DNS traffic</td></tr>
+<tr><td><code>dns.qry.name contains "example"</code></td><td>DNS queries containing text</td></tr>
+<tr><td><code>tls.handshake.type == 1</code></td><td>TLS Client Hello</td></tr>
+<tr><td><code>tcp.analysis.retransmission</code></td><td>TCP retransmissions</td></tr>
+<tr><td><code>tcp.flags.syn == 1</code></td><td>TCP SYN flag set</td></tr>
+<tr><td><code>ip.src == 192.168.1.0/24</code></td><td>Source IP in subnet</td></tr>
+<tr><td><code>frame.len &gt; 1000</code></td><td>Packets larger than 1000 bytes</td></tr>
+<tr><td><code>http.request.method == "POST"</code></td><td>HTTP POST requests</td></tr>
+<tr><td><code>tcp.stream == 0</code></td><td>First TCP stream</td></tr>
+<tr><td><code>expert</code></td><td>Expert information</td></tr>
+</tbody></table>
+</div>
+<h3 id="output-format-options-1"><a class="header" href="#output-format-options-1">Output Format Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Format</th></tr></thead><tbody>
+<tr><td><code>-T text</code></td><td>Default text output</td></tr>
+<tr><td><code>-T fields</code></td><td>Custom field extraction</td></tr>
+<tr><td><code>-T json</code></td><td>JSON format</td></tr>
+<tr><td><code>-T jsonraw</code></td><td>JSON with raw hex</td></tr>
+<tr><td><code>-T ek</code></td><td>Elasticsearch JSON</td></tr>
+<tr><td><code>-T pdml</code></td><td>XML (PDML)</td></tr>
+<tr><td><code>-T ps</code></td><td>PostScript</td></tr>
+<tr><td><code>-V</code></td><td>Verbose packet details</td></tr>
+<tr><td><code>-x</code></td><td>Hex and ASCII dump</td></tr>
+</tbody></table>
+</div>
+<h3 id="common-statistics"><a class="header" href="#common-statistics">Common Statistics</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Statistics</th></tr></thead><tbody>
+<tr><td><code>-q -z io,phs</code></td><td>Protocol hierarchy</td></tr>
+<tr><td><code>-q -z conv,tcp</code></td><td>TCP conversations</td></tr>
+<tr><td><code>-q -z endpoints,ip</code></td><td>IP endpoints</td></tr>
+<tr><td><code>-q -z io,stat,1</code></td><td>I/O statistics (1 sec intervals)</td></tr>
+<tr><td><code>-q -z http,tree</code></td><td>HTTP statistics</td></tr>
+<tr><td><code>-q -z dns,tree</code></td><td>DNS statistics</td></tr>
+<tr><td><code>-q -z expert</code></td><td>Expert information</td></tr>
+<tr><td><code>-q -z follow,tcp,ascii,0</code></td><td>Follow TCP stream 0</td></tr>
+</tbody></table>
+</div>
+<h3 id="useful-field-names"><a class="header" href="#useful-field-names">Useful Field Names</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>frame.number</code></td><td>Packet number</td></tr>
+<tr><td><code>frame.time</code></td><td>Timestamp</td></tr>
+<tr><td><code>frame.len</code></td><td>Frame length</td></tr>
+<tr><td><code>eth.src</code></td><td>Source MAC</td></tr>
+<tr><td><code>eth.dst</code></td><td>Destination MAC</td></tr>
+<tr><td><code>ip.src</code></td><td>Source IP</td></tr>
+<tr><td><code>ip.dst</code></td><td>Destination IP</td></tr>
+<tr><td><code>ip.proto</code></td><td>IP protocol</td></tr>
+<tr><td><code>tcp.srcport</code></td><td>TCP source port</td></tr>
+<tr><td><code>tcp.dstport</code></td><td>TCP destination port</td></tr>
+<tr><td><code>tcp.stream</code></td><td>TCP stream index</td></tr>
+<tr><td><code>tcp.flags</code></td><td>TCP flags</td></tr>
+<tr><td><code>udp.srcport</code></td><td>UDP source port</td></tr>
+<tr><td><code>udp.dstport</code></td><td>UDP destination port</td></tr>
+<tr><td><code>http.request.method</code></td><td>HTTP method</td></tr>
+<tr><td><code>http.host</code></td><td>HTTP host</td></tr>
+<tr><td><code>http.request.uri</code></td><td>HTTP URI</td></tr>
+<tr><td><code>http.response.code</code></td><td>HTTP response code</td></tr>
+<tr><td><code>dns.qry.name</code></td><td>DNS query name</td></tr>
+<tr><td><code>dns.a</code></td><td>DNS A record</td></tr>
+<tr><td><code>tls.handshake.extensions_server_name</code></td><td>TLS SNI</td></tr>
+</tbody></table>
+</div>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>TShark is an essential tool for network analysis, troubleshooting, and security investigations. Its command-line nature makes it ideal for remote systems, automation, and integration with other tools.</p>
+<p><strong>Key Takeaways:</strong></p>
+<ul>
+<li>Understand the difference between capture and display filters</li>
+<li>Use capture filters for performance and efficiency</li>
+<li>Use display filters for detailed analysis</li>
+<li>Choose appropriate output formats for your use case</li>
+<li>Apply ring buffers for long-term monitoring</li>
+<li>Leverage statistics for quick insights</li>
+<li>Follow streams for application-level analysis</li>
+<li>Combine with other tools for comprehensive analysis</li>
+<li>Always consider legal and ethical implications</li>
+<li>Secure and protect captured data</li>
+</ul>
+<p><strong>Learning Path:</strong></p>
+<ol>
+<li><strong>Week 1</strong>: Basic capture and reading, simple filters</li>
+<li><strong>Week 2</strong>: Display filters, field extraction, output formats</li>
+<li><strong>Week 3</strong>: Protocol analysis (HTTP, DNS, TCP, TLS)</li>
+<li><strong>Week 4</strong>: Statistics, expert information, stream following</li>
+<li><strong>Month 2</strong>: Advanced filters, performance optimization, automation</li>
+<li><strong>Month 3+</strong>: Integration, scripting, specialized analysis</li>
+</ol>
+<p><strong>Resources:</strong></p>
+<ul>
+<li>Wireshark documentation: https://www.wireshark.org/docs/</li>
+<li>Display filter reference: https://www.wireshark.org/docs/dfref/</li>
+<li>TShark man page: <code>man tshark</code></li>
+<li>Wireshark wiki: https://wiki.wireshark.org/</li>
+<li>Practice on sample captures: https://wiki.wireshark.org/SampleCaptures</li>
+</ul>
+<p>TShark's power lies in its flexibility and depth. Master its basics first, then gradually explore advanced features as needed. Combined with proper authorization and ethical use, it becomes an invaluable tool for understanding network behavior and diagnosing issues.</p>
+<p>Happy analyzing!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../tools/nmap.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../tools/wireshark.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../tools/nmap.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../tools/wireshark.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

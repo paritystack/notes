@@ -1,0 +1,751 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Message Queues - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="message-queues"><a class="header" href="#message-queues">Message Queues</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Message queues enable asynchronous communication between services, decoupling producers from consumers and providing reliability and scalability.</p>
+<h2 id="why-message-queues"><a class="header" href="#why-message-queues">Why Message Queues?</a></h2>
+<h3 id="without-queue-synchronous"><a class="header" href="#without-queue-synchronous">Without Queue (Synchronous)</a></h3>
+<pre><code>Client → API → Process → Database → Response
+         (waits for everything to complete)
+</code></pre>
+<p><strong>Problems</strong>:</p>
+<ul>
+<li>Slow response times</li>
+<li>Lost requests if service down</li>
+<li>Tight coupling</li>
+<li>No retry mechanism</li>
+</ul>
+<h3 id="with-queue-asynchronous"><a class="header" href="#with-queue-asynchronous">With Queue (Asynchronous)</a></h3>
+<pre><code>Client → API → Queue → Response (fast)
+                 ↓
+              Worker → Process → Database
+              (background)
+</code></pre>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>Fast responses</li>
+<li>Decoupled services</li>
+<li>Automatic retries</li>
+<li>Load smoothing</li>
+<li>Guaranteed delivery</li>
+</ul>
+<h2 id="message-queue-patterns"><a class="header" href="#message-queue-patterns">Message Queue Patterns</a></h2>
+<h3 id="point-to-point-queue"><a class="header" href="#point-to-point-queue">Point-to-Point (Queue)</a></h3>
+<p>One message, one consumer:</p>
+<pre><code>Producer → [Queue] → Consumer
+               ↓
+           Message deleted after consumed
+</code></pre>
+<p><strong>Example</strong>: Order processing</p>
+<pre><code class="language-python"># Producer
+queue.send({
+    "order_id": "123",
+    "user_id": "456",
+    "total": 99.99
+})
+
+# Consumer
+message = queue.receive()
+process_order(message)
+queue.delete(message)  # Acknowledge
+</code></pre>
+<h3 id="publish-subscribe-topic"><a class="header" href="#publish-subscribe-topic">Publish-Subscribe (Topic)</a></h3>
+<p>One message, many consumers:</p>
+<pre><code>               ┌→ Consumer A
+Producer → [Topic] → Consumer B
+               └→ Consumer C
+</code></pre>
+<p><strong>Example</strong>: User signup event</p>
+<pre><code class="language-python"># Publisher
+topic.publish({
+    "event": "user.signup",
+    "user_id": "123",
+    "email": "alice@example.com"
+})
+
+# Subscriber 1: Send welcome email
+# Subscriber 2: Create user profile
+# Subscriber 3: Track analytics
+</code></pre>
+<h2 id="popular-message-queue-systems"><a class="header" href="#popular-message-queue-systems">Popular Message Queue Systems</a></h2>
+<h3 id="rabbitmq-amqp"><a class="header" href="#rabbitmq-amqp">RabbitMQ (AMQP)</a></h3>
+<pre><code class="language-python">import pika
+
+# Connect
+connection = pika.BlockingConnection(
+    pika.ConnectionParameters('localhost')
+)
+channel = connection.channel()
+
+# Declare queue
+channel.queue_declare(queue='tasks', durable=True)
+
+# Publish
+channel.basic_publish(
+    exchange='',
+    routing_key='tasks',
+    body='Process this task',
+    properties=pika.BasicProperties(
+        delivery_mode=2,  # Persistent
+    )
+)
+
+# Consume
+def callback(ch, method, properties, body):
+    print(f"Received {body}")
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+channel.basic_consume(
+    queue='tasks',
+    on_message_callback=callback
+)
+
+channel.start_consuming()
+</code></pre>
+<h3 id="apache-kafka-event-streaming"><a class="header" href="#apache-kafka-event-streaming">Apache Kafka (Event Streaming)</a></h3>
+<pre><code class="language-python">from kafka import KafkaProducer, KafkaConsumer
+
+# Producer
+producer = KafkaProducer(
+    bootstrap_servers=['localhost:9092']
+)
+
+producer.send('orders', b'{"order_id": 123}')
+producer.flush()
+
+# Consumer
+consumer = KafkaConsumer(
+    'orders',
+    bootstrap_servers=['localhost:9092'],
+    group_id='order-processors',
+    auto_offset_reset='earliest'
+)
+
+for message in consumer:
+    print(f"Processing: {message.value}")
+</code></pre>
+<h3 id="aws-sqs-simple-queue-service"><a class="header" href="#aws-sqs-simple-queue-service">AWS SQS (Simple Queue Service)</a></h3>
+<pre><code class="language-python">import boto3
+
+sqs = boto3.client('sqs')
+
+# Send message
+sqs.send_message(
+    QueueUrl='https://sqs.us-east-1.amazonaws.com/123/myqueue',
+    MessageBody='Process this order',
+    MessageAttributes={
+        'Priority': {'StringValue': 'high', 'DataType': 'String'}
+    }
+)
+
+# Receive message
+messages = sqs.receive_message(
+    QueueUrl='...',
+    MaxNumberOfMessages=10,
+    WaitTimeSeconds=20  # Long polling
+)
+
+for message in messages.get('Messages', []):
+    # Process
+    process(message['Body'])
+
+    # Delete
+    sqs.delete_message(
+        QueueUrl='...',
+        ReceiptHandle=message['ReceiptHandle']
+    )
+</code></pre>
+<h3 id="redis-lightweight"><a class="header" href="#redis-lightweight">Redis (Lightweight)</a></h3>
+<pre><code class="language-python">import redis
+
+r = redis.Redis()
+
+# Queue with lists
+r.lpush('tasks', '{"task": "send_email"}')
+
+# Worker
+while True:
+    task = r.brpop('tasks', timeout=5)  # Blocking pop
+    if task:
+        process(task[1])
+</code></pre>
+<h2 id="message-queue-concepts"><a class="header" href="#message-queue-concepts">Message Queue Concepts</a></h2>
+<h3 id="acknowledgment-ack"><a class="header" href="#acknowledgment-ack">Acknowledgment (ACK)</a></h3>
+<p>Confirm message processed:</p>
+<pre><code>1. Receive message from queue
+2. Process message
+3. Send ACK
+4. Queue deletes message
+
+If no ACK: Message returns to queue (retry)
+</code></pre>
+<pre><code class="language-python"># Auto ACK (dangerous - lose messages)
+channel.basic_consume(queue='tasks', auto_ack=True)
+
+# Manual ACK (safe)
+def callback(ch, method, properties, body):
+    try:
+        process(body)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+    except Exception as e:
+        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+</code></pre>
+<h3 id="dead-letter-queue-dlq"><a class="header" href="#dead-letter-queue-dlq">Dead Letter Queue (DLQ)</a></h3>
+<p>Failed messages go to DLQ:</p>
+<pre><code>Queue → Process → Success ✓
+  ↓
+Retry 3x → Still fails → DLQ
+</code></pre>
+<pre><code class="language-python"># RabbitMQ DLQ
+channel.queue_declare(
+    queue='tasks',
+    arguments={
+        'x-dead-letter-exchange': 'dlx',
+        'x-max-retries': 3
+    }
+)
+
+# SQS DLQ
+sqs.create_queue(
+    QueueName='tasks',
+    Attributes={
+        'RedrivePolicy': json.dumps({
+            'deadLetterTargetArn': dlq_arn,
+            'maxReceiveCount': '3'
+        })
+    }
+)
+</code></pre>
+<h3 id="message-ordering"><a class="header" href="#message-ordering">Message Ordering</a></h3>
+<p><strong>FIFO Queues</strong>: Guaranteed order</p>
+<pre><code>Send: [A, B, C] → Receive: [A, B, C]
+</code></pre>
+<p><strong>Standard Queues</strong>: Best-effort order</p>
+<pre><code>Send: [A, B, C] → Receive: [B, A, C] (possible)
+</code></pre>
+<pre><code class="language-python"># SQS FIFO
+sqs.send_message(
+    QueueUrl='https://sqs.us-east-1.amazonaws.com/123/myqueue.fifo',
+    MessageBody='Task',
+    MessageGroupId='user-123',  # Same group = ordered
+    MessageDeduplicationId='unique-id'
+)
+</code></pre>
+<h3 id="message-persistence"><a class="header" href="#message-persistence">Message Persistence</a></h3>
+<p><strong>In-Memory</strong>: Fast but lost on crash</p>
+<pre><code>RAM Queue → Crash → Messages lost
+</code></pre>
+<p><strong>Persistent</strong>: Slower but durable</p>
+<pre><code>Disk Queue → Crash → Messages recovered
+</code></pre>
+<pre><code class="language-python"># RabbitMQ persistent
+channel.queue_declare(queue='tasks', durable=True)
+channel.basic_publish(
+    exchange='',
+    routing_key='tasks',
+    body='data',
+    properties=pika.BasicProperties(delivery_mode=2)
+)
+</code></pre>
+<h2 id="queue-patterns"><a class="header" href="#queue-patterns">Queue Patterns</a></h2>
+<h3 id="task-queue"><a class="header" href="#task-queue">Task Queue</a></h3>
+<p>Background job processing:</p>
+<pre><code>Web Request → Queue Task → Return immediately
+                  ↓
+               Worker picks up task
+                  ↓
+              Process (slow operation)
+</code></pre>
+<p><strong>Example</strong>: Image processing</p>
+<pre><code class="language-python"># API endpoint
+@app.post('/upload')
+def upload_image(image):
+    # Save to storage
+    storage.save(image)
+
+    # Queue processing
+    queue.send({
+        'task': 'process_image',
+        'image_id': image.id,
+        'operations': ['resize', 'thumbnail', 'watermark']
+    })
+
+    return {'status': 'processing'}
+
+# Worker
+def worker():
+    while True:
+        task = queue.receive()
+        if task['task'] == 'process_image':
+            process_image(task['image_id'], task['operations'])
+</code></pre>
+<h3 id="priority-queue"><a class="header" href="#priority-queue">Priority Queue</a></h3>
+<p>High-priority messages first:</p>
+<pre><code>High Priority:   [A, B] → Process first
+Medium Priority: [C, D] → Process next
+Low Priority:    [E, F] → Process last
+</code></pre>
+<pre><code class="language-python"># With priority
+queue.send(message, priority=10)  # High
+queue.send(message, priority=5)   # Medium
+queue.send(message, priority=1)   # Low
+
+# Consumer gets highest priority first
+</code></pre>
+<h3 id="delay-queue"><a class="header" href="#delay-queue">Delay Queue</a></h3>
+<p>Delayed message delivery:</p>
+<pre><code>Send message with delay=300s
+  ↓
+Wait 5 minutes
+  ↓
+Message becomes visible
+  ↓
+Consumer receives
+</code></pre>
+<pre><code class="language-python"># SQS delay
+sqs.send_message(
+    QueueUrl='...',
+    MessageBody='Reminder email',
+    DelaySeconds=300  # 5 minutes
+)
+
+# RabbitMQ delay
+channel.basic_publish(
+    exchange='delayed',
+    routing_key='tasks',
+    body='data',
+    properties=pika.BasicProperties(
+        headers={'x-delay': 5000}  # 5 seconds
+    )
+)
+</code></pre>
+<h3 id="fan-out-pattern"><a class="header" href="#fan-out-pattern">Fan-Out Pattern</a></h3>
+<p>One message to multiple queues:</p>
+<pre><code>         Exchange
+         /  |  \
+        ↓   ↓   ↓
+      Q1  Q2  Q3
+</code></pre>
+<pre><code class="language-python"># RabbitMQ fan-out
+channel.exchange_declare(exchange='logs', exchange_type='fanout')
+
+# Bind multiple queues
+channel.queue_bind(exchange='logs', queue='email-service')
+channel.queue_bind(exchange='logs', queue='sms-service')
+channel.queue_bind(exchange='logs', queue='analytics')
+
+# Publish once
+channel.basic_publish(exchange='logs', routing_key='', body='event')
+# All 3 queues receive the message
+</code></pre>
+<h2 id="event-driven-architecture"><a class="header" href="#event-driven-architecture">Event-Driven Architecture</a></h2>
+<h3 id="event-sourcing"><a class="header" href="#event-sourcing">Event Sourcing</a></h3>
+<p>Store all changes as events:</p>
+<pre><code>Event 1: UserCreated(id=123, name="Alice")
+Event 2: EmailUpdated(id=123, email="new@example.com")
+Event 3: UserDeleted(id=123)
+
+State = Replay all events
+</code></pre>
+<pre><code class="language-python"># Store events
+events = [
+    {"type": "UserCreated", "data": {"id": 123, "name": "Alice"}},
+    {"type": "EmailUpdated", "data": {"id": 123, "email": "new@..."}},
+]
+
+# Rebuild state
+def get_user_state(user_id):
+    user = None
+    for event in events:
+        if event['type'] == 'UserCreated':
+            user = event['data']
+        elif event['type'] == 'EmailUpdated':
+            user['email'] = event['data']['email']
+    return user
+</code></pre>
+<h3 id="cqrs-command-query-responsibility-segregation"><a class="header" href="#cqrs-command-query-responsibility-segregation">CQRS (Command Query Responsibility Segregation)</a></h3>
+<p>Separate read and write models:</p>
+<pre><code>Commands (Write) → Event Store → Events
+                                    ↓
+                              Read Model DB
+                                    ↑
+Queries (Read) ← ← ← ← ← ← ← ← ← ←
+</code></pre>
+<pre><code class="language-python"># Command (write)
+def create_order(order_data):
+    event = {
+        "type": "OrderCreated",
+        "data": order_data,
+        "timestamp": now()
+    }
+    event_store.append(event)
+    event_bus.publish(event)
+
+# Query (read)
+def get_order_summary():
+    return read_db.query("SELECT * FROM order_summary")
+
+# Event handler updates read model
+@event_handler('OrderCreated')
+def update_read_model(event):
+    read_db.execute(
+        "INSERT INTO order_summary VALUES (...)",
+        event['data']
+    )
+</code></pre>
+<h3 id="saga-pattern"><a class="header" href="#saga-pattern">Saga Pattern</a></h3>
+<p>Distributed transactions:</p>
+<pre><code>Service A → Success → Service B → Success → Service C
+                ↓
+              Failure → Compensate A
+</code></pre>
+<pre><code class="language-python"># Order saga
+def process_order(order):
+    # Step 1: Reserve inventory
+    inventory_result = inventory_service.reserve(order.items)
+    if not inventory_result.success:
+        return fail("Inventory unavailable")
+
+    # Step 2: Charge payment
+    payment_result = payment_service.charge(order.total)
+    if not payment_result.success:
+        # Compensate: Release inventory
+        inventory_service.release(order.items)
+        return fail("Payment failed")
+
+    # Step 3: Create shipment
+    shipment_result = shipping_service.create(order)
+    if not shipment_result.success:
+        # Compensate: Refund payment
+        payment_service.refund(payment_result.id)
+        # Compensate: Release inventory
+        inventory_service.release(order.items)
+        return fail("Shipping failed")
+
+    return success("Order completed")
+</code></pre>
+<h2 id="message-queue-best-practices"><a class="header" href="#message-queue-best-practices">Message Queue Best Practices</a></h2>
+<h3 id="idempotency"><a class="header" href="#idempotency">Idempotency</a></h3>
+<p>Handle duplicate messages safely:</p>
+<pre><code class="language-python"># Non-idempotent (bad)
+def process(message):
+    balance = get_balance(user_id)
+    set_balance(user_id, balance + 100)  # Duplicate = double credit!
+
+# Idempotent (good)
+def process(message):
+    if processed_messages.exists(message.id):
+        return  # Already processed
+
+    balance = get_balance(user_id)
+    set_balance(user_id, balance + 100)
+    processed_messages.add(message.id)
+</code></pre>
+<h3 id="poison-messages"><a class="header" href="#poison-messages">Poison Messages</a></h3>
+<p>Handle messages that always fail:</p>
+<pre><code class="language-python">def process_message(message):
+    try:
+        # Process
+        result = process(message.body)
+    except Exception as e:
+        message.retry_count += 1
+
+        if message.retry_count &gt; 3:
+            # Move to DLQ
+            dlq.send(message)
+            logger.error(f"Poison message: {message.id}")
+        else:
+            # Retry with backoff
+            queue.send(message, delay=2 ** message.retry_count)
+</code></pre>
+<h3 id="batching"><a class="header" href="#batching">Batching</a></h3>
+<p>Process multiple messages together:</p>
+<pre><code class="language-python"># Instead of 1 at a time
+messages = queue.receive_batch(max_messages=10)
+
+# Batch insert to DB
+db.bulk_insert([process(m) for m in messages])
+
+# Batch ACK
+queue.delete_batch([m.receipt_handle for m in messages])
+</code></pre>
+<h3 id="monitoring"><a class="header" href="#monitoring">Monitoring</a></h3>
+<p>Track queue health:</p>
+<pre><code class="language-python"># Queue metrics
+metrics = {
+    'messages_in_queue': queue.size(),
+    'messages_in_flight': queue.in_flight(),
+    'oldest_message_age': queue.oldest_age(),
+    'consumer_count': queue.consumers()
+}
+
+# Alerts
+if metrics['messages_in_queue'] &gt; 10000:
+    alert("Queue backing up!")
+
+if metrics['oldest_message_age'] &gt; 3600:
+    alert("Messages not being processed!")
+</code></pre>
+<h2 id="comparison"><a class="header" href="#comparison">Comparison</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>System</th><th>Type</th><th>Ordering</th><th>Persistence</th><th>Use Case</th></tr></thead><tbody>
+<tr><td><strong>RabbitMQ</strong></td><td>Broker</td><td>Yes</td><td>Yes</td><td>Task queues, RPC</td></tr>
+<tr><td><strong>Kafka</strong></td><td>Log</td><td>Partition</td><td>Yes</td><td>Event streaming, logs</td></tr>
+<tr><td><strong>SQS</strong></td><td>Broker</td><td>FIFO optional</td><td>Yes</td><td>Cloud-native, AWS</td></tr>
+<tr><td><strong>Redis</strong></td><td>In-memory</td><td>Lists</td><td>Optional</td><td>Simple queues, caching</td></tr>
+<tr><td><strong>ActiveMQ</strong></td><td>Broker</td><td>Yes</td><td>Yes</td><td>Enterprise, JMS</td></tr>
+</tbody></table>
+</div>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>Message queues are like a postal service:</p>
+<ul>
+<li><strong>Queue</strong>: Mailbox where messages wait</li>
+<li><strong>Producer</strong>: Person sending letters</li>
+<li><strong>Consumer</strong>: Person receiving letters</li>
+<li><strong>ACK</strong>: Confirmation letter was read</li>
+<li><strong>DLQ</strong>: Return to sender for undeliverable mail</li>
+</ul>
+<p><strong>Why useful?</strong></p>
+<ul>
+<li>Send letters even if recipient not home (asynchronous)</li>
+<li>Letters don't get lost (reliability)</li>
+<li>Can handle many letters (scalability)</li>
+<li>Different mailboxes for different types (routing)</li>
+</ul>
+<p>Don't wait for responses - queue it up!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<ul>
+<li><a href="https://www.rabbitmq.com/getstarted.html">RabbitMQ Tutorials</a></li>
+<li><a href="https://kafka.apache.org/documentation/">Apache Kafka Documentation</a></li>
+<li><a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-best-practices.html">AWS SQS Best Practices</a></li>
+<li><a href="https://www.enterpriseintegrationpatterns.com/">Enterprise Integration Patterns</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../system_design/distributed_consensus.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../mobile_development/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../system_design/distributed_consensus.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../mobile_development/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

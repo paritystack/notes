@@ -1,0 +1,1383 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Vllm - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="vllm-high-performance-llm-inference-and-serving"><a class="header" href="#vllm-high-performance-llm-inference-and-serving">vLLM: High-Performance LLM Inference and Serving</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>vLLM is a fast and easy-to-use library for large language model (LLM) inference and serving. It's designed to achieve high throughput and efficient memory management through innovative techniques like PagedAttention and continuous batching.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>High Performance</strong>: 10-20x higher throughput than HuggingFace Transformers</li>
+<li><strong>PagedAttention</strong>: Efficient memory management inspired by virtual memory and paging in OS</li>
+<li><strong>Continuous Batching</strong>: Dynamic request batching for optimal GPU utilization</li>
+<li><strong>OpenAI-Compatible API</strong>: Drop-in replacement for OpenAI API endpoints</li>
+<li><strong>Multi-GPU Support</strong>: Tensor parallelism and pipeline parallelism</li>
+<li><strong>Quantization</strong>: Support for AWQ, GPTQ, SqueezeLLM, and more</li>
+<li><strong>Streaming Output</strong>: Real-time token generation</li>
+<li><strong>LoRA Support</strong>: Efficient fine-tuned model serving</li>
+</ul>
+<h3 id="why-vllm"><a class="header" href="#why-vllm">Why vLLM?</a></h3>
+<ul>
+<li><strong>Memory Efficiency</strong>: Up to 2x improvement in memory usage through PagedAttention</li>
+<li><strong>Throughput</strong>: Handles concurrent requests efficiently with continuous batching</li>
+<li><strong>Ease of Use</strong>: Simple Python API and OpenAI-compatible server</li>
+<li><strong>Production Ready</strong>: Battle-tested in real-world deployments</li>
+</ul>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="pagedattention"><a class="header" href="#pagedattention">PagedAttention</a></h3>
+<p>PagedAttention is the key innovation that makes vLLM efficient:</p>
+<ul>
+<li><strong>Problem</strong>: Traditional LLM inference wastes memory storing KV caches contiguously</li>
+<li><strong>Solution</strong>: Store KV caches in non-contiguous memory blocks (pages)</li>
+<li><strong>Benefits</strong>:
+<ul>
+<li>Eliminates memory fragmentation</li>
+<li>Enables sharing KV caches across requests (for parallel sampling)</li>
+<li>Allows preemption and swapping of requests</li>
+</ul>
+</li>
+</ul>
+<p><strong>Key Parameters</strong>:</p>
+<ul>
+<li><code>block_size</code>: Size of each memory block (typically 16 tokens)</li>
+<li><code>max_num_seqs</code>: Maximum number of sequences processed simultaneously</li>
+<li><code>max_num_batched_tokens</code>: Maximum tokens in a batch</li>
+</ul>
+<h3 id="continuous-batching"><a class="header" href="#continuous-batching">Continuous Batching</a></h3>
+<p>Unlike traditional static batching, vLLM uses continuous (dynamic) batching:</p>
+<ul>
+<li><strong>Static Batching</strong>: Wait for all sequences to complete before processing new batch</li>
+<li><strong>Continuous Batching</strong>: Add new requests as soon as existing ones complete</li>
+<li><strong>Result</strong>: Higher GPU utilization and lower latency</li>
+</ul>
+<h3 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h3>
+<p>vLLM's memory hierarchy:</p>
+<ol>
+<li><strong>GPU Memory</strong>: Primary KV cache storage</li>
+<li><strong>CPU Memory</strong>: Swap space for preempted requests</li>
+<li><strong>Disk</strong>: Optional persistent cache storage</li>
+</ol>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<ul>
+<li>Python 3.8+</li>
+<li>CUDA 11.8+ (for GPU support)</li>
+<li>PyTorch 2.0+</li>
+<li>GPU with compute capability 7.0+ (V100, T4, A100, H100, etc.)</li>
+</ul>
+<h3 id="installation-methods"><a class="header" href="#installation-methods">Installation Methods</a></h3>
+<h4 id="via-pip-recommended"><a class="header" href="#via-pip-recommended">Via pip (Recommended)</a></h4>
+<pre><code class="language-bash"># Install vLLM with CUDA 12.1
+pip install vllm
+
+# Or with specific CUDA version
+pip install vllm-cuda118  # For CUDA 11.8
+pip install vllm-cuda121  # For CUDA 12.1
+</code></pre>
+<h4 id="via-docker"><a class="header" href="#via-docker">Via Docker</a></h4>
+<pre><code class="language-bash"># Pull official image
+docker pull vllm/vllm-openai:latest
+
+# Run server
+docker run --runtime nvidia --gpus all \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -p 8000:8000 \
+    --ipc=host \
+    vllm/vllm-openai:latest \
+    --model mistralai/Mistral-7B-v0.1
+</code></pre>
+<h4 id="from-source"><a class="header" href="#from-source">From Source</a></h4>
+<pre><code class="language-bash">git clone https://github.com/vllm-project/vllm.git
+cd vllm
+pip install -e .
+</code></pre>
+<h3 id="verification"><a class="header" href="#verification">Verification</a></h3>
+<pre><code class="language-bash"># Test installation
+python -c "import vllm; print(vllm.__version__)"
+</code></pre>
+<h2 id="common-operations"><a class="header" href="#common-operations">Common Operations</a></h2>
+<h3 id="1-starting-a-vllm-server"><a class="header" href="#1-starting-a-vllm-server">1. Starting a vLLM Server</a></h3>
+<h4 id="basic-server-start"><a class="header" href="#basic-server-start">Basic Server Start</a></h4>
+<pre><code class="language-bash"># Start OpenAI-compatible server
+python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-2-7b-hf \
+    --port 8000
+</code></pre>
+<h4 id="production-server-configuration"><a class="header" href="#production-server-configuration">Production Server Configuration</a></h4>
+<pre><code class="language-bash">python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-2-70b-hf \
+    --tensor-parallel-size 4 \
+    --gpu-memory-utilization 0.95 \
+    --max-num-seqs 256 \
+    --max-model-len 4096 \
+    --port 8000 \
+    --host 0.0.0.0 \
+    --served-model-name llama2-70b
+</code></pre>
+<p><strong>Key Parameters</strong>:</p>
+<ul>
+<li><code>--model</code>: HuggingFace model name or local path</li>
+<li><code>--tensor-parallel-size</code>: Number of GPUs for tensor parallelism</li>
+<li><code>--pipeline-parallel-size</code>: Number of pipeline stages</li>
+<li><code>--gpu-memory-utilization</code>: Fraction of GPU memory to use (0.0-1.0)</li>
+<li><code>--max-num-seqs</code>: Max concurrent sequences</li>
+<li><code>--max-model-len</code>: Maximum sequence length</li>
+<li><code>--dtype</code>: Data type (auto, half, float16, bfloat16, float)</li>
+<li><code>--quantization</code>: Quantization method (awq, gptq, squeezellm)</li>
+</ul>
+<h3 id="2-python-api-usage"><a class="header" href="#2-python-api-usage">2. Python API Usage</a></h3>
+<h4 id="basic-inference"><a class="header" href="#basic-inference">Basic Inference</a></h4>
+<pre><code class="language-python">from vllm import LLM, SamplingParams
+
+# Initialize model
+llm = LLM(model="meta-llama/Llama-2-7b-hf")
+
+# Define sampling parameters
+sampling_params = SamplingParams(
+    temperature=0.8,
+    top_p=0.95,
+    max_tokens=512
+)
+
+# Single prompt
+prompt = "Explain quantum computing in simple terms:"
+outputs = llm.generate(prompt, sampling_params)
+
+for output in outputs:
+    generated_text = output.outputs[0].text
+    print(generated_text)
+</code></pre>
+<h4 id="batch-processing"><a class="header" href="#batch-processing">Batch Processing</a></h4>
+<pre><code class="language-python">from vllm import LLM, SamplingParams
+
+llm = LLM(
+    model="meta-llama/Llama-2-7b-hf",
+    tensor_parallel_size=2,
+    gpu_memory_utilization=0.9
+)
+
+# Multiple prompts
+prompts = [
+    "What is machine learning?",
+    "Explain neural networks.",
+    "What is deep learning?"
+]
+
+sampling_params = SamplingParams(temperature=0.7, max_tokens=256)
+
+# Batch generation
+outputs = llm.generate(prompts, sampling_params)
+
+for prompt, output in zip(prompts, outputs):
+    print(f"Prompt: {prompt}")
+    print(f"Generated: {output.outputs[0].text}\n")
+</code></pre>
+<h4 id="advanced-sampling-parameters"><a class="header" href="#advanced-sampling-parameters">Advanced Sampling Parameters</a></h4>
+<pre><code class="language-python">sampling_params = SamplingParams(
+    # Temperature sampling
+    temperature=0.8,          # Randomness (0=deterministic, 1+=creative)
+    top_p=0.95,              # Nucleus sampling
+    top_k=50,                # Top-k sampling
+
+    # Length control
+    max_tokens=1024,         # Maximum tokens to generate
+    min_tokens=10,           # Minimum tokens to generate
+
+    # Stopping conditions
+    stop=["&lt;/s&gt;", "\n\n"],   # Stop sequences
+
+    # Penalties
+    presence_penalty=0.1,    # Penalize repeated topics
+    frequency_penalty=0.1,   # Penalize repeated tokens
+    repetition_penalty=1.1,  # Alternative repetition control
+
+    # Beam search
+    n=1,                     # Number of completions
+    best_of=1,               # Generate best_of and return n best
+    use_beam_search=False,   # Use beam search instead of sampling
+
+    # Other
+    logprobs=None,           # Return log probabilities
+    skip_special_tokens=True # Skip special tokens in output
+)
+</code></pre>
+<h3 id="3-openai-compatible-api"><a class="header" href="#3-openai-compatible-api">3. OpenAI-Compatible API</a></h3>
+<h4 id="using-with-openai-python-client"><a class="header" href="#using-with-openai-python-client">Using with OpenAI Python Client</a></h4>
+<pre><code class="language-python">from openai import OpenAI
+
+# Point to vLLM server
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="EMPTY"  # vLLM doesn't require API key by default
+)
+
+# Chat completion
+response = client.chat.completions.create(
+    model="meta-llama/Llama-2-7b-hf",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain vLLM in one sentence."}
+    ],
+    temperature=0.7,
+    max_tokens=100
+)
+
+print(response.choices[0].message.content)
+</code></pre>
+<h4 id="streaming-responses"><a class="header" href="#streaming-responses">Streaming Responses</a></h4>
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="EMPTY")
+
+# Streaming chat completion
+stream = client.chat.completions.create(
+    model="meta-llama/Llama-2-7b-hf",
+    messages=[{"role": "user", "content": "Write a short story."}],
+    stream=True,
+    max_tokens=500
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+</code></pre>
+<h4 id="using-with-curl"><a class="header" href="#using-with-curl">Using with curl</a></h4>
+<pre><code class="language-bash"># Completion request
+curl http://localhost:8000/v1/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "meta-llama/Llama-2-7b-hf",
+        "prompt": "Once upon a time",
+        "max_tokens": 100,
+        "temperature": 0.7
+    }'
+
+# Chat completion
+curl http://localhost:8000/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "meta-llama/Llama-2-7b-hf",
+        "messages": [
+            {"role": "user", "content": "Hello!"}
+        ],
+        "max_tokens": 100
+    }'
+</code></pre>
+<h3 id="4-streaming-in-python-api"><a class="header" href="#4-streaming-in-python-api">4. Streaming in Python API</a></h3>
+<pre><code class="language-python">from vllm import LLM, SamplingParams
+
+llm = LLM(model="meta-llama/Llama-2-7b-hf")
+
+sampling_params = SamplingParams(
+    temperature=0.8,
+    max_tokens=512,
+    stream=True  # Enable streaming
+)
+
+prompt = "Write a detailed explanation of vLLM:"
+
+# Stream tokens as they're generated
+for output in llm.generate(prompt, sampling_params):
+    for token_output in output.outputs:
+        print(token_output.text, end="", flush=True)
+</code></pre>
+<h2 id="advanced-features"><a class="header" href="#advanced-features">Advanced Features</a></h2>
+<h3 id="multi-gpu-configuration"><a class="header" href="#multi-gpu-configuration">Multi-GPU Configuration</a></h3>
+<h4 id="tensor-parallelism"><a class="header" href="#tensor-parallelism">Tensor Parallelism</a></h4>
+<p>Split model layers across multiple GPUs:</p>
+<pre><code class="language-python">from vllm import LLM
+
+# Use 4 GPUs with tensor parallelism
+llm = LLM(
+    model="meta-llama/Llama-2-70b-hf",
+    tensor_parallel_size=4,
+    dtype="bfloat16"
+)
+</code></pre>
+<pre><code class="language-bash"># Server with tensor parallelism
+python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-2-70b-hf \
+    --tensor-parallel-size 4
+</code></pre>
+<p><strong>Best for</strong>: Large models that don't fit on single GPU</p>
+<h4 id="pipeline-parallelism"><a class="header" href="#pipeline-parallelism">Pipeline Parallelism</a></h4>
+<p>Split model vertically across pipeline stages:</p>
+<pre><code class="language-python">llm = LLM(
+    model="meta-llama/Llama-2-70b-hf",
+    pipeline_parallel_size=2,
+    tensor_parallel_size=2  # Can combine both
+)
+</code></pre>
+<p><strong>Best for</strong>: Very large models with high throughput requirements</p>
+<h3 id="quantization"><a class="header" href="#quantization">Quantization</a></h3>
+<h4 id="awq-activation-aware-weight-quantization"><a class="header" href="#awq-activation-aware-weight-quantization">AWQ (Activation-aware Weight Quantization)</a></h4>
+<pre><code class="language-python">from vllm import LLM
+
+# Load AWQ quantized model
+llm = LLM(
+    model="TheBloke/Llama-2-7B-AWQ",
+    quantization="awq",
+    dtype="half"
+)
+</code></pre>
+<pre><code class="language-bash"># Server with AWQ
+python -m vllm.entrypoints.openai.api_server \
+    --model TheBloke/Llama-2-70B-AWQ \
+    --quantization awq \
+    --dtype half
+</code></pre>
+<h4 id="gptq"><a class="header" href="#gptq">GPTQ</a></h4>
+<pre><code class="language-python">llm = LLM(
+    model="TheBloke/Llama-2-7B-GPTQ",
+    quantization="gptq"
+)
+</code></pre>
+<h4 id="squeezellm"><a class="header" href="#squeezellm">SqueezeLLM</a></h4>
+<pre><code class="language-python">llm = LLM(
+    model="squeeze-ai-lab/sq-llama-2-7b-w4",
+    quantization="squeezellm"
+)
+</code></pre>
+<p><strong>Quantization Benefits</strong>:</p>
+<ul>
+<li><strong>AWQ</strong>: 4-bit quantization, minimal accuracy loss, fast inference</li>
+<li><strong>GPTQ</strong>: 4-bit quantization, good for memory-constrained deployments</li>
+<li><strong>SqueezeLLM</strong>: Ultra-low bit quantization with sparse matrix multiplication</li>
+</ul>
+<h3 id="lora-adapters"><a class="header" href="#lora-adapters">LoRA Adapters</a></h3>
+<p>Serve multiple LoRA adapters with a single base model:</p>
+<pre><code class="language-bash">python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-2-7b-hf \
+    --enable-lora \
+    --lora-modules \
+        sql-lora=/path/to/sql-adapter \
+        code-lora=/path/to/code-adapter \
+    --max-lora-rank 64
+</code></pre>
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="EMPTY")
+
+# Use specific LoRA adapter
+response = client.chat.completions.create(
+    model="sql-lora",  # Specify LoRA adapter name
+    messages=[{"role": "user", "content": "Generate SQL query"}]
+)
+</code></pre>
+<h3 id="speculative-decoding"><a class="header" href="#speculative-decoding">Speculative Decoding</a></h3>
+<p>Use a smaller draft model to speed up generation:</p>
+<pre><code class="language-python">from vllm import LLM
+
+llm = LLM(
+    model="meta-llama/Llama-2-70b-hf",  # Target model
+    speculative_model="meta-llama/Llama-2-7b-hf",  # Draft model
+    num_speculative_tokens=5
+)
+</code></pre>
+<p><strong>Benefits</strong>: 1.5-2x speedup for large models with minimal quality impact</p>
+<h2 id="configuration--optimization"><a class="header" href="#configuration--optimization">Configuration &amp; Optimization</a></h2>
+<h3 id="memory-optimization"><a class="header" href="#memory-optimization">Memory Optimization</a></h3>
+<h4 id="gpu-memory-utilization"><a class="header" href="#gpu-memory-utilization">GPU Memory Utilization</a></h4>
+<pre><code class="language-python">llm = LLM(
+    model="meta-llama/Llama-2-7b-hf",
+    gpu_memory_utilization=0.95,  # Use 95% of GPU memory
+    swap_space=4  # 4GB CPU swap space
+)
+</code></pre>
+<p><strong>Guidelines</strong>:</p>
+<ul>
+<li>Start with <code>0.9</code> and increase if no OOM errors</li>
+<li>Leave headroom for CUDA kernels and buffers</li>
+<li>Use <code>swap_space</code> for handling request spikes</li>
+</ul>
+<h4 id="block-size-and-batching"><a class="header" href="#block-size-and-batching">Block Size and Batching</a></h4>
+<pre><code class="language-python">llm = LLM(
+    model="meta-llama/Llama-2-7b-hf",
+    block_size=16,  # Tokens per block (default: 16)
+    max_num_seqs=256,  # Max concurrent sequences
+    max_num_batched_tokens=8192  # Max tokens per batch
+)
+</code></pre>
+<p><strong>Tuning Tips</strong>:</p>
+<ul>
+<li>Larger <code>block_size</code>: Better memory efficiency, less flexibility</li>
+<li>Larger <code>max_num_seqs</code>: Higher throughput, more memory usage</li>
+<li><code>max_num_batched_tokens</code>: Balance throughput vs. latency</li>
+</ul>
+<h3 id="performance-tuning"><a class="header" href="#performance-tuning">Performance Tuning</a></h3>
+<h4 id="for-high-throughput"><a class="header" href="#for-high-throughput">For High Throughput</a></h4>
+<pre><code class="language-python">llm = LLM(
+    model="meta-llama/Llama-2-7b-hf",
+    max_num_seqs=512,  # High concurrency
+    gpu_memory_utilization=0.95,
+    dtype="bfloat16",
+    enforce_eager=False,  # Use CUDA graph
+    max_model_len=2048  # Limit sequence length
+)
+</code></pre>
+<h4 id="for-low-latency"><a class="header" href="#for-low-latency">For Low Latency</a></h4>
+<pre><code class="language-python">llm = LLM(
+    model="meta-llama/Llama-2-7b-hf",
+    max_num_seqs=32,  # Lower concurrency
+    gpu_memory_utilization=0.8,
+    dtype="float16"
+)
+</code></pre>
+<h4 id="data-types"><a class="header" href="#data-types">Data Types</a></h4>
+<pre><code class="language-python"># Options: auto, half, float16, bfloat16, float32
+llm = LLM(model="...", dtype="bfloat16")
+</code></pre>
+<p><strong>Recommendations</strong>:</p>
+<ul>
+<li><code>bfloat16</code>: Best for A100/H100, good numerical stability</li>
+<li><code>float16</code>: Good for V100/T4, faster than float32</li>
+<li><code>auto</code>: Let vLLM choose based on model and hardware</li>
+</ul>
+<h3 id="environment-variables"><a class="header" href="#environment-variables">Environment Variables</a></h3>
+<pre><code class="language-bash"># CUDA optimization
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+export NCCL_DEBUG=INFO  # For debugging multi-GPU
+
+# vLLM configuration
+export VLLM_USE_MODELSCOPE=True  # Use ModelScope hub
+export VLLM_ATTENTION_BACKEND=FLASH_ATTN  # Use Flash Attention
+export VLLM_WORKER_MULTIPROC_METHOD=spawn  # Worker process method
+
+# Logging
+export VLLM_LOGGING_LEVEL=INFO
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="pattern-1-production-api-server"><a class="header" href="#pattern-1-production-api-server">Pattern 1: Production API Server</a></h3>
+<pre><code class="language-python"># production_server.py
+import asyncio
+from vllm.engine.arg_utils import AsyncEngineArgs
+from vllm.engine.async_llm_engine import AsyncLLMEngine
+from vllm.sampling_params import SamplingParams
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
+
+# Initialize engine
+engine_args = AsyncEngineArgs(
+    model="meta-llama/Llama-2-7b-hf",
+    tensor_parallel_size=2,
+    gpu_memory_utilization=0.95,
+    max_num_seqs=256
+)
+engine = AsyncLLMEngine.from_engine_args(engine_args)
+
+class GenerateRequest(BaseModel):
+    prompt: str
+    max_tokens: int = 512
+    temperature: float = 0.7
+
+@app.post("/generate")
+async def generate(request: GenerateRequest):
+    try:
+        sampling_params = SamplingParams(
+            temperature=request.temperature,
+            max_tokens=request.max_tokens
+        )
+
+        request_id = f"req-{asyncio.current_task().get_name()}"
+        results_generator = engine.generate(
+            request.prompt,
+            sampling_params,
+            request_id
+        )
+
+        final_output = None
+        async for output in results_generator:
+            final_output = output
+
+        return {"text": final_output.outputs[0].text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+</code></pre>
+<h3 id="pattern-2-batch-processing-pipeline"><a class="header" href="#pattern-2-batch-processing-pipeline">Pattern 2: Batch Processing Pipeline</a></h3>
+<pre><code class="language-python"># batch_processor.py
+from vllm import LLM, SamplingParams
+from typing import List, Dict
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+class BatchProcessor:
+    def __init__(self, model_name: str, batch_size: int = 32):
+        self.llm = LLM(
+            model=model_name,
+            tensor_parallel_size=2,
+            max_num_seqs=batch_size,
+            gpu_memory_utilization=0.95
+        )
+        self.batch_size = batch_size
+
+    def process_batch(
+        self,
+        prompts: List[str],
+        sampling_params: SamplingParams
+    ) -&gt; List[str]:
+        """Process a batch of prompts"""
+        outputs = self.llm.generate(prompts, sampling_params)
+        return [output.outputs[0].text for output in outputs]
+
+    def process_large_dataset(
+        self,
+        prompts: List[str],
+        sampling_params: SamplingParams
+    ) -&gt; List[str]:
+        """Process dataset in batches"""
+        results = []
+
+        for i in range(0, len(prompts), self.batch_size):
+            batch = prompts[i:i + self.batch_size]
+            batch_results = self.process_batch(batch, sampling_params)
+            results.extend(batch_results)
+
+            print(f"Processed {min(i + self.batch_size, len(prompts))}/{len(prompts)}")
+
+        return results
+
+# Usage
+processor = BatchProcessor("meta-llama/Llama-2-7b-hf", batch_size=64)
+prompts = ["Prompt 1", "Prompt 2", ...]  # Large dataset
+sampling_params = SamplingParams(temperature=0.7, max_tokens=256)
+results = processor.process_large_dataset(prompts, sampling_params)
+</code></pre>
+<h3 id="pattern-3-dynamic-request-routing"><a class="header" href="#pattern-3-dynamic-request-routing">Pattern 3: Dynamic Request Routing</a></h3>
+<pre><code class="language-python"># router.py
+from vllm import LLM, SamplingParams
+from enum import Enum
+from typing import Dict
+
+class ModelSize(Enum):
+    SMALL = "7b"
+    MEDIUM = "13b"
+    LARGE = "70b"
+
+class ModelRouter:
+    def __init__(self):
+        self.models: Dict[ModelSize, LLM] = {
+            ModelSize.SMALL: LLM("meta-llama/Llama-2-7b-hf"),
+            ModelSize.MEDIUM: LLM(
+                "meta-llama/Llama-2-13b-hf",
+                tensor_parallel_size=2
+            ),
+            ModelSize.LARGE: LLM(
+                "meta-llama/Llama-2-70b-hf",
+                tensor_parallel_size=4
+            )
+        }
+
+    def route_request(self, prompt: str, complexity: str = "auto") -&gt; str:
+        """Route request to appropriate model based on complexity"""
+        if complexity == "auto":
+            # Simple heuristic: route by prompt length
+            model_size = (
+                ModelSize.LARGE if len(prompt) &gt; 1000
+                else ModelSize.MEDIUM if len(prompt) &gt; 500
+                else ModelSize.SMALL
+            )
+        else:
+            model_size = ModelSize[complexity.upper()]
+
+        llm = self.models[model_size]
+        sampling_params = SamplingParams(temperature=0.7, max_tokens=512)
+        output = llm.generate(prompt, sampling_params)
+
+        return output[0].outputs[0].text
+
+# Usage
+router = ModelRouter()
+result = router.route_request("Short question", complexity="auto")
+</code></pre>
+<h3 id="pattern-4-error-handling-and-retries"><a class="header" href="#pattern-4-error-handling-and-retries">Pattern 4: Error Handling and Retries</a></h3>
+<pre><code class="language-python"># robust_client.py
+from openai import OpenAI
+from tenacity import retry, stop_after_attempt, wait_exponential
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class RobustVLLMClient:
+    def __init__(self, base_url: str = "http://localhost:8000/v1"):
+        self.client = OpenAI(base_url=base_url, api_key="EMPTY")
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10)
+    )
+    def generate(
+        self,
+        messages: list,
+        model: str = "default",
+        **kwargs
+    ) -&gt; str:
+        """Generate with automatic retries"""
+        try:
+            response = self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                **kwargs
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.error(f"Generation failed: {e}")
+            raise
+
+    def generate_with_fallback(
+        self,
+        messages: list,
+        primary_model: str,
+        fallback_model: str,
+        **kwargs
+    ) -&gt; tuple[str, str]:
+        """Try primary model, fallback to secondary on failure"""
+        try:
+            result = self.generate(messages, model=primary_model, **kwargs)
+            return result, primary_model
+        except Exception as e:
+            logger.warning(f"Primary model failed: {e}, using fallback")
+            result = self.generate(messages, model=fallback_model, **kwargs)
+            return result, fallback_model
+
+# Usage
+client = RobustVLLMClient()
+messages = [{"role": "user", "content": "Hello!"}]
+response, model_used = client.generate_with_fallback(
+    messages,
+    primary_model="llama-70b",
+    fallback_model="llama-7b"
+)
+</code></pre>
+<h3 id="pattern-5-monitoring-and-metrics"><a class="header" href="#pattern-5-monitoring-and-metrics">Pattern 5: Monitoring and Metrics</a></h3>
+<pre><code class="language-python"># monitoring.py
+from prometheus_client import Counter, Histogram, Gauge, start_http_server
+from vllm import LLM, SamplingParams
+import time
+from typing import List
+
+# Prometheus metrics
+REQUEST_COUNT = Counter('vllm_requests_total', 'Total requests')
+REQUEST_DURATION = Histogram('vllm_request_duration_seconds', 'Request duration')
+ACTIVE_REQUESTS = Gauge('vllm_active_requests', 'Active requests')
+TOKENS_GENERATED = Counter('vllm_tokens_generated_total', 'Total tokens generated')
+REQUEST_ERRORS = Counter('vllm_request_errors_total', 'Total errors')
+
+class MonitoredLLM:
+    def __init__(self, model_name: str):
+        self.llm = LLM(model=model_name)
+        # Start Prometheus metrics server
+        start_http_server(9090)
+
+    def generate(self, prompts: List[str], sampling_params: SamplingParams):
+        REQUEST_COUNT.inc(len(prompts))
+        ACTIVE_REQUESTS.inc(len(prompts))
+
+        start_time = time.time()
+
+        try:
+            outputs = self.llm.generate(prompts, sampling_params)
+
+            # Track tokens generated
+            for output in outputs:
+                TOKENS_GENERATED.inc(len(output.outputs[0].token_ids))
+
+            return outputs
+        except Exception as e:
+            REQUEST_ERRORS.inc()
+            raise
+        finally:
+            duration = time.time() - start_time
+            REQUEST_DURATION.observe(duration)
+            ACTIVE_REQUESTS.dec(len(prompts))
+
+# Usage
+llm = MonitoredLLM("meta-llama/Llama-2-7b-hf")
+# Metrics available at http://localhost:9090/metrics
+</code></pre>
+<h3 id="pattern-6-caching-layer"><a class="header" href="#pattern-6-caching-layer">Pattern 6: Caching Layer</a></h3>
+<pre><code class="language-python"># caching.py
+from vllm import LLM, SamplingParams
+from functools import lru_cache
+import hashlib
+import json
+from typing import Optional
+import redis
+
+class CachedLLM:
+    def __init__(self, model_name: str, redis_url: Optional[str] = None):
+        self.llm = LLM(model=model_name)
+        self.redis_client = redis.from_url(redis_url) if redis_url else None
+
+    def _cache_key(self, prompt: str, sampling_params: SamplingParams) -&gt; str:
+        """Generate cache key from prompt and params"""
+        params_str = json.dumps({
+            "temperature": sampling_params.temperature,
+            "max_tokens": sampling_params.max_tokens,
+            "top_p": sampling_params.top_p,
+            "top_k": sampling_params.top_k,
+        }, sort_keys=True)
+
+        key_str = f"{prompt}:{params_str}"
+        return hashlib.sha256(key_str.encode()).hexdigest()
+
+    def generate(self, prompt: str, sampling_params: SamplingParams) -&gt; str:
+        """Generate with caching"""
+        # Check cache
+        if self.redis_client:
+            cache_key = self._cache_key(prompt, sampling_params)
+            cached = self.redis_client.get(cache_key)
+
+            if cached:
+                return cached.decode('utf-8')
+
+        # Generate
+        output = self.llm.generate(prompt, sampling_params)
+        result = output[0].outputs[0].text
+
+        # Store in cache
+        if self.redis_client:
+            self.redis_client.setex(
+                cache_key,
+                3600,  # 1 hour TTL
+                result
+            )
+
+        return result
+
+# Usage
+llm = CachedLLM("meta-llama/Llama-2-7b-hf", redis_url="redis://localhost:6379")
+</code></pre>
+<h2 id="model-management"><a class="header" href="#model-management">Model Management</a></h2>
+<h3 id="loading-models"><a class="header" href="#loading-models">Loading Models</a></h3>
+<h4 id="from-huggingface-hub"><a class="header" href="#from-huggingface-hub">From HuggingFace Hub</a></h4>
+<pre><code class="language-python">llm = LLM(model="meta-llama/Llama-2-7b-hf")
+</code></pre>
+<h4 id="from-local-path"><a class="header" href="#from-local-path">From Local Path</a></h4>
+<pre><code class="language-python">llm = LLM(model="/path/to/local/model")
+</code></pre>
+<h4 id="with-custom-tokenizer"><a class="header" href="#with-custom-tokenizer">With Custom Tokenizer</a></h4>
+<pre><code class="language-python">llm = LLM(
+    model="meta-llama/Llama-2-7b-hf",
+    tokenizer="meta-llama/Llama-2-7b-hf",
+    tokenizer_mode="auto"  # or "slow"
+)
+</code></pre>
+<h4 id="with-authentication"><a class="header" href="#with-authentication">With Authentication</a></h4>
+<pre><code class="language-bash"># Set HuggingFace token
+export HF_TOKEN=your_token_here
+
+# Or in code
+llm = LLM(
+    model="meta-llama/Llama-2-7b-hf",
+    download_dir="/custom/cache/dir"
+)
+</code></pre>
+<h3 id="supported-model-architectures"><a class="header" href="#supported-model-architectures">Supported Model Architectures</a></h3>
+<p>vLLM supports many popular architectures:</p>
+<ul>
+<li><strong>LLaMA &amp; LLaMA 2</strong>: Meta's LLaMA family</li>
+<li><strong>Mistral &amp; Mixtral</strong>: Mistral AI models</li>
+<li><strong>GPT-2, GPT-J, GPT-NeoX</strong>: GPT variants</li>
+<li><strong>OPT</strong>: Meta's OPT models</li>
+<li><strong>BLOOM</strong>: BigScience BLOOM</li>
+<li><strong>Falcon</strong>: TII Falcon models</li>
+<li><strong>MPT</strong>: MosaicML MPT</li>
+<li><strong>Qwen</strong>: Alibaba Qwen</li>
+<li><strong>Baichuan</strong>: Baichuan models</li>
+<li><strong>Yi</strong>: 01.AI Yi models</li>
+<li><strong>DeepSeek</strong>: DeepSeek models</li>
+<li><strong>Phi</strong>: Microsoft Phi models</li>
+<li><strong>Gemma</strong>: Google Gemma</li>
+</ul>
+<h3 id="model-warmup"><a class="header" href="#model-warmup">Model Warmup</a></h3>
+<pre><code class="language-python"># Warm up model with sample request
+llm = LLM(model="meta-llama/Llama-2-7b-hf")
+
+# Warm up
+_ = llm.generate("Hello", SamplingParams(max_tokens=1))
+
+# Now ready for production requests
+</code></pre>
+<h2 id="monitoring--debugging"><a class="header" href="#monitoring--debugging">Monitoring &amp; Debugging</a></h2>
+<h3 id="logging-configuration"><a class="header" href="#logging-configuration">Logging Configuration</a></h3>
+<pre><code class="language-python">import logging
+
+# Configure vLLM logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# vLLM-specific loggers
+logging.getLogger('vllm').setLevel(logging.DEBUG)
+logging.getLogger('vllm.engine').setLevel(logging.INFO)
+</code></pre>
+<h3 id="server-metrics-endpoint"><a class="header" href="#server-metrics-endpoint">Server Metrics Endpoint</a></h3>
+<p>vLLM server exposes metrics at <code>/metrics</code>:</p>
+<pre><code class="language-bash">curl http://localhost:8000/metrics
+</code></pre>
+<p><strong>Key Metrics</strong>:</p>
+<ul>
+<li><code>vllm:num_requests_running</code>: Currently running requests</li>
+<li><code>vllm:num_requests_waiting</code>: Queued requests</li>
+<li><code>vllm:gpu_cache_usage_perc</code>: GPU cache utilization</li>
+<li><code>vllm:cpu_cache_usage_perc</code>: CPU cache utilization</li>
+<li><code>vllm:time_to_first_token_seconds</code>: TTFT latency</li>
+<li><code>vllm:time_per_output_token_seconds</code>: Token generation speed</li>
+</ul>
+<h3 id="debug-mode"><a class="header" href="#debug-mode">Debug Mode</a></h3>
+<pre><code class="language-bash"># Enable debug logging
+python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-2-7b-hf \
+    --log-level debug
+</code></pre>
+<h3 id="health-checks"><a class="header" href="#health-checks">Health Checks</a></h3>
+<pre><code class="language-bash"># Health endpoint
+curl http://localhost:8000/health
+
+# Returns:
+# {"status": "ok"}
+
+# Model info
+curl http://localhost:8000/v1/models
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<h4 id="1-out-of-memory-oom-errors"><a class="header" href="#1-out-of-memory-oom-errors">1. Out of Memory (OOM) Errors</a></h4>
+<p><strong>Symptoms</strong>: CUDA OOM, crash during model loading</p>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-python"># Reduce GPU memory utilization
+llm = LLM(model="...", gpu_memory_utilization=0.8)
+
+# Reduce max sequence length
+llm = LLM(model="...", max_model_len=2048)
+
+# Enable CPU swap
+llm = LLM(model="...", swap_space=8)
+
+# Use quantization
+llm = LLM(model="...", quantization="awq")
+
+# Use tensor parallelism
+llm = LLM(model="...", tensor_parallel_size=2)
+</code></pre>
+<h4 id="2-slow-generation"><a class="header" href="#2-slow-generation">2. Slow Generation</a></h4>
+<p><strong>Symptoms</strong>: Low throughput, high latency</p>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-python"># Increase batch size
+llm = LLM(model="...", max_num_seqs=256)
+
+# Use CUDA graph
+llm = LLM(model="...", enforce_eager=False)
+
+# Optimize data type
+llm = LLM(model="...", dtype="bfloat16")
+
+# Check GPU utilization
+nvidia-smi dmon -s u
+</code></pre>
+<h4 id="3-model-loading-failures"><a class="header" href="#3-model-loading-failures">3. Model Loading Failures</a></h4>
+<p><strong>Symptoms</strong>: Cannot load model, missing files</p>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-bash"># Clear cache and re-download
+rm -rf ~/.cache/huggingface
+huggingface-cli download meta-llama/Llama-2-7b-hf
+
+# Verify model path
+ls -la /path/to/model/
+
+# Check authentication
+export HF_TOKEN=your_token
+</code></pre>
+<h4 id="4-networking-issues-in-multi-gpu"><a class="header" href="#4-networking-issues-in-multi-gpu">4. Networking Issues in Multi-GPU</a></h4>
+<p><strong>Symptoms</strong>: NCCL errors, timeout in distributed setup</p>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-bash"># Debug NCCL
+export NCCL_DEBUG=INFO
+export NCCL_P2P_DISABLE=1  # Disable P2P if issues
+
+# Check GPU visibility
+nvidia-smi topo -m
+
+# Verify CUDA version
+python -c "import torch; print(torch.cuda.is_available())"
+</code></pre>
+<h3 id="performance-debugging"><a class="header" href="#performance-debugging">Performance Debugging</a></h3>
+<pre><code class="language-python"># Enable profiling
+import torch.profiler
+
+with torch.profiler.profile(
+    activities=[torch.profiler.ProfilerActivity.CPU,
+                torch.profiler.ProfilerActivity.CUDA]
+) as prof:
+    llm.generate(prompt, sampling_params)
+
+print(prof.key_averages().table(sort_by="cuda_time_total"))
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="1-resource-allocation"><a class="header" href="#1-resource-allocation">1. Resource Allocation</a></h3>
+<ul>
+<li><strong>Memory</strong>: Start with <code>gpu_memory_utilization=0.9</code>, adjust based on OOM</li>
+<li><strong>Batch Size</strong>: Larger <code>max_num_seqs</code> for throughput, smaller for latency</li>
+<li><strong>Parallelism</strong>: Use tensor parallelism for large models (&gt;70B params)</li>
+</ul>
+<h3 id="2-model-selection"><a class="header" href="#2-model-selection">2. Model Selection</a></h3>
+<ul>
+<li><strong>7B models</strong>: Single GPU, low latency applications</li>
+<li><strong>13B-30B models</strong>: 1-2 GPUs, balanced performance</li>
+<li><strong>70B+ models</strong>: 4-8 GPUs, maximum quality</li>
+</ul>
+<h3 id="3-optimization-strategy"><a class="header" href="#3-optimization-strategy">3. Optimization Strategy</a></h3>
+<ol>
+<li><strong>Start simple</strong>: Single GPU, default settings</li>
+<li><strong>Profile</strong>: Measure throughput and latency</li>
+<li><strong>Scale horizontally</strong>: Add tensor parallelism if needed</li>
+<li><strong>Optimize memory</strong>: Tune <code>gpu_memory_utilization</code>, consider quantization</li>
+<li><strong>Fine-tune batching</strong>: Adjust <code>max_num_seqs</code> and <code>max_num_batched_tokens</code></li>
+</ol>
+<h3 id="4-production-deployment"><a class="header" href="#4-production-deployment">4. Production Deployment</a></h3>
+<pre><code class="language-yaml"># docker-compose.yml
+version: '3.8'
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - VLLM_LOGGING_LEVEL=INFO
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    ports:
+      - "8000:8000"
+    command: &gt;
+      --model meta-llama/Llama-2-7b-hf
+      --tensor-parallel-size 2
+      --gpu-memory-utilization 0.95
+      --max-num-seqs 256
+      --host 0.0.0.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 2
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+</code></pre>
+<h3 id="5-security-considerations"><a class="header" href="#5-security-considerations">5. Security Considerations</a></h3>
+<pre><code class="language-python"># Add authentication
+from fastapi import Security, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+security = HTTPBearer()
+
+@app.post("/generate")
+async def generate(
+    request: GenerateRequest,
+    credentials: HTTPAuthorizationCredentials = Security(security)
+):
+    if credentials.credentials != "your-secret-token":
+        raise HTTPException(status_code=401, detail="Invalid token")
+    # ... generate logic
+</code></pre>
+<pre><code class="language-bash"># Rate limiting with nginx
+# nginx.conf
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+
+server {
+    location / {
+        limit_req zone=api_limit burst=20 nodelay;
+        proxy_pass http://vllm_backend:8000;
+    }
+}
+</code></pre>
+<h3 id="6-cost-optimization"><a class="header" href="#6-cost-optimization">6. Cost Optimization</a></h3>
+<ul>
+<li><strong>Use quantization</strong>: 4-bit AWQ reduces memory by ~4x</li>
+<li><strong>Right-size models</strong>: Don't use 70B when 7B suffices</li>
+<li><strong>Batch aggressively</strong>: Higher throughput = lower cost per request</li>
+<li><strong>Monitor utilization</strong>: Scale down during low traffic</li>
+</ul>
+<h2 id="integration-examples"><a class="header" href="#integration-examples">Integration Examples</a></h2>
+<h3 id="with-langchain"><a class="header" href="#with-langchain">With LangChain</a></h3>
+<pre><code class="language-python">from langchain.llms import VLLM
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+
+# Initialize vLLM
+llm = VLLM(
+    model="meta-llama/Llama-2-7b-hf",
+    trust_remote_code=True,
+    max_new_tokens=512,
+    temperature=0.7
+)
+
+# Create chain
+template = """Question: {question}
+
+Answer: Let's think step by step."""
+
+prompt = PromptTemplate(template=template, input_variables=["question"])
+chain = LLMChain(prompt=prompt, llm=llm)
+
+# Run
+result = chain.run("What is vLLM?")
+print(result)
+</code></pre>
+<h3 id="with-ray-serve"><a class="header" href="#with-ray-serve">With Ray Serve</a></h3>
+<pre><code class="language-python">from ray import serve
+from vllm import LLM, SamplingParams
+import ray
+
+ray.init()
+serve.start()
+
+@serve.deployment(
+    ray_actor_options={"num_gpus": 2},
+    max_concurrent_queries=100
+)
+class VLLMDeployment:
+    def __init__(self):
+        self.llm = LLM(
+            model="meta-llama/Llama-2-7b-hf",
+            tensor_parallel_size=2
+        )
+
+    def __call__(self, request):
+        prompt = request.query_params["prompt"]
+        sampling_params = SamplingParams(temperature=0.7, max_tokens=512)
+        output = self.llm.generate(prompt, sampling_params)
+        return output[0].outputs[0].text
+
+VLLMDeployment.deploy()
+</code></pre>
+<h3 id="with-kubernetes"><a class="header" href="#with-kubernetes">With Kubernetes</a></h3>
+<pre><code class="language-yaml"># vllm-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vllm
+  template:
+    metadata:
+      labels:
+        app: vllm
+    spec:
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:latest
+        args:
+          - --model
+          - meta-llama/Llama-2-7b-hf
+          - --tensor-parallel-size
+          - "2"
+          - --gpu-memory-utilization
+          - "0.95"
+        resources:
+          limits:
+            nvidia.com/gpu: 2
+          requests:
+            nvidia.com/gpu: 2
+        ports:
+        - containerPort: 8000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-service
+spec:
+  selector:
+    app: vllm
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: LoadBalancer
+</code></pre>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
+<ul>
+<li><strong>Official Documentation</strong>: https://docs.vllm.ai/</li>
+<li><strong>GitHub Repository</strong>: https://github.com/vllm-project/vllm</li>
+<li><strong>Paper</strong>: "Efficient Memory Management for Large Language Model Serving with PagedAttention"</li>
+<li><strong>Blog</strong>: https://blog.vllm.ai/</li>
+<li><strong>Discord Community</strong>: https://discord.gg/vllm</li>
+</ul>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="common-commands"><a class="header" href="#common-commands">Common Commands</a></h3>
+<pre><code class="language-bash"># Start server
+python -m vllm.entrypoints.openai.api_server --model &lt;model&gt;
+
+# Check version
+python -c "import vllm; print(vllm.__version__)"
+
+# Test inference
+curl http://localhost:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "&lt;model&gt;", "prompt": "Hello", "max_tokens": 50}'
+
+# Monitor GPU
+nvidia-smi dmon -s u -d 1
+
+# Check metrics
+curl http://localhost:8000/metrics
+</code></pre>
+<h3 id="key-parameters-cheat-sheet"><a class="header" href="#key-parameters-cheat-sheet">Key Parameters Cheat Sheet</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Parameter</th><th>Purpose</th><th>Typical Values</th></tr></thead><tbody>
+<tr><td><code>tensor_parallel_size</code></td><td>Multi-GPU distribution</td><td>1, 2, 4, 8</td></tr>
+<tr><td><code>gpu_memory_utilization</code></td><td>GPU memory fraction</td><td>0.8-0.95</td></tr>
+<tr><td><code>max_num_seqs</code></td><td>Concurrent sequences</td><td>32-512</td></tr>
+<tr><td><code>max_model_len</code></td><td>Max sequence length</td><td>2048, 4096, 8192</td></tr>
+<tr><td><code>dtype</code></td><td>Precision</td><td>bfloat16, float16</td></tr>
+<tr><td><code>quantization</code></td><td>Quantization method</td><td>awq, gptq</td></tr>
+<tr><td><code>temperature</code></td><td>Randomness</td><td>0.0-2.0</td></tr>
+<tr><td><code>top_p</code></td><td>Nucleus sampling</td><td>0.9-1.0</td></tr>
+<tr><td><code>max_tokens</code></td><td>Generation limit</td><td>128-2048</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../ai/phi.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../cloud/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../ai/phi.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../cloud/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -250,6 +250,7 @@
 
 - [Debugging](debugging/README.md)
     - [GDB](debugging/gdb.md)
+    - [Binary Analysis Tools](debugging/tools.md)
     - [Core Dump Analysis](debugging/core_dump.md)
     - [Linux Kernel Debugging](debugging/linux_kernel.md)
 

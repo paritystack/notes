@@ -252,7 +252,7 @@
     - [Core Dump Analysis](debugging/core_dump.md)
     - [Linux Kernel Debugging](debugging/linux_kernel.md)
 
-- [Miscellaneous](misc/)
+- [Miscellaneous](misc/README.md)
     - [Mathematics](misc/math.md)
     - [Statistics](misc/statistics.md)
 

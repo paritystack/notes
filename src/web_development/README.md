@@ -10,6 +10,10 @@ Modern web development covering frontend, backend, APIs, and full-stack technolo
 - **[Next.js](nextjs.md)**: Production-ready React framework with SSR, SSG, and API routes
 - **[Vue.js](vuejs.md)**: Progressive framework with Composition API
 - **[Svelte](svelte.md)**: Compiled framework with reactive programming
+
+### Styling
+
+- **[CSS](css.md)**: Comprehensive CSS guide covering selectors, layouts, animations, responsive design, and modern features
 - **[Tailwind CSS](tailwind.md)**: Utility-first CSS framework
 
 ### Backend Frameworks
@@ -42,14 +46,14 @@ Modern web development covering frontend, backend, APIs, and full-stack technolo
 
 ### Other Topics
 
-- **Frontend**: HTML, CSS, JavaScript fundamentals
+- **Frontend**: HTML, JavaScript fundamentals
 - **Backend**: Express.js, Node.js
 - **Authentication**: JWT, OAuth, sessions
 - **Databases**: Integration with web apps
 - **Deployment**: Hosting, CI/CD for web
 
 ## Frontend Stack
-- HTML/CSS/JavaScript
+- HTML/CSS/JavaScript (see [CSS](css.md) for comprehensive styling guide)
 - React, Vue, or Angular
 - State management (Redux, Vuex)
 - Build tools (Webpack, Vite)

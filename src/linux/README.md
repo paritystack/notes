@@ -18,6 +18,8 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 12. [systemd](./systemd.md) - Service management and init system
 13. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
 14. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
+15. [Netlink](./netlink.md) - Kernel-userspace communication interface
+16. [eBPF](./ebpf.md) - Extended Berkeley Packet Filter for kernel programmability
 
 ## Overview
 

@@ -44,6 +44,24 @@ Practical statistics guide focused on real-world applications:
 - Percentiles for performance monitoring
 - Common statistical pitfalls
 
+### 📈 [Matplotlib](matplotlib.md)
+Complete data visualization guide for Python:
+- **Architecture & Core Concepts** - Figure, Axes, Artists hierarchy
+- **Basic Plotting** - Line plots, scatter plots, bar charts
+- **Customization** - Colors, styles, labels, legends, annotations
+- **Advanced Plot Types** - Subplots, 3D plots, contours, heatmaps
+- **ML/Data Science Visualizations** - Loss curves, confusion matrices, feature distributions
+- **Styling and Themes** - Seaborn integration, custom styles
+- **Animations** - Dynamic visualizations
+- **Performance & Best Practices** - Efficient plotting for large datasets
+
+**Comprehensive guide** with:
+- Publication-quality visualizations
+- Two interfaces: pyplot vs object-oriented
+- Machine learning focused examples
+- Integration patterns with NumPy, Pandas, Seaborn
+- Common patterns and recipes
+
 ---
 
 ## How These Topics Relate

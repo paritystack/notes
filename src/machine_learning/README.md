@@ -14,10 +14,11 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 8. [Deep Generative Models](./deep_generative_models.md) - Advanced generative architectures
 9. [Transfer Learning](./transfer_learning.md) - Pre-training, fine-tuning, and domain adaptation
 10. [PyTorch](./pytorch.md) - Deep learning framework, tensors, autograd, training
-11. [Quantization](./quantization.md) - Model compression, INT8/INT4 quantization, GPTQ, AWQ
-12. [Transformers](./transformers.md) - Attention mechanisms, BERT, GPT architectures
-13. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
-14. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+11. [NumPy](./numpy.md) - Foundational numerical computing for ML implementations
+12. [Quantization](./quantization.md) - Model compression, INT8/INT4 quantization, GPTQ, AWQ
+13. [Transformers](./transformers.md) - Attention mechanisms, BERT, GPT architectures
+14. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
+15. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

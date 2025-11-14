@@ -635,7 +635,7 @@ Defined in RFC 3551, permanently assigned:
 
 | PT | Codec | Type | Clock Rate | Channels | Bitrate |
 |----|-------|------|-----------|----------|---------|
-| 0 | PCMU (G.711 ¼-law) | Audio | 8000 Hz | 1 | 64 kbps |
+| 0 | PCMU (G.711 Î¼-law) | Audio | 8000 Hz | 1 | 64 kbps |
 | 3 | GSM | Audio | 8000 Hz | 1 | 13 kbps |
 | 4 | G.723 | Audio | 8000 Hz | 1 | 5.3/6.3 kbps |
 | 8 | PCMA (G.711 A-law) | Audio | 8000 Hz | 1 | 64 kbps |
@@ -1238,7 +1238,7 @@ Receiver arrival times (with jitter):
   t=61ms:  Packet 3 arrives (21ms delay)
   t=95ms:  Packet 4 arrives (35ms delay)
 
-Without buffering ’ choppy audio/video
+Without buffering Â’ choppy audio/video
 ```
 
 ### The Solution: Jitter Buffer
@@ -1560,7 +1560,7 @@ Receive scenario:
    Packet 1 received
    Packet 2 lost
    Packet 3 (FEC) received
-  ’ Recover P2 = P1 XOR FEC
+  Â’ Recover P2 = P1 XOR FEC
 ```
 
 **Overhead**: 33% for this scheme (1 FEC per 2 data packets)
@@ -1674,7 +1674,7 @@ Indicates camera rotation:
 
 ```
 Extension data: 0 0 0 R R R 0 0
-RRR = rotation (0=0°, 1=90°, 2=180°, 3=270°)
+RRR = rotation (0=0Â°, 1=90Â°, 2=180Â°, 3=270Â°)
 ```
 
 **Usage**: Correctly rotate video on receiver
@@ -1796,9 +1796,9 @@ SRTP doesn't use keys directly. Instead:
 ```
 Master Key (128 or 256 bits)
 Master Salt (112 bits)
-    “
+    Â“
 Key Derivation Function (KDF)
-    “
+    Â“
 Encryption Key, Auth Key, Salting Key
 ```
 
@@ -1960,9 +1960,9 @@ a=fmtp:97 profile-level-id=42e01f      # H.264 profile
 
 ```
 Application (JavaScript)
-        “
+        Â“
    WebRTC API
-        “
+        Â“
                  
   Signaling       (SDP offer/answer)
                  $
@@ -1970,11 +1970,11 @@ Application (JavaScript)
                  $
   DTLS            (Key exchange)
                  $
-  SRTP/SRTCP      (Media transport)  RTP here
+  SRTP/SRTCP      (Media transport) Â RTP here
                  $
   SCTP            (Data channels)
                  
-        “
+        Â“
       UDP
 ```
 
@@ -2140,7 +2140,7 @@ SAMPLES_PER_PACKET = int(SAMPLE_RATE * PACKET_DURATION)  # 160
 # Send audio packets
 def send_voip_audio(sender, audio_stream):
     for audio_chunk in audio_stream:
-        # Encode with G.711 (¼-law)
+        # Encode with G.711 (Î¼-law)
         encoded = g711_ulaw_encode(audio_chunk)
 
         # Send RTP packet (PT=0 for PCMU)
@@ -2159,11 +2159,11 @@ def send_voip_audio(sender, audio_stream):
 ```
 Streamer                             Viewer
   Camera                               Display
-    “                                    ‘
+    Â“                                    Â‘
   H.264 Encoder                    H.264 Decoder
-    “                                    ‘
+    Â“                                    Â‘
   RTP Packetizer                  RTP Depacketizer
-    “                                    ‘
+    Â“                                    Â‘
   |=========== RTP/UDP/IP =============|
 ```
 
@@ -2357,8 +2357,8 @@ Encoder produces 3 streams:
   SSRC 3: 360p  @ 0.3 Mbps  (low)
 
 SFU routes appropriate stream to each receiver:
-  Desktop with good connection ’ high
-  Mobile with poor connection  ’ low
+  Desktop with good connection Â’ high
+  Mobile with poor connection  Â’ low
 ```
 
 **SDP Signaling:**
@@ -2377,13 +2377,13 @@ a=ssrc:33333333 cname:user@host
 
 ```
 Base layer: 360p
-Enhancement layer 1: +360p ’ 720p
-Enhancement layer 2: +720p ’ 1080p
+Enhancement layer 1: +360p Â’ 720p
+Enhancement layer 2: +720p Â’ 1080p
 
 Receiver can decode:
-  - Base only ’ 360p
-  - Base + EL1 ’ 720p
-  - Base + EL1 + EL2 ’ 1080p
+  - Base only Â’ 360p
+  - Base + EL1 Â’ 720p
+  - Base + EL1 + EL2 Â’ 1080p
 ```
 
 **Advantages over Simulcast:**
@@ -2423,11 +2423,11 @@ Output:
 **Translator**: Forwards RTP packets between networks.
 
 ```
-Internal Network  ’  Translator  ’  External Network
+Internal Network  ÂÂ’  Translator  ÂÂ’  External Network
 
 Functions:
 - NAT traversal
-- Protocol conversion (RTP ” RTP/RTCP mux)
+- Protocol conversion (RTP Â” RTP/RTCP mux)
 - Transcoding (optional)
 ```
 
@@ -2504,7 +2504,7 @@ Audio SR: NTP=12345.500, RTP=48000
 Video SR: NTP=12345.500, RTP=90000
 
 Both streams aligned to same NTP time
-’ Perfect lip-sync
+Â’ Perfect lip-sync
 ```
 
 ---
@@ -2532,8 +2532,8 @@ rtp.seq > 1000 && rtp.seq < 1100  # Sequence range
 ```
 
 **RTP Stream Analysis:**
-1. **Telephony** ’ **RTP** ’ **RTP Streams**
-2. Select stream ’ **Analyze**
+1. **Telephony** Â’ **RTP** Â’ **RTP Streams**
+2. Select stream Â’ **Analyze**
 
 **Metrics shown:**
 - Packet count
@@ -2544,8 +2544,8 @@ rtp.seq > 1000 && rtp.seq < 1100  # Sequence range
 - Clock drift
 
 **Stream Player:**
-1. **Telephony** ’ **RTP** ’ **RTP Streams**
-2. Select audio stream ’ **Play Streams**
+1. **Telephony** Â’ **RTP** Â’ **RTP Streams**
+2. Select audio stream Â’ **Play Streams**
 3. Listen to decoded audio
 
 **Packet Details:**
@@ -2572,8 +2572,8 @@ Real-Time Transport Protocol
 tcpdump -i eth0 'udp[1] & 1 == 0 && udp[8] & 0xC0 == 0x80'
 
 # Explanation:
-# udp[1] & 1 == 0   ’ Even destination port
-# udp[8] & 0xC0 == 0x80   ’ RTP version 2
+# udp[1] & 1 == 0   Â’ Even destination port
+# udp[8] & 0xC0 == 0x80   Â’ RTP version 2
 ```
 
 #### ffmpeg with RTP
@@ -3222,8 +3222,8 @@ Imagine you're watching a live sports game on TV.
 
 5. **RTCP = Quality Reports**
    - Like a report card for the delivery service
-   - "10% of trucks were late" ’ send trucks slower
-   - "Everything arrived on time" ’ can send more trucks
+   - "10% of trucks were late" Â’ send trucks slower
+   - "Everything arrived on time" Â’ can send more trucks
 
 6. **SRTP = Locked Trucks**
    - Regular RTP = open trucks (anyone can see inside)
@@ -3236,9 +3236,9 @@ Imagine you're watching a live sports game on TV.
 - Better for live events, calls, and real-time stuff
 
 **Real-world examples:**
-- **Zoom/Teams calls**: Your voice ’ RTP ’ Friend's computer
-- **YouTube Live**: Streamer ’ RTP ’ YouTube ’ You
-- **Online gaming voice chat**: Your mic ’ RTP ’ Other players
+- **Zoom/Teams calls**: Your voice Â’ RTP Â’ Friend's computer
+- **YouTube Live**: Streamer Â’ RTP Â’ YouTube Â’ You
+- **Online gaming voice chat**: Your mic Â’ RTP Â’ Other players
 
 ---
 

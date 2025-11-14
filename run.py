@@ -141,7 +141,7 @@ def update_summary_operation(summary_file):
 def main():
     parser = argparse.ArgumentParser(description="For creating missing files in the src directory")
     parser.add_argument("--file", default="src/SUMMARY.md", type=str, help="Input file")
-    parser.add_argument("--op", default="update_fs", type=str, choices=["check", "update_fs", "update_summary"],
+    parser.add_argument("--op", default="check", type=str, choices=["check", "update_fs", "update_summary"],
                         help="Operation: 'check' to compare files, 'update_fs' to create missing files, 'update_summary' to add unreferenced files to SUMMARY.md")
     args = parser.parse_args()
 

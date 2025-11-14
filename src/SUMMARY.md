@@ -71,10 +71,6 @@
     - [Greedy Algorithms](algorithms/greedy_algorithms.md)
     - [Sorting](algorithms/sorting.md)
     - [Searching](algorithms/searching.md)
-    - [Graphs](algorithms/graphs.md)
-    - [Trees](algorithms/trees.md)
-    - [Heaps](algorithms/heaps.md)
-    - [Tries](algorithms/tries.md)
     - [Raft Consensus Algorithm](algorithms/raft.md)
 
 - [Security](security/README.md)

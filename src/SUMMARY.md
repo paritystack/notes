@@ -142,6 +142,9 @@
     - [Ansible](tools/ansible.md)
     - [wpa_supplicant](tools/wpa_supplicant.md)
     - [hostapd](tools/hostapd.md)
+    - [Nmap](tools/nmap.md)
+    - [Tshark](tools/tshark.md)
+    - [Wireshark](tools/wireshark.md)
 
 - [Embedded](embedded/README.md)
     - [AVR](embedded/avr.md)
@@ -222,6 +225,7 @@
     - [REST APIs](web_development/rest_apis.md)
     - [GraphQL](web_development/graphql.md)
     - [gRPC](web_development/grpc.md)
+    - [Css](web_development/css.md)
 
 - [DevOps](devops/README.md)
     - [Docker](devops/docker.md)
@@ -233,6 +237,10 @@
     - [Caching](system_design/caching.md)
     - [RPC](system_design/rpc.md)
     - [Microservices](system_design/microservices.md)
+    - [Databases](system_design/databases.md)
+    - [Design Patterns](system_design/design_patterns.md)
+    - [Distributed Consensus](system_design/distributed_consensus.md)
+    - [Message Queues](system_design/message_queues.md)
 
 - [Mobile Development](mobile_development/README.md)
     - [React Native](mobile_development/react_native.md)

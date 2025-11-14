@@ -1128,6 +1128,20 @@ git ci -m "Message"
 git visual
 ```
 
+## Git Internals
+
+Want to understand how Git works under the hood? The [Git Internals guide](internals.md) provides an in-depth exploration of:
+
+- **Object Model**: Blobs, trees, commits, tags, and SHA-1 hashing
+- **File Tracking**: The index, staging area, and file states
+- **Refs and HEAD**: References, symbolic refs, and detached HEAD
+- **Plumbing Commands**: Low-level commands that power Git
+- **Pack Files**: Storage optimization and delta compression
+- **Reflog**: Recovery and time-travel debugging
+- **Remote Tracking**: How fetch, pull, and push work internally
+
+Understanding internals helps you debug issues, recover from mistakes, and master advanced Git operations.
+
 ## Integration with GitHub
 
 GitHub adds collaboration features on top of Git. See the dedicated [GitHub guide](github.md) for:
@@ -1143,6 +1157,7 @@ GitHub adds collaboration features on top of Git. See the dedicated [GitHub guid
 
 - [Git Cheat Sheet](cheatsheet.md) - Quick reference guide
 - [Git Commands](commands.md) - Comprehensive command list
+- [Git Internals](internals.md) - Deep dive into Git's internal architecture, plumbing commands, refs, object model, and tracking
 - [GitHub Guide](github.md) - GitHub-specific features
 
 ## Learning Resources

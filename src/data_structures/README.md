@@ -767,6 +767,7 @@ Explore detailed guides for specific data structures:
 7. [Graphs](graphs.md) - Graph representations, traversal, algorithms
 8. [Heaps](heaps.md) - Min heaps, max heaps, priority queues
 9. [Tries](tries.md) - Prefix trees, autocomplete, string matching
+10. [Bloom Filter](bloom_filter.md) - Space-efficient probabilistic set membership testing
 
 Related algorithm topics:
 - [Sorting Algorithms](../algorithms/sorting.md)

@@ -253,6 +253,600 @@ Even "rare" problems affect thousands of users!
 
 ---
 
+## Z-score (Normalization)
+
+### Intuition: Standardizing Measurements
+
+**The Core Question**: How unusual is this value compared to the average?
+
+**The Problem**: You can't directly compare values from different distributions:
+- Is a score of 85 on Test A better than 90 on Test B?
+- Is 120ms latency good or bad?
+- Is a height of 175cm tall or average?
+
+**The Solution**: Z-score transforms any value into "how many standard deviations from the mean?"
+
+**What Z-score Does**:
+- Converts raw values to a standardized scale
+- Makes different datasets comparable
+- Quantifies "how unusual" a value is
+- Enables probability calculations
+
+**The Fundamental Insight**: Once you know how many standard deviations away something is, you can understand its relative position regardless of the original units or scale.
+
+---
+
+### Definition and Formula
+
+**Z-score** (also called standard score):
+```
+z = (x - μ) / σ
+
+Where:
+- x = the value you're measuring
+- μ = mean of the distribution
+- σ = standard deviation
+```
+
+**Intuition**:
+- Numerator (x - μ): How far from average?
+- Denominator (σ): In units of "typical deviation"
+- Result: Distance from mean in standard deviation units
+
+**Alternative Form** (using sample statistics):
+```
+z = (x - x̄) / s
+
+Where:
+- x̄ = sample mean
+- s = sample standard deviation
+```
+
+---
+
+### Interpreting Z-scores
+
+**What Different Z-scores Mean**:
+
+**z = 0**: Exactly at the mean
+- Not unusual at all
+- Right in the middle
+- 50th percentile
+
+**z = +1**: One standard deviation above mean
+- Above average
+- Better than ~84% of values
+- Moderately unusual
+
+**z = -1**: One standard deviation below mean
+- Below average
+- Better than only ~16% of values
+- Moderately unusual (low side)
+
+**z = +2**: Two standard deviations above mean
+- Well above average
+- Better than ~97.5% of values
+- Quite unusual
+
+**z = -2**: Two standard deviations below mean
+- Well below average
+- Better than only ~2.5% of values
+- Quite unusual (low side)
+
+**z = +3**: Three standard deviations above mean
+- Extremely high
+- Better than ~99.85% of values
+- Very rare
+
+**z = -3**: Three standard deviations below mean
+- Extremely low
+- Better than only ~0.15% of values
+- Very rare
+
+**General Rules of Thumb**:
+- |z| < 1: Common, within normal range
+- 1 < |z| < 2: Somewhat unusual
+- 2 < |z| < 3: Unusual, worth noting
+- |z| > 3: Very rare, often investigated as outliers
+
+---
+
+### The 68-95-99.7 Rule (for Normal Distributions)
+
+**For normally distributed data**:
+
+**68% Rule**: ~68% of values have |z| < 1
+- Between z = -1 and z = +1
+- Within one standard deviation of mean
+- The "normal" range
+
+**95% Rule**: ~95% of values have |z| < 2
+- Between z = -2 and z = +2
+- Within two standard deviations
+- Captures most values
+
+**99.7% Rule**: ~99.7% of values have |z| < 3
+- Between z = -3 and z = +3
+- Within three standard deviations
+- Captures almost everything
+
+**Practical Implication**: For normal distributions, z-scores immediately tell you percentiles!
+
+---
+
+### Z-scores and Percentiles
+
+**Conversion** (for normal distribution):
+
+| Z-score | Percentile | Better Than | Interpretation |
+|---------|-----------|-------------|----------------|
+| -3.0 | 0.13% | 0.13% | Extremely low |
+| -2.5 | 0.62% | 0.62% | Very low |
+| -2.0 | 2.28% | 2.28% | Low |
+| -1.5 | 6.68% | 6.68% | Below average |
+| -1.0 | 15.87% | 15.87% | Moderately below |
+| -0.5 | 30.85% | 30.85% | Slightly below |
+| 0.0 | 50% | 50% | Average |
+| +0.5 | 69.15% | 69.15% | Slightly above |
+| +1.0 | 84.13% | 84.13% | Moderately above |
+| +1.5 | 93.32% | 93.32% | Above average |
+| +2.0 | 97.72% | 97.72% | High |
+| +2.5 | 99.38% | 99.38% | Very high |
+| +3.0 | 99.87% | 99.87% | Extremely high |
+
+**Key Insight**: A z-score of 2.0 means you're at approximately the 97.72nd percentile!
+
+---
+
+### Real-World Examples
+
+#### Example 1: Test Scores
+
+**Scenario**: Two students comparing test scores
+
+**Test A** (Math):
+- Your score: 85
+- Class mean: 75
+- Standard deviation: 10
+
+**Test B** (English):
+- Your score: 90
+- Class mean: 88
+- Standard deviation: 4
+
+**Question**: Which test did you perform better on, relatively?
+
+**Calculation**:
+```
+Math z-score:
+z = (85 - 75) / 10 = 10 / 10 = 1.0
+
+English z-score:
+z = (90 - 88) / 4 = 2 / 4 = 0.5
+```
+
+**Interpretation**:
+- Math: z = 1.0 → 84th percentile (better than ~84% of class)
+- English: z = 0.5 → 69th percentile (better than ~69% of class)
+
+**Answer**: You did better on the Math test (relatively speaking), even though the raw score was lower!
+
+**The Lesson**: Raw scores can be misleading. Z-scores account for difficulty and variability.
+
+---
+
+#### Example 2: Performance Monitoring
+
+**Scenario**: API latency monitoring
+
+**Current latency**: 150ms
+**Historical mean**: 100ms
+**Standard deviation**: 20ms
+
+**Calculation**:
+```
+z = (150 - 100) / 20 = 50 / 20 = 2.5
+```
+
+**Interpretation**:
+- z = 2.5 is very unusual (p99.38)
+- Only 0.62% of requests are this slow or slower
+- This is likely a problem worth investigating
+
+**Alert Logic**:
+```
+If z > 2: Warning (unusual, investigate)
+If z > 3: Critical (very rare, likely outage)
+```
+
+**Why This Works**:
+- Accounts for normal variability (σ = 20ms)
+- Only alerts on truly unusual values
+- Reduces false alarms from minor fluctuations
+
+---
+
+#### Example 3: Physical Measurements
+
+**Scenario**: Adult male height distribution
+
+**Your height**: 190 cm
+**Population mean**: 175 cm
+**Standard deviation**: 7 cm
+
+**Calculation**:
+```
+z = (190 - 175) / 7 = 15 / 7 ≈ 2.14
+```
+
+**Interpretation**:
+- z ≈ 2.14 → approximately 98th percentile
+- Taller than ~98% of adult males
+- Quite unusual, but not extremely rare
+
+**Practical Meaning**: You're tall enough that:
+- Finding clothes is sometimes challenging
+- You'd stand out in most groups
+- But not so rare as to be medical concern (z < 3)
+
+---
+
+### The Standard Normal Distribution
+
+**Definition**: A normal distribution with μ = 0 and σ = 1
+
+**Key Insight**: Any normal distribution can be converted to standard normal using z-scores!
+
+**The Process** (Standardization):
+1. Take any normal distribution with mean μ and std dev σ
+2. Transform each value: z = (x - μ) / σ
+3. Result: Standard normal distribution (mean = 0, std dev = 1)
+
+**Why This Matters**:
+- Only need ONE table of probabilities (for standard normal)
+- Can look up any normal probability by converting to z-score
+- Simplifies calculations enormously
+
+**Historical Significance**: Before computers, this transformation was essential for probability calculations!
+
+**Modern Usage**: Still fundamental for:
+- Statistical tests (t-tests, z-tests)
+- Confidence intervals
+- Quality control
+- Outlier detection
+
+---
+
+### Applications and Use Cases
+
+#### 1. Outlier Detection
+
+**Method**: Flag values with |z| > threshold
+
+**Common Thresholds**:
+- Conservative: |z| > 3 (99.7% rule)
+- Moderate: |z| > 2.5
+- Aggressive: |z| > 2
+
+**Example**: Quality control in manufacturing
+```
+Bolt length: 10.5 cm
+Mean: 10.0 cm
+Std dev: 0.1 cm
+
+z = (10.5 - 10.0) / 0.1 = 5.0
+
+Interpretation: z = 5 is VERY unusual (>99.9999%)
+Action: Investigate manufacturing process
+```
+
+**Advantage**: Accounts for expected variability, not just absolute distance from mean.
+
+---
+
+#### 2. Comparing Different Scales
+
+**Problem**: Combining scores measured on different scales
+
+**Example**: College admissions
+
+**Student A**:
+- SAT: 1400 (mean: 1050, σ: 200)
+- GPA: 3.6 (mean: 3.0, σ: 0.5)
+
+**Standardize**:
+```
+SAT z-score: (1400 - 1050) / 200 = 1.75
+GPA z-score: (3.6 - 3.0) / 0.5 = 1.2
+```
+
+**Now comparable**: Both on same scale (standard deviations from mean)
+
+**Combined score** (if weighted equally):
+```
+Average z-score: (1.75 + 1.2) / 2 = 1.475
+```
+
+**Interpretation**: Overall performance is ~1.5 standard deviations above average.
+
+---
+
+#### 3. Anomaly Detection in Time Series
+
+**Application**: Server monitoring, fraud detection
+
+**Method**:
+1. Calculate rolling mean and standard deviation
+2. Compute z-score for each new value
+3. Alert when |z| exceeds threshold
+
+**Example**: Credit card transactions
+
+Normal spending:
+- Mean: $50/transaction
+- Std dev: $30
+
+New transaction: $500
+
+```
+z = (500 - 50) / 30 = 15.0
+```
+
+**Interpretation**: z = 15 is EXTREMELY unusual
+**Action**: Flag as potential fraud
+
+**Why Z-scores Work Here**:
+- Adapts to individual spending patterns
+- Accounts for normal variability
+- Reduces false positives for people with high variability
+
+---
+
+#### 4. A/B Testing and Hypothesis Testing
+
+**Application**: Testing if observed difference is significant
+
+**Example**: Website conversion rates
+
+Control group: 10% conversion (n=1000)
+Test group: 12% conversion (n=1000)
+
+**Calculate z-score of difference**:
+```
+If z > 1.96: Significant at 95% level
+If z > 2.58: Significant at 99% level
+```
+
+**Interpretation**: How many standard deviations is the observed difference from "no difference"?
+
+---
+
+### Z-scores vs Percentiles
+
+**Relationship**: For normal distributions, z-scores directly map to percentiles
+
+**Advantages of Z-scores**:
+- Mathematical properties (can add, average, etc.)
+- Works for any distribution (not just data you have)
+- Standardized across different datasets
+- Enables hypothesis testing
+
+**Advantages of Percentiles**:
+- More intuitive ("better than 90% of people")
+- Works for any distribution shape
+- Doesn't assume normality
+- Directly measurable from data
+
+**When to Use Z-scores**:
+- Data is approximately normal
+- Need to combine different metrics
+- Performing statistical tests
+- Detecting outliers
+
+**When to Use Percentiles**:
+- Data is skewed or has heavy tails
+- Reporting to non-technical audiences
+- Service Level Agreements (SLAs)
+- When exact distribution shape unknown
+
+---
+
+### Modified Z-score (for Robust Outlier Detection)
+
+**Problem**: Standard z-score sensitive to outliers in the data itself!
+
+**Example**:
+Data: [1, 2, 3, 4, 5, 100]
+- Mean = 19.17 (pulled up by outlier!)
+- Std dev = 39.45 (inflated!)
+- z-score of 100 = only 2.05 (doesn't look unusual!)
+
+**Solution**: Modified z-score using median and MAD
+
+**Formula**:
+```
+Modified z-score = 0.6745 × (x - median) / MAD
+
+Where MAD = Median Absolute Deviation
+MAD = median(|xᵢ - median(x)|)
+```
+
+**Why Better**:
+- Median resistant to outliers
+- MAD resistant to outliers
+- More reliable outlier detection
+
+**Example** (same data):
+```
+Median = 3.5
+MAD = median([2.5, 1.5, 0.5, 0.5, 1.5, 96.5]) = 1.5
+
+Modified z-score of 100:
+= 0.6745 × (100 - 3.5) / 1.5
+= 0.6745 × 96.5 / 1.5
+≈ 43.4
+```
+
+**Much more appropriate**: Now clearly flagged as extreme outlier!
+
+**Threshold**: |modified z-score| > 3.5 commonly used for outlier detection
+
+---
+
+### Practical Calculation Examples
+
+#### Example: Response Time Analysis
+
+**Dataset**: API response times (ms)
+```
+[45, 52, 48, 51, 49, 200, 47, 50, 46, 48]
+```
+
+**Calculate**:
+```
+Mean (μ) = (45 + 52 + ... + 48) / 10 = 63.6 ms
+Std dev (σ) = 46.8 ms (calculated from variance)
+```
+
+**Z-score for 200ms response**:
+```
+z = (200 - 63.6) / 46.8 = 2.91
+```
+
+**Interpretation**:
+- z ≈ 2.91 (close to 3)
+- Very unusual (~99.8th percentile)
+- Likely an outlier worth investigating
+
+**Z-score for 50ms response**:
+```
+z = (50 - 63.6) / 46.8 = -0.29
+```
+
+**Interpretation**:
+- z ≈ -0.29 (close to 0)
+- Very typical
+- Slightly faster than average
+
+---
+
+#### Example: Grading on a Curve
+
+**Scenario**: Professor wants to assign letter grades based on z-scores
+
+**Grading Scheme**:
+- A: z > 1.5 (top ~7%)
+- B: 0.5 < z ≤ 1.5 (next ~24%)
+- C: -0.5 < z ≤ 0.5 (middle ~38%)
+- D: -1.5 < z ≤ -0.5 (next ~24%)
+- F: z ≤ -1.5 (bottom ~7%)
+
+**Student scores**:
+- Class mean: 72
+- Std dev: 12
+- Your score: 85
+
+**Calculation**:
+```
+z = (85 - 72) / 12 = 1.08
+```
+
+**Grade**: B (since 0.5 < 1.08 ≤ 1.5)
+
+**Percentile**: Approximately 86th percentile (better than ~86% of class)
+
+---
+
+### Common Pitfalls and Misconceptions
+
+#### 1. Assuming Normal Distribution
+
+**Problem**: Z-score percentiles only accurate for normal distributions
+
+**Reality**: Many real-world distributions are skewed
+
+**Example**: Income
+- z = 2 for income doesn't mean 97.5th percentile
+- Income distribution heavily right-skewed
+- Would underestimate actual percentile
+
+**Solution**: Check distribution shape first, or use percentiles directly
+
+---
+
+#### 2. Using Sample Stats for Population Inference
+
+**Problem**: z = (x - x̄) / s assumes sample represents population well
+
+**Small samples**: High uncertainty
+**Biased samples**: Wrong mean/std dev
+
+**Solution**:
+- Larger samples better
+- Use t-distribution for small samples
+- Ensure representative sampling
+
+---
+
+#### 3. Outliers Affecting Z-scores
+
+**Problem**: Outliers inflate standard deviation, making other outliers look normal
+
+**Solution**:
+- Use modified z-score (MAD-based)
+- Remove confirmed outliers before recalculating
+- Use robust statistics
+
+---
+
+#### 4. Comparing Z-scores Across Different Distributions
+
+**Problem**: z = 2 has different meanings for different distribution shapes
+
+**Normal**: z = 2 → 97.7th percentile
+**Exponential**: z = 2 → different percentile
+**Bimodal**: z-scores less meaningful
+
+**Solution**: Only compare z-scores within same distribution type
+
+---
+
+### Summary
+
+**Z-score Essentials**:
+- Formula: z = (x - μ) / σ
+- Meaning: Standard deviations from mean
+- Range: Typically -3 to +3 for normal data
+
+**Interpretation**:
+- |z| < 1: Normal range (~68%)
+- |z| < 2: Common range (~95%)
+- |z| < 3: Expected range (~99.7%)
+- |z| > 3: Very unusual, investigate
+
+**Key Applications**:
+- Comparing different scales
+- Outlier detection
+- Hypothesis testing
+- Standardization
+- Quality control
+
+**When to Use**:
+- Data approximately normal
+- Need standardized comparison
+- Statistical testing required
+- Combining different metrics
+
+**When NOT to Use**:
+- Heavily skewed data
+- Unknown distribution
+- Small samples
+- Non-technical reporting (use percentiles)
+
+**The Power**: Z-scores transform any measurement into a universal scale of "how unusual is this?", enabling comparisons and insights impossible with raw values alone.
+
+---
+
 ## Variance and Standard Deviation
 
 ### Intuition: Measuring Spread

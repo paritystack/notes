@@ -37,7 +37,7 @@ Practical statistics guide focused on real-world applications:
 - **Correlation & Regression** - Correlation ≠ Causation
 - **Real-World Applications** - Performance monitoring, A/B testing, reliability
 
-**900+ lines** of content with:
+**2,600+ lines** of content with:
 - Software engineering focus
 - SRE/DevOps examples
 - Tail latency explained

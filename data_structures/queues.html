@@ -177,30 +177,2471 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p>A queue is a linear data structure that follows the First In First Out (FIFO) principle. This means that the first element added to the queue will be the first one to be removed. Queues are commonly used in scenarios where order needs to be preserved, such as in scheduling tasks, managing requests in a server, or handling asynchronous data.</p>
-<h3 id="key-operations"><a class="header" href="#key-operations">Key Operations</a></h3>
+                        <h1 id="queues"><a class="header" href="#queues">Queues</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#queue-fundamentals">Queue Fundamentals</a></li>
+<li><a href="#basic-queue-implementation">Basic Queue Implementation</a></li>
+<li><a href="#circular-queue">Circular Queue</a></li>
+<li><a href="#priority-queue">Priority Queue</a></li>
+<li><a href="#deque-double-ended-queue">Deque (Double-Ended Queue)</a></li>
+<li><a href="#thread-safe-queues">Thread-Safe Queues</a></li>
+<li><a href="#real-world-applications">Real-World Applications</a></li>
+<li><a href="#complexity-analysis">Complexity Analysis</a></li>
+<li><a href="#comparison-with-other-data-structures">Comparison with Other Data Structures</a></li>
+<li><a href="#interview-problems-and-patterns">Interview Problems and Patterns</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>A queue is a fundamental linear data structure that follows the <strong>First In First Out (FIFO)</strong> principle. This means that the first element added to the queue will be the first one to be removed, much like a line of people waiting for service.</p>
+<p>Queues are ubiquitous in computer science and are used in:</p>
+<ul>
+<li>Operating systems for process scheduling</li>
+<li>Network packet management</li>
+<li>Printer job management</li>
+<li>Breadth-first search algorithms</li>
+<li>Asynchronous data handling</li>
+<li>Event-driven programming</li>
+</ul>
+<h2 id="queue-fundamentals"><a class="header" href="#queue-fundamentals">Queue Fundamentals</a></h2>
+<h3 id="fifo-principle"><a class="header" href="#fifo-principle">FIFO Principle</a></h3>
+<p>The FIFO (First In First Out) principle is the defining characteristic of a queue. Elements are:</p>
+<ul>
+<li><strong>Enqueued</strong> (added) at the <strong>rear</strong> (back/tail) of the queue</li>
+<li><strong>Dequeued</strong> (removed) from the <strong>front</strong> (head) of the queue</li>
+</ul>
+<pre><code>Front                                    Rear
+  |                                        |
+  v                                        v
+[10] -&gt; [20] -&gt; [30] -&gt; [40] -&gt; [50]
+  ^                                        ^
+  |                                        |
+Dequeue here                         Enqueue here
+</code></pre>
+<h3 id="core-operations"><a class="header" href="#core-operations">Core Operations</a></h3>
 <ol>
-<li><strong>Enqueue</strong>: Add an element to the end of the queue.</li>
-<li><strong>Dequeue</strong>: Remove an element from the front of the queue.</li>
-<li><strong>Peek/Front</strong>: Get the element at the front of the queue without removing it.</li>
-<li><strong>IsEmpty</strong>: Check if the queue is empty.</li>
-<li><strong>Size</strong>: Get the number of elements in the queue.</li>
+<li><strong>Enqueue(item)</strong>: Add an element to the rear of the queue</li>
+<li><strong>Dequeue()</strong>: Remove and return the element at the front</li>
+<li><strong>Peek() / Front()</strong>: View the front element without removing it</li>
+<li><strong>IsEmpty()</strong>: Check if the queue is empty</li>
+<li><strong>Size()</strong>: Return the number of elements in the queue</li>
+<li><strong>Clear()</strong>: Remove all elements from the queue</li>
 </ol>
-<h3 id="types-of-queues"><a class="header" href="#types-of-queues">Types of Queues</a></h3>
+<h3 id="queue-properties"><a class="header" href="#queue-properties">Queue Properties</a></h3>
 <ul>
-<li><strong>Simple Queue</strong>: Also known as a linear queue, where insertion happens at the rear and deletion happens at the front.</li>
-<li><strong>Circular Queue</strong>: A more efficient queue where the last position is connected back to the first position to make a circle.</li>
-<li><strong>Priority Queue</strong>: Each element is associated with a priority, and elements are served based on their priority.</li>
-<li><strong>Double-ended Queue (Deque)</strong>: Insertion and deletion can happen at both the front and the rear of the queue.</li>
+<li><strong>Dynamic Size</strong>: Queues can grow or shrink as elements are added or removed</li>
+<li><strong>Order Preservation</strong>: Elements maintain their insertion order</li>
+<li><strong>Access Restriction</strong>: Only the front and rear are accessible (no random access)</li>
+<li><strong>Memory Efficiency</strong>: Can be implemented using arrays or linked lists</li>
 </ul>
-<h3 id="applications-of-queues"><a class="header" href="#applications-of-queues">Applications of Queues</a></h3>
+<h2 id="basic-queue-implementation"><a class="header" href="#basic-queue-implementation">Basic Queue Implementation</a></h2>
+<h3 id="python-implementation"><a class="header" href="#python-implementation">Python Implementation</a></h3>
+<h4 id="using-list-simple-but-inefficient-for-dequeue"><a class="header" href="#using-list-simple-but-inefficient-for-dequeue">Using List (Simple but Inefficient for Dequeue)</a></h4>
+<pre><code class="language-python">class Queue:
+    def __init__(self):
+        self.items = []
+
+    def enqueue(self, item):
+        """Add item to rear of queue - O(1)"""
+        self.items.append(item)
+
+    def dequeue(self):
+        """Remove and return front item - O(n) due to list shift"""
+        if self.is_empty():
+            raise IndexError("Dequeue from empty queue")
+        return self.items.pop(0)
+
+    def peek(self):
+        """Return front item without removing - O(1)"""
+        if self.is_empty():
+            raise IndexError("Peek from empty queue")
+        return self.items[0]
+
+    def is_empty(self):
+        """Check if queue is empty - O(1)"""
+        return len(self.items) == 0
+
+    def size(self):
+        """Return number of items - O(1)"""
+        return len(self.items)
+
+    def clear(self):
+        """Remove all items - O(1)"""
+        self.items = []
+
+    def __str__(self):
+        return f"Queue({self.items})"
+
+
+# Usage example
+queue = Queue()
+queue.enqueue(10)
+queue.enqueue(20)
+queue.enqueue(30)
+print(queue)  # Queue([10, 20, 30])
+print(queue.dequeue())  # 10
+print(queue.peek())  # 20
+print(queue.size())  # 2
+</code></pre>
+<h4 id="using-collectionsdeque-efficient"><a class="header" href="#using-collectionsdeque-efficient">Using collections.deque (Efficient)</a></h4>
+<pre><code class="language-python">from collections import deque
+
+class EfficientQueue:
+    def __init__(self):
+        self.items = deque()
+
+    def enqueue(self, item):
+        """Add item to rear - O(1)"""
+        self.items.append(item)
+
+    def dequeue(self):
+        """Remove and return front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Dequeue from empty queue")
+        return self.items.popleft()
+
+    def peek(self):
+        """Return front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Peek from empty queue")
+        return self.items[0]
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def size(self):
+        return len(self.items)
+
+    def clear(self):
+        self.items.clear()
+
+
+# Usage
+q = EfficientQueue()
+q.enqueue(1)
+q.enqueue(2)
+q.enqueue(3)
+print(q.dequeue())  # 1
+print(q.dequeue())  # 2
+</code></pre>
+<h4 id="using-linked-list"><a class="header" href="#using-linked-list">Using Linked List</a></h4>
+<pre><code class="language-python">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+
+class LinkedQueue:
+    def __init__(self):
+        self.front = None
+        self.rear = None
+        self._size = 0
+
+    def enqueue(self, item):
+        """Add item to rear - O(1)"""
+        new_node = Node(item)
+
+        if self.rear is None:
+            # Queue is empty
+            self.front = self.rear = new_node
+        else:
+            # Add to rear and update rear pointer
+            self.rear.next = new_node
+            self.rear = new_node
+
+        self._size += 1
+
+    def dequeue(self):
+        """Remove and return front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Dequeue from empty queue")
+
+        item = self.front.data
+        self.front = self.front.next
+        self._size -= 1
+
+        # If queue becomes empty, update rear pointer
+        if self.front is None:
+            self.rear = None
+
+        return item
+
+    def peek(self):
+        """Return front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Peek from empty queue")
+        return self.front.data
+
+    def is_empty(self):
+        return self.front is None
+
+    def size(self):
+        return self._size
+
+    def clear(self):
+        self.front = None
+        self.rear = None
+        self._size = 0
+
+    def __str__(self):
+        items = []
+        current = self.front
+        while current:
+            items.append(str(current.data))
+            current = current.next
+        return f"Queue([{' -&gt; '.join(items)}])"
+
+
+# Usage
+lq = LinkedQueue()
+lq.enqueue(100)
+lq.enqueue(200)
+lq.enqueue(300)
+print(lq)  # Queue([100 -&gt; 200 -&gt; 300])
+print(lq.dequeue())  # 100
+print(lq)  # Queue([200 -&gt; 300])
+</code></pre>
+<h3 id="javascripttypescript-implementation"><a class="header" href="#javascripttypescript-implementation">JavaScript/TypeScript Implementation</a></h3>
+<h4 id="basic-queue-class"><a class="header" href="#basic-queue-class">Basic Queue Class</a></h4>
+<pre><code class="language-javascript">class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(item) {
+        // Add to rear - O(1)
+        this.items.push(item);
+    }
+
+    dequeue() {
+        // Remove from front - O(n) due to array shift
+        if (this.isEmpty()) {
+            throw new Error("Dequeue from empty queue");
+        }
+        return this.items.shift();
+    }
+
+    peek() {
+        if (this.isEmpty()) {
+            throw new Error("Peek from empty queue");
+        }
+        return this.items[0];
+    }
+
+    isEmpty() {
+        return this.items.length === 0;
+    }
+
+    size() {
+        return this.items.length;
+    }
+
+    clear() {
+        this.items = [];
+    }
+
+    toString() {
+        return `Queue([${this.items.join(', ')}])`;
+    }
+}
+
+// Usage
+const queue = new Queue();
+queue.enqueue(10);
+queue.enqueue(20);
+queue.enqueue(30);
+console.log(queue.toString());  // Queue([10, 20, 30])
+console.log(queue.dequeue());  // 10
+console.log(queue.peek());  // 20
+</code></pre>
+<h4 id="efficient-queue-using-object"><a class="header" href="#efficient-queue-using-object">Efficient Queue Using Object</a></h4>
+<pre><code class="language-javascript">class EfficientQueue {
+    constructor() {
+        this.items = {};
+        this.frontIndex = 0;
+        this.rearIndex = 0;
+    }
+
+    enqueue(item) {
+        // Add to rear - O(1)
+        this.items[this.rearIndex] = item;
+        this.rearIndex++;
+    }
+
+    dequeue() {
+        // Remove from front - O(1)
+        if (this.isEmpty()) {
+            throw new Error("Dequeue from empty queue");
+        }
+
+        const item = this.items[this.frontIndex];
+        delete this.items[this.frontIndex];
+        this.frontIndex++;
+
+        return item;
+    }
+
+    peek() {
+        if (this.isEmpty()) {
+            throw new Error("Peek from empty queue");
+        }
+        return this.items[this.frontIndex];
+    }
+
+    isEmpty() {
+        return this.frontIndex === this.rearIndex;
+    }
+
+    size() {
+        return this.rearIndex - this.frontIndex;
+    }
+
+    clear() {
+        this.items = {};
+        this.frontIndex = 0;
+        this.rearIndex = 0;
+    }
+}
+
+// Usage
+const eq = new EfficientQueue();
+eq.enqueue(1);
+eq.enqueue(2);
+eq.enqueue(3);
+console.log(eq.dequeue());  // 1
+console.log(eq.size());  // 2
+</code></pre>
+<h4 id="typescript-implementation"><a class="header" href="#typescript-implementation">TypeScript Implementation</a></h4>
+<pre><code class="language-typescript">interface QueueInterface&lt;T&gt; {
+    enqueue(item: T): void;
+    dequeue(): T;
+    peek(): T;
+    isEmpty(): boolean;
+    size(): number;
+    clear(): void;
+}
+
+class TypedQueue&lt;T&gt; implements QueueInterface&lt;T&gt; {
+    private items: Map&lt;number, T&gt;;
+    private frontIndex: number;
+    private rearIndex: number;
+
+    constructor() {
+        this.items = new Map&lt;number, T&gt;();
+        this.frontIndex = 0;
+        this.rearIndex = 0;
+    }
+
+    enqueue(item: T): void {
+        this.items.set(this.rearIndex, item);
+        this.rearIndex++;
+    }
+
+    dequeue(): T {
+        if (this.isEmpty()) {
+            throw new Error("Dequeue from empty queue");
+        }
+
+        const item = this.items.get(this.frontIndex)!;
+        this.items.delete(this.frontIndex);
+        this.frontIndex++;
+
+        return item;
+    }
+
+    peek(): T {
+        if (this.isEmpty()) {
+            throw new Error("Peek from empty queue");
+        }
+        return this.items.get(this.frontIndex)!;
+    }
+
+    isEmpty(): boolean {
+        return this.frontIndex === this.rearIndex;
+    }
+
+    size(): number {
+        return this.rearIndex - this.frontIndex;
+    }
+
+    clear(): void {
+        this.items.clear();
+        this.frontIndex = 0;
+        this.rearIndex = 0;
+    }
+}
+
+// Usage
+const tq = new TypedQueue&lt;number&gt;();
+tq.enqueue(10);
+tq.enqueue(20);
+console.log(tq.dequeue());  // 10
+</code></pre>
+<h3 id="c-implementation"><a class="header" href="#c-implementation">C++ Implementation</a></h3>
+<h4 id="using-stdqueue"><a class="header" href="#using-stdqueue">Using std::queue</a></h4>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;queue&gt;
+#include &lt;string&gt;
+
+void basicQueueExample() {
+    std::queue&lt;int&gt; q;
+
+    // Enqueue
+    q.push(10);
+    q.push(20);
+    q.push(30);
+
+    std::cout &lt;&lt; "Front: " &lt;&lt; q.front() &lt;&lt; std::endl;  // 10
+    std::cout &lt;&lt; "Size: " &lt;&lt; q.size() &lt;&lt; std::endl;    // 3
+
+    // Dequeue
+    q.pop();
+    std::cout &lt;&lt; "Front after pop: " &lt;&lt; q.front() &lt;&lt; std::endl;  // 20
+
+    // Check empty
+    std::cout &lt;&lt; "Is empty: " &lt;&lt; (q.empty() ? "Yes" : "No") &lt;&lt; std::endl;
+}
+</code></pre>
+<h4 id="custom-queue-implementation-using-array"><a class="header" href="#custom-queue-implementation-using-array">Custom Queue Implementation Using Array</a></h4>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+template&lt;typename T&gt;
+class ArrayQueue {
+private:
+    T* items;
+    int capacity;
+    int frontIndex;
+    int rearIndex;
+    int count;
+
+    void resize() {
+        int newCapacity = capacity * 2;
+        T* newItems = new T[newCapacity];
+
+        // Copy elements
+        for (int i = 0; i &lt; count; i++) {
+            newItems[i] = items[(frontIndex + i) % capacity];
+        }
+
+        delete[] items;
+        items = newItems;
+        capacity = newCapacity;
+        frontIndex = 0;
+        rearIndex = count;
+    }
+
+public:
+    ArrayQueue(int initialCapacity = 10)
+        : capacity(initialCapacity), frontIndex(0), rearIndex(0), count(0) {
+        items = new T[capacity];
+    }
+
+    ~ArrayQueue() {
+        delete[] items;
+    }
+
+    void enqueue(const T&amp; item) {
+        if (count == capacity) {
+            resize();
+        }
+
+        items[rearIndex] = item;
+        rearIndex = (rearIndex + 1) % capacity;
+        count++;
+    }
+
+    T dequeue() {
+        if (isEmpty()) {
+            throw std::runtime_error("Dequeue from empty queue");
+        }
+
+        T item = items[frontIndex];
+        frontIndex = (frontIndex + 1) % capacity;
+        count--;
+
+        return item;
+    }
+
+    T&amp; peek() {
+        if (isEmpty()) {
+            throw std::runtime_error("Peek from empty queue");
+        }
+        return items[frontIndex];
+    }
+
+    bool isEmpty() const {
+        return count == 0;
+    }
+
+    int size() const {
+        return count;
+    }
+
+    void clear() {
+        frontIndex = 0;
+        rearIndex = 0;
+        count = 0;
+    }
+};
+
+// Usage
+int main() {
+    ArrayQueue&lt;int&gt; q;
+    q.enqueue(10);
+    q.enqueue(20);
+    q.enqueue(30);
+
+    std::cout &lt;&lt; "Dequeue: " &lt;&lt; q.dequeue() &lt;&lt; std::endl;  // 10
+    std::cout &lt;&lt; "Peek: " &lt;&lt; q.peek() &lt;&lt; std::endl;  // 20
+    std::cout &lt;&lt; "Size: " &lt;&lt; q.size() &lt;&lt; std::endl;  // 2
+
+    return 0;
+}
+</code></pre>
+<h4 id="custom-queue-using-linked-list"><a class="header" href="#custom-queue-using-linked-list">Custom Queue Using Linked List</a></h4>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+template&lt;typename T&gt;
+class LinkedQueue {
+private:
+    struct Node {
+        T data;
+        Node* next;
+
+        Node(const T&amp; value) : data(value), next(nullptr) {}
+    };
+
+    Node* front;
+    Node* rear;
+    int count;
+
+public:
+    LinkedQueue() : front(nullptr), rear(nullptr), count(0) {}
+
+    ~LinkedQueue() {
+        clear();
+    }
+
+    void enqueue(const T&amp; item) {
+        Node* newNode = new Node(item);
+
+        if (rear == nullptr) {
+            // Queue is empty
+            front = rear = newNode;
+        } else {
+            rear-&gt;next = newNode;
+            rear = newNode;
+        }
+
+        count++;
+    }
+
+    T dequeue() {
+        if (isEmpty()) {
+            throw std::runtime_error("Dequeue from empty queue");
+        }
+
+        Node* temp = front;
+        T item = front-&gt;data;
+
+        front = front-&gt;next;
+
+        if (front == nullptr) {
+            rear = nullptr;
+        }
+
+        delete temp;
+        count--;
+
+        return item;
+    }
+
+    T&amp; peek() {
+        if (isEmpty()) {
+            throw std::runtime_error("Peek from empty queue");
+        }
+        return front-&gt;data;
+    }
+
+    bool isEmpty() const {
+        return front == nullptr;
+    }
+
+    int size() const {
+        return count;
+    }
+
+    void clear() {
+        while (!isEmpty()) {
+            dequeue();
+        }
+    }
+};
+
+// Usage
+int main() {
+    LinkedQueue&lt;std::string&gt; q;
+    q.enqueue("First");
+    q.enqueue("Second");
+    q.enqueue("Third");
+
+    std::cout &lt;&lt; q.dequeue() &lt;&lt; std::endl;  // First
+    std::cout &lt;&lt; q.peek() &lt;&lt; std::endl;     // Second
+
+    return 0;
+}
+</code></pre>
+<h2 id="circular-queue"><a class="header" href="#circular-queue">Circular Queue</a></h2>
+<p>A circular queue is a linear data structure that connects the end position back to the beginning, forming a circle. This design overcomes the limitation of a regular queue where space at the beginning cannot be reused after dequeue operations.</p>
+<h3 id="advantages-of-circular-queue"><a class="header" href="#advantages-of-circular-queue">Advantages of Circular Queue</a></h3>
+<ol>
+<li><strong>Efficient Memory Usage</strong>: Reuses freed space after dequeue operations</li>
+<li><strong>Fixed Size</strong>: Useful when maximum size is known beforehand</li>
+<li><strong>No Shifting Required</strong>: Unlike linear queues, no need to shift elements</li>
+<li><strong>Cache-Friendly</strong>: Better locality of reference</li>
+</ol>
+<h3 id="visual-representation"><a class="header" href="#visual-representation">Visual Representation</a></h3>
+<pre><code>Initial State (capacity = 5):
+Front = 0, Rear = 0
+[_][_][_][_][_]
+ 0  1  2  3  4
+
+After enqueue(10, 20, 30):
+Front = 0, Rear = 3
+[10][20][30][_][_]
+ F            R
+
+After dequeue() twice:
+Front = 2, Rear = 3
+[_][_][30][_][_]
+       F   R
+
+After enqueue(40, 50, 60):
+Front = 2, Rear = 0 (wrapped around)
+[60][_][30][40][50]
+ R       F
+
+</code></pre>
+<h3 id="python-implementation-1"><a class="header" href="#python-implementation-1">Python Implementation</a></h3>
+<pre><code class="language-python">class CircularQueue:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.items = [None] * capacity
+        self.front = -1
+        self.rear = -1
+        self.count = 0
+
+    def enqueue(self, item):
+        """Add item to rear - O(1)"""
+        if self.is_full():
+            raise OverflowError("Queue is full")
+
+        if self.is_empty():
+            self.front = 0
+            self.rear = 0
+        else:
+            self.rear = (self.rear + 1) % self.capacity
+
+        self.items[self.rear] = item
+        self.count += 1
+
+    def dequeue(self):
+        """Remove and return front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Queue is empty")
+
+        item = self.items[self.front]
+
+        if self.front == self.rear:
+            # Queue becomes empty
+            self.front = -1
+            self.rear = -1
+        else:
+            self.front = (self.front + 1) % self.capacity
+
+        self.count -= 1
+        return item
+
+    def peek(self):
+        """Return front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Queue is empty")
+        return self.items[self.front]
+
+    def is_empty(self):
+        return self.count == 0
+
+    def is_full(self):
+        return self.count == self.capacity
+
+    def size(self):
+        return self.count
+
+    def __str__(self):
+        if self.is_empty():
+            return "CircularQueue([])"
+
+        result = []
+        i = self.front
+        for _ in range(self.count):
+            result.append(str(self.items[i]))
+            i = (i + 1) % self.capacity
+
+        return f"CircularQueue([{', '.join(result)}])"
+
+
+# Usage
+cq = CircularQueue(5)
+cq.enqueue(10)
+cq.enqueue(20)
+cq.enqueue(30)
+print(cq)  # CircularQueue([10, 20, 30])
+
+cq.dequeue()
+cq.dequeue()
+print(cq)  # CircularQueue([30])
+
+cq.enqueue(40)
+cq.enqueue(50)
+cq.enqueue(60)
+cq.enqueue(70)
+print(cq)  # CircularQueue([30, 40, 50, 60, 70])
+</code></pre>
+<h3 id="c-implementation-1"><a class="header" href="#c-implementation-1">C++ Implementation</a></h3>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+template&lt;typename T&gt;
+class CircularQueue {
+private:
+    T* items;
+    int capacity;
+    int front;
+    int rear;
+    int count;
+
+public:
+    CircularQueue(int cap) : capacity(cap), front(-1), rear(-1), count(0) {
+        items = new T[capacity];
+    }
+
+    ~CircularQueue() {
+        delete[] items;
+    }
+
+    void enqueue(const T&amp; item) {
+        if (isFull()) {
+            throw std::overflow_error("Queue is full");
+        }
+
+        if (isEmpty()) {
+            front = 0;
+            rear = 0;
+        } else {
+            rear = (rear + 1) % capacity;
+        }
+
+        items[rear] = item;
+        count++;
+    }
+
+    T dequeue() {
+        if (isEmpty()) {
+            throw std::underflow_error("Queue is empty");
+        }
+
+        T item = items[front];
+
+        if (front == rear) {
+            // Queue becomes empty
+            front = -1;
+            rear = -1;
+        } else {
+            front = (front + 1) % capacity;
+        }
+
+        count--;
+        return item;
+    }
+
+    T&amp; peek() {
+        if (isEmpty()) {
+            throw std::runtime_error("Queue is empty");
+        }
+        return items[front];
+    }
+
+    bool isEmpty() const {
+        return count == 0;
+    }
+
+    bool isFull() const {
+        return count == capacity;
+    }
+
+    int size() const {
+        return count;
+    }
+
+    void display() const {
+        if (isEmpty()) {
+            std::cout &lt;&lt; "CircularQueue([])" &lt;&lt; std::endl;
+            return;
+        }
+
+        std::cout &lt;&lt; "CircularQueue([";
+        int i = front;
+        for (int c = 0; c &lt; count; c++) {
+            std::cout &lt;&lt; items[i];
+            if (c &lt; count - 1) std::cout &lt;&lt; ", ";
+            i = (i + 1) % capacity;
+        }
+        std::cout &lt;&lt; "])" &lt;&lt; std::endl;
+    }
+};
+</code></pre>
+<h3 id="use-cases-for-circular-queue"><a class="header" href="#use-cases-for-circular-queue">Use Cases for Circular Queue</a></h3>
+<ol>
+<li><strong>CPU Scheduling</strong>: Round-robin scheduling algorithm</li>
+<li><strong>Memory Management</strong>: Buffer management in operating systems</li>
+<li><strong>Traffic Systems</strong>: Traffic light control systems</li>
+<li><strong>Audio/Video Streaming</strong>: Ring buffers for streaming data</li>
+<li><strong>Keyboard Buffers</strong>: Storing keystrokes in a fixed-size buffer</li>
+</ol>
+<h2 id="priority-queue"><a class="header" href="#priority-queue">Priority Queue</a></h2>
+<p>A priority queue is an abstract data type where each element has an associated priority. Elements with higher priority are dequeued before elements with lower priority, regardless of insertion order.</p>
+<h3 id="properties"><a class="header" href="#properties">Properties</a></h3>
 <ul>
-<li><strong>CPU Scheduling</strong>: Managing processes in operating systems.</li>
-<li><strong>Disk Scheduling</strong>: Managing I/O requests.</li>
-<li><strong>Breadth-First Search (BFS)</strong>: Traversing or searching tree or graph data structures.</li>
-<li><strong>Print Queue</strong>: Managing print jobs in a printer.</li>
+<li>Elements are served based on priority, not FIFO order</li>
+<li>Can be implemented using heaps (binary heap most common)</li>
+<li>Supports efficient insertion and removal of the highest priority element</li>
+<li>Can be min-priority (smallest first) or max-priority (largest first)</li>
 </ul>
-<p>Queues are fundamental data structures that are widely used in computer science and programming for managing ordered collections of items.</p>
+<h3 id="python-implementation-using-heapq"><a class="header" href="#python-implementation-using-heapq">Python Implementation Using heapq</a></h3>
+<pre><code class="language-python">import heapq
+
+class PriorityQueue:
+    def __init__(self, max_heap=False):
+        self.heap = []
+        self.max_heap = max_heap
+        self.counter = 0  # For tie-breaking (FIFO for same priority)
+
+    def enqueue(self, item, priority):
+        """Add item with priority - O(log n)"""
+        # For max heap, negate priority
+        if self.max_heap:
+            priority = -priority
+
+        # Use counter for tie-breaking to maintain FIFO order
+        heapq.heappush(self.heap, (priority, self.counter, item))
+        self.counter += 1
+
+    def dequeue(self):
+        """Remove and return highest priority item - O(log n)"""
+        if self.is_empty():
+            raise IndexError("Dequeue from empty priority queue")
+
+        priority, _, item = heapq.heappop(self.heap)
+        return item
+
+    def peek(self):
+        """Return highest priority item without removing - O(1)"""
+        if self.is_empty():
+            raise IndexError("Peek from empty priority queue")
+
+        return self.heap[0][2]
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    def size(self):
+        return len(self.heap)
+
+    def clear(self):
+        self.heap = []
+        self.counter = 0
+
+
+# Usage - Min Priority Queue (lower value = higher priority)
+pq = PriorityQueue()
+pq.enqueue("Low priority task", priority=5)
+pq.enqueue("High priority task", priority=1)
+pq.enqueue("Medium priority task", priority=3)
+
+print(pq.dequeue())  # High priority task (priority=1)
+print(pq.dequeue())  # Medium priority task (priority=3)
+print(pq.dequeue())  # Low priority task (priority=5)
+
+# Max Priority Queue (higher value = higher priority)
+max_pq = PriorityQueue(max_heap=True)
+max_pq.enqueue("Task A", priority=10)
+max_pq.enqueue("Task B", priority=50)
+max_pq.enqueue("Task C", priority=30)
+
+print(max_pq.dequeue())  # Task B (priority=50)
+print(max_pq.dequeue())  # Task C (priority=30)
+</code></pre>
+<h3 id="custom-priority-queue-with-heap"><a class="header" href="#custom-priority-queue-with-heap">Custom Priority Queue with Heap</a></h3>
+<pre><code class="language-python">class HeapPriorityQueue:
+    def __init__(self):
+        self.heap = []
+
+    def _parent(self, i):
+        return (i - 1) // 2
+
+    def _left_child(self, i):
+        return 2 * i + 1
+
+    def _right_child(self, i):
+        return 2 * i + 2
+
+    def _swap(self, i, j):
+        self.heap[i], self.heap[j] = self.heap[j], self.heap[i]
+
+    def _heapify_up(self, i):
+        """Move element up to maintain heap property"""
+        while i &gt; 0 and self.heap[i][0] &lt; self.heap[self._parent(i)][0]:
+            parent = self._parent(i)
+            self._swap(i, parent)
+            i = parent
+
+    def _heapify_down(self, i):
+        """Move element down to maintain heap property"""
+        min_index = i
+        left = self._left_child(i)
+        right = self._right_child(i)
+
+        if left &lt; len(self.heap) and self.heap[left][0] &lt; self.heap[min_index][0]:
+            min_index = left
+
+        if right &lt; len(self.heap) and self.heap[right][0] &lt; self.heap[min_index][0]:
+            min_index = right
+
+        if i != min_index:
+            self._swap(i, min_index)
+            self._heapify_down(min_index)
+
+    def enqueue(self, item, priority):
+        """Add item with priority - O(log n)"""
+        self.heap.append((priority, item))
+        self._heapify_up(len(self.heap) - 1)
+
+    def dequeue(self):
+        """Remove and return min priority item - O(log n)"""
+        if self.is_empty():
+            raise IndexError("Dequeue from empty priority queue")
+
+        if len(self.heap) == 1:
+            return self.heap.pop()[1]
+
+        # Swap root with last element
+        self._swap(0, len(self.heap) - 1)
+        priority, item = self.heap.pop()
+
+        # Restore heap property
+        if len(self.heap) &gt; 0:
+            self._heapify_down(0)
+
+        return item
+
+    def peek(self):
+        if self.is_empty():
+            raise IndexError("Peek from empty priority queue")
+        return self.heap[0][1]
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    def size(self):
+        return len(self.heap)
+
+
+# Usage
+hpq = HeapPriorityQueue()
+hpq.enqueue("Emergency", 1)
+hpq.enqueue("Normal", 5)
+hpq.enqueue("Urgent", 2)
+
+print(hpq.dequeue())  # Emergency
+print(hpq.dequeue())  # Urgent
+print(hpq.dequeue())  # Normal
+</code></pre>
+<h3 id="c-implementation-2"><a class="header" href="#c-implementation-2">C++ Implementation</a></h3>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;queue&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+
+// Using std::priority_queue (max heap by default)
+void basicPriorityQueue() {
+    // Max heap (largest value has highest priority)
+    std::priority_queue&lt;int&gt; maxHeap;
+
+    maxHeap.push(30);
+    maxHeap.push(10);
+    maxHeap.push(50);
+    maxHeap.push(20);
+
+    while (!maxHeap.empty()) {
+        std::cout &lt;&lt; maxHeap.top() &lt;&lt; " ";  // 50 30 20 10
+        maxHeap.pop();
+    }
+    std::cout &lt;&lt; std::endl;
+
+    // Min heap (smallest value has highest priority)
+    std::priority_queue&lt;int, std::vector&lt;int&gt;, std::greater&lt;int&gt;&gt; minHeap;
+
+    minHeap.push(30);
+    minHeap.push(10);
+    minHeap.push(50);
+    minHeap.push(20);
+
+    while (!minHeap.empty()) {
+        std::cout &lt;&lt; minHeap.top() &lt;&lt; " ";  // 10 20 30 50
+        minHeap.pop();
+    }
+    std::cout &lt;&lt; std::endl;
+}
+
+// Custom priority queue with objects
+struct Task {
+    std::string name;
+    int priority;
+
+    Task(const std::string&amp; n, int p) : name(n), priority(p) {}
+
+    // Comparison operator for max heap (higher priority value = higher priority)
+    bool operator&lt;(const Task&amp; other) const {
+        return priority &lt; other.priority;  // Lower priority goes to bottom
+    }
+};
+
+void customPriorityQueue() {
+    std::priority_queue&lt;Task&gt; taskQueue;
+
+    taskQueue.push(Task("Low priority", 1));
+    taskQueue.push(Task("High priority", 10));
+    taskQueue.push(Task("Medium priority", 5));
+
+    while (!taskQueue.empty()) {
+        Task t = taskQueue.top();
+        std::cout &lt;&lt; t.name &lt;&lt; " (priority: " &lt;&lt; t.priority &lt;&lt; ")" &lt;&lt; std::endl;
+        taskQueue.pop();
+    }
+}
+</code></pre>
+<h3 id="javascript-implementation"><a class="header" href="#javascript-implementation">JavaScript Implementation</a></h3>
+<pre><code class="language-javascript">class PriorityQueue {
+    constructor(comparator = (a, b) =&gt; a.priority - b.priority) {
+        this.heap = [];
+        this.comparator = comparator;
+    }
+
+    parent(i) {
+        return Math.floor((i - 1) / 2);
+    }
+
+    leftChild(i) {
+        return 2 * i + 1;
+    }
+
+    rightChild(i) {
+        return 2 * i + 2;
+    }
+
+    swap(i, j) {
+        [this.heap[i], this.heap[j]] = [this.heap[j], this.heap[i]];
+    }
+
+    heapifyUp(i) {
+        while (i &gt; 0 &amp;&amp; this.comparator(this.heap[i], this.heap[this.parent(i)]) &lt; 0) {
+            const parent = this.parent(i);
+            this.swap(i, parent);
+            i = parent;
+        }
+    }
+
+    heapifyDown(i) {
+        let minIndex = i;
+        const left = this.leftChild(i);
+        const right = this.rightChild(i);
+
+        if (left &lt; this.heap.length &amp;&amp;
+            this.comparator(this.heap[left], this.heap[minIndex]) &lt; 0) {
+            minIndex = left;
+        }
+
+        if (right &lt; this.heap.length &amp;&amp;
+            this.comparator(this.heap[right], this.heap[minIndex]) &lt; 0) {
+            minIndex = right;
+        }
+
+        if (i !== minIndex) {
+            this.swap(i, minIndex);
+            this.heapifyDown(minIndex);
+        }
+    }
+
+    enqueue(item, priority) {
+        this.heap.push({ item, priority });
+        this.heapifyUp(this.heap.length - 1);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) {
+            throw new Error("Dequeue from empty priority queue");
+        }
+
+        if (this.heap.length === 1) {
+            return this.heap.pop().item;
+        }
+
+        this.swap(0, this.heap.length - 1);
+        const item = this.heap.pop().item;
+        this.heapifyDown(0);
+
+        return item;
+    }
+
+    peek() {
+        if (this.isEmpty()) {
+            throw new Error("Peek from empty priority queue");
+        }
+        return this.heap[0].item;
+    }
+
+    isEmpty() {
+        return this.heap.length === 0;
+    }
+
+    size() {
+        return this.heap.length;
+    }
+}
+
+// Usage
+const pq = new PriorityQueue();
+pq.enqueue("Low priority", 5);
+pq.enqueue("High priority", 1);
+pq.enqueue("Medium priority", 3);
+
+console.log(pq.dequeue());  // High priority
+console.log(pq.dequeue());  // Medium priority
+console.log(pq.dequeue());  // Low priority
+</code></pre>
+<h3 id="priority-queue-use-cases"><a class="header" href="#priority-queue-use-cases">Priority Queue Use Cases</a></h3>
+<ol>
+<li><strong>Dijkstra's Shortest Path Algorithm</strong>: Finding shortest paths in graphs</li>
+<li><em><em>A</em> Search Algorithm</em>*: Pathfinding with heuristics</li>
+<li><strong>Huffman Coding</strong>: Data compression</li>
+<li><strong>Event-Driven Simulation</strong>: Processing events by time</li>
+<li><strong>Task Scheduling</strong>: Operating system task scheduling</li>
+<li><strong>Median Finding</strong>: Maintaining running median with two heaps</li>
+<li><strong>Load Balancing</strong>: Distributing tasks based on priority</li>
+</ol>
+<h2 id="deque-double-ended-queue"><a class="header" href="#deque-double-ended-queue">Deque (Double-Ended Queue)</a></h2>
+<p>A deque (pronounced "deck") is a double-ended queue that allows insertion and deletion at both ends. It's more flexible than a standard queue and can be used as both a queue and a stack.</p>
+<h3 id="operations"><a class="header" href="#operations">Operations</a></h3>
+<ul>
+<li><strong>addFront(item)</strong>: Add to the front - O(1)</li>
+<li><strong>addRear(item)</strong>: Add to the rear - O(1)</li>
+<li><strong>removeFront()</strong>: Remove from front - O(1)</li>
+<li><strong>removeRear()</strong>: Remove from rear - O(1)</li>
+<li><strong>peekFront()</strong>: View front element - O(1)</li>
+<li><strong>peekRear()</strong>: View rear element - O(1)</li>
+</ul>
+<h3 id="python-implementation-using-collectionsdeque"><a class="header" href="#python-implementation-using-collectionsdeque">Python Implementation Using collections.deque</a></h3>
+<pre><code class="language-python">from collections import deque
+
+class Deque:
+    def __init__(self):
+        self.items = deque()
+
+    def add_front(self, item):
+        """Add item to front - O(1)"""
+        self.items.appendleft(item)
+
+    def add_rear(self, item):
+        """Add item to rear - O(1)"""
+        self.items.append(item)
+
+    def remove_front(self):
+        """Remove and return front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Remove from empty deque")
+        return self.items.popleft()
+
+    def remove_rear(self):
+        """Remove and return rear item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Remove from empty deque")
+        return self.items.pop()
+
+    def peek_front(self):
+        """View front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Peek from empty deque")
+        return self.items[0]
+
+    def peek_rear(self):
+        """View rear item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Peek from empty deque")
+        return self.items[-1]
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def size(self):
+        return len(self.items)
+
+    def clear(self):
+        self.items.clear()
+
+    def __str__(self):
+        return f"Deque({list(self.items)})"
+
+
+# Usage
+dq = Deque()
+dq.add_rear(10)
+dq.add_rear(20)
+dq.add_front(5)
+print(dq)  # Deque([5, 10, 20])
+
+print(dq.remove_front())  # 5
+print(dq.remove_rear())   # 20
+print(dq)  # Deque([10])
+</code></pre>
+<h3 id="custom-deque-using-doubly-linked-list"><a class="header" href="#custom-deque-using-doubly-linked-list">Custom Deque Using Doubly Linked List</a></h3>
+<pre><code class="language-python">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+        self.prev = None
+
+
+class DoublyLinkedDeque:
+    def __init__(self):
+        self.front = None
+        self.rear = None
+        self._size = 0
+
+    def add_front(self, item):
+        """Add item to front - O(1)"""
+        new_node = Node(item)
+
+        if self.is_empty():
+            self.front = self.rear = new_node
+        else:
+            new_node.next = self.front
+            self.front.prev = new_node
+            self.front = new_node
+
+        self._size += 1
+
+    def add_rear(self, item):
+        """Add item to rear - O(1)"""
+        new_node = Node(item)
+
+        if self.is_empty():
+            self.front = self.rear = new_node
+        else:
+            new_node.prev = self.rear
+            self.rear.next = new_node
+            self.rear = new_node
+
+        self._size += 1
+
+    def remove_front(self):
+        """Remove and return front item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Remove from empty deque")
+
+        item = self.front.data
+        self.front = self.front.next
+
+        if self.front is None:
+            self.rear = None
+        else:
+            self.front.prev = None
+
+        self._size -= 1
+        return item
+
+    def remove_rear(self):
+        """Remove and return rear item - O(1)"""
+        if self.is_empty():
+            raise IndexError("Remove from empty deque")
+
+        item = self.rear.data
+        self.rear = self.rear.prev
+
+        if self.rear is None:
+            self.front = None
+        else:
+            self.rear.next = None
+
+        self._size -= 1
+        return item
+
+    def peek_front(self):
+        if self.is_empty():
+            raise IndexError("Peek from empty deque")
+        return self.front.data
+
+    def peek_rear(self):
+        if self.is_empty():
+            raise IndexError("Peek from empty deque")
+        return self.rear.data
+
+    def is_empty(self):
+        return self.front is None
+
+    def size(self):
+        return self._size
+
+
+# Usage
+dll_deque = DoublyLinkedDeque()
+dll_deque.add_rear(1)
+dll_deque.add_rear(2)
+dll_deque.add_front(0)
+print(dll_deque.remove_front())  # 0
+print(dll_deque.remove_rear())   # 2
+</code></pre>
+<h3 id="c-implementation-3"><a class="header" href="#c-implementation-3">C++ Implementation</a></h3>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;deque&gt;
+
+void basicDequeExample() {
+    std::deque&lt;int&gt; dq;
+
+    // Add to rear
+    dq.push_back(10);
+    dq.push_back(20);
+
+    // Add to front
+    dq.push_front(5);
+    dq.push_front(1);
+
+    // dq: [1, 5, 10, 20]
+
+    std::cout &lt;&lt; "Front: " &lt;&lt; dq.front() &lt;&lt; std::endl;  // 1
+    std::cout &lt;&lt; "Back: " &lt;&lt; dq.back() &lt;&lt; std::endl;    // 20
+
+    // Remove from front
+    dq.pop_front();  // dq: [5, 10, 20]
+
+    // Remove from rear
+    dq.pop_back();  // dq: [5, 10]
+
+    // Access by index (like vector)
+    std::cout &lt;&lt; "dq[0]: " &lt;&lt; dq[0] &lt;&lt; std::endl;  // 5
+    std::cout &lt;&lt; "dq[1]: " &lt;&lt; dq[1] &lt;&lt; std::endl;  // 10
+}
+</code></pre>
+<h3 id="deque-common-patterns"><a class="header" href="#deque-common-patterns">Deque Common Patterns</a></h3>
+<h4 id="sliding-window-maximum"><a class="header" href="#sliding-window-maximum">Sliding Window Maximum</a></h4>
+<pre><code class="language-python">from collections import deque
+
+def sliding_window_max(nums, k):
+    """
+    Find maximum in each sliding window of size k.
+    Time: O(n), Space: O(k)
+    """
+    if not nums or k == 0:
+        return []
+
+    dq = deque()  # Store indices
+    result = []
+
+    for i, num in enumerate(nums):
+        # Remove elements outside window
+        while dq and dq[0] &lt; i - k + 1:
+            dq.popleft()
+
+        # Remove elements smaller than current
+        while dq and nums[dq[-1]] &lt; num:
+            dq.pop()
+
+        dq.append(i)
+
+        # Add to result when window is full
+        if i &gt;= k - 1:
+            result.append(nums[dq[0]])
+
+    return result
+
+
+# Usage
+print(sliding_window_max([1, 3, -1, -3, 5, 3, 6, 7], 3))
+# Output: [3, 3, 5, 5, 6, 7]
+</code></pre>
+<h4 id="palindrome-checker"><a class="header" href="#palindrome-checker">Palindrome Checker</a></h4>
+<pre><code class="language-python">def is_palindrome(text):
+    """Check if text is palindrome using deque"""
+    from collections import deque
+
+    # Remove non-alphanumeric and convert to lowercase
+    dq = deque(c.lower() for c in text if c.isalnum())
+
+    while len(dq) &gt; 1:
+        if dq.popleft() != dq.pop():
+            return False
+
+    return True
+
+
+# Usage
+print(is_palindrome("A man, a plan, a canal: Panama"))  # True
+print(is_palindrome("race a car"))  # False
+</code></pre>
+<h3 id="deque-use-cases"><a class="header" href="#deque-use-cases">Deque Use Cases</a></h3>
+<ol>
+<li><strong>Sliding Window Problems</strong>: Maximum/minimum in sliding windows</li>
+<li><strong>Palindrome Checking</strong>: Compare from both ends</li>
+<li><strong>Undo/Redo Operations</strong>: Browser history navigation</li>
+<li><strong>Task Stealing</strong>: Work-stealing algorithms in parallel processing</li>
+<li><strong>Cache Implementation</strong>: LRU cache with quick access at both ends</li>
+</ol>
+<h2 id="thread-safe-queues"><a class="header" href="#thread-safe-queues">Thread-Safe Queues</a></h2>
+<p>Thread-safe queues are essential for concurrent programming, allowing multiple threads to safely enqueue and dequeue elements without data corruption or race conditions.</p>
+<h3 id="python-thread-safe-queue"><a class="header" href="#python-thread-safe-queue">Python Thread-Safe Queue</a></h3>
+<pre><code class="language-python">import queue
+import threading
+import time
+
+# Using queue.Queue (thread-safe by default)
+def producer(q, items):
+    """Producer thread adds items to queue"""
+    for item in items:
+        print(f"Producing: {item}")
+        q.put(item)
+        time.sleep(0.1)
+
+    # Signal completion
+    q.put(None)
+
+
+def consumer(q):
+    """Consumer thread removes items from queue"""
+    while True:
+        item = q.get()
+
+        if item is None:
+            # Poison pill - exit
+            q.task_done()
+            break
+
+        print(f"Consuming: {item}")
+        time.sleep(0.2)
+        q.task_done()
+
+
+# Usage
+q = queue.Queue()
+
+# Create threads
+producer_thread = threading.Thread(target=producer, args=(q, range(10)))
+consumer_thread = threading.Thread(target=consumer, args=(q,))
+
+# Start threads
+producer_thread.start()
+consumer_thread.start()
+
+# Wait for completion
+producer_thread.join()
+consumer_thread.join()
+q.join()
+
+print("All tasks completed")
+</code></pre>
+<h3 id="priority-queue-with-threading"><a class="header" href="#priority-queue-with-threading">Priority Queue with Threading</a></h3>
+<pre><code class="language-python">import queue
+import threading
+import time
+import random
+
+def task_producer(pq, num_tasks):
+    """Produce tasks with random priorities"""
+    for i in range(num_tasks):
+        priority = random.randint(1, 10)
+        task = f"Task-{i}"
+        pq.put((priority, task))
+        print(f"Added: {task} with priority {priority}")
+        time.sleep(0.1)
+
+
+def task_consumer(pq, consumer_id):
+    """Consume tasks based on priority"""
+    while True:
+        try:
+            # Wait for 1 second, then exit if no items
+            priority, task = pq.get(timeout=1)
+            print(f"Consumer-{consumer_id} processing: {task} (priority {priority})")
+            time.sleep(0.3)
+            pq.task_done()
+        except queue.Empty:
+            print(f"Consumer-{consumer_id} finished")
+            break
+
+
+# Usage
+pq = queue.PriorityQueue()
+
+# Create producer
+producer = threading.Thread(target=task_producer, args=(pq, 10))
+
+# Create multiple consumers
+consumers = [
+    threading.Thread(target=task_consumer, args=(pq, i))
+    for i in range(3)
+]
+
+# Start all threads
+producer.start()
+for consumer in consumers:
+    consumer.start()
+
+# Wait for completion
+producer.join()
+pq.join()
+for consumer in consumers:
+    consumer.join()
+
+print("All tasks processed")
+</code></pre>
+<h3 id="custom-thread-safe-queue"><a class="header" href="#custom-thread-safe-queue">Custom Thread-Safe Queue</a></h3>
+<pre><code class="language-python">import threading
+
+class ThreadSafeQueue:
+    def __init__(self, max_size=None):
+        self.items = []
+        self.max_size = max_size
+        self.lock = threading.Lock()
+        self.not_empty = threading.Condition(self.lock)
+        self.not_full = threading.Condition(self.lock)
+
+    def enqueue(self, item, block=True, timeout=None):
+        """Add item to queue - thread-safe"""
+        with self.not_full:
+            # Wait if queue is full
+            if self.max_size is not None:
+                while len(self.items) &gt;= self.max_size:
+                    if not block:
+                        raise queue.Full("Queue is full")
+                    self.not_full.wait(timeout)
+
+            self.items.append(item)
+            self.not_empty.notify()
+
+    def dequeue(self, block=True, timeout=None):
+        """Remove item from queue - thread-safe"""
+        with self.not_empty:
+            # Wait if queue is empty
+            while len(self.items) == 0:
+                if not block:
+                    raise queue.Empty("Queue is empty")
+                self.not_empty.wait(timeout)
+
+            item = self.items.pop(0)
+            self.not_full.notify()
+            return item
+
+    def size(self):
+        with self.lock:
+            return len(self.items)
+
+    def is_empty(self):
+        with self.lock:
+            return len(self.items) == 0
+</code></pre>
+<h3 id="c-thread-safe-queue"><a class="header" href="#c-thread-safe-queue">C++ Thread-Safe Queue</a></h3>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;queue&gt;
+#include &lt;mutex&gt;
+#include &lt;condition_variable&gt;
+#include &lt;thread&gt;
+#include &lt;chrono&gt;
+
+template&lt;typename T&gt;
+class ThreadSafeQueue {
+private:
+    std::queue&lt;T&gt; queue;
+    mutable std::mutex mutex;
+    std::condition_variable cond_var;
+
+public:
+    void enqueue(const T&amp; item) {
+        {
+            std::lock_guard&lt;std::mutex&gt; lock(mutex);
+            queue.push(item);
+        }
+        cond_var.notify_one();
+    }
+
+    bool dequeue(T&amp; item, int timeout_ms = -1) {
+        std::unique_lock&lt;std::mutex&gt; lock(mutex);
+
+        if (timeout_ms &lt; 0) {
+            // Wait indefinitely
+            cond_var.wait(lock, [this] { return !queue.empty(); });
+        } else {
+            // Wait with timeout
+            auto timeout = std::chrono::milliseconds(timeout_ms);
+            if (!cond_var.wait_for(lock, timeout, [this] { return !queue.empty(); })) {
+                return false;  // Timeout
+            }
+        }
+
+        item = queue.front();
+        queue.pop();
+        return true;
+    }
+
+    bool tryDequeue(T&amp; item) {
+        std::lock_guard&lt;std::mutex&gt; lock(mutex);
+
+        if (queue.empty()) {
+            return false;
+        }
+
+        item = queue.front();
+        queue.pop();
+        return true;
+    }
+
+    bool isEmpty() const {
+        std::lock_guard&lt;std::mutex&gt; lock(mutex);
+        return queue.empty();
+    }
+
+    size_t size() const {
+        std::lock_guard&lt;std::mutex&gt; lock(mutex);
+        return queue.size();
+    }
+};
+
+// Usage example
+void producer(ThreadSafeQueue&lt;int&gt;&amp; q) {
+    for (int i = 0; i &lt; 10; i++) {
+        q.enqueue(i);
+        std::cout &lt;&lt; "Produced: " &lt;&lt; i &lt;&lt; std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
+
+void consumer(ThreadSafeQueue&lt;int&gt;&amp; q, int id) {
+    while (true) {
+        int item;
+        if (q.dequeue(item, 1000)) {
+            std::cout &lt;&lt; "Consumer " &lt;&lt; id &lt;&lt; " consumed: " &lt;&lt; item &lt;&lt; std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        } else {
+            break;  // Timeout - no more items
+        }
+    }
+}
+
+int main() {
+    ThreadSafeQueue&lt;int&gt; q;
+
+    std::thread prod(producer, std::ref(q));
+    std::thread cons1(consumer, std::ref(q), 1);
+    std::thread cons2(consumer, std::ref(q), 2);
+
+    prod.join();
+    cons1.join();
+    cons2.join();
+
+    return 0;
+}
+</code></pre>
+<h2 id="real-world-applications"><a class="header" href="#real-world-applications">Real-World Applications</a></h2>
+<h3 id="1-task-scheduling"><a class="header" href="#1-task-scheduling">1. Task Scheduling</a></h3>
+<pre><code class="language-python">from collections import deque
+import time
+
+class TaskScheduler:
+    def __init__(self):
+        self.task_queue = deque()
+
+    def add_task(self, task_name, priority=0):
+        """Add task to queue"""
+        self.task_queue.append({
+            'name': task_name,
+            'priority': priority,
+            'timestamp': time.time()
+        })
+
+    def execute_tasks(self):
+        """Execute all tasks in FIFO order"""
+        while self.task_queue:
+            task = self.task_queue.popleft()
+            print(f"Executing: {task['name']} (queued at {task['timestamp']:.2f})")
+            # Simulate task execution
+            time.sleep(0.1)
+
+
+# Usage
+scheduler = TaskScheduler()
+scheduler.add_task("Send email")
+scheduler.add_task("Generate report")
+scheduler.add_task("Backup database")
+scheduler.execute_tasks()
+</code></pre>
+<h3 id="2-breadth-first-search-bfs-traversal"><a class="header" href="#2-breadth-first-search-bfs-traversal">2. Breadth-First Search (BFS) Traversal</a></h3>
+<pre><code class="language-python">from collections import deque
+
+class TreeNode:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def bfs_traversal(root):
+    """
+    Breadth-first traversal of binary tree using queue.
+    Time: O(n), Space: O(w) where w is max width
+    """
+    if not root:
+        return []
+
+    result = []
+    queue = deque([root])
+
+    while queue:
+        node = queue.popleft()
+        result.append(node.value)
+
+        if node.left:
+            queue.append(node.left)
+        if node.right:
+            queue.append(node.right)
+
+    return result
+
+
+def level_order_traversal(root):
+    """Get nodes level by level"""
+    if not root:
+        return []
+
+    levels = []
+    queue = deque([root])
+
+    while queue:
+        level_size = len(queue)
+        current_level = []
+
+        for _ in range(level_size):
+            node = queue.popleft()
+            current_level.append(node.value)
+
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+
+        levels.append(current_level)
+
+    return levels
+
+
+# Usage
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.right = TreeNode(3)
+root.left.left = TreeNode(4)
+root.left.right = TreeNode(5)
+
+print(bfs_traversal(root))  # [1, 2, 3, 4, 5]
+print(level_order_traversal(root))  # [[1], [2, 3], [4, 5]]
+</code></pre>
+<h3 id="3-message-queue-system"><a class="header" href="#3-message-queue-system">3. Message Queue System</a></h3>
+<pre><code class="language-python">from collections import deque
+from datetime import datetime
+
+class Message:
+    def __init__(self, sender, recipient, content):
+        self.sender = sender
+        self.recipient = recipient
+        self.content = content
+        self.timestamp = datetime.now()
+
+    def __str__(self):
+        return f"[{self.timestamp}] {self.sender} -&gt; {self.recipient}: {self.content}"
+
+
+class MessageQueue:
+    def __init__(self):
+        self.queue = deque()
+
+    def send_message(self, sender, recipient, content):
+        """Add message to queue"""
+        message = Message(sender, recipient, content)
+        self.queue.append(message)
+        print(f"Message queued: {message}")
+
+    def process_messages(self, batch_size=10):
+        """Process messages in batches"""
+        processed = 0
+
+        while self.queue and processed &lt; batch_size:
+            message = self.queue.popleft()
+            self._deliver_message(message)
+            processed += 1
+
+        return processed
+
+    def _deliver_message(self, message):
+        """Simulate message delivery"""
+        print(f"Delivering: {message}")
+
+    def pending_count(self):
+        return len(self.queue)
+
+
+# Usage
+mq = MessageQueue()
+mq.send_message("Alice", "Bob", "Hello!")
+mq.send_message("Bob", "Alice", "Hi there!")
+mq.send_message("Charlie", "Alice", "Meeting at 3pm")
+
+print(f"\nProcessing {mq.pending_count()} messages...")
+mq.process_messages()
+</code></pre>
+<h3 id="4-print-queue-management"><a class="header" href="#4-print-queue-management">4. Print Queue Management</a></h3>
+<pre><code class="language-python">from collections import deque
+import time
+
+class PrintJob:
+    def __init__(self, document_name, pages, priority=0):
+        self.document_name = document_name
+        self.pages = pages
+        self.priority = priority
+        self.submitted_at = time.time()
+
+    def __str__(self):
+        return f"{self.document_name} ({self.pages} pages)"
+
+
+class PrintQueue:
+    def __init__(self):
+        self.queue = deque()
+
+    def submit_job(self, document_name, pages, priority=0):
+        """Submit print job"""
+        job = PrintJob(document_name, pages, priority)
+        self.queue.append(job)
+        print(f"Job submitted: {job}")
+
+    def print_next(self):
+        """Print next job in queue"""
+        if not self.queue:
+            print("No jobs in queue")
+            return
+
+        job = self.queue.popleft()
+        print(f"Printing: {job}")
+
+        # Simulate printing time (1 second per page)
+        time.sleep(job.pages * 0.1)
+        print(f"Completed: {job}")
+
+    def print_all(self):
+        """Process all print jobs"""
+        while self.queue:
+            self.print_next()
+
+    def cancel_job(self, document_name):
+        """Cancel a specific job"""
+        for i, job in enumerate(self.queue):
+            if job.document_name == document_name:
+                del self.queue[i]
+                print(f"Cancelled: {job}")
+                return True
+        return False
+
+    def jobs_pending(self):
+        return len(self.queue)
+
+
+# Usage
+printer = PrintQueue()
+printer.submit_job("Report.pdf", 5)
+printer.submit_job("Presentation.pptx", 10)
+printer.submit_job("Invoice.pdf", 2)
+
+print(f"\nJobs pending: {printer.jobs_pending()}")
+printer.print_all()
+</code></pre>
+<h3 id="5-buffer-management"><a class="header" href="#5-buffer-management">5. Buffer Management</a></h3>
+<pre><code class="language-python">from collections import deque
+
+class CircularBuffer:
+    """Fixed-size buffer for streaming data"""
+
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.buffer = deque(maxlen=capacity)
+
+    def write(self, data):
+        """Write data to buffer (oldest data removed if full)"""
+        self.buffer.append(data)
+
+    def read(self, n=1):
+        """Read n items from buffer"""
+        if n &gt; len(self.buffer):
+            raise ValueError(f"Only {len(self.buffer)} items available")
+
+        result = []
+        for _ in range(n):
+            result.append(self.buffer.popleft())
+        return result
+
+    def peek(self, n=1):
+        """View n items without removing"""
+        if n &gt; len(self.buffer):
+            return list(self.buffer)
+        return list(self.buffer)[:n]
+
+    def size(self):
+        return len(self.buffer)
+
+    def is_full(self):
+        return len(self.buffer) == self.capacity
+
+    def is_empty(self):
+        return len(self.buffer) == 0
+
+
+# Usage - Audio streaming buffer
+audio_buffer = CircularBuffer(capacity=1000)
+
+# Simulate audio streaming
+for i in range(1500):
+    audio_buffer.write(f"sample_{i}")
+
+print(f"Buffer size: {audio_buffer.size()}")  # 1000
+print(f"First samples: {audio_buffer.peek(5)}")  # Last 5 of first 1000
+</code></pre>
+<h2 id="complexity-analysis"><a class="header" href="#complexity-analysis">Complexity Analysis</a></h2>
+<h3 id="time-complexity"><a class="header" href="#time-complexity">Time Complexity</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Array-based Queue</th><th>Linked Queue</th><th>Circular Queue</th><th>Priority Queue (Heap)</th><th>Deque</th></tr></thead><tbody>
+<tr><td>Enqueue</td><td>O(1) amortized*</td><td>O(1)</td><td>O(1)</td><td>O(log n)</td><td>O(1)</td></tr>
+<tr><td>Dequeue</td><td>O(n)**</td><td>O(1)</td><td>O(1)</td><td>O(log n)</td><td>O(1)</td></tr>
+<tr><td>Peek</td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(1)</td></tr>
+<tr><td>Search</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
+<tr><td>IsEmpty</td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(1)</td></tr>
+<tr><td>Size</td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(1)</td></tr>
+</tbody></table>
+</div>
+<p>* Amortized O(1) for dynamic array resizing
+** O(n) if using array.pop(0); O(1) with proper implementation (object-based or circular)</p>
+<h3 id="space-complexity"><a class="header" href="#space-complexity">Space Complexity</a></h3>
+<ul>
+<li><strong>Array-based Queue</strong>: O(n) where n is the number of elements</li>
+<li><strong>Linked Queue</strong>: O(n) with additional overhead for node pointers</li>
+<li><strong>Circular Queue</strong>: O(capacity) - fixed size</li>
+<li><strong>Priority Queue</strong>: O(n)</li>
+<li><strong>Deque</strong>: O(n)</li>
+</ul>
+<h3 id="detailed-complexity-analysis"><a class="header" href="#detailed-complexity-analysis">Detailed Complexity Analysis</a></h3>
+<h4 id="enqueue-operation"><a class="header" href="#enqueue-operation">Enqueue Operation</a></h4>
+<pre><code class="language-python"># Array-based (dynamic resizing)
+# Most operations: O(1)
+# When resizing: O(n) - copy all elements to new array
+# Amortized: O(1)
+
+# Linked list
+# Always: O(1) - just update rear pointer
+</code></pre>
+<h4 id="dequeue-operation"><a class="header" href="#dequeue-operation">Dequeue Operation</a></h4>
+<pre><code class="language-python"># Array-based with pop(0)
+# O(n) - shift all remaining elements
+
+# Array-based with index tracking
+# O(1) - just increment front index
+
+# Linked list
+# O(1) - update front pointer
+</code></pre>
+<h2 id="comparison-with-other-data-structures"><a class="header" href="#comparison-with-other-data-structures">Comparison with Other Data Structures</a></h2>
+<h3 id="queue-vs-stack"><a class="header" href="#queue-vs-stack">Queue vs Stack</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Queue</th><th>Stack</th></tr></thead><tbody>
+<tr><td>Order</td><td>FIFO (First In First Out)</td><td>LIFO (Last In First Out)</td></tr>
+<tr><td>Access</td><td>Front and rear only</td><td>Top only</td></tr>
+<tr><td>Operations</td><td>enqueue, dequeue</td><td>push, pop</td></tr>
+<tr><td>Use Cases</td><td>BFS, scheduling, buffering</td><td>DFS, undo/redo, expression evaluation</td></tr>
+<tr><td>Real-world analogy</td><td>Line at store</td><td>Stack of plates</td></tr>
+</tbody></table>
+</div>
+<h3 id="queue-vs-arraylist"><a class="header" href="#queue-vs-arraylist">Queue vs Array/List</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Queue</th><th>Array/List</th></tr></thead><tbody>
+<tr><td>Access pattern</td><td>Sequential (FIFO)</td><td>Random access by index</td></tr>
+<tr><td>Insertion</td><td>O(1) at rear</td><td>O(1) at end, O(n) elsewhere</td></tr>
+<tr><td>Deletion</td><td>O(1) at front</td><td>O(1) at end, O(n) elsewhere</td></tr>
+<tr><td>Use when</td><td>Order matters, process sequentially</td><td>Need random access</td></tr>
+</tbody></table>
+</div>
+<h3 id="queue-vs-priority-queue"><a class="header" href="#queue-vs-priority-queue">Queue vs Priority Queue</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Queue</th><th>Priority Queue</th></tr></thead><tbody>
+<tr><td>Order</td><td>Insertion order (FIFO)</td><td>Priority order</td></tr>
+<tr><td>Dequeue</td><td>First element</td><td>Highest priority</td></tr>
+<tr><td>Implementation</td><td>Array or linked list</td><td>Heap</td></tr>
+<tr><td>Complexity</td><td>O(1) enqueue/dequeue</td><td>O(log n) enqueue/dequeue</td></tr>
+<tr><td>Use when</td><td>Order by time</td><td>Order by importance</td></tr>
+</tbody></table>
+</div>
+<h3 id="when-to-use-each"><a class="header" href="#when-to-use-each">When to Use Each</a></h3>
+<p><strong>Use Regular Queue when:</strong></p>
+<ul>
+<li>Processing items in order received</li>
+<li>FIFO behavior is required</li>
+<li>Simple task scheduling</li>
+<li>BFS traversal</li>
+<li>Request handling</li>
+</ul>
+<p><strong>Use Priority Queue when:</strong></p>
+<ul>
+<li>Items have different priorities</li>
+<li>Need to process most important items first</li>
+<li>Implementing Dijkstra's algorithm</li>
+<li>Event-driven simulation</li>
+<li>Task scheduling with priorities</li>
+</ul>
+<p><strong>Use Deque when:</strong></p>
+<ul>
+<li>Need insertion/deletion at both ends</li>
+<li>Implementing sliding window problems</li>
+<li>Palindrome checking</li>
+<li>Undo/redo functionality</li>
+<li>Both stack and queue operations needed</li>
+</ul>
+<p><strong>Use Circular Queue when:</strong></p>
+<ul>
+<li>Fixed maximum size is known</li>
+<li>Need to reuse memory efficiently</li>
+<li>Implementing buffers</li>
+<li>Round-robin scheduling</li>
+</ul>
+<h2 id="interview-problems-and-patterns"><a class="header" href="#interview-problems-and-patterns">Interview Problems and Patterns</a></h2>
+<h3 id="pattern-1-queue-using-stacks"><a class="header" href="#pattern-1-queue-using-stacks">Pattern 1: Queue Using Stacks</a></h3>
+<p><strong>Problem</strong>: Implement a queue using two stacks.</p>
+<pre><code class="language-python">class QueueUsingStacks:
+    def __init__(self):
+        self.stack_in = []   # For enqueue
+        self.stack_out = []  # For dequeue
+
+    def enqueue(self, item):
+        """O(1)"""
+        self.stack_in.append(item)
+
+    def dequeue(self):
+        """Amortized O(1)"""
+        if not self.stack_out:
+            # Transfer all from stack_in to stack_out
+            while self.stack_in:
+                self.stack_out.append(self.stack_in.pop())
+
+        if not self.stack_out:
+            raise IndexError("Dequeue from empty queue")
+
+        return self.stack_out.pop()
+
+    def peek(self):
+        """Amortized O(1)"""
+        if not self.stack_out:
+            while self.stack_in:
+                self.stack_out.append(self.stack_in.pop())
+
+        if not self.stack_out:
+            raise IndexError("Peek from empty queue")
+
+        return self.stack_out[-1]
+
+    def is_empty(self):
+        return len(self.stack_in) == 0 and len(self.stack_out) == 0
+
+
+# Test
+q = QueueUsingStacks()
+q.enqueue(1)
+q.enqueue(2)
+q.enqueue(3)
+print(q.dequeue())  # 1
+print(q.peek())     # 2
+q.enqueue(4)
+print(q.dequeue())  # 2
+print(q.dequeue())  # 3
+</code></pre>
+<h3 id="pattern-2-stack-using-queues"><a class="header" href="#pattern-2-stack-using-queues">Pattern 2: Stack Using Queues</a></h3>
+<p><strong>Problem</strong>: Implement a stack using two queues.</p>
+<pre><code class="language-python">from collections import deque
+
+class StackUsingQueues:
+    def __init__(self):
+        self.q1 = deque()
+        self.q2 = deque()
+
+    def push(self, item):
+        """O(n) - make push expensive"""
+        # Add to q2
+        self.q2.append(item)
+
+        # Move all from q1 to q2
+        while self.q1:
+            self.q2.append(self.q1.popleft())
+
+        # Swap q1 and q2
+        self.q1, self.q2 = self.q2, self.q1
+
+    def pop(self):
+        """O(1)"""
+        if not self.q1:
+            raise IndexError("Pop from empty stack")
+        return self.q1.popleft()
+
+    def top(self):
+        """O(1)"""
+        if not self.q1:
+            raise IndexError("Top from empty stack")
+        return self.q1[0]
+
+    def is_empty(self):
+        return len(self.q1) == 0
+
+
+# Test
+s = StackUsingQueues()
+s.push(1)
+s.push(2)
+s.push(3)
+print(s.pop())  # 3
+print(s.top())  # 2
+</code></pre>
+<h3 id="pattern-3-first-unique-number"><a class="header" href="#pattern-3-first-unique-number">Pattern 3: First Unique Number</a></h3>
+<p><strong>Problem</strong>: Find the first non-repeating element in a stream.</p>
+<pre><code class="language-python">from collections import deque
+
+class FirstUnique:
+    def __init__(self):
+        self.queue = deque()
+        self.count = {}
+
+    def add(self, num):
+        """Add number to stream"""
+        if num in self.count:
+            self.count[num] += 1
+        else:
+            self.count[num] = 1
+            self.queue.append(num)
+
+    def get_first_unique(self):
+        """Get first unique number - O(1) amortized"""
+        # Remove non-unique from front
+        while self.queue and self.count[self.queue[0]] &gt; 1:
+            self.queue.popleft()
+
+        if self.queue:
+            return self.queue[0]
+        return -1
+
+
+# Usage
+fu = FirstUnique()
+for num in [1, 2, 1, 3, 2, 4]:
+    fu.add(num)
+    print(f"Added {num}, first unique: {fu.get_first_unique()}")
+# Output: 1, 2, 2, 3, 3, 3
+</code></pre>
+<h3 id="pattern-4-generate-binary-numbers"><a class="header" href="#pattern-4-generate-binary-numbers">Pattern 4: Generate Binary Numbers</a></h3>
+<p><strong>Problem</strong>: Generate binary numbers from 1 to n using a queue.</p>
+<pre><code class="language-python">from collections import deque
+
+def generate_binary_numbers(n):
+    """
+    Generate binary numbers 1 to n using queue.
+    Time: O(n), Space: O(n)
+    """
+    result = []
+    queue = deque(['1'])
+
+    for _ in range(n):
+        # Get front binary number
+        binary = queue.popleft()
+        result.append(binary)
+
+        # Generate next numbers by appending 0 and 1
+        queue.append(binary + '0')
+        queue.append(binary + '1')
+
+    return result
+
+
+# Usage
+print(generate_binary_numbers(10))
+# ['1', '10', '11', '100', '101', '110', '111', '1000', '1001', '1010']
+</code></pre>
+<h3 id="pattern-5-moving-average-from-data-stream"><a class="header" href="#pattern-5-moving-average-from-data-stream">Pattern 5: Moving Average from Data Stream</a></h3>
+<p><strong>Problem</strong>: Calculate moving average from a stream of integers.</p>
+<pre><code class="language-python">from collections import deque
+
+class MovingAverage:
+    def __init__(self, size):
+        self.size = size
+        self.queue = deque()
+        self.sum = 0
+
+    def next(self, val):
+        """Add value and return moving average - O(1)"""
+        self.queue.append(val)
+        self.sum += val
+
+        if len(self.queue) &gt; self.size:
+            removed = self.queue.popleft()
+            self.sum -= removed
+
+        return self.sum / len(self.queue)
+
+
+# Usage
+ma = MovingAverage(3)
+print(ma.next(1))   # 1.0
+print(ma.next(10))  # 5.5
+print(ma.next(3))   # 4.666...
+print(ma.next(5))   # 6.0
+</code></pre>
+<h3 id="pattern-6-recent-counter"><a class="header" href="#pattern-6-recent-counter">Pattern 6: Recent Counter</a></h3>
+<p><strong>Problem</strong>: Count requests in the last 3000 milliseconds.</p>
+<pre><code class="language-python">from collections import deque
+
+class RecentCounter:
+    def __init__(self):
+        self.requests = deque()
+
+    def ping(self, t):
+        """
+        Add request at time t, return count in [t-3000, t].
+        Time: O(1) amortized
+        """
+        self.requests.append(t)
+
+        # Remove requests older than t-3000
+        while self.requests and self.requests[0] &lt; t - 3000:
+            self.requests.popleft()
+
+        return len(self.requests)
+
+
+# Usage
+rc = RecentCounter()
+print(rc.ping(1))     # 1
+print(rc.ping(100))   # 2
+print(rc.ping(3001))  # 3
+print(rc.ping(3002))  # 3 (request at t=1 is now outside window)
+</code></pre>
+<h3 id="pattern-7-design-hit-counter"><a class="header" href="#pattern-7-design-hit-counter">Pattern 7: Design Hit Counter</a></h3>
+<p><strong>Problem</strong>: Design a hit counter that counts hits in the past 5 minutes.</p>
+<pre><code class="language-python">from collections import deque
+
+class HitCounter:
+    def __init__(self):
+        self.hits = deque()
+
+    def hit(self, timestamp):
+        """Record a hit at timestamp - O(1)"""
+        self.hits.append(timestamp)
+
+    def get_hits(self, timestamp):
+        """
+        Return hits in past 5 minutes (300 seconds).
+        Time: O(n) worst case, O(1) amortized
+        """
+        # Remove hits older than 300 seconds
+        while self.hits and self.hits[0] &lt;= timestamp - 300:
+            self.hits.popleft()
+
+        return len(self.hits)
+
+
+# Usage
+hc = HitCounter()
+hc.hit(1)
+hc.hit(2)
+hc.hit(3)
+print(hc.get_hits(4))    # 3
+hc.hit(300)
+print(hc.get_hits(300))  # 4
+print(hc.get_hits(301))  # 3 (hit at t=1 expired)
+</code></pre>
+<h3 id="pattern-8-number-of-recent-calls-sliding-window"><a class="header" href="#pattern-8-number-of-recent-calls-sliding-window">Pattern 8: Number of Recent Calls (Sliding Window)</a></h3>
+<p><strong>Problem</strong>: Solve sliding window problems using queue.</p>
+<pre><code class="language-python">from collections import deque
+
+def max_sliding_window(nums, k):
+    """
+    Find maximum in each sliding window of size k.
+    Time: O(n), Space: O(k)
+    """
+    if not nums or k == 0:
+        return []
+
+    dq = deque()  # Store indices
+    result = []
+
+    for i in range(len(nums)):
+        # Remove elements outside current window
+        while dq and dq[0] &lt; i - k + 1:
+            dq.popleft()
+
+        # Remove smaller elements (they won't be max)
+        while dq and nums[dq[-1]] &lt; nums[i]:
+            dq.pop()
+
+        dq.append(i)
+
+        # Add to result when window is complete
+        if i &gt;= k - 1:
+            result.append(nums[dq[0]])
+
+    return result
+
+
+# Usage
+print(max_sliding_window([1,3,-1,-3,5,3,6,7], 3))
+# Output: [3, 3, 5, 5, 6, 7]
+</code></pre>
+<h3 id="pattern-9-perfect-squares-bfs"><a class="header" href="#pattern-9-perfect-squares-bfs">Pattern 9: Perfect Squares (BFS)</a></h3>
+<p><strong>Problem</strong>: Find minimum number of perfect squares that sum to n.</p>
+<pre><code class="language-python">from collections import deque
+import math
+
+def num_squares(n):
+    """
+    Find min perfect squares that sum to n using BFS.
+    Time: O(n * sqrt(n)), Space: O(n)
+    """
+    if n &lt;= 0:
+        return 0
+
+    # Generate perfect squares up to n
+    squares = []
+    i = 1
+    while i * i &lt;= n:
+        squares.append(i * i)
+        i += 1
+
+    # BFS
+    queue = deque([(n, 0)])  # (remaining, steps)
+    visited = {n}
+
+    while queue:
+        remaining, steps = queue.popleft()
+
+        for square in squares:
+            next_remaining = remaining - square
+
+            if next_remaining == 0:
+                return steps + 1
+
+            if next_remaining &gt; 0 and next_remaining not in visited:
+                visited.add(next_remaining)
+                queue.append((next_remaining, steps + 1))
+
+    return -1
+
+
+# Usage
+print(num_squares(12))  # 3 (4+4+4)
+print(num_squares(13))  # 2 (4+9)
+</code></pre>
+<h3 id="pattern-10-rotting-oranges-multi-source-bfs"><a class="header" href="#pattern-10-rotting-oranges-multi-source-bfs">Pattern 10: Rotting Oranges (Multi-source BFS)</a></h3>
+<p><strong>Problem</strong>: Find minimum time to rot all oranges.</p>
+<pre><code class="language-python">from collections import deque
+
+def oranges_rotting(grid):
+    """
+    Multi-source BFS to find time to rot all oranges.
+    Time: O(m*n), Space: O(m*n)
+    """
+    if not grid:
+        return -1
+
+    rows, cols = len(grid), len(grid[0])
+    queue = deque()
+    fresh_count = 0
+
+    # Find all initial rotten oranges and count fresh
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == 2:
+                queue.append((r, c, 0))  # (row, col, time)
+            elif grid[r][c] == 1:
+                fresh_count += 1
+
+    if fresh_count == 0:
+        return 0
+
+    # BFS
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    max_time = 0
+
+    while queue:
+        r, c, time = queue.popleft()
+        max_time = max(max_time, time)
+
+        for dr, dc in directions:
+            nr, nc = r + dr, c + dc
+
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and grid[nr][nc] == 1:
+                grid[nr][nc] = 2  # Mark as rotten
+                fresh_count -= 1
+                queue.append((nr, nc, time + 1))
+
+    return max_time if fresh_count == 0 else -1
+
+
+# Usage
+grid = [
+    [2, 1, 1],
+    [1, 1, 0],
+    [0, 1, 1]
+]
+print(oranges_rotting(grid))  # 4
+</code></pre>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Queues are fundamental data structures with wide-ranging applications in computer science:</p>
+<h3 id="key-takeaways"><a class="header" href="#key-takeaways">Key Takeaways</a></h3>
+<ol>
+<li><strong>FIFO Principle</strong>: First In First Out - core defining characteristic</li>
+<li><strong>Multiple Variants</strong>: Regular, circular, priority, and deque serve different needs</li>
+<li><strong>Efficient Operations</strong>: O(1) for enqueue/dequeue with proper implementation</li>
+<li><strong>Essential for Algorithms</strong>: BFS, scheduling, buffering all rely on queues</li>
+<li><strong>Thread-Safe Options</strong>: Critical for concurrent programming</li>
+<li><strong>Interview Frequency</strong>: Common in coding interviews with various patterns</li>
+</ol>
+<h3 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h3>
+<ul>
+<li>Use <code>collections.deque</code> in Python for efficient queue operations</li>
+<li>Use circular queues when maximum size is known</li>
+<li>Use priority queues when order depends on priority, not arrival time</li>
+<li>Consider thread-safety requirements in concurrent environments</li>
+<li>Choose implementation based on specific use case requirements</li>
+</ul>
+<h3 id="further-study"><a class="header" href="#further-study">Further Study</a></h3>
+<ul>
+<li>Advanced priority queue operations (decrease-key, merge)</li>
+<li>Lock-free concurrent queues</li>
+<li>Distributed message queues (RabbitMQ, Kafka)</li>
+<li>Queue-based load balancing algorithms</li>
+<li>Advanced graph algorithms using queues (bidirectional BFS, 0-1 BFS)</li>
+</ul>
 
                     </main>
 

@@ -87,15 +87,23 @@ def add_to_summary(summary_file, files_to_add):
                 break
 
         if section_start is not None:
+            # Backtrack from section_end to find the last non-empty line
+            # This ensures we insert after the last item, not after blank lines
+            actual_insert_pos = section_end
+            for k in range(section_end - 1, section_start, -1):
+                if lines[k].strip():  # Found last non-empty line
+                    actual_insert_pos = k + 1
+                    break
+
             # Add each file to the section
             for file in sorted(files):
                 # Extract filename without extension for title
                 filename = file.split('/')[-1].replace('.md', '').replace('_', ' ').title()
                 new_line = f"    - [{filename}]({file})\n"
 
-                # Insert before the section end
-                lines.insert(section_end, new_line)
-                section_end += 1
+                # Insert after the last item in the section
+                lines.insert(actual_insert_pos, new_line)
+                actual_insert_pos += 1
                 modified = True
                 print(f"Added to SUMMARY.md: {file}")
         else:

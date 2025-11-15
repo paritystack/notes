@@ -67,6 +67,7 @@
     - [Graphs](data_structures/graphs.md)
     - [Heaps](data_structures/heaps.md)
     - [Tries](data_structures/tries.md)
+    - [Bloom Filter](data_structures/bloom_filter.md)
 
 * [Algorithms](algorithms/README.md)
     - [Big O](algorithms/big_o.md)
@@ -78,6 +79,8 @@
     - [Sorting](algorithms/sorting.md)
     - [Searching](algorithms/searching.md)
     - [Raft Consensus Algorithm](algorithms/raft.md)
+    - [Graph Algorithms](algorithms/graph_algorithms.md)
+    - [String Algorithms](algorithms/string_algorithms.md)
 
 - [Security](security/README.md)
     - [Hashing](security/hashing.md)

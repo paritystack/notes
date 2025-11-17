@@ -26,6 +26,8 @@
     - [Interview Questions](programming/interview_questions.md)
     - [Design Patterns](programming/design_patterns.md)
     - [Kotlin](programming/kotlin.md)
+    - [Concurrency](programming/concurrency.md)
+    - [Memory Management](programming/memory_management.md)
 
 - [Linux](linux/README.md)
     - [Networking](linux/networking.md)

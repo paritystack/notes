@@ -237,6 +237,7 @@
     - [Next.js](web_development/nextjs.md)
     - [Vue.js](web_development/vuejs.md)
     - [Svelte](web_development/svelte.md)
+    - [SvelteKit](web_development/sveltekit.md)
     - [Tailwind CSS](web_development/tailwind.md)
     - [Express.js](web_development/expressjs.md)
     - [NestJS](web_development/nestjs.md)

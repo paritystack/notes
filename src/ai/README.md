@@ -16,7 +16,23 @@ Learn the art and science of crafting effective prompts for Large Language Model
 - Few-shot and zero-shot learning
 - Advanced strategies for different tasks
 
-### 2. [Generative AI](./generative_ai.md)
+### 2. [Software Development Prompts](./software_dev_prompts.md)
+Comprehensive guide to AI-assisted software development with proven prompt patterns:
+- Code generation (functions, classes, APIs, full applications)
+- Debugging and troubleshooting strategies
+- Code review and quality assurance
+- Refactoring and optimization patterns
+- Testing (unit, integration, E2E)
+- Documentation generation
+- Database design and queries
+- API design (REST, GraphQL, gRPC)
+- DevOps and infrastructure as code
+- Security patterns and best practices
+- Migration and upgrade workflows
+- Git and version control operations
+- Meta-development (planning, architecture, estimation)
+
+### 3. [Generative AI](./generative_ai.md)
 Comprehensive overview of generative AI models and applications:
 - Text generation (GPT, Claude, PaLM)
 - Image generation (DALL-E, Midjourney, Stable Diffusion)
@@ -55,7 +71,7 @@ Comprehensive overview of Large Language Models:
 - Prompt engineering techniques
 - API usage and best practices
 
-### 7. [ComfyUI](./comfyui.md)
+### 8. [ComfyUI](./comfyui.md)
 Node-based interface for Stable Diffusion workflows:
 - Installation and setup
 - Workflow creation
@@ -63,7 +79,7 @@ Node-based interface for Stable Diffusion workflows:
 - Advanced generation techniques
 - Integration with other tools
 
-### 8. [Fine-Tuning](./fine_tuning.md)
+### 9. [Fine-Tuning](./fine_tuning.md)
 Model adaptation and customization:
 - Fine-tuning strategies and approaches
 - Parameter-efficient methods (LoRA, QLoRA)

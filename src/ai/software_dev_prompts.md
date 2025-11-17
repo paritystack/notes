@@ -1,0 +1,3121 @@
+# Software Development Prompts
+
+A comprehensive guide to effective prompts for software development tasks using AI assistants.
+
+## Table of Contents
+- [Introduction](#introduction)
+- [Code Generation Patterns](#code-generation-patterns)
+- [Code Understanding & Analysis](#code-understanding--analysis)
+- [Debugging & Troubleshooting](#debugging--troubleshooting)
+- [Code Review & Quality Assurance](#code-review--quality-assurance)
+- [Refactoring Patterns](#refactoring-patterns)
+- [Testing Patterns](#testing-patterns)
+- [Documentation Generation](#documentation-generation)
+- [Database & Data Operations](#database--data-operations)
+- [API Design & Development](#api-design--development)
+- [DevOps & Infrastructure](#devops--infrastructure)
+- [Migration & Upgrade Patterns](#migration--upgrade-patterns)
+- [Security Patterns](#security-patterns)
+- [Performance Optimization](#performance-optimization)
+- [Project Scaffolding](#project-scaffolding)
+- [Git & Version Control](#git--version-control)
+- [Common Development Operations](#common-development-operations)
+- [Meta-Development Prompts](#meta-development-prompts)
+- [Best Practices](#best-practices)
+
+## Introduction
+
+This guide provides proven prompt patterns specifically designed for software development tasks. Unlike general prompt engineering, these patterns are optimized for code generation, debugging, architecture design, and other software engineering activities.
+
+### Key Principles for Development Prompts
+
+1. **Specify the language and version** - "Python 3.11", "TypeScript 5.0", "Java 17"
+2. **Define dependencies and frameworks** - "using React 18", "with Django 4.2", "using Spring Boot 3"
+3. **Include context about the codebase** - Architecture, patterns, existing code
+4. **Specify output format** - Complete files, snippets, diffs, explanations
+5. **Define constraints** - Performance requirements, compatibility, security needs
+6. **Request error handling** - Edge cases, validation, exceptions
+7. **Ask for tests** - Unit tests, examples, usage demonstrations
+
+## Code Generation Patterns
+
+### 1. Function/Method Generation
+
+#### Basic Function Pattern
+
+```
+Generate a [language] function that [purpose].
+
+Requirements:
+- Function name: [name]
+- Parameters: [param1: type], [param2: type]
+- Return type: [type]
+- Handle edge cases: [cases]
+- Include type hints/annotations
+- Add docstring/comments
+- Include error handling
+
+Example usage: [expected usage]
+```
+
+**Example:**
+
+```
+Generate a Python function that validates email addresses using regex.
+
+Requirements:
+- Function name: validate_email
+- Parameters: email: str
+- Return type: bool
+- Handle edge cases: empty string, None, malformed emails
+- Include type hints
+- Add docstring with examples
+- Include comprehensive regex pattern
+
+Example usage:
+validate_email("user@example.com") # True
+validate_email("invalid.email") # False
+```
+
+#### Async Function Pattern
+
+```
+Create an async [language] function that [purpose].
+
+Requirements:
+- Use async/await syntax
+- Handle concurrent operations
+- Include timeout handling: [timeout]
+- Error handling: [strategy]
+- Return type: [type]
+- Dependencies: [libraries]
+
+Performance considerations:
+- [specific requirements]
+```
+
+**Example:**
+
+```
+Create an async Python function that fetches data from multiple APIs concurrently.
+
+Requirements:
+- Use aiohttp for HTTP requests
+- Handle 3+ concurrent API calls
+- Include 5-second timeout per request
+- Error handling: return None for failed requests
+- Return type: list[dict | None]
+- Include retry logic (max 3 attempts)
+
+Performance considerations:
+- Use connection pooling
+- Limit concurrent requests to 10
+```
+
+### 2. Class/Object Generation
+
+#### Class Design Pattern
+
+```
+Create a [language] class that [purpose].
+
+Structure:
+- Class name: [name]
+- Inherits from: [base classes]
+- Attributes: [list attributes with types]
+- Methods: [list methods with signatures]
+
+Requirements:
+- Design pattern: [pattern if applicable]
+- Encapsulation: [public/private members]
+- Include: __init__, __str__, __repr__ (Python) or toString, equals (Java)
+- Validation in constructor
+- Property getters/setters where appropriate
+- Type annotations/generics
+
+Include:
+- Docstrings/JavaDoc
+- Usage example
+- Unit test example
+```
+
+**Example:**
+
+```
+Create a Python class that represents a thread-safe cache with TTL (time-to-live).
+
+Structure:
+- Class name: TTLCache
+- Attributes: max_size: int, default_ttl: int, _cache: dict, _lock: Lock
+- Methods: get(key), set(key, value, ttl=None), delete(key), clear(), size()
+
+Requirements:
+- Design pattern: Singleton (optional mode)
+- Thread-safe using threading.Lock
+- Auto-cleanup of expired entries
+- LRU eviction when max_size reached
+- Type hints throughout
+
+Include:
+- Comprehensive docstrings
+- Usage examples
+- Unit test with threading
+```
+
+#### Interface/Protocol Pattern
+
+```
+Define a [language] interface/protocol for [purpose].
+
+Specification:
+- Name: [interface name]
+- Methods: [method signatures]
+- Properties: [property definitions]
+- Generic types: [if applicable]
+
+Also provide:
+- Implementation example
+- Use case documentation
+- Why this abstraction is useful
+```
+
+### 3. API Endpoint Generation
+
+#### REST API Endpoint Pattern
+
+```
+Create a [framework] REST API endpoint that [purpose].
+
+Specifications:
+- HTTP Method: [GET/POST/PUT/DELETE]
+- Route: [/api/v1/resource]
+- Request body: [schema]
+- Response: [schema with status codes]
+- Authentication: [method]
+- Authorization: [rules]
+
+Requirements:
+- Input validation
+- Error handling (400, 401, 403, 404, 500)
+- Logging
+- Rate limiting: [if needed]
+- Pagination: [if applicable]
+- OpenAPI/Swagger documentation
+
+Include:
+- Request/response examples
+- cURL examples
+- Unit tests
+```
+
+**Example:**
+
+```
+Create a FastAPI endpoint that creates a new user account.
+
+Specifications:
+- HTTP Method: POST
+- Route: /api/v1/users
+- Request body: {"email": str, "password": str, "name": str}
+- Response: {"id": int, "email": str, "name": str, "created_at": datetime} | error
+- Authentication: None (public endpoint)
+- Authorization: None
+
+Requirements:
+- Validate email format
+- Password: min 8 chars, 1 uppercase, 1 number
+- Hash password with bcrypt
+- Check for duplicate email
+- Error handling: 400 (invalid), 409 (duplicate), 500 (server error)
+- Log user creation events
+- Return 201 on success
+
+Include:
+- Pydantic models for request/response
+- Example requests
+- Unit tests with pytest
+```
+
+### 4. CLI Tool Generation
+
+#### CLI Application Pattern
+
+```
+Create a [language] CLI tool that [purpose].
+
+Structure:
+- Tool name: [name]
+- Commands: [list commands]
+- Options/Flags: [list with descriptions]
+- Arguments: [positional args]
+
+Requirements:
+- CLI framework: [argparse/click/typer/cobra]
+- Help text for all commands
+- Input validation
+- Error messages
+- Progress indicators (if long-running)
+- Config file support: [format]
+- Output format: [text/JSON/YAML]
+
+Include:
+- Installation instructions
+- Usage examples
+- Help output example
+```
+
+**Example:**
+
+```
+Create a Python CLI tool that analyzes code complexity.
+
+Structure:
+- Tool name: complexity-analyzer
+- Commands: analyze, report, config
+- Options: --path, --threshold, --format (json/text), --recursive
+- Arguments: [file or directory path]
+
+Requirements:
+- CLI framework: click
+- Calculate cyclomatic complexity
+- Support Python files initially
+- Colored output for terminal
+- Progress bar for multiple files
+- Save reports to file
+- Config file: .complexity.yaml
+
+Include:
+- setup.py for installation
+- Usage examples
+- Sample output
+```
+
+### 5. Full Application Scaffolding
+
+#### Web Application Pattern
+
+```
+Create a [framework] web application for [purpose].
+
+Architecture:
+- Framework: [framework + version]
+- Database: [database type]
+- Authentication: [method]
+- Frontend: [if applicable]
+
+Structure:
+- Project layout: [describe directory structure]
+- Key components: [list main modules]
+- Configuration: [config files needed]
+
+Features:
+1. [Feature 1 with details]
+2. [Feature 2 with details]
+3. [Feature 3 with details]
+
+Requirements:
+- Environment variables for config
+- Database migrations
+- Input validation
+- Error handling and logging
+- Security best practices
+- API documentation
+- Docker support
+
+Provide:
+- Complete file structure
+- Key files with implementation
+- README with setup instructions
+- requirements.txt / package.json
+- .env.example
+```
+
+**Example:**
+
+```
+Create a Flask REST API application for a task management system.
+
+Architecture:
+- Framework: Flask 3.0 with Flask-RESTful
+- Database: PostgreSQL with SQLAlchemy
+- Authentication: JWT with Flask-JWT-Extended
+- Frontend: None (API only)
+
+Structure:
+app/
+  __init__.py
+  models/
+  routes/
+  services/
+  utils/
+config.py
+tests/
+requirements.txt
+Dockerfile
+
+Features:
+1. User registration and authentication
+2. CRUD operations for tasks (title, description, status, due_date)
+3. Task assignment to users
+4. Filter and search tasks
+
+Requirements:
+- Environment variables: DATABASE_URL, JWT_SECRET, etc.
+- Alembic for migrations
+- Marshmallow for serialization
+- Error handling with proper HTTP codes
+- Request logging
+- CORS support
+- OpenAPI documentation with Flasgger
+- Docker and docker-compose
+
+Provide:
+- Complete project structure
+- Models, routes, and schemas
+- README with setup
+- requirements.txt
+- docker-compose.yml
+```
+
+## Code Understanding & Analysis
+
+### 1. Code Explanation Pattern
+
+```
+Explain this [language] code:
+
+[paste code here]
+
+Please provide:
+1. High-level purpose - What does this code do?
+2. Line-by-line explanation - Detailed walkthrough
+3. Key concepts - Important patterns or techniques used
+4. Potential issues - Edge cases, bugs, or improvements
+5. Use cases - When/why you'd use this
+
+Target audience: [beginner/intermediate/advanced]
+```
+
+### 2. Architecture Analysis Pattern
+
+```
+Analyze the architecture of this [type] system:
+
+[paste code/description]
+
+Analyze:
+1. Architectural pattern - MVC, microservices, layered, etc.
+2. Component relationships - How do parts interact?
+3. Data flow - How does data move through the system?
+4. Design patterns used - Singleton, Factory, Strategy, etc.
+5. Strengths - What's done well?
+6. Weaknesses - What could be improved?
+7. Scalability concerns
+8. Security considerations
+
+Provide:
+- Architecture diagram (in ASCII or mermaid syntax)
+- Recommendations for improvements
+```
+
+### 3. Dependency Analysis Pattern
+
+```
+Analyze the dependencies in this project:
+
+Project type: [language/framework]
+Dependency file: [package.json/requirements.txt/pom.xml]
+
+[paste dependency file]
+
+Provide:
+1. Dependency tree - Main dependencies and their sub-dependencies
+2. Version analysis - Outdated packages
+3. Security vulnerabilities - Known CVEs
+4. Redundancies - Overlapping functionality
+5. Size analysis - Largest dependencies
+6. Recommendations - Packages to update, remove, or add
+```
+
+### 4. Complexity Analysis Pattern
+
+```
+Analyze the complexity of this code:
+
+[paste code]
+
+Calculate:
+1. Cyclomatic complexity - Number of independent paths
+2. Cognitive complexity - How hard to understand
+3. Code smells - Anti-patterns present
+4. Maintainability index
+5. Lines of code metrics
+
+Recommend:
+- Refactoring opportunities
+- Simplification strategies
+- Functions to split
+- Abstractions to introduce
+```
+
+## Debugging & Troubleshooting
+
+### 1. Error Analysis Pattern
+
+```
+Help me debug this [language] error:
+
+Error message:
+[paste complete error with stack trace]
+
+Code:
+[paste relevant code]
+
+Context:
+- What I'm trying to do: [description]
+- Environment: [OS, version, dependencies]
+- What I've tried: [list attempts]
+
+Please provide:
+1. Root cause - Why is this happening?
+2. Explanation - What does the error mean?
+3. Solution - Step-by-step fix
+4. Prevention - How to avoid this in future
+5. Related issues - Similar problems to watch for
+```
+
+**Example:**
+
+```
+Help me debug this Python error:
+
+Error message:
+TypeError: 'NoneType' object is not subscriptable
+  File "app.py", line 45, in process_user
+    return user['name']
+
+Code:
+def get_user(user_id):
+    users = {1: {"name": "Alice"}, 2: {"name": "Bob"}}
+    return users.get(user_id)
+
+def process_user(user_id):
+    user = get_user(user_id)
+    return user['name']  # Line 45
+
+Context:
+- Trying to fetch and process user data
+- Python 3.11
+- Error occurs when user_id=3 (doesn't exist)
+- Tried: adding print statements
+
+Please provide complete analysis and fix.
+```
+
+### 2. Performance Debugging Pattern
+
+```
+Help me debug performance issues in this [language] code:
+
+Code:
+[paste code]
+
+Performance issues:
+- Current performance: [metrics]
+- Expected performance: [metrics]
+- Test conditions: [data size, environment]
+
+Profiling data (if available):
+[paste profiling output]
+
+Please analyze:
+1. Bottlenecks - Where is time being spent?
+2. Algorithm complexity - Big O analysis
+3. Resource usage - Memory, CPU, I/O
+4. Optimization opportunities
+5. Trade-offs - What are the options?
+
+Provide:
+- Optimized code
+- Before/after comparison
+- Performance benchmarks
+```
+
+### 3. Bug Reproduction Pattern
+
+```
+Help me create a minimal reproducible example for this bug:
+
+Bug description:
+[describe the bug]
+
+Full code:
+[paste relevant code]
+
+Expected behavior:
+[what should happen]
+
+Actual behavior:
+[what actually happens]
+
+Environment:
+- [language/framework versions]
+- [OS and relevant system info]
+
+Create:
+1. Minimal code example that reproduces the bug
+2. Step-by-step reproduction steps
+3. Expected vs actual output
+4. Environment setup instructions
+5. Potential workarounds
+```
+
+### 4. Root Cause Analysis Pattern
+
+```
+Perform root cause analysis for this issue:
+
+Symptom:
+[describe the problem]
+
+Timeline:
+- [when did it start?]
+- [what changed?]
+
+Logs:
+[paste relevant logs]
+
+System info:
+- Architecture: [description]
+- Components involved: [list]
+- Recent changes: [deployments, config changes]
+
+Use the "5 Whys" technique:
+1. Why did [symptom] happen?
+2. Why did [cause1] happen?
+3. Why did [cause2] happen?
+4. Why did [cause3] happen?
+5. Why did [cause4] happen?
+
+Provide:
+- Root cause identification
+- Immediate fix
+- Long-term prevention strategy
+- Monitoring recommendations
+```
+
+## Code Review & Quality Assurance
+
+### 1. Comprehensive Code Review Pattern
+
+```
+Review this [language] code for production readiness:
+
+[paste code]
+
+Context:
+- Purpose: [what does this code do?]
+- Framework: [if applicable]
+- Target deployment: [production environment]
+
+Review for:
+1. Functionality - Does it work correctly?
+2. Code quality - Is it clean and maintainable?
+3. Performance - Any performance issues?
+4. Security - Any vulnerabilities?
+5. Error handling - Are errors handled properly?
+6. Testing - Are there adequate tests?
+7. Documentation - Is it well-documented?
+8. Best practices - Does it follow conventions?
+9. Edge cases - Are edge cases handled?
+10. Scalability - Will it scale?
+
+Provide:
+- Rating (1-10) for each category
+- Specific issues with line numbers
+- Recommended fixes with code examples
+- Priority (critical/high/medium/low) for each issue
+```
+
+### 2. Security Review Pattern
+
+```
+Perform a security review of this [language] code:
+
+[paste code]
+
+Context:
+- Type: [web app/API/CLI/library]
+- User input sources: [list]
+- Data handling: [what sensitive data is processed]
+- Dependencies: [key libraries used]
+
+Check for:
+1. OWASP Top 10 vulnerabilities
+   - Injection (SQL, command, etc.)
+   - Broken authentication
+   - Sensitive data exposure
+   - XML external entities
+   - Broken access control
+   - Security misconfiguration
+   - XSS
+   - Insecure deserialization
+   - Components with known vulnerabilities
+   - Insufficient logging
+2. Input validation
+3. Output encoding
+4. Authentication/authorization
+5. Cryptography usage
+6. Secrets management
+7. Error message information disclosure
+
+Provide:
+- Vulnerability list with severity
+- Proof of concept exploits
+- Mitigation strategies with code
+- Security best practice recommendations
+```
+
+### 3. Performance Review Pattern
+
+```
+Review this [language] code for performance:
+
+[paste code]
+
+Context:
+- Expected load: [requests/second, data size, etc.]
+- Current performance: [metrics]
+- Performance requirements: [SLAs, targets]
+- Environment: [hardware, infrastructure]
+
+Analyze:
+1. Algorithm complexity - Big O notation
+2. Database queries - N+1 problems, missing indexes
+3. Network calls - Unnecessary requests, parallelization
+4. Memory usage - Leaks, excessive allocations
+5. Caching opportunities
+6. Lazy loading vs eager loading
+7. Batch processing opportunities
+8. Resource cleanup
+
+Provide:
+- Performance bottlenecks with metrics
+- Optimized code examples
+- Expected improvements
+- Monitoring recommendations
+```
+
+### 4. Best Practices Review Pattern
+
+```
+Review this [language] code for best practices:
+
+[paste code]
+
+Language/Framework: [specific version]
+Style guide: [PEP 8, Airbnb, Google, etc.]
+
+Check for:
+1. Naming conventions - Variables, functions, classes
+2. Code structure - Organization, modularity
+3. DRY principle - Repeated code
+4. SOLID principles - Single responsibility, etc.
+5. Error handling patterns
+6. Logging practices
+7. Comments and documentation
+8. Type hints/annotations
+9. Import organization
+10. Code formatting
+
+Provide:
+- Issues list with examples
+- Refactored code following best practices
+- Style guide violations
+- Linter configuration recommendations
+```
+
+## Refactoring Patterns
+
+### 1. Code Modernization Pattern
+
+```
+Refactor this [old version] code to [new version]:
+
+Current code:
+[paste legacy code]
+
+Context:
+- Current version: [language/framework version]
+- Target version: [new version]
+- Breaking changes: [known issues]
+
+Update:
+1. Deprecated APIs - Use modern equivalents
+2. New language features - Use latest syntax
+3. Performance improvements - Leverage new optimizations
+4. Type annotations - Add modern type hints
+5. Async/await - If applicable
+6. Modern patterns - Update design patterns
+
+Requirements:
+- Maintain backward compatibility: [yes/no]
+- Update tests
+- Document changes
+- Migration guide for consumers
+
+Provide:
+- Refactored code
+- Side-by-side comparison
+- List of changes
+- Testing strategy
+```
+
+**Example:**
+
+```
+Refactor this Python 2.7 code to Python 3.11:
+
+Current code:
+class UserManager:
+    def get_user(self, user_id):
+        users = {1: "Alice", 2: "Bob"}
+        return users.get(user_id, None)
+
+    def get_all_users(self):
+        return self.users.values()
+
+    def filter_users(self, predicate):
+        return filter(predicate, self.users.values())
+
+Update to use:
+- Type hints
+- f-strings
+- Data classes
+- Modern dictionary methods
+- Type checking with mypy
+
+Provide modernized code with explanations.
+```
+
+### 2. Extract Function/Class Pattern
+
+```
+Refactor this code by extracting [functions/classes]:
+
+[paste code with duplication or long methods]
+
+Goals:
+- Reduce duplication
+- Improve readability
+- Enhance testability
+- Single responsibility principle
+
+Identify:
+1. Repeated code blocks - Extract to functions
+2. Long methods - Split into smaller functions
+3. Mixed concerns - Separate responsibilities
+4. Complex logic - Extract to helper methods
+
+Provide:
+- Refactored code with extracted components
+- Before/after comparison
+- Unit tests for new functions
+- Documentation for new components
+```
+
+### 3. Design Pattern Introduction Pattern
+
+```
+Refactor this code to use the [pattern name] pattern:
+
+Current code:
+[paste code]
+
+Target pattern: [Strategy/Factory/Observer/etc.]
+
+Reasoning:
+- Why this pattern: [benefits]
+- Problem it solves: [current issues]
+
+Requirements:
+- Maintain existing functionality
+- Improve extensibility
+- Make code more testable
+- Clear separation of concerns
+
+Provide:
+- UML/diagram of new design
+- Refactored code
+- Usage examples
+- How to extend in the future
+```
+
+### 4. Simplification Pattern
+
+```
+Simplify this overly complex code:
+
+[paste complex code]
+
+Complexity issues:
+- Cyclomatic complexity: [number]
+- Nested levels: [depth]
+- Lines of code: [count]
+
+Simplify by:
+1. Reducing nesting - Early returns, guard clauses
+2. Extracting methods - Break into smaller pieces
+3. Removing duplication - DRY principle
+4. Simplifying conditionals - Reduce boolean logic
+5. Using standard library - Replace custom code
+
+Goals:
+- Reduce complexity by 50%
+- Improve readability
+- Maintain functionality
+- Add tests
+
+Provide:
+- Simplified code
+- Complexity metrics before/after
+- Explanation of simplifications
+```
+
+## Testing Patterns
+
+### 1. Unit Test Generation Pattern
+
+```
+Generate unit tests for this [language] code:
+
+Code to test:
+[paste code]
+
+Test framework: [pytest/jest/junit/etc.]
+Coverage goal: [percentage]
+
+Requirements:
+1. Test all public methods
+2. Test edge cases:
+   - Null/None inputs
+   - Empty collections
+   - Boundary values
+   - Invalid inputs
+3. Test error conditions
+4. Use mocking for dependencies: [list dependencies]
+5. Include setup/teardown
+6. Descriptive test names
+
+Provide:
+- Complete test file
+- Test organization (classes/describe blocks)
+- Fixtures/setup data
+- Mock configurations
+- Expected coverage report
+```
+
+**Example:**
+
+```
+Generate pytest unit tests for this Python code:
+
+Code to test:
+class Calculator:
+    def divide(self, a: float, b: float) -> float:
+        if b == 0:
+            raise ValueError("Cannot divide by zero")
+        return a / b
+
+    def sqrt(self, x: float) -> float:
+        if x < 0:
+            raise ValueError("Cannot calculate square root of negative number")
+        return x ** 0.5
+
+Test framework: pytest
+Coverage goal: 100%
+
+Include:
+- Parametrized tests for multiple inputs
+- Exception testing
+- Fixtures for Calculator instance
+- Edge cases: zero, negative, large numbers
+- Docstrings for tests
+```
+
+### 2. Integration Test Pattern
+
+```
+Generate integration tests for this [system]:
+
+System description:
+[describe the system and components]
+
+Components to test:
+1. [Component 1]
+2. [Component 2]
+3. [Component 3]
+
+Integration points:
+- [How components interact]
+
+Test framework: [framework]
+
+Scenarios to test:
+1. Happy path - Normal operation
+2. Error handling - Component failures
+3. Data flow - End-to-end data processing
+4. External dependencies - API calls, database
+5. Performance - Under load
+
+Requirements:
+- Test environment setup
+- Mock external services: [list]
+- Test data fixtures
+- Cleanup after tests
+- Parallel execution safe
+
+Provide:
+- Integration test suite
+- Setup/teardown code
+- Mock configurations
+- Test data
+- Docker compose for test environment
+```
+
+### 3. End-to-End Test Pattern
+
+```
+Generate E2E tests for this [application type]:
+
+Application: [description]
+Test framework: [Cypress/Playwright/Selenium]
+
+User flows to test:
+1. [Flow 1: e.g., user registration]
+2. [Flow 2: e.g., login and purchase]
+3. [Flow 3: e.g., error handling]
+
+For each flow:
+- Step-by-step actions
+- Assertions at each step
+- Screenshot on failure
+- Handle async operations
+- Test data management
+
+Requirements:
+- Page object model
+- Reusable components
+- Wait strategies
+- Cross-browser: [browsers to test]
+- Mobile viewport testing
+- Accessibility checks
+
+Provide:
+- Complete E2E test suite
+- Page objects
+- Helper utilities
+- Test configuration
+- CI/CD integration
+```
+
+### 4. Test Data Generation Pattern
+
+```
+Generate test data for [type of data]:
+
+Schema:
+[paste schema/model definition]
+
+Requirements:
+1. Volume: [number of records]
+2. Realistic data - Valid formats, distributions
+3. Edge cases - Boundary values, special characters
+4. Relationships - Foreign keys, associations
+5. Variety - Different categories, types
+
+Constraints:
+- [Any business rules]
+- [Data validation rules]
+- [Uniqueness requirements]
+
+Format: [JSON/SQL/CSV/fixtures]
+
+Provide:
+- Test data in specified format
+- Data generation script
+- Seed data for database
+- Factory/builder functions
+```
+
+**Example:**
+
+```
+Generate test data for a user database:
+
+Schema:
+User:
+  id: integer (primary key)
+  email: string (unique, valid email)
+  username: string (3-20 chars, alphanumeric)
+  age: integer (18-100)
+  created_at: datetime
+  is_active: boolean
+
+Requirements:
+1. Volume: 100 users
+2. Realistic emails and usernames
+3. Age distribution: 60% between 25-45, 40% other
+4. Created dates: last 2 years
+5. 90% active, 10% inactive
+
+Edge cases:
+- 5 users with min username length (3 chars)
+- 5 users with max username length (20 chars)
+- 5 users at boundary ages (18, 100)
+
+Format: JSON array and Python factory using Faker
+
+Provide:
+- users.json file
+- factory.py with Faker
+- Script to populate database
+```
+
+## Documentation Generation
+
+### 1. Code Comment Pattern
+
+```
+Add comprehensive comments to this code:
+
+[paste code]
+
+Comment style: [language-specific: docstring/JSDoc/JavaDoc]
+
+Include:
+1. Module/file header - Purpose, author, version
+2. Class docstrings - Purpose, attributes, usage example
+3. Method docstrings - Purpose, parameters, returns, raises, examples
+4. Inline comments - Complex logic explanation
+5. Type hints/annotations - If not present
+6. Usage examples - In docstrings
+
+Requirements:
+- Follow [style guide]
+- Clear and concise
+- Explain "why" not "what"
+- Include edge cases
+- Document assumptions
+
+Provide:
+- Fully commented code
+- Documentation examples
+```
+
+### 2. API Documentation Pattern
+
+```
+Generate API documentation for this [framework] API:
+
+Code:
+[paste API routes/endpoints]
+
+Documentation format: [OpenAPI/Swagger/API Blueprint/Markdown]
+
+For each endpoint document:
+1. HTTP method and path
+2. Description
+3. Authentication requirements
+4. Request parameters:
+   - Path parameters
+   - Query parameters
+   - Request body (with schema)
+5. Response:
+   - Success responses (with schema)
+   - Error responses (with codes)
+6. Example requests (cURL, JavaScript, Python)
+7. Example responses
+8. Rate limiting
+9. Versioning info
+
+Provide:
+- Complete API documentation
+- Interactive examples
+- Schema definitions
+- Authentication guide
+```
+
+### 3. README Generation Pattern
+
+```
+Generate a comprehensive README.md for this project:
+
+Project info:
+- Name: [project name]
+- Purpose: [what it does]
+- Language/Framework: [stack]
+- Type: [library/CLI/web app/etc.]
+
+Include sections:
+1. Title and badges - Build status, coverage, version, license
+2. Description - What it is, key features
+3. Demo - Screenshots, GIFs, or live demo link
+4. Installation - Step-by-step setup
+5. Quick Start - Simple usage example
+6. Usage - Detailed usage with examples
+7. Configuration - Environment variables, config files
+8. API Reference - If applicable
+9. Examples - Multiple use cases
+10. Development - How to contribute
+11. Testing - How to run tests
+12. Deployment - Production deployment guide
+13. Built With - Dependencies and tools
+14. Contributing - Contribution guidelines
+15. License - License type
+16. Authors - Credits
+17. Acknowledgments
+
+Provide:
+- Complete README.md
+- Well-formatted markdown
+- Code examples with syntax highlighting
+- Links to relevant docs
+```
+
+### 4. Architecture Documentation Pattern
+
+```
+Generate architecture documentation for this system:
+
+System: [name and purpose]
+Type: [microservices/monolith/serverless/etc.]
+
+Include:
+1. Overview - High-level description
+2. Architecture diagram - In Mermaid or ASCII
+3. Components - Detailed component descriptions
+4. Data flow - How data moves through the system
+5. Technology stack - All technologies used
+6. Design decisions - Why certain choices were made
+7. Deployment architecture - Infrastructure
+8. Security architecture - Auth, encryption, etc.
+9. Scalability approach - How to scale
+10. Monitoring and observability - Logs, metrics, traces
+
+Provide:
+- Complete architecture document
+- Diagrams in Mermaid format
+- Decision records (ADRs)
+- Runbooks for operations
+```
+
+## Database & Data Operations
+
+### 1. SQL Query Generation Pattern
+
+```
+Generate a SQL query that [purpose]:
+
+Database: [PostgreSQL/MySQL/SQLite/etc.]
+Schema:
+[paste table schemas or describe tables]
+
+Requirements:
+- [Specific conditions]
+- [Join requirements]
+- [Aggregations needed]
+- [Sorting/ordering]
+- [Limit/offset]
+- Performance: [indexes, optimization]
+
+Provide:
+- SQL query
+- Explanation of query logic
+- Expected result format
+- Performance considerations
+- Alternative approaches
+```
+
+**Example:**
+
+```
+Generate a SQL query that finds the top 5 customers by total purchase amount in the last 30 days:
+
+Database: PostgreSQL 14
+
+Schema:
+customers:
+  id (integer, primary key)
+  name (varchar)
+  email (varchar)
+  created_at (timestamp)
+
+orders:
+  id (integer, primary key)
+  customer_id (integer, foreign key)
+  total_amount (decimal)
+  order_date (timestamp)
+  status (varchar)
+
+Requirements:
+- Only completed orders (status = 'completed')
+- Last 30 days from current date
+- Group by customer
+- Order by total purchase amount descending
+- Include customer name and email
+- Show total number of orders per customer
+
+Provide optimized query with indexes.
+```
+
+### 2. Database Schema Design Pattern
+
+```
+Design a database schema for [application purpose]:
+
+Requirements:
+1. Entities: [list main entities]
+2. Relationships: [describe relationships]
+3. Constraints: [business rules]
+4. Scale: [expected data volume]
+
+Database: [relational/document/graph]
+
+Design considerations:
+- Normalization level: [1NF/2NF/3NF/denormalized]
+- Indexing strategy
+- Partitioning: [if needed]
+- Soft delete vs hard delete
+- Audit trail: [yes/no]
+- Multi-tenancy: [yes/no]
+
+Provide:
+- Entity-Relationship Diagram (ERD) in text/mermaid
+- CREATE TABLE statements with:
+  - Primary keys
+  - Foreign keys
+  - Indexes
+  - Constraints
+- Sample data
+- Common query patterns
+- Migration strategy
+```
+
+**Example:**
+
+```
+Design a database schema for a blog platform:
+
+Requirements:
+1. Entities: Users, Posts, Comments, Tags, Categories
+2. Relationships:
+   - Users write Posts and Comments
+   - Posts have multiple Tags and one Category
+   - Comments belong to Posts and can be nested (replies)
+3. Constraints:
+   - Email unique per user
+   - Post slugs unique
+   - Soft delete for posts and comments
+4. Scale: 100K users, 1M posts, 10M comments
+
+Database: PostgreSQL
+
+Design considerations:
+- Normalize to 3NF
+- Full-text search on posts
+- Audit trail: yes (created_at, updated_at)
+- Support for drafts and published states
+
+Provide complete schema with indexes.
+```
+
+### 3. Database Migration Pattern
+
+```
+Create a database migration for [change description]:
+
+Current state:
+[describe current schema or paste CREATE statements]
+
+Desired state:
+[describe new schema]
+
+Migration framework: [Alembic/Liquibase/Flyway/Django/etc.]
+
+Changes:
+1. [Change 1: add column, modify, etc.]
+2. [Change 2]
+3. [Change 3]
+
+Requirements:
+- Zero-downtime: [yes/no]
+- Data transformation: [if needed]
+- Rollback strategy
+- Handle existing data
+- Validate after migration
+
+Provide:
+- Up migration
+- Down migration (rollback)
+- Data migration scripts
+- Verification queries
+- Deployment steps
+```
+
+### 4. ORM Model Pattern
+
+```
+Create [ORM] models for [purpose]:
+
+ORM: [SQLAlchemy/Sequelize/Entity Framework/etc.]
+Database: [database type]
+
+Models needed:
+1. [Model 1 with fields]
+2. [Model 2 with fields]
+3. [Model 3 with fields]
+
+Relationships:
+- [Describe relationships]
+
+Requirements:
+- Validation rules: [describe]
+- Indexes: [important queries]
+- Methods: [custom model methods]
+- Properties: [computed properties]
+- Serialization: [to JSON/dict]
+- Hooks/signals: [before save, after create, etc.]
+
+Provide:
+- Complete model definitions
+- Relationship configurations
+- Custom methods and properties
+- Example usage
+- Query examples
+```
+
+**Example:**
+
+```
+Create SQLAlchemy models for an e-commerce store:
+
+ORM: SQLAlchemy 2.0 with async
+Database: PostgreSQL
+
+Models needed:
+1. Product: id, name, description, price, stock_quantity, category_id
+2. Category: id, name, slug, parent_id (self-referential)
+3. Order: id, user_id, total_amount, status, created_at
+4. OrderItem: id, order_id, product_id, quantity, price
+
+Relationships:
+- Product belongs to Category (many-to-one)
+- Category can have parent Category (self-referential)
+- Order has many OrderItems (one-to-many)
+- OrderItem references Product and Order (many-to-one each)
+
+Requirements:
+- Validation: price > 0, stock_quantity >= 0
+- Indexes: product name, category slug
+- Methods: Product.is_in_stock(), Order.calculate_total()
+- Properties: Category.full_path
+- Serialization: to_dict() method
+- Hooks: Update order total_amount when items change
+
+Provide complete async SQLAlchemy 2.0 models.
+```
+
+## API Design & Development
+
+### 1. REST API Design Pattern
+
+```
+Design a REST API for [purpose]:
+
+Resources:
+1. [Resource 1]
+2. [Resource 2]
+3. [Resource 3]
+
+For each resource specify:
+- Endpoints (GET, POST, PUT, PATCH, DELETE)
+- URL structure
+- Request/response schemas
+- Status codes
+- Authentication/authorization
+
+Design principles:
+- RESTful conventions
+- Resource naming (plural nouns)
+- Nested resources: [strategy]
+- Versioning: [URL/header/none]
+- HATEOAS: [yes/no]
+- Pagination: [offset/cursor]
+- Filtering, sorting, searching
+- Rate limiting
+
+Provide:
+- Complete API specification
+- OpenAPI/Swagger definition
+- Example requests/responses
+- Error response format
+- Authentication flow
+```
+
+**Example:**
+
+```
+Design a REST API for a library management system:
+
+Resources:
+1. Books
+2. Authors
+3. Members
+4. Loans (book borrowing)
+
+Design:
+- RESTful endpoints for CRUD
+- Nested: /authors/:id/books
+- Versioning: URL (/api/v1/)
+- Pagination: cursor-based
+- Authentication: JWT
+- Authorization: Role-based (admin, librarian, member)
+
+Special endpoints:
+- POST /books/:id/borrow (create loan)
+- POST /loans/:id/return
+- GET /books/available
+- GET /members/:id/loans
+
+Provide:
+- Full OpenAPI 3.0 specification
+- All endpoints with details
+- Authentication flows
+- Example cURL requests
+```
+
+### 2. GraphQL Schema Pattern
+
+```
+Design a GraphQL schema for [purpose]:
+
+Types:
+1. [Type 1 with fields]
+2. [Type 2 with fields]
+3. [Type 3 with fields]
+
+Queries:
+- [List main queries]
+
+Mutations:
+- [List main mutations]
+
+Subscriptions:
+- [If real-time updates needed]
+
+Design considerations:
+- Nullable vs non-nullable fields
+- Pagination: relay/offset
+- Input types for mutations
+- Error handling strategy
+- N+1 query prevention (DataLoader)
+- Authorization: [field-level/query-level]
+- File uploads: [if needed]
+
+Provide:
+- Complete GraphQL schema
+- Resolver structure
+- Example queries and mutations
+- DataLoader implementations
+```
+
+### 3. gRPC Service Pattern
+
+```
+Design a gRPC service for [purpose]:
+
+Service: [service name]
+
+RPCs (methods):
+1. [Method 1]: [unary/server streaming/client streaming/bidirectional]
+2. [Method 2]
+3. [Method 3]
+
+Messages (data structures):
+- [List message types]
+
+Requirements:
+- Protocol buffers syntax: proto3
+- Error handling: status codes
+- Metadata: [authentication, tracing]
+- Deadlines/timeouts
+- Interceptors: [logging, auth]
+
+Provide:
+- Complete .proto file
+- Service implementation skeleton
+- Client usage example
+- Error handling patterns
+- Testing approach
+```
+
+### 4. API Client Library Pattern
+
+```
+Create an API client library for [API name]:
+
+Language: [target language]
+API type: [REST/GraphQL/gRPC]
+
+Features:
+1. Authentication handling - [method]
+2. Request/response models - Typed
+3. Error handling - Custom exceptions
+4. Retry logic - Exponential backoff
+5. Rate limiting - Client-side throttling
+6. Pagination - Automatic handling
+7. Timeout configuration
+8. Logging/debugging
+9. Async support - [if applicable]
+10. Testing utilities - Mocking
+
+Structure:
+- Main client class
+- Resource classes (users, posts, etc.)
+- Model classes
+- Exception classes
+- Utilities
+
+Provide:
+- Complete client library code
+- README with examples
+- Type definitions
+- Unit tests
+- Publishing setup (PyPI, npm, etc.)
+```
+
+## DevOps & Infrastructure
+
+### 1. Dockerfile Pattern
+
+```
+Create a Dockerfile for [application type]:
+
+Application:
+- Language/Runtime: [language and version]
+- Framework: [if applicable]
+- Dependencies: [key dependencies]
+
+Requirements:
+- Base image: [specify or ask for recommendation]
+- Multi-stage build: [yes/no]
+- Security: non-root user, minimal attack surface
+- Size optimization: minimize layers and size
+- Environment variables: [list]
+- Health check: [command]
+- Build-time arguments: [if needed]
+
+Production considerations:
+- Cache dependencies separately
+- Use .dockerignore
+- Security scanning
+- Layer optimization
+
+Provide:
+- Complete Dockerfile
+- .dockerignore file
+- docker-compose.yml (if needed)
+- Build and run commands
+- Multi-stage explanation
+```
+
+**Example:**
+
+```
+Create a Dockerfile for a FastAPI Python application:
+
+Application:
+- Language: Python 3.11
+- Framework: FastAPI with uvicorn
+- Dependencies: requirements.txt with 15 packages
+
+Requirements:
+- Base image: python:3.11-slim
+- Multi-stage build: yes (build deps separately)
+- Security: run as non-root user
+- Health check: HTTP GET /health
+- Size optimization: remove build dependencies
+- Environment variables: DATABASE_URL, SECRET_KEY, LOG_LEVEL
+
+Provide:
+- Production-ready Dockerfile
+- Development docker-compose.yml
+- .dockerignore
+- Build commands for both dev and prod
+```
+
+### 2. CI/CD Pipeline Pattern
+
+```
+Create a CI/CD pipeline for [application]:
+
+Platform: [GitHub Actions/GitLab CI/Jenkins/CircleCI]
+Application: [description]
+
+Pipeline stages:
+1. Build - Compile/install dependencies
+2. Test - Run unit, integration tests
+3. Lint - Code quality checks
+4. Security - Vulnerability scanning
+5. Build artifact - Docker image/binary
+6. Deploy - [environments]
+
+Requirements:
+- Triggers: [on push, PR, tag]
+- Branches: [main, develop, feature/*]
+- Environment variables: [secrets management]
+- Caching: dependencies, build cache
+- Parallel jobs: [where applicable]
+- Matrix builds: [different versions/platforms]
+- Deployment strategy: [blue-green/rolling/canary]
+
+Provide:
+- Complete pipeline configuration
+- Environment setup
+- Secrets management approach
+- Deployment scripts
+- Rollback procedure
+```
+
+**Example:**
+
+```
+Create a GitHub Actions pipeline for a Node.js web app:
+
+Application: Express.js + React frontend
+
+Pipeline stages:
+1. Install dependencies (npm ci)
+2. Lint (ESLint)
+3. Test (Jest with coverage)
+4. Build (webpack production build)
+5. Build Docker image
+6. Push to registry (Docker Hub)
+7. Deploy to Kubernetes
+
+Requirements:
+- Triggers: push to main, PRs
+- Matrix: Node 18, 20
+- Cache: node_modules
+- Coverage reporting: Codecov
+- Security: npm audit, Snyk
+- Deploy to: staging (on main), production (on tag)
+
+Provide complete .github/workflows/ci.yml
+```
+
+### 3. Infrastructure as Code Pattern
+
+```
+Create infrastructure as code for [infrastructure description]:
+
+Tool: [Terraform/CloudFormation/Pulumi/Ansible]
+Provider: [AWS/Azure/GCP/etc.]
+
+Resources needed:
+1. [Resource 1: e.g., EC2 instances]
+2. [Resource 2: e.g., RDS database]
+3. [Resource 3: e.g., Load balancer]
+
+Architecture:
+- [Describe architecture]
+
+Requirements:
+- Environment: [dev/staging/prod]
+- High availability: [yes/no]
+- Auto-scaling: [if needed]
+- Networking: VPC, subnets, security groups
+- Secrets management: [solution]
+- State management: [backend]
+- Modules: reusable components
+
+Provide:
+- Complete IaC configuration
+- Variables file
+- Outputs
+- README with usage
+- Cost estimation
+```
+
+### 4. Kubernetes Manifests Pattern
+
+```
+Create Kubernetes manifests for [application]:
+
+Application: [description]
+Components:
+1. [Component 1]
+2. [Component 2]
+3. [Component 3]
+
+Manifests needed:
+- Deployment (replicas, strategy, resources)
+- Service (type, ports)
+- ConfigMap (configuration)
+- Secret (sensitive data)
+- Ingress (routing)
+- HorizontalPodAutoscaler (if applicable)
+- PersistentVolumeClaim (if stateful)
+
+Requirements:
+- Namespace: [name]
+- Resource limits: [CPU, memory]
+- Health checks: liveness, readiness
+- Rolling update strategy
+- Environment: [dev/prod]
+- Labels and annotations
+- Security context
+
+Provide:
+- All manifest YAML files
+- kustomization.yaml (for customization)
+- Helm chart (alternative)
+- Deployment instructions
+```
+
+## Migration & Upgrade Patterns
+
+### 1. Language Migration Pattern
+
+```
+Migrate this code from [source language] to [target language]:
+
+Source code:
+[paste code]
+
+Context:
+- Purpose: [what the code does]
+- Dependencies: [libraries used]
+- Constraints: [any specific requirements]
+
+Migration requirements:
+1. Maintain functionality - Exact same behavior
+2. Use idiomatic [target language] - Not a direct translation
+3. Leverage [target language] features - Best practices
+4. Update patterns - Modern approaches
+5. Dependencies - Equivalent libraries
+6. Type safety - Add type hints/annotations
+7. Error handling - [target language] conventions
+8. Testing - Equivalent tests
+
+Provide:
+- Migrated code
+- Dependency mapping (old → new)
+- Key differences explained
+- Testing strategy
+- Migration checklist
+```
+
+**Example:**
+
+```
+Migrate this JavaScript/Node.js code to Python:
+
+Source code:
+const express = require('express');
+const app = express();
+
+app.get('/users/:id', async (req, res) => {
+  try {
+    const user = await db.getUser(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(3000, () => console.log('Server started'));
+
+Context:
+- REST API endpoint
+- Express.js framework
+- Async database calls
+
+Target: FastAPI with async/await
+Use: Pydantic models, proper HTTP exceptions, type hints
+
+Provide complete FastAPI equivalent.
+```
+
+### 2. Framework Upgrade Pattern
+
+```
+Upgrade this code from [framework version A] to [framework version B]:
+
+Current code:
+[paste code]
+
+Current version: [version]
+Target version: [version]
+
+Breaking changes in target version:
+[list known breaking changes or ask AI to identify]
+
+Upgrade requirements:
+1. Update deprecated APIs
+2. Fix breaking changes
+3. Leverage new features
+4. Update configuration
+5. Update dependencies
+6. Maintain backward compatibility: [yes/no]
+7. Update tests
+
+Provide:
+- Upgraded code
+- Change summary
+- Deprecation warnings addressed
+- New features utilized
+- Testing strategy
+- Deployment considerations
+```
+
+### 3. Database Migration Pattern
+
+```
+Migrate from [source database] to [target database]:
+
+Current schema:
+[paste schema or describe]
+
+Source DB: [database type and version]
+Target DB: [database type and version]
+
+Data volume: [number of records]
+
+Migration requirements:
+1. Schema conversion - Handle type differences
+2. Data migration - ETL process
+3. Query conversion - Update application queries
+4. Index migration - Performance maintained
+5. Constraint migration - Foreign keys, checks
+6. Zero downtime: [yes/no]
+7. Rollback strategy
+
+Differences to handle:
+- [List known differences between databases]
+
+Provide:
+- Target schema
+- Migration scripts
+- Data transformation logic
+- Query conversion examples
+- Testing approach
+- Cutover plan
+```
+
+### 4. API Version Migration Pattern
+
+```
+Create a migration guide from API v[old] to v[new]:
+
+Old API:
+[describe or paste specification]
+
+New API:
+[describe changes]
+
+Breaking changes:
+1. [Change 1]
+2. [Change 2]
+3. [Change 3]
+
+Provide:
+1. Detailed migration guide
+2. Side-by-side comparison
+3. Code examples (before/after)
+4. Client library updates
+5. Deprecated endpoint mapping
+6. New endpoint documentation
+7. Backwards compatibility options
+8. Timeline for deprecation
+9. Testing checklist
+```
+
+## Security Patterns
+
+### 1. Secure Authentication Implementation
+
+```
+Implement secure [authentication method] for [application type]:
+
+Method: [JWT/OAuth2/SAML/session-based]
+Framework: [framework]
+
+Requirements:
+1. User registration - Email/password with validation
+2. Login - Secure credential verification
+3. Token/session management - Generation, storage, refresh
+4. Logout - Proper cleanup
+5. Password security - Hashing (bcrypt/argon2), salt
+6. Password reset - Secure flow
+7. Multi-factor authentication - [if needed]
+8. Account lockout - Brute force protection
+9. Rate limiting - Login attempts
+
+Security considerations:
+- HTTPS only
+- Secure cookies (httpOnly, secure, sameSite)
+- CSRF protection
+- Token expiration
+- Refresh token rotation
+- Audit logging
+
+Provide:
+- Complete authentication system
+- Security best practices
+- Configuration
+- Testing approach
+```
+
+### 2. Input Validation & Sanitization Pattern
+
+```
+Implement input validation and sanitization for [application]:
+
+Language/Framework: [stack]
+
+Input sources:
+1. [Form data/API requests/File uploads]
+2. [User input fields]
+
+Validation needs:
+- Data types - Enforce expected types
+- Format validation - Email, URL, phone, etc.
+- Length limits - Min/max characters
+- Pattern matching - Regex validation
+- Whitelist - Allowed values
+- Blacklist - Forbidden patterns
+- File upload - Type, size, content validation
+- SQL injection prevention
+- XSS prevention
+- Command injection prevention
+
+Provide:
+- Validation functions/classes
+- Sanitization utilities
+- Error messages
+- Usage examples
+- Test cases for attacks
+```
+
+### 3. Security Audit Pattern
+
+```
+Perform a security audit of this application:
+
+Application type: [web/API/mobile]
+Tech stack: [languages, frameworks]
+Code: [paste relevant code or describe]
+
+Audit checklist:
+1. Authentication & Authorization
+   - Secure password storage
+   - Session management
+   - Access control
+   - Privilege escalation
+2. Input Validation
+   - SQL injection
+   - XSS
+   - Command injection
+   - Path traversal
+3. Data Protection
+   - Encryption at rest
+   - Encryption in transit
+   - Sensitive data exposure
+   - API key management
+4. Configuration
+   - Security headers
+   - CORS settings
+   - Error handling (no info leakage)
+   - Debug mode disabled
+5. Dependencies
+   - Known vulnerabilities
+   - Outdated packages
+6. Logging & Monitoring
+   - Security events logged
+   - No sensitive data in logs
+
+Provide:
+- Vulnerability report with severity
+- Proof of concept
+- Remediation code
+- Security checklist
+```
+
+### 4. Secrets Management Pattern
+
+```
+Implement secure secrets management for [application]:
+
+Application: [description]
+Deployment: [local/cloud/container]
+
+Secrets to manage:
+1. [Database credentials]
+2. [API keys]
+3. [Encryption keys]
+4. [OAuth secrets]
+
+Solution: [HashiCorp Vault/AWS Secrets Manager/env variables]
+
+Requirements:
+1. Never commit secrets to git
+2. Environment-specific secrets
+3. Rotation strategy - [frequency]
+4. Access control - Who can access what
+5. Audit logging - Track secret access
+6. Encryption - At rest and in transit
+7. Fallback mechanism - [if service unavailable]
+
+Provide:
+- Secrets management implementation
+- Configuration loading code
+- .env.example file
+- Documentation
+- CI/CD integration
+- Rotation script
+```
+
+## Performance Optimization
+
+### 1. Code Optimization Pattern
+
+```
+Optimize this [language] code for performance:
+
+Current code:
+[paste code]
+
+Performance issue:
+- Current: [metrics - time, memory]
+- Target: [desired metrics]
+- Bottleneck: [if identified]
+
+Profiling data:
+[paste profiling output if available]
+
+Optimization strategies to apply:
+1. Algorithm optimization - Better time complexity
+2. Data structure selection - More efficient structures
+3. Caching - Memoization, result caching
+4. Lazy evaluation - Compute only when needed
+5. Parallel processing - Multi-threading/processing
+6. Batching - Group operations
+7. Memory optimization - Reduce allocations
+
+Constraints:
+- Maintain functionality
+- [Any limitations]
+
+Provide:
+- Optimized code
+- Performance comparison
+- Big O analysis (before/after)
+- Benchmark results
+- Trade-offs explanation
+```
+
+### 2. Database Query Optimization Pattern
+
+```
+Optimize this database query:
+
+Query:
+[paste SQL query]
+
+Database: [type and version]
+Schema:
+[paste relevant schema]
+
+Performance issue:
+- Current execution time: [time]
+- Number of rows: [approximate]
+- Explain plan: [if available]
+
+Optimization techniques to apply:
+1. Index optimization - Add/modify indexes
+2. Query rewriting - More efficient SQL
+3. Join optimization - Better join strategy
+4. Subquery elimination - Use joins instead
+5. Denormalization - If appropriate
+6. Partitioning - For large tables
+7. Caching - Query result caching
+
+Provide:
+- Optimized query
+- Index recommendations (CREATE INDEX statements)
+- Explain plan comparison
+- Expected performance improvement
+- Trade-offs and considerations
+```
+
+### 3. Caching Strategy Pattern
+
+```
+Design a caching strategy for [application]:
+
+Application: [description]
+Performance goals: [targets]
+
+Data to cache:
+1. [Data type 1: e.g., user profiles]
+2. [Data type 2: e.g., product catalog]
+3. [Data type 3: e.g., API responses]
+
+For each:
+- Update frequency: [how often changes]
+- Access pattern: [read/write ratio]
+- Size: [data size]
+- TTL: [time-to-live]
+
+Cache layers:
+- Application cache: [in-memory/Redis/Memcached]
+- CDN: [for static assets]
+- Browser cache: [cache headers]
+- Database query cache: [if applicable]
+
+Requirements:
+- Cache invalidation strategy
+- Cache warming (if needed)
+- Cache stampede prevention
+- Fallback to source
+- Monitoring and metrics
+
+Provide:
+- Complete caching implementation
+- Cache key design
+- Invalidation logic
+- Configuration
+- Performance impact estimate
+```
+
+### 4. Frontend Performance Pattern
+
+```
+Optimize frontend performance for [web application]:
+
+Current issues:
+- Load time: [current]
+- First Contentful Paint: [current]
+- Time to Interactive: [current]
+- Bundle size: [current]
+
+Technology: [React/Vue/Angular/vanilla JS]
+
+Optimization strategies:
+1. Code splitting - Dynamic imports
+2. Lazy loading - Components, images
+3. Bundle optimization - Tree shaking, minification
+4. Asset optimization - Image compression, WebP
+5. Caching - Service workers, cache headers
+6. Critical CSS - Inline critical styles
+7. JavaScript optimization - Defer/async loading
+8. Font optimization - Font display strategy
+9. CDN usage - Static asset delivery
+10. Performance monitoring - Real user metrics
+
+Provide:
+- Optimization implementation
+- Webpack/Vite configuration
+- Before/after metrics
+- Lighthouse score improvements
+- Implementation checklist
+```
+
+## Project Scaffolding
+
+### 1. Project Structure Pattern
+
+```
+Create a project structure for [project type]:
+
+Project: [name and description]
+Language/Framework: [stack]
+Project type: [library/CLI/web app/microservice]
+
+Structure requirements:
+- Source code organization
+- Test directory structure
+- Configuration files
+- Documentation location
+- Build/deployment files
+- Environment management
+
+Best practices:
+- Separation of concerns
+- Clear module boundaries
+- Test co-location: [yes/no]
+- Configuration: [centralized/distributed]
+
+Provide:
+- Complete directory tree
+- Purpose of each directory/file
+- Example files for key locations
+- .gitignore
+- README structure
+```
+
+**Example:**
+
+```
+Create a project structure for a Python FastAPI microservice:
+
+Project: User Authentication Service
+Framework: FastAPI, SQLAlchemy, Alembic
+Type: REST API microservice
+
+Requirements:
+- Clean architecture (domain, application, infrastructure)
+- Separate tests
+- Docker support
+- Database migrations
+- Environment configs
+
+Provide:
+- Full directory structure
+- Key file templates
+- Configuration files
+- Docker setup
+- Makefile for common tasks
+```
+
+### 2. Configuration Setup Pattern
+
+```
+Set up configuration management for [application]:
+
+Application: [description]
+Framework: [framework]
+
+Environments:
+- Development
+- Testing
+- Staging
+- Production
+
+Configuration needs:
+1. [Database connections]
+2. [API keys and secrets]
+3. [Feature flags]
+4. [Logging levels]
+5. [External service URLs]
+
+Requirements:
+- Environment variables
+- Config file support: [format]
+- Secrets management
+- Configuration validation
+- Default values
+- Override hierarchy
+- Type safety
+
+Provide:
+- Configuration module/class
+- Config file templates
+- .env.example
+- Validation schema
+- Loading mechanism
+- Documentation
+```
+
+### 3. Build System Setup Pattern
+
+```
+Set up a build system for [project]:
+
+Project type: [type]
+Language: [language]
+
+Build tasks:
+1. Compile/transpile: [if needed]
+2. Dependency installation
+3. Run tests
+4. Lint code
+5. Generate documentation
+6. Build artifacts: [what to produce]
+7. Package for distribution
+
+Tools: [Make/npm scripts/Gradle/Maven/etc.]
+
+Requirements:
+- Development build: fast, with source maps
+- Production build: optimized, minified
+- Watch mode: auto-rebuild
+- Clean task: remove build artifacts
+- CI/CD integration
+
+Provide:
+- Build configuration (Makefile/package.json/etc.)
+- Build scripts
+- All task definitions
+- Usage documentation
+- CI/CD integration examples
+```
+
+### 4. Development Environment Setup Pattern
+
+```
+Create a development environment setup for [project]:
+
+Project: [description]
+Tech stack: [full stack]
+
+Developer needs:
+1. Language runtime: [version]
+2. Database: [type and version]
+3. Cache: [if needed]
+4. Message queue: [if needed]
+5. External services: [list]
+
+Setup approaches:
+- Local installation: [installation guide]
+- Docker Compose: [containerized setup]
+- Dev containers: [VS Code dev containers]
+
+Requirements:
+- One-command setup
+- Seed data: [yes/no]
+- Hot reload: [yes/no]
+- Environment isolation
+- Team consistency
+
+Provide:
+- docker-compose.yml
+- Setup script (setup.sh)
+- README with instructions
+- .env.example
+- Seed data scripts
+- Troubleshooting guide
+```
+
+## Git & Version Control
+
+### 1. Commit Message Generation Pattern
+
+```
+Generate a commit message for these changes:
+
+Changes:
+[paste git diff or describe changes]
+
+Commit message format: [Conventional Commits/Angular/Custom]
+
+Guidelines:
+- Type: feat/fix/docs/style/refactor/test/chore
+- Scope: [affected component/module]
+- Subject: imperative, present tense, lowercase, no period
+- Body: motivation and contrast with previous behavior
+- Footer: breaking changes, issue references
+
+Example format:
+type(scope): subject
+
+body
+
+footer
+
+Generate: commit message following the format
+```
+
+### 2. Branch Strategy Pattern
+
+```
+Design a Git branching strategy for [team/project]:
+
+Project: [description]
+Team size: [number]
+Release cycle: [frequency]
+Environment: [dev/staging/prod]
+
+Strategy type: [Git Flow/GitHub Flow/Trunk-Based/Custom]
+
+Requirements:
+- Branch naming convention
+- Protected branches
+- PR/MR workflow
+- Code review process
+- CI/CD integration
+- Hotfix process
+- Release tagging
+
+Provide:
+- Complete branching model diagram
+- Branch naming patterns
+- Workflow documentation
+- Protection rules
+- Merge strategies
+- Example scenarios
+```
+
+### 3. Git Hooks Pattern
+
+```
+Create Git hooks for [project]:
+
+Project: [description]
+Language: [language]
+
+Hooks needed:
+1. pre-commit:
+   - [Run linter]
+   - [Format code]
+   - [Check for secrets]
+   - [Run quick tests]
+2. commit-msg:
+   - [Validate commit message format]
+3. pre-push:
+   - [Run full test suite]
+   - [Check branch name]
+
+Framework: [Husky/pre-commit/custom]
+
+Requirements:
+- Easy team adoption
+- Performance: < [time] seconds
+- Skip option: [for emergencies]
+- Error messages: clear and helpful
+- Cross-platform: Windows/Mac/Linux
+
+Provide:
+- Hook scripts
+- Installation instructions
+- Configuration files
+- Documentation
+- Bypass instructions
+```
+
+### 4. Git Conflict Resolution Pattern
+
+```
+Help resolve this Git merge conflict:
+
+Conflict:
+[paste conflict with <<< === >>> markers]
+
+Context:
+- Branch: [current branch]
+- Merging from: [source branch]
+- File: [file path]
+- Purpose of file: [what it does]
+
+Changes:
+- Your changes: [describe]
+- Their changes: [describe]
+
+Resolution strategy:
+- Keep both: [combine changes]
+- Accept theirs: [use incoming]
+- Accept yours: [keep current]
+- Custom: [manual merge]
+
+Provide:
+- Resolved code
+- Explanation of resolution
+- Testing recommendations
+- Prevention tips for future
+```
+
+## Common Development Operations
+
+### 1. File Processing Pattern
+
+```
+Create a [language] script to process files:
+
+Task: [describe file processing task]
+
+Input:
+- File type: [CSV/JSON/XML/text/binary]
+- Location: [path or pattern]
+- Size: [approximate]
+
+Processing:
+1. [Operation 1: e.g., parse]
+2. [Operation 2: e.g., transform]
+3. [Operation 3: e.g., validate]
+4. [Operation 4: e.g., aggregate]
+
+Output:
+- Format: [format]
+- Destination: [where to save]
+
+Requirements:
+- Handle large files: streaming/chunking
+- Error handling: malformed data
+- Logging: progress and errors
+- Performance: [speed requirements]
+- Memory efficient: [constraints]
+
+Provide:
+- Complete script
+- Usage examples
+- Error handling
+- Testing approach
+```
+
+### 2. Data Transformation Pattern
+
+```
+Create a function to transform data from [format A] to [format B]:
+
+Input format:
+[describe or paste example]
+
+Output format:
+[describe or paste example]
+
+Transformation rules:
+1. [Rule 1: field mapping]
+2. [Rule 2: calculation]
+3. [Rule 3: formatting]
+4. [Rule 4: filtering]
+
+Requirements:
+- Handle missing data: [strategy]
+- Data validation: [rules]
+- Type conversion: [specific conversions]
+- Nested structures: [how to handle]
+- Preserve metadata: [yes/no]
+- Performance: process [N] records/second
+
+Provide:
+- Transformation function
+- Input/output examples
+- Validation logic
+- Error handling
+- Unit tests
+```
+
+### 3. String Processing Pattern
+
+```
+Create a [language] function for string processing:
+
+Task: [specific string operation]
+
+Examples:
+Input: [example 1] → Output: [expected output]
+Input: [example 2] → Output: [expected output]
+
+Requirements:
+- Handle unicode: [yes/no]
+- Case sensitivity: [sensitive/insensitive]
+- Trim whitespace: [yes/no]
+- Handle empty strings: [behavior]
+- Performance: [for strings up to N chars]
+- Regex needed: [yes/no]
+
+Edge cases to handle:
+- [Edge case 1]
+- [Edge case 2]
+- [Edge case 3]
+
+Provide:
+- Function implementation
+- Docstring/comments
+- Test cases
+- Performance notes
+```
+
+### 4. Algorithm Implementation Pattern
+
+```
+Implement the [algorithm name] algorithm in [language]:
+
+Algorithm: [name and description]
+
+Specifications:
+- Input: [data type and constraints]
+- Output: [data type]
+- Time complexity target: [Big O]
+- Space complexity target: [Big O]
+
+Requirements:
+- Follow [specific variant/approach]
+- Handle edge cases: [list]
+- Optimize for: [time/space/readability]
+- Include: documentation, examples
+- Type hints: [yes/no]
+
+Provide:
+- Algorithm implementation
+- Complexity analysis
+- Test cases
+- Comparison with alternatives
+- Usage examples
+```
+
+**Example:**
+
+```
+Implement the quicksort algorithm in Python:
+
+Specifications:
+- Input: List of comparable elements
+- Output: Sorted list
+- Time complexity: O(n log n) average
+- Space complexity: O(log n) for recursion
+
+Requirements:
+- In-place sorting
+- Median-of-three pivot selection
+- Handle duplicates correctly
+- Iterative version (optional)
+- Type hints and docstring
+- Handle empty and single-element lists
+
+Provide:
+- Implementation
+- Complexity explanation
+- Test cases
+- Comparison with built-in sort
+```
+
+## Meta-Development Prompts
+
+### 1. Feature Planning Pattern
+
+```
+Help me plan the implementation of [feature]:
+
+Feature description:
+[detailed description of what the feature should do]
+
+Current system:
+- Architecture: [describe]
+- Tech stack: [list]
+- Relevant components: [list]
+
+Requirements:
+- User stories: [list or describe]
+- Constraints: [technical, business]
+- Performance: [expectations]
+- Security: [concerns]
+
+Planning needed:
+1. Technical design - Architecture and components
+2. Database changes - Schema modifications
+3. API changes - New endpoints or modifications
+4. UI changes - User interface updates
+5. Testing strategy - How to test
+6. Rollout plan - Phased or all-at-once
+7. Risks - Potential issues
+8. Effort estimation - Time and resources
+
+Provide:
+- Detailed implementation plan
+- Task breakdown
+- Technical specifications
+- Diagrams (sequence, component)
+- Risk mitigation strategies
+- Testing checklist
+```
+
+### 2. Technology Selection Pattern
+
+```
+Help me choose between [technology A] and [technology B] for [use case]:
+
+Use case: [detailed description]
+
+Requirements:
+- Functional: [what it needs to do]
+- Non-functional: [performance, scale, etc.]
+- Team expertise: [current skills]
+- Timeline: [how soon needed]
+- Budget: [constraints]
+
+Options:
+1. [Technology A]
+   - Pros: [if known]
+   - Cons: [if known]
+2. [Technology B]
+   - Pros: [if known]
+   - Cons: [if known]
+
+Compare on:
+1. Suitability for use case
+2. Learning curve
+3. Community and ecosystem
+4. Performance characteristics
+5. Scalability
+6. Maintenance burden
+7. Cost (licensing, infrastructure)
+8. Integration with existing stack
+9. Long-term viability
+10. Migration path (if switching)
+
+Provide:
+- Detailed comparison
+- Recommendation with reasoning
+- Implementation considerations
+- Learning resources
+- Proof of concept suggestions
+```
+
+### 3. Architecture Design Pattern
+
+```
+Design an architecture for [system]:
+
+System description:
+[what the system should do]
+
+Requirements:
+- Functional: [features]
+- Non-functional:
+  - Users: [number and type]
+  - Scale: [requests/day, data volume]
+  - Availability: [uptime requirement]
+  - Latency: [response time requirement]
+  - Regions: [geographic distribution]
+
+Constraints:
+- Budget: [limitations]
+- Team: [size and expertise]
+- Timeline: [deadlines]
+- Technology: [any mandated technologies]
+
+Design considerations:
+- Architectural pattern: [microservices/monolith/serverless/etc.]
+- Data storage: [SQL/NoSQL/hybrid]
+- Caching strategy
+- Message queuing: [if needed]
+- API design
+- Security architecture
+- Scalability approach
+- Disaster recovery
+
+Provide:
+- High-level architecture diagram
+- Component descriptions
+- Data flow diagrams
+- Technology stack recommendations
+- Scalability strategy
+- Cost estimation
+- Trade-offs explanation
+- Implementation phases
+```
+
+### 4. Effort Estimation Pattern
+
+```
+Help me estimate effort for this task:
+
+Task: [description]
+
+Scope:
+1. [Subtask 1]
+2. [Subtask 2]
+3. [Subtask 3]
+
+Context:
+- Team size: [number]
+- Team experience: [junior/mid/senior]
+- Codebase familiarity: [new/familiar/expert]
+- Tech stack: [technologies involved]
+- Dependencies: [external dependencies]
+
+Include:
+1. Development time - Coding
+2. Testing time - Unit, integration, E2E
+3. Code review time
+4. Documentation time
+5. Deployment time
+6. Buffer - For unknowns and issues
+
+Risks that could increase estimate:
+- [Known risks]
+
+Provide:
+- Detailed breakdown by subtask
+- Time estimates (best/likely/worst case)
+- Assumptions
+- Risk factors
+- Recommendations to reduce effort
+```
+
+### 5. Code Review Checklist Pattern
+
+```
+Create a code review checklist for [project type]:
+
+Project: [description]
+Language/Framework: [stack]
+
+Review categories:
+1. Functionality
+   - Does it work as intended?
+   - Edge cases handled?
+   - Error handling adequate?
+
+2. Code Quality
+   - Readability
+   - Maintainability
+   - DRY principle
+   - SOLID principles
+   - Design patterns appropriately used
+
+3. Performance
+   - Algorithm efficiency
+   - Database query optimization
+   - Caching where beneficial
+   - Resource cleanup
+
+4. Security
+   - Input validation
+   - Authentication/authorization
+   - Sensitive data handling
+   - Common vulnerabilities checked
+
+5. Testing
+   - Unit tests present and adequate
+   - Integration tests if needed
+   - Test coverage acceptable
+   - Edge cases tested
+
+6. Documentation
+   - Code comments where needed
+   - API documentation updated
+   - README updated if needed
+   - Breaking changes documented
+
+7. Best Practices
+   - Style guide followed
+   - Naming conventions
+   - Project patterns maintained
+
+Provide:
+- Comprehensive checklist
+- Severity levels (blocker/major/minor)
+- Examples of what to look for
+- Common issues for this stack
+```
+
+## Best Practices
+
+### 1. Prompt Crafting for Development
+
+**Be Specific About Versions**
+```
+❌ Bad: "Create a React component"
+✅ Good: "Create a React 18 functional component using TypeScript 5.0 and hooks"
+```
+
+**Provide Context**
+```
+❌ Bad: "Fix this bug"
+✅ Good: "Fix this bug in a Python 3.11 FastAPI application. The endpoint should validate email using pydantic, but currently accepts invalid formats."
+```
+
+**Specify Constraints**
+```
+✅ "Create a function that must:
+- Handle 10,000+ items efficiently
+- Use no external libraries
+- Work in Python 3.8+
+- Include type hints
+- Have O(n log n) time complexity or better"
+```
+
+**Request Complete Solutions**
+```
+✅ "Provide:
+1. Complete implementation
+2. Unit tests with pytest
+3. Usage examples
+4. Docstring with parameters and returns
+5. Error handling for edge cases"
+```
+
+### 2. Iterative Refinement
+
+Start broad, then narrow:
+
+```
+# First prompt:
+"Create a user authentication system for a Flask app"
+
+# After seeing output, refine:
+"Update the authentication system to:
+- Use JWT tokens instead of sessions
+- Add refresh token rotation
+- Implement rate limiting on login
+- Add multi-factor authentication support"
+
+# Further refinement:
+"Add comprehensive tests for the MFA flow including:
+- TOTP generation and validation
+- Backup codes
+- QR code generation for app setup"
+```
+
+### 3. Error Recovery
+
+When AI misunderstands:
+
+```
+"The previous implementation has an issue: [describe issue].
+Please revise to [specific fix needed].
+Keep [what was correct].
+Change [what needs changing].
+Ensure [specific requirement]."
+```
+
+### 4. Code Review Prompts
+
+```
+"Review this PR:
+- File 1: [description of changes]
+- File 2: [description of changes]
+
+Focus on:
+1. Security issues (especially [specific concern])
+2. Performance with [specific data volume]
+3. [Specific pattern] usage
+4. Test coverage for [critical path]
+
+Our standards:
+- [Style guide]
+- [Code coverage minimum]
+- [Specific practices for this codebase]"
+```
+
+### 5. Learning and Explanation
+
+```
+"Explain this code as if teaching a [level] developer:
+
+[code]
+
+Include:
+1. Line-by-line walkthrough
+2. Key concepts and why they're used
+3. Common mistakes to avoid
+4. How to extend or modify
+5. Related patterns or approaches
+6. Resources for learning more"
+```
+
+### 6. Debugging Workflow
+
+```
+# Step 1: Error Analysis
+"Analyze this error: [error and stack trace]"
+
+# Step 2: Root Cause
+"What are the possible root causes?"
+
+# Step 3: Solution
+"Provide a fix for the most likely cause, with explanation"
+
+# Step 4: Prevention
+"How can I prevent this error in the future? Add validation or tests."
+
+# Step 5: Related Issues
+"What related issues might exist in this code?"
+```
+
+### 7. Production-Ready Code
+
+Always request:
+```
+"Provide production-ready code including:
+- Error handling for all error cases
+- Input validation
+- Logging at appropriate levels
+- Configuration via environment variables
+- Security best practices
+- Performance optimization
+- Comprehensive tests (unit and integration)
+- Documentation (docstrings and README)
+- Type hints/annotations
+- Example usage"
+```
+
+### 8. Context Preservation
+
+For large projects:
+```
+"Working on [project name] - [brief description]
+Architecture: [pattern]
+Stack: [technologies]
+Recent context: [what was just done]
+Current task: [what you're doing now]
+Constraints: [relevant limitations]
+
+[Specific request]"
+```
+
+### 9. Multiple Solutions
+
+```
+"Provide 3 different approaches to [problem]:
+
+1. [Approach 1 criteria: e.g., most performant]
+2. [Approach 2 criteria: e.g., most maintainable]
+3. [Approach 3 criteria: e.g., simplest]
+
+For each include:
+- Implementation
+- Pros and cons
+- Use cases
+- Performance characteristics"
+```
+
+### 10. Code Evolution
+
+```
+# Version 1:
+"Create a basic [feature]"
+
+# Version 2:
+"Enhance the [feature] to support [new requirement]"
+
+# Version 3:
+"Refactor for [quality: performance/maintainability/scalability]"
+
+# Version 4:
+"Add comprehensive error handling and logging"
+
+# Version 5:
+"Create production deployment configuration"
+```
+
+## Conclusion
+
+These software development prompt patterns provide a foundation for effective AI-assisted development. Key takeaways:
+
+1. **Be Specific** - Language versions, frameworks, constraints
+2. **Provide Context** - Architecture, existing code, requirements
+3. **Request Completeness** - Tests, docs, error handling, examples
+4. **Iterate** - Start simple, refine progressively
+5. **Verify** - Always review and test AI-generated code
+6. **Learn** - Ask for explanations to improve your understanding
+
+Remember: AI is a powerful tool for accelerating development, but human judgment, code review, and testing remain essential for production-quality software.
+
+## Additional Resources
+
+- [Prompt Engineering Guide](./prompt_engineering.md) - General prompt engineering techniques
+- [OpenAI Best Practices](https://platform.openai.com/docs/guides/prompt-engineering)
+- [Anthropic Prompt Library](https://docs.anthropic.com/claude/prompt-library)
+- [GitHub Copilot Documentation](https://docs.github.com/en/copilot)
+
+---
+
+*This documentation is designed to be practical and immediately useful. Use these patterns as starting points and adapt them to your specific needs, tech stack, and development workflow.*

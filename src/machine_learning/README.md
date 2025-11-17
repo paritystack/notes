@@ -18,7 +18,9 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 12. [Quantization](./quantization.md) - Model compression, INT8/INT4 quantization, GPTQ, AWQ
 13. [Transformers](./transformers.md) - Attention mechanisms, BERT, GPT architectures
 14. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
-15. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+15. [LoRA](./lora.md) - Low-Rank Adaptation for efficient fine-tuning
+16. [CUDA](./cuda.md) - GPU programming, parallel computing, and optimization techniques
+17. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

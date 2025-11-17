@@ -1,0 +1,1592 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cuda - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="cuda-programming"><a class="header" href="#cuda-programming">CUDA Programming</a></h1>
+<p>CUDA (Compute Unified Device Architecture) is NVIDIA's parallel computing platform and programming model that enables dramatic increases in computing performance by harnessing the power of Graphics Processing Units (GPUs).</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#cuda-architecture">CUDA Architecture</a></li>
+<li><a href="#programming-model">Programming Model</a></li>
+<li><a href="#memory-hierarchy">Memory Hierarchy</a></li>
+<li><a href="#common-patterns">Common Patterns</a></li>
+<li><a href="#optimization-techniques">Optimization Techniques</a></li>
+<li><a href="#advanced-topics">Advanced Topics</a></li>
+<li><a href="#libraries-and-tools">Libraries and Tools</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+</ol>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<h3 id="what-is-cuda"><a class="header" href="#what-is-cuda">What is CUDA?</a></h3>
+<p>CUDA enables developers to accelerate compute-intensive applications by offloading parallel computations to NVIDIA GPUs. Unlike traditional CPU programming, CUDA allows thousands of threads to execute simultaneously.</p>
+<p><strong>Key Benefits:</strong></p>
+<ul>
+<li>Massive parallelism (thousands of cores)</li>
+<li>High memory bandwidth</li>
+<li>Specialized hardware for compute operations</li>
+<li>Rich ecosystem of libraries</li>
+<li>Integration with popular frameworks (PyTorch, TensorFlow)</li>
+</ul>
+<h3 id="setup-and-installation"><a class="header" href="#setup-and-installation">Setup and Installation</a></h3>
+<pre><code class="language-bash"># Check CUDA installation
+nvcc --version
+nvidia-smi
+
+# Install CUDA Toolkit (Ubuntu)
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb
+sudo dpkg -i cuda-keyring_1.0-1_all.deb
+sudo apt-get update
+sudo apt-get install cuda
+
+# Set environment variables
+export PATH=/usr/local/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+</code></pre>
+<h3 id="basic-compilation"><a class="header" href="#basic-compilation">Basic Compilation</a></h3>
+<pre><code class="language-bash"># Compile CUDA program
+nvcc program.cu -o program
+
+# With optimization
+nvcc -O3 program.cu -o program
+
+# Specify architecture
+nvcc -arch=sm_80 program.cu -o program
+
+# Debug mode
+nvcc -g -G program.cu -o program
+
+# Link with libraries
+nvcc program.cu -o program -lcublas -lcudnn
+</code></pre>
+<h2 id="cuda-architecture"><a class="header" href="#cuda-architecture">CUDA Architecture</a></h2>
+<h3 id="gpu-hardware-architecture"><a class="header" href="#gpu-hardware-architecture">GPU Hardware Architecture</a></h3>
+<p><strong>Streaming Multiprocessors (SMs):</strong></p>
+<ul>
+<li>Multiple SMs per GPU (e.g., 68 SMs on A100)</li>
+<li>Each SM contains:
+<ul>
+<li>CUDA cores (FP32/FP64)</li>
+<li>Tensor cores (matrix operations)</li>
+<li>Special function units</li>
+<li>Warp schedulers</li>
+<li>Shared memory and L1 cache</li>
+</ul>
+</li>
+</ul>
+<p><strong>Memory System:</strong></p>
+<pre><code>┌─────────────────────────────────────┐
+│         GPU Device Memory            │
+│  (Global Memory: GB scale)          │
+└─────────────────────────────────────┘
+            ↑
+            │
+┌─────────────────────────────────────┐
+│           L2 Cache                   │
+│        (MB scale)                    │
+└─────────────────────────────────────┘
+            ↑
+            │
+┌─────────────────────────────────────┐
+│  SM    SM    SM    SM    SM         │
+│  ┌─┐  ┌─┐  ┌─┐  ┌─┐  ┌─┐          │
+│  │L1│  │L1│  │L1│  │L1│  │L1│      │
+│  │/S│  │/S│  │/S│  │/S│  │/S│      │ L1 Cache/Shared Memory
+│  │M │  │M │  │M │  │M │  │M │      │ (KB scale per SM)
+│  └─┘  └─┘  └─┘  └─┘  └─┘          │
+└─────────────────────────────────────┘
+</code></pre>
+<h3 id="compute-capability"><a class="header" href="#compute-capability">Compute Capability</a></h3>
+<p>Different GPU architectures have different capabilities:</p>
+<div class="table-wrapper"><table><thead><tr><th>Architecture</th><th>Compute Capability</th><th>Key Features</th></tr></thead><tbody>
+<tr><td>Volta</td><td>7.0</td><td>Tensor Cores, Independent Thread Scheduling</td></tr>
+<tr><td>Turing</td><td>7.5</td><td>RT Cores, INT8 Tensor Cores</td></tr>
+<tr><td>Ampere</td><td>8.0, 8.6</td><td>3rd Gen Tensor Cores, Sparsity</td></tr>
+<tr><td>Hopper</td><td>9.0</td><td>4th Gen Tensor Cores, Thread Block Clusters</td></tr>
+</tbody></table>
+</div>
+<pre><code class="language-cpp">// Query device properties
+cudaDeviceProp prop;
+cudaGetDeviceProperties(&amp;prop, 0);
+printf("Device: %s\n", prop.name);
+printf("Compute Capability: %d.%d\n", prop.major, prop.minor);
+printf("Multiprocessors: %d\n", prop.multiProcessorCount);
+printf("Max threads per block: %d\n", prop.maxThreadsPerBlock);
+printf("Max threads per SM: %d\n", prop.maxThreadsPerMultiProcessor);
+printf("Warp size: %d\n", prop.warpSize);
+printf("Global memory: %.2f GB\n", prop.totalGlobalMem / 1e9);
+printf("Shared memory per block: %zu KB\n", prop.sharedMemPerBlock / 1024);
+</code></pre>
+<h2 id="programming-model"><a class="header" href="#programming-model">Programming Model</a></h2>
+<h3 id="thread-hierarchy"><a class="header" href="#thread-hierarchy">Thread Hierarchy</a></h3>
+<p>CUDA organizes threads in a three-level hierarchy:</p>
+<pre><code>Grid
+├── Block (0,0,0)
+│   ├── Thread (0,0,0)
+│   ├── Thread (1,0,0)
+│   └── ...
+├── Block (1,0,0)
+│   └── ...
+└── Block (gridDim-1)
+    └── ...
+</code></pre>
+<p><strong>Key Concepts:</strong></p>
+<ul>
+<li><strong>Thread</strong>: Basic execution unit</li>
+<li><strong>Warp</strong>: Group of 32 threads executing together (SIMT)</li>
+<li><strong>Block</strong>: Group of threads (up to 1024) sharing shared memory</li>
+<li><strong>Grid</strong>: Collection of blocks</li>
+</ul>
+<h3 id="basic-kernel-structure"><a class="header" href="#basic-kernel-structure">Basic Kernel Structure</a></h3>
+<pre><code class="language-cpp">// Kernel definition
+__global__ void vectorAdd(float *a, float *b, float *c, int n) {
+    // Calculate global thread ID
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Boundary check
+    if (idx &lt; n) {
+        c[idx] = a[idx] + b[idx];
+    }
+}
+
+int main() {
+    int n = 1000000;
+    size_t size = n * sizeof(float);
+
+    // Allocate host memory
+    float *h_a = (float*)malloc(size);
+    float *h_b = (float*)malloc(size);
+    float *h_c = (float*)malloc(size);
+
+    // Initialize host data
+    for (int i = 0; i &lt; n; i++) {
+        h_a[i] = i;
+        h_b[i] = i * 2;
+    }
+
+    // Allocate device memory
+    float *d_a, *d_b, *d_c;
+    cudaMalloc(&amp;d_a, size);
+    cudaMalloc(&amp;d_b, size);
+    cudaMalloc(&amp;d_c, size);
+
+    // Copy data to device
+    cudaMemcpy(d_a, h_a, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, h_b, size, cudaMemcpyHostToDevice);
+
+    // Launch kernel
+    int blockSize = 256;
+    int gridSize = (n + blockSize - 1) / blockSize;
+    vectorAdd&lt;&lt;&lt;gridSize, blockSize&gt;&gt;&gt;(d_a, d_b, d_c, n);
+
+    // Copy result back
+    cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost);
+
+    // Free memory
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_c);
+    free(h_a);
+    free(h_b);
+    free(h_c);
+
+    return 0;
+}
+</code></pre>
+<h3 id="thread-indexing"><a class="header" href="#thread-indexing">Thread Indexing</a></h3>
+<pre><code class="language-cpp">// 1D indexing
+__global__ void kernel1D() {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+}
+
+// 2D indexing
+__global__ void kernel2D() {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int idx = y * width + x;  // Row-major order
+}
+
+// 3D indexing
+__global__ void kernel3D() {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int z = blockIdx.z * blockDim.z + threadIdx.z;
+    int idx = z * width * height + y * width + x;
+}
+
+// Launch examples
+dim3 blockSize(16, 16);
+dim3 gridSize((width + 15) / 16, (height + 15) / 16);
+kernel2D&lt;&lt;&lt;gridSize, blockSize&gt;&gt;&gt;(...);
+</code></pre>
+<h3 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h3>
+<pre><code class="language-cpp">// Macro for checking CUDA errors
+#define CUDA_CHECK(call) \
+do { \
+    cudaError_t error = call; \
+    if (error != cudaSuccess) { \
+        fprintf(stderr, "CUDA error at %s:%d: %s\n", \
+                __FILE__, __LINE__, cudaGetErrorString(error)); \
+        exit(EXIT_FAILURE); \
+    } \
+} while(0)
+
+// Usage
+CUDA_CHECK(cudaMalloc(&amp;d_a, size));
+CUDA_CHECK(cudaMemcpy(d_a, h_a, size, cudaMemcpyHostToDevice));
+
+// Check kernel launch errors
+kernel&lt;&lt;&lt;grid, block&gt;&gt;&gt;(...);
+CUDA_CHECK(cudaGetLastError());
+CUDA_CHECK(cudaDeviceSynchronize());
+</code></pre>
+<h2 id="memory-hierarchy"><a class="header" href="#memory-hierarchy">Memory Hierarchy</a></h2>
+<h3 id="memory-types-and-characteristics"><a class="header" href="#memory-types-and-characteristics">Memory Types and Characteristics</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Memory Type</th><th>Location</th><th>Cached</th><th>Access</th><th>Scope</th><th>Lifetime</th></tr></thead><tbody>
+<tr><td>Register</td><td>On-chip</td><td>N/A</td><td>R/W</td><td>Thread</td><td>Thread</td></tr>
+<tr><td>Local</td><td>Off-chip</td><td>L1/L2</td><td>R/W</td><td>Thread</td><td>Thread</td></tr>
+<tr><td>Shared</td><td>On-chip</td><td>N/A</td><td>R/W</td><td>Block</td><td>Block</td></tr>
+<tr><td>Global</td><td>Off-chip</td><td>L1/L2</td><td>R/W</td><td>Grid</td><td>Application</td></tr>
+<tr><td>Constant</td><td>Off-chip</td><td>Yes</td><td>R</td><td>Grid</td><td>Application</td></tr>
+<tr><td>Texture</td><td>Off-chip</td><td>Yes</td><td>R</td><td>Grid</td><td>Application</td></tr>
+</tbody></table>
+</div>
+<h3 id="global-memory"><a class="header" href="#global-memory">Global Memory</a></h3>
+<pre><code class="language-cpp">// Basic allocation
+float *d_data;
+cudaMalloc(&amp;d_data, size);
+
+// Pitched allocation (for 2D arrays)
+float *d_matrix;
+size_t pitch;
+cudaMallocPitch(&amp;d_matrix, &amp;pitch, width * sizeof(float), height);
+
+// Access in kernel
+__global__ void kernel(float *matrix, size_t pitch) {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    float *row = (float*)((char*)matrix + y * pitch);
+    row[x] = ...;
+}
+
+// 3D allocation
+cudaExtent extent = make_cudaExtent(width, height, depth);
+cudaPitchedPtr devPitchedPtr;
+cudaMalloc3D(&amp;devPitchedPtr, extent);
+
+// Zero initialization
+cudaMemset(d_data, 0, size);
+</code></pre>
+<h3 id="shared-memory"><a class="header" href="#shared-memory">Shared Memory</a></h3>
+<p>Shared memory is fast on-chip memory shared by threads in a block:</p>
+<pre><code class="language-cpp">// Static shared memory
+__global__ void kernel() {
+    __shared__ float s_data[256];
+
+    int tid = threadIdx.x;
+    s_data[tid] = ...;  // Each thread writes
+
+    __syncthreads();  // Synchronize before reading
+
+    float value = s_data[tid];  // Read
+}
+
+// Dynamic shared memory
+__global__ void kernel(int n) {
+    extern __shared__ float s_data[];  // Size specified at launch
+
+    int tid = threadIdx.x;
+    s_data[tid] = ...;
+    __syncthreads();
+}
+
+// Launch with dynamic shared memory
+int sharedMemSize = blockSize * sizeof(float);
+kernel&lt;&lt;&lt;gridSize, blockSize, sharedMemSize&gt;&gt;&gt;(...);
+
+// Multiple dynamic arrays
+extern __shared__ char shared_mem[];
+float *s_float = (float*)shared_mem;
+int *s_int = (int*)&amp;s_float[float_size];
+</code></pre>
+<h3 id="memory-coalescing"><a class="header" href="#memory-coalescing">Memory Coalescing</a></h3>
+<p>Coalesced memory accesses are critical for performance:</p>
+<pre><code class="language-cpp">// GOOD: Coalesced access (sequential)
+__global__ void coalescedAccess(float *data) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    float value = data[idx];  // Each thread accesses consecutive elements
+}
+
+// BAD: Strided access
+__global__ void stridedAccess(float *data, int stride) {
+    int idx = (blockIdx.x * blockDim.x + threadIdx.x) * stride;
+    float value = data[idx];  // Large gaps between accesses
+}
+
+// GOOD: Structure of Arrays (SoA)
+struct SoA {
+    float *x;
+    float *y;
+    float *z;
+};
+
+__global__ void processCoalesced(SoA data, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx &lt; n) {
+        float x = data.x[idx];  // Coalesced
+        float y = data.y[idx];  // Coalesced
+        float z = data.z[idx];  // Coalesced
+    }
+}
+
+// BAD: Array of Structures (AoS)
+struct Point { float x, y, z; };
+
+__global__ void processUncoalesced(Point *data, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx &lt; n) {
+        float x = data[idx].x;  // Not coalesced
+    }
+}
+</code></pre>
+<h3 id="constant-memory"><a class="header" href="#constant-memory">Constant Memory</a></h3>
+<pre><code class="language-cpp">// Constant memory declaration (64KB limit)
+__constant__ float c_coefficients[1024];
+
+// Copy to constant memory
+float h_coefficients[1024];
+cudaMemcpyToSymbol(c_coefficients, h_coefficients, sizeof(h_coefficients));
+
+// Use in kernel (cached, broadcast)
+__global__ void kernel() {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    float coeff = c_coefficients[idx % 1024];  // Fast cached access
+}
+</code></pre>
+<h3 id="unified-memory"><a class="header" href="#unified-memory">Unified Memory</a></h3>
+<pre><code class="language-cpp">// Allocate unified memory (accessible from both CPU and GPU)
+float *data;
+cudaMallocManaged(&amp;data, size);
+
+// Can access from CPU
+data[0] = 1.0f;
+
+// Can access from GPU
+kernel&lt;&lt;&lt;grid, block&gt;&gt;&gt;(data);
+cudaDeviceSynchronize();
+
+// Access from CPU again
+float result = data[0];
+
+// Free
+cudaFree(data);
+
+// Memory prefetching
+cudaMemPrefetchAsync(data, size, deviceId);  // Prefetch to GPU
+cudaMemPrefetchAsync(data, size, cudaCpuDeviceId);  // Prefetch to CPU
+
+// Memory advise
+cudaMemAdvise(data, size, cudaMemAdviseSetReadMostly, deviceId);
+cudaMemAdvise(data, size, cudaMemAdviseSetPreferredLocation, deviceId);
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="1-vector-addition"><a class="header" href="#1-vector-addition">1. Vector Addition</a></h3>
+<pre><code class="language-cpp">__global__ void vectorAdd(const float *a, const float *b, float *c, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx &lt; n) {
+        c[idx] = a[idx] + b[idx];
+    }
+}
+
+// Launch
+int blockSize = 256;
+int gridSize = (n + blockSize - 1) / blockSize;
+vectorAdd&lt;&lt;&lt;gridSize, blockSize&gt;&gt;&gt;(d_a, d_b, d_c, n);
+</code></pre>
+<h3 id="2-matrix-multiplication-naive"><a class="header" href="#2-matrix-multiplication-naive">2. Matrix Multiplication (Naive)</a></h3>
+<pre><code class="language-cpp">// C = A * B
+// A: M x K, B: K x N, C: M x N
+__global__ void matmulNaive(const float *A, const float *B, float *C,
+                            int M, int N, int K) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row &lt; M &amp;&amp; col &lt; N) {
+        float sum = 0.0f;
+        for (int k = 0; k &lt; K; k++) {
+            sum += A[row * K + k] * B[k * N + col];
+        }
+        C[row * N + col] = sum;
+    }
+}
+
+// Launch
+dim3 blockSize(16, 16);
+dim3 gridSize((N + 15) / 16, (M + 15) / 16);
+matmulNaive&lt;&lt;&lt;gridSize, blockSize&gt;&gt;&gt;(d_A, d_B, d_C, M, N, K);
+</code></pre>
+<h3 id="3-matrix-multiplication-tiled-with-shared-memory"><a class="header" href="#3-matrix-multiplication-tiled-with-shared-memory">3. Matrix Multiplication (Tiled with Shared Memory)</a></h3>
+<pre><code class="language-cpp">#define TILE_SIZE 16
+
+__global__ void matmulTiled(const float *A, const float *B, float *C,
+                            int M, int N, int K) {
+    __shared__ float s_A[TILE_SIZE][TILE_SIZE];
+    __shared__ float s_B[TILE_SIZE][TILE_SIZE];
+
+    int bx = blockIdx.x, by = blockIdx.y;
+    int tx = threadIdx.x, ty = threadIdx.y;
+
+    int row = by * TILE_SIZE + ty;
+    int col = bx * TILE_SIZE + tx;
+
+    float sum = 0.0f;
+
+    // Loop over tiles
+    for (int t = 0; t &lt; (K + TILE_SIZE - 1) / TILE_SIZE; t++) {
+        // Load tile into shared memory
+        if (row &lt; M &amp;&amp; t * TILE_SIZE + tx &lt; K)
+            s_A[ty][tx] = A[row * K + t * TILE_SIZE + tx];
+        else
+            s_A[ty][tx] = 0.0f;
+
+        if (t * TILE_SIZE + ty &lt; K &amp;&amp; col &lt; N)
+            s_B[ty][tx] = B[(t * TILE_SIZE + ty) * N + col];
+        else
+            s_B[ty][tx] = 0.0f;
+
+        __syncthreads();
+
+        // Compute partial sum
+        for (int k = 0; k &lt; TILE_SIZE; k++) {
+            sum += s_A[ty][k] * s_B[k][tx];
+        }
+
+        __syncthreads();
+    }
+
+    if (row &lt; M &amp;&amp; col &lt; N) {
+        C[row * N + col] = sum;
+    }
+}
+</code></pre>
+<h3 id="4-reduction-sum"><a class="header" href="#4-reduction-sum">4. Reduction (Sum)</a></h3>
+<pre><code class="language-cpp">// Parallel reduction in shared memory
+__global__ void reduce(const float *input, float *output, int n) {
+    extern __shared__ float s_data[];
+
+    unsigned int tid = threadIdx.x;
+    unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Load data into shared memory
+    s_data[tid] = (idx &lt; n) ? input[idx] : 0.0f;
+    __syncthreads();
+
+    // Reduction in shared memory
+    for (unsigned int s = blockDim.x / 2; s &gt; 0; s &gt;&gt;= 1) {
+        if (tid &lt; s) {
+            s_data[tid] += s_data[tid + s];
+        }
+        __syncthreads();
+    }
+
+    // Write result for this block
+    if (tid == 0) {
+        output[blockIdx.x] = s_data[0];
+    }
+}
+
+// Optimized reduction (avoiding bank conflicts)
+__global__ void reduceOptimized(const float *input, float *output, int n) {
+    extern __shared__ float s_data[];
+
+    unsigned int tid = threadIdx.x;
+    unsigned int idx = blockIdx.x * (blockDim.x * 2) + threadIdx.x;
+
+    // Load and perform first level of reduction during load
+    s_data[tid] = 0.0f;
+    if (idx &lt; n) s_data[tid] += input[idx];
+    if (idx + blockDim.x &lt; n) s_data[tid] += input[idx + blockDim.x];
+    __syncthreads();
+
+    // Reduction with sequential addressing
+    for (unsigned int s = blockDim.x / 2; s &gt; 0; s &gt;&gt;= 1) {
+        if (tid &lt; s) {
+            s_data[tid] += s_data[tid + s];
+        }
+        __syncthreads();
+    }
+
+    if (tid == 0) output[blockIdx.x] = s_data[0];
+}
+</code></pre>
+<h3 id="5-scan-prefix-sum"><a class="header" href="#5-scan-prefix-sum">5. Scan (Prefix Sum)</a></h3>
+<pre><code class="language-cpp">// Inclusive scan using Blelloch algorithm
+__global__ void scanBlelloch(float *data, int n) {
+    extern __shared__ float temp[];
+
+    int tid = threadIdx.x;
+    int offset = 1;
+
+    // Load input into shared memory
+    temp[2 * tid] = data[2 * tid];
+    temp[2 * tid + 1] = data[2 * tid + 1];
+
+    // Build sum tree
+    for (int d = n &gt;&gt; 1; d &gt; 0; d &gt;&gt;= 1) {
+        __syncthreads();
+        if (tid &lt; d) {
+            int ai = offset * (2 * tid + 1) - 1;
+            int bi = offset * (2 * tid + 2) - 1;
+            temp[bi] += temp[ai];
+        }
+        offset *= 2;
+    }
+
+    // Clear last element
+    if (tid == 0) temp[n - 1] = 0;
+
+    // Traverse down tree and build scan
+    for (int d = 1; d &lt; n; d *= 2) {
+        offset &gt;&gt;= 1;
+        __syncthreads();
+        if (tid &lt; d) {
+            int ai = offset * (2 * tid + 1) - 1;
+            int bi = offset * (2 * tid + 2) - 1;
+            float t = temp[ai];
+            temp[ai] = temp[bi];
+            temp[bi] += t;
+        }
+    }
+    __syncthreads();
+
+    // Write results
+    data[2 * tid] = temp[2 * tid];
+    data[2 * tid + 1] = temp[2 * tid + 1];
+}
+</code></pre>
+<h3 id="6-histogram"><a class="header" href="#6-histogram">6. Histogram</a></h3>
+<pre><code class="language-cpp">// Atomic histogram
+__global__ void histogram(const int *data, int *hist, int n, int numBins) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx &lt; n) {
+        int bin = data[idx] % numBins;
+        atomicAdd(&amp;hist[bin], 1);
+    }
+}
+
+// Optimized with shared memory
+__global__ void histogramShared(const int *data, int *hist, int n, int numBins) {
+    extern __shared__ int s_hist[];
+
+    int tid = threadIdx.x;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Initialize shared histogram
+    for (int i = tid; i &lt; numBins; i += blockDim.x) {
+        s_hist[i] = 0;
+    }
+    __syncthreads();
+
+    // Accumulate in shared memory
+    if (idx &lt; n) {
+        int bin = data[idx] % numBins;
+        atomicAdd(&amp;s_hist[bin], 1);
+    }
+    __syncthreads();
+
+    // Write to global memory
+    for (int i = tid; i &lt; numBins; i += blockDim.x) {
+        atomicAdd(&amp;hist[i], s_hist[i]);
+    }
+}
+</code></pre>
+<h3 id="7-transpose"><a class="header" href="#7-transpose">7. Transpose</a></h3>
+<pre><code class="language-cpp">// Naive transpose
+__global__ void transposeNaive(const float *input, float *output,
+                               int width, int height) {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (x &lt; width &amp;&amp; y &lt; height) {
+        output[x * height + y] = input[y * width + x];
+    }
+}
+
+// Optimized with shared memory (no bank conflicts)
+#define TILE_DIM 32
+#define BLOCK_ROWS 8
+
+__global__ void transposeCoalesced(const float *input, float *output,
+                                   int width, int height) {
+    __shared__ float tile[TILE_DIM][TILE_DIM + 1];  // +1 to avoid bank conflicts
+
+    int x = blockIdx.x * TILE_DIM + threadIdx.x;
+    int y = blockIdx.y * TILE_DIM + threadIdx.y;
+
+    // Coalesced read from global memory
+    for (int j = 0; j &lt; TILE_DIM; j += BLOCK_ROWS) {
+        if (x &lt; width &amp;&amp; (y + j) &lt; height) {
+            tile[threadIdx.y + j][threadIdx.x] = input[(y + j) * width + x];
+        }
+    }
+
+    __syncthreads();
+
+    // Transpose block indices
+    x = blockIdx.y * TILE_DIM + threadIdx.x;
+    y = blockIdx.x * TILE_DIM + threadIdx.y;
+
+    // Coalesced write to global memory
+    for (int j = 0; j &lt; TILE_DIM; j += BLOCK_ROWS) {
+        if (x &lt; height &amp;&amp; (y + j) &lt; width) {
+            output[(y + j) * height + x] = tile[threadIdx.x][threadIdx.y + j];
+        }
+    }
+}
+</code></pre>
+<h3 id="8-convolution-1d"><a class="header" href="#8-convolution-1d">8. Convolution (1D)</a></h3>
+<pre><code class="language-cpp">#define KERNEL_RADIUS 3
+__constant__ float c_kernel[2 * KERNEL_RADIUS + 1];
+
+__global__ void convolution1D(const float *input, float *output, int n) {
+    extern __shared__ float s_data[];
+
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int tid = threadIdx.x;
+
+    // Load data into shared memory with halo
+    int halo_idx_left = (blockIdx.x - 1) * blockDim.x + tid;
+    int halo_idx_right = (blockIdx.x + 1) * blockDim.x + tid;
+
+    // Main data
+    if (idx &lt; n) {
+        s_data[tid + KERNEL_RADIUS] = input[idx];
+    }
+
+    // Left halo
+    if (tid &lt; KERNEL_RADIUS) {
+        s_data[tid] = (halo_idx_left &gt;= 0) ? input[halo_idx_left] : 0.0f;
+    }
+
+    // Right halo
+    if (tid &gt;= blockDim.x - KERNEL_RADIUS) {
+        int offset = tid - (blockDim.x - KERNEL_RADIUS);
+        s_data[tid + 2 * KERNEL_RADIUS] =
+            (halo_idx_right &lt; n) ? input[halo_idx_right] : 0.0f;
+    }
+
+    __syncthreads();
+
+    // Convolution
+    if (idx &lt; n) {
+        float sum = 0.0f;
+        for (int k = -KERNEL_RADIUS; k &lt;= KERNEL_RADIUS; k++) {
+            sum += s_data[tid + KERNEL_RADIUS + k] * c_kernel[k + KERNEL_RADIUS];
+        }
+        output[idx] = sum;
+    }
+}
+</code></pre>
+<h2 id="optimization-techniques"><a class="header" href="#optimization-techniques">Optimization Techniques</a></h2>
+<h3 id="1-occupancy-optimization"><a class="header" href="#1-occupancy-optimization">1. Occupancy Optimization</a></h3>
+<pre><code class="language-cpp">// Check theoretical occupancy
+int blockSize = 256;
+int minGridSize;
+int maxBlockSize;
+
+// Get optimal launch configuration
+cudaOccupancyMaxPotentialBlockSize(&amp;minGridSize, &amp;maxBlockSize,
+                                   kernel, 0, 0);
+
+// Calculate occupancy
+int numBlocks;
+cudaOccupancyMaxActiveBlocksPerMultiprocessor(&amp;numBlocks, kernel,
+                                              blockSize, 0);
+
+// Launch with optimal configuration
+int gridSize = (n + maxBlockSize - 1) / maxBlockSize;
+kernel&lt;&lt;&lt;gridSize, maxBlockSize&gt;&gt;&gt;(args);
+</code></pre>
+<h3 id="2-warp-level-primitives"><a class="header" href="#2-warp-level-primitives">2. Warp-Level Primitives</a></h3>
+<pre><code class="language-cpp">// Warp shuffle
+__global__ void warpReduce(float *data) {
+    int tid = threadIdx.x;
+    float val = data[tid];
+
+    // Warp-level reduction (no __syncthreads needed)
+    for (int offset = 16; offset &gt; 0; offset /= 2) {
+        val += __shfl_down_sync(0xffffffff, val, offset);
+    }
+
+    if ((tid % 32) == 0) {
+        data[tid / 32] = val;
+    }
+}
+
+// Warp vote functions
+__global__ void warpVote() {
+    int tid = threadIdx.x;
+    int value = tid % 2;
+
+    // Check if all threads in warp have value == 1
+    bool all_true = __all_sync(0xffffffff, value);
+
+    // Check if any thread in warp has value == 1
+    bool any_true = __any_sync(0xffffffff, value);
+
+    // Count threads in warp with value == 1
+    int count = __popc(__ballot_sync(0xffffffff, value));
+}
+</code></pre>
+<h3 id="3-avoiding-bank-conflicts"><a class="header" href="#3-avoiding-bank-conflicts">3. Avoiding Bank Conflicts</a></h3>
+<pre><code class="language-cpp">// BAD: Bank conflicts
+__shared__ float s_data[32][32];
+s_data[threadIdx.x][threadIdx.y] = ...;  // Conflicts when threadIdx.x varies
+
+// GOOD: Add padding to avoid conflicts
+__shared__ float s_data[32][33];  // Extra column eliminates conflicts
+s_data[threadIdx.x][threadIdx.y] = ...;
+
+// Access pattern analysis
+// Each bank serves one 32-bit word per cycle
+// Bank index = (address / 4) % 32
+// Conflict occurs when multiple threads access same bank
+</code></pre>
+<h3 id="4-asynchronous-operations"><a class="header" href="#4-asynchronous-operations">4. Asynchronous Operations</a></h3>
+<pre><code class="language-cpp">// Create CUDA streams
+cudaStream_t stream1, stream2;
+cudaStreamCreate(&amp;stream1);
+cudaStreamCreate(&amp;stream2);
+
+// Overlap computation and data transfer
+for (int i = 0; i &lt; nStreams; i++) {
+    int offset = i * streamSize;
+
+    // Async copy H2D
+    cudaMemcpyAsync(&amp;d_data[offset], &amp;h_data[offset], streamBytes,
+                    cudaMemcpyHostToDevice, stream[i]);
+
+    // Launch kernel
+    kernel&lt;&lt;&lt;grid, block, 0, stream[i]&gt;&gt;&gt;(&amp;d_data[offset], ...);
+
+    // Async copy D2H
+    cudaMemcpyAsync(&amp;h_result[offset], &amp;d_result[offset], streamBytes,
+                    cudaMemcpyDeviceToHost, stream[i]);
+}
+
+// Wait for all streams
+cudaDeviceSynchronize();
+
+// Cleanup
+cudaStreamDestroy(stream1);
+cudaStreamDestroy(stream2);
+</code></pre>
+<h3 id="5-memory-access-patterns"><a class="header" href="#5-memory-access-patterns">5. Memory Access Patterns</a></h3>
+<pre><code class="language-cpp">// Benchmark different access patterns
+__global__ void sequentialAccess(float *data, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx &lt; n) {
+        float val = data[idx];  // Coalesced: ~900 GB/s
+    }
+}
+
+__global__ void stridedAccess(float *data, int n, int stride) {
+    int idx = (blockIdx.x * blockDim.x + threadIdx.x) * stride;
+    if (idx &lt; n) {
+        float val = data[idx];  // Non-coalesced: ~100 GB/s
+    }
+}
+
+__global__ void randomAccess(float *data, int *indices, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx &lt; n) {
+        float val = data[indices[idx]];  // Random: ~50 GB/s
+    }
+}
+</code></pre>
+<h3 id="6-loop-unrolling"><a class="header" href="#6-loop-unrolling">6. Loop Unrolling</a></h3>
+<pre><code class="language-cpp">// Manual loop unrolling
+__global__ void matmulUnrolled(const float *A, const float *B, float *C,
+                               int M, int N, int K) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row &lt; M &amp;&amp; col &lt; N) {
+        float sum = 0.0f;
+
+        // Unroll by 4
+        int k;
+        for (k = 0; k &lt; K - 3; k += 4) {
+            sum += A[row * K + k] * B[k * N + col];
+            sum += A[row * K + k + 1] * B[(k + 1) * N + col];
+            sum += A[row * K + k + 2] * B[(k + 2) * N + col];
+            sum += A[row * K + k + 3] * B[(k + 3) * N + col];
+        }
+
+        // Handle remainder
+        for (; k &lt; K; k++) {
+            sum += A[row * K + k] * B[k * N + col];
+        }
+
+        C[row * N + col] = sum;
+    }
+}
+
+// Pragma unroll
+__global__ void kernel() {
+    #pragma unroll 8
+    for (int i = 0; i &lt; ITERATIONS; i++) {
+        // Loop body
+    }
+}
+</code></pre>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="1-dynamic-parallelism"><a class="header" href="#1-dynamic-parallelism">1. Dynamic Parallelism</a></h3>
+<pre><code class="language-cpp">// Parent kernel launches child kernels
+__global__ void childKernel(float *data, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx &lt; n) {
+        data[idx] *= 2.0f;
+    }
+}
+
+__global__ void parentKernel(float *data, int n, int depth) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx == 0 &amp;&amp; depth &gt; 0) {
+        // Launch child kernel from GPU
+        int childBlocks = (n + 255) / 256;
+        childKernel&lt;&lt;&lt;childBlocks, 256&gt;&gt;&gt;(data, n);
+
+        // Synchronize child kernel
+        cudaDeviceSynchronize();
+
+        // Recursive launch
+        parentKernel&lt;&lt;&lt;1, 1&gt;&gt;&gt;(data, n, depth - 1);
+    }
+}
+
+// Compile with: nvcc -arch=sm_35 -rdc=true -lcudadevrt
+</code></pre>
+<h3 id="2-cooperative-groups"><a class="header" href="#2-cooperative-groups">2. Cooperative Groups</a></h3>
+<pre><code class="language-cpp">#include &lt;cooperative_groups.h&gt;
+namespace cg = cooperative_groups;
+
+// Thread block group
+__global__ void kernelWithCG() {
+    cg::thread_block block = cg::this_thread_block();
+
+    // Synchronize block
+    block.sync();
+
+    // Get block info
+    int rank = block.thread_rank();
+    int size = block.size();
+}
+
+// Tiled partition (warp-level)
+__global__ void warpLevelCG() {
+    cg::thread_block block = cg::this_thread_block();
+    cg::thread_block_tile&lt;32&gt; warp = cg::tiled_partition&lt;32&gt;(block);
+
+    int value = threadIdx.x;
+
+    // Warp-level reduction
+    for (int offset = warp.size() / 2; offset &gt; 0; offset /= 2) {
+        value += warp.shfl_down(value, offset);
+    }
+
+    if (warp.thread_rank() == 0) {
+        // First thread in warp has the sum
+    }
+}
+
+// Grid-wide synchronization
+__global__ void gridSync(int *data) {
+    cg::grid_group grid = cg::this_grid();
+
+    // All threads in grid must reach this point
+    grid.sync();
+}
+
+// Launch with cooperative groups
+void *kernelArgs[] = {&amp;d_data};
+int numBlocks = 100;
+int blockSize = 256;
+cudaLaunchCooperativeKernel((void*)gridSync, numBlocks, blockSize,
+                            kernelArgs, 0, 0);
+</code></pre>
+<h3 id="3-tensor-cores"><a class="header" href="#3-tensor-cores">3. Tensor Cores</a></h3>
+<pre><code class="language-cpp">#include &lt;mma.h&gt;
+using namespace nvcuda;
+
+// Matrix multiplication with Tensor Cores (WMMA API)
+__global__ void wmma_matmul(half *a, half *b, float *c, int M, int N, int K) {
+    // Tile dimensions (16x16x16 for half precision)
+    const int WMMA_M = 16;
+    const int WMMA_N = 16;
+    const int WMMA_K = 16;
+
+    // Warp and lane IDs
+    int warpM = (blockIdx.x * blockDim.x + threadIdx.x) / warpSize;
+    int warpN = (blockIdx.y * blockDim.y + threadIdx.y);
+
+    // Declare fragments
+    wmma::fragment&lt;wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, half, wmma::row_major&gt; a_frag;
+    wmma::fragment&lt;wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, half, wmma::col_major&gt; b_frag;
+    wmma::fragment&lt;wmma::accumulator, WMMA_M, WMMA_N, WMMA_K, float&gt; acc_frag;
+
+    // Initialize accumulator
+    wmma::fill_fragment(acc_frag, 0.0f);
+
+    // Loop over K
+    for (int i = 0; i &lt; K; i += WMMA_K) {
+        int aRow = warpM * WMMA_M;
+        int aCol = i;
+        int bRow = i;
+        int bCol = warpN * WMMA_N;
+
+        // Bounds checking
+        if (aRow &lt; M &amp;&amp; bCol &lt; N) {
+            // Load matrices
+            wmma::load_matrix_sync(a_frag, a + aRow * K + aCol, K);
+            wmma::load_matrix_sync(b_frag, b + bRow * N + bCol, N);
+
+            // Perform matrix multiplication
+            wmma::mma_sync(acc_frag, a_frag, b_frag, acc_frag);
+        }
+    }
+
+    // Store result
+    int cRow = warpM * WMMA_M;
+    int cCol = warpN * WMMA_N;
+    if (cRow &lt; M &amp;&amp; cCol &lt; N) {
+        wmma::store_matrix_sync(c + cRow * N + cCol, acc_frag, N, wmma::mem_row_major);
+    }
+}
+</code></pre>
+<h3 id="4-cuda-graphs"><a class="header" href="#4-cuda-graphs">4. CUDA Graphs</a></h3>
+<pre><code class="language-cpp">// Create and execute CUDA graph
+cudaGraph_t graph;
+cudaGraphExec_t graphExec;
+
+// Begin graph capture
+cudaStreamBeginCapture(stream, cudaStreamCaptureModeGlobal);
+
+// Operations to capture
+kernel1&lt;&lt;&lt;grid1, block1, 0, stream&gt;&gt;&gt;(args1);
+cudaMemcpyAsync(dst, src, size, cudaMemcpyDeviceToHost, stream);
+kernel2&lt;&lt;&lt;grid2, block2, 0, stream&gt;&gt;&gt;(args2);
+
+// End capture
+cudaStreamEndCapture(stream, &amp;graph);
+
+// Instantiate graph
+cudaGraphInstantiate(&amp;graphExec, graph, NULL, NULL, 0);
+
+// Execute graph (can be launched multiple times)
+for (int i = 0; i &lt; iterations; i++) {
+    cudaGraphLaunch(graphExec, stream);
+    cudaStreamSynchronize(stream);
+}
+
+// Cleanup
+cudaGraphExecDestroy(graphExec);
+cudaGraphDestroy(graph);
+
+// Manual graph construction
+cudaGraphNode_t kernel1Node, kernel2Node, memcpyNode;
+cudaKernelNodeParams kernel1Params = {};
+kernel1Params.func = (void*)kernel1;
+kernel1Params.gridDim = grid1;
+kernel1Params.blockDim = block1;
+kernel1Params.kernelParams = args1;
+
+cudaGraphAddKernelNode(&amp;kernel1Node, graph, NULL, 0, &amp;kernel1Params);
+</code></pre>
+<h2 id="libraries-and-tools"><a class="header" href="#libraries-and-tools">Libraries and Tools</a></h2>
+<h3 id="cublas-linear-algebra"><a class="header" href="#cublas-linear-algebra">cuBLAS (Linear Algebra)</a></h3>
+<pre><code class="language-cpp">#include &lt;cublas_v2.h&gt;
+
+// Initialize cuBLAS
+cublasHandle_t handle;
+cublasCreate(&amp;handle);
+
+// Matrix multiplication: C = α*A*B + β*C
+const float alpha = 1.0f;
+const float beta = 0.0f;
+int m = 1024, n = 1024, k = 1024;
+
+cublasSgemm(handle,
+            CUBLAS_OP_N, CUBLAS_OP_N,
+            m, n, k,
+            &amp;alpha,
+            d_A, m,
+            d_B, k,
+            &amp;beta,
+            d_C, m);
+
+// Vector operations
+cublasSaxpy(handle, n, &amp;alpha, d_x, 1, d_y, 1);  // y = α*x + y
+cublasSdot(handle, n, d_x, 1, d_y, 1, &amp;result);  // dot product
+
+// Cleanup
+cublasDestroy(handle);
+</code></pre>
+<h3 id="cudnn-deep-learning"><a class="header" href="#cudnn-deep-learning">cuDNN (Deep Learning)</a></h3>
+<pre><code class="language-cpp">#include &lt;cudnn.h&gt;
+
+// Initialize cuDNN
+cudnnHandle_t cudnn;
+cudnnCreate(&amp;cudnn);
+
+// Convolution forward
+cudnnTensorDescriptor_t input_desc, output_desc;
+cudnnFilterDescriptor_t kernel_desc;
+cudnnConvolutionDescriptor_t conv_desc;
+
+cudnnCreateTensorDescriptor(&amp;input_desc);
+cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT,
+                           batch_size, channels, height, width);
+
+cudnnCreateFilterDescriptor(&amp;kernel_desc);
+cudnnSetFilter4dDescriptor(kernel_desc, CUDNN_DATA_FLOAT, CUDNN_TENSOR_NCHW,
+                          num_filters, channels, kernel_h, kernel_w);
+
+cudnnCreateConvolutionDescriptor(&amp;conv_desc);
+cudnnSetConvolution2dDescriptor(conv_desc, pad_h, pad_w, stride_h, stride_w,
+                                dilation_h, dilation_w,
+                                CUDNN_CROSS_CORRELATION, CUDNN_DATA_FLOAT);
+
+// Find best algorithm
+cudnnConvolutionFwdAlgoPerf_t perfResults;
+int returnedAlgoCount;
+cudnnFindConvolutionForwardAlgorithm(cudnn, input_desc, kernel_desc, conv_desc,
+                                     output_desc, 1, &amp;returnedAlgoCount, &amp;perfResults);
+
+// Execute convolution
+const float alpha = 1.0f, beta = 0.0f;
+cudnnConvolutionForward(cudnn, &amp;alpha, input_desc, d_input,
+                       kernel_desc, d_kernel, conv_desc,
+                       perfResults.algo, workspace, workspace_size,
+                       &amp;beta, output_desc, d_output);
+
+cudnnDestroy(cudnn);
+</code></pre>
+<h3 id="thrust-c-template-library"><a class="header" href="#thrust-c-template-library">Thrust (C++ Template Library)</a></h3>
+<pre><code class="language-cpp">#include &lt;thrust/device_vector.h&gt;
+#include &lt;thrust/sort.h&gt;
+#include &lt;thrust/reduce.h&gt;
+#include &lt;thrust/transform.h&gt;
+
+// Device vectors (automatic memory management)
+thrust::device_vector&lt;float&gt; d_vec(1000000);
+thrust::fill(d_vec.begin(), d_vec.end(), 1.0f);
+
+// Sorting
+thrust::sort(d_vec.begin(), d_vec.end());
+
+// Reduction
+float sum = thrust::reduce(d_vec.begin(), d_vec.end(), 0.0f, thrust::plus&lt;float&gt;());
+
+// Transform
+thrust::transform(d_vec.begin(), d_vec.end(), d_vec.begin(),
+                 thrust::negate&lt;float&gt;());
+
+// Custom functor
+struct square {
+    __host__ __device__
+    float operator()(const float &amp;x) const {
+        return x * x;
+    }
+};
+thrust::transform(d_vec.begin(), d_vec.end(), d_vec.begin(), square());
+
+// Scan (prefix sum)
+thrust::inclusive_scan(d_vec.begin(), d_vec.end(), d_vec.begin());
+
+// Copy to host
+thrust::host_vector&lt;float&gt; h_vec = d_vec;
+</code></pre>
+<h3 id="profiling-tools"><a class="header" href="#profiling-tools">Profiling Tools</a></h3>
+<pre><code class="language-bash"># nvprof (legacy)
+nvprof ./program
+nvprof --print-gpu-trace ./program
+nvprof --metrics achieved_occupancy ./program
+
+# Nsight Compute (detailed kernel profiling)
+ncu --set full --export profile ./program
+ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed ./program
+
+# Nsight Systems (timeline analysis)
+nsys profile --stats=true ./program
+nsys profile --trace=cuda,nvtx --output=report ./program
+
+# cuda-memcheck
+cuda-memcheck ./program
+cuda-memcheck --tool memcheck ./program
+cuda-memcheck --tool racecheck ./program
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="performance-optimization-checklist"><a class="header" href="#performance-optimization-checklist">Performance Optimization Checklist</a></h3>
+<ol>
+<li>
+<p><strong>Memory Access</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Use coalesced memory accesses</li>
+<li><input disabled="" type="checkbox"/>
+Minimize global memory accesses</li>
+<li><input disabled="" type="checkbox"/>
+Use shared memory for frequently accessed data</li>
+<li><input disabled="" type="checkbox"/>
+Avoid bank conflicts in shared memory</li>
+<li><input disabled="" type="checkbox"/>
+Use appropriate memory types (constant, texture)</li>
+</ul>
+</li>
+<li>
+<p><strong>Execution Configuration</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Maximize occupancy</li>
+<li><input disabled="" type="checkbox"/>
+Use block sizes that are multiples of warp size (32)</li>
+<li><input disabled="" type="checkbox"/>
+Balance register usage and occupancy</li>
+<li><input disabled="" type="checkbox"/>
+Minimize warp divergence</li>
+</ul>
+</li>
+<li>
+<p><strong>Compute Optimization</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Minimize thread divergence</li>
+<li><input disabled="" type="checkbox"/>
+Use fast math functions when appropriate (-use_fast_math)</li>
+<li><input disabled="" type="checkbox"/>
+Unroll loops when beneficial</li>
+<li><input disabled="" type="checkbox"/>
+Fuse kernels to reduce memory traffic</li>
+</ul>
+</li>
+<li>
+<p><strong>Data Transfer</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Minimize host-device transfers</li>
+<li><input disabled="" type="checkbox"/>
+Use pinned memory for faster transfers</li>
+<li><input disabled="" type="checkbox"/>
+Overlap computation and communication with streams</li>
+<li><input disabled="" type="checkbox"/>
+Batch small transfers</li>
+</ul>
+</li>
+</ol>
+<h3 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h3>
+<pre><code class="language-cpp">// 1. Race conditions
+__global__ void badKernel(int *data) {
+    int idx = threadIdx.x;
+    data[0] += idx;  // WRONG: Race condition
+}
+
+__global__ void goodKernel(int *data) {
+    int idx = threadIdx.x;
+    atomicAdd(&amp;data[0], idx);  // CORRECT: Atomic operation
+}
+
+// 2. Missing synchronization
+__global__ void badSync() {
+    __shared__ int s_data[256];
+    int tid = threadIdx.x;
+    s_data[tid] = tid;
+    // WRONG: No synchronization
+    int val = s_data[(tid + 1) % 256];  // Undefined behavior
+}
+
+__global__ void goodSync() {
+    __shared__ int s_data[256];
+    int tid = threadIdx.x;
+    s_data[tid] = tid;
+    __syncthreads();  // CORRECT: Synchronize before reading
+    int val = s_data[(tid + 1) % 256];
+}
+
+// 3. Ignoring error checking
+cudaMalloc(&amp;d_ptr, size);  // BAD: No error check
+kernel&lt;&lt;&lt;grid, block&gt;&gt;&gt;();  // BAD: No error check
+
+// GOOD:
+CUDA_CHECK(cudaMalloc(&amp;d_ptr, size));
+kernel&lt;&lt;&lt;grid, block&gt;&gt;&gt;();
+CUDA_CHECK(cudaGetLastError());
+CUDA_CHECK(cudaDeviceSynchronize());
+
+// 4. Unaligned memory access
+struct BadStruct {
+    char c;
+    float f;  // Unaligned on device
+};
+
+struct GoodStruct {
+    float f;
+    char c;
+    char padding[3];  // Explicit padding
+};
+
+// 5. Oversubscribing shared memory
+__global__ void badShared() {
+    __shared__ float s_data[10000];  // Too large!
+    // Kernel may not launch or have low occupancy
+}
+</code></pre>
+<h3 id="debugging-tips"><a class="header" href="#debugging-tips">Debugging Tips</a></h3>
+<pre><code class="language-cpp">// Use printf in kernels
+__global__ void debugKernel() {
+    int idx = threadIdx.x;
+    printf("Thread %d: value = %d\n", idx, value);
+}
+
+// Kernel with boundary checks
+__global__ void safeKernel(float *data, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Always check bounds
+    if (idx &gt;= n) return;
+
+    // Assertions (only in debug builds)
+    assert(data[idx] &gt;= 0.0f &amp;&amp; "Negative value detected");
+
+    data[idx] = sqrt(data[idx]);
+}
+
+// Compile with debug info and run with cuda-memcheck
+// nvcc -g -G program.cu -o program
+// cuda-memcheck ./program
+</code></pre>
+<h3 id="memory-management-patterns"><a class="header" href="#memory-management-patterns">Memory Management Patterns</a></h3>
+<pre><code class="language-cpp">// RAII wrapper for CUDA memory
+template&lt;typename T&gt;
+class CudaArray {
+private:
+    T *d_ptr;
+    size_t n;
+
+public:
+    CudaArray(size_t size) : n(size) {
+        CUDA_CHECK(cudaMalloc(&amp;d_ptr, n * sizeof(T)));
+    }
+
+    ~CudaArray() {
+        cudaFree(d_ptr);
+    }
+
+    void copyToDevice(const T *h_ptr) {
+        CUDA_CHECK(cudaMemcpy(d_ptr, h_ptr, n * sizeof(T),
+                             cudaMemcpyHostToDevice));
+    }
+
+    void copyToHost(T *h_ptr) {
+        CUDA_CHECK(cudaMemcpy(h_ptr, d_ptr, n * sizeof(T),
+                             cudaMemcpyDeviceToHost));
+    }
+
+    T* get() { return d_ptr; }
+    size_t size() const { return n; }
+};
+
+// Usage
+CudaArray&lt;float&gt; d_data(1000000);
+d_data.copyToDevice(h_data);
+kernel&lt;&lt;&lt;grid, block&gt;&gt;&gt;(d_data.get(), d_data.size());
+d_data.copyToHost(h_result);
+// Automatic cleanup when out of scope
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="memory-bandwidth-hierarchy"><a class="header" href="#memory-bandwidth-hierarchy">Memory Bandwidth Hierarchy</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Memory Type</th><th>Bandwidth</th><th>Latency</th></tr></thead><tbody>
+<tr><td>Registers</td><td>~20 TB/s</td><td>1 cycle</td></tr>
+<tr><td>Shared Memory</td><td>~15 TB/s</td><td>~20 cycles</td></tr>
+<tr><td>L1 Cache</td><td>~15 TB/s</td><td>~30 cycles</td></tr>
+<tr><td>L2 Cache</td><td>~5 TB/s</td><td>~200 cycles</td></tr>
+<tr><td>Global Memory</td><td>~1.5 TB/s</td><td>~400 cycles</td></tr>
+<tr><td>Host Memory</td><td>~50 GB/s</td><td>~100,000 cycles</td></tr>
+</tbody></table>
+</div>
+<h3 id="atomic-operations"><a class="header" href="#atomic-operations">Atomic Operations</a></h3>
+<pre><code class="language-cpp">// Integer atomics
+atomicAdd(&amp;addr, val);
+atomicSub(&amp;addr, val);
+atomicMin(&amp;addr, val);
+atomicMax(&amp;addr, val);
+atomicExch(&amp;addr, val);
+atomicCAS(&amp;addr, compare, val);  // Compare and swap
+atomicAnd(&amp;addr, val);
+atomicOr(&amp;addr, val);
+atomicXor(&amp;addr, val);
+
+// Floating-point atomics (newer GPUs)
+atomicAdd(&amp;float_addr, float_val);  // sm_20+
+atomicAdd(&amp;double_addr, double_val);  // sm_60+
+</code></pre>
+<h3 id="grid-and-block-limits"><a class="header" href="#grid-and-block-limits">Grid and Block Limits</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Parameter</th><th>Limit</th></tr></thead><tbody>
+<tr><td>Max threads per block</td><td>1024</td></tr>
+<tr><td>Max x-dimension of block</td><td>1024</td></tr>
+<tr><td>Max y/z-dimension of block</td><td>1024</td></tr>
+<tr><td>Max x-dimension of grid</td><td>2^31-1</td></tr>
+<tr><td>Max y/z-dimension of grid</td><td>65535</td></tr>
+<tr><td>Warp size</td><td>32</td></tr>
+<tr><td>Max shared memory per block</td><td>48-163 KB (arch dependent)</td></tr>
+</tbody></table>
+</div>
+<h3 id="resources"><a class="header" href="#resources">Resources</a></h3>
+<ul>
+<li><strong>Documentation</strong>: <a href="https://docs.nvidia.com/cuda/">NVIDIA CUDA Documentation</a></li>
+<li><strong>Programming Guide</strong>: <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/">CUDA C Programming Guide</a></li>
+<li><strong>Best Practices</strong>: <a href="https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/">CUDA C Best Practices Guide</a></li>
+<li><strong>Samples</strong>: CUDA SDK Samples</li>
+<li><strong>Books</strong>:
+<ul>
+<li>"Programming Massively Parallel Processors" by Kirk &amp; Hwu</li>
+<li>"CUDA by Example" by Sanders &amp; Kandrot</li>
+</ul>
+</li>
+<li><strong>Online Courses</strong>:
+<ul>
+<li>Udacity: Intro to Parallel Programming</li>
+<li>Coursera: GPU Programming Specialization</li>
+</ul>
+</li>
+</ul>
+<p>This guide covers the essential aspects of CUDA programming. For specific applications in machine learning, refer to the <a href="./pytorch.html">PyTorch</a>, <a href="./deep_learning.html">Deep Learning</a>, and <a href="./quantization.html">Quantization</a> documentation.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../machine_learning/lora.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../ai/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../machine_learning/lora.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../ai/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

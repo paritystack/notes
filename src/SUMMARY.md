@@ -119,6 +119,7 @@
     - [Quantization](machine_learning/quantization.md)
     - [Interesting Papers](machine_learning/interesting_papers.md)
     - [Lora](machine_learning/lora.md)
+    - [Cuda](machine_learning/cuda.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)
@@ -133,6 +134,7 @@
     - [Whisper](ai/whisper.md)
     - [Phi](ai/phi.md)
     - [Vllm](ai/vllm.md)
+    - [Software Dev Prompts](ai/software_dev_prompts.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)

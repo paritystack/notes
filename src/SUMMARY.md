@@ -252,6 +252,7 @@
     - [Django](web_development/django.md)
     - [Flask](web_development/flask.md)
     - [FastAPI](web_development/fastapi.md)
+    - [WebAssembly](web_development/webassembly.md)
     - [Web APIs](web_development/web_apis.md)
     - [REST APIs](web_development/rest_apis.md)
     - [GraphQL](web_development/graphql.md)

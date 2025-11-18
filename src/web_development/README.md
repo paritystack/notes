@@ -27,6 +27,15 @@ Modern web development covering frontend, backend, APIs, and full-stack technolo
 - **[Flask](flask.md)**: Lightweight and flexible Python microframework
 - **[FastAPI](fastapi.md)**: Modern, fast Python framework with automatic API documentation
 
+### WebAssembly
+
+- **[WebAssembly](webassembly.md)**: High-performance binary instruction format for the web
+  - Near-native execution speed in browsers
+  - Multi-language support (C/C++, Rust, Go, AssemblyScript)
+  - Secure sandboxed execution environment
+  - WASI for running outside browsers
+  - Use cases: game engines, video/audio processing, cryptography, ML inference
+
 ### Browser APIs
 
 - **[Web APIs](web_apis.md)**: Browser APIs for storage, workers, notifications, and more

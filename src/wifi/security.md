@@ -1,6 +1,12 @@
 # Wi-Fi Security
 
-Wi-Fi security is crucial for protecting wireless networks from unauthorized access and ensuring the confidentiality and integrity of data transmitted over the air. There are several wireless security protocols and mechanisms that have been developed over the years to enhance the security of Wi-Fi networks. Here are some of the most common wireless security protocols:
+Wi-Fi security is crucial for protecting wireless networks from unauthorized access and ensuring the confidentiality and integrity of data transmitted over the air. As wireless networks have become ubiquitous in homes, businesses, and public spaces, implementing robust security measures is essential to prevent data breaches, unauthorized access, and network exploitation.
+
+This document covers the evolution of Wi-Fi security protocols, technical implementation details, common threats, and best practices for securing wireless networks.
+
+## Overview of Wi-Fi Security Protocols
+
+There are several wireless security protocols and mechanisms that have been developed over the years to enhance the security of Wi-Fi networks. Here are the most common wireless security protocols:
 
 ### WEP (Wired Equivalent Privacy)
 - **Introduced**: 1997
@@ -185,4 +191,136 @@ By understanding the technical details and mechanisms of 802.1X, users and netwo
 ### Guest Networks
 - **Notes**: Many modern routers support the creation of guest networks, which provide a separate Wi-Fi network for visitors. Guest networks can be isolated from the main network, preventing guests from accessing sensitive resources. This is a useful feature for enhancing security in both home and business environments.
 
-By understanding and implementing these Wi-Fi security protocols and mechanisms, users and network administrators can protect their wireless networks from unauthorized access and ensure the confidentiality and integrity of their data.
+### Protected Management Frames (PMF)
+- **Introduced**: 802.11w amendment (2009), mandatory in WPA3
+- **Notes**: PMF protects management frames from eavesdropping and forging attacks. Management frames control important network functions like authentication, association, and disassociation. Without PMF, attackers can use forged management frames to perform denial-of-service attacks or force clients to disconnect. PMF is optional in WPA2 but mandatory in WPA3.
+
+## Common Wi-Fi Security Threats
+
+Understanding common security threats helps in implementing appropriate countermeasures:
+
+### 1. KRACK (Key Reinstallation Attack)
+- **Target**: WPA2
+- **Description**: Exploits the 4-way handshake to decrypt network traffic
+- **Mitigation**: Update devices with security patches, transition to WPA3
+
+### 2. Evil Twin Attacks
+- **Description**: Attackers create fake access points with legitimate-looking SSIDs to intercept user traffic
+- **Mitigation**: Use VPNs, verify network certificates, implement 802.1X authentication
+
+### 3. WPS PIN Brute-Force
+- **Description**: Exploits weak WPS PIN implementation to gain network access
+- **Mitigation**: Disable WPS functionality entirely
+
+### 4. Deauthentication Attacks
+- **Description**: Forged deauthentication frames force clients to disconnect
+- **Mitigation**: Enable Protected Management Frames (PMF/802.11w)
+
+### 5. Dictionary and Brute-Force Attacks
+- **Description**: Attackers attempt to guess network passwords
+- **Mitigation**: Use strong passphrases (20+ characters), implement WPA3 SAE
+
+### 6. Man-in-the-Middle (MITM) Attacks
+- **Description**: Attackers intercept and potentially modify traffic between clients and access points
+- **Mitigation**: Use encrypted protocols (HTTPS, SSH), implement certificate pinning, use WPA3
+
+## Security Best Practices
+
+### For Home Networks
+
+1. **Use WPA3 or WPA2 with AES**: Never use WEP or WPA-TKIP
+2. **Strong Passwords**: Use passphrases with at least 20 characters, including uppercase, lowercase, numbers, and symbols
+3. **Disable WPS**: Turn off Wi-Fi Protected Setup to prevent PIN brute-force attacks
+4. **Enable PMF**: If using WPA2, enable Protected Management Frames
+5. **Change Default Credentials**: Update router admin username and password
+6. **Firmware Updates**: Regularly update router firmware to patch security vulnerabilities
+7. **Network Segmentation**: Use guest networks for visitors and IoT devices
+8. **Hide SSID Cautiously**: While hiding SSID provides minimal security, it can reduce casual discovery
+9. **Disable Remote Management**: Turn off remote administration unless absolutely necessary
+10. **Enable Network Encryption**: Ensure all data transmitted over the network is encrypted
+
+### For Enterprise Networks
+
+1. **Implement WPA3-Enterprise**: Use 802.1X authentication with RADIUS servers
+2. **Certificate-Based Authentication**: Deploy EAP-TLS for strongest security
+3. **Network Access Control (NAC)**: Implement comprehensive NAC solutions
+4. **Regular Security Audits**: Conduct periodic wireless security assessments
+5. **Intrusion Detection Systems**: Deploy wireless IDS/IPS solutions
+6. **Rogue AP Detection**: Monitor for unauthorized access points
+7. **Client Isolation**: Prevent clients from communicating directly with each other
+8. **VLAN Segmentation**: Separate wireless traffic into appropriate VLANs
+9. **Logging and Monitoring**: Enable comprehensive logging and real-time monitoring
+10. **Security Policies**: Implement and enforce wireless security policies
+
+## Protocol Selection Guide
+
+### When to Use Each Protocol
+
+| Protocol | Recommended Use | Security Level |
+|----------|----------------|----------------|
+| **WEP** | Never - obsolete and insecure | ❌ Insecure |
+| **WPA** | Legacy devices only (if absolutely necessary) | ⚠️ Weak |
+| **WPA2-Personal** | Home networks, small offices (if WPA3 unavailable) | ✅ Adequate |
+| **WPA2-Enterprise** | Business networks (if WPA3 unavailable) | ✅ Good |
+| **WPA3-Personal** | Modern home networks and small offices | ✅✅ Strong |
+| **WPA3-Enterprise** | Modern business networks | ✅✅✅ Strongest |
+
+### Transition Strategy to WPA3
+
+1. **Assess Device Compatibility**: Inventory all wireless devices and check WPA3 support
+2. **Enable Transition Mode**: Use WPA2/WPA3 mixed mode during migration
+3. **Update Firmware**: Ensure all devices have latest firmware
+4. **Phase Out Legacy Devices**: Replace devices that cannot support WPA2 or higher
+5. **Test Thoroughly**: Verify connectivity for all devices before full deployment
+6. **Monitor Performance**: Watch for authentication issues during transition
+7. **Full WPA3 Deployment**: Switch to WPA3-only mode once all devices are compatible
+
+## Advanced Security Features
+
+### Opportunistic Wireless Encryption (OWE)
+- **Standard**: RFC 8110
+- **Purpose**: Provides encryption for open networks without authentication
+- **Use Case**: Public hotspots, guest networks
+- **Benefit**: Prevents passive eavesdropping on public networks
+
+### Enhanced Open
+- **Description**: Wi-Fi Alliance certification based on OWE
+- **Benefit**: Backward compatible with legacy devices while providing encryption for supported devices
+
+### Wi-Fi CERTIFIED Easy Connect
+- **Purpose**: Simplified onboarding for headless devices (IoT)
+- **Method**: Uses QR codes for secure device provisioning
+- **Security**: Based on Device Provisioning Protocol (DPP)
+
+## Monitoring and Auditing
+
+### Regular Security Assessments
+
+1. **Wireless Surveys**: Conduct regular site surveys to detect rogue access points
+2. **Penetration Testing**: Perform periodic security testing
+3. **Traffic Analysis**: Monitor for unusual patterns or unauthorized devices
+4. **Configuration Audits**: Regularly review security settings
+5. **Compliance Checks**: Ensure adherence to security policies and standards
+
+### Tools and Techniques
+
+- **Wireless Scanners**: Tools like Kismet, Aircrack-ng, or commercial solutions
+- **Network Analyzers**: Wireshark for protocol analysis
+- **SIEM Integration**: Integrate wireless logs with security information and event management systems
+- **Automated Monitoring**: Deploy continuous monitoring solutions
+
+## Compliance and Standards
+
+### Relevant Standards and Regulations
+
+- **PCI DSS**: Payment Card Industry Data Security Standard requires strong wireless security
+- **HIPAA**: Healthcare data protection requires encrypted wireless networks
+- **GDPR**: General Data Protection Regulation mandates appropriate security measures
+- **NIST Guidelines**: Follow NIST SP 800-97 and 800-153 for wireless security
+- **ISO/IEC 27001**: Information security management system standard
+
+## Conclusion
+
+By understanding and implementing these Wi-Fi security protocols, mechanisms, and best practices, users and network administrators can protect their wireless networks from unauthorized access and ensure the confidentiality and integrity of their data. The transition to WPA3 represents a significant improvement in wireless security, and organizations should prioritize upgrading to this protocol as devices and infrastructure support it.
+
+Remember that security is an ongoing process, requiring regular updates, monitoring, and adaptation to emerging threats. Stay informed about new vulnerabilities and security patches, and maintain a proactive approach to wireless network security.

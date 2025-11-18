@@ -48,7 +48,10 @@ latency_summary.observe(duration);
 - Aggregated patterns (request rate, error rate)
 
 ### 2. Logs
-Discrete event records with context:
+Discrete event records with context. Logs are what happened and why.
+
+#### Structured Logging
+Use JSON format for machine-readable logs:
 
 ```json
 {
@@ -70,10 +73,33 @@ Discrete event records with context:
 }
 ```
 
+**Log Levels:**
+- **DEBUG**: Detailed diagnostic info (development only)
+- **INFO**: General informational messages
+- **WARN**: Warning for potentially harmful situations
+- **ERROR**: Error events allowing app to continue
+- **FATAL**: Severe errors causing shutdown
+
+**Structured Logging Example:**
+```javascript
+// ❌ Bad: String interpolation
+logger.info('User ' + userId + ' purchased item ' + itemId + ' for $' + price);
+
+// ✅ Good: Structured fields
+logger.info('Purchase completed', {
+  user_id: userId,
+  item_id: itemId,
+  price: price,
+  currency: 'USD',
+  payment_method: 'credit_card'
+});
+```
+
 **When to use**:
 - Debugging specific issues
 - Audit trails
 - Unstructured investigation
+- Compliance and security events
 
 ### 3. Traces
 Request journey through distributed system:
@@ -688,6 +714,817 @@ if (analysis.errorIncrease > 0.01 || analysis.latencyIncrease > 100) {
 } else {
   promote();
 }
+```
+
+## Logging Platforms
+
+### ELK Stack (Elasticsearch, Logstash, Kibana)
+
+Complete log aggregation and analysis platform.
+
+#### Architecture
+```
+Applications → Filebeat/Fluentd → Logstash → Elasticsearch → Kibana
+                                      ↓
+                                  Filtering
+                                  Enrichment
+```
+
+#### Logstash Pipeline
+```ruby
+input {
+  beats {
+    port => 5044
+  }
+}
+
+filter {
+  # Parse JSON logs
+  json {
+    source => "message"
+  }
+
+  # Extract fields from message
+  grok {
+    match => { "message" => "%{COMBINEDAPACHELOG}" }
+  }
+
+  # Add geolocation
+  geoip {
+    source => "client_ip"
+  }
+
+  # Parse timestamps
+  date {
+    match => [ "timestamp", "ISO8601" ]
+    target => "@timestamp"
+  }
+
+  # Add custom fields
+  mutate {
+    add_field => {
+      "environment" => "production"
+      "indexed_at" => "%{@timestamp}"
+    }
+    remove_field => ["temp_field"]
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["elasticsearch:9200"]
+    index => "logs-%{+YYYY.MM.dd}"
+  }
+}
+```
+
+#### Kibana Query Language (KQL)
+```
+# Simple field match
+status: 500
+
+# Boolean operators
+status: 500 AND service: api
+
+# Wildcards
+message: *timeout*
+
+# Range queries
+response_time >= 1000
+
+# Exists query
+_exists_: error.stack
+
+# Time range
+@timestamp >= "2025-01-15T00:00:00"
+
+# Aggregations
+service: api | stats count() by status_code
+```
+
+### Grafana Loki
+
+Lightweight, cost-effective log aggregation system.
+
+#### Why Loki?
+- **Cost-effective**: Only indexes labels, not full text
+- **Simple**: Easy to operate, horizontally scalable
+- **Integrated**: Works seamlessly with Grafana
+- **Prometheus-like**: Uses familiar label model
+
+#### Architecture
+```
+Applications → Promtail → Loki → Grafana
+                ↓
+          Log files
+```
+
+#### Promtail Configuration
+```yaml
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          __path__: /var/log/*.log
+
+  - job_name: containers
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+```
+
+#### LogQL Queries
+```logql
+# Stream selector
+{service="api", environment="production"}
+
+# Filter by content
+{service="api"} |= "error"
+{service="api"} != "health"
+
+# JSON parsing
+{service="api"} | json | status_code >= 500
+
+# Pattern matching
+{service="api"} |~ "timeout|deadline"
+
+# Rate queries
+rate({service="api"}[5m])
+
+# Count over time
+count_over_time({service="api", level="error"}[1h])
+
+# Aggregation
+sum(rate({service="api"}[5m])) by (status_code)
+```
+
+#### Loki vs ELK Comparison
+
+| Feature | Loki | ELK |
+|---------|------|-----|
+| **Index Strategy** | Labels only | Full-text |
+| **Cost** | Lower | Higher |
+| **Query Speed** | Fast for label queries | Fast for full-text |
+| **Storage** | More efficient | More expensive |
+| **Complexity** | Simple | Complex |
+| **Best For** | Metrics-style logs | Full-text search |
+
+### Log Sampling
+
+Reduce volume while maintaining visibility.
+
+#### Head Sampling
+Decide at creation time:
+
+```javascript
+const shouldLog = (level, req) => {
+  // Always log errors
+  if (level === 'error' || level === 'fatal') {
+    return true;
+  }
+
+  // Always log important endpoints
+  if (req.path.startsWith('/api/payment')) {
+    return true;
+  }
+
+  // Sample 10% of info logs
+  if (level === 'info') {
+    return Math.random() < 0.1;
+  }
+
+  // Sample 1% of debug logs
+  return Math.random() < 0.01;
+};
+
+if (shouldLog('info', req)) {
+  logger.info({ req }, 'Request processed');
+}
+```
+
+#### Tail Sampling
+Decide after processing:
+
+```javascript
+class LogBuffer {
+  constructor() {
+    this.buffer = [];
+    this.maxSize = 1000;
+  }
+
+  add(logEntry) {
+    this.buffer.push(logEntry);
+
+    if (this.buffer.length > this.maxSize) {
+      this.flush();
+    }
+  }
+
+  flush() {
+    const hasErrors = this.buffer.some(log => log.level === 'error');
+    const isSlow = this.buffer.some(log => log.duration > 1000);
+
+    if (hasErrors || isSlow) {
+      // Send all logs for this request
+      this.sendLogs(this.buffer);
+    } else {
+      // Sample 1% of normal requests
+      if (Math.random() < 0.01) {
+        this.sendLogs(this.buffer);
+      }
+    }
+
+    this.buffer = [];
+  }
+}
+```
+
+#### Dynamic Sampling
+Adjust based on conditions:
+
+```javascript
+class AdaptiveLogSampler {
+  constructor() {
+    this.errorRate = 0;
+    this.baseRate = 0.01;
+  }
+
+  getSampleRate(level) {
+    if (level === 'error' || level === 'fatal') {
+      return 1.0; // 100%
+    }
+
+    // Increase sampling during high error rates
+    if (this.errorRate > 0.05) {
+      return 0.5; // 50%
+    }
+
+    if (this.errorRate > 0.01) {
+      return 0.1; // 10%
+    }
+
+    return this.baseRate; // 1%
+  }
+
+  updateErrorRate(rate) {
+    this.errorRate = rate;
+  }
+}
+```
+
+### Log Aggregation Patterns
+
+#### Centralized Logging
+```
+Service A ──┐
+Service B ──┼──→ Log Aggregator → Storage → Analysis
+Service C ──┘
+```
+
+#### Multi-Tier Logging
+```
+Edge Logs → Regional Aggregator → Central Storage
+                                      ↓
+                                  Archive (S3)
+```
+
+#### Hybrid Approach
+```
+High-value logs → Real-time (Loki/ES)
+All logs → Cold storage (S3)
+```
+
+## Distributed Tracing Platforms
+
+### OpenTelemetry
+Industry-standard observability framework.
+
+```javascript
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
+const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin');
+
+const sdk = new NodeSDK({
+  serviceName: 'my-service',
+  traceExporter: new JaegerExporter({
+    endpoint: 'http://jaeger:14268/api/traces',
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+sdk.start();
+```
+
+### Jaeger
+Distributed tracing platform inspired by Dapper and OpenZipkin.
+
+**Features:**
+- Distributed context propagation
+- Distributed transaction monitoring
+- Root cause analysis
+- Service dependency analysis
+- Performance optimization
+
+**Architecture:**
+```
+Client → Agent → Collector → Storage (Cassandra/ES) → UI
+```
+
+### Zipkin
+Distributed tracing system.
+
+**Features:**
+- Simpler than Jaeger
+- Good for smaller deployments
+- Native support in Spring Boot
+- Compatible with OpenTelemetry
+
+**Jaeger vs Zipkin:**
+
+| Feature | Jaeger | Zipkin |
+|---------|--------|--------|
+| **Origin** | Uber | Twitter |
+| **Storage** | Cassandra, ES, Badger | ES, MySQL, Cassandra |
+| **Sampling** | Adaptive | Fixed |
+| **Architecture** | More components | Simpler |
+| **Best For** | Large scale | Simple setups |
+
+## Incident Response
+
+### Incident Lifecycle
+
+```
+Detection → Response → Resolution → Postmortem
+```
+
+#### 1. Detection
+```javascript
+// Automated detection
+if (errorRate > SLO_THRESHOLD) {
+  incident.create({
+    severity: 'critical',
+    title: 'High error rate detected',
+    affected_service: 'api-gateway',
+    metrics: {
+      current_error_rate: errorRate,
+      threshold: SLO_THRESHOLD
+    }
+  });
+}
+```
+
+#### 2. Response
+```yaml
+# Incident response runbook
+steps:
+  1. Acknowledge alert
+  2. Check dashboard: https://grafana.company.com/d/incident
+  3. Review recent deployments
+  4. Check dependencies status
+  5. Enable debug logging if needed
+  6. Communicate in #incidents channel
+```
+
+#### 3. Resolution
+- Rollback bad deployment
+- Scale up resources
+- Fix configuration
+- Deploy hotfix
+
+#### 4. Postmortem
+
+**Blameless Postmortem Template:**
+
+```markdown
+# Incident Postmortem: [Title]
+
+## Summary
+Brief description of what happened
+
+## Impact
+- Duration: 2 hours 15 minutes
+- Affected users: ~15% of traffic
+- Revenue impact: $XX,XXX
+- Service: api-gateway
+
+## Timeline (all times UTC)
+- 14:00 - Deploy v2.3.4 to production
+- 14:05 - Error rate increases to 5%
+- 14:08 - PagerDuty alert triggers
+- 14:10 - On-call engineer starts investigation
+- 14:20 - Root cause identified: DB connection pool exhausted
+- 14:25 - Decision to rollback
+- 14:30 - Rollback initiated
+- 14:35 - Service recovered
+- 15:00 - Confirmed stable
+
+## Root Cause
+Database connection pool size was too small for new traffic pattern.
+New feature made 3x more DB calls per request than expected.
+
+## Resolution
+1. Rolled back to v2.3.3
+2. Increased connection pool size
+3. Re-deployed with fix
+
+## What Went Well
+- Alert triggered within 3 minutes
+- Clear runbooks enabled fast response
+- Communication was effective
+- Rollback process worked smoothly
+
+## What Went Wrong
+- Connection pool not load tested
+- No gradual rollout (canary)
+- Missing query count metrics
+- Load tests didn't simulate production pattern
+
+## Action Items
+- [ ] Add connection pool metrics (@alice, 2025-01-20)
+- [ ] Implement canary deployments (@bob, 2025-01-25)
+- [ ] Add query count per request metric (@charlie, 2025-01-22)
+- [ ] Update load test scenarios (@dave, 2025-01-30)
+- [ ] Document DB connection tuning (@eve, 2025-01-23)
+
+## Lessons Learned
+- Always canary deploy
+- Monitor connection pools
+- Load test with production-like data
+```
+
+### On-Call Best Practices
+
+#### On-Call Rotation
+```yaml
+rotation:
+  primary: 7 days
+  secondary: 7 days
+  handoff: Monday 10:00 AM
+
+responsibilities:
+  - Respond to pages within 15 minutes
+  - Investigate and mitigate incidents
+  - Write postmortems
+  - Update runbooks
+
+compensation:
+  - Shift differential
+  - Time off in lieu
+  - Rotation credits
+```
+
+#### Runbook Template
+```markdown
+# Runbook: High API Error Rate
+
+## Symptoms
+- Alert: "High error rate on api-gateway"
+- Dashboard: Error rate > 5%
+- User impact: API requests failing
+
+## Severity
+Critical (user-facing)
+
+## Diagnosis
+1. Check Grafana dashboard:
+   https://grafana.company.com/d/api-errors
+
+2. Query recent errors:
+   ```
+   {service="api"} | json | status_code >= 500
+   ```
+
+3. Check recent deployments:
+   ```bash
+   kubectl rollout history deployment/api-gateway
+   ```
+
+4. Check dependencies:
+   - Database: https://status.db.company.com
+   - Cache: https://status.redis.company.com
+   - External APIs: Check status pages
+
+## Mitigation
+### If recent deployment:
+```bash
+kubectl rollout undo deployment/api-gateway
+```
+
+### If database issue:
+```bash
+# Check connection pool
+kubectl exec -it api-gateway-xxx -- curl localhost:9090/metrics | grep db_connections
+
+# Scale up if needed
+kubectl scale deployment/api-gateway --replicas=10
+```
+
+### If external API down:
+```bash
+# Enable circuit breaker
+kubectl set env deployment/api-gateway CIRCUIT_BREAKER_ENABLED=true
+```
+
+## Escalation
+- Primary: @team-backend
+- Secondary: @team-platform
+- Manager: @engineering-manager
+
+## Postmortem
+Required for all critical incidents
+```
+
+### Alerting Integration
+
+#### PagerDuty Integration
+```javascript
+const { PagerDutyClient } = require('pagerduty-client');
+
+const pd = new PagerDutyClient({
+  integrationKey: process.env.PD_INTEGRATION_KEY
+});
+
+async function triggerIncident(alert) {
+  await pd.sendEvent({
+    event_action: 'trigger',
+    payload: {
+      summary: alert.title,
+      severity: alert.severity,
+      source: alert.source,
+      custom_details: {
+        error_rate: alert.metrics.error_rate,
+        threshold: alert.threshold,
+        dashboard: alert.dashboard_url
+      }
+    },
+    links: [
+      {
+        href: alert.dashboard_url,
+        text: 'View Dashboard'
+      },
+      {
+        href: alert.runbook_url,
+        text: 'View Runbook'
+      }
+    ]
+  });
+}
+```
+
+#### Opsgenie Integration
+```javascript
+const opsgenie = require('opsgenie-sdk');
+
+const client = new opsgenie.AlertApi({
+  apiKey: process.env.OPSGENIE_API_KEY
+});
+
+async function createAlert(alert) {
+  await client.createAlert({
+    message: alert.title,
+    description: alert.description,
+    priority: alertSeverityToPriority(alert.severity),
+    tags: [alert.service, alert.environment],
+    details: {
+      error_rate: alert.metrics.error_rate,
+      affected_users: alert.affected_users
+    },
+    responders: [
+      { type: 'team', name: 'Backend Team' }
+    ],
+    actions: ['View Dashboard', 'View Logs'],
+    entity: alert.service,
+    source: 'Prometheus'
+  });
+}
+
+function alertSeverityToPriority(severity) {
+  const map = {
+    critical: 'P1',
+    high: 'P2',
+    medium: 'P3',
+    low: 'P4',
+    info: 'P5'
+  };
+  return map[severity] || 'P3';
+}
+```
+
+## Debugging Production Issues
+
+### Systematic Debugging Approach
+
+#### 1. Gather Context
+```bash
+# What changed recently?
+git log --since="2 hours ago" --oneline
+
+# When did it start?
+# Check metrics dashboard for inflection point
+
+# What's the scope?
+# All users? Specific region? Specific feature?
+```
+
+#### 2. Form Hypothesis
+```
+Theory: Database connection pool exhausted
+Evidence needed:
+  - Connection pool metrics
+  - Database query latency
+  - Error messages mentioning connections
+```
+
+#### 3. Test Hypothesis
+```bash
+# Check connection pool
+curl http://api:9090/metrics | grep db_pool
+
+# Check database
+kubectl logs -l app=api --tail=100 | grep -i connection
+
+# Check traces for slow DB queries
+# Jaeger UI: Filter by service=api, minDuration=1000ms
+```
+
+#### 4. Mitigate
+```bash
+# Quick fix: Scale up
+kubectl scale deployment/api --replicas=10
+
+# Better fix: Increase pool size
+kubectl set env deployment/api DB_POOL_SIZE=50
+```
+
+#### 5. Verify
+```bash
+# Check error rate returned to normal
+curl -s http://prometheus:9090/api/v1/query?query='error_rate' | jq .
+
+# Check latency
+curl -s http://prometheus:9090/api/v1/query?query='p95_latency' | jq .
+```
+
+### Production Debugging Tools
+
+#### Live Debugging
+```bash
+# Attach debugger to running container (Node.js)
+kubectl exec -it api-gateway-xxx -- kill -USR1 1
+kubectl port-forward api-gateway-xxx 9229:9229
+# Chrome DevTools: chrome://inspect
+
+# Python
+kubectl exec -it api-gateway-xxx -- python -m pdb app.py
+
+# Go (requires delve)
+kubectl exec -it api-gateway-xxx -- dlv attach $(pidof app)
+```
+
+#### Dynamic Logging
+```javascript
+// Enable debug logs for specific user
+app.use((req, res, next) => {
+  if (req.headers['x-debug-user'] === 'user_123') {
+    req.log = logger.child({ level: 'debug' });
+  }
+  next();
+});
+
+// Enable via feature flag
+if (featureFlags.isEnabled('debug-logging', userId)) {
+  logger.level = 'debug';
+}
+```
+
+#### Traffic Replay
+```bash
+# Capture traffic with tcpdump
+tcpdump -i eth0 -w capture.pcap port 8080
+
+# Replay with tcpreplay
+tcpreplay --topspeed -i eth0 capture.pcap
+
+# Or use gor for more control
+gor --input-raw :8080 --output-http="http://staging:8080"
+```
+
+#### Query Analysis
+```javascript
+// Add query explanation
+const explain = await db.query('EXPLAIN ANALYZE ' + sqlQuery);
+logger.info({ explain }, 'Query plan');
+
+// Log slow queries
+const start = Date.now();
+const result = await db.query(sqlQuery);
+const duration = Date.now() - start;
+
+if (duration > 1000) {
+  logger.warn({
+    query: sqlQuery,
+    duration,
+    rows: result.rowCount
+  }, 'Slow query detected');
+}
+```
+
+### Common Production Issues
+
+#### Memory Leaks
+```javascript
+// Detect memory leaks
+const heapdump = require('heapdump');
+
+setInterval(() => {
+  const usage = process.memoryUsage();
+  logger.info({ memory: usage }, 'Memory usage');
+
+  if (usage.heapUsed > THRESHOLD) {
+    heapdump.writeSnapshot(`/tmp/heap-${Date.now()}.heapsnapshot`);
+  }
+}, 60000);
+
+// Analyze with Chrome DevTools
+```
+
+#### Connection Leaks
+```javascript
+// Track connection lifecycle
+class ConnectionPool {
+  constructor() {
+    this.active = new Set();
+  }
+
+  async acquire() {
+    const conn = await this.pool.acquire();
+    this.active.add(conn);
+    conn._acquiredAt = Date.now();
+    return conn;
+  }
+
+  release(conn) {
+    this.active.delete(conn);
+    this.pool.release(conn);
+  }
+
+  checkLeaks() {
+    const now = Date.now();
+    for (const conn of this.active) {
+      if (now - conn._acquiredAt > 30000) {
+        logger.warn({
+          age: now - conn._acquiredAt,
+          stack: conn._stack
+        }, 'Potential connection leak');
+      }
+    }
+  }
+}
+```
+
+#### Race Conditions
+```javascript
+// Add request tracing
+const traceRequest = (req, res, next) => {
+  req.id = generateId();
+  req.startTime = Date.now();
+
+  logger.info({
+    req_id: req.id,
+    method: req.method,
+    path: req.path
+  }, 'Request start');
+
+  res.on('finish', () => {
+    logger.info({
+      req_id: req.id,
+      duration: Date.now() - req.startTime,
+      status: res.statusCode
+    }, 'Request end');
+  });
+
+  next();
+};
 ```
 
 ## Tools and Platforms

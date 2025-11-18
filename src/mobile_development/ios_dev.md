@@ -869,6 +869,767 @@ struct SettingsView: View {
 }
 ```
 
+## UIKit vs SwiftUI
+
+### When to Use UIKit
+
+- **Legacy codebases**: Existing projects built with UIKit
+- **Advanced customization**: Complex UI requirements beyond SwiftUI
+- **Third-party libraries**: Many libraries still UIKit-based
+- **iOS 12 and earlier**: SwiftUI requires iOS 13+
+- **Precise control**: Fine-grained control over UI behavior
+
+### When to Use SwiftUI
+
+- **New projects**: Modern declarative approach
+- **Rapid development**: Less boilerplate code
+- **Cross-platform**: Share code with macOS, watchOS, tvOS
+- **iOS 13+**: Target modern iOS versions
+- **Reactive UIs**: Data-driven interfaces with automatic updates
+
+### Feature Comparison
+
+| Feature | UIKit | SwiftUI |
+|---------|-------|---------|
+| **Minimum iOS** | iOS 2.0+ | iOS 13+ |
+| **Paradigm** | Imperative | Declarative |
+| **Code Style** | Programmatic/Storyboards | Swift DSL |
+| **State Management** | Manual | Automatic (@State, @Binding) |
+| **Preview** | Simulator only | Live preview in Xcode |
+| **Learning Curve** | Steeper | Gentler (if new to iOS) |
+| **Performance** | Highly optimized | Optimized (improving) |
+| **Flexibility** | Very high | Growing |
+
+### UIKit in SwiftUI
+
+```swift
+import SwiftUI
+import UIKit
+
+// Wrap UIKit view in SwiftUI
+struct UIKitTextView: UIViewRepresentable {
+    @Binding var text: String
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.delegate = context.coordinator
+        textView.font = UIFont.systemFont(ofSize: 16)
+        return textView
+    }
+
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.text = text
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, UITextViewDelegate {
+        var parent: UIKitTextView
+
+        init(_ parent: UIKitTextView) {
+            self.parent = parent
+        }
+
+        func textViewDidChange(_ textView: UITextView) {
+            parent.text = textView.text
+        }
+    }
+}
+
+// Usage
+struct ContentView: View {
+    @State private var text = ""
+
+    var body: some View {
+        UIKitTextView(text: $text)
+            .frame(height: 200)
+    }
+}
+```
+
+### SwiftUI in UIKit
+
+```swift
+import UIKit
+import SwiftUI
+
+class ViewController: UIViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Embed SwiftUI view in UIKit
+        let swiftUIView = MySwiftUIView()
+        let hostingController = UIHostingController(rootView: swiftUIView)
+
+        addChild(hostingController)
+        view.addSubview(hostingController.view)
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
+            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        hostingController.didMove(toParent: self)
+    }
+}
+
+struct MySwiftUIView: View {
+    var body: some View {
+        VStack {
+            Text("SwiftUI View")
+            Button("Tap Me") {
+                print("Button tapped")
+            }
+        }
+    }
+}
+```
+
+## iOS Architecture Patterns
+
+### MVC (Model-View-Controller)
+
+Apple's recommended pattern, but often criticized for "Massive View Controller".
+
+```swift
+// Model
+struct User {
+    let id: Int
+    let name: String
+    let email: String
+}
+
+// View (typically in Storyboard or SwiftUI)
+class UserView: UIView {
+    let nameLabel = UILabel()
+    let emailLabel = UILabel()
+
+    func configure(with user: User) {
+        nameLabel.text = user.name
+        emailLabel.text = user.email
+    }
+}
+
+// Controller
+class UserViewController: UIViewController {
+
+    private var user: User?
+    private let userView = UserView()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        fetchUser()
+    }
+
+    private func fetchUser() {
+        // Fetch user from service
+        NetworkService.shared.getUser(id: 1) { [weak self] result in
+            switch result {
+            case .success(let user):
+                self?.user = user
+                self?.updateView()
+            case .failure(let error):
+                self?.showError(error)
+            }
+        }
+    }
+
+    private func updateView() {
+        guard let user = user else { return }
+        userView.configure(with: user)
+    }
+
+    private func showError(_ error: Error) {
+        // Show error alert
+    }
+}
+```
+
+### MVVM (Model-View-ViewModel)
+
+Separates business logic from view controllers, better for testability.
+
+```swift
+// Model
+struct User: Codable {
+    let id: Int
+    let name: String
+    let email: String
+}
+
+// ViewModel
+class UserViewModel: ObservableObject {
+    @Published var user: User?
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    private let networkService: NetworkService
+
+    init(networkService: NetworkService = .shared) {
+        self.networkService = networkService
+    }
+
+    func fetchUser(id: Int) async {
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            user = try await networkService.getUser(id: id)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
+    }
+
+    var displayName: String {
+        user?.name ?? "Unknown"
+    }
+
+    var displayEmail: String {
+        user?.email ?? "No email"
+    }
+}
+
+// View (SwiftUI)
+struct UserView: View {
+    @StateObject private var viewModel = UserViewModel()
+
+    var body: some View {
+        VStack {
+            if viewModel.isLoading {
+                ProgressView()
+            } else if let error = viewModel.errorMessage {
+                Text("Error: \(error)")
+                    .foregroundColor(.red)
+            } else {
+                VStack(alignment: .leading) {
+                    Text(viewModel.displayName)
+                        .font(.title)
+                    Text(viewModel.displayEmail)
+                        .font(.subheadline)
+                }
+            }
+        }
+        .task {
+            await viewModel.fetchUser(id: 1)
+        }
+    }
+}
+
+// View (UIKit)
+class UserViewController: UIViewController {
+
+    private let viewModel = UserViewModel()
+    private var cancellables = Set<AnyCancellable>()
+
+    private let nameLabel = UILabel()
+    private let emailLabel = UILabel()
+    private let activityIndicator = UIActivityIndicatorView()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupBindings()
+        Task {
+            await viewModel.fetchUser(id: 1)
+        }
+    }
+
+    private func setupBindings() {
+        viewModel.$user
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] user in
+                self?.nameLabel.text = self?.viewModel.displayName
+                self?.emailLabel.text = self?.viewModel.displayEmail
+            }
+            .store(in: &cancellables)
+
+        viewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                isLoading ? self?.activityIndicator.startAnimating() : self?.activityIndicator.stopAnimating()
+            }
+            .store(in: &cancellables)
+    }
+}
+```
+
+### VIPER (View-Interactor-Presenter-Entity-Router)
+
+Highly modular architecture for complex apps.
+
+```swift
+// Entity
+struct User {
+    let id: Int
+    let name: String
+    let email: String
+}
+
+// Interactor
+protocol UserInteractorProtocol {
+    func fetchUser(id: Int) async throws -> User
+}
+
+class UserInteractor: UserInteractorProtocol {
+    private let networkService: NetworkService
+
+    init(networkService: NetworkService = .shared) {
+        self.networkService = networkService
+    }
+
+    func fetchUser(id: Int) async throws -> User {
+        return try await networkService.getUser(id: id)
+    }
+}
+
+// Presenter
+protocol UserPresenterProtocol {
+    func viewDidLoad()
+    func formatUserName(_ name: String) -> String
+}
+
+class UserPresenter: UserPresenterProtocol {
+    weak var view: UserViewProtocol?
+    var interactor: UserInteractorProtocol?
+    var router: UserRouterProtocol?
+
+    func viewDidLoad() {
+        Task {
+            view?.showLoading()
+            do {
+                let user = try await interactor?.fetchUser(id: 1)
+                view?.hideLoading()
+                if let user = user {
+                    view?.displayUser(user)
+                }
+            } catch {
+                view?.hideLoading()
+                view?.displayError(error.localizedDescription)
+            }
+        }
+    }
+
+    func formatUserName(_ name: String) -> String {
+        return name.uppercased()
+    }
+}
+
+// View
+protocol UserViewProtocol: AnyObject {
+    func displayUser(_ user: User)
+    func displayError(_ message: String)
+    func showLoading()
+    func hideLoading()
+}
+
+class UserViewController: UIViewController, UserViewProtocol {
+    var presenter: UserPresenterProtocol?
+
+    private let nameLabel = UILabel()
+    private let emailLabel = UILabel()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        presenter?.viewDidLoad()
+    }
+
+    func displayUser(_ user: User) {
+        nameLabel.text = presenter?.formatUserName(user.name)
+        emailLabel.text = user.email
+    }
+
+    func displayError(_ message: String) {
+        // Show error
+    }
+
+    func showLoading() {
+        // Show loading indicator
+    }
+
+    func hideLoading() {
+        // Hide loading indicator
+    }
+}
+
+// Router
+protocol UserRouterProtocol {
+    static func createModule() -> UIViewController
+    func navigateToDetail(user: User)
+}
+
+class UserRouter: UserRouterProtocol {
+    weak var viewController: UIViewController?
+
+    static func createModule() -> UIViewController {
+        let view = UserViewController()
+        let presenter = UserPresenter()
+        let interactor = UserInteractor()
+        let router = UserRouter()
+
+        view.presenter = presenter
+        presenter.view = view
+        presenter.interactor = interactor
+        presenter.router = router
+        router.viewController = view
+
+        return view
+    }
+
+    func navigateToDetail(user: User) {
+        // Navigate to detail screen
+    }
+}
+```
+
+### Coordinator Pattern
+
+Manages navigation flow separately from view controllers.
+
+```swift
+// Coordinator Protocol
+protocol Coordinator {
+    var navigationController: UINavigationController { get set }
+    func start()
+}
+
+// App Coordinator
+class AppCoordinator: Coordinator {
+    var navigationController: UINavigationController
+
+    init(navigationController: UINavigationController) {
+        self.navigationController = navigationController
+    }
+
+    func start() {
+        showUserList()
+    }
+
+    func showUserList() {
+        let viewController = UserListViewController()
+        viewController.coordinator = self
+        navigationController.pushViewController(viewController, animated: false)
+    }
+
+    func showUserDetail(user: User) {
+        let viewController = UserDetailViewController(user: user)
+        viewController.coordinator = self
+        navigationController.pushViewController(viewController, animated: true)
+    }
+
+    func showSettings() {
+        let settingsCoordinator = SettingsCoordinator(navigationController: navigationController)
+        settingsCoordinator.start()
+    }
+}
+
+// View Controller
+class UserListViewController: UIViewController {
+    weak var coordinator: AppCoordinator?
+
+    private func didSelectUser(_ user: User) {
+        coordinator?.showUserDetail(user: user)
+    }
+}
+
+// App Delegate
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    var window: UIWindow?
+    var appCoordinator: AppCoordinator?
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        window = UIWindow(frame: UIScreen.main.bounds)
+        let navigationController = UINavigationController()
+
+        appCoordinator = AppCoordinator(navigationController: navigationController)
+        appCoordinator?.start()
+
+        window?.rootViewController = navigationController
+        window?.makeKeyAndVisible()
+
+        return true
+    }
+}
+```
+
+### Dependency Injection
+
+```swift
+// Protocol-based dependency injection
+protocol NetworkServiceProtocol {
+    func fetchData() async throws -> Data
+}
+
+class NetworkService: NetworkServiceProtocol {
+    func fetchData() async throws -> Data {
+        // Real implementation
+        return Data()
+    }
+}
+
+class MockNetworkService: NetworkServiceProtocol {
+    func fetchData() async throws -> Data {
+        // Mock implementation for testing
+        return Data()
+    }
+}
+
+// Constructor injection
+class UserViewModel {
+    private let networkService: NetworkServiceProtocol
+
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
+    }
+
+    func loadData() async {
+        do {
+            let data = try await networkService.fetchData()
+            // Process data
+        } catch {
+            // Handle error
+        }
+    }
+}
+
+// Usage
+let viewModel = UserViewModel(networkService: NetworkService())
+
+// Testing
+let testViewModel = UserViewModel(networkService: MockNetworkService())
+
+// Property injection
+class UserViewController: UIViewController {
+    var networkService: NetworkServiceProtocol = NetworkService()
+
+    func fetchData() {
+        Task {
+            _ = try await networkService.fetchData()
+        }
+    }
+}
+
+// Dependency injection container
+class DependencyContainer {
+    static let shared = DependencyContainer()
+
+    private init() {}
+
+    lazy var networkService: NetworkServiceProtocol = {
+        return NetworkService()
+    }()
+
+    func makeUserViewModel() -> UserViewModel {
+        return UserViewModel(networkService: networkService)
+    }
+}
+
+// Usage
+let viewModel = DependencyContainer.shared.makeUserViewModel()
+```
+
+## Combine Framework
+
+Combine is Apple's reactive programming framework for processing values over time.
+
+### Publishers and Subscribers
+
+```swift
+import Combine
+
+// Simple publisher
+let publisher = Just("Hello, Combine!")
+
+let cancellable = publisher.sink { value in
+    print(value)  // Prints: Hello, Combine!
+}
+
+// Publisher from array
+let numbers = [1, 2, 3, 4, 5].publisher
+
+numbers.sink { value in
+    print(value)
+}
+
+// Subject - publisher you can send values to
+let subject = PassthroughSubject<String, Never>()
+
+subject.sink { value in
+    print("Received: \(value)")
+}
+
+subject.send("First")
+subject.send("Second")
+subject.send(completion: .finished)
+
+// CurrentValueSubject - holds current value
+let currentValue = CurrentValueSubject<Int, Never>(0)
+
+currentValue.sink { value in
+    print("Current value: \(value)")
+}
+
+currentValue.send(10)
+currentValue.send(20)
+print("Last value: \(currentValue.value)")
+```
+
+### Operators
+
+```swift
+import Combine
+
+var cancellables = Set<AnyCancellable>()
+
+// Map
+[1, 2, 3, 4, 5].publisher
+    .map { $0 * 2 }
+    .sink { print($0) }
+    .store(in: &cancellables)
+
+// Filter
+[1, 2, 3, 4, 5].publisher
+    .filter { $0 % 2 == 0 }
+    .sink { print($0) }  // Prints: 2, 4
+    .store(in: &cancellables)
+
+// Reduce
+[1, 2, 3, 4, 5].publisher
+    .reduce(0, +)
+    .sink { print($0) }  // Prints: 15
+    .store(in: &cancellables)
+
+// FlatMap
+struct User {
+    let id: Int
+    let name: String
+}
+
+func fetchUser(id: Int) -> AnyPublisher<User, Error> {
+    Just(User(id: id, name: "User \(id)"))
+        .setFailureType(to: Error.self)
+        .eraseToAnyPublisher()
+}
+
+[1, 2, 3].publisher
+    .setFailureType(to: Error.self)
+    .flatMap { fetchUser(id: $0) }
+    .sink(
+        receiveCompletion: { _ in },
+        receiveValue: { print($0.name) }
+    )
+    .store(in: &cancellables)
+
+// CombineLatest
+let publisher1 = PassthroughSubject<String, Never>()
+let publisher2 = PassthroughSubject<String, Never>()
+
+publisher1.combineLatest(publisher2)
+    .sink { value1, value2 in
+        print("\(value1) - \(value2)")
+    }
+    .store(in: &cancellables)
+
+publisher1.send("A")
+publisher2.send("1")  // Prints: A - 1
+publisher1.send("B")  // Prints: B - 1
+publisher2.send("2")  // Prints: B - 2
+
+// Debounce (useful for search)
+let searchPublisher = PassthroughSubject<String, Never>()
+
+searchPublisher
+    .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+    .removeDuplicates()
+    .sink { searchText in
+        print("Searching for: \(searchText)")
+    }
+    .store(in: &cancellables)
+```
+
+### Combine with Networking
+
+```swift
+import Combine
+import Foundation
+
+class APIService {
+
+    func fetchUsers() -> AnyPublisher<[User], Error> {
+        guard let url = URL(string: "https://api.example.com/users") else {
+            return Fail(error: URLError(.badURL))
+                .eraseToAnyPublisher()
+        }
+
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map(\.data)
+            .decode(type: [User].self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+}
+
+// Usage
+class UserViewModel: ObservableObject {
+    @Published var users: [User] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    private let apiService = APIService()
+    private var cancellables = Set<AnyCancellable>()
+
+    func loadUsers() {
+        isLoading = true
+
+        apiService.fetchUsers()
+            .sink { [weak self] completion in
+                self?.isLoading = false
+                if case .failure(let error) = completion {
+                    self?.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] users in
+                self?.users = users
+            }
+            .store(in: &cancellables)
+    }
+}
+```
+
+### @Published Property Wrapper
+
+```swift
+import Combine
+
+class FormViewModel: ObservableObject {
+    @Published var username = ""
+    @Published var email = ""
+    @Published var password = ""
+    @Published var confirmPassword = ""
+
+    @Published var isValid = false
+
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        // Validate form when any field changes
+        Publishers.CombineLatest4($username, $email, $password, $confirmPassword)
+            .map { username, email, password, confirmPassword in
+                return !username.isEmpty &&
+                       email.contains("@") &&
+                       password.count >= 8 &&
+                       password == confirmPassword
+            }
+            .assign(to: &$isValid)
+    }
+}
+```
+
 ## Networking
 
 ### URLSession
@@ -1245,6 +2006,681 @@ Debug > View Debugging > Capture View Hierarchy
 - Find overlapping views
 - Identify layout issues
 ```
+
+## Push Notifications
+
+### Remote Notifications Setup
+
+```swift
+import UserNotifications
+
+// AppDelegate.swift
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+
+        // Request authorization
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if granted {
+                DispatchQueue.main.async {
+                    application.registerForRemoteNotifications()
+                }
+            }
+        }
+
+        return true
+    }
+
+    // Called when APNs successfully registered device
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        print("Device Token: \(token)")
+        // Send token to your server
+    }
+
+    // Called when registration fails
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register: \(error)")
+    }
+
+    // Handle notification when app is in foreground
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound, .badge])
+    }
+
+    // Handle notification tap
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        print("Notification tapped: \(userInfo)")
+
+        // Handle deep link or action
+        if let urlString = userInfo["deeplink"] as? String,
+           let url = URL(string: urlString) {
+            // Navigate to specific screen
+        }
+
+        completionHandler()
+    }
+}
+```
+
+### Local Notifications
+
+```swift
+import UserNotifications
+
+class NotificationManager {
+
+    static let shared = NotificationManager()
+
+    private init() {}
+
+    // Schedule local notification
+    func scheduleNotification(title: String, body: String, date: Date, identifier: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        content.badge = 1
+
+        // Add custom data
+        content.userInfo = ["customKey": "customValue"]
+
+        // Create trigger
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+
+        // Create request
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        // Schedule notification
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling notification: \(error)")
+            }
+        }
+    }
+
+    // Schedule notification with time interval
+    func scheduleNotification(title: String, body: String, timeInterval: TimeInterval, identifier: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    // Cancel notification
+    func cancelNotification(identifier: String) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
+    }
+
+    // Cancel all notifications
+    func cancelAllNotifications() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+
+    // Get pending notifications
+    func getPendingNotifications(completion: @escaping ([UNNotificationRequest]) -> Void) {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            completion(requests)
+        }
+    }
+}
+
+// Usage
+NotificationManager.shared.scheduleNotification(
+    title: "Reminder",
+    body: "Don't forget your meeting",
+    timeInterval: 60, // 1 minute
+    identifier: "meeting-reminder"
+)
+```
+
+### Notification Actions
+
+```swift
+// Define notification categories and actions
+func setupNotificationCategories() {
+    // Define actions
+    let likeAction = UNNotificationAction(
+        identifier: "LIKE_ACTION",
+        title: "Like",
+        options: .foreground
+    )
+
+    let commentAction = UNTextInputNotificationAction(
+        identifier: "COMMENT_ACTION",
+        title: "Comment",
+        options: [],
+        textInputButtonTitle: "Send",
+        textInputPlaceholder: "Your comment..."
+    )
+
+    let deleteAction = UNNotificationAction(
+        identifier: "DELETE_ACTION",
+        title: "Delete",
+        options: .destructive
+    )
+
+    // Define category
+    let category = UNNotificationCategory(
+        identifier: "POST_CATEGORY",
+        actions: [likeAction, commentAction, deleteAction],
+        intentIdentifiers: [],
+        options: []
+    )
+
+    // Register category
+    UNUserNotificationCenter.current().setNotificationCategories([category])
+}
+
+// Use category in notification
+func sendNotificationWithActions() {
+    let content = UNMutableNotificationContent()
+    content.title = "New Post"
+    content.body = "Someone posted a photo"
+    content.categoryIdentifier = "POST_CATEGORY"
+
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+    let request = UNNotificationRequest(identifier: "post-1", content: content, trigger: trigger)
+
+    UNUserNotificationCenter.current().add(request)
+}
+
+// Handle action response
+func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+
+    switch response.actionIdentifier {
+    case "LIKE_ACTION":
+        print("User liked the post")
+
+    case "COMMENT_ACTION":
+        if let textResponse = response as? UNTextInputNotificationResponse {
+            let comment = textResponse.userText
+            print("User commented: \(comment)")
+        }
+
+    case "DELETE_ACTION":
+        print("User deleted the post")
+
+    default:
+        break
+    }
+
+    completionHandler()
+}
+```
+
+### Rich Notifications (with Images)
+
+```swift
+// Send notification with image
+func sendNotificationWithImage(imageURL: URL) {
+    let content = UNMutableNotificationContent()
+    content.title = "New Photo"
+    content.body = "Check out this amazing photo!"
+
+    // Download and attach image
+    downloadImage(from: imageURL) { localURL in
+        if let localURL = localURL,
+           let attachment = try? UNNotificationAttachment(identifier: "image", url: localURL, options: nil) {
+            content.attachments = [attachment]
+
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+            let request = UNNotificationRequest(identifier: "photo-notification", content: content, trigger: trigger)
+
+            UNUserNotificationCenter.current().add(request)
+        }
+    }
+}
+
+func downloadImage(from url: URL, completion: @escaping (URL?) -> Void) {
+    URLSession.shared.downloadTask(with: url) { localURL, response, error in
+        guard let localURL = localURL, error == nil else {
+            completion(nil)
+            return
+        }
+
+        // Move to temp directory
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let tempFile = tempDirectory.appendingPathComponent(url.lastPathComponent)
+
+        try? FileManager.default.removeItem(at: tempFile)
+        try? FileManager.default.moveItem(at: localURL, to: tempFile)
+
+        completion(tempFile)
+    }.resume()
+}
+```
+
+## Testing
+
+### Unit Testing with XCTest
+
+```swift
+import XCTest
+@testable import MyApp
+
+class UserViewModelTests: XCTestCase {
+
+    var viewModel: UserViewModel!
+    var mockNetworkService: MockNetworkService!
+
+    override func setUp() {
+        super.setUp()
+        mockNetworkService = MockNetworkService()
+        viewModel = UserViewModel(networkService: mockNetworkService)
+    }
+
+    override func tearDown() {
+        viewModel = nil
+        mockNetworkService = nil
+        super.tearDown()
+    }
+
+    // Test async functions
+    func testFetchUserSuccess() async throws {
+        // Arrange
+        let expectedUser = User(id: 1, name: "John", email: "john@example.com")
+        mockNetworkService.mockUser = expectedUser
+
+        // Act
+        await viewModel.fetchUser(id: 1)
+
+        // Assert
+        XCTAssertEqual(viewModel.user?.id, expectedUser.id)
+        XCTAssertEqual(viewModel.user?.name, expectedUser.name)
+        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertNil(viewModel.errorMessage)
+    }
+
+    func testFetchUserFailure() async {
+        // Arrange
+        mockNetworkService.shouldFail = true
+
+        // Act
+        await viewModel.fetchUser(id: 1)
+
+        // Assert
+        XCTAssertNil(viewModel.user)
+        XCTAssertNotNil(viewModel.errorMessage)
+        XCTAssertFalse(viewModel.isLoading)
+    }
+
+    func testDisplayName() {
+        // Arrange
+        viewModel.user = User(id: 1, name: "John", email: "john@example.com")
+
+        // Act
+        let displayName = viewModel.displayName
+
+        // Assert
+        XCTAssertEqual(displayName, "John")
+    }
+
+    func testDisplayNameWhenUserIsNil() {
+        // Arrange
+        viewModel.user = nil
+
+        // Act
+        let displayName = viewModel.displayName
+
+        // Assert
+        XCTAssertEqual(displayName, "Unknown")
+    }
+}
+
+// Mock Network Service
+class MockNetworkService: NetworkServiceProtocol {
+    var mockUser: User?
+    var shouldFail = false
+
+    func getUser(id: Int) async throws -> User {
+        if shouldFail {
+            throw NSError(domain: "Test", code: -1, userInfo: [NSLocalizedDescriptionKey: "Mock error"])
+        }
+
+        guard let user = mockUser else {
+            throw NSError(domain: "Test", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user"])
+        }
+
+        return user
+    }
+}
+```
+
+### Testing Combine Publishers
+
+```swift
+import XCTest
+import Combine
+@testable import MyApp
+
+class APIServiceTests: XCTestCase {
+
+    var apiService: APIService!
+    var cancellables: Set<AnyCancellable>!
+
+    override func setUp() {
+        super.setUp()
+        apiService = APIService()
+        cancellables = []
+    }
+
+    override func tearDown() {
+        cancellables = nil
+        apiService = nil
+        super.tearDown()
+    }
+
+    func testFetchUsersSuccess() {
+        // Arrange
+        let expectation = XCTestExpectation(description: "Fetch users")
+        var receivedUsers: [User]?
+
+        // Act
+        apiService.fetchUsers()
+            .sink { completion in
+                if case .failure(let error) = completion {
+                    XCTFail("Expected success but got error: \(error)")
+                }
+            } receiveValue: { users in
+                receivedUsers = users
+                expectation.fulfill()
+            }
+            .store(in: &cancellables)
+
+        // Assert
+        wait(for: [expectation], timeout: 5.0)
+        XCTAssertNotNil(receivedUsers)
+        XCTAssertGreaterThan(receivedUsers?.count ?? 0, 0)
+    }
+}
+```
+
+### UI Testing
+
+```swift
+import XCTest
+
+class MyAppUITests: XCTestCase {
+
+    var app: XCUIApplication!
+
+    override func setUp() {
+        super.setUp()
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launch()
+    }
+
+    func testLoginFlow() {
+        // Find elements
+        let usernameField = app.textFields["usernameTextField"]
+        let passwordField = app.secureTextFields["passwordTextField"]
+        let loginButton = app.buttons["loginButton"]
+
+        // Interact with elements
+        XCTAssertTrue(usernameField.exists)
+        usernameField.tap()
+        usernameField.typeText("testuser")
+
+        XCTAssertTrue(passwordField.exists)
+        passwordField.tap()
+        passwordField.typeText("password123")
+
+        XCTAssertTrue(loginButton.exists)
+        loginButton.tap()
+
+        // Verify navigation
+        let welcomeLabel = app.staticTexts["welcomeLabel"]
+        XCTAssertTrue(welcomeLabel.waitForExistence(timeout: 5))
+    }
+
+    func testTableViewInteraction() {
+        let table = app.tables["userTable"]
+        XCTAssertTrue(table.exists)
+
+        let firstCell = table.cells.element(boundBy: 0)
+        XCTAssertTrue(firstCell.exists)
+
+        firstCell.tap()
+
+        // Verify detail screen
+        let detailView = app.otherElements["userDetailView"]
+        XCTAssertTrue(detailView.waitForExistence(timeout: 2))
+    }
+
+    func testScreenshot() {
+        let screenshot = app.screenshot()
+        let attachment = XCTAttachment(screenshot: screenshot)
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+}
+```
+
+### Performance Testing
+
+```swift
+import XCTest
+@testable import MyApp
+
+class PerformanceTests: XCTestCase {
+
+    func testDataProcessingPerformance() {
+        let largeDataSet = (0..<10000).map { User(id: $0, name: "User \($0)", email: "user\($0)@example.com") }
+
+        measure {
+            // Code to measure performance
+            let filtered = largeDataSet.filter { $0.id % 2 == 0 }
+            let mapped = filtered.map { $0.name }
+            _ = mapped.sorted()
+        }
+    }
+
+    func testViewControllerLoadTime() {
+        measure(metrics: [XCTClockMetric(), XCTMemoryMetric()]) {
+            _ = UserViewController()
+        }
+    }
+}
+```
+
+### Test Coverage
+
+```bash
+# Enable code coverage in Xcode
+# Edit Scheme > Test > Options > Code Coverage
+
+# Generate coverage report from command line
+xcodebuild test \
+  -scheme MyApp \
+  -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+  -enableCodeCoverage YES
+
+# View coverage in Xcode
+# Show Report Navigator > Coverage tab
+```
+
+## iOS vs Android Comparison
+
+### Development Environment
+
+| Aspect | iOS | Android |
+|--------|-----|---------|
+| **IDE** | Xcode (macOS only) | Android Studio (cross-platform) |
+| **Language** | Swift, Objective-C | Kotlin, Java |
+| **UI Framework** | UIKit, SwiftUI | XML layouts, Jetpack Compose |
+| **Simulator** | iOS Simulator (fast) | Android Emulator (slower) |
+| **Required Hardware** | Mac required | Any OS |
+
+### Programming Language
+
+| Feature | Swift | Kotlin |
+|---------|-------|--------|
+| **Null Safety** | Optionals (?) | Nullable types (?) |
+| **Type Inference** | Yes | Yes |
+| **Functional Programming** | Yes | Yes |
+| **Extensions** | Yes | Yes |
+| **Pattern Matching** | switch with patterns | when expressions |
+| **Async/Await** | Yes (iOS 15+) | Yes (Coroutines) |
+
+### UI Development
+
+| Feature | iOS (SwiftUI) | Android (Jetpack Compose) |
+|---------|---------------|---------------------------|
+| **Paradigm** | Declarative | Declarative |
+| **State Management** | @State, @Binding | remember, mutableStateOf |
+| **Layout** | VStack, HStack, ZStack | Column, Row, Box |
+| **Lists** | List, LazyVStack | LazyColumn, LazyRow |
+| **Navigation** | NavigationView | NavController |
+| **Preview** | Live preview | Live preview |
+
+```swift
+// iOS SwiftUI
+struct ContentView: View {
+    @State private var count = 0
+
+    var body: some View {
+        VStack {
+            Text("Count: \(count)")
+            Button("Increment") {
+                count += 1
+            }
+        }
+    }
+}
+```
+
+```kotlin
+// Android Jetpack Compose
+@Composable
+fun ContentView() {
+    var count by remember { mutableStateOf(0) }
+
+    Column {
+        Text("Count: $count")
+        Button(onClick = { count++ }) {
+            Text("Increment")
+        }
+    }
+}
+```
+
+### Architecture Patterns
+
+| Pattern | iOS Implementation | Android Implementation |
+|---------|-------------------|----------------------|
+| **MVC** | Standard (UIKit) | Less common |
+| **MVVM** | Common (with Combine/SwiftUI) | Very common (with LiveData/Flow) |
+| **Coordinator** | Popular for navigation | Less common |
+| **Clean Architecture** | Growing | Very popular |
+
+### Dependency Management
+
+| iOS | Android |
+|-----|---------|
+| Swift Package Manager (SPM) | Gradle |
+| CocoaPods | Maven |
+| Carthage | - |
+
+### Data Persistence
+
+| iOS | Android |
+|-----|---------|
+| UserDefaults | SharedPreferences |
+| Core Data | Room Database |
+| FileManager | File I/O |
+| Keychain | Keystore |
+
+### Networking
+
+```swift
+// iOS - URLSession
+let (data, _) = try await URLSession.shared.data(from: url)
+let users = try JSONDecoder().decode([User].self, from: data)
+```
+
+```kotlin
+// Android - Retrofit
+interface ApiService {
+    @GET("users")
+    suspend fun getUsers(): List<User>
+}
+```
+
+### Background Tasks
+
+| iOS | Android |
+|-----|---------|
+| Background Tasks Framework | WorkManager |
+| URLSession background tasks | JobScheduler |
+| Silent push notifications | Foreground Service |
+
+### Permissions
+
+```swift
+// iOS - Info.plist + Runtime request
+NSCameraUsageDescription = "Need camera for photos"
+
+AVCaptureDevice.requestAccess(for: .video) { granted in
+    // Handle response
+}
+```
+
+```kotlin
+// Android - Manifest + Runtime request (API 23+)
+<uses-permission android:name="android.permission.CAMERA" />
+
+if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+    != PackageManager.PERMISSION_GRANTED) {
+    ActivityCompat.requestPermissions(this,
+        arrayOf(Manifest.permission.CAMERA), REQUEST_CODE)
+}
+```
+
+### App Distribution
+
+| Aspect | iOS | Android |
+|--------|-----|---------|
+| **Store** | App Store only (official) | Google Play, alternatives |
+| **Review Process** | Strict (1-3 days) | Automated (hours) |
+| **Side-loading** | Enterprise only | Enabled by default |
+| **Beta Testing** | TestFlight | Internal testing, Open testing |
+| **Developer Fee** | $99/year | $25 one-time |
+
+### Device Fragmentation
+
+| iOS | Android |
+|-----|---------|
+| Limited devices | Thousands of devices |
+| Consistent screen sizes | Many screen sizes |
+| High OS adoption | Fragmented OS versions |
+| Uniform hardware | Varied hardware specs |
+
+### Key Differences
+
+**iOS Advantages:**
+- Consistent user experience
+- Less device fragmentation
+- Higher user spending
+- Easier testing (fewer devices)
+- Better performance on older devices
+
+**Android Advantages:**
+- Larger market share globally
+- More customization options
+- Develop on any platform
+- Easier sideloading for testing
+- More flexible app review
 
 ## Building and Deployment
 

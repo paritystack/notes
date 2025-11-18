@@ -15,11 +15,12 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 9. [Netfilter](./netfilter.md) - Packet filtering framework
 10. [iptables](./iptables.md) - Firewall configuration
 11. [Traffic Control (tc)](./tc.md) - Network traffic management
-12. [systemd](./systemd.md) - Service management and init system
-13. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
-14. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
-15. [Netlink](./netlink.md) - Kernel-userspace communication interface
-16. [eBPF](./ebpf.md) - Extended Berkeley Packet Filter for kernel programmability
+12. [WireGuard](./wireguard.md) - Modern VPN protocol and configuration
+13. [systemd](./systemd.md) - Service management and init system
+14. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
+15. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
+16. [Netlink](./netlink.md) - Kernel-userspace communication interface
+17. [eBPF](./ebpf.md) - Extended Berkeley Packet Filter for kernel programmability
 
 ## Overview
 
@@ -34,6 +35,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 - [Essential Commands](./commands.md) - Master command-line tools
 - [Networking](./networking.md) - Network configuration and diagnostics
 - [iptables](./iptables.md) - Firewall management
+- [WireGuard](./wireguard.md) - VPN setup and management
 
 ### For Developers
 - [Kernel Architecture](./kernel.md) - Understand Linux internals
@@ -49,6 +51,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 - [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless networking subsystem
 - [Netfilter](./netfilter.md) - Packet filtering framework
 - [Traffic Control](./tc.md) - QoS and traffic shaping
+- [WireGuard](./wireguard.md) - Modern VPN implementation
 
 ## Key Topics
 

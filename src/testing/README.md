@@ -6,6 +6,7 @@ Testing strategies, frameworks, and best practices for ensuring code quality and
 
 - **[Unit Testing](unit_testing.md)**: Testing individual functions and classes in isolation
 - **[Integration Testing](integration.md)**: Testing component interactions and APIs
+- **[E2E Testing](e2e_testing.md)**: End-to-end testing of complete user workflows
 - **[pytest](pytest.md)**: Python testing framework with fixtures and parametrization
 - **[TDD](tdd.md)**: Test-driven development approaches and best practices
 - **Test Frameworks**: pytest, Jest, unittest

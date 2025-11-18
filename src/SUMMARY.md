@@ -28,6 +28,7 @@
     - [Kotlin](programming/kotlin.md)
     - [Concurrency](programming/concurrency.md)
     - [Memory Management](programming/memory_management.md)
+    - [Compilers](programming/compilers.md)
 
 - [Linux](linux/README.md)
     - [Networking](linux/networking.md)
@@ -52,6 +53,7 @@
     - [Selinux](linux/selinux.md)
     - [Udev](linux/udev.md)
     - [Process](linux/process.md)
+    - [Wireguard](linux/wireguard.md)
 
 - [Android](android/README.md)
     - [Android Internals](android/internals.md)
@@ -93,6 +95,7 @@
     - [HMAC](security/hmac.md)
     - [OAuth 2.0](security/oauth2.md)
     - [JWT](security/jwt.md)
+    - [Auth](security/auth.md)
 
 - [Wifi](wifi/README.md)
     - [Wifi Basics](wifi/basics.md)
@@ -254,6 +257,8 @@
     - [GraphQL](web_development/graphql.md)
     - [gRPC](web_development/grpc.md)
     - [Css](web_development/css.md)
+    - [Api Design](web_development/api_design.md)
+    - [Frontend Performance](web_development/frontend_performance.md)
 
 - [DevOps](devops/README.md)
     - [Docker](devops/docker.md)
@@ -264,6 +269,7 @@
     - [Infrastructure](devops/infrastructure.md)
     - [Monitoring](devops/monitoring.md)
     - [Terraform](devops/terraform.md)
+    - [Observability](devops/observability.md)
 
 - [System Design](system_design/README.md)
     - [Scalability](system_design/scalability.md)
@@ -274,17 +280,21 @@
     - [Design Patterns](system_design/design_patterns.md)
     - [Distributed Consensus](system_design/distributed_consensus.md)
     - [Message Queues](system_design/message_queues.md)
+    - [Distributed Systems](system_design/distributed_systems.md)
+    - [Load Balancing](system_design/load_balancing.md)
 
 - [Mobile Development](mobile_development/README.md)
     - [React Native](mobile_development/react_native.md)
     - [Flutter](mobile_development/flutter.md)
     - [Android Dev](mobile_development/android_dev.md)
+    - [Ios Dev](mobile_development/ios_dev.md)
 
 - [Testing](testing/README.md)
     - [Unit Testing](testing/unit_testing.md)
     - [Integration Testing](testing/integration.md)
     - [TDD](testing/tdd.md)
     - [pytest](testing/pytest.md)
+    - [E2E Testing](testing/e2e_testing.md)
 
 - [Debugging](debugging/README.md)
     - [GDB](debugging/gdb.md)
@@ -297,6 +307,8 @@
     - [Statistics](misc/statistics.md)
     - [Matplotlib](misc/matplotlib.md)
     - [Pandas](misc/pandas.md)
+    - [Blockchain](misc/blockchain.md)
+    - [Operating Systems](misc/operating_systems.md)
 
 - [RTOS](rtos/README.md)
     - [FreeRTOS](rtos/freertos.md)

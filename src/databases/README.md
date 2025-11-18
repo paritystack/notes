@@ -4,6 +4,10 @@ Database systems and data engineering concepts for storing, querying, and managi
 
 ## Topics Covered
 
+### Database Design
+
+- **[Database Design](database_design.md)** - Schema design, normalization, relationships, indexing strategies, and best practices
+
 ### Relational Databases
 
 - **[SQL](sql.md)** - SQL fundamentals, queries, joins, indexes, transactions

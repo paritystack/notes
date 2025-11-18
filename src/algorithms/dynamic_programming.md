@@ -725,6 +725,246 @@ Many DP problems can be optimized by reducing the state space:
 3. **Compress coordinates**: Map large ranges to smaller ones
 4. **Rolling array**: Keep only last k rows/columns instead of entire table
 
+### DP with Data Structures
+
+Combining DP with advanced data structures can optimize solutions.
+
+#### Monotonic Queue Optimization
+
+**Problem**: Sliding window maximum with DP.
+
+```python
+from collections import deque
+
+def max_sliding_window_dp(nums, k):
+    """DP with monotonic deque for sliding window maximum"""
+    if not nums:
+        return []
+
+    dq = deque()  # Stores indices
+    result = []
+
+    for i in range(len(nums)):
+        # Remove elements outside window
+        while dq and dq[0] < i - k + 1:
+            dq.popleft()
+
+        # Remove smaller elements (maintain decreasing order)
+        while dq and nums[dq[-1]] < nums[i]:
+            dq.pop()
+
+        dq.append(i)
+
+        # Add to result when window is full
+        if i >= k - 1:
+            result.append(nums[dq[0]])
+
+    return result
+
+# Time: O(n), Space: O(k)
+```
+
+#### Segment Tree DP
+
+**Problem**: Range maximum query with updates in DP.
+
+```python
+class SegmentTree:
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (4 * n)
+
+    def update(self, node, start, end, idx, val):
+        if start == end:
+            self.tree[node] = val
+        else:
+            mid = (start + end) // 2
+            if idx <= mid:
+                self.update(2*node, start, mid, idx, val)
+            else:
+                self.update(2*node+1, mid+1, end, idx, val)
+            self.tree[node] = max(self.tree[2*node], self.tree[2*node+1])
+
+    def query(self, node, start, end, l, r):
+        if r < start or end < l:
+            return float('-inf')
+        if l <= start and end <= r:
+            return self.tree[node]
+        mid = (start + end) // 2
+        return max(
+            self.query(2*node, start, mid, l, r),
+            self.query(2*node+1, mid+1, end, l, r)
+        )
+
+def dp_with_segment_tree(arr):
+    """DP optimization using segment tree"""
+    n = len(arr)
+    st = SegmentTree(n)
+    dp = [0] * n
+
+    for i in range(n):
+        # Query best previous state in range
+        if i > 0:
+            best = st.query(1, 0, n-1, 0, i-1)
+            dp[i] = best + arr[i]
+        else:
+            dp[i] = arr[i]
+        # Update segment tree
+        st.update(1, 0, n-1, i, dp[i])
+
+    return max(dp)
+
+# Time: O(n log n), Space: O(n)
+```
+
+### Convex Hull Trick (CHT)
+
+Optimize DP transitions with linear functions.
+
+**Problem**: Minimum cost with linear transitions.
+
+```python
+from collections import deque
+
+def convex_hull_trick(arr):
+    """DP optimization using convex hull trick"""
+    n = len(arr)
+    dp = [0] * n
+
+    # Line represented as (m, c) for y = mx + c
+    hull = deque()
+
+    def bad(l1, l2, l3):
+        """Check if l2 is redundant"""
+        m1, c1 = l1
+        m2, c2 = l2
+        m3, c3 = l3
+        # Cross product comparison
+        return (c3 - c1) * (m1 - m2) <= (c2 - c1) * (m1 - m3)
+
+    def query(hull, x):
+        """Find minimum value at x"""
+        # Binary search for best line
+        left, right = 0, len(hull) - 1
+        while left < right:
+            mid = (left + right) // 2
+            m1, c1 = hull[mid]
+            m2, c2 = hull[mid + 1]
+            if m1 * x + c1 >= m2 * x + c2:
+                left = mid + 1
+            else:
+                right = mid
+        m, c = hull[left]
+        return m * x + c
+
+    dp[0] = 0
+    hull.append((0, 0))  # Initial line
+
+    for i in range(1, n):
+        # Query best previous state
+        dp[i] = query(hull, arr[i])
+
+        # Add new line to hull
+        new_line = (i, dp[i])
+        while len(hull) >= 2 and bad(hull[-2], hull[-1], new_line):
+            hull.pop()
+        hull.append(new_line)
+
+    return dp[n-1]
+
+# Time: O(n log n) with binary search, O(n) if queries are monotonic
+```
+
+### Divide and Conquer Optimization
+
+For DP with special monotonicity property.
+
+**Condition**: If `dp[i][j] = min(dp[i-1][k] + cost[k][j])` for `k < j`, and the optimal `k` is monotonic.
+
+```python
+def divide_and_conquer_dp(cost, m):
+    """
+    Divide and conquer DP optimization
+    dp[i][j] = min cost to partition arr[0..j] into i groups
+    """
+    n = len(cost)
+    dp = [[float('inf')] * n for _ in range(m + 1)]
+
+    # Base case
+    for j in range(n):
+        dp[1][j] = cost[0][j]
+
+    def solve(i, l, r, opt_l, opt_r):
+        """
+        Compute dp[i][l..r] knowing optimal k is in [opt_l, opt_r]
+        """
+        if l > r:
+            return
+
+        mid = (l + r) // 2
+        best_k = -1
+
+        # Find optimal k for dp[i][mid]
+        for k in range(opt_l, min(mid, opt_r) + 1):
+            val = dp[i-1][k] + cost[k+1][mid]
+            if val < dp[i][mid]:
+                dp[i][mid] = val
+                best_k = k
+
+        # Recursively solve left and right
+        solve(i, l, mid - 1, opt_l, best_k)
+        solve(i, mid + 1, r, best_k, opt_r)
+
+    for i in range(2, m + 1):
+        solve(i, 0, n - 1, 0, n - 1)
+
+    return dp[m][n-1]
+
+# Time: O(m × n log n), Space: O(m × n)
+# Without optimization: O(m × n²)
+```
+
+### Knuth's Optimization
+
+For interval DP with quadrangle inequality.
+
+**Condition**: If `cost[i][j]` satisfies quadrangle inequality.
+
+```python
+def knuth_optimization(arr):
+    """
+    Optimal binary search tree using Knuth's optimization
+    """
+    n = len(arr)
+    dp = [[0] * n for _ in range(n)]
+    opt = [[0] * n for _ in range(n)]  # Stores optimal split point
+
+    # Base case: single elements
+    for i in range(n):
+        opt[i][i] = i
+
+    # Build for increasing lengths
+    for length in range(2, n + 1):
+        for i in range(n - length + 1):
+            j = i + length - 1
+            dp[i][j] = float('inf')
+
+            # Search only between opt[i][j-1] and opt[i+1][j]
+            for k in range(opt[i][j-1], min(opt[i+1][j], j) + 1):
+                cost = dp[i][k-1] if k > i else 0
+                cost += dp[k+1][j] if k < j else 0
+                cost += sum(arr[i:j+1])  # Additional cost
+
+                if cost < dp[i][j]:
+                    dp[i][j] = cost
+                    opt[i][j] = k
+
+    return dp[0][n-1]
+
+# Time: O(n²), Space: O(n²)
+# Without optimization: O(n³)
+```
+
 ### Bitmask DP
 
 Use bitmasks to represent subsets when state involves combinations.
@@ -799,7 +1039,8 @@ def count_digit_dp(n):
 
 DP on trees, usually processing from leaves up.
 
-**Example: Maximum independent set in tree**
+#### Pattern 1: Maximum Independent Set in Tree
+
 ```python
 def tree_dp(graph, root):
     """Maximum independent set in tree"""
@@ -823,6 +1064,307 @@ def tree_dp(graph, root):
 
     dfs(root, -1)
     return max(include[root], exclude[root])
+```
+
+#### Pattern 2: Tree Distance DP
+
+**Problem**: Find maximum distance from each node.
+
+```python
+def tree_distance_dp(graph, n):
+    """Maximum distance from each node in tree"""
+    # dp_down[v] = max distance going down from v
+    # dp_up[v] = max distance going up from v
+    dp_down = [0] * n
+    dp_up = [0] * n
+
+    def dfs_down(node, parent):
+        """Calculate max distance going down"""
+        max_dist = 0
+        for child in graph[node]:
+            if child != parent:
+                dfs_down(child, node)
+                max_dist = max(max_dist, 1 + dp_down[child])
+        dp_down[node] = max_dist
+
+    def dfs_up(node, parent):
+        """Calculate max distance going up or to siblings"""
+        # Find two largest child distances
+        distances = []
+        for child in graph[node]:
+            if child != parent:
+                distances.append(dp_down[child])
+        distances.sort(reverse=True)
+
+        for child in graph[node]:
+            if child != parent:
+                # Distance going up through parent
+                up_dist = dp_up[node] + 1
+
+                # Distance to sibling through parent
+                if distances and dp_down[child] == distances[0]:
+                    # This child has max distance, use second max
+                    sibling_dist = (distances[1] + 2) if len(distances) > 1 else 0
+                else:
+                    sibling_dist = distances[0] + 2 if distances else 0
+
+                dp_up[child] = max(up_dist, sibling_dist)
+                dfs_up(child, node)
+
+    dfs_down(0, -1)
+    dfs_up(0, -1)
+
+    # Answer for each node
+    return [max(dp_down[i], dp_up[i]) for i in range(n)]
+
+# Time: O(n), Space: O(n)
+```
+
+#### Pattern 3: Rerooting Technique
+
+**Problem**: Compute answer for each node as root.
+
+```python
+def tree_rerooting(graph, n):
+    """Compute DP for each node as root using rerooting"""
+    dp = [0] * n
+    ans = [0] * n
+
+    def dfs1(node, parent):
+        """First DFS: compute subtree answers"""
+        result = 0
+        for child in graph[node]:
+            if child != parent:
+                result += dfs1(child, node) + 1
+        dp[node] = result
+        return result
+
+    def dfs2(node, parent, parent_contribution):
+        """Second DFS: reroot and compute answers"""
+        ans[node] = dp[node] + parent_contribution
+
+        for child in graph[node]:
+            if child != parent:
+                # Remove child's contribution
+                without_child = ans[node] - (dp[child] + 1)
+                # Reroot to child
+                dfs2(child, node, without_child + 1)
+
+    dfs1(0, -1)
+    dfs2(0, -1, 0)
+    return ans
+
+# Time: O(n), Space: O(n)
+```
+
+### Probabilistic DP
+
+Handle problems involving probabilities and expected values.
+
+#### Expected Value DP
+
+**Problem**: Expected number of dice rolls to reach target.
+
+```python
+def expected_dice_rolls(target):
+    """Expected rolls to reach target with fair die (1-6)"""
+    # dp[i] = expected rolls to reach target from i
+    dp = [0] * (target + 7)
+
+    for i in range(target - 1, -1, -1):
+        # From position i, roll die
+        expected = 0
+        for dice in range(1, 7):
+            next_pos = min(i + dice, target)
+            if next_pos == target:
+                expected += 1  # Reached target in 1 roll
+            else:
+                expected += 1 + dp[next_pos]  # 1 roll + expected from next
+        dp[i] = expected / 6  # Average over all outcomes
+
+    return dp[0]
+
+# Time: O(target), Space: O(target)
+```
+
+#### Probability DP
+
+**Problem**: Probability of reaching target score.
+
+```python
+def probability_target(n, k, target):
+    """
+    Probability of reaching exactly target with n dice, k faces each
+    """
+    # dp[i][j] = probability of sum j using i dice
+    dp = [[0.0] * (target + 1) for _ in range(n + 1)]
+    dp[0][0] = 1.0  # Base: 0 dice, 0 sum
+
+    for i in range(1, n + 1):
+        for j in range(i, min(target + 1, i * k + 1)):
+            # Roll current die
+            for face in range(1, k + 1):
+                if j - face >= 0:
+                    dp[i][j] += dp[i-1][j-face] / k
+
+    return dp[n][target]
+
+# Time: O(n × target × k), Space: O(n × target)
+```
+
+#### Expected Value with Decisions
+
+**Problem**: Expected maximum value with optimal strategy.
+
+```python
+def expected_maximum_value(prices):
+    """
+    Expected value selling stock optimally
+    Each day: know future is randomly up/down
+    """
+    n = len(prices)
+    # dp[i] = expected value starting from day i
+    dp = [0] * (n + 1)
+
+    for i in range(n - 1, -1, -1):
+        # Option 1: Sell now
+        sell_now = prices[i]
+
+        # Option 2: Wait (assume 50% up, 50% down)
+        if i < n - 1:
+            wait = (dp[i+1] * 1.1 + dp[i+1] * 0.9) / 2  # Expected next value
+        else:
+            wait = 0
+
+        dp[i] = max(sell_now, wait)
+
+    return dp[0]
+
+# Time: O(n), Space: O(n)
+```
+
+### Profile DP
+
+For grid problems where you need to track column state.
+
+**Problem**: Tiling a board with dominoes.
+
+```python
+def domino_tiling(n, m):
+    """Count ways to tile n×m board with 1×2 dominoes"""
+    # dp[col][mask] = ways to reach col with profile mask
+    # mask[i] = 1 if cell (i, col) is filled from previous column
+
+    def fits(mask, i, n):
+        """Check if we can place tiles starting from row i"""
+        if i == n:
+            return mask == 0  # All cells must be filled
+
+        if mask & (1 << i):  # Already filled
+            return fits(mask, i + 1, n)
+
+        # Try vertical tile (fills current column)
+        result = fits(mask | (1 << i), i + 1, n)
+
+        # Try horizontal tile (extends to next column)
+        if i + 1 < n and not (mask & (1 << (i + 1))):
+            new_mask = mask | (1 << i) | (1 << (i + 1))
+            result += fits(new_mask, i + 2, n)
+
+        return result
+
+    # dp[col][mask]
+    dp = [{} for _ in range(m + 1)]
+    dp[0][0] = 1
+
+    for col in range(m):
+        for mask, ways in dp[col].items():
+            # Try all next profiles
+            def fill_column(row, curr_mask, next_mask):
+                if row == n:
+                    dp[col + 1][next_mask] = dp[col + 1].get(next_mask, 0) + ways
+                    return
+
+                if curr_mask & (1 << row):  # Already filled
+                    fill_column(row + 1, curr_mask, next_mask)
+                else:
+                    # Place vertical tile
+                    fill_column(row + 1, curr_mask | (1 << row), next_mask)
+
+                    # Place horizontal tile
+                    if row + 1 < n and not (curr_mask & (1 << (row + 1))):
+                        new_curr = curr_mask | (1 << row) | (1 << (row + 1))
+                        new_next = next_mask | (1 << row) | (1 << (row + 1))
+                        fill_column(row + 2, new_curr, new_next)
+
+            fill_column(0, mask, 0)
+
+    return dp[m].get(0, 0)
+
+# Time: O(m × 2^n × n), Space: O(2^n)
+```
+
+### SOS (Sum over Subsets) DP
+
+Efficiently compute sum over all subsets.
+
+**Problem**: For each mask, compute sum over all its submasks.
+
+```python
+def sum_over_subsets(arr):
+    """
+    For each mask i, compute sum of arr[j] for all j that are submasks of i
+    """
+    n = len(arr)
+    max_mask = n  # Assuming arr indexed by mask values
+    log_n = max_mask.bit_length()
+
+    dp = arr[:]
+
+    # Iterate over bits
+    for i in range(log_n):
+        # Iterate over masks
+        for mask in range(max_mask):
+            if mask & (1 << i):
+                # Add contribution from mask without bit i
+                dp[mask] += dp[mask ^ (1 << i)]
+
+    return dp
+
+# Time: O(n × log n) where n = 2^k
+# Without SOS DP: O(3^k) for k bits
+```
+
+**Example: Count AND pairs**
+
+```python
+def count_and_pairs(arr, target):
+    """Count pairs where arr[i] & arr[j] == target"""
+    max_val = max(arr)
+    freq = [0] * (max_val + 1)
+
+    # Count frequency
+    for num in arr:
+        freq[num] += 1
+
+    # SOS DP
+    dp = freq[:]
+    for i in range(20):  # Assuming 20-bit numbers
+        for mask in range(max_val + 1):
+            if mask & (1 << i):
+                dp[mask] += dp[mask ^ (1 << i)]
+
+    # Count pairs
+    count = 0
+    for num in arr:
+        # Find supermasks that AND with num gives target
+        supermask = num | target
+        if supermask <= max_val:
+            count += dp[supermask]
+
+    return count
+
+# Time: O(n + M log M) where M is max value
 ```
 
 ## Complexity Analysis
@@ -976,6 +1518,192 @@ def dp(n, memo=None):
     ...
 ```
 
+### Matrix Exponentiation with DP
+
+Optimize linear recurrences using matrix exponentiation.
+
+**Problem**: Compute nth Fibonacci number in O(log n).
+
+```python
+def matrix_mult(A, B):
+    """Multiply two 2x2 matrices"""
+    return [
+        [A[0][0]*B[0][0] + A[0][1]*B[1][0], A[0][0]*B[0][1] + A[0][1]*B[1][1]],
+        [A[1][0]*B[0][0] + A[1][1]*B[1][0], A[1][0]*B[0][1] + A[1][1]*B[1][1]]
+    ]
+
+def matrix_pow(M, n):
+    """Compute M^n using binary exponentiation"""
+    if n == 1:
+        return M
+    if n % 2 == 0:
+        half = matrix_pow(M, n // 2)
+        return matrix_mult(half, half)
+    else:
+        return matrix_mult(M, matrix_pow(M, n - 1))
+
+def fibonacci_fast(n):
+    """Compute nth Fibonacci in O(log n)"""
+    if n <= 1:
+        return n
+
+    # Transformation matrix for Fibonacci
+    M = [[1, 1], [1, 0]]
+    result = matrix_pow(M, n)
+    return result[0][1]
+
+# Time: O(log n), Space: O(log n)
+# Standard DP: O(n) time
+```
+
+**General linear recurrence**:
+
+```python
+def linear_recurrence_fast(coeffs, init, n):
+    """
+    Solve f(n) = c1*f(n-1) + c2*f(n-2) + ... + ck*f(n-k)
+    coeffs = [c1, c2, ..., ck]
+    init = [f(0), f(1), ..., f(k-1)]
+    """
+    k = len(coeffs)
+    if n < k:
+        return init[n]
+
+    # Build transformation matrix
+    M = [[0] * k for _ in range(k)]
+    M[0] = coeffs
+    for i in range(1, k):
+        M[i][i-1] = 1
+
+    def mat_mult(A, B):
+        size = len(A)
+        C = [[0] * size for _ in range(size)]
+        for i in range(size):
+            for j in range(size):
+                for k in range(size):
+                    C[i][j] += A[i][k] * B[k][j]
+        return C
+
+    def mat_pow(mat, exp):
+        if exp == 1:
+            return mat
+        if exp % 2 == 0:
+            half = mat_pow(mat, exp // 2)
+            return mat_mult(half, half)
+        return mat_mult(mat, mat_pow(mat, exp - 1))
+
+    # Apply transformation n - k + 1 times
+    result_mat = mat_pow(M, n - k + 1)
+
+    # Compute result from initial values
+    result = 0
+    for i in range(k):
+        result += result_mat[0][i] * init[k - 1 - i]
+
+    return result
+
+# Time: O(k³ log n), Space: O(k²)
+```
+
+### DP with Number Theory
+
+Combine DP with mathematical properties.
+
+#### Counting with Modular Arithmetic
+
+```python
+MOD = 10**9 + 7
+
+def count_ways_mod(n, k):
+    """Count ways to reach n using steps 1 to k, modulo MOD"""
+    dp = [0] * (n + 1)
+    dp[0] = 1
+
+    for i in range(1, n + 1):
+        for step in range(1, min(i, k) + 1):
+            dp[i] = (dp[i] + dp[i - step]) % MOD
+
+    return dp[n]
+
+# Time: O(n × k), Space: O(n)
+```
+
+#### DP with GCD/LCM
+
+```python
+import math
+
+def max_gcd_path(grid):
+    """Maximum GCD along path from top-left to bottom-right"""
+    m, n = len(grid), len(grid[0])
+    # dp[i][j] = set of possible GCDs reaching (i, j)
+    dp = [[set() for _ in range(n)] for _ in range(m)]
+
+    dp[0][0].add(grid[0][0])
+
+    for i in range(m):
+        for j in range(n):
+            if i == 0 and j == 0:
+                continue
+
+            # From top
+            if i > 0:
+                for g in dp[i-1][j]:
+                    dp[i][j].add(math.gcd(g, grid[i][j]))
+
+            # From left
+            if j > 0:
+                for g in dp[i][j-1]:
+                    dp[i][j].add(math.gcd(g, grid[i][j]))
+
+    return max(dp[m-1][n-1])
+
+# Time: O(m × n × G × log V) where G is number of unique GCDs, V is max value
+```
+
+#### Digit DP with Constraints
+
+```python
+def count_numbers_with_digit_sum(n, target_sum):
+    """Count numbers from 1 to n with digit sum equal to target_sum"""
+    s = str(n)
+    memo = {}
+
+    def dp(pos, sum_so_far, tight, started):
+        """
+        pos: current position
+        sum_so_far: sum of digits chosen
+        tight: whether we're still bounded by n
+        started: whether we've placed a non-zero digit
+        """
+        if pos == len(s):
+            return 1 if (started and sum_so_far == target_sum) else 0
+
+        state = (pos, sum_so_far, tight, started)
+        if state in memo:
+            return memo[state]
+
+        limit = int(s[pos]) if tight else 9
+        result = 0
+
+        for digit in range(0, limit + 1):
+            if not started and digit == 0:
+                # Leading zero
+                result += dp(pos + 1, sum_so_far, False, False)
+            else:
+                new_sum = sum_so_far + digit
+                if new_sum <= target_sum:  # Prune
+                    new_tight = tight and (digit == limit)
+                    result += dp(pos + 1, new_sum, new_tight, True)
+
+        memo[state] = result
+        return result
+
+    return dp(0, 0, True, False)
+
+# Time: O(len(n) × target_sum × 2 × 2 × 10)
+```
+
 ## Problem-Solving Framework
 
 ### Step-by-Step Approach
@@ -1009,6 +1737,131 @@ def dp(n, memo=None):
    - Test base cases
    - Test small examples
    - Verify time/space complexity
+
+### Debugging DP Solutions
+
+#### Common Debugging Strategies
+
+1. **Print the DP table**
+```python
+def debug_dp_table(dp):
+    """Visualize DP table"""
+    for i, row in enumerate(dp):
+        print(f"dp[{i}] = {row}")
+```
+
+2. **Verify base cases**
+```python
+def verify_base_cases():
+    """Test smallest inputs"""
+    assert climb_stairs(1) == 1
+    assert climb_stairs(2) == 2
+    assert climb_stairs(3) == 3
+```
+
+3. **Check recurrence manually**
+```python
+def manual_check():
+    """Manually verify recurrence for small n"""
+    # For climbing stairs: dp[3] should equal dp[2] + dp[1]
+    assert dp[3] == dp[2] + dp[1]
+```
+
+4. **Compare with brute force**
+```python
+def brute_force(n):
+    """Exponential but correct solution"""
+    if n <= 1:
+        return 1
+    return brute_force(n-1) + brute_force(n-2)
+
+def test_against_brute_force():
+    """Verify DP against brute force for small inputs"""
+    for n in range(1, 15):
+        assert climb_stairs(n) == brute_force(n)
+```
+
+5. **Trace execution**
+```python
+def dp_with_trace(n, memo=None):
+    """Add tracing to see execution flow"""
+    if memo is None:
+        memo = {}
+
+    print(f"Computing dp({n})")
+
+    if n in memo:
+        print(f"  -> Found in memo: {memo[n]}")
+        return memo[n]
+
+    if n <= 1:
+        print(f"  -> Base case: {n}")
+        return n
+
+    result = dp_with_trace(n-1, memo) + dp_with_trace(n-2, memo)
+    memo[n] = result
+    print(f"  -> Computed dp({n}) = {result}")
+    return result
+```
+
+#### Performance Testing
+
+```python
+import time
+import functools
+
+def benchmark_dp_solutions():
+    """Compare different DP approaches"""
+    n = 30
+
+    # Memoization
+    start = time.time()
+    @functools.lru_cache(None)
+    def fib_memo(n):
+        return n if n <= 1 else fib_memo(n-1) + fib_memo(n-2)
+    result1 = fib_memo(n)
+    time1 = time.time() - start
+
+    # Tabulation
+    start = time.time()
+    def fib_tab(n):
+        if n <= 1: return n
+        dp = [0] * (n + 1)
+        dp[1] = 1
+        for i in range(2, n + 1):
+            dp[i] = dp[i-1] + dp[i-2]
+        return dp[n]
+    result2 = fib_tab(n)
+    time2 = time.time() - start
+
+    # Space-optimized
+    start = time.time()
+    def fib_opt(n):
+        if n <= 1: return n
+        a, b = 0, 1
+        for _ in range(2, n + 1):
+            a, b = b, a + b
+        return b
+    result3 = fib_opt(n)
+    time3 = time.time() - start
+
+    print(f"Memoization: {time1:.6f}s")
+    print(f"Tabulation:  {time2:.6f}s")
+    print(f"Optimized:   {time3:.6f}s")
+```
+
+### Optimization Checklist
+
+Before submitting your DP solution, verify:
+
+- [ ] **State is minimal**: No redundant dimensions
+- [ ] **Base cases are correct**: Handle edge cases (n=0, empty array, etc.)
+- [ ] **Recurrence is complete**: All transitions considered
+- [ ] **Iteration order is correct**: Smaller subproblems computed first
+- [ ] **Space can be optimized**: Check if rolling array applies
+- [ ] **Integer overflow handled**: Use modulo if needed
+- [ ] **Time complexity is acceptable**: Ensure it fits constraints
+- [ ] **Tested on examples**: Small inputs, edge cases, large inputs
 
 ## Real-World Applications
 
@@ -1051,6 +1904,411 @@ def dp(n, memo=None):
 - Portfolio optimization
 - Option pricing
 - Risk management
+
+### 9. Machine Learning
+- Sequence alignment in NLP
+- Hidden Markov Models (Viterbi algorithm)
+- Reinforcement learning (value iteration, policy iteration)
+
+## Advanced Case Studies
+
+### Case Study 1: Autocomplete System
+
+**Problem**: Design an autocomplete system that suggests top k sentences based on input.
+
+**DP Application**: Trie + DP for ranking.
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.sentences = []  # (sentence, frequency) pairs
+
+class AutocompleteSystem:
+    def __init__(self, sentences, times):
+        self.root = TrieNode()
+        self.current = self.root
+        self.prefix = ""
+
+        # Build trie with DP for top-k at each node
+        for sentence, freq in zip(sentences, times):
+            self._add_sentence(sentence, freq)
+
+    def _add_sentence(self, sentence, freq):
+        node = self.root
+        for char in sentence:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+            # DP: maintain top k sentences at each node
+            node.sentences.append((sentence, freq))
+            node.sentences.sort(key=lambda x: (-x[1], x[0]))
+            node.sentences = node.sentences[:3]  # Keep top 3
+
+    def input(self, c):
+        if c == '#':
+            # Save sentence
+            self._add_sentence(self.prefix, 1)
+            self.prefix = ""
+            self.current = self.root
+            return []
+
+        self.prefix += c
+        if self.current and c in self.current.children:
+            self.current = self.current.children[c]
+            return [s for s, _ in self.current.sentences]
+        else:
+            self.current = None
+            return []
+
+# Time: O(k × L) per input, where L is sentence length
+# Space: O(T) where T is total characters in trie
+```
+
+### Case Study 2: Video Encoding Optimization
+
+**Problem**: Optimize video encoding by selecting keyframes to minimize file size while maintaining quality.
+
+**DP Application**: Interval DP with quality constraints.
+
+```python
+def optimize_video_encoding(frames, max_distance):
+    """
+    Select keyframes to minimize encoding cost
+    frames[i] = quality score of frame i
+    max_distance = maximum frames between keyframes
+    """
+    n = len(frames)
+    # dp[i] = min cost to encode frames[0..i]
+    dp = [float('inf')] * n
+    keyframes = [[] for _ in range(n)]
+
+    # Cost function: more distance between keyframes = lower quality
+    def encoding_cost(start, end):
+        distance = end - start
+        if distance > max_distance:
+            return float('inf')
+        # Cost increases with distance
+        base_cost = distance * 10
+        quality_loss = sum(frames[start+1:end+1]) * distance
+        return base_cost + quality_loss
+
+    # Base case
+    dp[0] = 0
+    keyframes[0] = [0]
+
+    for i in range(1, n):
+        # Try each possible previous keyframe
+        for prev_keyframe in range(max(0, i - max_distance), i + 1):
+            cost = encoding_cost(prev_keyframe, i)
+            total_cost = (dp[prev_keyframe] if prev_keyframe > 0 else 0) + cost
+
+            if total_cost < dp[i]:
+                dp[i] = total_cost
+                keyframes[i] = keyframes[prev_keyframe - 1] + [i] if prev_keyframe > 0 else [i]
+
+    return dp[n-1], keyframes[n-1]
+
+# Time: O(n × max_distance), Space: O(n)
+```
+
+### Case Study 3: Supply Chain Optimization
+
+**Problem**: Minimize cost of ordering and storing inventory over time.
+
+**DP Application**: Inventory management with holding costs.
+
+```python
+def optimize_inventory(demand, order_cost, holding_cost, capacity):
+    """
+    Optimize inventory orders over time
+    demand[i] = demand in period i
+    order_cost = fixed cost per order
+    holding_cost = cost per unit per period
+    capacity = warehouse capacity
+    """
+    n = len(demand)
+    # dp[i] = min cost to satisfy demand for periods 0..i
+    dp = [float('inf')] * n
+    orders = [None] * n
+
+    for i in range(n):
+        # Try ordering for periods j to i in one order
+        total_demand = 0
+        for j in range(i, -1, -1):
+            total_demand += demand[j]
+
+            if total_demand > capacity:
+                break
+
+            # Calculate holding cost for this order
+            hold_cost = 0
+            cumulative = 0
+            for k in range(j, i + 1):
+                cumulative += demand[k]
+                # Hold cumulative units for (i - k) periods
+                hold_cost += cumulative * holding_cost * (i - k)
+
+            # Total cost
+            prev_cost = dp[j-1] if j > 0 else 0
+            total = prev_cost + order_cost + hold_cost
+
+            if total < dp[i]:
+                dp[i] = total
+                orders[i] = (j, i, total_demand)
+
+    # Reconstruct ordering strategy
+    strategy = []
+    i = n - 1
+    while i >= 0:
+        strategy.append(orders[i])
+        i = orders[i][0] - 1
+
+    return dp[n-1], list(reversed(strategy))
+
+# Time: O(n²), Space: O(n)
+```
+
+### Case Study 4: Route Planning with Time Windows
+
+**Problem**: Find optimal delivery route with time window constraints.
+
+**DP Application**: State includes time, making this a 2D DP problem.
+
+```python
+def delivery_route_dp(locations, time_windows, travel_time):
+    """
+    Find optimal delivery sequence
+    locations = list of delivery points
+    time_windows[i] = (earliest, latest) time for location i
+    travel_time[i][j] = time from location i to j
+    """
+    n = len(locations)
+    # dp[mask][last][time] = min cost to visit locations in mask, ending at last, at time
+    # Use dictionary for sparse storage
+    dp = {}
+
+    def solve(visited, last, current_time):
+        state = (visited, last, current_time)
+        if state in dp:
+            return dp[state]
+
+        # All locations visited
+        if visited == (1 << n) - 1:
+            return 0
+
+        min_cost = float('inf')
+
+        # Try visiting each unvisited location
+        for next_loc in range(n):
+            if visited & (1 << next_loc):
+                continue
+
+            # Travel to next location
+            arrival_time = current_time + travel_time[last][next_loc]
+            earliest, latest = time_windows[next_loc]
+
+            # Check if we can make the time window
+            if arrival_time <= latest:
+                # Wait if we arrive early
+                service_time = max(arrival_time, earliest)
+                wait_cost = max(0, earliest - arrival_time)
+
+                # Recurse
+                future_cost = solve(
+                    visited | (1 << next_loc),
+                    next_loc,
+                    service_time + 1  # Service takes 1 unit
+                )
+
+                total_cost = wait_cost + future_cost
+                min_cost = min(min_cost, total_cost)
+
+        dp[state] = min_cost
+        return min_cost
+
+    # Start from depot (location 0) at time 0
+    return solve(1, 0, 0)
+
+# Time: O(n² × 2^n × T) where T is time range
+# Space: O(2^n × T)
+```
+
+### Case Study 5: Natural Language Processing - Text Segmentation
+
+**Problem**: Segment text into words using a dictionary (Chinese word segmentation).
+
+**DP Application**: String DP with dictionary lookup.
+
+```python
+def segment_text(text, dictionary, language_model):
+    """
+    Segment text into words optimally
+    text = unsegmented text
+    dictionary = set of valid words
+    language_model = function giving probability of word sequence
+    """
+    n = len(text)
+    # dp[i] = (max_prob, segmentation) for text[0..i]
+    dp = [(0, [])] * (n + 1)
+    dp[0] = (1.0, [])
+
+    for i in range(1, n + 1):
+        best_prob = 0
+        best_seg = []
+
+        # Try all possible last words
+        for j in range(i):
+            word = text[j:i]
+            if word in dictionary:
+                prev_prob, prev_seg = dp[j]
+                # Use language model for word probability
+                word_prob = language_model(prev_seg, word)
+                total_prob = prev_prob * word_prob
+
+                if total_prob > best_prob:
+                    best_prob = total_prob
+                    best_seg = prev_seg + [word]
+
+        dp[i] = (best_prob, best_seg)
+
+    return dp[n][1]
+
+# Example with simple language model
+def simple_language_model(prev_words, new_word):
+    """Simple unigram model"""
+    # In practice, use bigram/trigram probabilities
+    freq = {
+        'hello': 0.01,
+        'world': 0.008,
+        'the': 0.05,
+        # ... more word frequencies
+    }
+    return freq.get(new_word, 0.0001)
+
+# Time: O(n² × D) where D is dictionary lookup time
+# Space: O(n × W) where W is average segmentation length
+```
+
+### Case Study 6: Database Query Optimization
+
+**Problem**: Optimize join order for multiple database tables.
+
+**DP Application**: Bitmask DP for subset enumeration.
+
+```python
+def optimize_join_order(tables, join_costs):
+    """
+    Find optimal order to join database tables
+    tables = list of table names
+    join_costs[i][j] = cost to join tables i and j
+    """
+    n = len(tables)
+    # dp[mask] = (min_cost, join_order) for tables in mask
+    dp = {}
+    dp[0] = (0, [])
+
+    # Initialize single tables
+    for i in range(n):
+        dp[1 << i] = (0, [tables[i]])
+
+    # Try all subsets
+    for mask in range(1, 1 << n):
+        if mask not in dp:
+            continue
+
+        current_cost, current_order = dp[mask]
+
+        # Try joining with each table not in mask
+        for i in range(n):
+            if mask & (1 << i):
+                continue
+
+            new_mask = mask | (1 << i)
+
+            # Calculate cost of joining table i
+            join_cost = 0
+            for j in range(n):
+                if mask & (1 << j):
+                    join_cost += join_costs[j][i]
+
+            total_cost = current_cost + join_cost
+            new_order = current_order + [tables[i]]
+
+            if new_mask not in dp or total_cost < dp[new_mask][0]:
+                dp[new_mask] = (total_cost, new_order)
+
+    full_mask = (1 << n) - 1
+    return dp[full_mask]
+
+# Time: O(n² × 2^n), Space: O(2^n)
+```
+
+### Case Study 7: Image Seam Carving (Content-Aware Resizing)
+
+**Problem**: Resize image by removing least important seams.
+
+**DP Application**: Grid DP with energy minimization.
+
+```python
+def seam_carving(image, energy_function):
+    """
+    Find minimum energy vertical seam for content-aware resizing
+    image = 2D array of pixels
+    energy_function = function to compute pixel importance
+    """
+    m, n = len(image), len(image[0])
+
+    # Compute energy for each pixel
+    energy = [[energy_function(image, i, j) for j in range(n)] for i in range(m)]
+
+    # dp[i][j] = min energy to reach pixel (i, j)
+    dp = [[float('inf')] * n for _ in range(m)]
+    parent = [[None] * n for _ in range(m)]
+
+    # Base case: first row
+    for j in range(n):
+        dp[0][j] = energy[0][j]
+
+    # Fill DP table
+    for i in range(1, m):
+        for j in range(n):
+            # Try coming from three possible parents
+            for pj in range(max(0, j-1), min(n, j+2)):
+                if dp[i-1][pj] + energy[i][j] < dp[i][j]:
+                    dp[i][j] = dp[i-1][pj] + energy[i][j]
+                    parent[i][j] = pj
+
+    # Find minimum in last row
+    min_col = min(range(n), key=lambda j: dp[m-1][j])
+
+    # Backtrack to find seam
+    seam = []
+    col = min_col
+    for i in range(m-1, -1, -1):
+        seam.append((i, col))
+        if parent[i][col] is not None:
+            col = parent[i][col]
+
+    return list(reversed(seam)), dp[m-1][min_col]
+
+def simple_energy(image, i, j):
+    """Simple gradient-based energy function"""
+    m, n = len(image), len(image[0])
+    energy = 0
+
+    # Horizontal gradient
+    if j > 0 and j < n - 1:
+        energy += abs(image[i][j+1] - image[i][j-1])
+
+    # Vertical gradient
+    if i > 0 and i < m - 1:
+        energy += abs(image[i+1][j] - image[i-1][j])
+
+    return energy
+
+# Time: O(m × n), Space: O(m × n)
+```
 
 ## Practice Problems by Difficulty
 

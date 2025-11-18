@@ -1330,6 +1330,466 @@ function alertSeverityToPriority(severity) {
 }
 ```
 
+## SLIs, SLOs, and SLAs
+
+### Understanding the Hierarchy
+
+```
+SLA (Agreement)
+  ↓ commits to
+SLO (Objective)
+  ↓ measured by
+SLI (Indicator)
+  ↓ tracked via
+Metrics
+```
+
+### Service Level Indicators (SLIs)
+
+**Definition**: Quantitative measures of service behavior.
+
+**What to measure** (the "what's happening"):
+
+```javascript
+// Availability SLI: % of successful requests
+const availabilitySLI = successfulRequests / totalRequests;
+
+// Latency SLI: % of requests faster than threshold
+const latencySLI = requestsFasterThan200ms / totalRequests;
+
+// Throughput SLI: Requests per second
+const throughputSLI = totalRequests / timeWindowSeconds;
+
+// Quality SLI: % of requests without data loss
+const qualitySLI = requestsWithoutDataLoss / totalRequests;
+```
+
+**Common SLIs:**
+
+| Category | SLI | Measurement |
+|----------|-----|-------------|
+| **Availability** | Request success rate | `(total - errors) / total` |
+| **Latency** | 95th percentile response time | `p95(response_time)` |
+| **Throughput** | Requests per second | `rate(requests[5m])` |
+| **Durability** | Data retention rate | `retained_data / stored_data` |
+| **Correctness** | Error-free transactions | `(total - corrupt) / total` |
+
+**Example SLI Queries:**
+
+```promql
+# Availability SLI: 99.9% of requests succeed
+sum(rate(http_requests_total{status!~"5.."}[30d])) /
+sum(rate(http_requests_total[30d]))
+
+# Latency SLI: 95% of requests complete in < 200ms
+sum(rate(http_request_duration_seconds_bucket{le="0.2"}[30d])) /
+sum(rate(http_request_duration_seconds_count[30d]))
+
+# Quality SLI: 99.99% of writes are durable
+sum(rate(db_writes_durable[30d])) /
+sum(rate(db_writes_total[30d]))
+```
+
+### Service Level Objectives (SLOs)
+
+**Definition**: Target values for SLIs. Internal goals for service reliability.
+
+**Setting Realistic SLOs:**
+
+1. **Start with current performance**:
+   ```
+   Current: 99.5% availability
+   Target: 99.9% availability (achievable stretch)
+   ```
+
+2. **Consider user expectations**:
+   - Consumer apps: 99.9% (3 nines)
+   - Enterprise SaaS: 99.95% (3.5 nines)
+   - Critical infrastructure: 99.99% (4 nines)
+
+3. **Balance reliability vs velocity**:
+   - Higher SLO = slower development
+   - Lower SLO = more risk, faster shipping
+
+**SLO Examples:**
+
+```yaml
+# API Gateway SLOs
+slos:
+  - name: availability
+    description: "API requests succeed"
+    target: 99.9%
+    window: 30d
+    sli: |
+      sum(rate(http_requests_total{status!~"5.."}[30d])) /
+      sum(rate(http_requests_total[30d]))
+
+  - name: latency_p95
+    description: "95% of requests < 200ms"
+    target: 95%
+    window: 30d
+    sli: |
+      sum(rate(http_request_duration_seconds_bucket{le="0.2"}[30d])) /
+      sum(rate(http_request_duration_seconds_count[30d]))
+
+  - name: latency_p99
+    description: "99% of requests < 1s"
+    target: 99%
+    window: 30d
+    sli: |
+      sum(rate(http_request_duration_seconds_bucket{le="1.0"}[30d])) /
+      sum(rate(http_request_duration_seconds_count[30d]))
+```
+
+**Multi-Window SLOs:**
+
+```yaml
+# Check SLO compliance over multiple time windows
+windows:
+  - 1h    # Fast feedback
+  - 24h   # Daily
+  - 7d    # Weekly
+  - 30d   # Monthly (official)
+```
+
+### Service Level Agreements (SLAs)
+
+**Definition**: Contractual commitments to customers with consequences.
+
+**SLA vs SLO:**
+
+```
+SLO (Internal): 99.9% availability
+  ↓ (set stricter than SLA)
+SLA (External): 99.5% availability
+  ↓ (with penalties if breached)
+Customer expectation met
+```
+
+**SLA Example:**
+
+```yaml
+service_level_agreement:
+  service: "API Platform"
+  customer: "Enterprise Tier"
+  effective_date: "2025-01-01"
+
+  commitments:
+    - metric: "Monthly Uptime"
+      target: 99.5%
+      measurement: |
+        (total_minutes - downtime_minutes) / total_minutes
+      measurement_period: calendar_month
+
+    - metric: "API Response Time"
+      target: "95% of requests < 500ms"
+      measurement_period: calendar_month
+
+  consequences:
+    - threshold: "< 99.5%"
+      credit: "10% monthly fee"
+    - threshold: "< 99.0%"
+      credit: "25% monthly fee"
+    - threshold: "< 95.0%"
+      credit: "100% monthly fee"
+
+  exclusions:
+    - "Customer-caused issues"
+    - "Scheduled maintenance (with 7-day notice)"
+    - "Force majeure events"
+    - "Third-party service failures"
+
+  measurement:
+    source: "Prometheus metrics"
+    dashboard: "https://status.company.com"
+    review: "Monthly"
+```
+
+### Error Budgets
+
+**Definition**: Amount of unreliability allowed within SLO.
+
+**Calculation:**
+
+```javascript
+// For 99.9% availability SLO over 30 days
+const sloTarget = 0.999;
+const errorBudget = 1 - sloTarget; // 0.001 = 0.1%
+
+// In time
+const totalMinutesPerMonth = 30 * 24 * 60; // 43,200 minutes
+const allowedDowntime = totalMinutesPerMonth * errorBudget; // 43.2 minutes
+
+// In requests
+const totalRequests = 10_000_000;
+const allowedErrors = totalRequests * errorBudget; // 10,000 errors
+```
+
+**Error Budget Tracking:**
+
+```promql
+# Error budget remaining (%)
+(
+  1 - (
+    (1 - availability_sli) / (1 - availability_slo_target)
+  )
+) * 100
+
+# Example: Current availability = 99.95%, Target = 99.9%
+# Error budget used = (1 - 0.9995) / (1 - 0.999) = 50%
+# Error budget remaining = 50%
+```
+
+**Burn Rate:**
+
+```promql
+# How fast are we consuming error budget?
+# 1.0 = consuming at exactly SLO rate
+# 2.0 = consuming twice as fast (will exhaust in 15 days)
+# 0.5 = consuming half as fast (will last 60 days)
+
+burn_rate = (1 - current_availability) / (1 - slo_target)
+
+# Alert on high burn rate
+burn_rate > 2.0  # Consuming budget too fast
+```
+
+**Error Budget Policy:**
+
+```yaml
+error_budget_policy:
+  when_budget_remaining:
+    - range: "100% - 50%"
+      action: "Normal development pace"
+      deployments: "Multiple per day"
+      features: "Ship new features"
+
+    - range: "50% - 25%"
+      action: "Caution mode"
+      deployments: "Daily deploys only"
+      features: "Prioritize reliability"
+
+    - range: "25% - 0%"
+      action: "Freeze mode"
+      deployments: "Emergency fixes only"
+      features: "All hands on reliability"
+
+    - range: "< 0%"
+      action: "SLO breach"
+      deployments: "Halted"
+      features: "Postmortem required"
+      notification: "Leadership escalation"
+```
+
+### Implementing SLOs
+
+#### 1. Choose SLIs
+```javascript
+// Identify what matters to users
+const userExperienceSLIs = {
+  // Can they access the service?
+  availability: true,
+
+  // Is it fast enough?
+  latency: true,
+
+  // Is data correct?
+  quality: true,
+
+  // Are actions completed?
+  throughput: false // Nice-to-have, not critical
+};
+```
+
+#### 2. Collect Data
+```javascript
+// Instrument to measure SLIs
+const sliMetrics = {
+  total: new Counter('requests_total'),
+  success: new Counter('requests_success'),
+  latency: new Histogram('request_duration_seconds', {
+    buckets: [0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
+  })
+};
+
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on('finish', () => {
+    sliMetrics.total.inc();
+
+    if (res.statusCode < 500) {
+      sliMetrics.success.inc();
+    }
+
+    const duration = (Date.now() - start) / 1000;
+    sliMetrics.latency.observe(duration);
+  });
+
+  next();
+});
+```
+
+#### 3. Set Targets
+```yaml
+# Start conservative, iterate
+initial_slo:
+  availability: 99.0%   # Easy to achieve
+  latency_p95: 500ms    # Comfortable target
+
+after_3_months:
+  availability: 99.5%   # Tighten based on data
+  latency_p95: 300ms
+
+after_6_months:
+  availability: 99.9%   # Final target
+  latency_p95: 200ms
+```
+
+#### 4. Alert on SLO Violations
+```yaml
+# Prometheus alert
+groups:
+  - name: slo_alerts
+    rules:
+      - alert: SLOViolation_Availability
+        expr: |
+          (
+            sum(rate(http_requests_total{status!~"5.."}[30d])) /
+            sum(rate(http_requests_total[30d]))
+          ) < 0.999
+        for: 1h
+        annotations:
+          summary: "Availability SLO violated"
+          description: "Current: {{ $value }}, Target: 0.999"
+
+      - alert: ErrorBudgetExhausted
+        expr: |
+          (
+            1 - (
+              (1 - availability_sli) / (1 - 0.999)
+            )
+          ) < 0
+        annotations:
+          summary: "Error budget exhausted"
+          description: "Stop feature development, focus on reliability"
+```
+
+#### 5. Report and Review
+```javascript
+// Weekly SLO report
+const sloReport = {
+  week: '2025-W03',
+  slos: [
+    {
+      name: 'availability',
+      target: 99.9,
+      actual: 99.95,
+      status: 'met',
+      error_budget_remaining: 50
+    },
+    {
+      name: 'latency_p95',
+      target: 200,
+      actual: 185,
+      status: 'met',
+      error_budget_remaining: 75
+    }
+  ],
+  incidents: [
+    {
+      date: '2025-01-15',
+      duration: '15 minutes',
+      impact: 'Used 10% of error budget',
+      root_cause: 'Database connection pool exhausted'
+    }
+  ],
+  actions: [
+    'Increase DB connection pool size',
+    'Add connection pool monitoring',
+    'Update runbook'
+  ]
+};
+```
+
+### SLO Dashboard
+
+```javascript
+// Grafana dashboard configuration
+const sloDashboard = {
+  title: 'SLO Dashboard',
+  panels: [
+    {
+      title: 'Availability - Last 30 Days',
+      query: `
+        sum(rate(http_requests_total{status!~"5.."}[30d])) /
+        sum(rate(http_requests_total[30d])) * 100
+      `,
+      target: 99.9,
+      visualization: 'gauge'
+    },
+    {
+      title: 'Error Budget Remaining',
+      query: `
+        (1 - ((1 - availability_sli) / (1 - 0.999))) * 100
+      `,
+      visualization: 'gauge',
+      thresholds: {
+        green: [50, 100],
+        yellow: [25, 50],
+        red: [0, 25]
+      }
+    },
+    {
+      title: 'Error Budget Burn Rate',
+      query: `
+        (1 - availability_sli) / (1 - 0.999)
+      `,
+      visualization: 'graph',
+      alert_threshold: 2.0
+    },
+    {
+      title: 'SLO Compliance - 30 Day Rolling',
+      query: `
+        avg_over_time(availability_sli[30d])
+      `,
+      visualization: 'graph',
+      bands: [
+        { min: 99.9, max: 100, color: 'green', label: 'Above SLO' },
+        { min: 0, max: 99.9, color: 'red', label: 'Below SLO' }
+      ]
+    }
+  ]
+};
+```
+
+### Best Practices
+
+**DO:**
+- Set SLOs based on user needs, not system capabilities
+- Make SLOs stricter than SLAs (buffer for safety)
+- Start conservative, tighten over time
+- Track error budgets, use them to make decisions
+- Review SLOs quarterly
+- Document SLO rationale
+
+**DON'T:**
+- Set 100% as SLO (no error budget for innovation)
+- Have too many SLOs (focus on what matters)
+- Ignore SLO violations (defeats the purpose)
+- Set SLOs without measuring current performance
+- Make SLOs a surprise (transparent with team)
+
+**Example: Too Many Nines**
+
+```
+99% = 7.2 hours downtime/month = OK for internal tools
+99.9% = 43 minutes downtime/month = Good for most services
+99.95% = 22 minutes downtime/month = Great for critical services
+99.99% = 4 minutes downtime/month = Extremely expensive
+99.999% = 26 seconds downtime/month = Reserved for critical infrastructure
+```
+
 ## Debugging Production Issues
 
 ### Systematic Debugging Approach

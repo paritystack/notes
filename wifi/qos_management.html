@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-69617736.js";
+            window.path_to_searchindex_js = "../searchindex-ccaedc6f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-da6337af.js"></script>
@@ -177,10 +177,576 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="qos-management"><a class="header" href="#qos-management">QoS Management</a></h1>
+<p>Quality of Service (QoS) management in WiFi ensures that different types of traffic receive appropriate prioritization and treatment based on their requirements. Modern WiFi standards (802.11ax/WiFi 6 and later) introduce advanced QoS mechanisms that enable fine-grained control over how applications and streams are handled.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>WiFi QoS has evolved from basic WMM (WiFi Multimedia) access categories to sophisticated stream-based classification systems. The key QoS mechanisms include:</p>
+<ul>
+<li><strong>WMM (WiFi Multimedia)</strong>: Foundation of WiFi QoS with 4 access categories</li>
+<li><strong>QoS Map</strong>: Mapping between IP layer DSCP values and WiFi access categories</li>
+<li><strong>MSCS (Mirrored Stream Classification Service)</strong>: Stream classification for uplink traffic</li>
+<li><strong>SCS (Stream Classification Service)</strong>: Bidirectional stream classification and QoS</li>
+<li><strong>DSCP Policy</strong>: Network-driven QoS policy for applications</li>
+</ul>
+<h3 id="access-categories-wmm"><a class="header" href="#access-categories-wmm">Access Categories (WMM)</a></h3>
+<p>WiFi Multimedia (WMM) defines four access categories for traffic prioritization:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Access Category</th><th>Acronym</th><th>Priority</th><th>Typical Use Cases</th></tr>
+</thead>
+<tbody>
+<tr><td>Voice</td><td>AC_VO</td><td>Highest</td><td>VoIP, real-time voice</td></tr>
+<tr><td>Video</td><td>AC_VI</td><td>High</td><td>Video streaming, conferencing</td></tr>
+<tr><td>Best Effort</td><td>AC_BE</td><td>Normal</td><td>General internet, web browsing</td></tr>
+<tr><td>Background</td><td>AC_BK</td><td>Lowest</td><td>File downloads, backups</td></tr>
+</tbody>
+</table>
+</div>
+<p>Each access category has different EDCA (Enhanced Distributed Channel Access) parameters that control channel access timing and contention behavior.</p>
 <h2 id="qos-map"><a class="header" href="#qos-map">QoS Map</a></h2>
-<h2 id="mscs"><a class="header" href="#mscs">MSCS</a></h2>
-<h2 id="scs"><a class="header" href="#scs">SCS</a></h2>
+<p>QoS Map provides the mechanism to translate IP layer QoS markings (DSCP values) to WiFi access categories. This enables end-to-end QoS from the application layer through the WiFi network.</p>
+<h3 id="purpose"><a class="header" href="#purpose">Purpose</a></h3>
+<ul>
+<li>Bridges Layer 3 (IP) QoS to Layer 2 (WiFi) QoS</li>
+<li>Allows applications to signal their QoS requirements using DSCP</li>
+<li>Enables consistent QoS treatment across wired and wireless networks</li>
+<li>Configurable by the Access Point (AP) and communicated to clients</li>
+</ul>
+<h3 id="dscp-to-access-category-mapping"><a class="header" href="#dscp-to-access-category-mapping">DSCP to Access Category Mapping</a></h3>
+<p>The default mapping follows RFC 8325 recommendations, but can be customized:</p>
+<pre><code>DSCP Range          → Access Category
+------------------------------------
+EF (46), CS6 (48)   → AC_VO (Voice)
+AF41-AF43 (34-38)   → AC_VI (Video)
+CS4 (32), AF31-AF33 → AC_VI (Video)
+AF21-AF23 (18-22)   → AC_BE (Best Effort)
+CS0 (0), DF (0)     → AC_BE (Best Effort)
+CS1 (8), CS2 (16)   → AC_BK (Background)
+</code></pre>
+<h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
+<p>QoS Map is negotiated during association and can be updated dynamically:</p>
+<ol>
+<li><strong>AP Advertisement</strong>: AP includes QoS Map Set element in association response</li>
+<li><strong>Client Processing</strong>: Client applies the mapping to outbound traffic</li>
+<li><strong>Dynamic Updates</strong>: AP can send QoS Map Configure frames to update mapping</li>
+</ol>
+<h3 id="qos-map-set-format"><a class="header" href="#qos-map-set-format">QoS Map Set Format</a></h3>
+<p>The QoS Map Set element consists of:</p>
+<ul>
+<li><strong>DSCP Exception fields</strong>: Individual DSCP values mapped to specific ACs</li>
+<li><strong>DSCP Range fields</strong>: Continuous ranges of DSCP values mapped to ACs</li>
+</ul>
+<p>Example QoS Map configuration:</p>
+<pre><code>Exceptions:
+  DSCP 46 → AC_VO
+  DSCP 34 → AC_VI
+
+Ranges:
+  DSCP 0-7   → AC_BK
+  DSCP 8-15  → AC_BE
+  DSCP 16-31 → AC_BE
+  DSCP 32-47 → AC_VI
+  DSCP 48-63 → AC_VO
+</code></pre>
+<h3 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h3>
+<ul>
+<li><strong>Enterprise Networks</strong>: Ensure voice/video traffic gets priority</li>
+<li><strong>Carrier WiFi</strong>: Apply operator QoS policies to subscriber traffic</li>
+<li><strong>Home Networks</strong>: Prioritize gaming or video streaming over downloads</li>
+<li><strong>Public Hotspots</strong>: Differentiate service tiers based on QoS</li>
+</ul>
+<h3 id="implementation-notes"><a class="header" href="#implementation-notes">Implementation Notes</a></h3>
+<ul>
+<li>Clients should honor the QoS Map provided by the AP</li>
+<li>Upstream traffic classification uses DSCP-to-AC mapping</li>
+<li>Downstream traffic is classified by the AP before transmission</li>
+<li>QoS Map support is mandatory in WiFi 6 certified devices</li>
+</ul>
+<h2 id="mscs-mirrored-stream-classification-service"><a class="header" href="#mscs-mirrored-stream-classification-service">MSCS (Mirrored Stream Classification Service)</a></h2>
+<p>MSCS, introduced in 802.11aa and enhanced in 802.11ax, allows a client (STA) to request that the AP mirror the QoS classification applied to a specific traffic stream. This is particularly useful for uplink traffic where the client knows the application requirements.</p>
+<h3 id="purpose-1"><a class="header" href="#purpose-1">Purpose</a></h3>
+<ul>
+<li>Client-initiated QoS classification for uplink streams</li>
+<li>Ensures consistent QoS treatment in both directions</li>
+<li>Reduces latency for time-sensitive applications</li>
+<li>Optimizes airtime usage for classified streams</li>
+</ul>
+<h3 id="how-mscs-works"><a class="header" href="#how-mscs-works">How MSCS Works</a></h3>
+<ol>
+<li><strong>Stream Detection</strong>: Client identifies a traffic stream (by 5-tuple: src IP, dst IP, src port, dst port, protocol)</li>
+<li><strong>MSCS Request</strong>: Client sends MSCS Request frame to AP with stream classifiers</li>
+<li><strong>AP Processing</strong>: AP classifies the stream and applies appropriate QoS</li>
+<li><strong>Mirroring</strong>: AP applies the same classification to corresponding downstream traffic</li>
+<li><strong>MSCS Response</strong>: AP confirms acceptance with MSCS Response frame</li>
+</ol>
+<h3 id="stream-classification"><a class="header" href="#stream-classification">Stream Classification</a></h3>
+<p>MSCS uses TCLAS (Traffic Classification) elements to identify streams:</p>
+<pre><code>TCLAS Elements:
+- Classifier Type 4 (IP and higher layer parameters):
+  • Source IP address
+  • Destination IP address
+  • Source port
+  • Destination port
+  • Protocol (TCP/UDP)
+  • DSCP value
+</code></pre>
+<h3 id="mscs-frame-exchange"><a class="header" href="#mscs-frame-exchange">MSCS Frame Exchange</a></h3>
+<pre><code>Client (STA)                          Access Point (AP)
+     |                                       |
+     |  MSCS Request (TCLAS, QoS params)    |
+     |--------------------------------------&gt;|
+     |                                       | [Process &amp; Classify]
+     |       MSCS Response (Accept/Reject)   |
+     |&lt;--------------------------------------|
+     |                                       |
+     |  [Uplink stream with QoS]            |
+     |--------------------------------------&gt;|
+     |                                       |
+     |  [Downlink stream with mirrored QoS] |
+     |&lt;--------------------------------------|
+</code></pre>
+<h3 id="mscs-parameters"><a class="header" href="#mscs-parameters">MSCS Parameters</a></h3>
+<ul>
+<li><strong>Stream Timeout</strong>: Duration for which classification remains active</li>
+<li><strong>TCLAS Processing</strong>: How multiple TCLAS elements are combined (AND/OR)</li>
+<li><strong>User Priority</strong>: Requested user priority (0-7)</li>
+<li><strong>Stream Status</strong>: Active, inactive, or being modified</li>
+</ul>
+<h3 id="use-cases-1"><a class="header" href="#use-cases-1">Use Cases</a></h3>
+<ul>
+<li><strong>Video Conferencing</strong>: Ensure low latency for bidirectional video/audio</li>
+<li><strong>Online Gaming</strong>: Prioritize game traffic for minimal lag</li>
+<li><strong>VoIP Applications</strong>: QoS for voice calls over WiFi</li>
+<li><strong>Industrial IoT</strong>: Time-sensitive sensor data and control traffic</li>
+</ul>
+<h3 id="benefits"><a class="header" href="#benefits">Benefits</a></h3>
+<ul>
+<li><strong>Application-Aware QoS</strong>: Applications directly signal their requirements</li>
+<li><strong>Reduced Overhead</strong>: AP doesn’t need deep packet inspection</li>
+<li><strong>Bidirectional Consistency</strong>: Same QoS in both directions</li>
+<li><strong>Dynamic Classification</strong>: Can be updated as application needs change</li>
+</ul>
+<h3 id="limitations"><a class="header" href="#limitations">Limitations</a></h3>
+<ul>
+<li>Requires WiFi 6 or later</li>
+<li>Client and AP must both support MSCS</li>
+<li>Limited number of concurrent streams (implementation-dependent)</li>
+<li>Stream identification requires stable 5-tuple (challenging with NAT)</li>
+</ul>
+<h2 id="scs-stream-classification-service"><a class="header" href="#scs-stream-classification-service">SCS (Stream Classification Service)</a></h2>
+<p>SCS, introduced in 802.11be (WiFi 7), is an evolution of MSCS that provides more comprehensive stream classification capabilities. SCS supports both uplink and downlink stream classification with enhanced flexibility.</p>
+<h3 id="purpose-2"><a class="header" href="#purpose-2">Purpose</a></h3>
+<ul>
+<li>Advanced stream-based QoS for WiFi 7 networks</li>
+<li>Bidirectional stream classification with independent parameters</li>
+<li>Support for complex traffic patterns and multiple streams</li>
+<li>Enable application-specific QoS policies</li>
+</ul>
+<h3 id="scs-vs-mscs"><a class="header" href="#scs-vs-mscs">SCS vs MSCS</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>MSCS</th><th>SCS</th></tr>
+</thead>
+<tbody>
+<tr><td>Standard</td><td>802.11ax (WiFi 6)</td><td>802.11be (WiFi 7)</td></tr>
+<tr><td>Direction</td><td>Primarily uplink</td><td>Bidirectional</td></tr>
+<tr><td>Complexity</td><td>Basic stream identification</td><td>Advanced classification</td></tr>
+<tr><td>Stream Control</td><td>Mirrored QoS</td><td>Independent QoS per direction</td></tr>
+<tr><td>Scalability</td><td>Limited streams</td><td>More concurrent streams</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="scs-architecture"><a class="header" href="#scs-architecture">SCS Architecture</a></h3>
+<p>SCS provides a framework for:</p>
+<ol>
+<li><strong>Stream Identification</strong>: Flexible classifiers beyond 5-tuple</li>
+<li><strong>QoS Assignment</strong>: Per-stream QoS parameters</li>
+<li><strong>Stream Grouping</strong>: Multiple related streams with coordinated QoS</li>
+<li><strong>Dynamic Adaptation</strong>: Runtime adjustment based on network conditions</li>
+</ol>
+<h3 id="scs-requestresponse"><a class="header" href="#scs-requestresponse">SCS Request/Response</a></h3>
+<pre><code>Client initiates SCS:
+┌─────────────────────────────────────────┐
+│ SCS Request Frame                       │
+├─────────────────────────────────────────┤
+│ • Stream ID(s)                          │
+│ • TCLAS elements (stream classifiers)   │
+│ • TCLAS Processing rule                 │
+│ • QoS Characteristics:                  │
+│   - Service class                       │
+│   - Minimum data rate                   │
+│   - Maximum latency                     │
+│   - Mean data rate                      │
+│   - Burst size                          │
+│ • Stream timeout                        │
+└─────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────┐
+│ SCS Response Frame                      │
+├─────────────────────────────────────────┤
+│ • Stream ID                             │
+│ • Status (Accept/Reject/Modify)         │
+│ • Accepted QoS parameters               │
+│ • Alternative suggestions (if rejected) │
+└─────────────────────────────────────────┘
+</code></pre>
+<h3 id="enhanced-classification"><a class="header" href="#enhanced-classification">Enhanced Classification</a></h3>
+<p>SCS supports advanced classifiers:</p>
+<ul>
+<li><strong>Layer 2</strong>: MAC addresses, Ethernet type</li>
+<li><strong>Layer 3</strong>: IPv4/IPv6 addresses, DSCP, flow label</li>
+<li><strong>Layer 4</strong>: TCP/UDP ports, protocol type</li>
+<li><strong>Application Layer</strong>: URL patterns, application signatures</li>
+<li><strong>Temporal</strong>: Time-of-day based classification</li>
+</ul>
+<h3 id="qos-characteristics"><a class="header" href="#qos-characteristics">QoS Characteristics</a></h3>
+<p>SCS allows specifying detailed QoS requirements:</p>
+<pre><code>Service Class Types:
+• BE (Best Effort): Default internet traffic
+• BK (Background): Bulk data transfer
+• EE (Excellent Effort): Better than BE, not time-critical
+• CL (Controlled Load): Moderate latency requirements
+• VI (Video): Low latency, moderate jitter tolerance
+• VO (Voice): Ultra-low latency, minimal jitter
+• NC (Network Control): Critical network management
+</code></pre>
+<p>Performance Parameters:</p>
+<ul>
+<li><strong>Minimum Data Rate</strong>: Guaranteed throughput</li>
+<li><strong>Maximum Latency</strong>: Latency bound for the stream</li>
+<li><strong>Peak Data Rate</strong>: Burst handling capacity</li>
+<li><strong>Mean Data Rate</strong>: Average throughput requirement</li>
+<li><strong>Burst Size</strong>: Maximum burst the stream will generate</li>
+<li><strong>Delay Bound</strong>: Maximum acceptable delay</li>
+</ul>
+<h3 id="multi-link-operation-mlo-support"><a class="header" href="#multi-link-operation-mlo-support">Multi-Link Operation (MLO) Support</a></h3>
+<p>In WiFi 7, SCS integrates with Multi-Link Operation:</p>
+<ul>
+<li><strong>Per-Link Classification</strong>: Different QoS on different links</li>
+<li><strong>Link Aggregation</strong>: Combine links for high-priority streams</li>
+<li><strong>Load Balancing</strong>: Distribute streams across links based on QoS</li>
+<li><strong>Failover</strong>: Automatic stream migration on link failure</li>
+</ul>
+<h3 id="scs-stream-states"><a class="header" href="#scs-stream-states">SCS Stream States</a></h3>
+<pre><code>Stream Lifecycle:
+┌─────────┐  Request  ┌─────────┐  Traffic   ┌────────┐
+│ Pending │─────────→│ Active  │──────────→│ Active │
+└─────────┘  Accepted └─────────┘  Flowing   └────────┘
+                                                  │
+                                                  │ Timeout
+                                                  ↓
+                                              ┌────────┐
+                                              │ Ended  │
+                                              └────────┘
+</code></pre>
+<h3 id="use-cases-2"><a class="header" href="#use-cases-2">Use Cases</a></h3>
+<ul>
+<li><strong>8K Video Streaming</strong>: High bandwidth, low latency requirements</li>
+<li><strong>Cloud Gaming</strong>: Ultra-low latency with guaranteed throughput</li>
+<li><strong>AR/VR Applications</strong>: Strict latency and jitter requirements</li>
+<li><strong>Multi-Stream Apps</strong>: Different QoS for video, audio, control channels</li>
+<li><strong>Enterprise Collaboration</strong>: Simultaneous video, voice, screen sharing</li>
+</ul>
+<h3 id="implementation-considerations"><a class="header" href="#implementation-considerations">Implementation Considerations</a></h3>
+<ul>
+<li><strong>Stream Limits</strong>: APs have finite resources for concurrent SCS streams</li>
+<li><strong>Admission Control</strong>: APs may reject requests if resources unavailable</li>
+<li><strong>Fallback Mechanisms</strong>: Applications should handle SCS rejection gracefully</li>
+<li><strong>Battery Impact</strong>: SCS requires active stream management (power trade-off)</li>
+</ul>
 <h2 id="dscp-policy"><a class="header" href="#dscp-policy">DSCP Policy</a></h2>
+<p>DSCP (Differentiated Services Code Point) Policy enables network operators and enterprises to enforce QoS policies at the network edge. The AP communicates DSCP policy to clients, instructing them how to mark their traffic.</p>
+<h3 id="purpose-3"><a class="header" href="#purpose-3">Purpose</a></h3>
+<ul>
+<li>Network-driven QoS policy enforcement</li>
+<li>Standardize DSCP marking across all clients</li>
+<li>Enable operator/enterprise control over application QoS</li>
+<li>Simplify QoS configuration for end users</li>
+</ul>
+<h3 id="dscp-policy-framework"><a class="header" href="#dscp-policy-framework">DSCP Policy Framework</a></h3>
+<p>DSCP Policy consists of:</p>
+<ol>
+<li><strong>Policy Advertisement</strong>: AP advertises supported policies</li>
+<li><strong>Policy Query</strong>: Client can query for specific policies</li>
+<li><strong>Policy Application</strong>: Client marks traffic according to policy</li>
+<li><strong>Policy Update</strong>: Dynamic policy changes propagated to clients</li>
+</ol>
+<h3 id="dscp-policy-element"><a class="header" href="#dscp-policy-element">DSCP Policy Element</a></h3>
+<p>The DSCP Policy element includes:</p>
+<pre><code>Policy Attributes:
+┌──────────────────────────────────────┐
+│ • Policy ID                          │
+│ • Request Type Control               │
+│ • Domain Name (e.g., *.company.com)  │
+│ • DSCP Value(s) to apply             │
+│ • Port Range                         │
+│ • Protocol (TCP/UDP/both)            │
+│ • Direction (uplink/downlink/both)   │
+│ • Policy Lifetime                    │
+└──────────────────────────────────────┘
+</code></pre>
+<h3 id="policy-types"><a class="header" href="#policy-types">Policy Types</a></h3>
+<ol>
+<li>
+<p><strong>Domain-Based Policy</strong></p>
+<ul>
+<li>Apply DSCP based on domain name (URL)</li>
+<li>Example: “*.zoom.us” → DSCP EF (46)</li>
+<li>Useful for SaaS applications</li>
+</ul>
+</li>
+<li>
+<p><strong>Application-Based Policy</strong></p>
+<ul>
+<li>Identify applications by signature</li>
+<li>Apply appropriate DSCP marking</li>
+<li>Example: “Microsoft Teams” → DSCP 34</li>
+</ul>
+</li>
+<li>
+<p><strong>Port-Based Policy</strong></p>
+<ul>
+<li>Traditional port-based classification</li>
+<li>Example: Port 5060 (SIP) → DSCP EF</li>
+</ul>
+</li>
+<li>
+<p><strong>Protocol-Based Policy</strong></p>
+<ul>
+<li>Classify by protocol type</li>
+<li>Example: UDP → DSCP 34 (for RTP)</li>
+</ul>
+</li>
+</ol>
+<h3 id="policy-query-and-response"><a class="header" href="#policy-query-and-response">Policy Query and Response</a></h3>
+<pre><code>Client                                    AP
+  |                                        |
+  |  DSCP Policy Query                     |
+  |  (Request policies for domain/app)     |
+  |---------------------------------------&gt;|
+  |                                        |
+  |  DSCP Policy Response                  |
+  |  (Policy elements for requested items) |
+  |&lt;---------------------------------------|
+  |                                        |
+  |  Apply DSCP marking to traffic         |
+  |---------------------------------------&gt;|
+</code></pre>
+<h3 id="example-policy-configurations"><a class="header" href="#example-policy-configurations">Example Policy Configurations</a></h3>
+<p><strong>Enterprise Video Conferencing</strong></p>
+<pre><code>Policy: Zoom
+  Domain: *.zoom.us
+  DSCP: 34 (AF41) for video
+  DSCP: 46 (EF) for audio
+  Direction: Both
+</code></pre>
+<p><strong>VoIP Services</strong></p>
+<pre><code>Policy: VoIP
+  Ports: 5060-5061 (SIP), 10000-20000 (RTP)
+  Protocol: UDP
+  DSCP: 46 (EF)
+  Direction: Both
+</code></pre>
+<p><strong>Cloud Storage (Background)</strong></p>
+<pre><code>Policy: Cloud Backup
+  Domain: *.dropbox.com, *.onedrive.com
+  DSCP: 8 (CS1)
+  Direction: Uplink
+</code></pre>
+<h3 id="policy-enforcement"><a class="header" href="#policy-enforcement">Policy Enforcement</a></h3>
+<ul>
+<li><strong>Client-Side Marking</strong>: Client marks packets according to policy</li>
+<li><strong>AP Verification</strong>: AP can verify and override if needed</li>
+<li><strong>Policy Hierarchy</strong>: More specific policies override general ones</li>
+<li><strong>Default Behavior</strong>: Unmarked traffic uses default QoS Map</li>
+</ul>
+<h3 id="integration-with-qos-map"><a class="header" href="#integration-with-qos-map">Integration with QoS Map</a></h3>
+<p>DSCP Policy and QoS Map work together:</p>
+<pre><code>Application → DSCP Policy → DSCP Marking → QoS Map → Access Category
+
+Example:
+Zoom Call → "Zoom Policy" → DSCP 46 → QoS Map → AC_VO
+</code></pre>
+<h3 id="benefits-1"><a class="header" href="#benefits-1">Benefits</a></h3>
+<ul>
+<li><strong>Centralized Management</strong>: Network admins control QoS policy</li>
+<li><strong>Consistency</strong>: All clients use same DSCP markings</li>
+<li><strong>Application Awareness</strong>: Policies based on actual applications</li>
+<li><strong>Flexibility</strong>: Policies can be updated without client changes</li>
+<li><strong>Multi-Vendor</strong>: Works across different client devices</li>
+</ul>
+<h3 id="use-cases-3"><a class="header" href="#use-cases-3">Use Cases</a></h3>
+<ol>
+<li>
+<p><strong>Enterprise Networks</strong></p>
+<ul>
+<li>Prioritize business-critical applications (Teams, Zoom)</li>
+<li>Deprioritize personal streaming services</li>
+<li>Enforce bandwidth policies per application</li>
+</ul>
+</li>
+<li>
+<p><strong>Carrier WiFi</strong></p>
+<ul>
+<li>Differentiate service tiers</li>
+<li>Prioritize operator services</li>
+<li>Enforce fair usage policies</li>
+</ul>
+</li>
+<li>
+<p><strong>Public Hotspots</strong></p>
+<ul>
+<li>Premium QoS for paid tiers</li>
+<li>Basic QoS for free access</li>
+<li>Protect against bandwidth abuse</li>
+</ul>
+</li>
+<li>
+<p><strong>Educational Institutions</strong></p>
+<ul>
+<li>Prioritize learning platforms</li>
+<li>Limit gaming and streaming</li>
+<li>Ensure fair access for all users</li>
+</ul>
+</li>
+</ol>
+<h3 id="implementation-requirements"><a class="header" href="#implementation-requirements">Implementation Requirements</a></h3>
+<ul>
+<li><strong>DNS-Based Identification</strong>: Many policies rely on domain names</li>
+<li><strong>TLS/HTTPS Support</strong>: Policy must work with encrypted traffic</li>
+<li><strong>Client Support</strong>: Requires WiFi 6 (802.11ax) or later</li>
+<li><strong>Policy Storage</strong>: Clients cache policies for performance</li>
+<li><strong>Privacy Considerations</strong>: Domain-based policies may reveal user activity</li>
+</ul>
+<h3 id="security-considerations"><a class="header" href="#security-considerations">Security Considerations</a></h3>
+<ul>
+<li><strong>Policy Authenticity</strong>: Ensure policies come from legitimate AP</li>
+<li><strong>Privacy</strong>: Domain monitoring for policy application</li>
+<li><strong>Tampering</strong>: Prevent malicious policy injection</li>
+<li><strong>Override Protection</strong>: AP can override client markings if needed</li>
+</ul>
+<h2 id="comparison-of-qos-mechanisms"><a class="header" href="#comparison-of-qos-mechanisms">Comparison of QoS Mechanisms</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>QoS Map</th><th>MSCS</th><th>SCS</th><th>DSCP Policy</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Standard</strong></td><td>802.11</td><td>802.11ax</td><td>802.11be</td><td>802.11ax</td></tr>
+<tr><td><strong>Direction</strong></td><td>Both</td><td>Uplink (mirrored)</td><td>Both</td><td>Both</td></tr>
+<tr><td><strong>Granularity</strong></td><td>DSCP ranges</td><td>Per-stream</td><td>Per-stream</td><td>Per-app/domain</td></tr>
+<tr><td><strong>Initiated By</strong></td><td>AP</td><td>Client</td><td>Client</td><td>AP</td></tr>
+<tr><td><strong>Complexity</strong></td><td>Low</td><td>Medium</td><td>High</td><td>Medium</td></tr>
+<tr><td><strong>Application Awareness</strong></td><td>No</td><td>Partial</td><td>Yes</td><td>Yes</td></tr>
+<tr><td><strong>Dynamic</strong></td><td>Semi</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="for-network-administrators"><a class="header" href="#for-network-administrators">For Network Administrators</a></h3>
+<ol>
+<li><strong>Start with QoS Map</strong>: Establish baseline DSCP-to-AC mapping</li>
+<li><strong>Enable DSCP Policy</strong>: Define policies for known applications</li>
+<li><strong>Monitor SCS/MSCS Usage</strong>: Understand application QoS needs</li>
+<li><strong>Admission Control</strong>: Limit concurrent high-priority streams</li>
+<li><strong>Test and Validate</strong>: Verify QoS behavior with real applications</li>
+</ol>
+<h3 id="for-application-developers"><a class="header" href="#for-application-developers">For Application Developers</a></h3>
+<ol>
+<li><strong>Use Standard DSCP Values</strong>: Follow RFC 8325 recommendations</li>
+<li><strong>Request MSCS/SCS</strong>: For latency-sensitive applications</li>
+<li><strong>Handle Rejection</strong>: Gracefully degrade if QoS not available</li>
+<li><strong>Minimize Streams</strong>: Don’t over-request high-priority QoS</li>
+<li><strong>Test Without QoS</strong>: Ensure app works on basic WiFi</li>
+</ol>
+<h3 id="for-end-users"><a class="header" href="#for-end-users">For End Users</a></h3>
+<ol>
+<li><strong>Update Firmware</strong>: Ensure AP supports modern QoS features</li>
+<li><strong>WiFi 6/7 Devices</strong>: Newer devices have better QoS support</li>
+<li><strong>Prioritize Applications</strong>: Configure router to prioritize important traffic</li>
+<li><strong>Monitor Performance</strong>: Use QoS-aware monitoring tools</li>
+</ol>
+<h2 id="troubleshooting-qos-issues"><a class="header" href="#troubleshooting-qos-issues">Troubleshooting QoS Issues</a></h2>
+<h3 id="common-problems"><a class="header" href="#common-problems">Common Problems</a></h3>
+<ol>
+<li>
+<p><strong>QoS Not Working</strong></p>
+<ul>
+<li>Check if AP and client both support the QoS mechanism</li>
+<li>Verify QoS is enabled on the AP</li>
+<li>Ensure DSCP markings are preserved through the network</li>
+</ul>
+</li>
+<li>
+<p><strong>Inconsistent Performance</strong></p>
+<ul>
+<li>Check for QoS Map mismatches</li>
+<li>Verify MSCS/SCS requests are accepted</li>
+<li>Monitor airtime usage per access category</li>
+</ul>
+</li>
+<li>
+<p><strong>High Priority Traffic Not Prioritized</strong></p>
+<ul>
+<li>Verify DSCP markings are correct</li>
+<li>Check QoS Map configuration</li>
+<li>Ensure WMM is enabled</li>
+</ul>
+</li>
+</ol>
+<h3 id="diagnostic-commands-linux"><a class="header" href="#diagnostic-commands-linux">Diagnostic Commands (Linux)</a></h3>
+<pre><code class="language-bash"># Check QoS capabilities
+iw dev wlan0 info | grep -i qos
+
+# View current QoS Map
+iw dev wlan0 station dump | grep -i "qos\|wmm"
+
+# Monitor WiFi QoS statistics
+tc -s qdisc show dev wlan0
+
+# Capture QoS frames
+tcpdump -i wlan0 -v 'type mgt subtype action'
+</code></pre>
+<h3 id="wireshark-analysis"><a class="header" href="#wireshark-analysis">Wireshark Analysis</a></h3>
+<p>Filter for QoS-related frames:</p>
+<pre><code># QoS Map frames
+wlan.fixed.action_code == 4
+
+# MSCS frames
+wlan.fixed.action_code == 5
+
+# SCS frames
+wlan.fixed.action_code == 6
+
+# DSCP Policy frames
+wlan.ext_tag.number == 108
+</code></pre>
+<h2 id="future-developments"><a class="header" href="#future-developments">Future Developments</a></h2>
+<h3 id="wifi-7-enhancements"><a class="header" href="#wifi-7-enhancements">WiFi 7 Enhancements</a></h3>
+<ul>
+<li><strong>Enhanced SCS</strong>: More sophisticated stream classification</li>
+<li><strong>Multi-Link QoS</strong>: Coordinated QoS across multiple links</li>
+<li><strong>AI-Driven QoS</strong>: Machine learning for dynamic QoS optimization</li>
+<li><strong>Latency Guarantees</strong>: Stricter bounds for time-sensitive traffic</li>
+</ul>
+<h3 id="emerging-use-cases"><a class="header" href="#emerging-use-cases">Emerging Use Cases</a></h3>
+<ul>
+<li><strong>Extended Reality (XR)</strong>: Ultra-low latency for AR/VR</li>
+<li><strong>Cloud Gaming</strong>: Guaranteed performance for game streaming</li>
+<li><strong>Autonomous Vehicles</strong>: V2X communication with QoS</li>
+<li><strong>Industrial Automation</strong>: Deterministic WiFi for Industry 4.0</li>
+</ul>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
+<ul>
+<li><strong>IEEE 802.11-2020</strong>: WiFi standard with QoS Map and MSCS</li>
+<li><strong>IEEE 802.11be</strong>: WiFi 7 with SCS enhancements</li>
+<li><strong>RFC 8325</strong>: Mapping DSCP to WiFi Access Categories</li>
+<li><strong>Wi-Fi Alliance</strong>: WMM and QoS certification programs</li>
+<li><strong>IETF Diffserv</strong>: DSCP definitions and usage</li>
+</ul>
+<hr>
+<p>Modern WiFi QoS mechanisms provide sophisticated tools for ensuring application performance in wireless networks. By understanding and properly implementing QoS Map, MSCS, SCS, and DSCP Policy, networks can deliver excellent user experiences for latency-sensitive and bandwidth-intensive applications.</p>
 
                     </main>
 

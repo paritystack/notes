@@ -68,6 +68,105 @@ img {
 - Avoid inserting content above existing content
 - Use `transform` instead of layout properties
 
+## Additional Performance Metrics
+
+### First Contentful Paint (FCP)
+
+Time when the first text or image is painted.
+
+**Target**: < 1.8 seconds
+
+```javascript
+// Monitor FCP
+new PerformanceObserver((entryList) => {
+  for (const entry of entryList.getEntries()) {
+    if (entry.name === 'first-contentful-paint') {
+      console.log('FCP:', entry.startTime);
+    }
+  }
+}).observe({ entryTypes: ['paint'] });
+```
+
+**Optimizations**:
+- Eliminate render-blocking resources
+- Minify CSS
+- Remove unused CSS
+- Preconnect to required origins
+- Reduce server response times
+
+### Time to Interactive (TTI)
+
+Time until page is fully interactive (can respond to user input).
+
+**Target**: < 3.8 seconds
+
+```javascript
+// Approximate TTI detection
+let ttiTime;
+const observer = new PerformanceObserver((list) => {
+  const entries = list.getEntries();
+  // Look for a 5-second window with no long tasks
+  entries.forEach(entry => {
+    if (entry.duration < 50) {
+      ttiTime = entry.startTime + entry.duration;
+    }
+  });
+});
+observer.observe({ entryTypes: ['longtask'] });
+```
+
+**Optimizations**:
+- Minimize main thread work
+- Reduce JavaScript execution time
+- Break up long tasks (> 50ms)
+- Defer non-critical third-party scripts
+- Use code splitting and lazy loading
+
+### Time to First Byte (TTFB)
+
+Time from request to first byte of response.
+
+**Target**: < 600 milliseconds
+
+```javascript
+// Measure TTFB
+const perfData = performance.getEntriesByType('navigation')[0];
+const ttfb = perfData.responseStart - perfData.requestStart;
+console.log('TTFB:', ttfb);
+```
+
+**Optimizations**:
+- Use a CDN
+- Optimize server processing time
+- Enable database query caching
+- Implement server-side caching (Redis, Memcached)
+- Use HTTP/2 or HTTP/3
+- Reduce redirects
+
+### Total Blocking Time (TBT)
+
+Sum of all time periods between FCP and TTI where task length exceeded 50ms.
+
+**Target**: < 200 milliseconds
+
+```javascript
+// Monitor long tasks
+const observer = new PerformanceObserver((list) => {
+  for (const entry of list.getEntries()) {
+    // Tasks longer than 50ms block the main thread
+    console.log('Long task:', entry.duration);
+  }
+});
+observer.observe({ entryTypes: ['longtask'] });
+```
+
+**Optimizations**:
+- Break up long tasks
+- Optimize third-party scripts
+- Use web workers
+- Implement code splitting
+- Defer non-critical JavaScript
+
 ## Loading Strategies
 
 ### Critical Rendering Path
@@ -209,6 +308,210 @@ document.querySelectorAll('img.lazy').forEach(img => {
 - Serve via CDN
 - Use `srcset` for retina displays
 
+### Image CDNs
+
+Automatically optimize and deliver images:
+
+```html
+<!-- Cloudinary -->
+<img src="https://res.cloudinary.com/demo/image/upload/w_400,f_auto,q_auto/sample.jpg">
+
+<!-- Parameters:
+     w_400: width 400px
+     f_auto: automatic format (WebP/AVIF)
+     q_auto: automatic quality optimization
+-->
+
+<!-- imgix -->
+<img src="https://demo.imgix.net/sample.jpg?w=400&auto=format,compress">
+```
+
+**Features**:
+- Automatic format selection (WebP/AVIF)
+- On-the-fly resizing
+- Smart compression
+- Global CDN delivery
+- Lazy loading support
+
+```javascript
+// Responsive images with Cloudinary
+const cloudinaryUrl = (publicId, width) => {
+  return `https://res.cloudinary.com/demo/image/upload/w_${width},f_auto,q_auto,dpr_auto/${publicId}`;
+};
+
+// Usage
+<img
+  srcset="
+    ${cloudinaryUrl('sample', 400)} 400w,
+    ${cloudinaryUrl('sample', 800)} 800w,
+    ${cloudinaryUrl('sample', 1200)} 1200w
+  "
+  sizes="(max-width: 400px) 400px, (max-width: 800px) 800px, 1200px"
+  src="${cloudinaryUrl('sample', 800)}"
+  alt="Sample"
+>
+```
+
+**Popular Image CDNs**:
+- Cloudinary
+- imgix
+- Cloudflare Images
+- ImageKit
+- AWS CloudFront with Lambda@Edge
+
+## Bundle Optimization
+
+### Minification
+
+Remove unnecessary characters without changing functionality:
+
+```javascript
+// webpack.config.js
+const TerserPlugin = require('terser-webpack-plugin');
+
+module.exports = {
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          compress: {
+            drop_console: true, // Remove console.logs
+            dead_code: true,    // Remove unreachable code
+          },
+          mangle: true,         // Shorten variable names
+        },
+      }),
+    ],
+  },
+};
+```
+
+### Compression (Gzip & Brotli)
+
+Compress assets before sending to browser:
+
+```
+Uncompressed: 1000 KB
+Gzip:         300 KB (70% reduction)
+Brotli:       250 KB (75% reduction)
+```
+
+```nginx
+# Nginx configuration
+http {
+  # Gzip compression
+  gzip on;
+  gzip_vary on;
+  gzip_min_length 1024;
+  gzip_types text/plain text/css text/xml text/javascript
+             application/javascript application/json application/xml+rss;
+  gzip_comp_level 6;
+
+  # Brotli compression (better than gzip)
+  brotli on;
+  brotli_comp_level 6;
+  brotli_types text/plain text/css text/xml text/javascript
+               application/javascript application/json application/xml+rss;
+}
+```
+
+```javascript
+// Express.js
+const compression = require('compression');
+const express = require('express');
+const app = express();
+
+// Enable gzip compression
+app.use(compression({
+  level: 6,
+  threshold: 1024, // Only compress responses > 1KB
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+```
+
+### Tree Shaking
+
+Remove unused code during bundling:
+
+```javascript
+// Bad - imports entire library
+import _ from 'lodash';
+const result = _.debounce(fn, 300);
+
+// Good - only imports what's needed
+import debounce from 'lodash-es/debounce';
+const result = debounce(fn, 300);
+
+// package.json - mark as side-effect free
+{
+  "name": "my-app",
+  "sideEffects": false, // Enable tree shaking
+  // or specify files with side effects
+  "sideEffects": ["*.css", "*.scss"]
+}
+```
+
+### Analyzing Bundle Size
+
+```bash
+# Webpack Bundle Analyzer
+npm install --save-dev webpack-bundle-analyzer
+
+# Add to webpack.config.js
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+module.exports = {
+  plugins: [
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      openAnalyzer: true,
+      reportFilename: 'bundle-report.html'
+    })
+  ]
+};
+
+# Run analysis
+npm run build
+# Opens interactive treemap visualization
+```
+
+```bash
+# Source Map Explorer
+npm install -g source-map-explorer
+
+# Analyze bundle
+source-map-explorer bundle.min.js bundle.min.js.map
+
+# Vite
+npm run build -- --report
+
+# Next.js
+npm install @next/bundle-analyzer
+```
+
+```javascript
+// Monitor bundle size in CI/CD
+// package.json
+{
+  "scripts": {
+    "analyze": "webpack-bundle-analyzer dist/stats.json",
+    "size": "size-limit"
+  },
+  "size-limit": [
+    {
+      "path": "dist/bundle.js",
+      "limit": "300 KB"
+    }
+  ]
+}
+```
+
 ## JavaScript Optimization
 
 ### Bundle Size Reduction
@@ -217,9 +520,6 @@ document.querySelectorAll('img.lazy').forEach(img => {
 // Tree shaking - remove unused code
 import { debounce } from 'lodash-es'; // Instead of entire lodash
 
-// Analyze bundle
-// npm install --save-dev webpack-bundle-analyzer
-
 // Dynamic imports for routes
 const routes = [
   {
@@ -227,6 +527,98 @@ const routes = [
     component: () => import('./Dashboard.vue')
   }
 ];
+```
+
+### Reducing JavaScript Execution Time
+
+Break up long-running tasks to keep UI responsive:
+
+```javascript
+// Bad - blocks main thread
+function processLargeArray(items) {
+  items.forEach(item => {
+    heavyProcessing(item); // Takes 200ms total
+  });
+}
+
+// Good - break into chunks
+async function processLargeArray(items) {
+  const chunkSize = 50;
+
+  for (let i = 0; i < items.length; i += chunkSize) {
+    const chunk = items.slice(i, i + chunkSize);
+
+    // Process chunk
+    chunk.forEach(item => heavyProcessing(item));
+
+    // Yield to browser for UI updates
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+}
+
+// Using requestIdleCallback
+function processWhenIdle(items) {
+  function processChunk(deadline) {
+    while (deadline.timeRemaining() > 0 && items.length > 0) {
+      const item = items.shift();
+      heavyProcessing(item);
+    }
+
+    if (items.length > 0) {
+      requestIdleCallback(processChunk);
+    }
+  }
+
+  requestIdleCallback(processChunk);
+}
+```
+
+### Long Tasks Detection & Prevention
+
+Tasks > 50ms block user input:
+
+```javascript
+// Detect long tasks
+const observer = new PerformanceObserver((list) => {
+  for (const entry of list.getEntries()) {
+    console.warn('Long task detected:', {
+      duration: entry.duration,
+      startTime: entry.startTime,
+      name: entry.name
+    });
+
+    // Send to analytics
+    analytics.track('long-task', {
+      duration: entry.duration,
+      url: window.location.href
+    });
+  }
+});
+
+observer.observe({ entryTypes: ['longtask'] });
+
+// Break up long tasks with Task Scheduler API
+if ('scheduler' in window) {
+  await scheduler.yield(); // Give browser chance to render
+}
+
+// Polyfill for older browsers
+const yieldToMain = () => {
+  return new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
+};
+
+async function processData(data) {
+  for (const item of data) {
+    processItem(item);
+
+    // Yield every 50ms
+    if (performance.now() % 50 < 1) {
+      await yieldToMain();
+    }
+  }
+}
 ```
 
 ### Performance Patterns
@@ -373,6 +765,281 @@ Inline above-the-fold styles:
 }
 ```
 
+### Unused CSS Removal
+
+Remove CSS that isn't used on your pages:
+
+```bash
+# PurgeCSS
+npm install --save-dev @fullhuman/postcss-purgecss
+
+# Configure in postcss.config.js
+module.exports = {
+  plugins: [
+    require('@fullhuman/postcss-purgecss')({
+      content: [
+        './src/**/*.html',
+        './src/**/*.js',
+        './src/**/*.jsx',
+        './src/**/*.vue',
+      ],
+      safelist: ['active', 'disabled'], // Don't remove these
+      defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || []
+    })
+  ]
+};
+```
+
+```bash
+# UnCSS
+npm install -g uncss
+
+uncss https://example.com > cleaned.css
+
+# Reduces CSS by 90%+
+Before: 150 KB
+After:   15 KB
+```
+
+```javascript
+// Tailwind CSS built-in purging
+// tailwind.config.js
+module.exports = {
+  content: [
+    './src/**/*.{html,js,jsx,ts,tsx}',
+  ],
+  // Automatically removes unused utility classes
+};
+```
+
+**Chrome DevTools Coverage**:
+1. Open DevTools (F12)
+2. Cmd+Shift+P → "Show Coverage"
+3. Reload page
+4. See unused CSS/JS percentages
+
+### CSS-in-JS Performance
+
+Runtime vs compile-time CSS-in-JS:
+
+```javascript
+// ❌ Runtime CSS-in-JS (slower)
+// styled-components, Emotion (without compilation)
+import styled from 'styled-components';
+
+const Button = styled.button`
+  background: ${props => props.primary ? 'blue' : 'gray'};
+  padding: 10px 20px;
+`;
+// Generates styles at runtime (impacts performance)
+
+// ✅ Zero-runtime CSS-in-JS (faster)
+// Linaria, vanilla-extract, Compiled
+import { styled } from '@linaria/react';
+
+const Button = styled.button`
+  background: blue;
+  padding: 10px 20px;
+`;
+// Styles extracted at build time (no runtime cost)
+```
+
+**Performance comparison**:
+
+| Library | Runtime | Initial Paint | Re-render |
+|---------|---------|---------------|-----------|
+| **Plain CSS** | None | Fast | Fast |
+| **CSS Modules** | None | Fast | Fast |
+| **Styled-components** | Yes | Slower | Slower |
+| **Emotion** | Yes | Slower | Slower |
+| **Linaria** | No | Fast | Fast |
+| **vanilla-extract** | No | Fast | Fast |
+
+**Best practices**:
+```javascript
+// ✅ Use static styles when possible
+const Button = styled.button`
+  padding: 10px 20px; /* Static */
+`;
+
+// ✅ Memoize dynamic styles
+const DynamicButton = memo(styled.button`
+  background: ${({ color }) => color};
+`);
+
+// ❌ Avoid creating styled components in render
+function Component() {
+  // Bad - new component every render
+  const Button = styled.button`...`;
+  return <Button />;
+}
+
+// ✅ Define outside component
+const Button = styled.button`...`;
+function Component() {
+  return <Button />;
+}
+```
+
+## Font Optimization
+
+Web fonts can significantly impact performance if not optimized:
+
+### Font Loading Strategies
+
+```css
+/* font-display property */
+@font-face {
+  font-family: 'MyFont';
+  src: url('/fonts/myfont.woff2') format('woff2');
+  font-display: swap; /* Show fallback immediately */
+}
+
+/* Options:
+   auto: Browser default
+   block: Hide text up to 3s (FOIT - Flash of Invisible Text)
+   swap: Show fallback immediately (FOUT - Flash of Unstyled Text)
+   fallback: 100ms block, then swap
+   optional: 100ms block, may not download font
+*/
+```
+
+### Preload Critical Fonts
+
+```html
+<!-- Preload fonts used above-fold -->
+<link
+  rel="preload"
+  href="/fonts/myfont.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin="anonymous"
+>
+```
+
+### Self-Host Fonts
+
+```html
+<!-- ❌ External font (extra DNS lookup, connection) -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto" rel="stylesheet">
+
+<!-- ✅ Self-hosted fonts (faster) -->
+<link rel="stylesheet" href="/fonts/fonts.css">
+```
+
+```css
+/* fonts.css */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/roboto-v30-latin-regular.woff2') format('woff2');
+  /* Only load Latin subset */
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153;
+}
+```
+
+### Font Subsetting
+
+Reduce font file size by including only needed characters:
+
+```bash
+# pyftsubset (fonttools)
+pip install fonttools brotli
+
+# Create subset with only needed characters
+pyftsubset font.ttf \
+  --output-file=font-subset.woff2 \
+  --flavor=woff2 \
+  --layout-features=* \
+  --unicodes=U+0020-007F
+
+# Result:
+Original: 150 KB
+Subset:    30 KB (80% reduction)
+```
+
+### Variable Fonts
+
+Use variable fonts for multiple weights/styles in one file:
+
+```css
+/* Traditional: 3 separate files */
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 400;
+  src: url('roboto-regular.woff2'); /* 50 KB */
+}
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 700;
+  src: url('roboto-bold.woff2'); /* 50 KB */
+}
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 900;
+  src: url('roboto-black.woff2'); /* 50 KB */
+}
+/* Total: 150 KB */
+
+/* Variable font: 1 file with all weights */
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 100 900; /* Full weight range */
+  src: url('roboto-variable.woff2'); /* 80 KB */
+}
+/* Total: 80 KB (47% reduction) */
+```
+
+### System Font Stack
+
+Fastest option - use system fonts (no download):
+
+```css
+body {
+  font-family:
+    -apple-system,        /* macOS, iOS */
+    BlinkMacSystemFont,   /* macOS Chrome */
+    "Segoe UI",           /* Windows */
+    Roboto,               /* Android */
+    "Helvetica Neue",     /* macOS legacy */
+    Arial,                /* Fallback */
+    sans-serif;           /* Generic */
+}
+```
+
+### Google Fonts Optimization
+
+```html
+<!-- ❌ Bad - blocks rendering -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto" rel="stylesheet">
+
+<!-- ✅ Better - preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+<!-- ✅ Best - async load -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+  media="print"
+  onload="this.media='all'"
+>
+```
+
+**Font loading checklist**:
+- [ ] Use WOFF2 format (best compression)
+- [ ] Subset fonts (remove unused characters)
+- [ ] Use `font-display: swap`
+- [ ] Preload critical fonts
+- [ ] Self-host when possible
+- [ ] Consider variable fonts
+- [ ] Limit font families and weights
+
 ## Caching Strategies
 
 ### HTTP Caching
@@ -387,6 +1054,103 @@ Cache-Control Headers:
 │ max-age: Cache duration (sec)   │
 │ immutable: Never revalidate     │
 └─────────────────────────────────┘
+```
+
+```nginx
+# Nginx cache configuration
+location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+  expires 1y;
+  add_header Cache-Control "public, immutable";
+}
+
+location ~* \.(html)$ {
+  expires 0;
+  add_header Cache-Control "no-cache, must-revalidate";
+}
+```
+
+```javascript
+// Express.js caching
+app.use('/static', express.static('public', {
+  maxAge: '1y',
+  immutable: true
+}));
+
+// Set cache headers manually
+app.get('/api/data', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300'); // 5 minutes
+  res.json(data);
+});
+```
+
+### CDN Caching
+
+Distribute static assets globally for faster delivery:
+
+```
+User Request → CDN Edge Server (nearest location)
+               ↓
+         Cache Hit? → Return cached content
+               ↓ No
+         Origin Server → Cache & return content
+```
+
+**CDN Benefits**:
+- Lower latency (geographic proximity)
+- Reduced origin server load
+- DDoS protection
+- Automatic compression
+- SSL/TLS termination
+
+```javascript
+// Cloudflare cache configuration
+// cloudflare-worker.js
+addEventListener('fetch', event => {
+  event.respondWith(handleRequest(event.request));
+});
+
+async function handleRequest(request) {
+  const cache = caches.default;
+  let response = await cache.match(request);
+
+  if (!response) {
+    response = await fetch(request);
+    // Cache for 1 hour
+    const headers = new Headers(response.headers);
+    headers.set('Cache-Control', 's-maxage=3600');
+
+    response = new Response(response.body, {
+      status: response.status,
+      headers: headers
+    });
+
+    event.waitUntil(cache.put(request, response.clone()));
+  }
+
+  return response;
+}
+```
+
+**Popular CDNs**:
+- Cloudflare
+- AWS CloudFront
+- Fastly
+- Akamai
+- Vercel Edge Network
+- Netlify Edge
+
+**Cache invalidation**:
+```bash
+# Versioned URLs (best practice)
+<link rel="stylesheet" href="/styles.abc123.css">
+
+# Query string versioning
+<link rel="stylesheet" href="/styles.css?v=1.2.3">
+
+# Cloudflare purge
+curl -X POST "https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache" \
+  -H "Authorization: Bearer {api_token}" \
+  -d '{"files":["https://example.com/styles.css"]}'
 ```
 
 ```javascript

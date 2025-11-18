@@ -1,0 +1,1634 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Database Design - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="database-design"><a class="header" href="#database-design">Database Design</a></h1>
+<p>A comprehensive guide to designing robust, scalable, and maintainable database schemas.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Database design is the process of organizing data according to a database model. Good database design ensures data integrity, minimizes redundancy, and optimizes performance.</p>
+<h2 id="database-design-process"><a class="header" href="#database-design-process">Database Design Process</a></h2>
+<h3 id="1-requirements-analysis"><a class="header" href="#1-requirements-analysis">1. Requirements Analysis</a></h3>
+<p>Understand what data needs to be stored and how it will be used:</p>
+<pre><code>Business Requirements:
+├─ What data needs to be stored?
+├─ Who will access the data?
+├─ What operations will be performed?
+├─ What are the performance requirements?
+└─ What are the scalability needs?
+</code></pre>
+<h3 id="2-conceptual-design-er-diagram"><a class="header" href="#2-conceptual-design-er-diagram">2. Conceptual Design (ER Diagram)</a></h3>
+<p>Create an Entity-Relationship diagram:</p>
+<pre><code>┌─────────────┐         ┌─────────────┐
+│   User      │         │    Order    │
+├─────────────┤         ├─────────────┤
+│ id (PK)     │────────&lt;│ id (PK)     │
+│ name        │   1:N   │ user_id(FK) │
+│ email       │         │ total       │
+│ created_at  │         │ status      │
+└─────────────┘         │ created_at  │
+                        └─────────────┘
+</code></pre>
+<h3 id="3-logical-design-schema"><a class="header" href="#3-logical-design-schema">3. Logical Design (Schema)</a></h3>
+<p>Convert ER diagram to relational schema:</p>
+<pre><code class="language-sql">-- Entities become tables
+-- Attributes become columns
+-- Relationships become foreign keys
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    total DECIMAL(10,2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT NOW()
+);
+</code></pre>
+<h3 id="4-physical-design"><a class="header" href="#4-physical-design">4. Physical Design</a></h3>
+<p>Optimize for performance:</p>
+<pre><code class="language-sql">-- Add indexes
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_created_at ON orders(created_at);
+
+-- Add partitioning for large tables
+CREATE TABLE orders (
+    id SERIAL,
+    user_id INTEGER,
+    total DECIMAL(10,2),
+    created_at TIMESTAMP
+) PARTITION BY RANGE (created_at);
+
+CREATE TABLE orders_2024 PARTITION OF orders
+    FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');
+</code></pre>
+<h2 id="normalization"><a class="header" href="#normalization">Normalization</a></h2>
+<p>The process of organizing data to reduce redundancy and improve data integrity.</p>
+<h3 id="first-normal-form-1nf"><a class="header" href="#first-normal-form-1nf">First Normal Form (1NF)</a></h3>
+<p><strong>Rule</strong>: Each column contains atomic (indivisible) values, no repeating groups.</p>
+<p><strong>Bad</strong> (Not 1NF):</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id INT,
+    name VARCHAR(100),
+    phone_numbers VARCHAR(255)  -- "555-1234, 555-5678"
+);
+</code></pre>
+<p><strong>Good</strong> (1NF):</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+CREATE TABLE user_phones (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    phone_number VARCHAR(20)
+);
+</code></pre>
+<h3 id="second-normal-form-2nf"><a class="header" href="#second-normal-form-2nf">Second Normal Form (2NF)</a></h3>
+<p><strong>Rule</strong>: 1NF + no partial dependencies (all non-key columns depend on the entire primary key).</p>
+<p><strong>Bad</strong> (Not 2NF):</p>
+<pre><code class="language-sql">CREATE TABLE order_items (
+    order_id INT,
+    product_id INT,
+    product_name VARCHAR(100),  -- Depends only on product_id
+    product_price DECIMAL(10,2), -- Depends only on product_id
+    quantity INT,
+    PRIMARY KEY (order_id, product_id)
+);
+</code></pre>
+<p><strong>Good</strong> (2NF):</p>
+<pre><code class="language-sql">CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    price DECIMAL(10,2)
+);
+
+CREATE TABLE order_items (
+    order_id INTEGER REFERENCES orders(id),
+    product_id INTEGER REFERENCES products(id),
+    quantity INTEGER,
+    PRIMARY KEY (order_id, product_id)
+);
+</code></pre>
+<h3 id="third-normal-form-3nf"><a class="header" href="#third-normal-form-3nf">Third Normal Form (3NF)</a></h3>
+<p><strong>Rule</strong>: 2NF + no transitive dependencies (non-key columns depend only on the primary key).</p>
+<p><strong>Bad</strong> (Not 3NF):</p>
+<pre><code class="language-sql">CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    customer_id INTEGER,
+    customer_name VARCHAR(100),  -- Depends on customer_id, not order id
+    customer_email VARCHAR(255), -- Transitive dependency
+    total DECIMAL(10,2)
+);
+</code></pre>
+<p><strong>Good</strong> (3NF):</p>
+<pre><code class="language-sql">CREATE TABLE customers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(255)
+);
+
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    customer_id INTEGER REFERENCES customers(id),
+    total DECIMAL(10,2)
+);
+</code></pre>
+<h3 id="boyce-codd-normal-form-bcnf"><a class="header" href="#boyce-codd-normal-form-bcnf">Boyce-Codd Normal Form (BCNF)</a></h3>
+<p><strong>Rule</strong>: 3NF + for every dependency X → Y, X must be a superkey.</p>
+<p><strong>Example</strong>:</p>
+<pre><code class="language-sql">-- Not BCNF: professor determines course, but professor is not a superkey
+CREATE TABLE teaching (
+    student_id INT,
+    course_id INT,
+    professor_id INT,
+    PRIMARY KEY (student_id, course_id)
+);
+
+-- BCNF: Split into two tables
+CREATE TABLE course_professors (
+    course_id INT PRIMARY KEY,
+    professor_id INT
+);
+
+CREATE TABLE student_courses (
+    student_id INT,
+    course_id INT REFERENCES course_professors(course_id),
+    PRIMARY KEY (student_id, course_id)
+);
+</code></pre>
+<h2 id="denormalization"><a class="header" href="#denormalization">Denormalization</a></h2>
+<p>Intentionally introducing redundancy for performance.</p>
+<h3 id="when-to-denormalize"><a class="header" href="#when-to-denormalize">When to Denormalize</a></h3>
+<ol>
+<li><strong>Read-heavy workloads</strong> where JOINs are expensive</li>
+<li><strong>Reporting and analytics</strong> queries</li>
+<li><strong>Caching frequently accessed data</strong></li>
+<li><strong>Reducing JOIN complexity</strong></li>
+</ol>
+<h3 id="example-denormalization-for-performance"><a class="header" href="#example-denormalization-for-performance">Example: Denormalization for Performance</a></h3>
+<p><strong>Normalized</strong> (requires JOINs):</p>
+<pre><code class="language-sql">SELECT
+    o.id,
+    o.total,
+    c.name as customer_name,
+    c.email as customer_email
+FROM orders o
+JOIN customers c ON o.customer_id = c.id;
+</code></pre>
+<p><strong>Denormalized</strong> (faster reads):</p>
+<pre><code class="language-sql">CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    customer_id INTEGER,
+    customer_name VARCHAR(100),  -- Denormalized
+    customer_email VARCHAR(255), -- Denormalized
+    total DECIMAL(10,2)
+);
+
+-- Much faster query
+SELECT id, total, customer_name, customer_email
+FROM orders;
+</code></pre>
+<p><strong>Trade-offs</strong>:</p>
+<ul>
+<li>Faster reads</li>
+<li>More storage space</li>
+<li>Complex updates (must update multiple places)</li>
+<li>Risk of data inconsistency</li>
+</ul>
+<h2 id="relationship-types"><a class="header" href="#relationship-types">Relationship Types</a></h2>
+<h3 id="one-to-one-11"><a class="header" href="#one-to-one-11">One-to-One (1:1)</a></h3>
+<pre><code class="language-sql">-- User has one profile
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE user_profiles (
+    user_id INTEGER PRIMARY KEY REFERENCES users(id),
+    bio TEXT,
+    avatar_url VARCHAR(255)
+);
+</code></pre>
+<h3 id="one-to-many-1n"><a class="header" href="#one-to-many-1n">One-to-Many (1:N)</a></h3>
+<pre><code class="language-sql">-- User has many posts
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50)
+);
+
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    title VARCHAR(200),
+    content TEXT
+);
+</code></pre>
+<h3 id="many-to-many-mn"><a class="header" href="#many-to-many-mn">Many-to-Many (M:N)</a></h3>
+<p>Requires a junction/join table:</p>
+<pre><code class="language-sql">-- Students enroll in many courses
+-- Courses have many students
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+CREATE TABLE courses (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+-- Junction table
+CREATE TABLE enrollments (
+    student_id INTEGER REFERENCES students(id),
+    course_id INTEGER REFERENCES courses(id),
+    enrolled_at TIMESTAMP DEFAULT NOW(),
+    grade VARCHAR(2),
+    PRIMARY KEY (student_id, course_id)
+);
+</code></pre>
+<h3 id="self-referencing-relationship"><a class="header" href="#self-referencing-relationship">Self-Referencing Relationship</a></h3>
+<pre><code class="language-sql">-- Employee manager hierarchy
+CREATE TABLE employees (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    manager_id INTEGER REFERENCES employees(id)
+);
+
+-- Query: Find all employees under a manager
+WITH RECURSIVE employee_tree AS (
+    SELECT id, name, manager_id, 1 as level
+    FROM employees
+    WHERE manager_id IS NULL
+
+    UNION ALL
+
+    SELECT e.id, e.name, e.manager_id, et.level + 1
+    FROM employees e
+    JOIN employee_tree et ON e.manager_id = et.id
+)
+SELECT * FROM employee_tree;
+</code></pre>
+<h2 id="primary-keys"><a class="header" href="#primary-keys">Primary Keys</a></h2>
+<h3 id="surrogate-keys-recommended"><a class="header" href="#surrogate-keys-recommended">Surrogate Keys (Recommended)</a></h3>
+<p>Auto-incrementing integers or UUIDs:</p>
+<pre><code class="language-sql">-- Auto-increment (PostgreSQL)
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE
+);
+
+-- UUID (better for distributed systems)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE
+);
+</code></pre>
+<h3 id="natural-keys"><a class="header" href="#natural-keys">Natural Keys</a></h3>
+<p>Use existing data as key:</p>
+<pre><code class="language-sql">-- Email as natural key
+CREATE TABLE users (
+    email VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+-- Composite natural key
+CREATE TABLE flight_bookings (
+    flight_number VARCHAR(10),
+    seat_number VARCHAR(5),
+    passenger_name VARCHAR(100),
+    PRIMARY KEY (flight_number, seat_number)
+);
+</code></pre>
+<p><strong>When to use</strong>:</p>
+<ul>
+<li>Natural keys: When the value is truly unique and stable</li>
+<li>Surrogate keys: Most other cases (recommended default)</li>
+</ul>
+<h2 id="foreign-keys"><a class="header" href="#foreign-keys">Foreign Keys</a></h2>
+<h3 id="basic-foreign-key"><a class="header" href="#basic-foreign-key">Basic Foreign Key</a></h3>
+<pre><code class="language-sql">CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id)
+);
+</code></pre>
+<h3 id="cascade-options"><a class="header" href="#cascade-options">Cascade Options</a></h3>
+<pre><code class="language-sql">CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id)
+        ON DELETE CASCADE        -- Delete posts when user deleted
+        ON UPDATE CASCADE        -- Update posts when user id changes
+);
+
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER REFERENCES posts(id)
+        ON DELETE SET NULL       -- Set to NULL when post deleted
+);
+
+CREATE TABLE audit_log (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id)
+        ON DELETE RESTRICT       -- Prevent deletion if referenced
+);
+</code></pre>
+<h3 id="composite-foreign-keys"><a class="header" href="#composite-foreign-keys">Composite Foreign Keys</a></h3>
+<pre><code class="language-sql">CREATE TABLE order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER,
+    item_number INTEGER,
+    quantity INTEGER,
+    FOREIGN KEY (order_id, item_number)
+        REFERENCES inventory(warehouse_id, product_id)
+);
+</code></pre>
+<h2 id="indexes"><a class="header" href="#indexes">Indexes</a></h2>
+<h3 id="b-tree-index-default"><a class="header" href="#b-tree-index-default">B-Tree Index (Default)</a></h3>
+<p>Best for equality and range queries:</p>
+<pre><code class="language-sql">CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_orders_created_at ON orders(created_at);
+
+-- Range query benefits from index
+SELECT * FROM orders
+WHERE created_at BETWEEN '2024-01-01' AND '2024-12-31';
+</code></pre>
+<h3 id="hash-index"><a class="header" href="#hash-index">Hash Index</a></h3>
+<p>Best for exact equality:</p>
+<pre><code class="language-sql">CREATE INDEX idx_users_email_hash ON users USING HASH (email);
+
+-- Fast exact match
+SELECT * FROM users WHERE email = 'user@example.com';
+</code></pre>
+<h3 id="composite-multi-column-index"><a class="header" href="#composite-multi-column-index">Composite (Multi-column) Index</a></h3>
+<pre><code class="language-sql">CREATE INDEX idx_users_name_email ON users(last_name, first_name);
+
+-- Fast (uses index)
+SELECT * FROM users WHERE last_name = 'Smith';
+SELECT * FROM users WHERE last_name = 'Smith' AND first_name = 'John';
+
+-- Slow (doesn't use index - missing leftmost column)
+SELECT * FROM users WHERE first_name = 'John';
+</code></pre>
+<h3 id="partial-index"><a class="header" href="#partial-index">Partial Index</a></h3>
+<p>Index only subset of rows:</p>
+<pre><code class="language-sql">CREATE INDEX idx_active_users ON users(email)
+WHERE status = 'active';
+
+-- Fast query on active users
+SELECT * FROM users WHERE email = 'user@example.com' AND status = 'active';
+</code></pre>
+<h3 id="covering-index"><a class="header" href="#covering-index">Covering Index</a></h3>
+<p>Include extra columns for index-only scans:</p>
+<pre><code class="language-sql">CREATE INDEX idx_users_email_covering ON users(email)
+INCLUDE (name, created_at);
+
+-- Can be answered entirely from index
+SELECT name, created_at FROM users WHERE email = 'user@example.com';
+</code></pre>
+<h3 id="full-text-index"><a class="header" href="#full-text-index">Full-Text Index</a></h3>
+<pre><code class="language-sql">-- PostgreSQL
+CREATE INDEX idx_posts_content_fts ON posts USING GIN(to_tsvector('english', content));
+
+SELECT * FROM posts
+WHERE to_tsvector('english', content) @@ to_tsquery('database &amp; design');
+</code></pre>
+<h3 id="spatial-index"><a class="header" href="#spatial-index">Spatial Index</a></h3>
+<p>For geographic and geometric data:</p>
+<pre><code class="language-sql">-- PostgreSQL with PostGIS
+CREATE EXTENSION postgis;
+
+CREATE TABLE locations (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    coordinates GEOGRAPHY(POINT, 4326)
+);
+
+-- Create spatial index (GiST - Generalized Search Tree)
+CREATE INDEX idx_locations_coordinates ON locations USING GIST(coordinates);
+
+-- Find locations within 1000 meters
+SELECT name FROM locations
+WHERE ST_DWithin(
+    coordinates,
+    ST_MakePoint(-122.4194, 37.7749)::geography,
+    1000
+);
+
+-- MySQL spatial index
+CREATE SPATIAL INDEX idx_location ON locations(coordinates);
+</code></pre>
+<p><strong>Use cases</strong>: Maps, location-based services, geographic queries</p>
+<h2 id="data-types"><a class="header" href="#data-types">Data Types</a></h2>
+<h3 id="choosing-the-right-type"><a class="header" href="#choosing-the-right-type">Choosing the Right Type</a></h3>
+<pre><code class="language-sql">CREATE TABLE users (
+    -- Integer types
+    id BIGSERIAL,                    -- Auto-increment 64-bit integer
+    age SMALLINT,                    -- 16-bit (-32768 to 32767)
+    views INTEGER,                   -- 32-bit
+
+    -- Strings
+    username VARCHAR(50),            -- Variable, max 50 chars
+    bio TEXT,                        -- Unlimited text
+    country_code CHAR(2),           -- Fixed 2 chars (e.g., 'US')
+
+    -- Decimal
+    price DECIMAL(10,2),            -- Exact decimal (10 digits, 2 decimal places)
+    rating NUMERIC(3,1),            -- Same as DECIMAL
+
+    -- Floating point (avoid for money!)
+    latitude FLOAT,
+    longitude DOUBLE PRECISION,
+
+    -- Date/Time
+    created_at TIMESTAMP,           -- Date and time
+    birth_date DATE,                -- Date only
+    login_time TIME,                -- Time only
+    updated_at TIMESTAMPTZ,         -- Timestamp with timezone
+
+    -- Boolean
+    is_active BOOLEAN,
+
+    -- JSON
+    preferences JSONB,              -- Binary JSON (faster, indexable)
+    metadata JSON,                  -- Text JSON
+
+    -- UUID
+    session_id UUID,
+
+    -- Array (PostgreSQL)
+    tags TEXT[],
+
+    -- Enum
+    status user_status              -- Custom enum type
+);
+
+-- Create enum type
+CREATE TYPE user_status AS ENUM ('active', 'inactive', 'banned');
+</code></pre>
+<h3 id="type-best-practices"><a class="header" href="#type-best-practices">Type Best Practices</a></h3>
+<pre><code class="language-sql">-- DON'T: Use VARCHAR without limit
+description VARCHAR                 -- Avoid
+
+-- DO: Set reasonable limits
+description VARCHAR(500)
+
+-- DON'T: Use FLOAT/DOUBLE for money
+price FLOAT                        -- WRONG! Precision issues
+
+-- DO: Use DECIMAL/NUMERIC
+price DECIMAL(10,2)               -- Correct
+
+-- DON'T: Store dates as strings
+date_field VARCHAR(10)            -- '2024-01-15'
+
+-- DO: Use proper date types
+date_field DATE                   -- Proper type, can use date functions
+</code></pre>
+<h2 id="constraints"><a class="header" href="#constraints">Constraints</a></h2>
+<h3 id="not-null"><a class="header" href="#not-null">NOT NULL</a></h3>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL
+);
+</code></pre>
+<h3 id="unique"><a class="header" href="#unique">UNIQUE</a></h3>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- Composite unique constraint
+CREATE TABLE user_roles (
+    user_id INTEGER,
+    role_id INTEGER,
+    UNIQUE (user_id, role_id)
+);
+</code></pre>
+<h3 id="check"><a class="header" href="#check">CHECK</a></h3>
+<pre><code class="language-sql">CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10,2) CHECK (price &gt;= 0),
+    stock INTEGER CHECK (stock &gt;= 0),
+    discount_percent INTEGER CHECK (discount_percent BETWEEN 0 AND 100)
+);
+
+-- Complex check constraint
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    age INTEGER,
+    email VARCHAR(255),
+    CONSTRAINT valid_adult_email CHECK (
+        (age &gt;= 18 AND email IS NOT NULL) OR age &lt; 18
+    )
+);
+</code></pre>
+<h3 id="default"><a class="header" href="#default">DEFAULT</a></h3>
+<pre><code class="language-sql">CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    status VARCHAR(20) DEFAULT 'draft',
+    views INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_published BOOLEAN DEFAULT false
+);
+</code></pre>
+<h2 id="query-optimization"><a class="header" href="#query-optimization">Query Optimization</a></h2>
+<h3 id="explain-plans"><a class="header" href="#explain-plans">EXPLAIN Plans</a></h3>
+<p>Analyze query performance:</p>
+<pre><code class="language-sql">-- PostgreSQL
+EXPLAIN ANALYZE
+SELECT u.name, COUNT(o.id) as order_count
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+GROUP BY u.id, u.name;
+
+-- Look for:
+-- - Seq Scan (bad for large tables) → add index
+-- - Index Scan (good)
+-- - Bitmap Heap Scan (okay)
+-- - High cost numbers
+-- - Many rows processed
+</code></pre>
+<h3 id="n1-query-problem"><a class="header" href="#n1-query-problem">N+1 Query Problem</a></h3>
+<p><strong>Bad</strong> (1 + N queries):</p>
+<pre><code class="language-python"># 1 query for posts
+posts = db.query("SELECT * FROM posts LIMIT 10")
+
+# N queries for authors (10 more queries!)
+for post in posts:
+    author = db.query("SELECT * FROM users WHERE id = ?", post.user_id)
+    print(f"{post.title} by {author.name}")
+</code></pre>
+<p><strong>Good</strong> (1 query with JOIN):</p>
+<pre><code class="language-python">posts = db.query("""
+    SELECT p.*, u.name as author_name
+    FROM posts p
+    JOIN users u ON p.user_id = u.id
+    LIMIT 10
+""")
+
+for post in posts:
+    print(f"{post.title} by {post.author_name}")
+</code></pre>
+<p><strong>Good</strong> (2 queries with eager loading):</p>
+<pre><code class="language-python"># Fetch all posts
+posts = db.query("SELECT * FROM posts LIMIT 10")
+user_ids = [p.user_id for p in posts]
+
+# Fetch all users in one query
+users = db.query("SELECT * FROM users WHERE id IN (?)", user_ids)
+user_map = {u.id: u for u in users}
+
+for post in posts:
+    print(f"{post.title} by {user_map[post.user_id].name}")
+</code></pre>
+<h3 id="query-caching"><a class="header" href="#query-caching">Query Caching</a></h3>
+<h4 id="application-level-caching"><a class="header" href="#application-level-caching">Application-Level Caching</a></h4>
+<pre><code class="language-python">import redis
+
+cache = redis.Redis(host='localhost', port=6379)
+
+def get_user(user_id):
+    # Try cache first
+    cache_key = f"user:{user_id}"
+    cached = cache.get(cache_key)
+
+    if cached:
+        return json.loads(cached)
+
+    # Cache miss - query database
+    user = db.query("SELECT * FROM users WHERE id = ?", user_id)
+
+    # Store in cache (expire after 1 hour)
+    cache.setex(cache_key, 3600, json.dumps(user))
+
+    return user
+</code></pre>
+<h4 id="database-query-cache"><a class="header" href="#database-query-cache">Database Query Cache</a></h4>
+<pre><code class="language-sql">-- MySQL query cache (deprecated in MySQL 8.0)
+SET query_cache_type = ON;
+SET query_cache_size = 1048576;  -- 1MB
+
+-- PostgreSQL shared_buffers (acts as cache)
+-- In postgresql.conf:
+-- shared_buffers = 256MB
+
+-- Materialized views (pre-computed results)
+CREATE MATERIALIZED VIEW user_order_stats AS
+SELECT
+    u.id,
+    u.name,
+    COUNT(o.id) as order_count,
+    SUM(o.total) as total_spent
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+GROUP BY u.id, u.name;
+
+-- Refresh periodically
+REFRESH MATERIALIZED VIEW user_order_stats;
+
+-- Query is now instant
+SELECT * FROM user_order_stats WHERE id = 123;
+</code></pre>
+<h3 id="prepared-statements"><a class="header" href="#prepared-statements">Prepared Statements</a></h3>
+<p>Prevent SQL injection and improve performance:</p>
+<pre><code class="language-python"># Bad - SQL injection risk, no caching
+user_input = "admin' OR '1'='1"
+query = f"SELECT * FROM users WHERE username = '{user_input}'"
+db.execute(query)  # VULNERABLE!
+
+# Good - parameterized query
+import psycopg2
+
+conn = psycopg2.connect(...)
+cursor = conn.cursor()
+
+# Prepared statement (query plan cached)
+cursor.execute(
+    "SELECT * FROM users WHERE username = %s",
+    (user_input,)  # Safe - treated as data, not SQL
+)
+
+# Explicitly prepare (useful for repeated queries)
+cursor.execute("PREPARE user_query AS SELECT * FROM users WHERE id = $1")
+cursor.execute("EXECUTE user_query(123)")
+cursor.execute("EXECUTE user_query(456)")
+cursor.execute("EXECUTE user_query(789)")
+</code></pre>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li><strong>Security</strong>: Prevents SQL injection</li>
+<li><strong>Performance</strong>: Query plan cached and reused</li>
+<li><strong>Type safety</strong>: Database validates parameters</li>
+</ul>
+<h3 id="connection-pooling"><a class="header" href="#connection-pooling">Connection Pooling</a></h3>
+<pre><code class="language-python">from psycopg2 import pool
+
+# Create connection pool
+db_pool = pool.ThreadedConnectionPool(
+    minconn=5,     # Keep 5 connections open
+    maxconn=20,    # Max 20 concurrent connections
+    host='localhost',
+    database='myapp'
+)
+
+# Get connection from pool
+conn = db_pool.getconn()
+try:
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    results = cursor.fetchall()
+finally:
+    # Return connection to pool (don't close!)
+    db_pool.putconn(conn)
+</code></pre>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>Avoid connection setup overhead</li>
+<li>Limit database load</li>
+<li>Better resource utilization</li>
+<li>Handle connection spikes</li>
+</ul>
+<h2 id="common-design-patterns"><a class="header" href="#common-design-patterns">Common Design Patterns</a></h2>
+<h3 id="soft-delete"><a class="header" href="#soft-delete">Soft Delete</a></h3>
+<p>Keep deleted records for audit/recovery:</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    deleted_at TIMESTAMP NULL
+);
+
+-- "Delete" user
+UPDATE users SET deleted_at = NOW() WHERE id = 123;
+
+-- Query active users
+SELECT * FROM users WHERE deleted_at IS NULL;
+
+-- Index for performance
+CREATE INDEX idx_users_active ON users(id) WHERE deleted_at IS NULL;
+</code></pre>
+<h3 id="audit-trail--history-tracking"><a class="header" href="#audit-trail--history-tracking">Audit Trail / History Tracking</a></h3>
+<p>Track all changes:</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE users_audit (
+    audit_id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    action VARCHAR(10),           -- INSERT, UPDATE, DELETE
+    old_data JSONB,
+    new_data JSONB,
+    changed_by INTEGER,
+    changed_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Trigger to log changes
+CREATE OR REPLACE FUNCTION audit_users()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        INSERT INTO users_audit(user_id, action, old_data)
+        VALUES (OLD.id, 'DELETE', row_to_json(OLD));
+        RETURN OLD;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO users_audit(user_id, action, old_data, new_data)
+        VALUES (NEW.id, 'UPDATE', row_to_json(OLD), row_to_json(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'INSERT') THEN
+        INSERT INTO users_audit(user_id, action, new_data)
+        VALUES (NEW.id, 'INSERT', row_to_json(NEW));
+        RETURN NEW;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER users_audit_trigger
+AFTER INSERT OR UPDATE OR DELETE ON users
+FOR EACH ROW EXECUTE FUNCTION audit_users();
+</code></pre>
+<h3 id="optimistic-locking"><a class="header" href="#optimistic-locking">Optimistic Locking</a></h3>
+<p>Prevent lost updates:</p>
+<pre><code class="language-sql">CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    price DECIMAL(10,2),
+    version INTEGER DEFAULT 1    -- Version number
+);
+
+-- Update with version check
+UPDATE products
+SET price = 29.99, version = version + 1
+WHERE id = 123 AND version = 5;
+
+-- If 0 rows affected, concurrent update occurred
+</code></pre>
+<h3 id="polymorphic-associations"><a class="header" href="#polymorphic-associations">Polymorphic Associations</a></h3>
+<p>One table references multiple tables:</p>
+<pre><code class="language-sql">-- Option 1: Separate foreign keys (recommended)
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    content TEXT,
+    post_id INTEGER REFERENCES posts(id),
+    photo_id INTEGER REFERENCES photos(id),
+    CHECK (
+        (post_id IS NOT NULL AND photo_id IS NULL) OR
+        (post_id IS NULL AND photo_id IS NOT NULL)
+    )
+);
+
+-- Option 2: Type field (less type-safe)
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    content TEXT,
+    commentable_type VARCHAR(50),  -- 'Post' or 'Photo'
+    commentable_id INTEGER
+);
+</code></pre>
+<h3 id="tag-system"><a class="header" href="#tag-system">Tag System</a></h3>
+<pre><code class="language-sql">-- Simple tagging
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200),
+    content TEXT
+);
+
+CREATE TABLE tags (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE
+);
+
+CREATE TABLE post_tags (
+    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+    tag_id INTEGER REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (post_id, tag_id)
+);
+
+-- Find posts with specific tag
+SELECT p.* FROM posts p
+JOIN post_tags pt ON p.id = pt.post_id
+JOIN tags t ON pt.tag_id = t.id
+WHERE t.name = 'database';
+
+-- Find posts with multiple tags
+SELECT p.* FROM posts p
+JOIN post_tags pt ON p.id = pt.post_id
+JOIN tags t ON pt.tag_id = t.id
+WHERE t.name IN ('database', 'design')
+GROUP BY p.id
+HAVING COUNT(DISTINCT t.id) = 2;  -- Must have both tags
+</code></pre>
+<h3 id="tree-structures"><a class="header" href="#tree-structures">Tree Structures</a></h3>
+<h4 id="adjacency-list-simple"><a class="header" href="#adjacency-list-simple">Adjacency List (Simple)</a></h4>
+<pre><code class="language-sql">CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    parent_id INTEGER REFERENCES categories(id)
+);
+
+-- Query with recursive CTE
+WITH RECURSIVE category_tree AS (
+    SELECT id, name, parent_id, 1 as depth
+    FROM categories
+    WHERE parent_id IS NULL
+
+    UNION ALL
+
+    SELECT c.id, c.name, c.parent_id, ct.depth + 1
+    FROM categories c
+    JOIN category_tree ct ON c.parent_id = ct.id
+)
+SELECT * FROM category_tree;
+</code></pre>
+<h4 id="nested-set-model-fast-reads"><a class="header" href="#nested-set-model-fast-reads">Nested Set Model (Fast reads)</a></h4>
+<pre><code class="language-sql">CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    lft INTEGER NOT NULL,
+    rgt INTEGER NOT NULL
+);
+
+-- Example data:
+-- Electronics (1, 10)
+--   ├─ Computers (2, 5)
+--   │   └─ Laptops (3, 4)
+--   └─ Phones (6, 9)
+--       └─ Smartphones (7, 8)
+
+-- Get all descendants (very fast)
+SELECT * FROM categories
+WHERE lft &gt; 2 AND rgt &lt; 5;  -- All under Computers
+</code></pre>
+<h3 id="temporal-data-time-based-versioning"><a class="header" href="#temporal-data-time-based-versioning">Temporal Data (Time-Based Versioning)</a></h3>
+<p>Track how data changes over time:</p>
+<h4 id="valid-time-business-time"><a class="header" href="#valid-time-business-time">Valid Time (Business Time)</a></h4>
+<p>Track when data is valid in the real world:</p>
+<pre><code class="language-sql">CREATE TABLE product_prices (
+    product_id INTEGER,
+    price DECIMAL(10,2),
+    valid_from DATE,
+    valid_to DATE,
+    PRIMARY KEY (product_id, valid_from)
+);
+
+-- Insert price changes
+INSERT INTO product_prices VALUES
+    (1, 19.99, '2024-01-01', '2024-06-30'),
+    (1, 24.99, '2024-07-01', '2024-12-31'),
+    (1, 29.99, '2025-01-01', '9999-12-31');  -- Current price
+
+-- Get price on specific date
+SELECT price FROM product_prices
+WHERE product_id = 1
+  AND '2024-08-15' BETWEEN valid_from AND valid_to;
+
+-- Get current price
+SELECT price FROM product_prices
+WHERE product_id = 1
+  AND CURRENT_DATE BETWEEN valid_from AND valid_to;
+</code></pre>
+<h4 id="transaction-time-system-time"><a class="header" href="#transaction-time-system-time">Transaction Time (System Time)</a></h4>
+<p>Track when data was stored in the database:</p>
+<pre><code class="language-sql">CREATE TABLE employees (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    salary DECIMAL(10,2),
+    transaction_start TIMESTAMP DEFAULT NOW(),
+    transaction_end TIMESTAMP DEFAULT '9999-12-31 23:59:59'
+);
+
+-- Update creates new version, marks old version as ended
+UPDATE employees
+SET transaction_end = NOW()
+WHERE id = 1 AND transaction_end = '9999-12-31 23:59:59';
+
+INSERT INTO employees (id, name, salary, transaction_start)
+VALUES (1, 'Alice', 75000, NOW());
+
+-- Get current version
+SELECT * FROM employees
+WHERE id = 1 AND transaction_end = '9999-12-31 23:59:59';
+
+-- Get history (all versions)
+SELECT * FROM employees WHERE id = 1 ORDER BY transaction_start;
+
+-- Point-in-time query (what was the salary on Jan 1?)
+SELECT salary FROM employees
+WHERE id = 1
+  AND transaction_start &lt;= '2024-01-01'
+  AND transaction_end &gt; '2024-01-01';
+</code></pre>
+<h4 id="bi-temporal-both-valid-and-transaction-time"><a class="header" href="#bi-temporal-both-valid-and-transaction-time">Bi-Temporal (Both Valid and Transaction Time)</a></h4>
+<pre><code class="language-sql">CREATE TABLE insurance_policies (
+    policy_id INTEGER,
+    customer_id INTEGER,
+    coverage DECIMAL(10,2),
+    -- Business time (when policy is valid)
+    valid_from DATE,
+    valid_to DATE,
+    -- System time (when we knew about it)
+    transaction_start TIMESTAMP DEFAULT NOW(),
+    transaction_end TIMESTAMP DEFAULT '9999-12-31 23:59:59',
+    PRIMARY KEY (policy_id, valid_from, transaction_start)
+);
+
+-- Query: What coverage did we think customer had on 2024-06-01,
+--        as of what we knew on 2024-03-15?
+SELECT coverage FROM insurance_policies
+WHERE customer_id = 123
+  AND '2024-06-01' BETWEEN valid_from AND valid_to
+  AND '2024-03-15' BETWEEN transaction_start AND transaction_end;
+</code></pre>
+<h4 id="postgresql-temporal-tables"><a class="header" href="#postgresql-temporal-tables">PostgreSQL Temporal Tables</a></h4>
+<pre><code class="language-sql">-- PostgreSQL 12+ supports period ranges
+CREATE EXTENSION btree_gist;
+
+CREATE TABLE room_bookings (
+    room_id INTEGER,
+    guest_name VARCHAR(100),
+    during TSRANGE,  -- Time range type
+    EXCLUDE USING GIST (room_id WITH =, during WITH &amp;&amp;)  -- Prevent overlaps
+);
+
+-- Insert bookings
+INSERT INTO room_bookings VALUES
+    (101, 'Alice', '[2024-01-01 14:00, 2024-01-03 10:00)');
+
+-- This will fail - overlapping booking!
+INSERT INTO room_bookings VALUES
+    (101, 'Bob', '[2024-01-02 14:00, 2024-01-04 10:00)');
+
+-- This succeeds - no overlap
+INSERT INTO room_bookings VALUES
+    (101, 'Bob', '[2024-01-03 14:00, 2024-01-05 10:00)');
+</code></pre>
+<h2 id="acid-vs-base"><a class="header" href="#acid-vs-base">ACID vs BASE</a></h2>
+<h3 id="acid-traditional-sql-databases"><a class="header" href="#acid-traditional-sql-databases">ACID (Traditional SQL Databases)</a></h3>
+<p><strong>Atomicity</strong>: All operations in a transaction succeed or all fail:</p>
+<pre><code class="language-sql">BEGIN TRANSACTION;
+    UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+    UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;  -- Both succeed or both rollback
+</code></pre>
+<p><strong>Consistency</strong>: Database moves from one valid state to another:</p>
+<pre><code class="language-sql">-- Constraint ensures consistency
+ALTER TABLE accounts ADD CONSTRAINT positive_balance
+    CHECK (balance &gt;= 0);
+
+-- This transaction will fail - maintains consistency
+UPDATE accounts SET balance = balance - 1000 WHERE balance = 100;
+</code></pre>
+<p><strong>Isolation</strong>: Concurrent transactions don't interfere:</p>
+<pre><code class="language-sql">-- Transaction 1
+BEGIN TRANSACTION;
+SELECT balance FROM accounts WHERE id = 1;  -- Reads 100
+-- Transaction 2 updates balance to 200 here
+SELECT balance FROM accounts WHERE id = 1;  -- Still reads 100 (isolation)
+COMMIT;
+</code></pre>
+<p><strong>Durability</strong>: Committed transactions persist:</p>
+<pre><code class="language-sql">COMMIT;  -- Once committed, data survives crashes
+</code></pre>
+<p><strong>Isolation Levels</strong>:</p>
+<pre><code class="language-sql">-- Read Uncommitted: Can see uncommitted changes (dirty reads)
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+-- Read Committed: Only see committed changes (default in PostgreSQL)
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+-- Repeatable Read: Same query returns same result in transaction
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+-- Serializable: Full isolation, transactions appear serial
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+</code></pre>
+<h3 id="base-nosqldistributed-systems"><a class="header" href="#base-nosqldistributed-systems">BASE (NoSQL/Distributed Systems)</a></h3>
+<p><strong>Basically Available</strong>: System appears to work most of the time
+<strong>Soft state</strong>: State may change without input (replication lag)
+<strong>Eventual consistency</strong>: System becomes consistent over time</p>
+<pre><code class="language-python"># Example: Eventually consistent cache
+def update_user(user_id, name):
+    # Write to primary database
+    primary_db.update(user_id, name)
+
+    # Asynchronously update cache (eventual consistency)
+    async_update_cache(user_id, name)
+
+    # Immediately after, cache might be stale
+    # But will eventually be consistent
+
+def get_user(user_id):
+    # Might return old value briefly
+    return cache.get(user_id)
+</code></pre>
+<p><strong>When to use</strong>:</p>
+<ul>
+<li><strong>ACID</strong>: Financial transactions, inventory, critical data</li>
+<li><strong>BASE</strong>: Social media feeds, recommendations, analytics</li>
+</ul>
+<h2 id="partitioning-and-sharding"><a class="header" href="#partitioning-and-sharding">Partitioning and Sharding</a></h2>
+<h3 id="partitioning-within-single-database"><a class="header" href="#partitioning-within-single-database">Partitioning (Within Single Database)</a></h3>
+<p>Split large table into smaller pieces:</p>
+<h4 id="range-partitioning"><a class="header" href="#range-partitioning">Range Partitioning</a></h4>
+<pre><code class="language-sql">-- Partition by date range
+CREATE TABLE orders (
+    id SERIAL,
+    user_id INTEGER,
+    total DECIMAL(10,2),
+    created_at DATE
+) PARTITION BY RANGE (created_at);
+
+CREATE TABLE orders_2023 PARTITION OF orders
+    FOR VALUES FROM ('2023-01-01') TO ('2024-01-01');
+
+CREATE TABLE orders_2024 PARTITION OF orders
+    FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');
+
+CREATE TABLE orders_2025 PARTITION OF orders
+    FOR VALUES FROM ('2025-01-01') TO ('2026-01-01');
+
+-- Queries automatically use correct partition
+SELECT * FROM orders WHERE created_at = '2024-06-15';  -- Only scans orders_2024
+</code></pre>
+<h4 id="list-partitioning"><a class="header" href="#list-partitioning">List Partitioning</a></h4>
+<pre><code class="language-sql">CREATE TABLE sales (
+    id SERIAL,
+    region VARCHAR(50),
+    amount DECIMAL(10,2)
+) PARTITION BY LIST (region);
+
+CREATE TABLE sales_north PARTITION OF sales
+    FOR VALUES IN ('US-NORTH', 'CA-NORTH');
+
+CREATE TABLE sales_south PARTITION OF sales
+    FOR VALUES IN ('US-SOUTH', 'MX');
+
+CREATE TABLE sales_europe PARTITION OF sales
+    FOR VALUES IN ('UK', 'DE', 'FR');
+</code></pre>
+<h4 id="hash-partitioning"><a class="header" href="#hash-partitioning">Hash Partitioning</a></h4>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL,
+    email VARCHAR(255)
+) PARTITION BY HASH (id);
+
+CREATE TABLE users_0 PARTITION OF users
+    FOR VALUES WITH (MODULUS 4, REMAINDER 0);
+
+CREATE TABLE users_1 PARTITION OF users
+    FOR VALUES WITH (MODULUS 4, REMAINDER 1);
+
+CREATE TABLE users_2 PARTITION OF users
+    FOR VALUES WITH (MODULUS 4, REMAINDER 2);
+
+CREATE TABLE users_3 PARTITION OF users
+    FOR VALUES WITH (MODULUS 4, REMAINDER 3);
+</code></pre>
+<h3 id="sharding-across-multiple-databases"><a class="header" href="#sharding-across-multiple-databases">Sharding (Across Multiple Databases)</a></h3>
+<p>Distribute data across separate database instances:</p>
+<pre><code class="language-python"># Simple hash-based sharding
+class ShardedDatabase:
+    def __init__(self, shard_count=4):
+        self.shards = [
+            connect_to_db(f'shard_{i}')
+            for i in range(shard_count)
+        ]
+
+    def get_shard(self, user_id):
+        shard_num = hash(user_id) % len(self.shards)
+        return self.shards[shard_num]
+
+    def get_user(self, user_id):
+        shard = self.get_shard(user_id)
+        return shard.query("SELECT * FROM users WHERE id = ?", user_id)
+
+    def create_user(self, user_id, data):
+        shard = self.get_shard(user_id)
+        return shard.execute("INSERT INTO users ...", data)
+
+# Usage
+db = ShardedDatabase(shard_count=4)
+user = db.get_user(12345)  # Routes to correct shard
+</code></pre>
+<p><strong>Sharding Strategies</strong>:</p>
+<ol>
+<li><strong>Range-based</strong>: Users 0-999 in Shard 1, 1000-1999 in Shard 2</li>
+<li><strong>Hash-based</strong>: Hash user ID, mod by shard count</li>
+<li><strong>Geographic</strong>: US users in US shard, EU users in EU shard</li>
+<li><strong>Directory-based</strong>: Lookup table maps keys to shards</li>
+</ol>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Cross-shard queries expensive</li>
+<li>Rebalancing when adding shards</li>
+<li>Hotspots if data not distributed evenly</li>
+<li>Transaction complexity across shards</li>
+</ul>
+<h2 id="schema-versioning"><a class="header" href="#schema-versioning">Schema Versioning</a></h2>
+<h3 id="migration-pattern"><a class="header" href="#migration-pattern">Migration Pattern</a></h3>
+<pre><code class="language-sql">-- migrations/001_create_users.sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- migrations/002_add_users_name.sql
+ALTER TABLE users ADD COLUMN name VARCHAR(100);
+
+-- migrations/003_add_users_status.sql
+ALTER TABLE users ADD COLUMN status VARCHAR(20) DEFAULT 'active';
+CREATE INDEX idx_users_status ON users(status);
+
+-- Track migrations
+CREATE TABLE schema_migrations (
+    version INTEGER PRIMARY KEY,
+    applied_at TIMESTAMP DEFAULT NOW()
+);
+</code></pre>
+<h3 id="zero-downtime-migrations"><a class="header" href="#zero-downtime-migrations">Zero-Downtime Migrations</a></h3>
+<p>Techniques for migrating without service interruption:</p>
+<h4 id="1-additive-changes-safe"><a class="header" href="#1-additive-changes-safe">1. Additive Changes (Safe)</a></h4>
+<pre><code class="language-sql">-- ✓ Add new column with default (no downtime)
+ALTER TABLE users ADD COLUMN phone VARCHAR(20) DEFAULT NULL;
+
+-- ✓ Add new index (concurrent, no locks in PostgreSQL)
+CREATE INDEX CONCURRENTLY idx_users_email ON users(email);
+
+-- ✓ Add new table
+CREATE TABLE user_preferences (
+    user_id INTEGER REFERENCES users(id),
+    theme VARCHAR(20)
+);
+</code></pre>
+<h4 id="2-multi-step-column-rename"><a class="header" href="#2-multi-step-column-rename">2. Multi-Step Column Rename</a></h4>
+<p><strong>Don't do this</strong> (breaks running code):</p>
+<pre><code class="language-sql">ALTER TABLE users RENAME COLUMN name TO full_name;  -- ❌ Instant breakage!
+</code></pre>
+<p><strong>Do this</strong> (multi-step, zero downtime):</p>
+<pre><code class="language-sql">-- Step 1: Add new column
+ALTER TABLE users ADD COLUMN full_name VARCHAR(100);
+
+-- Step 2: Backfill data (in batches for large tables)
+UPDATE users SET full_name = name WHERE full_name IS NULL;
+
+-- Step 3: Deploy code that writes to both columns
+-- Application now writes to both 'name' and 'full_name'
+
+-- Step 4: Deploy code that reads from new column
+-- Application now reads from 'full_name', still writes to both
+
+-- Step 5: Drop old column (only after all code updated)
+ALTER TABLE users DROP COLUMN name;
+</code></pre>
+<h4 id="3-multi-step-column-type-change"><a class="header" href="#3-multi-step-column-type-change">3. Multi-Step Column Type Change</a></h4>
+<pre><code class="language-sql">-- Don't: ALTER TABLE users ALTER COLUMN id TYPE BIGINT;  -- ❌ Locks table!
+
+-- Step 1: Add new column
+ALTER TABLE users ADD COLUMN id_new BIGINT;
+
+-- Step 2: Backfill (in batches)
+UPDATE users SET id_new = id::BIGINT WHERE id_new IS NULL;
+
+-- Step 3: Add unique constraint and index
+ALTER TABLE users ADD CONSTRAINT users_id_new_unique UNIQUE (id_new);
+CREATE INDEX CONCURRENTLY idx_users_id_new ON users(id_new);
+
+-- Step 4: Update application to use new column
+
+-- Step 5: Swap columns (if needed) or drop old column
+ALTER TABLE users DROP COLUMN id;
+ALTER TABLE users RENAME COLUMN id_new TO id;
+</code></pre>
+<h4 id="4-removing-not-null-constraint"><a class="header" href="#4-removing-not-null-constraint">4. Removing NOT NULL Constraint</a></h4>
+<pre><code class="language-sql">-- Step 1: Remove constraint
+ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+
+-- Step 2: Deploy code that handles NULL values
+
+-- Step 3: Optionally re-add constraint if needed
+ALTER TABLE users ALTER COLUMN email SET NOT NULL;
+</code></pre>
+<h4 id="5-batch-processing-for-large-tables"><a class="header" href="#5-batch-processing-for-large-tables">5. Batch Processing for Large Tables</a></h4>
+<pre><code class="language-python"># Don't: UPDATE users SET status = 'active';  -- Locks entire table!
+
+# Do: Update in batches
+def backfill_status_in_batches():
+    batch_size = 1000
+    last_id = 0
+
+    while True:
+        # Update batch
+        result = db.execute("""
+            UPDATE users
+            SET status = 'active'
+            WHERE id &gt; %s
+              AND id &lt;= %s + %s
+              AND status IS NULL
+        """, (last_id, last_id, batch_size))
+
+        if result.rowcount == 0:
+            break  # No more rows to update
+
+        last_id += batch_size
+        time.sleep(0.1)  # Brief pause to avoid overwhelming DB
+</code></pre>
+<h3 id="rollback-strategies"><a class="header" href="#rollback-strategies">Rollback Strategies</a></h3>
+<p>Plan for migration failures:</p>
+<h4 id="1-reversible-migrations"><a class="header" href="#1-reversible-migrations">1. Reversible Migrations</a></h4>
+<p>Every migration should have a rollback:</p>
+<pre><code class="language-sql">-- migrations/005_add_user_status.sql (UP)
+ALTER TABLE users ADD COLUMN status VARCHAR(20) DEFAULT 'active';
+CREATE INDEX idx_users_status ON users(status);
+
+-- migrations/005_add_user_status_rollback.sql (DOWN)
+DROP INDEX IF EXISTS idx_users_status;
+ALTER TABLE users DROP COLUMN status;
+</code></pre>
+<h4 id="2-migration-with-rollback-tracking"><a class="header" href="#2-migration-with-rollback-tracking">2. Migration with Rollback Tracking</a></h4>
+<pre><code class="language-sql">CREATE TABLE schema_migrations (
+    version INTEGER PRIMARY KEY,
+    name VARCHAR(255),
+    applied_at TIMESTAMP DEFAULT NOW(),
+    rolled_back_at TIMESTAMP NULL
+);
+
+-- Apply migration
+INSERT INTO schema_migrations (version, name)
+VALUES (5, 'add_user_status');
+
+-- Rollback
+UPDATE schema_migrations
+SET rolled_back_at = NOW()
+WHERE version = 5;
+</code></pre>
+<h4 id="3-testing-migrations"><a class="header" href="#3-testing-migrations">3. Testing Migrations</a></h4>
+<pre><code class="language-bash"># Test on staging/development first
+$ psql staging_db &lt; migrations/005_add_user_status.sql
+
+# Verify migration
+$ psql staging_db -c "SELECT * FROM users LIMIT 1;"
+
+# Test rollback
+$ psql staging_db &lt; migrations/005_add_user_status_rollback.sql
+
+# Verify rollback worked
+$ psql staging_db -c "\d users"
+</code></pre>
+<h4 id="4-gradual-rollout"><a class="header" href="#4-gradual-rollout">4. Gradual Rollout</a></h4>
+<pre><code class="language-python"># Use feature flags to gradually enable new schema
+def get_user_status(user_id):
+    if feature_flag_enabled('use_new_status_column'):
+        return db.query("SELECT status FROM users WHERE id = ?", user_id)
+    else:
+        # Fallback to old logic
+        return calculate_status_from_other_fields(user_id)
+
+# Enable for 5% of users first
+# If stable, increase to 50%, then 100%
+</code></pre>
+<h4 id="5-backup-before-migration"><a class="header" href="#5-backup-before-migration">5. Backup Before Migration</a></h4>
+<pre><code class="language-bash"># Always backup before major migrations
+$ pg_dump -h localhost -U postgres mydb &gt; backup_before_migration.sql
+
+# Run migration
+$ psql mydb &lt; migrations/006_major_change.sql
+
+# If something goes wrong, restore
+$ psql mydb &lt; backup_before_migration.sql
+</code></pre>
+<h2 id="design-anti-patterns-to-avoid"><a class="header" href="#design-anti-patterns-to-avoid">Design Anti-Patterns to Avoid</a></h2>
+<h3 id="1-god-table"><a class="header" href="#1-god-table">1. God Table</a></h3>
+<p><strong>Bad</strong>: One massive table with everything:</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255),
+    -- 100+ columns here...
+    last_login TIMESTAMP,
+    preferences TEXT,
+    -- Don't do this!
+);
+</code></pre>
+<p><strong>Good</strong>: Split into related tables:</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255)
+);
+
+CREATE TABLE user_profiles (
+    user_id INTEGER PRIMARY KEY REFERENCES users(id),
+    bio TEXT,
+    avatar_url VARCHAR(255)
+);
+
+CREATE TABLE user_preferences (
+    user_id INTEGER PRIMARY KEY REFERENCES users(id),
+    theme VARCHAR(20),
+    notifications BOOLEAN
+);
+</code></pre>
+<h3 id="2-eav-entity-attribute-value-anti-pattern"><a class="header" href="#2-eav-entity-attribute-value-anti-pattern">2. EAV (Entity-Attribute-Value) Anti-pattern</a></h3>
+<p><strong>Bad</strong>: Flexible but slow and complex:</p>
+<pre><code class="language-sql">CREATE TABLE eav_data (
+    entity_id INTEGER,
+    attribute_name VARCHAR(100),
+    attribute_value TEXT
+);
+
+-- Query becomes nightmare
+SELECT * FROM eav_data WHERE entity_id = 1;
+</code></pre>
+<p><strong>Good</strong>: Use proper columns or JSONB:</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255),
+    properties JSONB  -- Use JSONB for truly dynamic data
+);
+
+-- Much better query
+SELECT properties-&gt;&gt;'theme' as theme FROM users WHERE id = 1;
+</code></pre>
+<h3 id="3-premature-optimization"><a class="header" href="#3-premature-optimization">3. Premature Optimization</a></h3>
+<p><strong>Bad</strong>: Over-engineering before knowing requirements:</p>
+<pre><code class="language-sql">-- Don't create 50 indexes upfront
+CREATE INDEX idx_1 ON users(email);
+CREATE INDEX idx_2 ON users(name);
+CREATE INDEX idx_3 ON users(created_at);
+-- ... 47 more indexes
+</code></pre>
+<p><strong>Good</strong>: Start simple, measure, then optimize:</p>
+<pre><code class="language-sql">-- Start with essential indexes
+CREATE UNIQUE INDEX idx_users_email ON users(email);
+
+-- Add more indexes based on actual query patterns
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Use meaningful names</strong>: <code>user_id</code> not <code>uid</code>, <code>created_at</code> not <code>crtd</code></li>
+<li><strong>Be consistent</strong>: Stick to naming conventions (snake_case vs camelCase)</li>
+<li><strong>Add timestamps</strong>: Every table should have <code>created_at</code>, often <code>updated_at</code></li>
+<li><strong>Use UUIDs for distributed systems</strong>: Better than auto-increment IDs</li>
+<li><strong>Index foreign keys</strong>: Almost always need indexes on FK columns</li>
+<li><strong>Document your schema</strong>: Add comments to tables and columns</li>
+<li><strong>Plan for growth</strong>: Consider partitioning for large tables</li>
+<li><strong>Use transactions</strong>: Maintain data integrity for multi-step operations</li>
+<li><strong>Regular backups</strong>: Automate database backups</li>
+<li><strong>Monitor performance</strong>: Track slow queries and optimize</li>
+</ol>
+<h2 id="tools"><a class="header" href="#tools">Tools</a></h2>
+<ul>
+<li><strong>Schema Design</strong>: dbdiagram.io, draw.io, Lucidchart</li>
+<li><strong>Migrations</strong>: Flyway, Liquibase, Alembic (Python), Migrate (Go)</li>
+<li><strong>ORMs</strong>: SQLAlchemy, Django ORM, Hibernate, Entity Framework</li>
+<li><strong>Database Clients</strong>: pgAdmin, DBeaver, TablePlus, DataGrip</li>
+</ul>
+<h2 id="further-reading"><a class="header" href="#further-reading">Further Reading</a></h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Database_normalization">Database Normalization</a></li>
+<li><a href="https://www.postgresql.org/docs/">PostgreSQL Documentation</a></li>
+<li><a href="https://www.sqlstyle.guide/">SQL Style Guide</a></li>
+<li><a href="https://www.martinfowler.com/eaaCatalog/">Database Design Patterns</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../databases/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../databases/sql.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../databases/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../databases/sql.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

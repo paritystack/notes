@@ -313,6 +313,8 @@
     - [Blockchain](misc/blockchain.md)
     - [Operating Systems](misc/operating_systems.md)
     - [Computer Graphics](misc/computer_graphics.md)
+    - [Uboot](misc/uboot.md)
+    - [Ubuntu](misc/ubuntu.md)
 
 - [RTOS](rtos/README.md)
     - [FreeRTOS](rtos/freertos.md)

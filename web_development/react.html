@@ -179,7 +179,17 @@
                     <main>
                         <h1 id="react"><a class="header" href="#react">React</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>React is a JavaScript library for building user interfaces with reusable components and efficient rendering.</p>
+<p>React is a JavaScript library for building user interfaces with reusable components and efficient rendering. Developed by Meta (Facebook), React uses a virtual DOM for optimal performance and supports declarative programming, component-based architecture, and unidirectional data flow.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Component-based architecture</li>
+<li>Virtual DOM for efficient updates</li>
+<li>JSX syntax (JavaScript XML)</li>
+<li>One-way data binding</li>
+<li>Rich ecosystem and community</li>
+<li>Server-side rendering (SSR) support</li>
+<li>Concurrent rendering (React 18+)</li>
+</ul>
 <h2 id="components"><a class="header" href="#components">Components</a></h2>
 <h3 id="functional-components-modern"><a class="header" href="#functional-components-modern">Functional Components (Modern)</a></h3>
 <pre><code class="language-javascript">function Welcome({ name }) {
@@ -218,15 +228,101 @@ function Counter() {
 }
 </code></pre>
 <h2 id="common-hooks"><a class="header" href="#common-hooks">Common Hooks</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Hook</th><th>Purpose</th></tr></thead><tbody>
-<tr><td><strong>useState</strong></td><td>Manage state</td></tr>
-<tr><td><strong>useEffect</strong></td><td>Side effects</td></tr>
-<tr><td><strong>useContext</strong></td><td>Access context</td></tr>
-<tr><td><strong>useReducer</strong></td><td>Complex state logic</td></tr>
-<tr><td><strong>useCallback</strong></td><td>Memoize function</td></tr>
-<tr><td><strong>useMemo</strong></td><td>Memoize value</td></tr>
+<div class="table-wrapper"><table><thead><tr><th>Hook</th><th>Purpose</th><th>When to Use</th></tr></thead><tbody>
+<tr><td><strong>useState</strong></td><td>Manage component state</td><td>Simple state values</td></tr>
+<tr><td><strong>useEffect</strong></td><td>Side effects &amp; lifecycle</td><td>API calls, subscriptions, DOM manipulation</td></tr>
+<tr><td><strong>useContext</strong></td><td>Access context values</td><td>Avoid prop drilling</td></tr>
+<tr><td><strong>useReducer</strong></td><td>Complex state logic</td><td>Multiple related state values</td></tr>
+<tr><td><strong>useCallback</strong></td><td>Memoize functions</td><td>Prevent child re-renders</td></tr>
+<tr><td><strong>useMemo</strong></td><td>Memoize computed values</td><td>Expensive calculations</td></tr>
+<tr><td><strong>useRef</strong></td><td>Persist values/DOM refs</td><td>Access DOM, store mutable values</td></tr>
+<tr><td><strong>useLayoutEffect</strong></td><td>Synchronous effects</td><td>Measure DOM, prevent flicker</td></tr>
+<tr><td><strong>useImperativeHandle</strong></td><td>Customize ref exposure</td><td>Expose specific methods to parent</td></tr>
+<tr><td><strong>useId</strong></td><td>Generate unique IDs</td><td>Accessibility IDs (React 18+)</td></tr>
+<tr><td><strong>useTransition</strong></td><td>Mark updates as transitions</td><td>Non-urgent updates (React 18+)</td></tr>
+<tr><td><strong>useDeferredValue</strong></td><td>Defer expensive updates</td><td>Debounce values (React 18+)</td></tr>
 </tbody></table>
 </div>
+<h3 id="useref-example"><a class="header" href="#useref-example">useRef Example</a></h3>
+<pre><code class="language-javascript">function TextInput() {
+  const inputRef = useRef(null);
+
+  const focusInput = () =&gt; {
+    inputRef.current.focus();
+  };
+
+  return (
+    &lt;&gt;
+      &lt;input ref={inputRef} /&gt;
+      &lt;button onClick={focusInput}&gt;Focus Input&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+</code></pre>
+<h3 id="usereducer-example"><a class="header" href="#usereducer-example">useReducer Example</a></h3>
+<pre><code class="language-javascript">const initialState = { count: 0 };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return { count: state.count + 1 };
+    case 'decrement':
+      return { count: state.count - 1 };
+    case 'reset':
+      return initialState;
+    default:
+      throw new Error('Unknown action');
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    &lt;&gt;
+      &lt;p&gt;Count: {state.count}&lt;/p&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'increment' })}&gt;+&lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'decrement' })}&gt;-&lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'reset' })}&gt;Reset&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+</code></pre>
+<h3 id="custom-hooks"><a class="header" href="#custom-hooks">Custom Hooks</a></h3>
+<pre><code class="language-javascript">// Custom hook for fetching data
+function useFetch(url) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() =&gt; {
+    const fetchData = async () =&gt; {
+      try {
+        const response = await fetch(url);
+        const json = await response.json();
+        setData(json);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [url]);
+
+  return { data, loading, error };
+}
+
+// Usage
+function UserProfile({ userId }) {
+  const { data, loading, error } = useFetch(`/api/users/${userId}`);
+
+  if (loading) return &lt;Spinner /&gt;;
+  if (error) return &lt;Error message={error.message} /&gt;;
+  return &lt;div&gt;{data.name}&lt;/div&gt;;
+}
+</code></pre>
 <h2 id="props"><a class="header" href="#props">Props</a></h2>
 <pre><code class="language-javascript">// Parent
 &lt;Child name="John" age={30} onClick={handleClick} /&gt;
@@ -337,11 +433,427 @@ componentWillUnmount() { } // Before remove
 <h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
 <ol>
 <li><strong>Functional components</strong> (with hooks)</li>
-<li><strong>Keep components small</strong></li>
+<li><strong>Keep components small</strong> and focused</li>
 <li><strong>Lift state up</strong> when needed</li>
-<li><strong>Use keys</strong> in lists</li>
+<li><strong>Use keys</strong> in lists (stable, unique IDs)</li>
 <li><strong>Memoize</strong> expensive computations</li>
 <li><strong>Lazy load</strong> components</li>
+<li><strong>Avoid inline functions</strong> in JSX (use useCallback)</li>
+<li><strong>Use fragments</strong> to avoid extra DOM nodes</li>
+<li><strong>Name components</strong> for better debugging</li>
+<li><strong>Follow hooks rules</strong> (top level, React functions only)</li>
+</ol>
+<h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
+<h3 id="reactmemo"><a class="header" href="#reactmemo">React.memo</a></h3>
+<p>Prevents unnecessary re-renders when props haven't changed:</p>
+<pre><code class="language-javascript">const ExpensiveComponent = React.memo(({ data }) =&gt; {
+  // Only re-renders if 'data' prop changes
+  return &lt;div&gt;{/* expensive rendering */}&lt;/div&gt;;
+});
+</code></pre>
+<h3 id="usecallback--usememo"><a class="header" href="#usecallback--usememo">useCallback &amp; useMemo</a></h3>
+<pre><code class="language-javascript">function Parent() {
+  const [count, setCount] = useState(0);
+  const [items, setItems] = useState([]);
+
+  // Memoize callback to prevent child re-renders
+  const handleClick = useCallback(() =&gt; {
+    console.log('Clicked');
+  }, []); // Dependencies
+
+  // Memoize expensive computation
+  const expensiveValue = useMemo(() =&gt; {
+    return items.reduce((sum, item) =&gt; sum + item.value, 0);
+  }, [items]);
+
+  return &lt;Child onClick={handleClick} total={expensiveValue} /&gt;;
+}
+</code></pre>
+<h3 id="code-splitting--lazy-loading"><a class="header" href="#code-splitting--lazy-loading">Code Splitting &amp; Lazy Loading</a></h3>
+<pre><code class="language-javascript">import { lazy, Suspense } from 'react';
+
+// Lazy load component
+const Dashboard = lazy(() =&gt; import('./Dashboard'));
+const Profile = lazy(() =&gt; import('./Profile'));
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;div&gt;Loading...&lt;/div&gt;}&gt;
+      &lt;Dashboard /&gt;
+    &lt;/Suspense&gt;
+  );
+}
+</code></pre>
+<h3 id="virtualization-large-lists"><a class="header" href="#virtualization-large-lists">Virtualization (Large Lists)</a></h3>
+<pre><code class="language-javascript">// Using react-window or react-virtualized
+import { FixedSizeList } from 'react-window';
+
+function VirtualList({ items }) {
+  const Row = ({ index, style }) =&gt; (
+    &lt;div style={style}&gt;{items[index].name}&lt;/div&gt;
+  );
+
+  return (
+    &lt;FixedSizeList
+      height={400}
+      itemCount={items.length}
+      itemSize={35}
+      width="100%"
+    &gt;
+      {Row}
+    &lt;/FixedSizeList&gt;
+  );
+}
+</code></pre>
+<h2 id="error-boundaries"><a class="header" href="#error-boundaries">Error Boundaries</a></h2>
+<p>Catch JavaScript errors in component tree:</p>
+<pre><code class="language-javascript">class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error:', error, errorInfo);
+    // Log to error reporting service
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        &lt;div&gt;
+          &lt;h1&gt;Something went wrong.&lt;/h1&gt;
+          &lt;details&gt;{this.state.error.toString()}&lt;/details&gt;
+        &lt;/div&gt;
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Usage
+&lt;ErrorBoundary&gt;
+  &lt;App /&gt;
+&lt;/ErrorBoundary&gt;
+</code></pre>
+<h2 id="typescript-with-react"><a class="header" href="#typescript-with-react">TypeScript with React</a></h2>
+<h3 id="component-types"><a class="header" href="#component-types">Component Types</a></h3>
+<pre><code class="language-typescript">// Function component with props
+interface ButtonProps {
+  label: string;
+  onClick: () =&gt; void;
+  disabled?: boolean;
+}
+
+const Button: React.FC&lt;ButtonProps&gt; = ({ label, onClick, disabled = false }) =&gt; {
+  return &lt;button onClick={onClick} disabled={disabled}&gt;{label}&lt;/button&gt;;
+};
+
+// Or without React.FC (preferred)
+function Button({ label, onClick, disabled = false }: ButtonProps) {
+  return &lt;button onClick={onClick} disabled={disabled}&gt;{label}&lt;/button&gt;;
+}
+</code></pre>
+<h3 id="hooks-with-typescript"><a class="header" href="#hooks-with-typescript">Hooks with TypeScript</a></h3>
+<pre><code class="language-typescript">// useState with type
+const [count, setCount] = useState&lt;number&gt;(0);
+const [user, setUser] = useState&lt;User | null&gt;(null);
+
+// useRef with type
+const inputRef = useRef&lt;HTMLInputElement&gt;(null);
+
+// Custom hook with types
+function useFetch&lt;T&gt;(url: string): {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+} {
+  const [data, setData] = useState&lt;T | null&gt;(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState&lt;Error | null&gt;(null);
+
+  useEffect(() =&gt; {
+    fetch(url)
+      .then(res =&gt; res.json())
+      .then((data: T) =&gt; setData(data))
+      .catch(setError)
+      .finally(() =&gt; setLoading(false));
+  }, [url]);
+
+  return { data, loading, error };
+}
+</code></pre>
+<h3 id="event-types"><a class="header" href="#event-types">Event Types</a></h3>
+<pre><code class="language-typescript">function Input() {
+  const handleChange = (e: React.ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {
+    console.log(e.target.value);
+  };
+
+  const handleClick = (e: React.MouseEvent&lt;HTMLButtonElement&gt;) =&gt; {
+    e.preventDefault();
+  };
+
+  const handleSubmit = (e: React.FormEvent&lt;HTMLFormElement&gt;) =&gt; {
+    e.preventDefault();
+  };
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input onChange={handleChange} /&gt;
+      &lt;button onClick={handleClick}&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</code></pre>
+<h2 id="react-router-v6"><a class="header" href="#react-router-v6">React Router (v6)</a></h2>
+<pre><code class="language-javascript">import { BrowserRouter, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
+
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;nav&gt;
+        &lt;Link to="/"&gt;Home&lt;/Link&gt;
+        &lt;Link to="/about"&gt;About&lt;/Link&gt;
+        &lt;Link to="/users/123"&gt;User 123&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;Routes&gt;
+        &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+        &lt;Route path="/about" element={&lt;About /&gt;} /&gt;
+        &lt;Route path="/users/:id" element={&lt;User /&gt;} /&gt;
+        &lt;Route path="*" element={&lt;NotFound /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}
+
+// Access URL parameters
+function User() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;User {id}&lt;/h1&gt;
+      &lt;button onClick={() =&gt; navigate('/about')}&gt;Go to About&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<h2 id="concurrent-features-react-18"><a class="header" href="#concurrent-features-react-18">Concurrent Features (React 18+)</a></h2>
+<h3 id="transitions"><a class="header" href="#transitions">Transitions</a></h3>
+<p>Mark non-urgent updates:</p>
+<pre><code class="language-javascript">import { useTransition } from 'react';
+
+function SearchResults() {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [isPending, startTransition] = useTransition();
+
+  const handleChange = (e) =&gt; {
+    setQuery(e.target.value);
+
+    // Mark this update as non-urgent
+    startTransition(() =&gt; {
+      setResults(filterResults(e.target.value));
+    });
+  };
+
+  return (
+    &lt;&gt;
+      &lt;input value={query} onChange={handleChange} /&gt;
+      {isPending ? &lt;Spinner /&gt; : &lt;ResultsList results={results} /&gt;}
+    &lt;/&gt;
+  );
+}
+</code></pre>
+<h3 id="suspense-for-data-fetching"><a class="header" href="#suspense-for-data-fetching">Suspense for Data Fetching</a></h3>
+<pre><code class="language-javascript">import { Suspense } from 'react';
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;LoadingSpinner /&gt;}&gt;
+      &lt;UserProfile /&gt;
+    &lt;/Suspense&gt;
+  );
+}
+
+// Component that suspends while loading
+function UserProfile() {
+  const user = use(fetchUser()); // Suspends until data loads
+  return &lt;div&gt;{user.name}&lt;/div&gt;;
+}
+</code></pre>
+<h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
+<h3 id="react-testing-library"><a class="header" href="#react-testing-library">React Testing Library</a></h3>
+<pre><code class="language-javascript">import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+test('counter increments', () =&gt; {
+  render(&lt;Counter /&gt;);
+
+  const button = screen.getByRole('button', { name: /increment/i });
+  const count = screen.getByText(/count: 0/i);
+
+  fireEvent.click(button);
+
+  expect(screen.getByText(/count: 1/i)).toBeInTheDocument();
+});
+
+test('fetches and displays user', async () =&gt; {
+  render(&lt;UserProfile userId={1} /&gt;);
+
+  expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+  await waitFor(() =&gt; {
+    expect(screen.getByText(/john doe/i)).toBeInTheDocument();
+  });
+});
+</code></pre>
+<h3 id="component-testing"><a class="header" href="#component-testing">Component Testing</a></h3>
+<pre><code class="language-javascript">import { render } from '@testing-library/react';
+
+test('renders with props', () =&gt; {
+  const { container } = render(
+    &lt;Button label="Click me" onClick={jest.fn()} /&gt;
+  );
+
+  expect(container.firstChild).toMatchSnapshot();
+});
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="render-props"><a class="header" href="#render-props">Render Props</a></h3>
+<pre><code class="language-javascript">function DataProvider({ render }) {
+  const [data, setData] = useState(null);
+
+  useEffect(() =&gt; {
+    fetchData().then(setData);
+  }, []);
+
+  return render(data);
+}
+
+// Usage
+&lt;DataProvider render={(data) =&gt; &lt;div&gt;{data}&lt;/div&gt;} /&gt;
+</code></pre>
+<h3 id="higher-order-components-hoc"><a class="header" href="#higher-order-components-hoc">Higher-Order Components (HOC)</a></h3>
+<pre><code class="language-javascript">function withAuth(Component) {
+  return function AuthenticatedComponent(props) {
+    const { user } = useAuth();
+
+    if (!user) {
+      return &lt;Login /&gt;;
+    }
+
+    return &lt;Component {...props} user={user} /&gt;;
+  };
+}
+
+// Usage
+const ProtectedPage = withAuth(Dashboard);
+</code></pre>
+<h3 id="compound-components"><a class="header" href="#compound-components">Compound Components</a></h3>
+<pre><code class="language-javascript">function Tabs({ children }) {
+  const [activeTab, setActiveTab] = useState(0);
+
+  return (
+    &lt;TabsContext.Provider value={{ activeTab, setActiveTab }}&gt;
+      &lt;div&gt;{children}&lt;/div&gt;
+    &lt;/TabsContext.Provider&gt;
+  );
+}
+
+Tabs.List = function TabsList({ children }) {
+  return &lt;div role="tablist"&gt;{children}&lt;/div&gt;;
+};
+
+Tabs.Tab = function Tab({ index, children }) {
+  const { activeTab, setActiveTab } = useContext(TabsContext);
+  return (
+    &lt;button onClick={() =&gt; setActiveTab(index)}&gt;
+      {children}
+    &lt;/button&gt;
+  );
+};
+
+Tabs.Panel = function TabPanel({ index, children }) {
+  const { activeTab } = useContext(TabsContext);
+  return activeTab === index ? &lt;div&gt;{children}&lt;/div&gt; : null;
+};
+
+// Usage
+&lt;Tabs&gt;
+  &lt;Tabs.List&gt;
+    &lt;Tabs.Tab index={0}&gt;Tab 1&lt;/Tabs.Tab&gt;
+    &lt;Tabs.Tab index={1}&gt;Tab 2&lt;/Tabs.Tab&gt;
+  &lt;/Tabs.List&gt;
+  &lt;Tabs.Panel index={0}&gt;Content 1&lt;/Tabs.Panel&gt;
+  &lt;Tabs.Panel index={1}&gt;Content 2&lt;/Tabs.Panel&gt;
+&lt;/Tabs&gt;
+</code></pre>
+<h2 id="portals"><a class="header" href="#portals">Portals</a></h2>
+<p>Render children outside parent DOM hierarchy:</p>
+<pre><code class="language-javascript">import { createPortal } from 'react-dom';
+
+function Modal({ children, isOpen }) {
+  if (!isOpen) return null;
+
+  return createPortal(
+    &lt;div className="modal-overlay"&gt;
+      &lt;div className="modal-content"&gt;
+        {children}
+      &lt;/div&gt;
+    &lt;/div&gt;,
+    document.getElementById('modal-root')
+  );
+}
+</code></pre>
+<h2 id="refs-and-forward-refs"><a class="header" href="#refs-and-forward-refs">Refs and Forward Refs</a></h2>
+<pre><code class="language-javascript">import { forwardRef, useImperativeHandle, useRef } from 'react';
+
+// Forward ref to child
+const FancyInput = forwardRef((props, ref) =&gt; {
+  return &lt;input ref={ref} {...props} /&gt;;
+});
+
+// Usage
+function Parent() {
+  const inputRef = useRef();
+
+  const focusInput = () =&gt; {
+    inputRef.current.focus();
+  };
+
+  return &lt;FancyInput ref={inputRef} /&gt;;
+}
+
+// Expose specific methods
+const CustomInput = forwardRef((props, ref) =&gt; {
+  const inputRef = useRef();
+
+  useImperativeHandle(ref, () =&gt; ({
+    focus: () =&gt; inputRef.current.focus(),
+    clear: () =&gt; inputRef.current.value = ''
+  }));
+
+  return &lt;input ref={inputRef} /&gt;;
+});
+</code></pre>
+<h2 id="common-anti-patterns-to-avoid"><a class="header" href="#common-anti-patterns-to-avoid">Common Anti-Patterns to Avoid</a></h2>
+<ol>
+<li><strong>Mutating state directly</strong>: Use setState, never <code>state.value = x</code></li>
+<li><strong>Using index as key</strong>: Causes re-render issues</li>
+<li><strong>Forgetting useCallback dependencies</strong>: Stale closures</li>
+<li><strong>Too many useEffects</strong>: Consider combining or custom hooks</li>
+<li><strong>Props drilling</strong>: Use Context or state management</li>
+<li><strong>Large components</strong>: Break into smaller, focused components</li>
+<li><strong>Inline object/array creation in JSX</strong>: Causes re-renders</li>
+<li><strong>Not cleaning up effects</strong>: Memory leaks in subscriptions</li>
 </ol>
 <h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
 <p>React is like LEGO blocks:</p>
@@ -352,9 +864,37 @@ componentWillUnmount() { } // Before remove
 <li>Efficient updates when data changes!</li>
 </ul>
 <h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<h3 id="official-documentation"><a class="header" href="#official-documentation">Official Documentation</a></h3>
 <ul>
-<li><a href="https://react.dev/">React Documentation</a></li>
-<li><a href="https://react.dev/reference/react">React Hooks</a></li>
+<li><a href="https://react.dev/">React Documentation</a> - Official React docs</li>
+<li><a href="https://react.dev/reference/react">React API Reference</a> - Complete API reference</li>
+<li><a href="https://react.dev/reference/react/hooks">React Hooks Reference</a> - All hooks documentation</li>
+<li><a href="https://react.dev/learn/react-developer-tools">React DevTools</a> - Browser extension</li>
+</ul>
+<h3 id="popular-libraries"><a class="header" href="#popular-libraries">Popular Libraries</a></h3>
+<ul>
+<li><a href="https://reactrouter.com/">React Router</a> - Client-side routing</li>
+<li><a href="https://redux-toolkit.js.org/">Redux Toolkit</a> - State management</li>
+<li><a href="https://tanstack.com/query/latest">React Query</a> - Data fetching &amp; caching</li>
+<li><a href="https://zustand-demo.pmnd.rs/">Zustand</a> - Lightweight state management</li>
+<li><a href="https://jotai.org/">Jotai</a> - Atomic state management</li>
+<li><a href="https://react-hook-form.com/">React Hook Form</a> - Form validation</li>
+<li><a href="https://testing-library.com/react">React Testing Library</a> - Testing utilities</li>
+<li><a href="https://styled-components.com/">Styled Components</a> - CSS-in-JS</li>
+<li><a href="https://www.framer.com/motion/">Framer Motion</a> - Animations</li>
+</ul>
+<h3 id="frameworks-built-on-react"><a class="header" href="#frameworks-built-on-react">Frameworks Built on React</a></h3>
+<ul>
+<li><a href="https://nextjs.org/">Next.js</a> - Full-stack React framework with SSR/SSG</li>
+<li><a href="https://remix.run/">Remix</a> - Full-stack web framework</li>
+<li><a href="https://www.gatsbyjs.com/">Gatsby</a> - Static site generator</li>
+<li><a href="https://expo.dev/">Expo</a> - React Native for mobile apps</li>
+</ul>
+<h3 id="learning-resources"><a class="header" href="#learning-resources">Learning Resources</a></h3>
+<ul>
+<li><a href="https://react.dev/learn">React Tutorial</a> - Official interactive tutorial</li>
+<li><a href="https://reactpatterns.com/">React Patterns</a> - Common design patterns</li>
+<li><a href="https://github.com/enaqx/awesome-react">Awesome React</a> - Curated list of resources</li>
 </ul>
 
                     </main>

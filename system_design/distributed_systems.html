@@ -1,0 +1,1981 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Distributed Systems - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="distributed-systems"><a class="header" href="#distributed-systems">Distributed Systems</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A distributed system is a collection of independent computers that appear to its users as a single coherent system. These systems work together to achieve a common goal by communicating and coordinating their actions through message passing.</p>
+<h2 id="distributed-systems-fundamentals"><a class="header" href="#distributed-systems-fundamentals">Distributed Systems Fundamentals</a></h2>
+<h3 id="core-challenges"><a class="header" href="#core-challenges">Core Challenges</a></h3>
+<h4 id="1-network-failures"><a class="header" href="#1-network-failures">1. Network Failures</a></h4>
+<ul>
+<li><strong>Packet loss</strong>: Messages can be dropped in transit</li>
+<li><strong>Network partitions</strong>: Parts of the system become isolated from each other</li>
+<li><strong>Asymmetric failures</strong>: Node A can reach B, but B cannot reach A</li>
+<li><strong>Message reordering</strong>: Messages may arrive out of order</li>
+<li><strong>Byzantine failures</strong>: Nodes may behave arbitrarily or maliciously</li>
+</ul>
+<h4 id="2-latency-and-performance"><a class="header" href="#2-latency-and-performance">2. Latency and Performance</a></h4>
+<ul>
+<li><strong>Variable latency</strong>: Network delays are unpredictable</li>
+<li><strong>Geographic distribution</strong>: Physical distance increases communication time</li>
+<li><strong>Bandwidth limitations</strong>: Network capacity constraints</li>
+<li><strong>Synchronous vs asynchronous</strong>: Trade-offs between consistency and performance</li>
+</ul>
+<h4 id="3-partial-failures"><a class="header" href="#3-partial-failures">3. Partial Failures</a></h4>
+<ul>
+<li><strong>Individual component failures</strong>: Single nodes can fail while others continue</li>
+<li><strong>Cascading failures</strong>: One failure triggers others</li>
+<li><strong>Gray failures</strong>: Components function partially, making detection difficult</li>
+<li><strong>Fail-stop vs fail-slow</strong>: Different failure modes require different handling</li>
+</ul>
+<h3 id="the-eight-fallacies-of-distributed-computing"><a class="header" href="#the-eight-fallacies-of-distributed-computing">The Eight Fallacies of Distributed Computing</a></h3>
+<p>Originally identified by L. Peter Deutsch and others at Sun Microsystems:</p>
+<ol>
+<li><strong>The network is reliable</strong>: Networks fail, packets get lost, connections drop</li>
+<li><strong>Latency is zero</strong>: Communication takes time, and that time varies</li>
+<li><strong>Bandwidth is infinite</strong>: Network capacity is limited and shared</li>
+<li><strong>The network is secure</strong>: Security must be designed in, not assumed</li>
+<li><strong>Topology doesn't change</strong>: Network paths and configurations change dynamically</li>
+<li><strong>There is one administrator</strong>: Multiple organizations and teams manage different parts</li>
+<li><strong>Transport cost is zero</strong>: Serialization, network usage, and infrastructure have real costs</li>
+<li><strong>The network is homogeneous</strong>: Different protocols, formats, and systems must interoperate</li>
+</ol>
+<h3 id="time-and-ordering"><a class="header" href="#time-and-ordering">Time and Ordering</a></h3>
+<h4 id="physical-clocks"><a class="header" href="#physical-clocks">Physical Clocks</a></h4>
+<ul>
+<li><strong>Clock drift</strong>: Hardware clocks run at slightly different rates</li>
+<li><strong>Clock skew</strong>: Difference between clock values at a point in time</li>
+<li><strong>NTP (Network Time Protocol)</strong>: Synchronizes clocks across network
+<ul>
+<li>Accuracy: typically 1-50ms on internet, &lt;1ms on LAN</li>
+<li>Cannot guarantee perfect synchronization</li>
+</ul>
+</li>
+</ul>
+<h4 id="logical-clocks"><a class="header" href="#logical-clocks">Logical Clocks</a></h4>
+<h5 id="lamport-timestamps"><a class="header" href="#lamport-timestamps">Lamport Timestamps</a></h5>
+<ul>
+<li>Provides partial ordering of events</li>
+<li>Each process maintains a counter</li>
+<li>Algorithm:
+<ol>
+<li>Increment counter before each event</li>
+<li>When sending message, include timestamp</li>
+<li>On receiving message: counter = max(local_counter, message_timestamp) + 1</li>
+</ol>
+</li>
+<li><strong>Limitation</strong>: Cannot distinguish concurrent events</li>
+</ul>
+<h5 id="vector-clocks"><a class="header" href="#vector-clocks">Vector Clocks</a></h5>
+<ul>
+<li>Provides causal ordering</li>
+<li>Each process maintains vector of counters (one per process)</li>
+<li>Can determine if events are concurrent or causally related</li>
+<li>Algorithm:
+<ol>
+<li>Increment own position in vector before event</li>
+<li>Send entire vector with message</li>
+<li>On receive: merge vectors element-wise (take max) and increment own position</li>
+</ol>
+</li>
+<li><strong>Use cases</strong>: Conflict detection in replicated systems (Riak, Voldemort)</li>
+</ul>
+<h5 id="hybrid-logical-clocks-hlc"><a class="header" href="#hybrid-logical-clocks-hlc">Hybrid Logical Clocks (HLC)</a></h5>
+<ul>
+<li>Combines physical and logical clocks</li>
+<li>Maintains causality like vector clocks</li>
+<li>Bounded by physical time</li>
+<li>More compact than vector clocks</li>
+<li>Used in: CockroachDB, MongoDB</li>
+</ul>
+<h4 id="happens-before-relationship"><a class="header" href="#happens-before-relationship">Happens-Before Relationship</a></h4>
+<ul>
+<li>Event A happens-before event B if:
+<ol>
+<li>A and B occur on same process and A occurs before B, OR</li>
+<li>A is sending a message and B is receiving that message, OR</li>
+<li>Transitive: A → C and C → B, then A → B</li>
+</ol>
+</li>
+<li>Events are concurrent if neither happens-before the other</li>
+</ul>
+<h2 id="cap-theorem"><a class="header" href="#cap-theorem">CAP Theorem</a></h2>
+<h3 id="the-theorem"><a class="header" href="#the-theorem">The Theorem</a></h3>
+<p>Proven by Seth Gilbert and Nancy Lynch (2002), based on Eric Brewer's conjecture (2000):</p>
+<p>A distributed system can only guarantee <strong>two out of three</strong> properties simultaneously:</p>
+<ul>
+<li><strong>Consistency (C)</strong>: All nodes see the same data at the same time (linearizability)</li>
+<li><strong>Availability (A)</strong>: Every request receives a response (success or failure), without guarantee of most recent write</li>
+<li><strong>Partition Tolerance (P)</strong>: System continues to operate despite network partitions</li>
+</ul>
+<h3 id="understanding-the-trade-offs"><a class="header" href="#understanding-the-trade-offs">Understanding the Trade-offs</a></h3>
+<p>Since <strong>network partitions are inevitable</strong> in real-world systems, the practical choice is:</p>
+<h4 id="cp-systems-consistency--partition-tolerance"><a class="header" href="#cp-systems-consistency--partition-tolerance">CP Systems (Consistency + Partition Tolerance)</a></h4>
+<p><strong>Choose consistency over availability during partitions</strong></p>
+<ul>
+<li>System refuses to respond or returns errors during partition</li>
+<li>Ensures all clients see the same data</li>
+<li>May sacrifice uptime</li>
+</ul>
+<p><strong>Real-world CP systems:</strong></p>
+<ul>
+<li><strong>HBase</strong>: Returns errors if cannot reach required replicas</li>
+<li><strong>MongoDB</strong> (with strong consistency settings): Primary election during partition causes unavailability</li>
+<li><strong>Redis</strong> (with wait command): Blocks until replication confirmed</li>
+<li><strong>ZooKeeper</strong>: Refuses writes if cannot reach quorum</li>
+<li><strong>Consul</strong>: CP for service configuration</li>
+<li><strong>Google Spanner</strong>: Sacrifices availability for strong consistency across regions</li>
+<li><strong>etcd</strong>: Raft-based consensus, unavailable during leader election</li>
+</ul>
+<p><strong>Use cases:</strong></p>
+<ul>
+<li>Financial transactions</li>
+<li>Inventory management</li>
+<li>Systems requiring strong guarantees</li>
+</ul>
+<h4 id="ap-systems-availability--partition-tolerance"><a class="header" href="#ap-systems-availability--partition-tolerance">AP Systems (Availability + Partition Tolerance)</a></h4>
+<p><strong>Choose availability over consistency during partitions</strong></p>
+<ul>
+<li>System always responds, even if data might be stale</li>
+<li>Different nodes may return different values temporarily</li>
+<li>Eventual consistency when partition heals</li>
+</ul>
+<p><strong>Real-world AP systems:</strong></p>
+<ul>
+<li><strong>Cassandra</strong>: Always available, tunable consistency</li>
+<li><strong>DynamoDB</strong>: Eventually consistent reads by default</li>
+<li><strong>Riak</strong>: Highly available, uses vector clocks for conflict resolution</li>
+<li><strong>CouchDB</strong>: Multi-master replication, conflict resolution</li>
+<li><strong>Voldemort</strong>: Shopping cart always writable (Amazon design)</li>
+<li><strong>DNS</strong>: Availability critical, stale data acceptable</li>
+</ul>
+<p><strong>Use cases:</strong></p>
+<ul>
+<li>Social media feeds</li>
+<li>Product catalogs</li>
+<li>User profiles</li>
+<li>Shopping carts</li>
+</ul>
+<h3 id="pacelc-theorem"><a class="header" href="#pacelc-theorem">PACELC Theorem</a></h3>
+<p>Extension by Daniel Abadi - describes behavior both during and without partitions:</p>
+<ul>
+<li><strong>If Partition (P)</strong>: choose between Availability (A) and Consistency (C)</li>
+<li><strong>Else (E)</strong>: choose between Latency (L) and Consistency (C)</li>
+</ul>
+<p><strong>Examples:</strong></p>
+<ul>
+<li><strong>PA/EL systems</strong>: Cassandra, Riak (Available during partition, Low latency otherwise)</li>
+<li><strong>PC/EC systems</strong>: HBase, MongoDB (Consistent during partition, Consistent otherwise)</li>
+<li><strong>PA/EC systems</strong>: DynamoDB (Available during partition, Consistent for normal ops)</li>
+<li><strong>PC/EL systems</strong>: Rare, but some MySQL cluster configurations</li>
+</ul>
+<h2 id="consistency-models"><a class="header" href="#consistency-models">Consistency Models</a></h2>
+<p>Consistency models define guarantees about when and how updates become visible.</p>
+<h3 id="1-strong-consistency-linearizability"><a class="header" href="#1-strong-consistency-linearizability">1. Strong Consistency (Linearizability)</a></h3>
+<p><strong>Guarantee</strong>: All operations appear to occur atomically in some total order consistent with real-time ordering</p>
+<ul>
+<li>Strongest consistency model</li>
+<li>After write completes, all subsequent reads see that value or newer</li>
+<li>Operations appear instantaneous</li>
+<li>Expensive: requires coordination</li>
+</ul>
+<p><strong>Implementation approaches:</strong></p>
+<ul>
+<li>Consensus algorithms (Paxos, Raft)</li>
+<li>Two-phase commit</li>
+<li>Primary-copy replication with synchronous replication</li>
+</ul>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>Google Spanner</li>
+<li>CockroachDB</li>
+<li>etcd</li>
+<li>ZooKeeper</li>
+</ul>
+<h3 id="2-sequential-consistency"><a class="header" href="#2-sequential-consistency">2. Sequential Consistency</a></h3>
+<p><strong>Guarantee</strong>: Operations appear to take effect in some sequential order, consistent with program order on each process</p>
+<ul>
+<li>Weaker than linearizability (no real-time constraint)</li>
+<li>All processes see operations in same order</li>
+<li>Each process's operations stay in order</li>
+</ul>
+<p><strong>Use cases:</strong></p>
+<ul>
+<li>Multi-processor memory models</li>
+<li>Some distributed databases</li>
+</ul>
+<h3 id="3-causal-consistency"><a class="header" href="#3-causal-consistency">3. Causal Consistency</a></h3>
+<p><strong>Guarantee</strong>: Causally related operations are seen in the same order by all processes</p>
+<ul>
+<li>Concurrent (non-causal) operations may be seen in different orders</li>
+<li>Preserves happens-before relationships</li>
+<li>More available than sequential consistency</li>
+</ul>
+<p><strong>Implementation:</strong></p>
+<ul>
+<li>Vector clocks</li>
+<li>Dependency tracking</li>
+</ul>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>COPS (Clusters of Order-Preserving Servers)</li>
+<li>Bolt-on Causal Consistency (Facebook)</li>
+</ul>
+<h3 id="4-eventual-consistency"><a class="header" href="#4-eventual-consistency">4. Eventual Consistency</a></h3>
+<p><strong>Guarantee</strong>: If no new updates, all replicas eventually converge to the same value</p>
+<ul>
+<li>Most available model</li>
+<li>No guarantees about intermediate states</li>
+<li>Convergence time unbounded (in theory)</li>
+</ul>
+<p><strong>Variants:</strong></p>
+<h4 id="4a-read-your-writes-consistency"><a class="header" href="#4a-read-your-writes-consistency">4a. Read-Your-Writes Consistency</a></h4>
+<ul>
+<li>Process always sees its own writes</li>
+<li>Other processes may see stale data</li>
+<li>Implementation: read from same replica you wrote to, or track write version</li>
+</ul>
+<h4 id="4b-monotonic-reads"><a class="header" href="#4b-monotonic-reads">4b. Monotonic Reads</a></h4>
+<ul>
+<li>If process reads value X, subsequent reads never return older values</li>
+<li>Prevents "going back in time"</li>
+<li>Implementation: sticky sessions, or track last-read version</li>
+</ul>
+<h4 id="4c-monotonic-writes"><a class="header" href="#4c-monotonic-writes">4c. Monotonic Writes</a></h4>
+<ul>
+<li>Process's writes are applied in order they were submitted</li>
+<li>Implementation: serialize writes from same client</li>
+</ul>
+<h4 id="4d-writes-follow-reads"><a class="header" href="#4d-writes-follow-reads">4d. Writes-Follow-Reads</a></h4>
+<ul>
+<li>Write after reading value is guaranteed to see that read value or newer</li>
+<li>Implementation: include read version with write</li>
+</ul>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>DynamoDB (default mode)</li>
+<li>Cassandra (with eventual consistency level)</li>
+<li>Riak</li>
+<li>DNS</li>
+</ul>
+<h3 id="5-session-consistency"><a class="header" href="#5-session-consistency">5. Session Consistency</a></h3>
+<p><strong>Guarantee</strong>: Strong consistency within a session, eventual consistency across sessions</p>
+<ul>
+<li>Combines read-your-writes, monotonic reads, and writes-follow-reads</li>
+<li>Common in practice</li>
+</ul>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>Azure CosmosDB session consistency</li>
+<li>Many web applications with sticky sessions</li>
+</ul>
+<h2 id="consensus-algorithms"><a class="header" href="#consensus-algorithms">Consensus Algorithms</a></h2>
+<p>Consensus allows multiple nodes to agree on a single value or sequence of values, even in the presence of failures.</p>
+<h3 id="paxos"><a class="header" href="#paxos">Paxos</a></h3>
+<p>Developed by Leslie Lamport (1989), published 1998.</p>
+<h4 id="roles"><a class="header" href="#roles">Roles</a></h4>
+<ol>
+<li><strong>Proposers</strong>: Propose values</li>
+<li><strong>Acceptors</strong>: Vote on proposals (typically 2f+1 to tolerate f failures)</li>
+<li><strong>Learners</strong>: Learn chosen value</li>
+</ol>
+<h4 id="algorithm-phases"><a class="header" href="#algorithm-phases">Algorithm Phases</a></h4>
+<p><strong>Phase 1: Prepare</strong></p>
+<ol>
+<li>Proposer selects proposal number n, sends PREPARE(n) to acceptors</li>
+<li>Acceptor receives PREPARE(n):
+<ul>
+<li>If n &gt; any previous proposal, promise not to accept proposals &lt; n</li>
+<li>Return highest-numbered proposal already accepted (if any)</li>
+</ul>
+</li>
+</ol>
+<p><strong>Phase 2: Accept</strong></p>
+<ol>
+<li>If proposer receives responses from majority:
+<ul>
+<li>If any acceptor already accepted value, use highest-numbered one</li>
+<li>Otherwise, use own value</li>
+<li>Send ACCEPT(n, value) to acceptors</li>
+</ul>
+</li>
+<li>Acceptor receives ACCEPT(n, value):
+<ul>
+<li>If n ≥ any promised proposal number, accept it</li>
+<li>Notify learners</li>
+</ul>
+</li>
+</ol>
+<h4 id="challenges"><a class="header" href="#challenges">Challenges</a></h4>
+<ul>
+<li><strong>Livelock</strong>: Competing proposers can prevent progress
+<ul>
+<li>Solution: Use leader election, or randomized backoff</li>
+</ul>
+</li>
+<li><strong>Complex</strong>: Difficult to understand and implement correctly</li>
+<li><strong>Multi-Paxos</strong>: Extension for agreeing on sequence of values (log)</li>
+</ul>
+<h4 id="usage"><a class="header" href="#usage">Usage</a></h4>
+<ul>
+<li>Google Chubby lock service</li>
+<li>Apache ZooKeeper (variant: ZAB - ZooKeeper Atomic Broadcast)</li>
+<li>Cassandra (for lightweight transactions)</li>
+</ul>
+<h3 id="raft---deep-dive"><a class="header" href="#raft---deep-dive">Raft - Deep Dive</a></h3>
+<p>Designed by Diego Ongaro and John Ousterhout (2014) for understandability.</p>
+<h4 id="core-principles"><a class="header" href="#core-principles">Core Principles</a></h4>
+<ul>
+<li><strong>Strong leader</strong>: Log entries only flow from leader to followers</li>
+<li><strong>Decomposed problem</strong>: Separate leader election, log replication, safety</li>
+<li><strong>Simplicity</strong>: Easier to understand and implement than Paxos</li>
+</ul>
+<h4 id="server-states"><a class="header" href="#server-states">Server States</a></h4>
+<ol>
+<li><strong>Leader</strong>: Handles all client requests, sends heartbeats</li>
+<li><strong>Follower</strong>: Passive, responds to RPCs from leader and candidates</li>
+<li><strong>Candidate</strong>: Used to elect new leader</li>
+</ol>
+<h4 id="terms"><a class="header" href="#terms">Terms</a></h4>
+<ul>
+<li>Logical clock numbered with consecutive integers</li>
+<li>Each term has at most one leader</li>
+<li>Servers maintain current term number</li>
+<li>Term advances when:
+<ul>
+<li>Follower times out and becomes candidate</li>
+<li>Server discovers higher term</li>
+</ul>
+</li>
+</ul>
+<h4 id="leader-election"><a class="header" href="#leader-election">Leader Election</a></h4>
+<p><strong>Trigger</strong>: Follower doesn't receive heartbeat within election timeout (randomized: 150-300ms)</p>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Follower increments term, transitions to candidate</li>
+<li>Votes for self</li>
+<li>Sends RequestVote RPCs to all servers</li>
+<li>Outcomes:
+<ul>
+<li><strong>Wins election</strong>: Receives votes from majority → becomes leader</li>
+<li><strong>Another server wins</strong>: Receives heartbeat with ≥ term → becomes follower</li>
+<li><strong>Timeout</strong>: Split vote, nobody wins → start new election (increment term, retry)</li>
+</ul>
+</li>
+</ol>
+<p><strong>Vote granting</strong>:</p>
+<ul>
+<li>One vote per term, first-come-first-served</li>
+<li>Candidate's log must be at least as up-to-date:
+<ul>
+<li>Last log entry has higher term, OR</li>
+<li>Same term but log is at least as long</li>
+</ul>
+</li>
+</ul>
+<p><strong>Election timeout randomization</strong>: Prevents split votes</p>
+<h4 id="log-replication"><a class="header" href="#log-replication">Log Replication</a></h4>
+<p><strong>Normal operation</strong>:</p>
+<ol>
+<li>Client sends command to leader</li>
+<li>Leader appends entry to local log</li>
+<li>Leader sends AppendEntries RPCs to followers</li>
+<li>Once replicated on majority: entry is <strong>committed</strong></li>
+<li>Leader applies entry to state machine, returns result to client</li>
+<li>Leader includes commit index in heartbeats</li>
+<li>Followers apply committed entries to their state machines</li>
+</ol>
+<p><strong>Log matching property</strong>:</p>
+<ul>
+<li>If two logs contain entry with same index and term:
+<ul>
+<li>They store the same command</li>
+<li>All preceding entries are identical</li>
+</ul>
+</li>
+</ul>
+<p><strong>Consistency check</strong>:</p>
+<ul>
+<li>AppendEntries includes index and term of immediately preceding entry</li>
+<li>Follower rejects if it doesn't have matching entry</li>
+<li>Leader decrements nextIndex and retries</li>
+<li>Eventually finds point where logs match, overwrites follower's inconsistent entries</li>
+</ul>
+<h4 id="safety-properties"><a class="header" href="#safety-properties">Safety Properties</a></h4>
+<p><strong>Election restriction</strong>: Leader must contain all committed entries</p>
+<ul>
+<li>Ensured by vote granting rule (candidate's log must be up-to-date)</li>
+</ul>
+<p><strong>Commitment rule</strong>: Leader never overwrites or deletes entries in its log</p>
+<ul>
+<li>Only appends new entries</li>
+</ul>
+<p><strong>State machine safety</strong>: If server has applied log entry at index i, no other server applies different entry at index i</p>
+<h4 id="log-compaction-snapshotting"><a class="header" href="#log-compaction-snapshotting">Log Compaction (Snapshotting)</a></h4>
+<ul>
+<li>Snapshot includes:
+<ul>
+<li>State machine state</li>
+<li>Last included index and term</li>
+</ul>
+</li>
+<li>Discard log entries before snapshot</li>
+<li>Send InstallSnapshot RPC to slow followers</li>
+</ul>
+<h4 id="cluster-membership-changes"><a class="header" href="#cluster-membership-changes">Cluster Membership Changes</a></h4>
+<ul>
+<li><strong>Joint consensus</strong>: Two configurations overlap during transition</li>
+<li>Prevents split-brain during reconfiguration</li>
+</ul>
+<h4 id="key-advantages"><a class="header" href="#key-advantages">Key Advantages</a></h4>
+<ol>
+<li><strong>Understandability</strong>: Clear separation of concerns</li>
+<li><strong>Strong leader</strong>: Simplifies log replication</li>
+<li><strong>Randomized timeouts</strong>: Solves split vote problem elegantly</li>
+<li><strong>Membership changes</strong>: Safe reconfiguration protocol</li>
+</ol>
+<p><strong>Implementations</strong>:</p>
+<ul>
+<li>etcd (Kubernetes)</li>
+<li>Consul (HashiCorp)</li>
+<li>CockroachDB</li>
+<li>TiKV (TiDB)</li>
+</ul>
+<h3 id="two-phase-commit-2pc"><a class="header" href="#two-phase-commit-2pc">Two-Phase Commit (2PC)</a></h3>
+<p>Atomic commitment protocol for distributed transactions.</p>
+<h4 id="roles-1"><a class="header" href="#roles-1">Roles</a></h4>
+<ul>
+<li><strong>Coordinator</strong>: Orchestrates the commit</li>
+<li><strong>Participants</strong>: Resources being committed (databases, services)</li>
+</ul>
+<h4 id="phases"><a class="header" href="#phases">Phases</a></h4>
+<p><strong>Phase 1: Prepare (Voting)</strong></p>
+<ol>
+<li>Coordinator sends PREPARE message to all participants</li>
+<li>Each participant:
+<ul>
+<li>Prepares transaction (write to redo log, acquire locks)</li>
+<li>Votes YES (can commit) or NO (abort)</li>
+<li>If YES, enters prepared state (cannot unilaterally abort)</li>
+</ul>
+</li>
+</ol>
+<p><strong>Phase 2: Commit/Abort</strong></p>
+<ol>
+<li>Coordinator collects votes:
+<ul>
+<li>If all YES: sends COMMIT to all participants</li>
+<li>If any NO or timeout: sends ABORT to all participants</li>
+</ul>
+</li>
+<li>Participants execute command and acknowledge</li>
+<li>Coordinator completes when all acknowledgments received</li>
+</ol>
+<h4 id="problems"><a class="header" href="#problems">Problems</a></h4>
+<p><strong>Blocking protocol</strong>:</p>
+<ul>
+<li>If coordinator crashes after PREPARE, participants are blocked</li>
+<li>Cannot commit or abort without coordinator decision</li>
+<li>Locks held until coordinator recovers</li>
+</ul>
+<p><strong>No progress guarantee</strong>:</p>
+<ul>
+<li>Single point of failure (coordinator)</li>
+<li>Participant failures also block progress</li>
+</ul>
+<p><strong>Performance</strong>:</p>
+<ul>
+<li>Multiple round-trips</li>
+<li>Synchronous blocking</li>
+<li>High latency</li>
+</ul>
+<p><strong>Usage</strong>: Traditional distributed databases (Oracle, DB2, MySQL XA)</p>
+<h3 id="three-phase-commit-3pc"><a class="header" href="#three-phase-commit-3pc">Three-Phase Commit (3PC)</a></h3>
+<p>Non-blocking extension of 2PC.</p>
+<h4 id="additional-phase-pre-commit"><a class="header" href="#additional-phase-pre-commit">Additional Phase: Pre-Commit</a></h4>
+<p><strong>Phase 1: CanCommit</strong></p>
+<ul>
+<li>Like 2PC prepare phase</li>
+</ul>
+<p><strong>Phase 2: PreCommit</strong></p>
+<ul>
+<li>Coordinator sends PRECOMMIT if all voted YES</li>
+<li>Participants acknowledge</li>
+<li><strong>Key property</strong>: If participant receives PRECOMMIT, it knows all voted YES</li>
+</ul>
+<p><strong>Phase 3: DoCommit</strong></p>
+<ul>
+<li>Coordinator sends COMMIT</li>
+<li>Participants commit and acknowledge</li>
+</ul>
+<h4 id="advantages"><a class="header" href="#advantages">Advantages</a></h4>
+<ul>
+<li><strong>Non-blocking</strong>: Participants can make progress using timeout + state machine</li>
+<li>If participant times out in pre-commit state, it knows all voted YES → can commit</li>
+</ul>
+<h4 id="disadvantages"><a class="header" href="#disadvantages">Disadvantages</a></h4>
+<ul>
+<li><strong>Network partitions</strong>: Can lead to inconsistency if partition occurs between phases</li>
+<li><strong>More latency</strong>: Additional round-trip</li>
+<li><strong>Rarely used in practice</strong>: Complexity outweighs benefits; partition tolerance is critical</li>
+</ul>
+<h2 id="distributed-transactions"><a class="header" href="#distributed-transactions">Distributed Transactions</a></h2>
+<h3 id="acid-in-distributed-systems"><a class="header" href="#acid-in-distributed-systems">ACID in Distributed Systems</a></h3>
+<p>Traditional ACID properties are challenging in distributed environments:</p>
+<h4 id="atomicity"><a class="header" href="#atomicity">Atomicity</a></h4>
+<ul>
+<li><strong>Challenge</strong>: Partial failures across multiple nodes</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>Two-phase commit (2PC)</li>
+<li>Saga pattern with compensating transactions</li>
+<li>Consensus-based approaches (Raft, Paxos)</li>
+</ul>
+</li>
+</ul>
+<h4 id="consistency"><a class="header" href="#consistency">Consistency</a></h4>
+<ul>
+<li><strong>Challenge</strong>: Maintaining invariants across distributed data</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>Application-level validation</li>
+<li>Distributed constraints checking</li>
+<li>Eventual consistency with conflict resolution</li>
+</ul>
+</li>
+</ul>
+<h4 id="isolation"><a class="header" href="#isolation">Isolation</a></h4>
+<ul>
+<li><strong>Challenge</strong>: Coordinating concurrent access across nodes</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>Distributed locking (pessimistic)</li>
+<li>Optimistic concurrency control</li>
+<li>Snapshot isolation (Google Spanner)</li>
+<li>Serializable Snapshot Isolation (SSI)</li>
+</ul>
+</li>
+</ul>
+<h4 id="durability"><a class="header" href="#durability">Durability</a></h4>
+<ul>
+<li><strong>Challenge</strong>: Ensuring writes survive failures</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>Replication (synchronous or asynchronous)</li>
+<li>Write-ahead logging</li>
+<li>Quorum-based writes</li>
+</ul>
+</li>
+</ul>
+<h3 id="saga-pattern"><a class="header" href="#saga-pattern">Saga Pattern</a></h3>
+<p>Long-lived transactions broken into sequence of local transactions, each with compensating action.</p>
+<h4 id="choreography"><a class="header" href="#choreography">Choreography</a></h4>
+<p><strong>Decentralized coordination</strong>: Each service produces and listens to events</p>
+<p><strong>Example</strong>: Order placement</p>
+<pre><code>1. Order Service: Create order → Emit OrderCreated event
+2. Inventory Service: Reserve items → Emit ItemsReserved (or ReservationFailed)
+3. Payment Service: Charge customer → Emit PaymentSucceeded (or PaymentFailed)
+4. Shipping Service: Schedule shipment → Emit ShipmentScheduled
+
+If any step fails:
+- Emit failure event
+- Previous services listen and execute compensating transactions
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>No central coordination</li>
+<li>Loose coupling</li>
+<li>Good for simple workflows</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Hard to understand and debug</li>
+<li>Difficult to track overall state</li>
+<li>Complex error handling</li>
+<li>Cyclic dependencies possible</li>
+</ul>
+<h4 id="orchestration"><a class="header" href="#orchestration">Orchestration</a></h4>
+<p><strong>Centralized coordination</strong>: Orchestrator tells services what to do</p>
+<p><strong>Example</strong>: Same order placement</p>
+<pre><code>Orchestrator:
+1. Call Order Service: Create order
+2. Call Inventory Service: Reserve items
+   - If fails: Call Order Service: Cancel order → END
+3. Call Payment Service: Charge customer
+   - If fails: Call Inventory: Release items → Call Order: Cancel → END
+4. Call Shipping Service: Schedule shipment
+   - If fails: Call Payment: Refund → Call Inventory: Release → Call Order: Cancel → END
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Clear workflow logic in one place</li>
+<li>Easier to understand and debug</li>
+<li>Centralized monitoring</li>
+<li>Timeout management simplified</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Orchestrator is potential bottleneck</li>
+<li>Additional infrastructure required</li>
+<li>Tighter coupling to orchestrator</li>
+</ul>
+<h3 id="compensating-transactions"><a class="header" href="#compensating-transactions">Compensating Transactions</a></h3>
+<p><strong>Semantic undo</strong>: Logically reverse a transaction (not physical undo)</p>
+<p><strong>Examples</strong>:</p>
+<ul>
+<li>Order placement → Order cancellation</li>
+<li>Money debit → Money credit</li>
+<li>Item reservation → Item release</li>
+<li>Email sent → Correction email (cannot "unsend")</li>
+</ul>
+<p><strong>Key properties</strong>:</p>
+<ul>
+<li><strong>Idempotent</strong>: Safe to retry</li>
+<li><strong>Commutative</strong> (ideally): Order shouldn't matter</li>
+<li><strong>Semantically correct</strong>: Achieves business goal of reversal</li>
+</ul>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Some actions cannot be compensated (sent email, published data)</li>
+<li>Timing issues (compensate before user sees original effect?)</li>
+<li>Partial compensations</li>
+<li>Compensation failures (need retries, dead letter queues)</li>
+</ul>
+<p><strong>Best practices</strong>:</p>
+<ol>
+<li>Design compensating actions upfront</li>
+<li>Make them idempotent</li>
+<li>Log all actions for audit trail</li>
+<li>Monitor saga execution</li>
+<li>Alert on compensation failures</li>
+<li>Consider time windows for compensation</li>
+</ol>
+<h2 id="event-sourcing"><a class="header" href="#event-sourcing">Event Sourcing</a></h2>
+<h3 id="core-concept"><a class="header" href="#core-concept">Core Concept</a></h3>
+<p><strong>Event log as source of truth</strong>: Store all changes as immutable sequence of events, rather than storing current state.</p>
+<p><strong>Traditional approach</strong>:</p>
+<pre><code>User account table: { id: 1, name: "Alice", email: "alice@example.com", balance: 1000 }
+Update balance → Overwrite value
+</code></pre>
+<p><strong>Event sourcing</strong>:</p>
+<pre><code>Events:
+1. UserCreated(id=1, name="Alice", email="alice@example.com")
+2. DepositMade(id=1, amount=1000)
+3. WithdrawalMade(id=1, amount=200)
+4. DepositMade(id=1, amount=200)
+
+Current state = replay all events
+Balance = 0 + 1000 - 200 + 200 = 1000
+</code></pre>
+<h3 id="key-benefits"><a class="header" href="#key-benefits">Key Benefits</a></h3>
+<ol>
+<li><strong>Audit trail</strong>: Complete history of what happened</li>
+<li><strong>Time travel</strong>: Reconstruct state at any point in time</li>
+<li><strong>Event replay</strong>: Fix bugs by replaying with corrected logic</li>
+<li><strong>Multiple projections</strong>: Build different views from same events</li>
+<li><strong>Debug and analysis</strong>: Understand how system reached current state</li>
+<li><strong>Event notifications</strong>: Other systems subscribe to events</li>
+</ol>
+<h3 id="event-store"><a class="header" href="#event-store">Event Store</a></h3>
+<p><strong>Append-only log</strong> of events:</p>
+<ul>
+<li>Events are immutable</li>
+<li>Only append new events, never modify or delete</li>
+<li>Events ordered (typically per aggregate)</li>
+</ul>
+<p><strong>Operations</strong>:</p>
+<ul>
+<li><strong>Append</strong>: Add new event</li>
+<li><strong>Read</strong>: Get events for aggregate or time range</li>
+<li><strong>Subscribe</strong>: Listen for new events</li>
+</ul>
+<p><strong>Implementations</strong>:</p>
+<ul>
+<li>Event Store DB</li>
+<li>Apache Kafka</li>
+<li>Custom database tables</li>
+<li>AWS DynamoDB Streams</li>
+</ul>
+<h3 id="event-replay"><a class="header" href="#event-replay">Event Replay</a></h3>
+<p><strong>Rebuild state</strong> by replaying events:</p>
+<pre><code>Initial state: empty
+Apply UserCreated → { id: 1, name: "Alice", email: "alice@example.com", balance: 0 }
+Apply DepositMade → { balance: 1000 }
+Apply WithdrawalMade → { balance: 800 }
+Apply DepositMade → { balance: 1000 }
+</code></pre>
+<p><strong>Use cases</strong>:</p>
+<ul>
+<li>Rebuild read models after schema change</li>
+<li>Fix bugs in event handlers</li>
+<li>Create new projections</li>
+<li>Audit and compliance</li>
+</ul>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Slow for large event streams</li>
+<li>Schema evolution (old events with old format)</li>
+<li>Solution: Snapshots</li>
+</ul>
+<h3 id="snapshotting"><a class="header" href="#snapshotting">Snapshotting</a></h3>
+<p><strong>Periodic state snapshots</strong> to avoid replaying all events.</p>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Replay events up to snapshot point</li>
+<li>Save snapshot with version/event number</li>
+<li>To rebuild: Load snapshot + replay subsequent events</li>
+</ol>
+<p><strong>Example</strong>:</p>
+<pre><code>Events 1-1000: Snapshot at event 1000 (balance = 5000)
+Events 1001-1500: Current state
+To get current state: Load snapshot + replay events 1001-1500
+</code></pre>
+<p><strong>Snapshot strategies</strong>:</p>
+<ul>
+<li><strong>Periodic</strong>: Every N events or time interval</li>
+<li><strong>On-demand</strong>: When loading latest snapshot + replaying is still fast enough</li>
+<li><strong>Per aggregate</strong>: Different aggregates snapshot independently</li>
+</ul>
+<p><strong>Storage</strong>:</p>
+<ul>
+<li>Same event store</li>
+<li>Separate snapshot store</li>
+<li>Cache (Redis, Memcached)</li>
+</ul>
+<h3 id="cqrs-integration"><a class="header" href="#cqrs-integration">CQRS Integration</a></h3>
+<p><strong>Command Query Responsibility Segregation</strong>: Separate models for reads and writes.</p>
+<p><strong>Event sourcing + CQRS</strong>:</p>
+<p><strong>Write side (Command)</strong>:</p>
+<ul>
+<li>Commands validate and generate events</li>
+<li>Events appended to event store</li>
+<li>No read operations on write model</li>
+</ul>
+<p><strong>Read side (Query)</strong>:</p>
+<ul>
+<li>Event handlers build projections (read models)</li>
+<li>Optimized for queries (denormalized, indexed)</li>
+<li>Can have multiple projections for different use cases</li>
+</ul>
+<p><strong>Example</strong>:</p>
+<pre><code>Commands (Write):
+- CreateOrder
+- AddOrderItem
+- PlaceOrder
+→ Generate events: OrderCreated, ItemAdded, OrderPlaced
+→ Store in event log
+
+Events published →
+
+Read Models (Query):
+1. Order details view: Relational table with current order state
+2. Order history view: Timeline of order changes
+3. Analytics view: Aggregated sales data
+4. Search index: Elasticsearch for order search
+</code></pre>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>Independent scaling of reads and writes</li>
+<li>Optimize each side for its purpose</li>
+<li>Multiple specialized read models</li>
+<li>Eventual consistency acceptable</li>
+</ul>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Eventual consistency between write and read</li>
+<li>More complex architecture</li>
+<li>Data duplication across projections</li>
+<li>Need to handle projection rebuilds</li>
+</ul>
+<h3 id="event-schema-evolution"><a class="header" href="#event-schema-evolution">Event Schema Evolution</a></h3>
+<p><strong>Problem</strong>: Old events with old schema, new code expects new schema</p>
+<p><strong>Strategies</strong>:</p>
+<ol>
+<li><strong>Upcasting</strong>: Convert old events to new format when reading</li>
+<li><strong>Versioned events</strong>: Include version number, handle each version</li>
+<li><strong>Weak schema</strong>: Use flexible formats (JSON) with optional fields</li>
+<li><strong>Event migration</strong>: Background process to rewrite old events (rare)</li>
+</ol>
+<h3 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h3>
+<ol>
+<li><strong>Events are facts</strong>: Past tense (UserRegistered, OrderPlaced, not RegisterUser)</li>
+<li><strong>Events are immutable</strong>: Never change or delete events</li>
+<li><strong>Domain events</strong>: Model business events, not CRUD operations</li>
+<li><strong>Idempotency</strong>: Handle duplicate events gracefully</li>
+<li><strong>Event size</strong>: Keep events small and focused</li>
+<li><strong>Correlation IDs</strong>: Track related events across aggregates</li>
+<li><strong>Metadata</strong>: Timestamp, user, causation ID, correlation ID</li>
+<li><strong>Testing</strong>: Verify state transitions via event replay</li>
+</ol>
+<h2 id="replication"><a class="header" href="#replication">Replication</a></h2>
+<p>Keeping copies of data on multiple nodes for fault tolerance and performance.</p>
+<h3 id="leader-follower-replication-master-slave"><a class="header" href="#leader-follower-replication-master-slave">Leader-Follower Replication (Master-Slave)</a></h3>
+<p><strong>One leader</strong> accepts writes, <strong>followers</strong> replicate and serve reads.</p>
+<h4 id="synchronous-replication"><a class="header" href="#synchronous-replication">Synchronous Replication</a></h4>
+<ul>
+<li>Leader waits for follower acknowledgment before confirming write</li>
+<li><strong>Pros</strong>: Follower guaranteed to have up-to-date copy</li>
+<li><strong>Cons</strong>: Write latency increases, unavailable if follower down</li>
+<li><strong>Semi-synchronous</strong>: Wait for one follower, others async</li>
+</ul>
+<h4 id="asynchronous-replication"><a class="header" href="#asynchronous-replication">Asynchronous Replication</a></h4>
+<ul>
+<li>Leader confirms write immediately, replicates in background</li>
+<li><strong>Pros</strong>: Low latency, high availability</li>
+<li><strong>Cons</strong>: Data loss if leader fails before replication</li>
+<li><strong>Most common</strong> in practice</li>
+</ul>
+<h4 id="follower-failure-and-catch-up"><a class="header" href="#follower-failure-and-catch-up">Follower Failure and Catch-up</a></h4>
+<ul>
+<li>Follower keeps log of processed transactions</li>
+<li>On reconnect, requests all changes since last processed</li>
+<li>Applies changes to catch up</li>
+</ul>
+<h4 id="leader-failure-failover"><a class="header" href="#leader-failure-failover">Leader Failure (Failover)</a></h4>
+<p><strong>Detection</strong>: Heartbeat timeout (typically 30s)</p>
+<p><strong>New leader election</strong>:</p>
+<ol>
+<li>Promote follower (often most up-to-date)</li>
+<li>Reconfigure clients to send writes to new leader</li>
+<li>Old leader becomes follower when it recovers</li>
+</ol>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li><strong>Data loss</strong>: If async replication, some writes lost</li>
+<li><strong>Split brain</strong>: Two nodes think they're leader</li>
+<li><strong>Timeout tuning</strong>: Too short → unnecessary failovers, too long → longer downtime</li>
+</ul>
+<h4 id="replication-log-implementation"><a class="header" href="#replication-log-implementation">Replication Log Implementation</a></h4>
+<p><strong>Statement-based</strong>: Ship SQL statements</p>
+<ul>
+<li><strong>Problem</strong>: Non-deterministic functions (NOW(), RAND())</li>
+</ul>
+<p><strong>Write-ahead log (WAL) shipping</strong>: Ship low-level disk writes</p>
+<ul>
+<li><strong>Problem</strong>: Tightly coupled to storage engine</li>
+</ul>
+<p><strong>Logical (row-based) log</strong>: Ship logical row changes</p>
+<ul>
+<li><strong>Most common</strong>: Decoupled from storage, supports different versions</li>
+</ul>
+<p><strong>Trigger-based</strong>: Application-level triggers</p>
+<ul>
+<li><strong>Flexibility</strong>: Custom logic, but higher overhead</li>
+</ul>
+<h3 id="multi-leader-replication-multi-master"><a class="header" href="#multi-leader-replication-multi-master">Multi-Leader Replication (Multi-Master)</a></h3>
+<p><strong>Multiple nodes</strong> accept writes, replicate to each other.</p>
+<h4 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h4>
+<ul>
+<li><strong>Multi-datacenter</strong>: Leader in each datacenter</li>
+<li><strong>Offline clients</strong>: Each device is a leader (mobile apps)</li>
+<li><strong>Collaborative editing</strong>: Each user's edits are writes</li>
+</ul>
+<h4 id="advantages-1"><a class="header" href="#advantages-1">Advantages</a></h4>
+<ul>
+<li><strong>Performance</strong>: Lower latency (write to nearest leader)</li>
+<li><strong>Fault tolerance</strong>: Continue operating if datacenter fails</li>
+<li><strong>Availability</strong>: Each datacenter operates independently</li>
+</ul>
+<h4 id="conflict-resolution"><a class="header" href="#conflict-resolution">Conflict Resolution</a></h4>
+<p><strong>Conflicts inevitable</strong>: Same key modified concurrently at different leaders</p>
+<p><strong>Example</strong>:</p>
+<pre><code>User A (DC1): Update title = "Distributed Systems"
+User B (DC2): Update title = "Distributed Computing"
+Both writes succeed locally, then replicate to each other
+→ Conflict!
+</code></pre>
+<p><strong>Resolution strategies</strong>:</p>
+<ol>
+<li>
+<p><strong>Last-write-wins (LWW)</strong>:</p>
+<ul>
+<li>Use timestamp or version number</li>
+<li><strong>Problem</strong>: Data loss, timestamp synchronization issues</li>
+<li><strong>Use</strong>: Cassandra, Riak (with client-side timestamps)</li>
+</ul>
+</li>
+<li>
+<p><strong>Application-level resolution</strong>:</p>
+<ul>
+<li>Application provides conflict handler</li>
+<li><strong>Example</strong>: Merge function for collaborative editing</li>
+<li><strong>Use</strong>: CouchDB</li>
+</ul>
+</li>
+<li>
+<p><strong>Multi-value (version vectors)</strong>:</p>
+<ul>
+<li>Keep all conflicting versions</li>
+<li>Application reads all versions and resolves</li>
+<li><strong>Use</strong>: Riak, Voldemort</li>
+</ul>
+</li>
+<li>
+<p><strong>CRDT (Conflict-free Replicated Data Types)</strong>:</p>
+<ul>
+<li>Data structures with built-in conflict resolution</li>
+<li>Mathematically proven to converge</li>
+<li><strong>Examples</strong>: Counters, sets, maps</li>
+<li><strong>Use</strong>: Riak (maps), Redis (CRDTs)</li>
+</ul>
+</li>
+<li>
+<p><strong>Operational Transform</strong>:</p>
+<ul>
+<li>Transform concurrent operations so they can be applied in any order</li>
+<li><strong>Use</strong>: Google Docs, collaborative editing</li>
+</ul>
+</li>
+</ol>
+<p><strong>Custom topologies</strong>:</p>
+<ul>
+<li><strong>Circular</strong>: Each leader replicates to next in ring</li>
+<li><strong>Star</strong>: One designated root, others replicate through it</li>
+<li><strong>All-to-all</strong>: Every leader replicates to every other (most common)</li>
+</ul>
+<h3 id="leaderless-replication-dynamo-style"><a class="header" href="#leaderless-replication-dynamo-style">Leaderless Replication (Dynamo-style)</a></h3>
+<p><strong>No leader</strong>: Client writes to multiple replicas directly.</p>
+<h4 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h4>
+<p><strong>Quorum reads and writes</strong>:</p>
+<ul>
+<li>N = total replicas</li>
+<li>W = write quorum (replicas that must acknowledge write)</li>
+<li>R = read quorum (replicas that must respond to read)</li>
+<li><strong>Rule</strong>: W + R &gt; N ensures reads see recent writes</li>
+</ul>
+<p><strong>Example</strong>: N=3, W=2, R=2</p>
+<ul>
+<li>Write succeeds when 2 of 3 replicas acknowledge</li>
+<li>Read queries 2 of 3 replicas, takes newest value</li>
+</ul>
+<h4 id="read-repair"><a class="header" href="#read-repair">Read Repair</a></h4>
+<ul>
+<li>Read queries multiple replicas</li>
+<li>If stale data detected, write newer value back</li>
+<li>Ensures eventually all replicas converge</li>
+</ul>
+<h4 id="anti-entropy-process"><a class="header" href="#anti-entropy-process">Anti-Entropy Process</a></h4>
+<ul>
+<li>Background process compares replicas</li>
+<li>Synchronizes differences</li>
+<li>Uses Merkle trees for efficient comparison</li>
+</ul>
+<h4 id="sloppy-quorums-and-hinted-handoff"><a class="header" href="#sloppy-quorums-and-hinted-handoff">Sloppy Quorums and Hinted Handoff</a></h4>
+<p><strong>Problem</strong>: W replicas unavailable, write would fail</p>
+<p><strong>Sloppy quorum</strong>: Accept writes to any W available nodes, even if not "home" replicas</p>
+<p><strong>Hinted handoff</strong>: When home replica recovers, temporary replica forwards writes</p>
+<p><strong>Trade-off</strong>: Higher availability, but W + R &gt; N doesn't guarantee latest value</p>
+<h4 id="conflict-resolution-1"><a class="header" href="#conflict-resolution-1">Conflict Resolution</a></h4>
+<ul>
+<li>Same strategies as multi-leader (LWW, version vectors, CRDTs)</li>
+<li><strong>Siblings</strong>: Multiple conflicting values returned to client</li>
+<li><strong>Application resolves</strong>: Client merges conflicts</li>
+</ul>
+<p><strong>Examples</strong>:</p>
+<ul>
+<li>Amazon DynamoDB</li>
+<li>Apache Cassandra</li>
+<li>Riak</li>
+<li>Voldemort</li>
+</ul>
+<h3 id="conflict-resolution-strategies-detailed"><a class="header" href="#conflict-resolution-strategies-detailed">Conflict Resolution Strategies (Detailed)</a></h3>
+<h4 id="1-version-vectors-vector-clocks"><a class="header" href="#1-version-vectors-vector-clocks">1. Version Vectors (Vector Clocks)</a></h4>
+<p>Track causality to detect conflicts:</p>
+<pre><code>Initial: {}
+Write A: {A:1} value="Alice"
+Write B: {B:1} value="Bob"
+Replicate A→B: {A:1, B:1} (conflict detected!)
+Replicate B→A: {A:1, B:1} (conflict detected!)
+→ Application resolves: {A:1, B:1} value="Alice, Bob"
+</code></pre>
+<h4 id="2-crdts-conflict-free-replicated-data-types"><a class="header" href="#2-crdts-conflict-free-replicated-data-types">2. CRDTs (Conflict-free Replicated Data Types)</a></h4>
+<p><strong>Grow-only Counter (G-Counter)</strong>:</p>
+<ul>
+<li>Each replica maintains counter per node</li>
+<li>Increment local counter</li>
+<li>Merge: take max of each position</li>
+<li>Value = sum of all counters</li>
+</ul>
+<p><strong>PN-Counter (Positive-Negative Counter)</strong>:</p>
+<ul>
+<li>Two G-Counters: increments and decrements</li>
+<li>Value = increments - decrements</li>
+</ul>
+<p><strong>G-Set (Grow-only Set)</strong>:</p>
+<ul>
+<li>Add-only set</li>
+<li>Merge: union</li>
+</ul>
+<p><strong>OR-Set (Observed-Remove Set)</strong>:</p>
+<ul>
+<li>Add includes unique tag</li>
+<li>Remove based on observed tags</li>
+<li>Merge: union adds, remove only if tag in removed set</li>
+</ul>
+<p><strong>LWW-Register (Last-Write-Wins Register)</strong>:</p>
+<ul>
+<li>Each write includes timestamp</li>
+<li>Merge: keep value with latest timestamp</li>
+</ul>
+<h4 id="3-operational-transform"><a class="header" href="#3-operational-transform">3. Operational Transform</a></h4>
+<p>Transform concurrent operations to maintain consistency:</p>
+<pre><code>Initial: "Hello"
+Op1: Insert("World", position=5)  → "HelloWorld"
+Op2: Delete(position=0, length=1) → "ello"
+
+Transform Op1 for Op2: Insert("World", position=4)  → "elloWorld"
+Both paths converge to same result
+</code></pre>
+<h2 id="partitioning-sharding"><a class="header" href="#partitioning-sharding">Partitioning (Sharding)</a></h2>
+<p>Splitting data across multiple nodes to scale beyond single machine capacity.</p>
+<h3 id="horizontal-vs-vertical-partitioning"><a class="header" href="#horizontal-vs-vertical-partitioning">Horizontal vs Vertical Partitioning</a></h3>
+<h4 id="vertical-partitioning"><a class="header" href="#vertical-partitioning">Vertical Partitioning</a></h4>
+<ul>
+<li>Split <strong>columns</strong> into separate tables/databases</li>
+<li><strong>Example</strong>: User table → (UserProfile, UserActivity, UserSettings)</li>
+<li><strong>Use case</strong>: Different access patterns, separate hot/cold data</li>
+<li><strong>Limit</strong>: Still limited by single-entity scale</li>
+</ul>
+<h4 id="horizontal-partitioning-sharding"><a class="header" href="#horizontal-partitioning-sharding">Horizontal Partitioning (Sharding)</a></h4>
+<ul>
+<li>Split <strong>rows</strong> across multiple nodes</li>
+<li><strong>Example</strong>: Users 1-1000 → Node A, Users 1001-2000 → Node B</li>
+<li><strong>Use case</strong>: True scalability, no single-node bottleneck</li>
+</ul>
+<h3 id="sharding-strategies"><a class="header" href="#sharding-strategies">Sharding Strategies</a></h3>
+<h4 id="1-range-based-sharding"><a class="header" href="#1-range-based-sharding">1. Range-Based Sharding</a></h4>
+<p><strong>Partition by key ranges</strong>:</p>
+<pre><code>A-F → Shard 1
+G-M → Shard 2
+N-Z → Shard 3
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Range queries efficient</li>
+<li>Easy to understand</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li><strong>Hotspots</strong>: Uneven distribution (many names start with S, few with Q)</li>
+<li>Load imbalance</li>
+<li>Requires understanding of data distribution</li>
+</ul>
+<p><strong>Example</strong>: HBase, MongoDB (with range-based shard keys)</p>
+<h4 id="2-hash-based-sharding"><a class="header" href="#2-hash-based-sharding">2. Hash-Based Sharding</a></h4>
+<p><strong>Hash key to determine partition</strong>:</p>
+<pre><code>hash(user_id) % num_shards → shard_id
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Even distribution</li>
+<li>No hotspots (if good hash function)</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Range queries require querying all shards</li>
+<li>Rebalancing requires moving data</li>
+</ul>
+<p><strong>Example</strong>: Cassandra, Redis Cluster</p>
+<h4 id="3-directory-based-sharding"><a class="header" href="#3-directory-based-sharding">3. Directory-Based Sharding</a></h4>
+<p><strong>Lookup table</strong> maps keys to shards:</p>
+<pre><code>Lookup table:
+user_id=1 → Shard A
+user_id=2 → Shard A
+user_id=3 → Shard B
+</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Flexible placement</li>
+<li>Easy to rebalance (update directory)</li>
+<li>Can use any partitioning logic</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Lookup table is bottleneck and single point of failure</li>
+<li>Additional latency</li>
+</ul>
+<p><strong>Example</strong>: Some MySQL sharding solutions</p>
+<h3 id="consistent-hashing"><a class="header" href="#consistent-hashing">Consistent Hashing</a></h3>
+<p>Minimizes data movement when nodes added/removed.</p>
+<p><strong>Algorithm</strong>:</p>
+<ol>
+<li>Hash nodes and keys to same hash space (e.g., 0-2^32)</li>
+<li>Arrange nodes on hash ring</li>
+<li>Key belongs to first node clockwise from key position</li>
+</ol>
+<p><strong>Example</strong>:</p>
+<pre><code>Ring: [Node A at 0, Node B at 1000, Node C at 2000]
+Key X hashes to 1500 → belongs to Node C
+</code></pre>
+<p><strong>Adding node D at 500</strong>:</p>
+<ul>
+<li>Only keys between Node A (0) and Node D (500) move to Node D</li>
+<li>~1/4 of keys move (not all keys like in modulo hashing)</li>
+</ul>
+<p><strong>Virtual nodes</strong>:</p>
+<ul>
+<li>Each physical node represented by multiple virtual nodes</li>
+<li>Better load distribution</li>
+<li>Smoother scaling</li>
+</ul>
+<p><strong>Usage</strong>:</p>
+<ul>
+<li>Cassandra</li>
+<li>DynamoDB</li>
+<li>Riak</li>
+<li>Chord DHT</li>
+<li>Memcached (client-side)</li>
+</ul>
+<h3 id="rebalancing"><a class="header" href="#rebalancing">Rebalancing</a></h3>
+<p><strong>Goal</strong>: Move data when adding/removing nodes while minimizing disruption</p>
+<h4 id="strategies"><a class="header" href="#strategies">Strategies</a></h4>
+<p><strong>1. Don't use hash % num_nodes</strong>:</p>
+<ul>
+<li>Problem: Changing num_nodes moves almost all keys</li>
+<li>Solution: Use consistent hashing or fixed number of partitions</li>
+</ul>
+<p><strong>2. Fixed number of partitions</strong>:</p>
+<ul>
+<li>Create many partitions upfront (e.g., 1000)</li>
+<li>Assign partitions to nodes</li>
+<li>When adding node, move some partitions to new node</li>
+<li><strong>Example</strong>: Riak, Elasticsearch, Couchbase</li>
+</ul>
+<p><strong>3. Dynamic partitioning</strong>:</p>
+<ul>
+<li>Split partitions when they grow too large</li>
+<li>Merge when too small</li>
+<li><strong>Example</strong>: HBase, MongoDB</li>
+</ul>
+<p><strong>4. Proportional to nodes</strong>:</p>
+<ul>
+<li>Fixed number of partitions per node</li>
+<li>When node added, steal partitions from existing nodes</li>
+<li><strong>Example</strong>: Cassandra (virtual nodes)</li>
+</ul>
+<h4 id="rebalancing-process"><a class="header" href="#rebalancing-process">Rebalancing Process</a></h4>
+<p><strong>Manual vs Automatic</strong>:</p>
+<ul>
+<li><strong>Manual</strong>: Administrator triggers rebalancing
+<ul>
+<li>More control, prevents cascading failures</li>
+</ul>
+</li>
+<li><strong>Automatic</strong>: System rebalances automatically
+<ul>
+<li>Convenient, but can cause issues during partial failures</li>
+</ul>
+</li>
+</ul>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li><strong>Network load</strong>: Rebalancing moves lots of data</li>
+<li><strong>Performance impact</strong>: Resources diverted from serving requests</li>
+<li><strong>Consistency</strong>: Ensure availability during rebalancing</li>
+</ul>
+<h3 id="partitioning-and-secondary-indexes"><a class="header" href="#partitioning-and-secondary-indexes">Partitioning and Secondary Indexes</a></h3>
+<p><strong>Problem</strong>: How to handle queries by non-partition key?</p>
+<h4 id="document-based-partitioning-local-index"><a class="header" href="#document-based-partitioning-local-index">Document-based Partitioning (Local Index)</a></h4>
+<p>Each partition maintains index for its own data only.</p>
+<p><strong>Query process</strong>: Scatter-gather across all partitions</p>
+<p><strong>Example</strong>:</p>
+<pre><code>Partition 1: Users A-M, index on age for users A-M
+Partition 2: Users N-Z, index on age for users N-Z
+
+Query "age=25": Query both partitions, merge results
+</code></pre>
+<p><strong>Pros</strong>: Writes only affect one partition
+<strong>Cons</strong>: Reads are expensive (query all partitions)</p>
+<p><strong>Use</strong>: MongoDB, Cassandra</p>
+<h4 id="term-based-partitioning-global-index"><a class="header" href="#term-based-partitioning-global-index">Term-based Partitioning (Global Index)</a></h4>
+<p>Index itself is partitioned separately from data.</p>
+<p><strong>Example</strong>:</p>
+<pre><code>Data partitions: by user_id
+Index partition 1: age 0-25
+Index partition 2: age 26-50
+Index partition 3: age 51+
+
+Query "age=25": Query index partition 1 only, then fetch data
+</code></pre>
+<p><strong>Pros</strong>: Reads are efficient
+<strong>Cons</strong>: Writes slower (update data partition and index partition), eventual consistency</p>
+<p><strong>Use</strong>: DynamoDB (Global Secondary Indexes), Riak Search</p>
+<h2 id="distributed-caching"><a class="header" href="#distributed-caching">Distributed Caching</a></h2>
+<h3 id="cache-invalidation-strategies"><a class="header" href="#cache-invalidation-strategies">Cache Invalidation Strategies</a></h3>
+<h4 id="1-time-to-live-ttl"><a class="header" href="#1-time-to-live-ttl">1. Time-to-Live (TTL)</a></h4>
+<ul>
+<li>Entry expires after fixed duration</li>
+<li><strong>Pros</strong>: Simple, prevents stale data</li>
+<li><strong>Cons</strong>: May serve stale data before TTL, cache miss on expiry</li>
+</ul>
+<h4 id="2-write-through"><a class="header" href="#2-write-through">2. Write-Through</a></h4>
+<ul>
+<li>Write to cache and database simultaneously</li>
+<li><strong>Pros</strong>: Cache always consistent with database</li>
+<li><strong>Cons</strong>: Higher write latency, wasted cache space for rarely-read data</li>
+</ul>
+<h4 id="3-write-behind-write-back"><a class="header" href="#3-write-behind-write-back">3. Write-Behind (Write-Back)</a></h4>
+<ul>
+<li>Write to cache, asynchronously write to database</li>
+<li><strong>Pros</strong>: Low write latency</li>
+<li><strong>Cons</strong>: Risk of data loss, complexity</li>
+</ul>
+<h4 id="4-cache-aside-lazy-loading"><a class="header" href="#4-cache-aside-lazy-loading">4. Cache-Aside (Lazy Loading)</a></h4>
+<pre><code>1. Check cache
+2. If miss: Read from database, write to cache, return data
+3. If hit: Return data from cache
+On write: Invalidate cache (or update)
+</code></pre>
+<ul>
+<li><strong>Pros</strong>: Only caches requested data</li>
+<li><strong>Cons</strong>: Cache miss penalty, potential for stale data</li>
+</ul>
+<h4 id="5-refresh-ahead"><a class="header" href="#5-refresh-ahead">5. Refresh-Ahead</a></h4>
+<ul>
+<li>Automatically refresh hot entries before expiration</li>
+<li><strong>Pros</strong>: Reduces cache misses for popular items</li>
+<li><strong>Cons</strong>: Difficult to predict what to refresh</li>
+</ul>
+<h3 id="cache-coherence"><a class="header" href="#cache-coherence">Cache Coherence</a></h3>
+<p><strong>Problem</strong>: Keeping multiple cache copies consistent</p>
+<h4 id="strategies-1"><a class="header" href="#strategies-1">Strategies</a></h4>
+<p><strong>1. Invalidation-based</strong>:</p>
+<ul>
+<li>When data changes, invalidate all cached copies</li>
+<li>Next access fetches fresh data</li>
+<li><strong>Use</strong>: Most distributed caches (Redis, Memcached)</li>
+</ul>
+<p><strong>2. Update-based</strong>:</p>
+<ul>
+<li>When data changes, push updates to all caches</li>
+<li><strong>Pros</strong>: No stale reads</li>
+<li><strong>Cons</strong>: More network traffic</li>
+</ul>
+<p><strong>3. Lease-based</strong>:</p>
+<ul>
+<li>Cache entries have leases (time-limited)</li>
+<li>Source can revoke leases to invalidate</li>
+<li><strong>Use</strong>: Some CDNs</li>
+</ul>
+<p><strong>4. Version-based</strong>:</p>
+<ul>
+<li>Include version with cached data</li>
+<li>Check version on read</li>
+<li><strong>Use</strong>: HTTP ETags</li>
+</ul>
+<h4 id="thundering-herd-problem"><a class="header" href="#thundering-herd-problem">Thundering Herd Problem</a></h4>
+<p><strong>Problem</strong>: Cache expires, many requests simultaneously query database</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Request coalescing</strong>: Only one request fetches, others wait</li>
+<li><strong>Probabilistic early expiration</strong>: Refresh before TTL with probability</li>
+<li><strong>Lock-based</strong>: First request acquires lock, others wait or use stale data</li>
+<li><strong>Sentinel values</strong>: Placeholder while refreshing</li>
+</ol>
+<h3 id="distributed-cache-architectures"><a class="header" href="#distributed-cache-architectures">Distributed Cache Architectures</a></h3>
+<h4 id="1-client-side-caching"><a class="header" href="#1-client-side-caching">1. Client-Side Caching</a></h4>
+<ul>
+<li>Each client has local cache</li>
+<li><strong>Pros</strong>: Lowest latency</li>
+<li><strong>Cons</strong>: Coherence challenges, memory usage</li>
+</ul>
+<h4 id="2-server-side-caching"><a class="header" href="#2-server-side-caching">2. Server-Side Caching</a></h4>
+<ul>
+<li>Cache layer between clients and database</li>
+<li><strong>Pros</strong>: Centralized control</li>
+<li><strong>Cons</strong>: Network hop</li>
+</ul>
+<h4 id="3-cdn-content-delivery-network"><a class="header" href="#3-cdn-content-delivery-network">3. CDN (Content Delivery Network)</a></h4>
+<ul>
+<li>Geographically distributed caches</li>
+<li><strong>Use</strong>: Static assets, media</li>
+<li><strong>Examples</strong>: Cloudflare, Akamai, CloudFront</li>
+</ul>
+<h3 id="cache-replacement-policies"><a class="header" href="#cache-replacement-policies">Cache Replacement Policies</a></h3>
+<ul>
+<li><strong>LRU (Least Recently Used)</strong>: Evict least recently accessed</li>
+<li><strong>LFU (Least Frequently Used)</strong>: Evict least frequently accessed</li>
+<li><strong>FIFO (First In First Out)</strong>: Evict oldest</li>
+<li><strong>Random</strong>: Evict random entry</li>
+<li><strong>ARC (Adaptive Replacement Cache)</strong>: Balances recency and frequency</li>
+</ul>
+<h2 id="real-world-distributed-systems"><a class="header" href="#real-world-distributed-systems">Real-World Distributed Systems</a></h2>
+<h3 id="google"><a class="header" href="#google">Google</a></h3>
+<h4 id="bigtable"><a class="header" href="#bigtable">Bigtable</a></h4>
+<ul>
+<li><strong>Type</strong>: Wide-column store (column-family database)</li>
+<li><strong>Architecture</strong>:
+<ul>
+<li>Data stored in tablets (row ranges)</li>
+<li>Tablet servers serve read/write requests</li>
+<li>Master assigns tablets to servers</li>
+<li>GFS (Google File System) for storage</li>
+<li>Chubby for coordination and master election</li>
+</ul>
+</li>
+<li><strong>Data model</strong>: (row key, column key, timestamp) → value</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Sorted by row key</li>
+<li>Strong consistency for single-row transactions</li>
+<li>Atomic row operations</li>
+<li>Bloom filters for efficient lookups</li>
+</ul>
+</li>
+<li><strong>Use cases</strong>: Google Search, Maps, Gmail</li>
+<li><strong>Inspired</strong>: HBase, Cassandra, Hypertable</li>
+</ul>
+<h4 id="spanner"><a class="header" href="#spanner">Spanner</a></h4>
+<ul>
+<li><strong>Type</strong>: Globally distributed SQL database</li>
+<li><strong>Architecture</strong>:
+<ul>
+<li>Paxos groups for replication</li>
+<li>TrueTime API for global consistency</li>
+<li>Two-phase commit for distributed transactions</li>
+</ul>
+</li>
+<li><strong>TrueTime</strong>:
+<ul>
+<li>GPS and atomic clocks in each datacenter</li>
+<li>Returns time interval with guaranteed bounds</li>
+<li>Enables serializable transactions globally</li>
+</ul>
+</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Linearizability across data centers</li>
+<li>ACID transactions</li>
+<li>SQL queries</li>
+<li>Schema changes without downtime</li>
+</ul>
+</li>
+<li><strong>Trade-offs</strong>:
+<ul>
+<li>Write latency (cross-datacenter commits)</li>
+<li>Requires specialized hardware (TrueTime)</li>
+</ul>
+</li>
+<li><strong>Use cases</strong>: Google AdWords, Play</li>
+<li><strong>Inspired</strong>: CockroachDB, YugabyteDB</li>
+</ul>
+<h4 id="other-google-systems"><a class="header" href="#other-google-systems">Other Google Systems</a></h4>
+<ul>
+<li><strong>GFS/Colossus</strong>: Distributed file system</li>
+<li><strong>MapReduce/Dataflow</strong>: Distributed computation</li>
+<li><strong>Chubby</strong>: Distributed lock service</li>
+<li><strong>Megastore</strong>: Semi-relational database (predecessor to Spanner)</li>
+</ul>
+<h3 id="amazon"><a class="header" href="#amazon">Amazon</a></h3>
+<h4 id="dynamodb"><a class="header" href="#dynamodb">DynamoDB</a></h4>
+<ul>
+<li><strong>Type</strong>: Key-value and document database</li>
+<li><strong>Architecture</strong>:
+<ul>
+<li>Consistent hashing for partitioning</li>
+<li>Leaderless replication (Dynamo-style)</li>
+<li>Multi-datacenter replication</li>
+</ul>
+</li>
+<li><strong>Consistency models</strong>:
+<ul>
+<li>Eventually consistent reads (default)</li>
+<li>Strongly consistent reads (optional)</li>
+<li>Transactions (ACID for multiple items)</li>
+</ul>
+</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Automatic partitioning and rebalancing</li>
+<li>Global tables (multi-region)</li>
+<li>Streams (change data capture)</li>
+<li>On-demand and provisioned capacity</li>
+</ul>
+</li>
+<li><strong>Quorums</strong>: W=2, R=2, N=3 (configurable via read consistency)</li>
+<li><strong>Conflict resolution</strong>: Last-write-wins (LWW) by default</li>
+<li><strong>Use cases</strong>: Amazon.com, Alexa, gaming leaderboards</li>
+<li><strong>Inspired</strong>: Cassandra, Riak, Voldemort</li>
+</ul>
+<h4 id="other-amazon-systems"><a class="header" href="#other-amazon-systems">Other Amazon Systems</a></h4>
+<ul>
+<li><strong>S3</strong>: Object storage (eventual consistency → strong consistency as of 2020)</li>
+<li><strong>Aurora</strong>: MySQL/PostgreSQL-compatible relational database
+<ul>
+<li>Replicates storage across 3 AZs (6 copies)</li>
+<li>Quorum: W=4, R=3, N=6</li>
+</ul>
+</li>
+<li><strong>EBS</strong>: Block storage with replication</li>
+</ul>
+<h3 id="facebook-meta"><a class="header" href="#facebook-meta">Facebook (Meta)</a></h3>
+<h4 id="cassandra"><a class="header" href="#cassandra">Cassandra</a></h4>
+<ul>
+<li><strong>Origin</strong>: Developed at Facebook, open-sourced 2008</li>
+<li><strong>Type</strong>: Wide-column store</li>
+<li><strong>Architecture</strong>:
+<ul>
+<li>Dynamo-style partitioning (consistent hashing)</li>
+<li>Bigtable-style data model</li>
+<li>Leaderless replication</li>
+<li>Gossip protocol for cluster membership</li>
+</ul>
+</li>
+<li><strong>Consistency levels</strong>: ONE, QUORUM, ALL (per-query tunable)</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Linear scalability</li>
+<li>Multi-datacenter replication</li>
+<li>Lightweight transactions (Paxos-based)</li>
+<li>CQL (Cassandra Query Language)</li>
+</ul>
+</li>
+<li><strong>Write path</strong>: MemTable → SSTable</li>
+<li><strong>Read path</strong>: Bloom filters → SSTables → compaction</li>
+<li><strong>Use cases</strong>: Originally for Facebook inbox search, now widely used (Netflix, Apple, Instagram)</li>
+</ul>
+<h4 id="tao-the-associations-and-objects"><a class="header" href="#tao-the-associations-and-objects">TAO (The Associations and Objects)</a></h4>
+<ul>
+<li><strong>Type</strong>: Distributed data store for social graph</li>
+<li><strong>Architecture</strong>:
+<ul>
+<li>Graph database on top of MySQL</li>
+<li>Read-optimized, heavily cached</li>
+<li>Write-through cache</li>
+</ul>
+</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Optimized for social graph queries (friends, likes, comments)</li>
+<li>Eventually consistent reads</li>
+<li>Asynchronous replication across datacenters</li>
+</ul>
+</li>
+<li><strong>Scale</strong>: Billions of nodes, trillions of edges</li>
+</ul>
+<h4 id="other-facebook-systems"><a class="header" href="#other-facebook-systems">Other Facebook Systems</a></h4>
+<ul>
+<li><strong>Haystack</strong>: Photo storage</li>
+<li><strong>Memcache</strong>: Massive distributed cache layer</li>
+<li><strong>RocksDB</strong>: Embedded key-value store (based on LevelDB)</li>
+<li><strong>Presto</strong>: Distributed SQL query engine</li>
+</ul>
+<h3 id="other-notable-systems"><a class="header" href="#other-notable-systems">Other Notable Systems</a></h3>
+<h4 id="apache-kafka-linkedin"><a class="header" href="#apache-kafka-linkedin">Apache Kafka (LinkedIn)</a></h4>
+<ul>
+<li><strong>Type</strong>: Distributed event streaming platform</li>
+<li><strong>Architecture</strong>:
+<ul>
+<li>Topics partitioned across brokers</li>
+<li>ZooKeeper for coordination (moving to KRaft)</li>
+<li>Replication with leader-follower</li>
+</ul>
+</li>
+<li><strong>Features</strong>:
+<ul>
+<li>High throughput (millions msgs/sec)</li>
+<li>Persistent log</li>
+<li>At-least-once, exactly-once semantics</li>
+<li>Consumer groups for parallel processing</li>
+</ul>
+</li>
+</ul>
+<h4 id="redis"><a class="header" href="#redis">Redis</a></h4>
+<ul>
+<li><strong>Type</strong>: In-memory data structure store</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Replication (leader-follower)</li>
+<li>Sentinel for high availability</li>
+<li>Cluster mode for partitioning</li>
+<li>Persistence (RDB snapshots, AOF log)</li>
+<li>CRDTs support</li>
+</ul>
+</li>
+<li><strong>Use cases</strong>: Caching, session store, leaderboards, pub/sub</li>
+</ul>
+<h4 id="elasticsearch"><a class="header" href="#elasticsearch">Elasticsearch</a></h4>
+<ul>
+<li><strong>Type</strong>: Distributed search and analytics</li>
+<li><strong>Architecture</strong>:
+<ul>
+<li>Built on Lucene</li>
+<li>Sharding and replication</li>
+<li>Master-eligible nodes elect leader</li>
+</ul>
+</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Full-text search</li>
+<li>Real-time indexing</li>
+<li>Aggregations for analytics</li>
+<li>RESTful API</li>
+</ul>
+</li>
+</ul>
+<h2 id="patterns-and-anti-patterns"><a class="header" href="#patterns-and-anti-patterns">Patterns and Anti-Patterns</a></h2>
+<h3 id="distributed-system-patterns"><a class="header" href="#distributed-system-patterns">Distributed System Patterns</a></h3>
+<h4 id="1-circuit-breaker"><a class="header" href="#1-circuit-breaker">1. Circuit Breaker</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Prevent cascading failures</li>
+<li><strong>How</strong>: Track failure rate, open circuit if threshold exceeded</li>
+<li><strong>States</strong>: Closed (normal), Open (failing), Half-Open (testing)</li>
+<li><strong>Example</strong>: Hystrix, Resilience4j</li>
+</ul>
+<h4 id="2-bulkhead"><a class="header" href="#2-bulkhead">2. Bulkhead</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Isolate resources to limit blast radius</li>
+<li><strong>How</strong>: Separate thread pools/connection pools per service</li>
+<li><strong>Example</strong>: 100 threads total → 30 for service A, 30 for B, 40 for C</li>
+</ul>
+<h4 id="3-retry-with-exponential-backoff"><a class="header" href="#3-retry-with-exponential-backoff">3. Retry with Exponential Backoff</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Handle transient failures</li>
+<li><strong>How</strong>: Retry with increasing delays (1s, 2s, 4s, 8s)</li>
+<li><strong>Enhancement</strong>: Add jitter to prevent thundering herd</li>
+</ul>
+<h4 id="4-idempotency"><a class="header" href="#4-idempotency">4. Idempotency</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Safe retry of operations</li>
+<li><strong>How</strong>: Same request produces same result, no side effects on retry</li>
+<li><strong>Implementation</strong>: Idempotency keys, deterministic UUIDs</li>
+</ul>
+<h4 id="5-timeout"><a class="header" href="#5-timeout">5. Timeout</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Prevent indefinite waiting</li>
+<li><strong>How</strong>: Set maximum wait time for operations</li>
+<li><strong>Challenge</strong>: Choosing right timeout value</li>
+</ul>
+<h4 id="6-rate-limiting--throttling"><a class="header" href="#6-rate-limiting--throttling">6. Rate Limiting / Throttling</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Protect system from overload</li>
+<li><strong>Algorithms</strong>: Token bucket, leaky bucket, fixed/sliding window</li>
+<li><strong>Example</strong>: Max 100 requests/second per user</li>
+</ul>
+<h4 id="7-load-shedding"><a class="header" href="#7-load-shedding">7. Load Shedding</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Gracefully degrade under extreme load</li>
+<li><strong>How</strong>: Reject low-priority requests, serve high-priority only</li>
+<li><strong>Example</strong>: Serve logged-in users, reject anonymous</li>
+</ul>
+<h4 id="8-health-checks"><a class="header" href="#8-health-checks">8. Health Checks</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Detect unhealthy instances</li>
+<li><strong>Types</strong>: Liveness (is it running?), Readiness (can it serve traffic?)</li>
+<li><strong>Implementation</strong>: HTTP endpoint (/health), regular probing</li>
+</ul>
+<h4 id="9-service-discovery"><a class="header" href="#9-service-discovery">9. Service Discovery</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Dynamic service location</li>
+<li><strong>Patterns</strong>: Client-side (Eureka), Server-side (Consul), DNS-based</li>
+<li><strong>Example</strong>: Service registers with Consul, client queries Consul</li>
+</ul>
+<h4 id="10-api-gateway"><a class="header" href="#10-api-gateway">10. API Gateway</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Single entry point for clients</li>
+<li><strong>Functions</strong>: Routing, authentication, rate limiting, load balancing</li>
+<li><strong>Example</strong>: Kong, Ambassador, AWS API Gateway</li>
+</ul>
+<h4 id="11-sidecar-pattern"><a class="header" href="#11-sidecar-pattern">11. Sidecar Pattern</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Augment service with additional capabilities</li>
+<li><strong>How</strong>: Deploy helper container alongside main container</li>
+<li><strong>Use cases</strong>: Logging, monitoring, service mesh proxy (Envoy)</li>
+</ul>
+<h4 id="12-strangler-fig-pattern"><a class="header" href="#12-strangler-fig-pattern">12. Strangler Fig Pattern</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Incrementally migrate legacy system</li>
+<li><strong>How</strong>: Route requests to new system, fall back to legacy</li>
+<li><strong>Process</strong>: Gradually replace pieces until legacy retired</li>
+</ul>
+<h3 id="anti-patterns"><a class="header" href="#anti-patterns">Anti-Patterns</a></h3>
+<h4 id="1-distributed-monolith"><a class="header" href="#1-distributed-monolith">1. Distributed Monolith</a></h4>
+<ul>
+<li><strong>Problem</strong>: Microservices with tight coupling</li>
+<li><strong>Symptoms</strong>: Must deploy all services together, shared database</li>
+<li><strong>Solution</strong>: Proper service boundaries, loose coupling</li>
+</ul>
+<h4 id="2-chatty-services"><a class="header" href="#2-chatty-services">2. Chatty Services</a></h4>
+<ul>
+<li><strong>Problem</strong>: Excessive inter-service communication</li>
+<li><strong>Symptoms</strong>: N+1 queries, high latency, network saturation</li>
+<li><strong>Solution</strong>: Batch requests, caching, coarser-grained APIs</li>
+</ul>
+<h4 id="3-mega-service"><a class="header" href="#3-mega-service">3. Mega Service</a></h4>
+<ul>
+<li><strong>Problem</strong>: Service doing too much</li>
+<li><strong>Symptoms</strong>: Hard to scale, deploy, understand</li>
+<li><strong>Solution</strong>: Split into smaller services with clear boundaries</li>
+</ul>
+<h4 id="4-shared-database"><a class="header" href="#4-shared-database">4. Shared Database</a></h4>
+<ul>
+<li><strong>Problem</strong>: Multiple services accessing same database</li>
+<li><strong>Symptoms</strong>: Tight coupling, hard to evolve schema</li>
+<li><strong>Solution</strong>: Database per service, async replication</li>
+</ul>
+<h4 id="5-ignoring-network-failures"><a class="header" href="#5-ignoring-network-failures">5. Ignoring Network Failures</a></h4>
+<ul>
+<li><strong>Problem</strong>: Not handling network issues</li>
+<li><strong>Symptoms</strong>: Hangs, cascading failures, poor UX</li>
+<li><strong>Solution</strong>: Timeouts, retries, circuit breakers, fallbacks</li>
+</ul>
+<h4 id="6-synchronous-coupling"><a class="header" href="#6-synchronous-coupling">6. Synchronous Coupling</a></h4>
+<ul>
+<li><strong>Problem</strong>: Over-reliance on synchronous calls</li>
+<li><strong>Symptoms</strong>: Tight coupling, cascading failures, high latency</li>
+<li><strong>Solution</strong>: Async messaging, event-driven architecture</li>
+</ul>
+<h4 id="7-missing-observability"><a class="header" href="#7-missing-observability">7. Missing Observability</a></h4>
+<ul>
+<li><strong>Problem</strong>: Can't understand system behavior</li>
+<li><strong>Symptoms</strong>: Hard to debug, slow to detect issues</li>
+<li><strong>Solution</strong>: Logging, metrics, distributed tracing</li>
+</ul>
+<h4 id="8-no-idempotency"><a class="header" href="#8-no-idempotency">8. No Idempotency</a></h4>
+<ul>
+<li><strong>Problem</strong>: Retries cause duplicate side effects</li>
+<li><strong>Symptoms</strong>: Double charges, duplicate records</li>
+<li><strong>Solution</strong>: Idempotency keys, idempotent operations</li>
+</ul>
+<h4 id="9-single-point-of-failure"><a class="header" href="#9-single-point-of-failure">9. Single Point of Failure</a></h4>
+<ul>
+<li><strong>Problem</strong>: One component failure brings down entire system</li>
+<li><strong>Symptoms</strong>: System outages from single failure</li>
+<li><strong>Solution</strong>: Redundancy, replication, failover</li>
+</ul>
+<h4 id="10-ignoring-cap-theorem"><a class="header" href="#10-ignoring-cap-theorem">10. Ignoring CAP Theorem</a></h4>
+<ul>
+<li><strong>Problem</strong>: Expecting strong consistency AND high availability during partitions</li>
+<li><strong>Symptoms</strong>: Surprised by eventual consistency, data loss</li>
+<li><strong>Solution</strong>: Understand trade-offs, choose appropriate model</li>
+</ul>
+<h4 id="11-premature-optimization"><a class="header" href="#11-premature-optimization">11. Premature Optimization</a></h4>
+<ul>
+<li><strong>Problem</strong>: Over-engineering for scale not yet needed</li>
+<li><strong>Symptoms</strong>: Complex architecture, high costs, slow development</li>
+<li><strong>Solution</strong>: Start simple, scale when needed</li>
+</ul>
+<h4 id="12-death-by-a-thousand-microservices"><a class="header" href="#12-death-by-a-thousand-microservices">12. Death by a Thousand Microservices</a></h4>
+<ul>
+<li><strong>Problem</strong>: Too many small services</li>
+<li><strong>Symptoms</strong>: High operational overhead, complex deployments, hard to trace</li>
+<li><strong>Solution</strong>: Right-size services, group related functionality</li>
+</ul>
+<h2 id="best-practices-1"><a class="header" href="#best-practices-1">Best Practices</a></h2>
+<ol>
+<li><strong>Design for Failure</strong>: Assume everything will fail</li>
+<li><strong>Loose Coupling</strong>: Services should be independent</li>
+<li><strong>Idempotency</strong>: Make operations safe to retry</li>
+<li><strong>Asynchronous Communication</strong>: Use message queues when possible</li>
+<li><strong>Graceful Degradation</strong>: Partial functionality over complete failure</li>
+<li><strong>Monitoring and Alerting</strong>: Comprehensive observability</li>
+<li><strong>Automation</strong>: Auto-scaling, self-healing systems</li>
+<li><strong>Testing</strong>: Chaos engineering, fault injection</li>
+<li><strong>Documentation</strong>: Clear service contracts and APIs</li>
+<li><strong>Security</strong>: Authentication, authorization, encryption</li>
+<li><strong>Backward Compatibility</strong>: Versioning, graceful upgrades</li>
+<li><strong>Distributed Tracing</strong>: Track requests across services</li>
+<li><strong>Bulkheads</strong>: Isolate failures</li>
+<li><strong>Rate Limiting</strong>: Protect from overload</li>
+<li><strong>Caching</strong>: Reduce load, improve performance</li>
+</ol>
+<h2 id="observability"><a class="header" href="#observability">Observability</a></h2>
+<h3 id="the-three-pillars"><a class="header" href="#the-three-pillars">The Three Pillars</a></h3>
+<h4 id="1-metrics"><a class="header" href="#1-metrics">1. Metrics</a></h4>
+<ul>
+<li><strong>Definition</strong>: Numeric measurements over time</li>
+<li><strong>Examples</strong>: Request rate, error rate, latency, CPU usage</li>
+<li><strong>Tools</strong>: Prometheus, Grafana, Datadog, CloudWatch</li>
+<li><strong>Patterns</strong>: RED (Rate, Errors, Duration), USE (Utilization, Saturation, Errors)</li>
+</ul>
+<h4 id="2-logs"><a class="header" href="#2-logs">2. Logs</a></h4>
+<ul>
+<li><strong>Definition</strong>: Discrete event records</li>
+<li><strong>Structure</strong>: Structured (JSON) vs unstructured (text)</li>
+<li><strong>Tools</strong>: ELK Stack (Elasticsearch, Logstash, Kibana), Splunk, Loki</li>
+<li><strong>Best practices</strong>: Include correlation IDs, timestamps, context</li>
+</ul>
+<h4 id="3-traces"><a class="header" href="#3-traces">3. Traces</a></h4>
+<ul>
+<li><strong>Definition</strong>: End-to-end request path through system</li>
+<li><strong>Components</strong>: Spans (single operation), traces (collection of spans)</li>
+<li><strong>Tools</strong>: Jaeger, Zipkin, Datadog APM, AWS X-Ray</li>
+<li><strong>Context propagation</strong>: Trace ID passed in headers</li>
+</ul>
+<h3 id="key-metrics"><a class="header" href="#key-metrics">Key Metrics</a></h3>
+<ul>
+<li><strong>Latency</strong>: Time to process requests (p50, p95, p99)</li>
+<li><strong>Throughput</strong>: Requests per second</li>
+<li><strong>Error Rate</strong>: Failed requests percentage</li>
+<li><strong>Saturation</strong>: Resource utilization (CPU, memory, disk, network)</li>
+<li><strong>Availability</strong>: Uptime percentage (SLA)</li>
+</ul>
+<h2 id="further-reading"><a class="header" href="#further-reading">Further Reading</a></h2>
+<h3 id="books"><a class="header" href="#books">Books</a></h3>
+<ul>
+<li>"Designing Data-Intensive Applications" by Martin Kleppmann</li>
+<li>"Distributed Systems" by Maarten van Steen and Andrew S. Tanenbaum</li>
+<li>"Building Microservices" by Sam Newman</li>
+<li>"Release It!" by Michael Nygard</li>
+<li>"Site Reliability Engineering" by Google</li>
+</ul>
+<h3 id="papers"><a class="header" href="#papers">Papers</a></h3>
+<ul>
+<li><strong>Consensus</strong>: "Paxos Made Simple" (Lamport), "In Search of an Understandable Consensus Algorithm" (Raft)</li>
+<li><strong>Storage</strong>: "Bigtable: A Distributed Storage System for Structured Data" (Google), "Dynamo: Amazon's Highly Available Key-value Store" (Amazon)</li>
+<li><strong>Databases</strong>: "Spanner: Google's Globally-Distributed Database", "TAO: Facebook's Distributed Data Store for the Social Graph"</li>
+<li><strong>Theory</strong>: "CAP Twelve Years Later: How the Rules Have Changed" (Brewer), "Impossibility of Distributed Consensus with One Faulty Process" (FLP)</li>
+<li><strong>Time</strong>: "Time, Clocks, and the Ordering of Events" (Lamport)</li>
+</ul>
+<h3 id="online-resources"><a class="header" href="#online-resources">Online Resources</a></h3>
+<ul>
+<li>AWS Architecture Blog</li>
+<li>Google Cloud Architecture Center</li>
+<li>Martin Fowler's blog</li>
+<li>The Morning Paper (paper summaries)</li>
+<li>Papers We Love</li>
+</ul>
+<h2 id="common-trade-offs"><a class="header" href="#common-trade-offs">Common Trade-offs</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Aspect</th><th>Trade-off</th></tr></thead><tbody>
+<tr><td>Consistency vs Availability</td><td>Stronger consistency reduces availability during partitions</td></tr>
+<tr><td>Latency vs Consistency</td><td>Lower latency may sacrifice consistency</td></tr>
+<tr><td>Complexity vs Performance</td><td>More complex systems may be more performant but harder to operate</td></tr>
+<tr><td>Cost vs Reliability</td><td>Higher reliability requires more resources (replication, redundancy)</td></tr>
+<tr><td>Scalability vs Simplicity</td><td>Horizontal scaling increases complexity</td></tr>
+<tr><td>Strong Consistency vs Throughput</td><td>Coordination for consistency reduces throughput</td></tr>
+<tr><td>Normalization vs Denormalization</td><td>Normalized reduces storage, denormalized improves read performance</td></tr>
+<tr><td>Sync vs Async</td><td>Synchronous simpler but couples services, async more complex but decouples</td></tr>
+<tr><td>Monolith vs Microservices</td><td>Monolith simpler initially, microservices better for scale and teams</td></tr>
+</tbody></table>
+</div>
+<hr />
+<p><em>Note: Distributed systems require careful consideration of requirements, constraints, and trade-offs. There is no one-size-fits-all solution. Choose the right tool and pattern for your specific use case.</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../system_design/message_queues.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../system_design/load_balancing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../system_design/message_queues.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../system_design/load_balancing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

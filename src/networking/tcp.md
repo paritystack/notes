@@ -2451,6 +2451,437 @@ strace -e trace=network nc example.com 80  # Trace network calls
 strace -p <pid> -e trace=network           # Attach to process
 ```
 
+## QUIC: Modern Alternative to TCP
+
+QUIC (Quick UDP Internet Connections) is a modern transport protocol designed to address TCP's limitations.
+
+### Why QUIC?
+
+**TCP Limitations:**
+```
+1. Head-of-line blocking
+   - One lost packet blocks entire stream
+   - All data waits for retransmission
+
+2. Slow connection establishment
+   - TCP handshake: 1 RTT
+   - TLS handshake: 1-2 RTTs
+   - Total: 2-3 RTTs before sending data
+
+3. Ossification
+   - Middleboxes break TCP extensions
+   - Hard to deploy improvements
+
+4. No built-in encryption
+   - TLS is separate layer
+   - More complexity
+```
+
+### QUIC Advantages
+
+**Key Features:**
+```
+1. Built on UDP
+   - Avoids middlebox interference
+   - Userspace implementation (faster updates)
+
+2. Multiplexed streams
+   - Multiple streams per connection
+   - No head-of-line blocking between streams
+
+3. 0-RTT connection establishment
+   - Resume previous connections instantly
+   - Send data in first packet
+
+4. Built-in encryption (TLS 1.3)
+   - Always encrypted
+   - No plaintext handshake
+
+5. Connection migration
+   - Survives IP address changes
+   - Mobile network switching
+
+6. Improved congestion control
+   - More accurate RTT measurement
+   - Better loss detection
+```
+
+### QUIC vs TCP Comparison
+
+| Feature | TCP | QUIC |
+|---------|-----|------|
+| Transport | Kernel space | Userspace |
+| Connection setup | 1-3 RTTs | 0-1 RTT |
+| Head-of-line blocking | Yes | No (per stream) |
+| Encryption | Optional (TLS) | Built-in (TLS 1.3) |
+| Stream multiplexing | No (HTTP/2 workaround) | Native |
+| Connection migration | No | Yes |
+| Ossification resistance | Low | High |
+| CPU overhead | Lower | Higher |
+| Deployment | Universal | Growing |
+
+### QUIC Protocol Structure
+
+```
+QUIC Stack:
+┌─────────────────────────┐
+│   HTTP/3 Application    │
+├─────────────────────────┤
+│   QUIC Transport        │
+│   - Streams             │
+│   - Flow control        │
+│   - Congestion control  │
+├─────────────────────────┤
+│   TLS 1.3 (built-in)    │
+├─────────────────────────┤
+│   UDP                   │
+└─────────────────────────┘
+
+vs
+
+Traditional Stack:
+┌─────────────────────────┐
+│   HTTP/1.1 or HTTP/2    │
+├─────────────────────────┤
+│   TLS 1.2/1.3          │
+├─────────────────────────┤
+│   TCP                   │
+├─────────────────────────┤
+│   IP                    │
+└─────────────────────────┘
+```
+
+### Connection Establishment
+
+**TCP + TLS (2-3 RTTs):**
+```
+Client                          Server
+  |                               |
+  | TCP SYN ------------------>   |
+  | <------------------ SYN-ACK   |
+  | ACK ---------------------->   |  [1 RTT]
+  |                               |
+  | ClientHello -------------->   |
+  | <-------- ServerHello, etc    |
+  | Finished ----------------->   |  [1-2 RTTs]
+  |                               |
+  | HTTP Request ------------->   |
+  | <------------ HTTP Response   |
+```
+
+**QUIC (0-1 RTT):**
+```
+Client                          Server
+  |                               |
+  | Initial (ClientHello) ---->   |
+  | <-- Initial/Handshake/1-RTT  |  [1 RTT for new connection]
+  | Handshake ---------------->   |
+  |                               |
+  | HTTP Request ------------->   |
+  | <------------ HTTP Response   |
+
+With 0-RTT resumption:
+  |                               |
+  | Initial + 0-RTT Data ------>  |  [0 RTT!]
+  | <-- Initial/Handshake/1-RTT  |
+```
+
+### Stream Multiplexing
+
+**TCP (with HTTP/2) - Head-of-line blocking:**
+```
+TCP Stream: [Stream1][Stream2][Stream3]
+                ↓
+If packet containing Stream2 data is lost:
+    Stream1 data blocked ✗
+    Stream2 data blocked ✗
+    Stream3 data blocked ✗
+All streams wait for retransmission!
+```
+
+**QUIC - No head-of-line blocking:**
+```
+QUIC Connection:
+    Stream 1: [Data][Data][Data] ✓
+    Stream 2: [Data][LOST][Data] ✗
+    Stream 3: [Data][Data][Data] ✓
+
+If packet containing Stream2 data is lost:
+    Stream1 continues ✓
+    Stream2 waits ✗
+    Stream3 continues ✓
+Only affected stream blocks!
+```
+
+### QUIC Implementation Example
+
+**Python with aioquic:**
+```python
+import asyncio
+from aioquic.asyncio import connect
+from aioquic.quic.configuration import QuicConfiguration
+
+async def quic_client():
+    """
+    QUIC client example using aioquic
+    """
+    # Configure QUIC
+    configuration = QuicConfiguration(
+        alpn_protocols=["h3"],  # HTTP/3
+        is_client=True,
+    )
+
+    # Connect to server (0-RTT if resuming)
+    async with connect(
+        "quic.example.com",
+        443,
+        configuration=configuration,
+    ) as client:
+        # Send HTTP/3 request
+        reader, writer = await client.create_stream()
+
+        request = b"GET / HTTP/3\r\nHost: example.com\r\n\r\n"
+        writer.write(request)
+        await writer.drain()
+
+        # Read response
+        response = await reader.read()
+        print(f"Received: {len(response)} bytes")
+
+# Run
+asyncio.run(quic_client())
+```
+
+**Node.js with node-quic:**
+```javascript
+const { createQuicSocket } = require('net');
+
+// Create QUIC socket
+const socket = createQuicSocket({ endpoint: { port: 0 } });
+
+// Connect to server
+const client = socket.connect({
+  address: 'quic.example.com',
+  port: 443,
+  alpn: 'h3',  // HTTP/3
+});
+
+// Handle stream
+client.on('stream', (stream) => {
+  stream.on('data', (data) => {
+    console.log(`Received: ${data.length} bytes`);
+  });
+});
+
+// Create stream and send request
+const stream = client.openStream();
+stream.write('GET / HTTP/3\r\nHost: example.com\r\n\r\n');
+```
+
+### Connection Migration Example
+
+```python
+import asyncio
+from aioquic.asyncio import connect
+from aioquic.quic.configuration import QuicConfiguration
+
+async def demonstrate_migration():
+    """
+    QUIC survives network changes
+    """
+    configuration = QuicConfiguration(is_client=True)
+
+    async with connect(
+        "example.com",
+        443,
+        configuration=configuration,
+    ) as client:
+        # Create stream
+        reader, writer = await client.create_stream()
+
+        # Send data
+        writer.write(b"Request 1")
+        await writer.drain()
+
+        # Network changes (WiFi -> 4G)
+        # Client IP address changes
+        # But connection continues!
+
+        # QUIC automatically migrates using connection ID
+        # No interruption to application
+
+        # Continue using same stream
+        writer.write(b"Request 2")
+        await writer.drain()
+
+        # Connection still works!
+```
+
+### When to Use QUIC vs TCP
+
+**Use QUIC when:**
+- Building web applications (HTTP/3)
+- Need fast connection establishment
+- Multiple parallel streams required
+- Users on mobile networks (connection migration)
+- Security is critical (built-in encryption)
+- Latency is primary concern
+
+**Use TCP when:**
+- Maximum compatibility required
+- IoT devices with limited resources
+- Protocols that don't need multiplexing
+- Environments that block UDP
+- Lower CPU overhead required
+- Existing TCP-optimized infrastructure
+
+### QUIC Deployment Status
+
+```bash
+# Check if server supports QUIC/HTTP/3
+curl -I --http3 https://www.google.com
+
+# Major deployments:
+# - Google (all services)
+# - Facebook/Meta
+# - Cloudflare
+# - Fastly
+# - LiteSpeed servers
+
+# Browser support:
+# - Chrome/Edge: Full support
+# - Firefox: Full support
+# - Safari: Full support (iOS 14.5+)
+
+# Check QUIC support in browser:
+# chrome://flags/#enable-quic
+```
+
+### QUIC Performance Testing
+
+```bash
+# Install quiche (Cloudflare's QUIC implementation)
+git clone --recursive https://github.com/cloudflare/quiche
+cd quiche
+
+# Build HTTP/3 client
+cargo build --release --examples
+
+# Test QUIC connection
+./target/release/examples/http3-client https://quic.tech:8443/
+
+# Compare TCP vs QUIC
+time curl https://example.com  # TCP
+time curl --http3 https://example.com  # QUIC
+
+# Use h2load for benchmarking
+h2load -n 1000 -c 10 https://example.com  # HTTP/2 over TCP
+h2load -n 1000 -c 10 --h3 https://example.com  # HTTP/3 over QUIC
+```
+
+### QUIC Congestion Control
+
+QUIC uses pluggable congestion control:
+
+```
+Available algorithms:
+1. CUBIC (default, similar to TCP)
+2. BBR (Bottleneck Bandwidth and RTT)
+3. Reno (classic TCP algorithm)
+4. NewReno
+
+Advantages over TCP:
+- More accurate RTT measurement
+- Better loss detection
+- Faster convergence
+- ACK frequency optimization
+```
+
+```python
+from aioquic.quic.configuration import QuicConfiguration
+
+config = QuicConfiguration()
+
+# Use BBR congestion control
+config.congestion_control_algorithm = "bbr"
+
+# Or CUBIC
+config.congestion_control_algorithm = "cubic"
+```
+
+### QUIC Security
+
+**Built-in Security Features:**
+```
+1. Always encrypted (TLS 1.3)
+   - No plaintext handshake
+   - Forward secrecy by default
+
+2. Connection ID
+   - Prevents address spoofing
+   - Enables connection migration
+
+3. Packet protection
+   - Header protection
+   - Payload encryption
+
+4. Version negotiation
+   - Protected against downgrade attacks
+
+5. Retry packets
+   - DDoS mitigation
+   - Similar to SYN cookies
+```
+
+### QUIC Limitations
+
+**Current Challenges:**
+```
+1. UDP blocking
+   - Some networks block UDP
+   - Fallback to TCP still needed
+
+2. CPU overhead
+   - Userspace implementation
+   - More processing required
+   - Battery impact on mobile
+
+3. Middlebox issues
+   - Some firewalls drop QUIC
+   - NAT traversal complexity
+
+4. Maturity
+   - Newer protocol
+   - Fewer debugging tools
+   - Less operational experience
+
+5. OS support
+   - Not kernel-integrated (yet)
+   - Inconsistent across platforms
+```
+
+### Future of TCP and QUIC
+
+```
+TCP will remain important for:
+- Legacy systems and protocols
+- Environments blocking UDP
+- Low-overhead requirements
+- IoT and embedded systems
+
+QUIC adoption growing for:
+- Web browsing (HTTP/3)
+- Video streaming
+- Real-time communications
+- Mobile applications
+- API services
+
+Convergence:
+- TCP improvements inspired by QUIC
+- QUIC learning from TCP experience
+- Coexistence rather than replacement
+```
+
 ## References
 
 - [RFC 793](https://tools.ietf.org/html/rfc793) - TCP Specification
@@ -2458,3 +2889,5 @@ strace -p <pid> -e trace=network           # Attach to process
 - [RFC 2018](https://tools.ietf.org/html/rfc2018) - TCP Selective Acknowledgment
 - [RFC 7413](https://tools.ietf.org/html/rfc7413) - TCP Fast Open
 - [RFC 8684](https://tools.ietf.org/html/rfc8684) - Multipath TCP
+- [RFC 9000](https://tools.ietf.org/html/rfc9000) - QUIC: A UDP-Based Multiplexed and Secure Transport
+- [RFC 9114](https://tools.ietf.org/html/rfc9114) - HTTP/3

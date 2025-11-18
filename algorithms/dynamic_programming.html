@@ -179,134 +179,1031 @@
                     <main>
                         <h1 id="dynamic-programming"><a class="header" href="#dynamic-programming">Dynamic Programming</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>Dynamic Programming (DP) solves complex problems by breaking them into simpler subproblems, solving each once, and storing results to avoid recomputation. Essential for optimization problems.</p>
-<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
-<p><strong>Optimal Substructure</strong>: Optimal solution built from optimal solutions of subproblems</p>
-<p><strong>Overlapping Subproblems</strong>: Same subproblem computed multiple times</p>
-<h2 id="approaches"><a class="header" href="#approaches">Approaches</a></h2>
-<h3 id="memoization-top-down"><a class="header" href="#memoization-top-down">Memoization (Top-Down)</a></h3>
-<pre><code class="language-python">def fib(n, memo={}):
+<p>Dynamic Programming (DP) is a powerful algorithmic paradigm that solves complex optimization problems by breaking them down into simpler overlapping subproblems. Instead of solving the same subproblem multiple times, DP stores the results of subproblems and reuses them, dramatically improving efficiency from exponential to polynomial time complexity.</p>
+<p>DP is essential for solving optimization problems where you need to find the best solution among many possibilities, counting problems where you need to count all possible ways to do something, and decision-making problems with multiple stages.</p>
+<h2 id="core-principles"><a class="header" href="#core-principles">Core Principles</a></h2>
+<h3 id="optimal-substructure"><a class="header" href="#optimal-substructure">Optimal Substructure</a></h3>
+<p>A problem exhibits <strong>optimal substructure</strong> if an optimal solution can be constructed from optimal solutions of its subproblems. This is the foundation that allows DP to work.</p>
+<p><strong>Example</strong>: In the shortest path problem, if the shortest path from A to C goes through B, then the path from A to B must also be the shortest path between those two points.</p>
+<p><strong>How to identify</strong>:</p>
+<ol>
+<li>Try to express the solution in terms of solutions to smaller instances</li>
+<li>Verify that combining optimal solutions to subproblems gives an optimal solution to the original problem</li>
+<li>If greedy choices work, you might not need DP (use greedy algorithm instead)</li>
+</ol>
+<h3 id="overlapping-subproblems"><a class="header" href="#overlapping-subproblems">Overlapping Subproblems</a></h3>
+<p>A problem has <strong>overlapping subproblems</strong> if the same subproblems are solved multiple times during the computation.</p>
+<p><strong>Example</strong>: Computing Fibonacci(5) recursively computes Fibonacci(3) twice, Fibonacci(2) three times, and Fibonacci(1) five times.</p>
+<p><strong>Key insight</strong>: Without DP, exponential time complexity. With DP, polynomial time complexity.</p>
+<h2 id="dp-approaches"><a class="header" href="#dp-approaches">DP Approaches</a></h2>
+<h3 id="1-memoization-top-down"><a class="header" href="#1-memoization-top-down">1. Memoization (Top-Down)</a></h3>
+<p>Memoization uses recursion with caching. Start with the original problem and recursively solve subproblems, storing results in a cache (usually a hash map or array).</p>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Intuitive and easier to implement for complex problems</li>
+<li>Only computes subproblems that are actually needed</li>
+<li>Natural fit for problems with recursive structure</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>Recursion overhead (stack space)</li>
+<li>Potential stack overflow for deep recursion</li>
+</ul>
+<pre><code class="language-python">def fib_memo(n, memo=None):
+    """Calculate nth Fibonacci number using memoization"""
+    if memo is None:
+        memo = {}
+
     if n in memo:
         return memo[n]
+
+    # Base cases
     if n &lt;= 1:
         return n
-    memo[n] = fib(n-1, memo) + fib(n-2, memo)
+
+    # Recursive case with memoization
+    memo[n] = fib_memo(n-1, memo) + fib_memo(n-2, memo)
     return memo[n]
+
+# Time: O(n), Space: O(n)
 </code></pre>
-<h3 id="tabulation-bottom-up"><a class="header" href="#tabulation-bottom-up">Tabulation (Bottom-Up)</a></h3>
-<pre><code class="language-python">def fib(n):
+<h3 id="2-tabulation-bottom-up"><a class="header" href="#2-tabulation-bottom-up">2. Tabulation (Bottom-Up)</a></h3>
+<p>Tabulation builds up the solution iteratively, starting from the smallest subproblems and working up to the final solution.</p>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>No recursion overhead</li>
+<li>Usually faster in practice</li>
+<li>Easier to optimize space complexity</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>May compute unnecessary subproblems</li>
+<li>Can be less intuitive for complex problems</li>
+</ul>
+<pre><code class="language-python">def fib_tab(n):
+    """Calculate nth Fibonacci number using tabulation"""
+    if n &lt;= 1:
+        return n
+
+    # Build table bottom-up
     dp = [0] * (n + 1)
     dp[1] = 1
+
     for i in range(2, n + 1):
         dp[i] = dp[i-1] + dp[i-2]
+
     return dp[n]
+
+# Time: O(n), Space: O(n)
 </code></pre>
-<h2 id="classic-problems"><a class="header" href="#classic-problems">Classic Problems</a></h2>
-<h3 id="coin-change"><a class="header" href="#coin-change">Coin Change</a></h3>
-<pre><code class="language-python">def coin_change(coins, amount):
-    dp = [float('inf')] * (amount + 1)
-    dp[0] = 0
-    for coin in coins:
-        for i in range(coin, amount + 1):
-            dp[i] = min(dp[i], dp[i - coin] + 1)
-    return dp[amount] if dp[amount] != float('inf') else -1
+<h3 id="3-space-optimized-tabulation"><a class="header" href="#3-space-optimized-tabulation">3. Space-Optimized Tabulation</a></h3>
+<p>For many DP problems, you only need the last few states, not the entire table.</p>
+<pre><code class="language-python">def fib_optimized(n):
+    """Space-optimized Fibonacci calculation"""
+    if n &lt;= 1:
+        return n
+
+    prev2, prev1 = 0, 1
+
+    for _ in range(2, n + 1):
+        current = prev1 + prev2
+        prev2, prev1 = prev1, current
+
+    return prev1
+
+# Time: O(n), Space: O(1)
 </code></pre>
-<h3 id="knapsack"><a class="header" href="#knapsack">Knapsack</a></h3>
-<pre><code class="language-python">def knapsack(weights, values, capacity):
-    dp = [[0] * (capacity + 1) for _ in range(len(weights) + 1)]
-    for i in range(1, len(weights) + 1):
-        for w in range(capacity + 1):
-            if weights[i-1] &lt;= w:
-                dp[i][w] = max(
-                    values[i-1] + dp[i-1][w - weights[i-1]],
-                    dp[i-1][w]
-                )
+<h2 id="problem-classification-by-pattern"><a class="header" href="#problem-classification-by-pattern">Problem Classification by Pattern</a></h2>
+<h3 id="pattern-1-linear-sequence-dp"><a class="header" href="#pattern-1-linear-sequence-dp">Pattern 1: Linear Sequence DP</a></h3>
+<p><strong>Characteristics</strong>: <code>dp[i]</code> depends on previous states <code>dp[i-1]</code>, <code>dp[i-2]</code>, etc.</p>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python">dp[i] = f(dp[i-1], dp[i-2], ..., dp[i-k])
+</code></pre>
+<h4 id="climbing-stairs"><a class="header" href="#climbing-stairs">Climbing Stairs</a></h4>
+<p><strong>Problem</strong>: Count ways to climb n stairs (1 or 2 steps at a time).</p>
+<pre><code class="language-python">def climb_stairs(n):
+    """Count distinct ways to climb n stairs"""
+    if n &lt;= 2:
+        return n
+
+    dp = [0] * (n + 1)
+    dp[1], dp[2] = 1, 2
+
+    for i in range(3, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+
+    return dp[n]
+
+# Time: O(n), Space: O(n)
+# Can be optimized to O(1) space
+</code></pre>
+<h4 id="house-robber"><a class="header" href="#house-robber">House Robber</a></h4>
+<p><strong>Problem</strong>: Rob houses to maximize money without robbing adjacent houses.</p>
+<pre><code class="language-python">def rob(nums):
+    """Maximum money you can rob without adjacent houses"""
+    if not nums:
+        return 0
+    if len(nums) == 1:
+        return nums[0]
+
+    # dp[i] = max money robbing houses 0..i
+    dp = [0] * len(nums)
+    dp[0] = nums[0]
+    dp[1] = max(nums[0], nums[1])
+
+    for i in range(2, len(nums)):
+        # Either rob current house + dp[i-2], or skip it
+        dp[i] = max(dp[i-1], nums[i] + dp[i-2])
+
+    return dp[-1]
+
+# Time: O(n), Space: O(n)
+</code></pre>
+<p><strong>Space-optimized version</strong>:</p>
+<pre><code class="language-python">def rob_optimized(nums):
+    if not nums:
+        return 0
+
+    prev2, prev1 = 0, 0
+
+    for num in nums:
+        current = max(prev1, num + prev2)
+        prev2, prev1 = prev1, current
+
+    return prev1
+
+# Time: O(n), Space: O(1)
+</code></pre>
+<h4 id="longest-increasing-subsequence"><a class="header" href="#longest-increasing-subsequence">Longest Increasing Subsequence</a></h4>
+<p><strong>Problem</strong>: Find length of longest strictly increasing subsequence.</p>
+<pre><code class="language-python">def length_of_LIS(nums):
+    """Length of longest increasing subsequence"""
+    if not nums:
+        return 0
+
+    n = len(nums)
+    # dp[i] = length of LIS ending at index i
+    dp = [1] * n
+
+    for i in range(1, n):
+        for j in range(i):
+            if nums[j] &lt; nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+
+    return max(dp)
+
+# Time: O(n²), Space: O(n)
+# Can be optimized to O(n log n) using binary search
+</code></pre>
+<h3 id="pattern-2-gridmatrix-dp"><a class="header" href="#pattern-2-gridmatrix-dp">Pattern 2: Grid/Matrix DP</a></h3>
+<p><strong>Characteristics</strong>: <code>dp[i][j]</code> depends on neighbors in 2D space.</p>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python">dp[i][j] = f(dp[i-1][j], dp[i][j-1], dp[i-1][j-1], ...)
+</code></pre>
+<h4 id="unique-paths"><a class="header" href="#unique-paths">Unique Paths</a></h4>
+<p><strong>Problem</strong>: Count paths from top-left to bottom-right (only right/down moves).</p>
+<pre><code class="language-python">def unique_paths(m, n):
+    """Count unique paths in m×n grid"""
+    # dp[i][j] = number of paths to reach cell (i,j)
+    dp = [[1] * n for _ in range(m)]
+
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[i][j] = dp[i-1][j] + dp[i][j-1]
+
+    return dp[m-1][n-1]
+
+# Time: O(m×n), Space: O(m×n)
+</code></pre>
+<p><strong>Space-optimized</strong>:</p>
+<pre><code class="language-python">def unique_paths_optimized(m, n):
+    dp = [1] * n
+
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[j] += dp[j-1]
+
+    return dp[n-1]
+
+# Time: O(m×n), Space: O(n)
+</code></pre>
+<h4 id="minimum-path-sum"><a class="header" href="#minimum-path-sum">Minimum Path Sum</a></h4>
+<p><strong>Problem</strong>: Find minimum sum path from top-left to bottom-right.</p>
+<pre><code class="language-python">def min_path_sum(grid):
+    """Minimum path sum in grid"""
+    if not grid or not grid[0]:
+        return 0
+
+    m, n = len(grid), len(grid[0])
+    dp = [[0] * n for _ in range(m)]
+
+    # Initialize first cell
+    dp[0][0] = grid[0][0]
+
+    # Initialize first row
+    for j in range(1, n):
+        dp[0][j] = dp[0][j-1] + grid[0][j]
+
+    # Initialize first column
+    for i in range(1, m):
+        dp[i][0] = dp[i-1][0] + grid[i][0]
+
+    # Fill rest of table
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])
+
+    return dp[m-1][n-1]
+
+# Time: O(m×n), Space: O(m×n)
+</code></pre>
+<h4 id="maximal-square"><a class="header" href="#maximal-square">Maximal Square</a></h4>
+<p><strong>Problem</strong>: Find largest square containing only 1s in binary matrix.</p>
+<pre><code class="language-python">def maximal_square(matrix):
+    """Find area of largest square of 1s"""
+    if not matrix or not matrix[0]:
+        return 0
+
+    m, n = len(matrix), len(matrix[0])
+    dp = [[0] * n for _ in range(m)]
+    max_side = 0
+
+    for i in range(m):
+        for j in range(n):
+            if matrix[i][j] == '1':
+                if i == 0 or j == 0:
+                    dp[i][j] = 1
+                else:
+                    # Square side length at (i,j)
+                    dp[i][j] = min(
+                        dp[i-1][j],      # top
+                        dp[i][j-1],      # left
+                        dp[i-1][j-1]     # diagonal
+                    ) + 1
+                max_side = max(max_side, dp[i][j])
+
+    return max_side * max_side
+
+# Time: O(m×n), Space: O(m×n)
+</code></pre>
+<h3 id="pattern-3-string-dp"><a class="header" href="#pattern-3-string-dp">Pattern 3: String DP</a></h3>
+<p><strong>Characteristics</strong>: Problems involving sequences, subsequences, or substring operations.</p>
+<h4 id="longest-common-subsequence-lcs"><a class="header" href="#longest-common-subsequence-lcs">Longest Common Subsequence (LCS)</a></h4>
+<p><strong>Problem</strong>: Find length of longest subsequence common to both strings.</p>
+<pre><code class="language-python">def longest_common_subsequence(text1, text2):
+    """Length of longest common subsequence"""
+    m, n = len(text1), len(text2)
+    # dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if text1[i-1] == text2[j-1]:
+                # Characters match: extend LCS
+                dp[i][j] = dp[i-1][j-1] + 1
             else:
-                dp[i][w] = dp[i-1][w]
-    return dp[len(weights)][capacity]
+                # Take max of excluding one character
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+    return dp[m][n]
+
+# Time: O(m×n), Space: O(m×n)
 </code></pre>
-<h3 id="longest-common-subsequence"><a class="header" href="#longest-common-subsequence">Longest Common Subsequence</a></h3>
-<pre><code class="language-python">def lcs(text1, text2):
+<p><strong>Reconstructing the LCS</strong>:</p>
+<pre><code class="language-python">def get_lcs(text1, text2):
+    """Get actual LCS string"""
     m, n = len(text1), len(text2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    # Build DP table
     for i in range(1, m + 1):
         for j in range(1, n + 1):
             if text1[i-1] == text2[j-1]:
                 dp[i][j] = dp[i-1][j-1] + 1
             else:
                 dp[i][j] = max(dp[i-1][j], dp[i][j-1])
-    return dp[m][n]
+
+    # Backtrack to find LCS
+    lcs = []
+    i, j = m, n
+    while i &gt; 0 and j &gt; 0:
+        if text1[i-1] == text2[j-1]:
+            lcs.append(text1[i-1])
+            i -= 1
+            j -= 1
+        elif dp[i-1][j] &gt; dp[i][j-1]:
+            i -= 1
+        else:
+            j -= 1
+
+    return ''.join(reversed(lcs))
 </code></pre>
-<h3 id="edit-distance"><a class="header" href="#edit-distance">Edit Distance</a></h3>
-<pre><code class="language-python">def editDistance(word1, word2):
+<h4 id="edit-distance-levenshtein-distance"><a class="header" href="#edit-distance-levenshtein-distance">Edit Distance (Levenshtein Distance)</a></h4>
+<p><strong>Problem</strong>: Minimum operations to convert word1 to word2 (insert, delete, replace).</p>
+<pre><code class="language-python">def min_distance(word1, word2):
+    """Minimum edit distance between two words"""
     m, n = len(word1), len(word2)
+    # dp[i][j] = min operations to convert word1[0..i-1] to word2[0..j-1]
     dp = [[0] * (n + 1) for _ in range(m + 1)]
 
+    # Base cases: converting to/from empty string
     for i in range(m + 1):
-        dp[i][0] = i
+        dp[i][0] = i  # Delete all characters
     for j in range(n + 1):
-        dp[0][j] = j
+        dp[0][j] = j  # Insert all characters
 
     for i in range(1, m + 1):
         for j in range(1, n + 1):
             if word1[i-1] == word2[j-1]:
+                # No operation needed
                 dp[i][j] = dp[i-1][j-1]
             else:
-                dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+                # Min of: replace, delete, insert
+                dp[i][j] = 1 + min(
+                    dp[i-1][j-1],  # Replace
+                    dp[i-1][j],    # Delete from word1
+                    dp[i][j-1]     # Insert to word1
+                )
 
     return dp[m][n]
+
+# Time: O(m×n), Space: O(m×n)
 </code></pre>
-<h2 id="patterns"><a class="header" href="#patterns">Patterns</a></h2>
-<p>1D DP: <code>dp[i] = f(dp[i-1], dp[i-2], ...)</code>
-2D DP: <code>dp[i][j] = f(dp[i-1][j], dp[i][j-1], ...)</code></p>
-<h2 id="complexity"><a class="header" href="#complexity">Complexity</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Problem</th><th>Naive</th><th>DP</th></tr></thead><tbody>
-<tr><td>Fibonacci</td><td>$O(2^n)$</td><td>$O(n)$</td></tr>
-<tr><td>Coin Change</td><td>$O(n^m)$</td><td>$O(n \times m)$</td></tr>
-<tr><td>Knapsack</td><td>$O(2^n)$</td><td>$O(n \times w)$</td></tr>
+<h4 id="longest-palindromic-subsequence"><a class="header" href="#longest-palindromic-subsequence">Longest Palindromic Subsequence</a></h4>
+<p><strong>Problem</strong>: Find length of longest palindromic subsequence.</p>
+<pre><code class="language-python">def longest_palindrome_subseq(s):
+    """Length of longest palindromic subsequence"""
+    n = len(s)
+    # dp[i][j] = length of LPS in s[i..j]
+    dp = [[0] * n for _ in range(n)]
+
+    # Every single character is a palindrome of length 1
+    for i in range(n):
+        dp[i][i] = 1
+
+    # Build table for substrings of increasing length
+    for length in range(2, n + 1):
+        for i in range(n - length + 1):
+            j = i + length - 1
+            if s[i] == s[j]:
+                # Characters match: add 2 to inner subsequence
+                dp[i][j] = dp[i+1][j-1] + 2
+            else:
+                # Take max of excluding one end
+                dp[i][j] = max(dp[i+1][j], dp[i][j-1])
+
+    return dp[0][n-1]
+
+# Time: O(n²), Space: O(n²)
+</code></pre>
+<h4 id="word-break"><a class="header" href="#word-break">Word Break</a></h4>
+<p><strong>Problem</strong>: Check if string can be segmented into dictionary words.</p>
+<pre><code class="language-python">def word_break(s, wordDict):
+    """Check if string can be segmented into words"""
+    word_set = set(wordDict)
+    n = len(s)
+    # dp[i] = True if s[0..i-1] can be segmented
+    dp = [False] * (n + 1)
+    dp[0] = True  # Empty string
+
+    for i in range(1, n + 1):
+        for j in range(i):
+            # If s[0..j-1] can be segmented and s[j..i-1] is a word
+            if dp[j] and s[j:i] in word_set:
+                dp[i] = True
+                break
+
+    return dp[n]
+
+# Time: O(n² × m) where m is average word length
+# Space: O(n)
+</code></pre>
+<h3 id="pattern-4-knapsack-problems"><a class="header" href="#pattern-4-knapsack-problems">Pattern 4: Knapsack Problems</a></h3>
+<p><strong>Characteristics</strong>: Selection problems with capacity constraints.</p>
+<h4 id="01-knapsack"><a class="header" href="#01-knapsack">0/1 Knapsack</a></h4>
+<p><strong>Problem</strong>: Maximize value with weight constraint (each item used at most once).</p>
+<pre><code class="language-python">def knapsack_01(weights, values, capacity):
+    """0/1 Knapsack: maximize value within capacity"""
+    n = len(weights)
+    # dp[i][w] = max value using items 0..i-1 with capacity w
+    dp = [[0] * (capacity + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        for w in range(capacity + 1):
+            # Don't include item i-1
+            dp[i][w] = dp[i-1][w]
+
+            # Include item i-1 if it fits
+            if weights[i-1] &lt;= w:
+                dp[i][w] = max(
+                    dp[i][w],
+                    values[i-1] + dp[i-1][w - weights[i-1]]
+                )
+
+    return dp[n][capacity]
+
+# Time: O(n×W), Space: O(n×W)
+</code></pre>
+<p><strong>Space-optimized 0/1 Knapsack</strong>:</p>
+<pre><code class="language-python">def knapsack_01_optimized(weights, values, capacity):
+    """Space-optimized 0/1 knapsack"""
+    dp = [0] * (capacity + 1)
+
+    for i in range(len(weights)):
+        # Traverse backwards to avoid using updated values
+        for w in range(capacity, weights[i] - 1, -1):
+            dp[w] = max(dp[w], values[i] + dp[w - weights[i]])
+
+    return dp[capacity]
+
+# Time: O(n×W), Space: O(W)
+</code></pre>
+<h4 id="unbounded-knapsack"><a class="header" href="#unbounded-knapsack">Unbounded Knapsack</a></h4>
+<p><strong>Problem</strong>: Same as 0/1 but can use each item unlimited times.</p>
+<pre><code class="language-python">def knapsack_unbounded(weights, values, capacity):
+    """Unbounded knapsack: items can be used multiple times"""
+    dp = [0] * (capacity + 1)
+
+    for w in range(1, capacity + 1):
+        for i in range(len(weights)):
+            if weights[i] &lt;= w:
+                dp[w] = max(dp[w], values[i] + dp[w - weights[i]])
+
+    return dp[capacity]
+
+# Time: O(n×W), Space: O(W)
+</code></pre>
+<h4 id="coin-change-minimum-coins"><a class="header" href="#coin-change-minimum-coins">Coin Change (Minimum Coins)</a></h4>
+<p><strong>Problem</strong>: Minimum coins needed to make amount.</p>
+<pre><code class="language-python">def coin_change(coins, amount):
+    """Minimum coins to make amount"""
+    # dp[i] = min coins to make amount i
+    dp = [float('inf')] * (amount + 1)
+    dp[0] = 0
+
+    for coin in coins:
+        for i in range(coin, amount + 1):
+            dp[i] = min(dp[i], dp[i - coin] + 1)
+
+    return dp[amount] if dp[amount] != float('inf') else -1
+
+# Time: O(amount × len(coins)), Space: O(amount)
+</code></pre>
+<h4 id="coin-change-count-ways"><a class="header" href="#coin-change-count-ways">Coin Change (Count Ways)</a></h4>
+<p><strong>Problem</strong>: Count ways to make amount with given coins.</p>
+<pre><code class="language-python">def coin_change_ways(coins, amount):
+    """Count ways to make amount"""
+    dp = [0] * (amount + 1)
+    dp[0] = 1
+
+    for coin in coins:
+        for i in range(coin, amount + 1):
+            dp[i] += dp[i - coin]
+
+    return dp[amount]
+
+# Time: O(amount × len(coins)), Space: O(amount)
+</code></pre>
+<h3 id="pattern-5-partition-dp"><a class="header" href="#pattern-5-partition-dp">Pattern 5: Partition DP</a></h3>
+<p><strong>Characteristics</strong>: Dividing array/string into parts to optimize some property.</p>
+<h4 id="partition-equal-subset-sum"><a class="header" href="#partition-equal-subset-sum">Partition Equal Subset Sum</a></h4>
+<p><strong>Problem</strong>: Check if array can be partitioned into two equal-sum subsets.</p>
+<pre><code class="language-python">def can_partition(nums):
+    """Check if array can be partitioned into equal sum subsets"""
+    total = sum(nums)
+    if total % 2:
+        return False
+
+    target = total // 2
+    # dp[i] = True if sum i is achievable
+    dp = [False] * (target + 1)
+    dp[0] = True
+
+    for num in nums:
+        # Traverse backwards (0/1 knapsack pattern)
+        for i in range(target, num - 1, -1):
+            dp[i] = dp[i] or dp[i - num]
+
+    return dp[target]
+
+# Time: O(n × sum/2), Space: O(sum/2)
+</code></pre>
+<h4 id="palindrome-partitioning-ii"><a class="header" href="#palindrome-partitioning-ii">Palindrome Partitioning II</a></h4>
+<p><strong>Problem</strong>: Minimum cuts needed to partition string into palindromes.</p>
+<pre><code class="language-python">def min_cut(s):
+    """Minimum cuts for palindrome partitioning"""
+    n = len(s)
+
+    # Precompute palindrome check
+    is_palindrome = [[False] * n for _ in range(n)]
+    for i in range(n):
+        is_palindrome[i][i] = True
+    for length in range(2, n + 1):
+        for i in range(n - length + 1):
+            j = i + length - 1
+            if s[i] == s[j]:
+                is_palindrome[i][j] = (length == 2 or is_palindrome[i+1][j-1])
+
+    # dp[i] = min cuts for s[0..i]
+    dp = [0] * n
+    for i in range(n):
+        if is_palindrome[0][i]:
+            dp[i] = 0
+        else:
+            dp[i] = i  # Max cuts
+            for j in range(i):
+                if is_palindrome[j+1][i]:
+                    dp[i] = min(dp[i], dp[j] + 1)
+
+    return dp[n-1]
+
+# Time: O(n²), Space: O(n²)
+</code></pre>
+<h3 id="pattern-6-state-machine-dp"><a class="header" href="#pattern-6-state-machine-dp">Pattern 6: State Machine DP</a></h3>
+<p><strong>Characteristics</strong>: Problems with multiple states and transitions.</p>
+<h4 id="best-time-to-buy-and-sell-stock-with-cooldown"><a class="header" href="#best-time-to-buy-and-sell-stock-with-cooldown">Best Time to Buy and Sell Stock with Cooldown</a></h4>
+<p><strong>Problem</strong>: Max profit with cooldown after selling.</p>
+<pre><code class="language-python">def max_profit_cooldown(prices):
+    """Max profit with cooldown"""
+    if not prices:
+        return 0
+
+    n = len(prices)
+    # States: hold stock, sold today, cooldown
+    hold = [0] * n
+    sold = [0] * n
+    cooldown = [0] * n
+
+    hold[0] = -prices[0]
+
+    for i in range(1, n):
+        # Hold: either already holding or buy today
+        hold[i] = max(hold[i-1], cooldown[i-1] - prices[i])
+        # Sold: sell today
+        sold[i] = hold[i-1] + prices[i]
+        # Cooldown: either already in cooldown or just sold
+        cooldown[i] = max(cooldown[i-1], sold[i-1])
+
+    return max(sold[-1], cooldown[-1])
+
+# Time: O(n), Space: O(n)
+</code></pre>
+<h3 id="pattern-7-interval-dp"><a class="header" href="#pattern-7-interval-dp">Pattern 7: Interval DP</a></h3>
+<p><strong>Characteristics</strong>: Problems on ranges/intervals <code>[i, j]</code>.</p>
+<h4 id="burst-balloons"><a class="header" href="#burst-balloons">Burst Balloons</a></h4>
+<p><strong>Problem</strong>: Maximize coins from bursting balloons.</p>
+<pre><code class="language-python">def max_coins(nums):
+    """Maximum coins from bursting balloons"""
+    # Add 1s at boundaries
+    nums = [1] + nums + [1]
+    n = len(nums)
+    # dp[i][j] = max coins bursting balloons (i, j) (exclusive)
+    dp = [[0] * n for _ in range(n)]
+
+    # Build for increasing interval lengths
+    for length in range(2, n):
+        for left in range(n - length):
+            right = left + length
+            # Try bursting each balloon k last in (left, right)
+            for k in range(left + 1, right):
+                coins = nums[left] * nums[k] * nums[right]
+                coins += dp[left][k] + dp[k][right]
+                dp[left][right] = max(dp[left][right], coins)
+
+    return dp[0][n-1]
+
+# Time: O(n³), Space: O(n²)
+</code></pre>
+<h2 id="advanced-techniques"><a class="header" href="#advanced-techniques">Advanced Techniques</a></h2>
+<h3 id="state-space-reduction"><a class="header" href="#state-space-reduction">State Space Reduction</a></h3>
+<p>Many DP problems can be optimized by reducing the state space:</p>
+<ol>
+<li><strong>Eliminate redundant dimensions</strong>: If a dimension can be computed from others, remove it</li>
+<li><strong>Use modulo arithmetic</strong>: For counting problems with large numbers</li>
+<li><strong>Compress coordinates</strong>: Map large ranges to smaller ones</li>
+<li><strong>Rolling array</strong>: Keep only last k rows/columns instead of entire table</li>
+</ol>
+<h3 id="bitmask-dp"><a class="header" href="#bitmask-dp">Bitmask DP</a></h3>
+<p>Use bitmasks to represent subsets when state involves combinations.</p>
+<p><strong>Example: Traveling Salesman Problem</strong></p>
+<pre><code class="language-python">def tsp(dist):
+    """Minimum cost to visit all cities (TSP)"""
+    n = len(dist)
+    # dp[mask][i] = min cost to visit cities in mask, ending at i
+    dp = [[float('inf')] * n for _ in range(1 &lt;&lt; n)]
+    dp[1][0] = 0  # Start at city 0
+
+    for mask in range(1 &lt;&lt; n):
+        for u in range(n):
+            if not (mask &amp; (1 &lt;&lt; u)):
+                continue
+            for v in range(n):
+                if mask &amp; (1 &lt;&lt; v):
+                    continue
+                new_mask = mask | (1 &lt;&lt; v)
+                dp[new_mask][v] = min(
+                    dp[new_mask][v],
+                    dp[mask][u] + dist[u][v]
+                )
+
+    # Return to start
+    return min(dp[(1 &lt;&lt; n) - 1][i] + dist[i][0] for i in range(n))
+
+# Time: O(2ⁿ × n²), Space: O(2ⁿ × n)
+</code></pre>
+<h3 id="digit-dp"><a class="header" href="#digit-dp">Digit DP</a></h3>
+<p>Solve problems on ranges of numbers by processing digits.</p>
+<p><strong>Example: Count numbers with property in range [L, R]</strong></p>
+<pre><code class="language-python">def count_digit_dp(n):
+    """Count numbers up to n with some property"""
+    s = str(n)
+    memo = {}
+
+    def dp(pos, tight, started):
+        """
+        pos: current digit position
+        tight: whether we're bounded by n
+        started: whether number has started (handle leading zeros)
+        """
+        if pos == len(s):
+            return 1 if started else 0
+
+        if (pos, tight, started) in memo:
+            return memo[(pos, tight, started)]
+
+        limit = int(s[pos]) if tight else 9
+        result = 0
+
+        for digit in range(0, limit + 1):
+            # Check property here
+            new_tight = tight and (digit == limit)
+            new_started = started or (digit != 0)
+            result += dp(pos + 1, new_tight, new_started)
+
+        memo[(pos, tight, started)] = result
+        return result
+
+    return dp(0, True, False)
+</code></pre>
+<h3 id="tree-dp"><a class="header" href="#tree-dp">Tree DP</a></h3>
+<p>DP on trees, usually processing from leaves up.</p>
+<p><strong>Example: Maximum independent set in tree</strong></p>
+<pre><code class="language-python">def tree_dp(graph, root):
+    """Maximum independent set in tree"""
+    # include[v] = max value including v
+    # exclude[v] = max value excluding v
+    include = {}
+    exclude = {}
+
+    def dfs(node, parent):
+        include[node] = 1  # Value of node
+        exclude[node] = 0
+
+        for child in graph[node]:
+            if child == parent:
+                continue
+            dfs(child, node)
+            # If we include node, can't include children
+            include[node] += exclude[child]
+            # If we exclude node, take max of children
+            exclude[node] += max(include[child], exclude[child])
+
+    dfs(root, -1)
+    return max(include[root], exclude[root])
+</code></pre>
+<h2 id="complexity-analysis"><a class="header" href="#complexity-analysis">Complexity Analysis</a></h2>
+<h3 id="time-complexity-patterns"><a class="header" href="#time-complexity-patterns">Time Complexity Patterns</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Pattern</th><th>Typical Complexity</th><th>Example</th></tr></thead><tbody>
+<tr><td>1D DP</td><td>O(n) to O(n²)</td><td>Fibonacci, House Robber</td></tr>
+<tr><td>2D DP</td><td>O(n²) to O(n³)</td><td>LCS, Edit Distance</td></tr>
+<tr><td>Knapsack</td><td>O(n × W)</td><td>0/1 Knapsack, Coin Change</td></tr>
+<tr><td>Substring</td><td>O(n²) to O(n³)</td><td>Palindrome problems</td></tr>
+<tr><td>Interval DP</td><td>O(n³)</td><td>Matrix chain, Burst balloons</td></tr>
+<tr><td>Bitmask DP</td><td>O(2ⁿ × n) to O(2ⁿ × n²)</td><td>TSP, Subset problems</td></tr>
 </tbody></table>
 </div>
-<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
-<p>DP is like climbing stairs - memorize steps you've already calculated instead of redoing them!</p>
-<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<h3 id="space-complexity-optimization"><a class="header" href="#space-complexity-optimization">Space Complexity Optimization</a></h3>
+<ol>
+<li><strong>Rolling array</strong>: O(n × m) → O(m) for many 2D DP problems</li>
+<li><strong>In-place modification</strong>: Use input array as DP table</li>
+<li><strong>State elimination</strong>: Remove redundant state dimensions</li>
+</ol>
+<h3 id="comparison-naive-vs-dp"><a class="header" href="#comparison-naive-vs-dp">Comparison: Naive vs DP</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Problem</th><th>Naive</th><th>DP</th><th>Improvement</th></tr></thead><tbody>
+<tr><td>Fibonacci</td><td>O(2ⁿ)</td><td>O(n)</td><td>Exponential → Linear</td></tr>
+<tr><td>LCS</td><td>O(2^(m+n))</td><td>O(m×n)</td><td>Exponential → Polynomial</td></tr>
+<tr><td>Knapsack</td><td>O(2ⁿ)</td><td>O(n×W)</td><td>Exponential → Pseudo-polynomial</td></tr>
+<tr><td>Coin Change</td><td>O(S^n)</td><td>O(n×amount)</td><td>Exponential → Polynomial</td></tr>
+</tbody></table>
+</div>
+<h2 id="implementation-tips"><a class="header" href="#implementation-tips">Implementation Tips</a></h2>
+<h3 id="1-define-the-state"><a class="header" href="#1-define-the-state">1. Define the State</a></h3>
+<p><strong>Questions to ask</strong>:</p>
 <ul>
-<li>
-<p><a href="https://leetcode.com/tag/dynamic-programming/">LeetCode DP Problems</a></p>
-</li>
-<li>
-<p>[Key Concepts</p>
-</li>
-<li>
-<p><strong>Overlapping Subproblems</strong>: Dynamic programming is applicable when the problem can be broken down into smaller, overlapping subproblems that can be solved independently. The results of these subproblems are stored to avoid redundant calculations.</p>
-</li>
-<li>
-<p><strong>Optimal Substructure</strong>: A problem exhibits optimal substructure if an optimal solution to the problem can be constructed from optimal solutions to its subproblems. This property allows dynamic programming to build up solutions incrementally.</p>
-</li>
+<li>What information is needed to solve subproblems?</li>
+<li>What's the minimum state needed (avoid redundancy)?</li>
+<li>Can I solve for state X using smaller states?</li>
 </ul>
-<h2 id="techniques"><a class="header" href="#techniques">Techniques</a></h2>
+<p><strong>Example</strong>: For LCS, state is <code>(i, j)</code> representing position in both strings.</p>
+<h3 id="2-define-the-recurrence-relation"><a class="header" href="#2-define-the-recurrence-relation">2. Define the Recurrence Relation</a></h3>
+<p>Express the solution in terms of smaller subproblems.</p>
+<p><strong>Template</strong>:</p>
+<pre><code>dp[current_state] = optimal_choice(
+    dp[smaller_state_1],
+    dp[smaller_state_2],
+    ...
+)
+</code></pre>
+<h3 id="3-identify-base-cases"><a class="header" href="#3-identify-base-cases">3. Identify Base Cases</a></h3>
+<p>What are the smallest subproblems you can solve directly?</p>
+<p><strong>Example</strong>:</p>
+<ul>
+<li>Empty string: <code>dp[0][...] = 0</code></li>
+<li>Single element: <code>dp[i][i] = ...</code></li>
+</ul>
+<h3 id="4-determine-iteration-order"><a class="header" href="#4-determine-iteration-order">4. Determine Iteration Order</a></h3>
+<p>Ensure you compute smaller subproblems before larger ones.</p>
+<p><strong>Patterns</strong>:</p>
+<ul>
+<li>1D: Iterate i from small to large</li>
+<li>2D: Iterate i, then j (or by diagonal/length)</li>
+<li>Intervals: Iterate by increasing interval length</li>
+</ul>
+<h3 id="5-initialize-the-dp-table"><a class="header" href="#5-initialize-the-dp-table">5. Initialize the DP Table</a></h3>
+<p>Set base cases and default values (0, infinity, false, etc.)</p>
+<h3 id="6-implement-and-optimize"><a class="header" href="#6-implement-and-optimize">6. Implement and Optimize</a></h3>
+<p>Start with clear memoization, then optimize to tabulation and space reduction.</p>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<h3 id="1-wrong-base-cases"><a class="header" href="#1-wrong-base-cases">1. Wrong Base Cases</a></h3>
+<pre><code class="language-python"># Wrong: doesn't handle n=0
+def fib(n):
+    dp = [0] * n
+    # IndexError when n=0!
+
+# Correct
+def fib(n):
+    if n &lt;= 1:
+        return n
+    dp = [0] * (n + 1)
+</code></pre>
+<h3 id="2-wrong-iteration-order"><a class="header" href="#2-wrong-iteration-order">2. Wrong Iteration Order</a></h3>
+<pre><code class="language-python"># Wrong: using updated values in 0/1 knapsack
+for item in items:
+    for w in range(W + 1):  # Forward iteration
+        dp[w] = max(dp[w], dp[w - weight] + value)
+
+# Correct: backward iteration prevents using updated values
+for item in items:
+    for w in range(W, weight - 1, -1):
+        dp[w] = max(dp[w], dp[w - weight] + value)
+</code></pre>
+<h3 id="3-off-by-one-errors"><a class="header" href="#3-off-by-one-errors">3. Off-by-One Errors</a></h3>
+<p>Be careful with array indices vs. problem indices.</p>
+<pre><code class="language-python"># dp[i] represents first i elements (0-indexed array)
+# So element at index i-1 in array
+dp[i] = f(array[i-1], dp[i-1])
+</code></pre>
+<h3 id="4-integer-overflow"><a class="header" href="#4-integer-overflow">4. Integer Overflow</a></h3>
+<p>For counting problems with large results:</p>
+<pre><code class="language-python">MOD = 10**9 + 7
+
+def count_ways(n):
+    dp = [0] * (n + 1)
+    dp[0] = 1
+    for i in range(1, n + 1):
+        dp[i] = (dp[i-1] + dp[i-2]) % MOD  # Take modulo
+    return dp[n]
+</code></pre>
+<h3 id="5-not-considering-all-transitions"><a class="header" href="#5-not-considering-all-transitions">5. Not Considering All Transitions</a></h3>
+<p>Ensure your recurrence considers all possible ways to reach a state.</p>
+<h3 id="6-mutable-default-arguments"><a class="header" href="#6-mutable-default-arguments">6. Mutable Default Arguments</a></h3>
+<pre><code class="language-python"># Wrong: memo is shared across calls!
+def dp(n, memo={}):
+    ...
+
+# Correct
+def dp(n, memo=None):
+    if memo is None:
+        memo = {}
+    ...
+</code></pre>
+<h2 id="problem-solving-framework"><a class="header" href="#problem-solving-framework">Problem-Solving Framework</a></h2>
+<h3 id="step-by-step-approach"><a class="header" href="#step-by-step-approach">Step-by-Step Approach</a></h3>
 <ol>
 <li>
-<p><strong>Top-Down Approach (Memoization)</strong>: This approach involves solving the problem recursively and storing the results of subproblems in a table (or cache) to avoid redundant calculations. When a subproblem is encountered again, the stored result is used instead of recalculating it.</p>
+<p><strong>Understand the problem</strong></p>
+<ul>
+<li>What are we optimizing/counting/deciding?</li>
+<li>What are the constraints?</li>
+</ul>
 </li>
 <li>
-<p><strong>Bottom-Up Approach (Tabulation)</strong>: In this approach, the problem is solved iteratively by filling up a table based on previously computed values. This method typically starts with the smallest subproblems and builds up to the solution of the original problem.</p>
+<p><strong>Check if DP is applicable</strong></p>
+<ul>
+<li>Optimal substructure?</li>
+<li>Overlapping subproblems?</li>
+<li>Can you identify a recurrence?</li>
+</ul>
+</li>
+<li>
+<p><strong>Define the state</strong></p>
+<ul>
+<li>What parameters uniquely identify a subproblem?</li>
+<li>Minimize dimensions if possible</li>
+</ul>
+</li>
+<li>
+<p><strong>Write the recurrence</strong></p>
+<ul>
+<li>How does <code>dp[current]</code> relate to previous states?</li>
+<li>Consider all transitions</li>
+</ul>
+</li>
+<li>
+<p><strong>Identify base cases</strong></p>
+<ul>
+<li>What are the simplest subproblems?</li>
+</ul>
+</li>
+<li>
+<p><strong>Choose implementation</strong></p>
+<ul>
+<li>Start with memoization (easier to implement)</li>
+<li>Optimize to tabulation if needed</li>
+<li>Consider space optimization</li>
+</ul>
+</li>
+<li>
+<p><strong>Code and test</strong></p>
+<ul>
+<li>Test base cases</li>
+<li>Test small examples</li>
+<li>Verify time/space complexity</li>
+</ul>
 </li>
 </ol>
-<h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
-<p>Dynamic programming is widely used in various applications, including:</p>
+<h2 id="real-world-applications"><a class="header" href="#real-world-applications">Real-World Applications</a></h2>
+<h3 id="1-text-processing"><a class="header" href="#1-text-processing">1. Text Processing</a></h3>
 <ul>
-<li>
-<p><strong>Fibonacci Sequence</strong>: Calculating Fibonacci numbers can be optimized using dynamic programming to avoid exponential time complexity.</p>
-</li>
-<li>
-<p><strong>Knapsack Problem</strong>: The 0/1 knapsack problem can be efficiently solved using dynamic programming techniques to maximize the total value of items that can be carried.</p>
-</li>
-<li>
-<p><strong>Longest Common Subsequence</strong>: Finding the longest common subsequence between two strings can be accomplished using dynamic programming to build a solution based on previously computed subsequences.</p>
-</li>
+<li>Spell checkers (edit distance)</li>
+<li>Diff tools (LCS)</li>
+<li>Plagiarism detection (longest common substring)</li>
 </ul>
-<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Dynamic programming is a crucial technique in algorithm design that enables efficient solutions to problems with overlapping subproblems and optimal substructure. By leveraging memoization or tabulation, developers can significantly improve the performance of their algorithms, making dynamic programming an essential tool in computer science and software engineering.</p>
+<h3 id="2-computational-biology"><a class="header" href="#2-computational-biology">2. Computational Biology</a></h3>
+<ul>
+<li>DNA sequence alignment</li>
+<li>Protein folding prediction</li>
+<li>Gene prediction</li>
+</ul>
+<h3 id="3-resource-allocation"><a class="header" href="#3-resource-allocation">3. Resource Allocation</a></h3>
+<ul>
+<li>Memory management</li>
+<li>Cache algorithms</li>
+<li>Budget optimization</li>
+</ul>
+<h3 id="4-graphics-and-image-processing"><a class="header" href="#4-graphics-and-image-processing">4. Graphics and Image Processing</a></h3>
+<ul>
+<li>Seam carving (content-aware image resizing)</li>
+<li>Image segmentation</li>
+<li>Path finding in graphics</li>
+</ul>
+<h3 id="5-compiler-optimization"><a class="header" href="#5-compiler-optimization">5. Compiler Optimization</a></h3>
+<ul>
+<li>Register allocation</li>
+<li>Code generation</li>
+<li>Instruction scheduling</li>
+</ul>
+<h3 id="6-network-routing"><a class="header" href="#6-network-routing">6. Network Routing</a></h3>
+<ul>
+<li>Shortest paths with constraints</li>
+<li>Network flow optimization</li>
+<li>Bandwidth allocation</li>
+</ul>
+<h3 id="7-game-theory"><a class="header" href="#7-game-theory">7. Game Theory</a></h3>
+<ul>
+<li>Optimal game playing strategies</li>
+<li>Move prediction</li>
+<li>Score maximization</li>
+</ul>
+<h3 id="8-finance"><a class="header" href="#8-finance">8. Finance</a></h3>
+<ul>
+<li>Portfolio optimization</li>
+<li>Option pricing</li>
+<li>Risk management</li>
+</ul>
+<h2 id="practice-problems-by-difficulty"><a class="header" href="#practice-problems-by-difficulty">Practice Problems by Difficulty</a></h2>
+<h3 id="beginner"><a class="header" href="#beginner">Beginner</a></h3>
+<ol>
+<li>Climbing Stairs (LeetCode 70)</li>
+<li>Min Cost Climbing Stairs (LeetCode 746)</li>
+<li>House Robber (LeetCode 198)</li>
+<li>Maximum Subarray (LeetCode 53)</li>
+<li>Best Time to Buy and Sell Stock (LeetCode 121)</li>
+</ol>
+<h3 id="intermediate"><a class="header" href="#intermediate">Intermediate</a></h3>
+<ol>
+<li>Longest Increasing Subsequence (LeetCode 300)</li>
+<li>Coin Change (LeetCode 322)</li>
+<li>Word Break (LeetCode 139)</li>
+<li>Unique Paths (LeetCode 62)</li>
+<li>Longest Common Subsequence (LeetCode 1143)</li>
+<li>Edit Distance (LeetCode 72)</li>
+<li>Partition Equal Subset Sum (LeetCode 416)</li>
+<li>Decode Ways (LeetCode 91)</li>
+</ol>
+<h3 id="advanced"><a class="header" href="#advanced">Advanced</a></h3>
+<ol>
+<li>Burst Balloons (LeetCode 312)</li>
+<li>Regular Expression Matching (LeetCode 10)</li>
+<li>Wildcard Matching (LeetCode 44)</li>
+<li>Distinct Subsequences (LeetCode 115)</li>
+<li>Interleaving String (LeetCode 97)</li>
+<li>Palindrome Partitioning II (LeetCode 132)</li>
+<li>Best Time to Buy and Sell Stock IV (LeetCode 188)</li>
+<li>Cherry Pickup (LeetCode 741)</li>
+</ol>
+<h3 id="expert"><a class="header" href="#expert">Expert</a></h3>
+<ol>
+<li>Minimum Window Subsequence (LeetCode 727)</li>
+<li>Count Different Palindromic Subsequences (LeetCode 730)</li>
+<li>Strange Printer (LeetCode 664)</li>
+<li>Frog Jump (LeetCode 403)</li>
+<li>Number of Music Playlists (LeetCode 920)</li>
+</ol>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="when-to-use-dp"><a class="header" href="#when-to-use-dp">When to Use DP</a></h3>
+<p>✅ <strong>Use DP when</strong>:</p>
+<ul>
+<li>Problem asks for optimum (max/min) or count</li>
+<li>Decisions lead to subproblems with similar structure</li>
+<li>Same subproblems appear multiple times</li>
+<li>Problem has optimal substructure</li>
+</ul>
+<p>❌ <strong>Don't use DP when</strong>:</p>
+<ul>
+<li>Problem needs actual combinations/permutations (use backtracking)</li>
+<li>Greedy approach works</li>
+<li>Problem is NP-complete without special structure</li>
+<li>State space is too large</li>
+</ul>
+<h3 id="dp-vs-other-paradigms"><a class="header" href="#dp-vs-other-paradigms">DP vs Other Paradigms</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Paradigm</th><th>When to Use</th><th>Example</th></tr></thead><tbody>
+<tr><td><strong>DP</strong></td><td>Overlapping subproblems, optimal substructure</td><td>LCS, Knapsack</td></tr>
+<tr><td><strong>Greedy</strong></td><td>Optimal substructure, greedy choice property</td><td>Huffman coding, Activity selection</td></tr>
+<tr><td><strong>Divide &amp; Conquer</strong></td><td>Non-overlapping subproblems</td><td>Merge sort, Quick sort</td></tr>
+<tr><td><strong>Backtracking</strong></td><td>Need all solutions, not just optimal</td><td>N-Queens, Sudoku</td></tr>
+</tbody></table>
+</div>
+<h3 id="state-transition-patterns"><a class="header" href="#state-transition-patterns">State Transition Patterns</a></h3>
+<pre><code class="language-python"># 1. Take or skip
+dp[i] = max(skip, take)
+
+# 2. Extend or reset
+dp[i] = max(dp[i-1] + arr[i], arr[i])
+
+# 3. Minimum of choices
+dp[i] = min(choice1, choice2, ...)
+
+# 4. Sum of ways
+dp[i] = sum(dp[j] for j in valid_previous_states)
+
+# 5. 2D combination
+dp[i][j] = f(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+</code></pre>
+<h2 id="eli10-explain-like-im-10"><a class="header" href="#eli10-explain-like-im-10">ELI10 (Explain Like I'm 10)</a></h2>
+<p>Imagine you're climbing a staircase and you can either take 1 step or 2 steps at a time. How many different ways can you reach the top?</p>
+<p>You could try every single path (slow!), or you could be smart:</p>
+<p>"To reach step 5, I either came from step 4 (one 1-step) or step 3 (one 2-step). So: ways(5) = ways(4) + ways(3)"</p>
+<p>That's DP! Instead of redoing all the work, you remember answers to smaller problems and build up to the big answer. Like remembering your times tables instead of counting on your fingers every time!</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<h3 id="online-judges"><a class="header" href="#online-judges">Online Judges</a></h3>
+<ul>
+<li><a href="https://leetcode.com/tag/dynamic-programming/">LeetCode DP Problems</a> - 500+ problems</li>
+<li><a href="https://codeforces.com/problemset/tags/dp">Codeforces DP Tag</a> - Competitive programming</li>
+<li><a href="https://atcoder.jp/contests/dp">AtCoder DP Contest</a> - Educational DP problems</li>
+</ul>
+<h3 id="books"><a class="header" href="#books">Books</a></h3>
+<ul>
+<li>"Introduction to Algorithms" (CLRS) - Chapter 15</li>
+<li>"Algorithm Design" by Kleinberg &amp; Tardos - Chapter 6</li>
+<li>"Dynamic Programming for Coding Interviews" by Meenakshi &amp; Kamal Rawat</li>
+</ul>
+<h3 id="tutorials"><a class="header" href="#tutorials">Tutorials</a></h3>
+<ul>
+<li><a href="https://www.geeksforgeeks.org/dynamic-programming/">GeeksforGeeks DP Tutorial</a></li>
+<li><a href="https://www.topcoder.com/community/competitive-programming/tutorials/dynamic-programming-from-novice-to-advanced/">TopCoder DP Tutorial</a></li>
+<li><a href="https://www.youtube.com/playlist?list=PLrmLmBdmIlpsHaNTPP_jHHDx_os9ItYXr">Tushar Roy's YouTube DP Playlist</a></li>
+</ul>
+<h3 id="visualizations"><a class="header" href="#visualizations">Visualizations</a></h3>
+<ul>
+<li><a href="https://visualgo.net/en/recursion">VisuAlgo Dynamic Programming</a> - Interactive visualizations</li>
+<li><a href="https://algorithm-visualizer.org/">Algorithm Visualizer</a></li>
+</ul>
+<h3 id="practice-platforms"><a class="header" href="#practice-platforms">Practice Platforms</a></h3>
+<ul>
+<li><a href="https://neetcode.io/roadmap">NeetCode DP Roadmap</a> - Curated problem list</li>
+<li><a href="https://www.teamblind.com/post/New-Year-Gift---Curated-List-of-Top-75-LeetCode-Questions-to-Save-Your-Time-OaM1orEU">Blind 75</a> - Essential interview problems</li>
+</ul>
 
                     </main>
 

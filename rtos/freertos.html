@@ -178,87 +178,898 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="freertos"><a class="header" href="#freertos">FreeRTOS</a></h1>
-<p>FreeRTOS is a real-time operating system kernel for embedded devices. It's designed to be small, simple, and easy to use.</p>
+<p>FreeRTOS is a real-time operating system kernel for embedded devices. It's designed to be small, simple, and easy to use, providing deterministic real-time behavior with minimal resource overhead.</p>
 <h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
-<p><strong>Tasks</strong>: Independent threads of execution
-<strong>Queues</strong>: Inter-task communication
-<strong>Semaphores</strong>: Synchronization
-<strong>Mutexes</strong>: Mutual exclusion
-<strong>Timers</strong>: Software timers
-<strong>Event Groups</strong>: Synchronization</p>
-<h2 id="task-creation"><a class="header" href="#task-creation">Task Creation</a></h2>
+<p><strong>Tasks</strong>: Independent threads of execution with their own stack and priority level
+<strong>Queues</strong>: FIFO buffers for inter-task communication and data passing
+<strong>Semaphores</strong>: Synchronization primitives for signaling and resource counting
+<strong>Mutexes</strong>: Mutual exclusion locks with priority inheritance to prevent priority inversion
+<strong>Timers</strong>: Software timers that execute callbacks in timer daemon task context
+<strong>Event Groups</strong>: Synchronization mechanism for managing multiple event flags
+<strong>Task Notifications</strong>: Lightweight alternative to semaphores and queues for task signaling
+<strong>Stream Buffers</strong>: Efficient byte stream passing between tasks or interrupts</p>
+<h2 id="task-management"><a class="header" href="#task-management">Task Management</a></h2>
+<h3 id="task-creation"><a class="header" href="#task-creation">Task Creation</a></h3>
 <pre><code class="language-c">#include "FreeRTOS.h"
 #include "task.h"
 
 void vTaskFunction(void *pvParameters) {
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    const TickType_t xFrequency = pdMS_TO_TICKS(1000);
+
     for(;;) {
-        // Task code
-        vTaskDelay(pdMS_TO_TICKS(1000));  // Delay 1 second
+        // Task code executes every 1000ms
+        printf("Task running\n");
+
+        // Delay until next cycle (more precise than vTaskDelay)
+        vTaskDelayUntil(&amp;xLastWakeTime, xFrequency);
     }
 }
 
 void main(void) {
-    xTaskCreate(
-        vTaskFunction,      // Function
-        "TaskName",         // Name
-        128,                // Stack size
-        NULL,               // Parameters
-        1,                  // Priority
-        NULL                // Task handle
+    TaskHandle_t xHandle = NULL;
+
+    BaseType_t xReturned = xTaskCreate(
+        vTaskFunction,      // Function pointer
+        "TaskName",         // Descriptive name
+        configMINIMAL_STACK_SIZE,  // Stack size in words
+        NULL,               // Task parameters
+        tskIDLE_PRIORITY + 1,  // Priority
+        &amp;xHandle            // Task handle
     );
 
-    vTaskStartScheduler();  // Start scheduler
+    if(xReturned == pdPASS) {
+        vTaskStartScheduler();  // Start scheduler
+    }
 
-    for(;;);  // Should never reach here
+    for(;;);  // Should never reach here if scheduler starts
 }
 </code></pre>
+<h3 id="task-states"><a class="header" href="#task-states">Task States</a></h3>
+<p>Tasks can be in one of four states:</p>
+<ul>
+<li><strong>Running</strong>: Currently executing on the CPU</li>
+<li><strong>Ready</strong>: Ready to run but not currently executing</li>
+<li><strong>Blocked</strong>: Waiting for an event (timeout, semaphore, queue, etc.)</li>
+<li><strong>Suspended</strong>: Not available to scheduler (explicitly suspended)</li>
+</ul>
+<h3 id="task-priority-and-scheduling"><a class="header" href="#task-priority-and-scheduling">Task Priority and Scheduling</a></h3>
+<pre><code class="language-c">// Priority levels
+#define PRIORITY_IDLE       0
+#define PRIORITY_LOW        1
+#define PRIORITY_NORMAL     2
+#define PRIORITY_HIGH       3
+#define PRIORITY_REALTIME   4
+
+// Change task priority at runtime
+vTaskPrioritySet(xHandle, PRIORITY_HIGH);
+UBaseType_t uxPriority = uxTaskPriorityGet(xHandle);
+
+// Task suspension and resumption
+vTaskSuspend(xHandle);    // Suspend task
+vTaskResume(xHandle);     // Resume task
+xTaskResumeFromISR(xHandle);  // Resume from ISR
+
+// Task deletion
+vTaskDelete(xHandle);     // Delete specified task
+vTaskDelete(NULL);        // Delete current task
+</code></pre>
 <h2 id="queues"><a class="header" href="#queues">Queues</a></h2>
+<p>Queues provide thread-safe FIFO communication between tasks and interrupts.</p>
 <pre><code class="language-c">#include "queue.h"
 
-QueueHandle_t xQueue;
+typedef struct {
+    int sensor_id;
+    float value;
+    TickType_t timestamp;
+} SensorData_t;
 
-void vSenderTask(void *pvParameters) {
-    int value = 42;
-    xQueue = xQueueCreate(10, sizeof(int));
+QueueHandle_t xDataQueue;
+
+void vProducerTask(void *pvParameters) {
+    SensorData_t data;
+
+    // Create queue for 10 items
+    xDataQueue = xQueueCreate(10, sizeof(SensorData_t));
+
+    if(xDataQueue != NULL) {
+        for(;;) {
+            data.sensor_id = 1;
+            data.value = read_sensor();
+            data.timestamp = xTaskGetTickCount();
+
+            // Send to queue (wait up to 100ms if full)
+            if(xQueueSend(xDataQueue, &amp;data, pdMS_TO_TICKS(100)) != pdPASS) {
+                // Queue full, handle error
+            }
+
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
+}
+
+void vConsumerTask(void *pvParameters) {
+    SensorData_t received;
 
     for(;;) {
-        xQueueSend(xQueue, &amp;value, portMAX_DELAY);
+        // Wait indefinitely for data
+        if(xQueueReceive(xDataQueue, &amp;received, portMAX_DELAY) == pdPASS) {
+            printf("Sensor %d: %.2f at tick %lu\n",
+                   received.sensor_id,
+                   received.value,
+                   received.timestamp);
+        }
+    }
+}
+
+// Queue utility functions
+UBaseType_t uxMessagesWaiting = uxQueueMessagesWaiting(xDataQueue);
+UBaseType_t uxSpacesAvailable = uxQueueSpacesAvailable(xDataQueue);
+xQueueReset(xDataQueue);  // Empty the queue
+</code></pre>
+<h3 id="queue-operations-from-isr"><a class="header" href="#queue-operations-from-isr">Queue Operations from ISR</a></h3>
+<pre><code class="language-c">void vExampleISR(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    SensorData_t data = {0};
+
+    // Send from ISR
+    xQueueSendFromISR(xDataQueue, &amp;data, &amp;xHigherPriorityTaskWoken);
+
+    // Context switch if higher priority task was woken
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+</code></pre>
+<h2 id="semaphores"><a class="header" href="#semaphores">Semaphores</a></h2>
+<h3 id="binary-semaphores"><a class="header" href="#binary-semaphores">Binary Semaphores</a></h3>
+<p>Used for synchronization and signaling between tasks.</p>
+<pre><code class="language-c">#include "semphr.h"
+
+SemaphoreHandle_t xBinarySemaphore;
+
+void vTaskSignaler(void *pvParameters) {
+    xBinarySemaphore = xSemaphoreCreateBinary();
+
+    for(;;) {
+        // Perform work
+        process_data();
+
+        // Signal completion
+        xSemaphoreGive(xBinarySemaphore);
+
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
-void vReceiverTask(void *pvParameters) {
-    int received;
-
+void vTaskWaiter(void *pvParameters) {
     for(;;) {
-        if(xQueueReceive(xQueue, &amp;received, portMAX_DELAY)) {
-            printf("Received: %d\n", received);
+        // Wait for signal
+        if(xSemaphoreTake(xBinarySemaphore, portMAX_DELAY) == pdTRUE) {
+            // Semaphore acquired, respond to event
+            handle_completion();
         }
     }
 }
 </code></pre>
-<h2 id="semaphores"><a class="header" href="#semaphores">Semaphores</a></h2>
-<pre><code class="language-c">#include "semphr.h"
+<h3 id="counting-semaphores"><a class="header" href="#counting-semaphores">Counting Semaphores</a></h3>
+<p>Used for resource management and event counting.</p>
+<pre><code class="language-c">// Create semaphore with max count of 5, initial count of 5
+SemaphoreHandle_t xCountingSemaphore = xSemaphoreCreateCounting(5, 5);
 
-SemaphoreHandle_t xSemaphore;
-
-void vTask1(void *pvParameters) {
+void vResourceUser(void *pvParameters) {
     for(;;) {
-        if(xSemaphoreTake(xSemaphore, portMAX_DELAY)) {
-            // Critical section
-            xSemaphoreGive(xSemaphore);
+        // Wait for resource (decrements count)
+        if(xSemaphoreTake(xCountingSemaphore, pdMS_TO_TICKS(100)) == pdTRUE) {
+            // Use resource
+            use_limited_resource();
+
+            // Release resource (increments count)
+            xSemaphoreGive(xCountingSemaphore);
         }
+
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 </code></pre>
-<h2 id="priority-levels"><a class="header" href="#priority-levels">Priority Levels</a></h2>
+<h2 id="mutexes"><a class="header" href="#mutexes">Mutexes</a></h2>
+<p>Mutexes provide mutual exclusion with priority inheritance to prevent priority inversion.</p>
+<pre><code class="language-c">SemaphoreHandle_t xMutex;
+
+void vCriticalTask(void *pvParameters) {
+    xMutex = xSemaphoreCreateMutex();
+
+    for(;;) {
+        // Acquire mutex (blocks if already taken)
+        if(xSemaphoreTake(xMutex, portMAX_DELAY) == pdTRUE) {
+            // Critical section - protected resource access
+            shared_resource++;
+            update_display(shared_resource);
+
+            // Release mutex
+            xSemaphoreGive(xMutex);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+</code></pre>
+<h3 id="recursive-mutexes"><a class="header" href="#recursive-mutexes">Recursive Mutexes</a></h3>
+<p>Allow the same task to take a mutex multiple times.</p>
+<pre><code class="language-c">SemaphoreHandle_t xRecursiveMutex;
+
+void vRecursiveFunction(int depth) {
+    if(depth &gt; 0) {
+        xSemaphoreTakeRecursive(xRecursiveMutex, portMAX_DELAY);
+        vRecursiveFunction(depth - 1);
+        xSemaphoreGiveRecursive(xRecursiveMutex);
+    }
+}
+</code></pre>
+<h2 id="software-timers"><a class="header" href="#software-timers">Software Timers</a></h2>
+<p>Software timers execute callbacks in the timer daemon task context.</p>
+<pre><code class="language-c">#include "timers.h"
+
+TimerHandle_t xAutoReloadTimer;
+TimerHandle_t xOneShotTimer;
+
+void vTimerCallback(TimerHandle_t xTimer) {
+    // Called when timer expires
+    uint32_t ulCount = (uint32_t)pvTimerGetTimerID(xTimer);
+    printf("Timer expired, count: %lu\n", ulCount);
+}
+
+void vTimerSetup(void) {
+    // Auto-reload timer (periodic, 1000ms)
+    xAutoReloadTimer = xTimerCreate(
+        "AutoReload",               // Name
+        pdMS_TO_TICKS(1000),       // Period
+        pdTRUE,                     // Auto-reload
+        (void *)0,                  // Timer ID
+        vTimerCallback              // Callback
+    );
+
+    // One-shot timer (single execution, 5000ms)
+    xOneShotTimer = xTimerCreate(
+        "OneShot",
+        pdMS_TO_TICKS(5000),
+        pdFALSE,                    // One-shot
+        (void *)1,
+        vTimerCallback
+    );
+
+    // Start timers
+    if(xAutoReloadTimer != NULL) {
+        xTimerStart(xAutoReloadTimer, 0);
+    }
+
+    if(xOneShotTimer != NULL) {
+        xTimerStart(xOneShotTimer, 0);
+    }
+}
+
+// Timer control
+xTimerStop(xAutoReloadTimer, 0);
+xTimerChangePeriod(xAutoReloadTimer, pdMS_TO_TICKS(2000), 0);
+xTimerReset(xOneShotTimer, 0);  // Restart timer
+</code></pre>
+<h2 id="event-groups"><a class="header" href="#event-groups">Event Groups</a></h2>
+<p>Event groups allow tasks to wait for multiple conditions (event bits).</p>
+<pre><code class="language-c">#include "event_groups.h"
+
+EventGroupHandle_t xEventGroup;
+
+// Define event bits
+#define BIT_0  (1 &lt;&lt; 0)  // Sensor ready
+#define BIT_1  (1 &lt;&lt; 1)  // Data valid
+#define BIT_2  (1 &lt;&lt; 2)  // Calibration complete
+#define ALL_SYNC_BITS (BIT_0 | BIT_1 | BIT_2)
+
+void vEventSetter(void *pvParameters) {
+    xEventGroup = xEventGroupCreate();
+
+    for(;;) {
+        // Set individual bits
+        xEventGroupSetBits(xEventGroup, BIT_0);
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        xEventGroupSetBits(xEventGroup, BIT_1);
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        xEventGroupSetBits(xEventGroup, BIT_2);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+void vEventWaiter(void *pvParameters) {
+    EventBits_t uxBits;
+
+    for(;;) {
+        // Wait for all bits to be set
+        uxBits = xEventGroupWaitBits(
+            xEventGroup,
+            ALL_SYNC_BITS,          // Bits to wait for
+            pdTRUE,                 // Clear on exit
+            pdTRUE,                 // Wait for all bits
+            portMAX_DELAY           // Wait indefinitely
+        );
+
+        if((uxBits &amp; ALL_SYNC_BITS) == ALL_SYNC_BITS) {
+            printf("All events occurred\n");
+        }
+    }
+}
+
+// Event group utilities
+EventBits_t uxCurrentBits = xEventGroupGetBits(xEventGroup);
+xEventGroupClearBits(xEventGroup, BIT_0);
+</code></pre>
+<h2 id="task-notifications"><a class="header" href="#task-notifications">Task Notifications</a></h2>
+<p>Lightweight alternative to semaphores and queues for direct task-to-task communication.</p>
+<pre><code class="language-c">TaskHandle_t xHandleToNotify;
+
+void vNotifyingTask(void *pvParameters) {
+    for(;;) {
+        // Perform work
+        uint32_t ulValueToSend = 42;
+
+        // Send notification
+        xTaskNotify(
+            xHandleToNotify,
+            ulValueToSend,
+            eSetValueWithOverwrite
+        );
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+void vNotifiedTask(void *pvParameters) {
+    uint32_t ulNotificationValue;
+
+    for(;;) {
+        // Wait for notification
+        if(xTaskNotifyWait(
+            0x00,                   // Don't clear on entry
+            0xFFFFFFFF,             // Clear all on exit
+            &amp;ulNotificationValue,
+            portMAX_DELAY) == pdTRUE) {
+
+            printf("Received: %lu\n", ulNotificationValue);
+        }
+    }
+}
+
+// Notification from ISR
+void vExampleISR(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    vTaskNotifyGiveFromISR(xHandleToNotify, &amp;xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+</code></pre>
+<h2 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h2>
+<p>FreeRTOS provides multiple heap allocation schemes.</p>
+<h3 id="heap-schemes"><a class="header" href="#heap-schemes">Heap Schemes</a></h3>
+<p><strong>heap_1</strong>: Simplest, no freeing (deterministic)
+<strong>heap_2</strong>: Permits freeing, no coalescence
+<strong>heap_3</strong>: Wraps malloc/free (thread-safe)
+<strong>heap_4</strong>: Coalescence, suitable for fragmentation-prone apps
+<strong>heap_5</strong>: Like heap_4, supports multiple memory regions</p>
+<h3 id="memory-api"><a class="header" href="#memory-api">Memory API</a></h3>
+<pre><code class="language-c">// Allocate memory
+void *pvBuffer = pvPortMalloc(100);
+
+// Free memory
+vPortFree(pvBuffer);
+
+// Get heap statistics
+HeapStats_t xHeapStats;
+vPortGetHeapStats(&amp;xHeapStats);
+
+printf("Available heap: %zu bytes\n", xHeapStats.xAvailableHeapSpaceInBytes);
+printf("Largest free block: %zu bytes\n", xHeapStats.xSizeOfLargestFreeBlockInBytes);
+printf("Minimum ever free: %zu bytes\n", xHeapStats.xMinimumEverFreeBytesRemaining);
+
+// Get free heap size
+size_t xFreeHeapSize = xPortGetFreeHeapSize();
+size_t xMinimumEverFreeHeapSize = xPortGetMinimumEverFreeHeapSize();
+</code></pre>
+<h3 id="static-allocation"><a class="header" href="#static-allocation">Static Allocation</a></h3>
+<p>Allocate memory at compile-time instead of runtime.</p>
+<pre><code class="language-c">// Enable static allocation in FreeRTOSConfig.h
+#define configSUPPORT_STATIC_ALLOCATION 1
+
+StaticTask_t xTaskBuffer;
+StackType_t xStack[128];
+
+TaskHandle_t xHandle = xTaskCreateStatic(
+    vTaskFunction,
+    "StaticTask",
+    128,
+    NULL,
+    1,
+    xStack,
+    &amp;xTaskBuffer
+);
+</code></pre>
+<h2 id="interrupt-handling"><a class="header" href="#interrupt-handling">Interrupt Handling</a></h2>
+<h3 id="isr-safe-api-functions"><a class="header" href="#isr-safe-api-functions">ISR-Safe API Functions</a></h3>
+<p>FreeRTOS provides FromISR variants for interrupt context.</p>
+<pre><code class="language-c">void vUART_ISR(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    char cReceivedChar;
+
+    // Read character from UART
+    cReceivedChar = UART_ReadByte();
+
+    // Send to queue from ISR
+    xQueueSendFromISR(xRxQueue, &amp;cReceivedChar, &amp;xHigherPriorityTaskWoken);
+
+    // Yield if necessary
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+</code></pre>
+<h3 id="critical-sections"><a class="header" href="#critical-sections">Critical Sections</a></h3>
+<pre><code class="language-c">// Disable interrupts (short critical sections only)
+taskENTER_CRITICAL();
+// Critical code
+taskEXIT_CRITICAL();
+
+// From ISR (saves/restores interrupt state)
+UBaseType_t uxSavedInterruptStatus;
+uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+// Critical code
+taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
+</code></pre>
+<h3 id="interrupt-priority"><a class="header" href="#interrupt-priority">Interrupt Priority</a></h3>
+<pre><code class="language-c">// Configure interrupt priorities
+// (implementation specific to hardware)
+
+// IMPORTANT: FreeRTOS API can only be called from interrupts
+// with priority at or below configMAX_SYSCALL_INTERRUPT_PRIORITY
+
+// On Cortex-M, lower numeric value = higher priority
+// Set priorities appropriately in FreeRTOSConfig.h
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY  5
+
+// High priority interrupt (cannot use FreeRTOS API)
+void vHighPriorityISR(void) {
+    // No FreeRTOS calls allowed
+    toggle_gpio_fast();
+}
+
+// Lower priority interrupt (can use FreeRTOS API)
+void vLowPriorityISR(void) {
+    // Can safely call FromISR functions
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    xSemaphoreGiveFromISR(xSemaphore, &amp;xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+</code></pre>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<p>Key settings in <code>FreeRTOSConfig.h</code>:</p>
+<pre><code class="language-c">// Scheduling
+#define configUSE_PREEMPTION              1
+#define configUSE_TIME_SLICING            1
+#define configUSE_IDLE_HOOK               0
+#define configUSE_TICK_HOOK               0
+
+// Tick rate (Hz)
+#define configTICK_RATE_HZ                1000
+
+// CPU clock (Hz)
+#define configCPU_CLOCK_HZ                80000000
+
+// Priorities
+#define configMAX_PRIORITIES              5
+#define configMINIMAL_STACK_SIZE          128
+
+// Heap size (bytes)
+#define configTOTAL_HEAP_SIZE             10240
+
+// Features
+#define configUSE_MUTEXES                 1
+#define configUSE_RECURSIVE_MUTEXES       1
+#define configUSE_COUNTING_SEMAPHORES     1
+#define configUSE_QUEUE_SETS              1
+#define configUSE_TIMERS                  1
+#define configUSE_TASK_NOTIFICATIONS      1
+
+// Memory allocation
+#define configSUPPORT_STATIC_ALLOCATION   1
+#define configSUPPORT_DYNAMIC_ALLOCATION  1
+
+// Runtime statistics
+#define configGENERATE_RUN_TIME_STATS     1
+#define configUSE_TRACE_FACILITY          1
+#define configUSE_STATS_FORMATTING_FUNCTIONS 1
+
+// Stack overflow detection
+#define configCHECK_FOR_STACK_OVERFLOW    2
+
+// Assert
+#define configASSERT(x)  if(!(x)) { taskDISABLE_INTERRUPTS(); for(;;); }
+</code></pre>
+<h2 id="runtime-statistics"><a class="header" href="#runtime-statistics">Runtime Statistics</a></h2>
+<p>Monitor task execution and performance.</p>
+<pre><code class="language-c">void vTaskList_Display(void) {
+    char pcWriteBuffer[512];
+
+    // Task list (name, state, priority, stack, task number)
+    vTaskList(pcWriteBuffer);
+    printf("%s\n", pcWriteBuffer);
+
+    // Runtime statistics (name, runtime, percentage)
+    vTaskGetRunTimeStats(pcWriteBuffer);
+    printf("%s\n", pcWriteBuffer);
+}
+
+// Get individual task information
+TaskStatus_t xTaskDetails;
+vTaskGetInfo(
+    xHandle,
+    &amp;xTaskDetails,
+    pdTRUE,         // Include stack high water mark
+    eInvalid        // Get current state
+);
+
+printf("Stack high water mark: %u\n", xTaskDetails.usStackHighWaterMark);
+printf("Task state: %d\n", xTaskDetails.eCurrentState);
+printf("Task priority: %u\n", xTaskDetails.uxCurrentPriority);
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="task-design"><a class="header" href="#task-design">Task Design</a></h3>
+<ol>
+<li><strong>Keep ISRs short</strong>: Defer processing to tasks using queues/semaphores</li>
+<li><strong>Use appropriate delays</strong>: <code>vTaskDelayUntil()</code> for periodic tasks</li>
+<li><strong>Avoid polling</strong>: Use blocking calls with timeouts</li>
+<li><strong>One responsibility per task</strong>: Follow single responsibility principle</li>
+<li><strong>Minimize critical sections</strong>: Keep interrupt-disabled time minimal</li>
+</ol>
+<h3 id="priority-assignment"><a class="header" href="#priority-assignment">Priority Assignment</a></h3>
+<pre><code class="language-c">// Example priority scheme
+#define PRIORITY_IDLE           0  // Idle task (system)
+#define PRIORITY_BACKGROUND     1  // Background processing
+#define PRIORITY_NORMAL         2  // Standard tasks
+#define PRIORITY_UI             3  // User interface
+#define PRIORITY_COMMS          4  // Time-critical communication
+#define PRIORITY_CONTROL        5  // Real-time control loops
+#define PRIORITY_SAFETY         6  // Safety-critical tasks
+</code></pre>
+<h3 id="stack-size-optimization"><a class="header" href="#stack-size-optimization">Stack Size Optimization</a></h3>
+<pre><code class="language-c">// Monitor stack usage
+UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+printf("Unused stack: %u words\n", uxHighWaterMark);
+
+// Start with generous size, then reduce based on measurements
+// Words, not bytes (multiply by sizeof(StackType_t) for bytes)
+</code></pre>
+<h3 id="resource-management"><a class="header" href="#resource-management">Resource Management</a></h3>
+<pre><code class="language-c">// RAII pattern for mutex
+typedef struct {
+    SemaphoreHandle_t mutex;
+    BaseType_t locked;
+} MutexGuard_t;
+
+MutexGuard_t MutexGuard_Lock(SemaphoreHandle_t mutex) {
+    MutexGuard_t guard = {mutex, pdFALSE};
+    if(xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        guard.locked = pdTRUE;
+    }
+    return guard;
+}
+
+void MutexGuard_Unlock(MutexGuard_t *guard) {
+    if(guard-&gt;locked) {
+        xSemaphoreGive(guard-&gt;mutex);
+        guard-&gt;locked = pdFALSE;
+    }
+}
+</code></pre>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<h3 id="priority-inversion"><a class="header" href="#priority-inversion">Priority Inversion</a></h3>
+<pre><code class="language-c">// Problem: Low priority task holds mutex, high priority task blocks
+// Solution: Use mutexes (not binary semaphores) for priority inheritance
+
+// BAD: Using binary semaphore for mutual exclusion
+SemaphoreHandle_t xBadLock = xSemaphoreCreateBinary();
+xSemaphoreGive(xBadLock);  // Initialize
+
+// GOOD: Using mutex with priority inheritance
+SemaphoreHandle_t xGoodLock = xSemaphoreCreateMutex();
+</code></pre>
+<h3 id="stack-overflow"><a class="header" href="#stack-overflow">Stack Overflow</a></h3>
+<pre><code class="language-c">// Enable stack overflow detection
+#define configCHECK_FOR_STACK_OVERFLOW 2
+
+// Implement hook
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+    // Log error and halt
+    printf("Stack overflow in task: %s\n", pcTaskName);
+    for(;;);
+}
+</code></pre>
+<h3 id="deadlock"><a class="header" href="#deadlock">Deadlock</a></h3>
+<pre><code class="language-c">// Problem: Circular wait for resources
+// Solution: Always acquire mutexes in same order
+
+SemaphoreHandle_t xMutexA, xMutexB;
+
+void vSafeTask1(void *pvParameters) {
+    // Always acquire A then B
+    xSemaphoreTake(xMutexA, portMAX_DELAY);
+    xSemaphoreTake(xMutexB, portMAX_DELAY);
+
+    // Critical section
+
+    xSemaphoreGive(xMutexB);
+    xSemaphoreGive(xMutexA);
+}
+
+void vSafeTask2(void *pvParameters) {
+    // Always acquire A then B (same order)
+    xSemaphoreTake(xMutexA, portMAX_DELAY);
+    xSemaphoreTake(xMutexB, portMAX_DELAY);
+
+    // Critical section
+
+    xSemaphoreGive(xMutexB);
+    xSemaphoreGive(xMutexA);
+}
+</code></pre>
+<h3 id="inappropriate-api-usage"><a class="header" href="#inappropriate-api-usage">Inappropriate API Usage</a></h3>
+<pre><code class="language-c">// WRONG: Calling non-ISR function from ISR
+void vBadISR(void) {
+    xQueueSend(xQueue, &amp;data, 0);  // DON'T DO THIS
+}
+
+// CORRECT: Use FromISR variant
+void vGoodISR(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    xQueueSendFromISR(xQueue, &amp;data, &amp;xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+</code></pre>
+<h2 id="debugging-techniques"><a class="header" href="#debugging-techniques">Debugging Techniques</a></h2>
+<h3 id="trace-hooks"><a class="header" href="#trace-hooks">Trace Hooks</a></h3>
+<pre><code class="language-c">#define configUSE_TRACE_FACILITY 1
+
+// Task switched in
+void vApplicationTaskSwitchedInHook(void) {
+    TaskHandle_t xHandle = xTaskGetCurrentTaskHandle();
+    char *pcTaskName = pcTaskGetName(xHandle);
+    printf("Switched to: %s\n", pcTaskName);
+}
+
+// Tick hook (called every tick)
+void vApplicationTickHook(void) {
+    // Lightweight monitoring only
+}
+
+// Idle hook (called by idle task)
+void vApplicationIdleHook(void) {
+    // Background processing, watchdog feeding
+}
+</code></pre>
+<h3 id="assertions"><a class="header" href="#assertions">Assertions</a></h3>
+<pre><code class="language-c">// Define assert macro
+#define configASSERT(x) \
+    if(!(x)) { \
+        printf("Assert failed: %s:%d\n", __FILE__, __LINE__); \
+        taskDISABLE_INTERRUPTS(); \
+        for(;;); \
+    }
+
+// Use in code
+configASSERT(xQueue != NULL);
+configASSERT(xSemaphoreTake(xMutex, portMAX_DELAY) == pdTRUE);
+</code></pre>
+<h3 id="queue-set-monitoring"><a class="header" href="#queue-set-monitoring">Queue Set Monitoring</a></h3>
+<pre><code class="language-c">// Monitor multiple queues
+QueueSetHandle_t xQueueSet = xQueueCreateSet(20);
+
+xQueueAddToSet(xQueue1, xQueueSet);
+xQueueAddToSet(xQueue2, xQueueSet);
+
+QueueSetMemberHandle_t xActivatedMember;
+xActivatedMember = xQueueSelectFromSet(xQueueSet, portMAX_DELAY);
+
+if(xActivatedMember == xQueue1) {
+    // Data available on queue 1
+} else if(xActivatedMember == xQueue2) {
+    // Data available on queue 2
+}
+</code></pre>
+<h2 id="real-world-example"><a class="header" href="#real-world-example">Real-World Example</a></h2>
+<p>Complete embedded system with multiple tasks and IPC mechanisms.</p>
+<pre><code class="language-c">#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
+#include "timers.h"
+
+// Shared resources
+QueueHandle_t xSensorQueue;
+SemaphoreHandle_t xDisplayMutex;
+TimerHandle_t xWatchdogTimer;
+
+typedef struct {
+    uint8_t sensor_id;
+    float temperature;
+    float humidity;
+} SensorReading_t;
+
+// Sensor reading task (high priority)
+void vSensorTask(void *pvParameters) {
+    SensorReading_t reading;
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+
+    for(;;) {
+        // Read sensors
+        reading.sensor_id = 1;
+        reading.temperature = read_temperature();
+        reading.humidity = read_humidity();
+
+        // Send to processing queue
+        if(xQueueSend(xSensorQueue, &amp;reading, 0) != pdPASS) {
+            // Queue full, log error
+        }
+
+        // Periodic execution every 500ms
+        vTaskDelayUntil(&amp;xLastWakeTime, pdMS_TO_TICKS(500));
+    }
+}
+
+// Data processing task (medium priority)
+void vProcessingTask(void *pvParameters) {
+    SensorReading_t reading;
+
+    for(;;) {
+        // Wait for sensor data
+        if(xQueueReceive(xSensorQueue, &amp;reading, portMAX_DELAY) == pdPASS) {
+            // Process data
+            if(reading.temperature &gt; 30.0f) {
+                activate_cooling();
+            }
+
+            // Update display (mutex protected)
+            if(xSemaphoreTake(xDisplayMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+                update_display(reading.temperature, reading.humidity);
+                xSemaphoreGive(xDisplayMutex);
+            }
+        }
+    }
+}
+
+// Communication task (medium priority)
+void vCommTask(void *pvParameters) {
+    char txBuffer[64];
+
+    for(;;) {
+        // Wait for command from UART
+        if(uart_data_available()) {
+            process_command();
+        }
+
+        // Periodic status transmission
+        snprintf(txBuffer, sizeof(txBuffer), "Status: OK\n");
+        uart_send(txBuffer, strlen(txBuffer));
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+// Watchdog timer callback
+void vWatchdogCallback(TimerHandle_t xTimer) {
+    feed_hardware_watchdog();
+}
+
+// Idle hook for power management
+void vApplicationIdleHook(void) {
+    enter_low_power_mode();
+}
+
+// Stack overflow hook
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+    printf("Stack overflow: %s\n", pcTaskName);
+    for(;;);
+}
+
+// Main application
+int main(void) {
+    // Hardware initialization
+    hardware_init();
+
+    // Create synchronization primitives
+    xSensorQueue = xQueueCreate(10, sizeof(SensorReading_t));
+    xDisplayMutex = xSemaphoreCreateMutex();
+
+    // Create watchdog timer (auto-reload, 1000ms)
+    xWatchdogTimer = xTimerCreate(
+        "Watchdog",
+        pdMS_TO_TICKS(1000),
+        pdTRUE,
+        NULL,
+        vWatchdogCallback
+    );
+
+    // Create tasks
+    xTaskCreate(vSensorTask, "Sensor", 256, NULL, 3, NULL);
+    xTaskCreate(vProcessingTask, "Process", 256, NULL, 2, NULL);
+    xTaskCreate(vCommTask, "Comm", 256, NULL, 2, NULL);
+
+    // Start watchdog timer
+    xTimerStart(xWatchdogTimer, 0);
+
+    // Start scheduler
+    vTaskStartScheduler();
+
+    // Should never reach here
+    for(;;);
+
+    return 0;
+}
+</code></pre>
+<h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
+<h3 id="context-switch-overhead"><a class="header" href="#context-switch-overhead">Context Switch Overhead</a></h3>
 <ul>
-<li>Higher number = higher priority</li>
-<li>Idle task = priority 0</li>
-<li>Typical range: 0-31</li>
-<li>Preemptive scheduling (default)</li>
+<li>Minimize task switching frequency</li>
+<li>Use task notifications instead of queues where possible</li>
+<li>Batch process queue messages</li>
+<li>Adjust tick rate based on timing requirements</li>
 </ul>
-<p>FreeRTOS provides essential RTOS functionality in a small footprint, ideal for resource-constrained embedded systems.</p>
+<h3 id="memory-footprint"><a class="header" href="#memory-footprint">Memory Footprint</a></h3>
+<pre><code class="language-c">// Reduce RAM usage
+#define configMINIMAL_STACK_SIZE          64   // Tune per task
+#define configTOTAL_HEAP_SIZE             4096 // Based on actual needs
+#define configMAX_PRIORITIES              4    // Only what's needed
+
+// Use static allocation for predictability
+#define configSUPPORT_STATIC_ALLOCATION   1
+#define configSUPPORT_DYNAMIC_ALLOCATION  0
+</code></pre>
+<h3 id="cpu-utilization"><a class="header" href="#cpu-utilization">CPU Utilization</a></h3>
+<pre><code class="language-c">// Monitor CPU usage
+void vCPUUtilization(void) {
+    TaskStatus_t *pxTaskStatusArray;
+    UBaseType_t uxArraySize, x;
+    uint32_t ulTotalRunTime, ulStatsAsPercentage;
+
+    uxArraySize = uxTaskGetNumberOfTasks();
+    pxTaskStatusArray = pvPortMalloc(uxArraySize * sizeof(TaskStatus_t));
+
+    if(pxTaskStatusArray != NULL) {
+        uxArraySize = uxTaskGetSystemState(pxTaskStatusArray,
+                                           uxArraySize,
+                                           &amp;ulTotalRunTime);
+
+        for(x = 0; x &lt; uxArraySize; x++) {
+            ulStatsAsPercentage = pxTaskStatusArray[x].ulRunTimeCounter /
+                                  (ulTotalRunTime / 100);
+
+            printf("%s\t\t%u%%\n",
+                   pxTaskStatusArray[x].pcTaskName,
+                   ulStatsAsPercentage);
+        }
+
+        vPortFree(pxTaskStatusArray);
+    }
+}
+</code></pre>
+<h2 id="platform-support"><a class="header" href="#platform-support">Platform Support</a></h2>
+<p>FreeRTOS supports numerous architectures:</p>
+<ul>
+<li><strong>ARM Cortex-M</strong> (M0, M0+, M3, M4, M7, M23, M33)</li>
+<li><strong>ARM Cortex-A</strong> (A9, A53, A72)</li>
+<li><strong>ARM Cortex-R</strong> (R4, R5)</li>
+<li><strong>RISC-V</strong> (RV32, RV64)</li>
+<li><strong>x86</strong> (IA-32, x86-64)</li>
+<li><strong>Xtensa</strong> (ESP32, ESP8266)</li>
+<li><strong>AVR</strong> (ATmega)</li>
+<li><strong>PIC</strong> (PIC24, PIC32)</li>
+<li><strong>MSP430</strong></li>
+<li><strong>Renesas RX</strong></li>
+</ul>
+<h2 id="freertos-provides-essential-rtos-functionality-in-a-small-footprint-ideal-for-resource-constrained-embedded-systems-with-deterministic-real-time-requirements"><a class="header" href="#freertos-provides-essential-rtos-functionality-in-a-small-footprint-ideal-for-resource-constrained-embedded-systems-with-deterministic-real-time-requirements">FreeRTOS provides essential RTOS functionality in a small footprint, ideal for resource-constrained embedded systems with deterministic real-time requirements.</a></h2>
 
                     </main>
 

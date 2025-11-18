@@ -177,22 +177,37 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="threadx"><a class="header" href="#threadx">ThreadX</a></h1>
-<p>ThreadX is a real-time operating system (RTOS) designed for deeply embedded applications. It's known for its small footprint and fast execution.</p>
+                        <h1 id="threadx-azure-rtos"><a class="header" href="#threadx-azure-rtos">ThreadX (Azure RTOS)</a></h1>
+<p>ThreadX is a professional-grade real-time operating system (RTOS) designed for deeply embedded, real-time, and IoT applications. Now part of Azure RTOS (open-sourced by Microsoft), it's known for its small footprint, fast execution, and deterministic real-time performance.</p>
+<h2 id="key-features"><a class="header" href="#key-features">Key Features</a></h2>
+<ul>
+<li><strong>Ultra-small footprint</strong>: Kernel as small as 2KB</li>
+<li><strong>Deterministic</strong>: Bounded execution times</li>
+<li><strong>Priority-based preemptive scheduling</strong>: 32 or 1024 priority levels</li>
+<li><strong>Safety certifications</strong>: IEC 61508, IEC 62304, ISO 26262, EN 50128</li>
+<li><strong>Picokernel architecture</strong>: Fast context switching (~200 clock cycles)</li>
+<li><strong>No royalties or licensing fees</strong>: Open-source under MIT license</li>
+<li><strong>Thread-Metrics test suite</strong>: Built-in performance analysis</li>
+</ul>
 <h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
-<p><strong>Threads</strong>: Execution contexts
-<strong>Message Queues</strong>: Inter-thread communication<br />
-<strong>Semaphores</strong>: Synchronization
-<strong>Mutexes</strong>: Resource protection
-<strong>Event Flags</strong>: Thread synchronization
-<strong>Memory Pools</strong>: Dynamic memory management</p>
-<h2 id="thread-creation"><a class="header" href="#thread-creation">Thread Creation</a></h2>
+<p><strong>Threads</strong>: Independent execution contexts with individual stacks and priorities
+<strong>Message Queues</strong>: FIFO-based inter-thread communication
+<strong>Semaphores</strong>: Counting and binary synchronization primitives
+<strong>Mutexes</strong>: Resource protection with priority inheritance
+<strong>Event Flags</strong>: Flexible thread synchronization mechanism
+<strong>Memory Pools</strong>: Block and byte pool allocation
+<strong>Timers</strong>: Application timers with expiration routines
+<strong>Interrupt Management</strong>: Fast ISR processing with deferred work</p>
+<h2 id="thread-management"><a class="header" href="#thread-management">Thread Management</a></h2>
+<h3 id="thread-creation-and-configuration"><a class="header" href="#thread-creation-and-configuration">Thread Creation and Configuration</a></h3>
 <pre><code class="language-c">#include "tx_api.h"
 
 TX_THREAD my_thread;
 UCHAR thread_stack[1024];
 
 void my_thread_entry(ULONG thread_input) {
+    UINT status;
+
     while(1) {
         // Thread logic
         tx_thread_sleep(100);  // Sleep 100 ticks
@@ -200,66 +215,569 @@ void my_thread_entry(ULONG thread_input) {
 }
 
 void tx_application_define(void *first_unused_memory) {
-    tx_thread_create(
+    UINT status = tx_thread_create(
         &amp;my_thread,              // Thread control block
         "My Thread",             // Name
         my_thread_entry,         // Entry function
-        0,                       // Input
+        0x1234,                  // Input parameter
         thread_stack,            // Stack start
         sizeof(thread_stack),    // Stack size
-        16,                      // Priority (0-31)
+        16,                      // Priority (0-31, 0 highest)
         16,                      // Preemption threshold
-        TX_NO_TIME_SLICE,        // Time slice
+        TX_NO_TIME_SLICE,        // Time slice (disabled)
         TX_AUTO_START            // Auto start
     );
+
+    if (status != TX_SUCCESS) {
+        // Handle error
+    }
 }
 </code></pre>
+<h3 id="thread-control"><a class="header" href="#thread-control">Thread Control</a></h3>
+<pre><code class="language-c">// Suspend and resume
+tx_thread_suspend(&amp;my_thread);
+tx_thread_resume(&amp;my_thread);
+
+// Priority management
+tx_thread_priority_change(&amp;my_thread, 10, &amp;old_priority);
+
+// Preemption threshold (prevents priority inversion)
+tx_thread_preemption_change(&amp;my_thread, 5, &amp;old_threshold);
+
+// Time slicing
+tx_thread_time_slice_change(&amp;my_thread, 10, &amp;old_time_slice);
+
+// Terminate and delete
+tx_thread_terminate(&amp;my_thread);
+tx_thread_delete(&amp;my_thread);
+
+// Relinquish CPU to other threads at same priority
+tx_thread_relinquish();
+</code></pre>
+<h3 id="thread-states"><a class="header" href="#thread-states">Thread States</a></h3>
+<ul>
+<li><strong>READY</strong>: Ready to execute</li>
+<li><strong>COMPLETED</strong>: Execution finished</li>
+<li><strong>TERMINATED</strong>: Terminated by another thread</li>
+<li><strong>SUSPENDED</strong>: Suspended by application</li>
+<li><strong>SLEEP</strong>: Sleeping for specific time</li>
+<li><strong>QUEUE</strong>: Waiting on queue</li>
+<li><strong>SEMAPHORE</strong>: Waiting on semaphore</li>
+<li><strong>EVENT</strong>: Waiting on event flags</li>
+<li><strong>MEMORY</strong>: Waiting on memory</li>
+<li><strong>MUTEX</strong>: Waiting on mutex</li>
+</ul>
 <h2 id="message-queues"><a class="header" href="#message-queues">Message Queues</a></h2>
+<h3 id="queue-operations"><a class="header" href="#queue-operations">Queue Operations</a></h3>
 <pre><code class="language-c">TX_QUEUE my_queue;
 UCHAR queue_area[100 * sizeof(ULONG)];
 
-// Create queue
+// Create queue (supports 1-16 ULONGs per message)
 tx_queue_create(
     &amp;my_queue,
     "My Queue",
-    TX_1_ULONG,              // Message size
+    TX_1_ULONG,              // Message size (TX_1_ULONG to TX_16_ULONG)
     queue_area,
     sizeof(queue_area)
 );
 
-// Send message
-ULONG message = 0x12345678;
-tx_queue_send(&amp;my_queue, &amp;message, TX_WAIT_FOREVER);
+// Send message (to back of queue)
+ULONG message[4] = {0x12345678, 0xABCDEF00, 0x11111111, 0x22222222};
+tx_queue_send(&amp;my_queue, message, TX_WAIT_FOREVER);
+
+// Send to front (priority message)
+tx_queue_front_send(&amp;my_queue, message, TX_NO_WAIT);
 
 // Receive message
-ULONG received;
-tx_queue_receive(&amp;my_queue, &amp;received, TX_WAIT_FOREVER);
+ULONG received[4];
+tx_queue_receive(&amp;my_queue, received, TX_WAIT_FOREVER);
+
+// Query queue information
+ULONG enqueued, available;
+TX_THREAD *first_suspended;
+tx_queue_info_get(&amp;my_queue, TX_NULL, &amp;enqueued,
+                  &amp;available, &amp;first_suspended, TX_NULL, TX_NULL);
+
+// Flush all messages
+tx_queue_flush(&amp;my_queue);
+
+// Delete queue
+tx_queue_delete(&amp;my_queue);
 </code></pre>
 <h2 id="semaphores"><a class="header" href="#semaphores">Semaphores</a></h2>
+<h3 id="counting-semaphores"><a class="header" href="#counting-semaphores">Counting Semaphores</a></h3>
 <pre><code class="language-c">TX_SEMAPHORE my_semaphore;
 
-// Create counting semaphore
-tx_semaphore_create(&amp;my_semaphore, "My Semaphore", 1);
+// Create counting semaphore (initial count = 3)
+tx_semaphore_create(&amp;my_semaphore, "My Semaphore", 3);
 
-// Get semaphore
-tx_semaphore_get(&amp;my_semaphore, TX_WAIT_FOREVER);
+// Get semaphore (decrements count)
+UINT status = tx_semaphore_get(&amp;my_semaphore, TX_WAIT_FOREVER);
 
-// Put semaphore
+if (status == TX_SUCCESS) {
+    // Access shared resource
+}
+
+// Put semaphore (increments count)
 tx_semaphore_put(&amp;my_semaphore);
+
+// Prioritized put (wakes highest priority thread)
+tx_semaphore_prioritize(&amp;my_semaphore);
+
+// Ceiling put (sets maximum count)
+tx_semaphore_ceiling_put(&amp;my_semaphore, 10);
+
+// Delete semaphore
+tx_semaphore_delete(&amp;my_semaphore);
+</code></pre>
+<h3 id="binary-semaphore-pattern"><a class="header" href="#binary-semaphore-pattern">Binary Semaphore Pattern</a></h3>
+<pre><code class="language-c">TX_SEMAPHORE binary_sem;
+
+// Binary semaphore: initial count = 0
+tx_semaphore_create(&amp;binary_sem, "Binary Sem", 0);
+
+// Signal (producer)
+tx_semaphore_put(&amp;binary_sem);
+
+// Wait (consumer)
+tx_semaphore_get(&amp;binary_sem, TX_WAIT_FOREVER);
 </code></pre>
 <h2 id="mutex"><a class="header" href="#mutex">Mutex</a></h2>
+<h3 id="mutex-with-priority-inheritance"><a class="header" href="#mutex-with-priority-inheritance">Mutex with Priority Inheritance</a></h3>
 <pre><code class="language-c">TX_MUTEX my_mutex;
 
-// Create mutex
-tx_mutex_create(&amp;my_mutex, "My Mutex", TX_NO_INHERIT);
+// Create mutex with priority inheritance
+tx_mutex_create(&amp;my_mutex, "My Mutex", TX_INHERIT);
 
-// Get mutex
+// Alternatives:
+// TX_NO_INHERIT - no priority inheritance
+// TX_INHERIT - priority inheritance enabled
+
+// Get mutex (with deadlock detection)
+UINT status = tx_mutex_get(&amp;my_mutex, TX_WAIT_FOREVER);
+
+if (status == TX_SUCCESS) {
+    // Critical section - access shared resource
+
+    // Release mutex
+    tx_mutex_put(&amp;my_mutex);
+}
+
+// Priority inheritance prevents priority inversion
+// Lower priority thread inherits priority of waiting higher priority thread
+</code></pre>
+<h3 id="recursive-mutex-locks"><a class="header" href="#recursive-mutex-locks">Recursive Mutex Locks</a></h3>
+<pre><code class="language-c">// ThreadX mutexes support recursive locking
 tx_mutex_get(&amp;my_mutex, TX_WAIT_FOREVER);
+tx_mutex_get(&amp;my_mutex, TX_WAIT_FOREVER);  // Same thread, succeeds
 
-// Release mutex
+// Must release same number of times
+tx_mutex_put(&amp;my_mutex);
 tx_mutex_put(&amp;my_mutex);
 </code></pre>
-<p>ThreadX is widely used in embedded systems, particularly in IoT and industrial applications, offering deterministic real-time performance.</p>
+<h2 id="event-flags"><a class="header" href="#event-flags">Event Flags</a></h2>
+<p>Event flags provide flexible thread synchronization based on boolean conditions.</p>
+<pre><code class="language-c">TX_EVENT_FLAGS_GROUP my_events;
+
+// Create event flags group (32 flags per group)
+tx_event_flags_create(&amp;my_events, "My Events");
+
+// Set event flags (OR operation)
+#define EVENT_FLAG_1    0x00000001
+#define EVENT_FLAG_2    0x00000002
+#define EVENT_FLAG_3    0x00000004
+
+tx_event_flags_set(&amp;my_events, EVENT_FLAG_1 | EVENT_FLAG_2, TX_OR);
+
+// Clear event flags (AND operation)
+tx_event_flags_set(&amp;my_events, ~EVENT_FLAG_1, TX_AND);
+
+// Wait for event flags - AND condition (all flags must be set)
+ULONG actual_flags;
+tx_event_flags_get(
+    &amp;my_events,
+    EVENT_FLAG_1 | EVENT_FLAG_2,    // Requested flags
+    TX_AND,                          // Wait for ALL flags
+    &amp;actual_flags,                   // Actual flags returned
+    TX_WAIT_FOREVER
+);
+
+// Wait for event flags - OR condition (any flag can be set)
+tx_event_flags_get(
+    &amp;my_events,
+    EVENT_FLAG_1 | EVENT_FLAG_2,    // Requested flags
+    TX_OR,                           // Wait for ANY flag
+    &amp;actual_flags,
+    100                              // Timeout in ticks
+);
+
+// Clear flags after getting them
+tx_event_flags_get(
+    &amp;my_events,
+    EVENT_FLAG_1,
+    TX_OR_CLEAR,                     // Clear after getting
+    &amp;actual_flags,
+    TX_WAIT_FOREVER
+);
+
+// Delete event flags group
+tx_event_flags_delete(&amp;my_events);
+</code></pre>
+<h2 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h2>
+<h3 id="block-memory-pools"><a class="header" href="#block-memory-pools">Block Memory Pools</a></h3>
+<p>Fixed-size block allocation for deterministic performance.</p>
+<pre><code class="language-c">TX_BLOCK_POOL my_pool;
+UCHAR pool_area[10000];
+
+// Create block pool (64-byte blocks)
+tx_block_pool_create(
+    &amp;my_pool,
+    "My Block Pool",
+    64,                      // Block size
+    pool_area,
+    sizeof(pool_area)
+);
+
+// Allocate block
+VOID *block_ptr;
+UINT status = tx_block_allocate(&amp;my_pool, &amp;block_ptr, TX_WAIT_FOREVER);
+
+if (status == TX_SUCCESS) {
+    // Use block
+
+    // Release block
+    tx_block_release(block_ptr);
+}
+
+// Query pool information
+ULONG available_blocks, total_blocks;
+tx_block_pool_info_get(&amp;my_pool, TX_NULL, &amp;available_blocks,
+                       &amp;total_blocks, TX_NULL, TX_NULL, TX_NULL);
+
+// Delete pool
+tx_block_pool_delete(&amp;my_pool);
+</code></pre>
+<h3 id="byte-memory-pools"><a class="header" href="#byte-memory-pools">Byte Memory Pools</a></h3>
+<p>Variable-size allocation (like malloc, but RTOS-aware).</p>
+<pre><code class="language-c">TX_BYTE_POOL my_byte_pool;
+UCHAR pool_area[10000];
+
+// Create byte pool
+tx_byte_pool_create(
+    &amp;my_byte_pool,
+    "My Byte Pool",
+    pool_area,
+    sizeof(pool_area)
+);
+
+// Allocate memory
+VOID *memory_ptr;
+tx_byte_allocate(&amp;my_byte_pool, &amp;memory_ptr, 256, TX_WAIT_FOREVER);
+
+// Use memory
+if (memory_ptr != TX_NULL) {
+    // Release memory
+    tx_byte_release(memory_ptr);
+}
+
+// Prioritize suspended threads
+tx_byte_pool_prioritize(&amp;my_byte_pool);
+
+// Delete pool
+tx_byte_pool_delete(&amp;my_byte_pool);
+</code></pre>
+<h2 id="application-timers"><a class="header" href="#application-timers">Application Timers</a></h2>
+<pre><code class="language-c">TX_TIMER my_timer;
+
+void timer_expiration_function(ULONG timer_input) {
+    // Timer expired - this runs in timer thread context
+    // Keep this function short and non-blocking
+}
+
+// Create one-shot timer
+tx_timer_create(
+    &amp;my_timer,
+    "My Timer",
+    timer_expiration_function,
+    0x1234,                  // Input to expiration function
+    100,                     // Initial ticks (delay before first expiration)
+    0,                       // Reschedule ticks (0 = one-shot)
+    TX_NO_ACTIVATE           // Don't activate yet
+);
+
+// Create periodic timer
+tx_timer_create(
+    &amp;my_timer,
+    "Periodic Timer",
+    timer_expiration_function,
+    0,
+    100,                     // Initial ticks
+    100,                     // Reschedule ticks (periodic)
+    TX_AUTO_ACTIVATE         // Activate immediately
+);
+
+// Activate timer
+tx_timer_activate(&amp;my_timer);
+
+// Deactivate timer
+tx_timer_deactivate(&amp;my_timer);
+
+// Change timer settings
+tx_timer_change(&amp;my_timer, 200, 200);  // New initial and reschedule ticks
+
+// Delete timer
+tx_timer_delete(&amp;my_timer);
+</code></pre>
+<h2 id="interrupt-management"><a class="header" href="#interrupt-management">Interrupt Management</a></h2>
+<h3 id="interrupt-service-routines"><a class="header" href="#interrupt-service-routines">Interrupt Service Routines</a></h3>
+<pre><code class="language-c">void my_isr(void) {
+    // Notify ThreadX we're in ISR context
+    // (Some ports do this automatically)
+
+    // ISR processing - keep minimal
+
+    // Wake up thread using semaphore
+    tx_semaphore_put(&amp;my_isr_semaphore);
+
+    // Or set event flag
+    tx_event_flags_set(&amp;my_events, ISR_EVENT, TX_OR);
+}
+
+// Deferred processing thread
+void isr_processing_thread(ULONG input) {
+    while(1) {
+        // Wait for ISR signal
+        tx_semaphore_get(&amp;my_isr_semaphore, TX_WAIT_FOREVER);
+
+        // Do time-consuming processing here
+        // (not in ISR context)
+    }
+}
+</code></pre>
+<h3 id="nested-interrupt-support"><a class="header" href="#nested-interrupt-support">Nested Interrupt Support</a></h3>
+<pre><code class="language-c">// ThreadX automatically handles nested interrupts
+// Save/restore is handled by context switching mechanism
+
+// Disable interrupts when needed
+TX_INTERRUPT_SAVE_AREA
+TX_DISABLE  // Save interrupt state and disable
+
+// Critical section code
+
+TX_RESTORE  // Restore previous interrupt state
+</code></pre>
+<h2 id="time-management"><a class="header" href="#time-management">Time Management</a></h2>
+<pre><code class="language-c">// Get current time (ticks since system start)
+ULONG current_time = tx_time_get();
+
+// Set current time
+tx_time_set(1000);
+
+// Sleep for specific ticks
+tx_thread_sleep(100);
+
+// Configure system timer
+// Timer tick usually occurs every 10ms (100Hz)
+// Configured in tx_initialize_low_level.s or similar
+</code></pre>
+<h2 id="system-information"><a class="header" href="#system-information">System Information</a></h2>
+<pre><code class="language-c">// Get ThreadX version
+ULONG version = tx_kernel_version_get();
+// Returns format: 0x06010000 for version 6.1
+
+// Get system state
+TX_THREAD *thread;
+ULONG state = tx_thread_identify();  // Returns current thread
+
+// Performance information
+ULONG resumptions, suspensions, solicited_preemptions;
+ULONG interrupt_preemptions, priority_inversions, time_slices;
+ULONG relinquishes, timeouts, waits;
+
+tx_thread_performance_info_get(
+    &amp;my_thread,
+    &amp;resumptions,
+    &amp;suspensions,
+    &amp;solicited_preemptions,
+    &amp;interrupt_preemptions,
+    &amp;priority_inversions,
+    &amp;time_slices,
+    &amp;relinquishes,
+    &amp;timeouts,
+    &amp;waits,
+    TX_NULL
+);
+</code></pre>
+<h2 id="priority-inversion-prevention"><a class="header" href="#priority-inversion-prevention">Priority Inversion Prevention</a></h2>
+<p>ThreadX provides multiple mechanisms to prevent priority inversion:</p>
+<h3 id="1-preemption-threshold"><a class="header" href="#1-preemption-threshold">1. Preemption Threshold</a></h3>
+<pre><code class="language-c">// Priority = 10, Preemption Threshold = 5
+// Thread runs at priority 10, but can only be preempted by priorities 0-4
+tx_thread_create(&amp;my_thread, "Thread", entry_func, 0,
+                 stack, 1024,
+                 10,                    // Priority
+                 5,                     // Preemption threshold
+                 TX_NO_TIME_SLICE, TX_AUTO_START);
+</code></pre>
+<h3 id="2-priority-inheritance-mutexes"><a class="header" href="#2-priority-inheritance-mutexes">2. Priority Inheritance (Mutexes)</a></h3>
+<pre><code class="language-c">// Create mutex with priority inheritance
+tx_mutex_create(&amp;my_mutex, "Mutex", TX_INHERIT);
+
+// Low priority thread gets mutex
+// High priority thread waits
+// Low priority thread inherits high priority temporarily
+</code></pre>
+<h2 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h2>
+<p>All ThreadX services return status codes:</p>
+<pre><code class="language-c">// Common return values
+TX_SUCCESS              // Successful completion
+TX_DELETED              // Object was deleted
+TX_POOL_ERROR          // Invalid memory pool
+TX_PTR_ERROR           // Invalid pointer
+TX_WAIT_ERROR          // Invalid wait option
+TX_SIZE_ERROR          // Invalid size
+TX_GROUP_ERROR         // Invalid group pointer
+TX_NO_EVENTS           // No events satisfied request
+TX_OPTION_ERROR        // Invalid option
+TX_QUEUE_ERROR         // Invalid queue pointer
+TX_QUEUE_EMPTY         // Queue is empty
+TX_QUEUE_FULL          // Queue is full
+TX_SEMAPHORE_ERROR     // Invalid semaphore pointer
+TX_NO_INSTANCE         // No instance available
+TX_THREAD_ERROR        // Invalid thread pointer
+TX_PRIORITY_ERROR      // Invalid priority
+TX_START_ERROR         // Invalid auto-start
+TX_DELETE_ERROR        // Thread not terminated
+TX_RESUME_ERROR        // Thread not suspended
+TX_CALLER_ERROR        // Invalid caller
+TX_SUSPEND_ERROR       // Thread already suspended
+TX_TIMER_ERROR         // Invalid timer pointer
+TX_TICK_ERROR          // Invalid tick value
+TX_ACTIVATE_ERROR      // Timer already active
+TX_THRESH_ERROR        // Invalid preemption threshold
+TX_SUSPEND_LIFTED      // Delayed suspension lifted
+TX_WAIT_ABORTED        // Wait aborted
+TX_MUTEX_ERROR         // Invalid mutex pointer
+TX_NOT_AVAILABLE       // Service not available
+TX_NOT_OWNED           // Mutex not owned
+TX_INHERIT_ERROR       // Invalid priority inheritance
+TX_NOT_DONE            // Service not completed
+</code></pre>
+<h3 id="example-error-handling"><a class="header" href="#example-error-handling">Example Error Handling</a></h3>
+<pre><code class="language-c">UINT status = tx_queue_send(&amp;my_queue, &amp;message, 100);
+
+switch(status) {
+    case TX_SUCCESS:
+        // Message sent successfully
+        break;
+    case TX_QUEUE_FULL:
+        // Queue full, handle overflow
+        break;
+    case TX_WAIT_ABORTED:
+        // Wait was aborted by another thread
+        break;
+    case TX_QUEUE_ERROR:
+        // Invalid queue pointer
+        break;
+    default:
+        // Unexpected error
+        break;
+}
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Stack Sizing</strong>: Use <code>tx_thread_stack_error_notify()</code> to detect stack overflow</li>
+<li><strong>Priority Assignment</strong>: Reserve highest priorities (0-2) for critical ISR threads</li>
+<li><strong>Avoid Busy Waiting</strong>: Use semaphores/events instead of polling</li>
+<li><strong>Timer Callbacks</strong>: Keep timer expiration functions short and non-blocking</li>
+<li><strong>Memory Pools</strong>: Prefer block pools over byte pools for predictable timing</li>
+<li><strong>Mutex vs Semaphore</strong>: Use mutexes for resource protection, semaphores for signaling</li>
+<li><strong>Event Flags</strong>: Use for complex synchronization conditions</li>
+<li><strong>Preemption Threshold</strong>: Set threshold = priority for most threads</li>
+<li><strong>Debug Support</strong>: Enable <code>TX_ENABLE_STACK_CHECKING</code> during development</li>
+<li><strong>TraceX Integration</strong>: Use Azure RTOS TraceX for system analysis</li>
+</ol>
+<h2 id="configuration-options"><a class="header" href="#configuration-options">Configuration Options</a></h2>
+<p>ThreadX behavior is configured in <code>tx_user.h</code>:</p>
+<pre><code class="language-c">// Maximum priority levels (default 32)
+#define TX_MAX_PRIORITIES               32
+
+// Minimum stack size
+#define TX_MINIMUM_STACK               200
+
+// Enable stack checking
+#define TX_ENABLE_STACK_CHECKING
+
+// Disable time-slice
+#define TX_DISABLE_TIME_SLICE
+
+// Timer thread priority
+#define TX_TIMER_THREAD_PRIORITY        0
+
+// Timer thread stack size
+#define TX_TIMER_THREAD_STACK_SIZE   1024
+
+// Enable event trace
+#define TX_ENABLE_EVENT_TRACE
+
+// Disable error checking (for production)
+#define TX_DISABLE_ERROR_CHECKING
+
+// Inline ThreadX services for performance
+#define TX_INLINE_THREAD_RESUME_SUSPEND
+</code></pre>
+<h2 id="performance-characteristics"><a class="header" href="#performance-characteristics">Performance Characteristics</a></h2>
+<ul>
+<li><strong>Context Switch</strong>: ~200 CPU cycles (Cortex-M4)</li>
+<li><strong>Interrupt Latency</strong>: Minimal (&lt; 10 cycles to ISR)</li>
+<li><strong>Service Call Overhead</strong>: 50-150 cycles depending on operation</li>
+<li><strong>Memory Footprint</strong>: 2-20 KB depending on configuration</li>
+<li><strong>RAM Usage</strong>: ~1 KB for kernel + per-thread overhead (~350 bytes/thread)</li>
+<li><strong>Deterministic</strong>: All operations have bounded execution time</li>
+</ul>
+<h2 id="supported-architectures"><a class="header" href="#supported-architectures">Supported Architectures</a></h2>
+<p>ThreadX supports 50+ processor families:</p>
+<ul>
+<li>ARM: Cortex-M, Cortex-R, Cortex-A, ARM7/9/11</li>
+<li>RISC-V: RV32, RV64</li>
+<li>x86/x64</li>
+<li>MIPS</li>
+<li>PowerPC</li>
+<li>Renesas: RX, SH, Synergy</li>
+<li>Microchip: PIC32, AVR32</li>
+<li>And many more...</li>
+</ul>
+<h2 id="azure-rtos-integration"><a class="header" href="#azure-rtos-integration">Azure RTOS Integration</a></h2>
+<p>ThreadX is part of the Azure RTOS family:</p>
+<ul>
+<li><strong>FileX</strong>: Embedded file system (FAT compatible)</li>
+<li><strong>NetX Duo</strong>: TCP/IP stack (IPv4/IPv6)</li>
+<li><strong>USBX</strong>: USB host/device stack</li>
+<li><strong>GUIX</strong>: Embedded GUI framework</li>
+<li><strong>LevelX</strong>: NAND/NOR flash wear leveling</li>
+<li><strong>TraceX</strong>: System analysis tool</li>
+</ul>
+<p>All components are designed to work seamlessly together.</p>
+<h2 id="safety-certifications"><a class="header" href="#safety-certifications">Safety Certifications</a></h2>
+<p>ThreadX is pre-certified for:</p>
+<ul>
+<li><strong>IEC 61508</strong> SIL 4 (Industrial)</li>
+<li><strong>IEC 62304</strong> Class C (Medical)</li>
+<li><strong>ISO 26262</strong> ASIL D (Automotive)</li>
+<li><strong>EN 50128</strong> SW-SIL 4 (Railway)</li>
+<li><strong>UL/IEC 60730</strong> Class B (Appliances)</li>
+</ul>
+<p>Certification packages include safety manuals, test reports, and compliance documentation.</p>
+<h2 id="license-and-availability"><a class="header" href="#license-and-availability">License and Availability</a></h2>
+<ul>
+<li><strong>License</strong>: MIT License (open source)</li>
+<li><strong>Repository</strong>: https://github.com/azure-rtos/threadx</li>
+<li><strong>Documentation</strong>: https://docs.microsoft.com/azure/rtos/threadx</li>
+<li><strong>No royalties</strong>: Free for commercial use</li>
+<li><strong>Community support</strong>: GitHub issues and discussions</li>
+<li><strong>Commercial support</strong>: Available through Microsoft and partners</li>
+</ul>
+<p>ThreadX is ideal for resource-constrained embedded systems requiring deterministic real-time performance, safety certification, or long-term support.</p>
 
                     </main>
 

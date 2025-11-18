@@ -227,6 +227,7 @@
     - [Crypto](finance/crypto.md)
 
 - [Databases](databases/README.md)
+    - [Database Design](databases/database_design.md)
     - [SQL](databases/sql.md)
     - [PostgreSQL](databases/postgres.md)
     - [SQLite](databases/sqlite.md)

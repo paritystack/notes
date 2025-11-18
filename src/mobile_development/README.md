@@ -4,6 +4,28 @@ Cross-platform and native mobile application development frameworks and best pra
 
 ## Topics Covered
 
+### Native Platform Development
+
+- **[iOS Development](ios_dev.md)**: Native iOS app development with Swift and Xcode
+  - Xcode setup and project structure
+  - Swift programming fundamentals
+  - UIKit view controllers and navigation
+  - SwiftUI declarative UI framework
+  - Networking with URLSession
+  - Data persistence (UserDefaults, Core Data)
+  - Debugging and profiling
+  - App Store deployment
+
+- **[Android Development](android_dev.md)**: Native Android app development with Kotlin
+  - Android Studio setup and configuration
+  - Kotlin programming essentials
+  - Activities and fragments
+  - UI layouts and view binding
+  - Intents and navigation
+  - Data persistence and Room database
+  - Testing and debugging
+  - Google Play deployment
+
 ### Cross-Platform Frameworks
 
 - **[React Native](react_native.md)**: Build native mobile apps using React and JavaScript/TypeScript

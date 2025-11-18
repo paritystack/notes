@@ -1837,6 +1837,1108 @@ On write: Invalidate cache (or update)
 <li><strong>Symptoms</strong>: High operational overhead, complex deployments, hard to trace</li>
 <li><strong>Solution</strong>: Right-size services, group related functionality</li>
 </ul>
+<h2 id="service-mesh"><a class="header" href="#service-mesh">Service Mesh</a></h2>
+<h3 id="overview-1"><a class="header" href="#overview-1">Overview</a></h3>
+<p><strong>Service mesh</strong>: Infrastructure layer for service-to-service communication, handling cross-cutting concerns.</p>
+<h4 id="core-capabilities"><a class="header" href="#core-capabilities">Core Capabilities</a></h4>
+<ol>
+<li><strong>Traffic Management</strong>: Load balancing, routing, failover</li>
+<li><strong>Security</strong>: mTLS, authentication, authorization</li>
+<li><strong>Observability</strong>: Metrics, logs, traces</li>
+<li><strong>Resilience</strong>: Retries, timeouts, circuit breakers</li>
+</ol>
+<h3 id="architecture"><a class="header" href="#architecture">Architecture</a></h3>
+<h4 id="data-plane"><a class="header" href="#data-plane">Data Plane</a></h4>
+<ul>
+<li><strong>Sidecar proxies</strong>: Deployed alongside each service instance</li>
+<li><strong>Intercept traffic</strong>: All service communication flows through proxy</li>
+<li><strong>Popular proxies</strong>: Envoy, Linkerd-proxy, NGINX</li>
+</ul>
+<h4 id="control-plane"><a class="header" href="#control-plane">Control Plane</a></h4>
+<ul>
+<li><strong>Configuration</strong>: Push config to data plane proxies</li>
+<li><strong>Service discovery</strong>: Track service instances</li>
+<li><strong>Certificate management</strong>: Issue and rotate certificates</li>
+<li><strong>Telemetry aggregation</strong>: Collect metrics and traces</li>
+</ul>
+<h3 id="popular-service-meshes"><a class="header" href="#popular-service-meshes">Popular Service Meshes</a></h3>
+<h4 id="istio"><a class="header" href="#istio">Istio</a></h4>
+<ul>
+<li><strong>Data plane</strong>: Envoy proxy</li>
+<li><strong>Control plane</strong>: istiod (unified control plane)</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Rich traffic management (canary, A/B testing)</li>
+<li>Strong security (mutual TLS by default)</li>
+<li>Extensive observability</li>
+<li>Multi-cluster support</li>
+</ul>
+</li>
+<li><strong>Complexity</strong>: Feature-rich but complex to operate</li>
+<li><strong>Use cases</strong>: Large enterprises, complex traffic patterns</li>
+</ul>
+<h4 id="linkerd"><a class="header" href="#linkerd">Linkerd</a></h4>
+<ul>
+<li><strong>Data plane</strong>: Custom Rust-based proxy (linkerd2-proxy)</li>
+<li><strong>Control plane</strong>: Simplified architecture</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Lightweight and fast</li>
+<li>Automatic mTLS</li>
+<li>Service profiles for per-route metrics</li>
+<li>Multi-cluster support</li>
+</ul>
+</li>
+<li><strong>Simplicity</strong>: Easier to adopt and operate than Istio</li>
+<li><strong>Use cases</strong>: Teams wanting simplicity with core features</li>
+</ul>
+<h4 id="consul-connect"><a class="header" href="#consul-connect">Consul Connect</a></h4>
+<ul>
+<li><strong>Data plane</strong>: Envoy or built-in proxy</li>
+<li><strong>Control plane</strong>: HashiCorp Consul</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Integrated service discovery</li>
+<li>Multi-datacenter support</li>
+<li>Intention-based security</li>
+<li>Works with VMs and Kubernetes</li>
+</ul>
+</li>
+<li><strong>Use cases</strong>: Hybrid cloud, VM + container environments</li>
+</ul>
+<h3 id="traffic-management-patterns"><a class="header" href="#traffic-management-patterns">Traffic Management Patterns</a></h3>
+<h4 id="canary-deployments"><a class="header" href="#canary-deployments">Canary Deployments</a></h4>
+<pre><code>Traffic split:
+- 95% to v1 (stable)
+- 5% to v2 (canary)
+
+Monitor metrics, gradually increase v2 traffic
+</code></pre>
+<h4 id="blue-green-deployments"><a class="header" href="#blue-green-deployments">Blue-Green Deployments</a></h4>
+<pre><code>- Blue: Current production version
+- Green: New version
+- Switch traffic instantly: 100% Blue → 100% Green
+- Quick rollback if issues
+</code></pre>
+<h4 id="ab-testing"><a class="header" href="#ab-testing">A/B Testing</a></h4>
+<pre><code>Route based on user attributes:
+- Premium users → v2 (new features)
+- Regular users → v1 (stable)
+</code></pre>
+<h4 id="traffic-mirroring-shadowing"><a class="header" href="#traffic-mirroring-shadowing">Traffic Mirroring (Shadowing)</a></h4>
+<pre><code>Send production traffic to:
+- Primary: v1 (serves responses)
+- Shadow: v2 (responses discarded)
+
+Test v2 with real traffic, no user impact
+</code></pre>
+<h3 id="security-features"><a class="header" href="#security-features">Security Features</a></h3>
+<h4 id="mutual-tls-mtls"><a class="header" href="#mutual-tls-mtls">Mutual TLS (mTLS)</a></h4>
+<ul>
+<li><strong>Automatic</strong>: Service mesh handles certificate issuance and rotation</li>
+<li><strong>Strong identity</strong>: Each service has cryptographic identity</li>
+<li><strong>Encryption</strong>: All service-to-service traffic encrypted</li>
+<li><strong>Zero-trust</strong>: Verify identity on every request</li>
+</ul>
+<h4 id="authorization-policies"><a class="header" href="#authorization-policies">Authorization Policies</a></h4>
+<pre><code>Example (Istio):
+- Allow service A to call service B on /api/data
+- Deny all other access to service B
+- Require JWT token for external traffic
+</code></pre>
+<h3 id="observability-integration"><a class="header" href="#observability-integration">Observability Integration</a></h3>
+<p><strong>Automatic metrics</strong>:</p>
+<ul>
+<li>Request rate, latency (p50, p95, p99)</li>
+<li>Success rate, error rate</li>
+<li>Connection pools, retries</li>
+</ul>
+<p><strong>Distributed tracing</strong>:</p>
+<ul>
+<li>Automatic span creation</li>
+<li>Context propagation</li>
+<li>Integration with Jaeger, Zipkin</li>
+</ul>
+<p><strong>Topology visualization</strong>:</p>
+<ul>
+<li>Service dependency graphs</li>
+<li>Traffic flow visualization</li>
+<li>Error tracking</li>
+</ul>
+<h3 id="trade-offs"><a class="header" href="#trade-offs">Trade-offs</a></h3>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Uniform traffic management across services</li>
+<li>Security without application changes</li>
+<li>Rich observability out of the box</li>
+<li>Multi-language support</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li><strong>Complexity</strong>: Additional infrastructure to manage</li>
+<li><strong>Performance</strong>: Proxy adds latency (typically 1-5ms)</li>
+<li><strong>Resource overhead</strong>: Sidecar per pod increases resource usage</li>
+<li><strong>Learning curve</strong>: New concepts and tools</li>
+</ul>
+<h2 id="message-queuing-and-stream-processing"><a class="header" href="#message-queuing-and-stream-processing">Message Queuing and Stream Processing</a></h2>
+<h3 id="message-queue-patterns"><a class="header" href="#message-queue-patterns">Message Queue Patterns</a></h3>
+<h4 id="point-to-point-queue"><a class="header" href="#point-to-point-queue">Point-to-Point (Queue)</a></h4>
+<ul>
+<li><strong>Model</strong>: One message, one consumer</li>
+<li><strong>Delivery</strong>: Message removed after consumption</li>
+<li><strong>Use cases</strong>: Task distribution, job queues</li>
+<li><strong>Example</strong>: Worker pool processing jobs</li>
+</ul>
+<h4 id="publish-subscribe-topic"><a class="header" href="#publish-subscribe-topic">Publish-Subscribe (Topic)</a></h4>
+<ul>
+<li><strong>Model</strong>: One message, multiple consumers</li>
+<li><strong>Delivery</strong>: All subscribers receive copy</li>
+<li><strong>Use cases</strong>: Event broadcasting, notifications</li>
+<li><strong>Example</strong>: Order placed → notify inventory, shipping, analytics</li>
+</ul>
+<h4 id="request-reply"><a class="header" href="#request-reply">Request-Reply</a></h4>
+<ul>
+<li><strong>Model</strong>: Synchronous-like communication over async messaging</li>
+<li><strong>How</strong>: Sender includes reply queue, waits for response</li>
+<li><strong>Use cases</strong>: RPC over messaging, distributed API calls</li>
+</ul>
+<h3 id="message-delivery-guarantees"><a class="header" href="#message-delivery-guarantees">Message Delivery Guarantees</a></h3>
+<h4 id="at-most-once"><a class="header" href="#at-most-once">At-Most-Once</a></h4>
+<ul>
+<li><strong>Guarantee</strong>: Message delivered 0 or 1 times</li>
+<li><strong>Mechanism</strong>: Send and forget, no acknowledgment</li>
+<li><strong>Use cases</strong>: Metrics, logs (where loss acceptable)</li>
+<li><strong>Pros</strong>: Highest performance</li>
+<li><strong>Cons</strong>: Possible message loss</li>
+</ul>
+<h4 id="at-least-once"><a class="header" href="#at-least-once">At-Least-Once</a></h4>
+<ul>
+<li><strong>Guarantee</strong>: Message delivered 1 or more times</li>
+<li><strong>Mechanism</strong>: Retry until acknowledged</li>
+<li><strong>Use cases</strong>: Most common, when duplicates tolerable</li>
+<li><strong>Pros</strong>: No message loss</li>
+<li><strong>Cons</strong>: Possible duplicates</li>
+<li><strong>Requirement</strong>: Idempotent consumers</li>
+</ul>
+<h4 id="exactly-once"><a class="header" href="#exactly-once">Exactly-Once</a></h4>
+<ul>
+<li><strong>Guarantee</strong>: Message processed exactly once</li>
+<li><strong>Mechanism</strong>: Deduplication + transactional processing</li>
+<li><strong>Use cases</strong>: Financial transactions, critical updates</li>
+<li><strong>Complexity</strong>: Hard to achieve, requires coordination</li>
+<li><strong>Approaches</strong>:
+<ul>
+<li>Idempotency keys</li>
+<li>Transactional outbox pattern</li>
+<li>Two-phase commit</li>
+<li>Kafka transactions (producer-consumer)</li>
+</ul>
+</li>
+</ul>
+<h3 id="apache-kafka---deep-dive"><a class="header" href="#apache-kafka---deep-dive">Apache Kafka - Deep Dive</a></h3>
+<h4 id="architecture-1"><a class="header" href="#architecture-1">Architecture</a></h4>
+<p><strong>Topics</strong>: Logical channels for messages</p>
+<ul>
+<li>Partitioned for parallelism</li>
+<li>Replicated for fault tolerance</li>
+</ul>
+<p><strong>Partitions</strong>: Ordered, immutable sequence of messages</p>
+<ul>
+<li>Messages appended to end (log)</li>
+<li>Each message has offset (position)</li>
+<li>Distributed across brokers</li>
+</ul>
+<p><strong>Brokers</strong>: Kafka servers storing partitions</p>
+<ul>
+<li>Leader: Handles reads/writes for partition</li>
+<li>Followers: Replicate leader's data</li>
+</ul>
+<p><strong>Producers</strong>: Write messages to topics</p>
+<ul>
+<li>Choose partition (round-robin, key-based, custom)</li>
+<li>Batching for efficiency</li>
+</ul>
+<p><strong>Consumers</strong>: Read messages from topics</p>
+<ul>
+<li>Consumer groups for parallel processing</li>
+<li>Each partition consumed by one consumer in group</li>
+</ul>
+<p><strong>ZooKeeper</strong> (legacy) / <strong>KRaft</strong> (new): Cluster coordination</p>
+<ul>
+<li>Leader election</li>
+<li>Configuration management</li>
+<li>KRaft removes ZooKeeper dependency</li>
+</ul>
+<h4 id="key-features"><a class="header" href="#key-features">Key Features</a></h4>
+<p><strong>1. Persistence</strong></p>
+<ul>
+<li>All messages written to disk</li>
+<li>Retention configurable (time or size-based)</li>
+<li>Enables replay and multiple consumers</li>
+</ul>
+<p><strong>2. Ordering Guarantees</strong></p>
+<ul>
+<li>Total order within partition</li>
+<li>Key-based partitioning for related messages</li>
+<li>No global ordering across partitions</li>
+</ul>
+<p><strong>3. Scalability</strong></p>
+<ul>
+<li>Add brokers to scale storage and throughput</li>
+<li>Add partitions to scale parallel processing</li>
+<li>Consumer groups for load distribution</li>
+</ul>
+<p><strong>4. Fault Tolerance</strong></p>
+<ul>
+<li>Replication factor (typically 3)</li>
+<li>In-sync replicas (ISR) for durability</li>
+<li>Automatic leader election on failure</li>
+</ul>
+<p><strong>5. Performance</strong></p>
+<ul>
+<li>Sequential disk I/O (fast)</li>
+<li>Zero-copy transfer to consumers</li>
+<li>Batching and compression</li>
+<li>Millions of messages per second</li>
+</ul>
+<h4 id="producer-configuration"><a class="header" href="#producer-configuration">Producer Configuration</a></h4>
+<p><strong>Acknowledgment levels</strong>:</p>
+<ul>
+<li><code>acks=0</code>: No acknowledgment (fire and forget)</li>
+<li><code>acks=1</code>: Leader acknowledges (fast, some risk)</li>
+<li><code>acks=all</code>: All in-sync replicas acknowledge (durable, slower)</li>
+</ul>
+<p><strong>Idempotent producer</strong>:</p>
+<pre><code>enable.idempotence=true
+- Prevents duplicate messages on retry
+- Maintains ordering per partition
+</code></pre>
+<p><strong>Transactions</strong>:</p>
+<pre><code>Atomic writes to multiple partitions
+Exactly-once semantics (with transactional consumers)
+</code></pre>
+<h4 id="consumer-configuration"><a class="header" href="#consumer-configuration">Consumer Configuration</a></h4>
+<p><strong>Offset management</strong>:</p>
+<ul>
+<li><code>auto.offset.reset</code>: What to do when no offset (earliest, latest)</li>
+<li><code>enable.auto.commit</code>: Automatic vs manual commit</li>
+<li>Manual commit provides more control</li>
+</ul>
+<p><strong>Consumer groups</strong>:</p>
+<ul>
+<li>Partition assignment strategies (range, round-robin, sticky)</li>
+<li>Rebalancing when consumers added/removed</li>
+</ul>
+<p><strong>Exactly-once consumption</strong>:</p>
+<pre><code>1. Read messages
+2. Process messages
+3. Save results + commit offsets in transaction
+</code></pre>
+<h4 id="use-cases-1"><a class="header" href="#use-cases-1">Use Cases</a></h4>
+<p><strong>1. Event Sourcing</strong>: Kafka as event store
+<strong>2. Stream Processing</strong>: Kafka Streams, ksqlDB
+<strong>3. Log Aggregation</strong>: Centralized logging
+<strong>4. Metrics Collection</strong>: Time-series data
+<strong>5. CDC (Change Data Capture)</strong>: Database change events
+<strong>6. Microservices Communication</strong>: Event-driven architecture</p>
+<h3 id="rabbitmq"><a class="header" href="#rabbitmq">RabbitMQ</a></h3>
+<h4 id="key-features-1"><a class="header" href="#key-features-1">Key Features</a></h4>
+<p><strong>1. Flexible Routing</strong></p>
+<ul>
+<li>Direct exchange: Route by routing key</li>
+<li>Fanout exchange: Broadcast to all queues</li>
+<li>Topic exchange: Pattern matching (e.g., <code>orders.*.created</code>)</li>
+<li>Headers exchange: Route by message headers</li>
+</ul>
+<p><strong>2. Message Priority</strong>: Prioritize urgent messages</p>
+<p><strong>3. Dead Letter Queues</strong>: Failed messages routed to DLQ</p>
+<p><strong>4. Message TTL</strong>: Automatic expiration</p>
+<p><strong>5. Federation</strong>: Connect multiple RabbitMQ clusters</p>
+<h4 id="vs-kafka"><a class="header" href="#vs-kafka">vs Kafka</a></h4>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Kafka</th><th>RabbitMQ</th></tr></thead><tbody>
+<tr><td><strong>Model</strong></td><td>Log-based, persistent</td><td>Traditional message queue</td></tr>
+<tr><td><strong>Throughput</strong></td><td>Very high (millions/sec)</td><td>High (tens of thousands/sec)</td></tr>
+<tr><td><strong>Retention</strong></td><td>Long-term (days/weeks)</td><td>Short-term (until consumed)</td></tr>
+<tr><td><strong>Ordering</strong></td><td>Per-partition</td><td>Per-queue (with single consumer)</td></tr>
+<tr><td><strong>Replay</strong></td><td>Yes (messages persisted)</td><td>No (consumed messages deleted)</td></tr>
+<tr><td><strong>Use case</strong></td><td>Event streaming, logs, analytics</td><td>Task queues, RPC, complex routing</td></tr>
+</tbody></table>
+</div>
+<h3 id="stream-processing"><a class="header" href="#stream-processing">Stream Processing</a></h3>
+<h4 id="apache-kafka-streams"><a class="header" href="#apache-kafka-streams">Apache Kafka Streams</a></h4>
+<p><strong>Library</strong>: Embedded in your application (no separate cluster)</p>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Stateful processing (joins, aggregations, windowing)</li>
+<li>Exactly-once semantics</li>
+<li>Interactive queries (query local state)</li>
+<li>Fault-tolerant state stores (RocksDB)</li>
+</ul>
+<p><strong>Example use cases</strong>:</p>
+<ul>
+<li>Real-time analytics</li>
+<li>Fraud detection</li>
+<li>Anomaly detection</li>
+<li>Stream enrichment</li>
+</ul>
+<h4 id="apache-flink"><a class="header" href="#apache-flink">Apache Flink</a></h4>
+<p><strong>Framework</strong>: Separate cluster for stream processing</p>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>True streaming (not micro-batching)</li>
+<li>Event time processing (handle late data)</li>
+<li>Exactly-once state consistency</li>
+<li>Complex event processing (CEP)</li>
+<li>SQL support</li>
+</ul>
+<p><strong>Advantages over Spark Streaming</strong>:</p>
+<ul>
+<li>Lower latency (milliseconds vs seconds)</li>
+<li>Better for event-time processing</li>
+<li>Native streaming (not batching)</li>
+</ul>
+<h4 id="apache-spark-streaming"><a class="header" href="#apache-spark-streaming">Apache Spark Streaming</a></h4>
+<p><strong>Model</strong>: Micro-batching (Structured Streaming)</p>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Unified batch and streaming</li>
+<li>Integration with Spark ecosystem (MLlib, SQL)</li>
+<li>Scalable and fault-tolerant</li>
+</ul>
+<p><strong>Use cases</strong>:</p>
+<ul>
+<li>ETL pipelines</li>
+<li>Real-time analytics</li>
+<li>ML model serving</li>
+</ul>
+<h2 id="cloud-native-patterns"><a class="header" href="#cloud-native-patterns">Cloud-Native Patterns</a></h2>
+<h3 id="twelve-factor-app-principles"><a class="header" href="#twelve-factor-app-principles">Twelve-Factor App Principles</a></h3>
+<ol>
+<li><strong>Codebase</strong>: One codebase tracked in version control, many deploys</li>
+<li><strong>Dependencies</strong>: Explicitly declare and isolate dependencies</li>
+<li><strong>Config</strong>: Store config in environment variables</li>
+<li><strong>Backing Services</strong>: Treat backing services as attached resources</li>
+<li><strong>Build, Release, Run</strong>: Strictly separate build and run stages</li>
+<li><strong>Processes</strong>: Execute app as one or more stateless processes</li>
+<li><strong>Port Binding</strong>: Export services via port binding</li>
+<li><strong>Concurrency</strong>: Scale out via the process model</li>
+<li><strong>Disposability</strong>: Maximize robustness with fast startup and graceful shutdown</li>
+<li><strong>Dev/Prod Parity</strong>: Keep development, staging, and production similar</li>
+<li><strong>Logs</strong>: Treat logs as event streams</li>
+<li><strong>Admin Processes</strong>: Run admin/management tasks as one-off processes</li>
+</ol>
+<h3 id="container-orchestration-with-kubernetes"><a class="header" href="#container-orchestration-with-kubernetes">Container Orchestration with Kubernetes</a></h3>
+<h4 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h4>
+<p><strong>Pod</strong>: Smallest deployable unit</p>
+<ul>
+<li>One or more containers</li>
+<li>Shared network namespace</li>
+<li>Shared storage volumes</li>
+<li>Co-located, co-scheduled</li>
+</ul>
+<p><strong>ReplicaSet</strong>: Maintains desired number of pod replicas</p>
+<ul>
+<li>Self-healing (replaces failed pods)</li>
+<li>Scaling (horizontal pod autoscaler)</li>
+</ul>
+<p><strong>Deployment</strong>: Declarative updates for pods</p>
+<ul>
+<li>Rolling updates</li>
+<li>Rollback capability</li>
+<li>Version history</li>
+</ul>
+<p><strong>Service</strong>: Stable network endpoint for pods</p>
+<ul>
+<li>Load balancing across pod replicas</li>
+<li>Service discovery (DNS)</li>
+<li>Types: ClusterIP, NodePort, LoadBalancer</li>
+</ul>
+<p><strong>ConfigMap</strong>: Configuration data</p>
+<ul>
+<li>Decoupled from container images</li>
+<li>Injected as environment variables or volumes</li>
+</ul>
+<p><strong>Secret</strong>: Sensitive data (passwords, tokens)</p>
+<ul>
+<li>Base64 encoded</li>
+<li>Can be encrypted at rest</li>
+<li>Mounted as volumes or env vars</li>
+</ul>
+<h4 id="kubernetes-patterns"><a class="header" href="#kubernetes-patterns">Kubernetes Patterns</a></h4>
+<h5 id="1-sidecar-pattern"><a class="header" href="#1-sidecar-pattern">1. Sidecar Pattern</a></h5>
+<pre><code>Pod:
+- Main container: Application
+- Sidecar: Log collector, metrics exporter, proxy
+</code></pre>
+<p><strong>Examples</strong>: Istio proxy, Fluentd log shipper, Consul agent</p>
+<h5 id="2-ambassador-pattern"><a class="header" href="#2-ambassador-pattern">2. Ambassador Pattern</a></h5>
+<pre><code>Sidecar acts as proxy for external services
+- Main container: Connects to localhost
+- Ambassador: Handles connection pooling, retry logic, circuit breaking
+</code></pre>
+<h5 id="3-adapter-pattern"><a class="header" href="#3-adapter-pattern">3. Adapter Pattern</a></h5>
+<pre><code>Sidecar standardizes and normalizes output
+- Main container: Legacy app with custom log format
+- Adapter: Converts logs to standard format
+</code></pre>
+<h5 id="4-init-container"><a class="header" href="#4-init-container">4. Init Container</a></h5>
+<pre><code>Runs before main containers
+- Setup tasks (download files, wait for dependencies)
+- Security (set permissions, scan for vulnerabilities)
+</code></pre>
+<h5 id="5-jobs-and-cronjobs"><a class="header" href="#5-jobs-and-cronjobs">5. Jobs and CronJobs</a></h5>
+<pre><code>Job: Run to completion (batch processing)
+CronJob: Scheduled execution (backups, reports)
+</code></pre>
+<h4 id="scaling-patterns"><a class="header" href="#scaling-patterns">Scaling Patterns</a></h4>
+<p><strong>Horizontal Pod Autoscaler (HPA)</strong>:</p>
+<ul>
+<li>Scale based on CPU, memory, or custom metrics</li>
+<li>Min/max replica bounds</li>
+</ul>
+<pre><code>If CPU &gt; 80%: Add pods
+If CPU &lt; 20%: Remove pods
+</code></pre>
+<p><strong>Vertical Pod Autoscaler (VPA)</strong>:</p>
+<ul>
+<li>Adjust resource requests/limits</li>
+<li>Rightsizing for efficiency</li>
+</ul>
+<p><strong>Cluster Autoscaler</strong>:</p>
+<ul>
+<li>Add/remove nodes based on pod resource requests</li>
+<li>Integrates with cloud providers (AWS, GCP, Azure)</li>
+</ul>
+<h4 id="advanced-scheduling"><a class="header" href="#advanced-scheduling">Advanced Scheduling</a></h4>
+<p><strong>Node Affinity</strong>: Schedule pods on specific nodes</p>
+<pre><code>Example: GPU workloads on GPU nodes
+</code></pre>
+<p><strong>Pod Affinity/Anti-Affinity</strong>: Co-locate or separate pods</p>
+<pre><code>Anti-affinity: Spread replicas across availability zones
+Affinity: Place cache pods near compute pods
+</code></pre>
+<p><strong>Taints and Tolerations</strong>: Prevent pods from scheduling on certain nodes</p>
+<pre><code>Taint node for dedicated workloads
+Only pods with matching toleration can schedule
+</code></pre>
+<h2 id="security-in-distributed-systems"><a class="header" href="#security-in-distributed-systems">Security in Distributed Systems</a></h2>
+<h3 id="authentication"><a class="header" href="#authentication">Authentication</a></h3>
+<h4 id="mutual-tls-mtls-1"><a class="header" href="#mutual-tls-mtls-1">Mutual TLS (mTLS)</a></h4>
+<ul>
+<li>Both client and server present certificates</li>
+<li>Cryptographic identity verification</li>
+<li>Prevents impersonation</li>
+<li><strong>Implementation</strong>: Service mesh, application-level</li>
+</ul>
+<h4 id="oauth-20--openid-connect"><a class="header" href="#oauth-20--openid-connect">OAuth 2.0 / OpenID Connect</a></h4>
+<ul>
+<li><strong>OAuth 2.0</strong>: Authorization framework</li>
+<li><strong>OpenID Connect</strong>: Authentication layer on OAuth 2.0</li>
+<li><strong>Flow</strong>: Client → Authorization Server → Resource Server</li>
+<li><strong>Tokens</strong>: Access tokens, refresh tokens, ID tokens (JWT)</li>
+<li><strong>Use cases</strong>: User authentication, API authorization</li>
+</ul>
+<h4 id="json-web-tokens-jwt"><a class="header" href="#json-web-tokens-jwt">JSON Web Tokens (JWT)</a></h4>
+<ul>
+<li><strong>Structure</strong>: Header.Payload.Signature</li>
+<li><strong>Stateless</strong>: No server-side session storage</li>
+<li><strong>Claims</strong>: User info, permissions, expiration</li>
+<li><strong>Verification</strong>: Signature validates authenticity</li>
+<li><strong>Challenges</strong>: Token revocation (use short expiration + refresh tokens)</li>
+</ul>
+<h3 id="authorization"><a class="header" href="#authorization">Authorization</a></h3>
+<h4 id="role-based-access-control-rbac"><a class="header" href="#role-based-access-control-rbac">Role-Based Access Control (RBAC)</a></h4>
+<ul>
+<li>Users assigned to roles</li>
+<li>Roles have permissions</li>
+<li>Check user's roles for access decision</li>
+<li><strong>Example</strong>: Admin, Editor, Viewer</li>
+</ul>
+<h4 id="attribute-based-access-control-abac"><a class="header" href="#attribute-based-access-control-abac">Attribute-Based Access Control (ABAC)</a></h4>
+<ul>
+<li>Policies based on attributes (user, resource, environment)</li>
+<li>More flexible than RBAC</li>
+<li><strong>Example</strong>: "Allow if user.department == resource.department AND time.hour &gt;= 9 AND time.hour &lt;= 17"</li>
+</ul>
+<h4 id="policy-engines"><a class="header" href="#policy-engines">Policy Engines</a></h4>
+<ul>
+<li><strong>Open Policy Agent (OPA)</strong>: General-purpose policy engine
+<ul>
+<li>Rego policy language</li>
+<li>Decoupled authorization</li>
+<li>Used in Kubernetes, microservices</li>
+</ul>
+</li>
+<li><strong>Casbin</strong>: Authorization library
+<ul>
+<li>Multiple models (ACL, RBAC, ABAC)</li>
+<li>Multiple languages</li>
+</ul>
+</li>
+</ul>
+<h3 id="data-security"><a class="header" href="#data-security">Data Security</a></h3>
+<h4 id="encryption-at-rest"><a class="header" href="#encryption-at-rest">Encryption at Rest</a></h4>
+<ul>
+<li>Encrypt data stored on disk</li>
+<li><strong>Methods</strong>: Full-disk encryption, database-level encryption, application-level</li>
+<li><strong>Key management</strong>: KMS (AWS KMS, Google Cloud KMS, Azure Key Vault)</li>
+</ul>
+<h4 id="encryption-in-transit"><a class="header" href="#encryption-in-transit">Encryption in Transit</a></h4>
+<ul>
+<li>TLS/SSL for network communication</li>
+<li>Certificate management (Let's Encrypt, cert-manager)</li>
+<li>Perfect Forward Secrecy (PFS)</li>
+</ul>
+<h4 id="secrets-management"><a class="header" href="#secrets-management">Secrets Management</a></h4>
+<ul>
+<li><strong>HashiCorp Vault</strong>: Dynamic secrets, encryption as a service, lease management</li>
+<li><strong>AWS Secrets Manager</strong>: Rotation, access control</li>
+<li><strong>Kubernetes Secrets</strong>: Base64 encoding, encryption with KMS</li>
+<li><strong>Sealed Secrets</strong>: Encrypted secrets in Git (GitOps)</li>
+</ul>
+<h3 id="network-security"><a class="header" href="#network-security">Network Security</a></h3>
+<h4 id="zero-trust-architecture"><a class="header" href="#zero-trust-architecture">Zero Trust Architecture</a></h4>
+<ul>
+<li><strong>Principle</strong>: Never trust, always verify</li>
+<li><strong>Implementation</strong>:
+<ul>
+<li>Verify every request (even internal)</li>
+<li>Micro-segmentation</li>
+<li>Least privilege access</li>
+<li>Continuous monitoring</li>
+</ul>
+</li>
+</ul>
+<h4 id="network-policies-kubernetes"><a class="header" href="#network-policies-kubernetes">Network Policies (Kubernetes)</a></h4>
+<ul>
+<li>Control traffic flow between pods</li>
+<li>Default deny, explicit allow</li>
+</ul>
+<pre><code>Example:
+- Allow frontend pods to call backend pods on port 8080
+- Deny all other traffic to backend
+</code></pre>
+<h4 id="api-gateway-security"><a class="header" href="#api-gateway-security">API Gateway Security</a></h4>
+<ul>
+<li><strong>Rate limiting</strong>: Prevent abuse</li>
+<li><strong>Authentication</strong>: Verify client identity</li>
+<li><strong>Authorization</strong>: Check permissions</li>
+<li><strong>Input validation</strong>: Prevent injection attacks</li>
+<li><strong>DDoS protection</strong>: Throttling, IP blocking</li>
+</ul>
+<h3 id="security-best-practices"><a class="header" href="#security-best-practices">Security Best Practices</a></h3>
+<ol>
+<li><strong>Principle of Least Privilege</strong>: Minimal permissions necessary</li>
+<li><strong>Defense in Depth</strong>: Multiple layers of security</li>
+<li><strong>Secure by Default</strong>: Security enabled out of the box</li>
+<li><strong>Immutable Infrastructure</strong>: Replace, don't patch</li>
+<li><strong>Audit Logging</strong>: Track all access and changes</li>
+<li><strong>Vulnerability Scanning</strong>: Regular image and dependency scans</li>
+<li><strong>Secret Rotation</strong>: Regularly rotate credentials</li>
+<li><strong>Network Segmentation</strong>: Isolate services and data</li>
+<li><strong>Input Validation</strong>: Sanitize all inputs</li>
+<li><strong>Security Testing</strong>: Penetration testing, chaos engineering</li>
+</ol>
+<h2 id="disaster-recovery-and-multi-region"><a class="header" href="#disaster-recovery-and-multi-region">Disaster Recovery and Multi-Region</a></h2>
+<h3 id="recovery-objectives"><a class="header" href="#recovery-objectives">Recovery Objectives</a></h3>
+<p><strong>RTO (Recovery Time Objective)</strong>: Maximum acceptable downtime</p>
+<ul>
+<li>Example: RTO = 1 hour (system must be restored within 1 hour)</li>
+</ul>
+<p><strong>RPO (Recovery Point Objective)</strong>: Maximum acceptable data loss</p>
+<ul>
+<li>Example: RPO = 15 minutes (can lose max 15 minutes of data)</li>
+</ul>
+<h3 id="multi-region-architectures"><a class="header" href="#multi-region-architectures">Multi-Region Architectures</a></h3>
+<h4 id="active-passive-disaster-recovery"><a class="header" href="#active-passive-disaster-recovery">Active-Passive (Disaster Recovery)</a></h4>
+<p><strong>Setup</strong>:</p>
+<ul>
+<li><strong>Active region</strong>: Serves all traffic</li>
+<li><strong>Passive region</strong>: Standby, ready to take over</li>
+<li>Data replication: Active → Passive</li>
+</ul>
+<p><strong>Failover</strong>:</p>
+<ol>
+<li>Detect failure in active region</li>
+<li>Promote passive region to active</li>
+<li>Redirect traffic (DNS update, load balancer)</li>
+<li>RPO: Replication lag (seconds to minutes)</li>
+<li>RTO: Failover time (minutes to hours)</li>
+</ol>
+<p><strong>Use cases</strong>: Cost-conscious DR, acceptable downtime</p>
+<h4 id="active-active-multi-region"><a class="header" href="#active-active-multi-region">Active-Active (Multi-Region)</a></h4>
+<p><strong>Setup</strong>:</p>
+<ul>
+<li>Multiple regions serve traffic simultaneously</li>
+<li>Data replicated between regions</li>
+<li>Global load balancer distributes traffic</li>
+</ul>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>Lower latency (users routed to nearest region)</li>
+<li>Higher availability (region failure transparent)</li>
+<li>Better resource utilization</li>
+</ul>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Data consistency (cross-region writes)</li>
+<li>Conflict resolution</li>
+<li>Increased cost</li>
+</ul>
+<p><strong>Patterns</strong>:</p>
+<p><strong>1. Read-Local, Write-Global</strong>:</p>
+<ul>
+<li>Reads from nearest region</li>
+<li>Writes to primary region, replicated globally</li>
+<li><strong>Trade-off</strong>: Write latency, but consistent</li>
+</ul>
+<p><strong>2. Write-Local, Async Replication</strong>:</p>
+<ul>
+<li>Writes to local region, async replication</li>
+<li><strong>Trade-off</strong>: Low latency, eventual consistency, conflicts</li>
+</ul>
+<p><strong>3. Multi-Master with CRDT</strong>:</p>
+<ul>
+<li>Writes to any region</li>
+<li>CRDTs ensure convergence</li>
+<li><strong>Trade-off</strong>: Complex, but no conflicts</li>
+</ul>
+<h3 id="database-replication-strategies"><a class="header" href="#database-replication-strategies">Database Replication Strategies</a></h3>
+<h4 id="cross-region-replication"><a class="header" href="#cross-region-replication">Cross-Region Replication</a></h4>
+<p><strong>Synchronous</strong>:</p>
+<ul>
+<li>Wait for remote region acknowledgment</li>
+<li><strong>Pros</strong>: No data loss (RPO = 0)</li>
+<li><strong>Cons</strong>: High latency (limited by speed of light)</li>
+</ul>
+<p><strong>Asynchronous</strong>:</p>
+<ul>
+<li>Replicate in background</li>
+<li><strong>Pros</strong>: Low latency</li>
+<li><strong>Cons</strong>: Data loss on failure (RPO &gt; 0)</li>
+</ul>
+<p><strong>Semi-synchronous</strong>:</p>
+<ul>
+<li>Wait for one local replica, async to remote</li>
+<li><strong>Balance</strong>: Durability + performance</li>
+</ul>
+<h4 id="global-databases"><a class="header" href="#global-databases">Global Databases</a></h4>
+<p><strong>Google Spanner</strong>:</p>
+<ul>
+<li>Globally distributed, strongly consistent</li>
+<li>TrueTime for global ordering</li>
+<li>Multi-region ACID transactions</li>
+</ul>
+<p><strong>CockroachDB</strong>:</p>
+<ul>
+<li>Distributed SQL, Spanner-inspired</li>
+<li>Raft consensus per range</li>
+<li>Geo-partitioning for data locality</li>
+</ul>
+<p><strong>AWS Aurora Global Database</strong>:</p>
+<ul>
+<li>Primary region + up to 5 secondary regions</li>
+<li>&lt; 1 second replication lag</li>
+<li>Cross-region failover</li>
+</ul>
+<p><strong>DynamoDB Global Tables</strong>:</p>
+<ul>
+<li>Multi-region, multi-master</li>
+<li>Last-write-wins conflict resolution</li>
+<li>Active-active replication</li>
+</ul>
+<h3 id="backup-strategies"><a class="header" href="#backup-strategies">Backup Strategies</a></h3>
+<h4 id="backup-types"><a class="header" href="#backup-types">Backup Types</a></h4>
+<p><strong>Full Backup</strong>: Complete copy of all data</p>
+<ul>
+<li><strong>Pros</strong>: Simple restore</li>
+<li><strong>Cons</strong>: Large storage, slow</li>
+</ul>
+<p><strong>Incremental Backup</strong>: Only changes since last backup</p>
+<ul>
+<li><strong>Pros</strong>: Fast, efficient storage</li>
+<li><strong>Cons</strong>: Complex restore (need full + all incrementals)</li>
+</ul>
+<p><strong>Differential Backup</strong>: Changes since last full backup</p>
+<ul>
+<li><strong>Pros</strong>: Faster restore than incremental</li>
+<li><strong>Cons</strong>: Larger than incremental</li>
+</ul>
+<h4 id="backup-best-practices"><a class="header" href="#backup-best-practices">Backup Best Practices</a></h4>
+<ol>
+<li><strong>3-2-1 Rule</strong>: 3 copies, 2 different media, 1 offsite</li>
+<li><strong>Automated Backups</strong>: Scheduled, no manual intervention</li>
+<li><strong>Test Restores</strong>: Regularly verify backups work</li>
+<li><strong>Encryption</strong>: Encrypt backups at rest and in transit</li>
+<li><strong>Retention Policy</strong>: Balance cost and compliance</li>
+<li><strong>Immutable Backups</strong>: Prevent ransomware deletion</li>
+<li><strong>Cross-Region</strong>: Store backups in different region</li>
+</ol>
+<h3 id="chaos-engineering"><a class="header" href="#chaos-engineering">Chaos Engineering</a></h3>
+<p><strong>Purpose</strong>: Proactively find weaknesses before they cause outages</p>
+<h4 id="principles"><a class="header" href="#principles">Principles</a></h4>
+<ol>
+<li><strong>Define steady state</strong>: Normal behavior metrics</li>
+<li><strong>Hypothesize</strong>: Predict impact of failure</li>
+<li><strong>Inject failure</strong>: Controlled experiments</li>
+<li><strong>Observe</strong>: Monitor impact on steady state</li>
+<li><strong>Learn and improve</strong>: Fix weaknesses</li>
+</ol>
+<h4 id="failure-scenarios"><a class="header" href="#failure-scenarios">Failure Scenarios</a></h4>
+<ul>
+<li><strong>Network</strong>: Latency injection, packet loss, partition</li>
+<li><strong>Compute</strong>: Kill instances, CPU/memory pressure</li>
+<li><strong>Storage</strong>: Disk failures, corruption</li>
+<li><strong>Dependencies</strong>: Service failures, degraded performance</li>
+</ul>
+<h4 id="tools"><a class="header" href="#tools">Tools</a></h4>
+<ul>
+<li><strong>Chaos Monkey</strong> (Netflix): Randomly kills instances</li>
+<li><strong>Chaos Toolkit</strong>: Generic chaos engineering platform</li>
+<li><strong>Gremlin</strong>: Chaos engineering as a service</li>
+<li><strong>Litmus</strong> (Kubernetes): Chaos experiments for K8s</li>
+</ul>
+<h2 id="edge-computing-and-cdn"><a class="header" href="#edge-computing-and-cdn">Edge Computing and CDN</a></h2>
+<h3 id="edge-computing"><a class="header" href="#edge-computing">Edge Computing</a></h3>
+<p><strong>Definition</strong>: Computation and data storage closer to users/devices</p>
+<h4 id="use-cases-2"><a class="header" href="#use-cases-2">Use Cases</a></h4>
+<p><strong>1. Low Latency Applications</strong>:</p>
+<ul>
+<li>Gaming (real-time multiplayer)</li>
+<li>AR/VR (motion-to-photon latency)</li>
+<li>Video streaming (adaptive bitrate)</li>
+</ul>
+<p><strong>2. Bandwidth Optimization</strong>:</p>
+<ul>
+<li>Process data locally, send only results</li>
+<li>IoT devices (process sensor data at edge)</li>
+</ul>
+<p><strong>3. Privacy and Compliance</strong>:</p>
+<ul>
+<li>Keep data within geographic boundaries</li>
+<li>Process sensitive data locally</li>
+</ul>
+<p><strong>4. Offline Capability</strong>:</p>
+<ul>
+<li>Continue operation without cloud connectivity</li>
+<li>Sync when connection restored</li>
+</ul>
+<h4 id="edge-architectures"><a class="header" href="#edge-architectures">Edge Architectures</a></h4>
+<p><strong>1. CDN with Edge Computing</strong> (Cloudflare Workers, AWS Lambda@Edge):</p>
+<ul>
+<li>Run code at CDN edge locations</li>
+<li>Modify requests/responses</li>
+<li>A/B testing, personalization, auth</li>
+</ul>
+<p><strong>2. Mobile Edge Computing (MEC)</strong>:</p>
+<ul>
+<li>Compute at cellular network edge (5G)</li>
+<li>Ultra-low latency (&lt;10ms)</li>
+<li>Use cases: Autonomous vehicles, smart cities</li>
+</ul>
+<p><strong>3. IoT Edge</strong>:</p>
+<ul>
+<li>Gateways aggregate and process IoT data</li>
+<li>Machine learning inference at edge</li>
+<li>Examples: AWS IoT Greengrass, Azure IoT Edge</li>
+</ul>
+<h3 id="content-delivery-networks-cdn"><a class="header" href="#content-delivery-networks-cdn">Content Delivery Networks (CDN)</a></h3>
+<h4 id="how-cdns-work"><a class="header" href="#how-cdns-work">How CDNs Work</a></h4>
+<ol>
+<li><strong>Origin server</strong>: Original content source</li>
+<li><strong>Edge servers</strong>: Cached content near users</li>
+<li><strong>Request flow</strong>:
+<ul>
+<li>User requests content</li>
+<li>DNS routes to nearest edge server</li>
+<li>Edge server serves from cache (cache hit)</li>
+<li>Or fetches from origin (cache miss), caches, serves</li>
+</ul>
+</li>
+</ol>
+<h4 id="cache-strategies"><a class="header" href="#cache-strategies">Cache Strategies</a></h4>
+<p><strong>1. Cache-Control Headers</strong>:</p>
+<pre><code>Cache-Control: public, max-age=3600
+- Public: Can be cached by CDN
+- max-age: Cache for 1 hour
+</code></pre>
+<p><strong>2. Cache Invalidation</strong>:</p>
+<ul>
+<li><strong>Purge</strong>: Remove from all edge servers</li>
+<li><strong>Time-based</strong>: Expire after TTL</li>
+<li><strong>Version-based</strong>: Include version in URL (e.g., /app.v2.js)</li>
+</ul>
+<p><strong>3. Cache Key</strong>:</p>
+<ul>
+<li>Default: URL</li>
+<li>Custom: URL + headers (User-Agent, Accept-Language)</li>
+</ul>
+<h4 id="cdn-features"><a class="header" href="#cdn-features">CDN Features</a></h4>
+<p><strong>1. Geographic Distribution</strong>: Servers in multiple regions
+<strong>2. DDoS Protection</strong>: Absorb attack traffic
+<strong>3. SSL/TLS Termination</strong>: Offload encryption from origin
+<strong>4. Compression</strong>: Gzip, Brotli
+<strong>5. Image Optimization</strong>: Resize, format conversion (WebP)
+<strong>6. Streaming</strong>: HLS, DASH for video</p>
+<h4 id="popular-cdns"><a class="header" href="#popular-cdns">Popular CDNs</a></h4>
+<ul>
+<li><strong>Cloudflare</strong>: Global network, DDoS protection, Workers (edge compute)</li>
+<li><strong>Akamai</strong>: Largest CDN, enterprise focus</li>
+<li><strong>Fastly</strong>: Real-time purging, edge compute (Compute@Edge)</li>
+<li><strong>AWS CloudFront</strong>: Integrated with AWS, Lambda@Edge</li>
+<li><strong>Google Cloud CDN</strong>: Integrated with GCP</li>
+</ul>
+<h2 id="serverless-architectures"><a class="header" href="#serverless-architectures">Serverless Architectures</a></h2>
+<h3 id="function-as-a-service-faas"><a class="header" href="#function-as-a-service-faas">Function as a Service (FaaS)</a></h3>
+<h4 id="characteristics"><a class="header" href="#characteristics">Characteristics</a></h4>
+<ol>
+<li><strong>Event-driven</strong>: Functions triggered by events</li>
+<li><strong>Stateless</strong>: No persistent state between invocations</li>
+<li><strong>Ephemeral</strong>: Short-lived execution (seconds to minutes)</li>
+<li><strong>Auto-scaling</strong>: Scale to zero, scale to thousands</li>
+<li><strong>Pay-per-use</strong>: Charged for execution time, not idle time</li>
+</ol>
+<h4 id="popular-faas-platforms"><a class="header" href="#popular-faas-platforms">Popular FaaS Platforms</a></h4>
+<p><strong>AWS Lambda</strong>:</p>
+<ul>
+<li>Multiple runtimes (Node.js, Python, Java, Go, .NET, Ruby)</li>
+<li>15-minute max execution</li>
+<li>Event sources: S3, DynamoDB, API Gateway, SQS, etc.</li>
+<li>Provisioned concurrency for low latency</li>
+</ul>
+<p><strong>Google Cloud Functions</strong>:</p>
+<ul>
+<li>HTTP and event-driven</li>
+<li>Auto-scaling</li>
+<li>Integration with GCP services</li>
+</ul>
+<p><strong>Azure Functions</strong>:</p>
+<ul>
+<li>Multiple triggers (HTTP, timer, queue, blob)</li>
+<li>Durable Functions (stateful workflows)</li>
+<li>Integration with Azure services</li>
+</ul>
+<p><strong>Cloudflare Workers</strong>:</p>
+<ul>
+<li>Edge compute (runs at CDN edge)</li>
+<li>V8 isolates (not containers)</li>
+<li>Sub-millisecond startup</li>
+<li>JavaScript/WebAssembly</li>
+</ul>
+<h4 id="serverless-patterns"><a class="header" href="#serverless-patterns">Serverless Patterns</a></h4>
+<h5 id="1-api-backend"><a class="header" href="#1-api-backend">1. API Backend</a></h5>
+<pre><code>API Gateway → Lambda → DynamoDB
+- Scalable REST API
+- No server management
+</code></pre>
+<h5 id="2-stream-processing"><a class="header" href="#2-stream-processing">2. Stream Processing</a></h5>
+<pre><code>Kinesis/Kafka → Lambda → S3/Database
+- Real-time data processing
+- Auto-scaling with stream shards
+</code></pre>
+<h5 id="3-scheduled-jobs"><a class="header" href="#3-scheduled-jobs">3. Scheduled Jobs</a></h5>
+<pre><code>CloudWatch Events (cron) → Lambda
+- Periodic tasks (cleanup, reports)
+</code></pre>
+<h5 id="4-file-processing"><a class="header" href="#4-file-processing">4. File Processing</a></h5>
+<pre><code>S3 upload → Lambda (resize image) → S3
+- Event-driven processing
+</code></pre>
+<h5 id="5-webhooks"><a class="header" href="#5-webhooks">5. Webhooks</a></h5>
+<pre><code>External service → API Gateway → Lambda
+- Handle incoming webhooks
+</code></pre>
+<h3 id="serverless-databases"><a class="header" href="#serverless-databases">Serverless Databases</a></h3>
+<p><strong>AWS DynamoDB</strong>:</p>
+<ul>
+<li>Serverless NoSQL</li>
+<li>On-demand or provisioned capacity</li>
+<li>Auto-scaling</li>
+</ul>
+<p><strong>Google Firestore</strong>:</p>
+<ul>
+<li>Serverless document database</li>
+<li>Real-time synchronization</li>
+<li>Offline support</li>
+</ul>
+<p><strong>Azure Cosmos DB</strong> (serverless):</p>
+<ul>
+<li>Multi-model database</li>
+<li>Global distribution</li>
+<li>Multiple consistency levels</li>
+</ul>
+<p><strong>FaunaDB</strong>:</p>
+<ul>
+<li>Serverless transactional database</li>
+<li>GraphQL, FQL query languages</li>
+<li>Multi-region, ACID</li>
+</ul>
+<h3 id="serverless-challenges"><a class="header" href="#serverless-challenges">Serverless Challenges</a></h3>
+<h4 id="1-cold-starts"><a class="header" href="#1-cold-starts">1. Cold Starts</a></h4>
+<ul>
+<li><strong>Problem</strong>: First invocation slow (100ms-10s)</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>Provisioned concurrency (keep warm)</li>
+<li>Minimize function size</li>
+<li>Use faster runtimes (Go, Rust)</li>
+<li>Edge compute (Cloudflare Workers)</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-statelessness"><a class="header" href="#2-statelessness">2. Statelessness</a></h4>
+<ul>
+<li><strong>Problem</strong>: No persistent memory between invocations</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>External state stores (Redis, DynamoDB)</li>
+<li>Step Functions for workflows</li>
+<li>Durable Functions (Azure)</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-vendor-lock-in"><a class="header" href="#3-vendor-lock-in">3. Vendor Lock-in</a></h4>
+<ul>
+<li><strong>Problem</strong>: Tied to specific cloud provider</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>Abstraction layers (Serverless Framework)</li>
+<li>Multi-cloud deployment</li>
+<li>Containers (Cloud Run, Fargate)</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-debugging-and-monitoring"><a class="header" href="#4-debugging-and-monitoring">4. Debugging and Monitoring</a></h4>
+<ul>
+<li><strong>Problem</strong>: Distributed, ephemeral environment</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>Distributed tracing (AWS X-Ray, Datadog)</li>
+<li>Structured logging</li>
+<li>Local emulators (SAM, LocalStack)</li>
+</ul>
+</li>
+</ul>
+<h4 id="5-timeouts-and-limits"><a class="header" href="#5-timeouts-and-limits">5. Timeouts and Limits</a></h4>
+<ul>
+<li><strong>Problem</strong>: Execution time limits (e.g., 15 min for Lambda)</li>
+<li><strong>Solutions</strong>:
+<ul>
+<li>Break into smaller functions</li>
+<li>Use Step Functions for orchestration</li>
+<li>Hybrid approach (long tasks on containers)</li>
+</ul>
+</li>
+</ul>
+<h3 id="serverless-vs-containers"><a class="header" href="#serverless-vs-containers">Serverless vs Containers</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Aspect</th><th>Serverless (FaaS)</th><th>Containers</th></tr></thead><tbody>
+<tr><td><strong>Abstraction</strong></td><td>High (no infra)</td><td>Medium (manage containers)</td></tr>
+<tr><td><strong>Scaling</strong></td><td>Automatic, instant</td><td>Auto-scaling with delay</td></tr>
+<tr><td><strong>Cold start</strong></td><td>Yes (100ms-10s)</td><td>Minimal (if running)</td></tr>
+<tr><td><strong>Cost</strong></td><td>Pay per execution</td><td>Pay for running time</td></tr>
+<tr><td><strong>State</strong></td><td>Stateless</td><td>Can be stateful</td></tr>
+<tr><td><strong>Execution limit</strong></td><td>15 min (Lambda)</td><td>No limit</td></tr>
+<tr><td><strong>Flexibility</strong></td><td>Limited runtimes</td><td>Any language/runtime</td></tr>
+<tr><td><strong>Best for</strong></td><td>Event-driven, bursty</td><td>Long-running, stateful</td></tr>
+</tbody></table>
+</div>
+<h2 id="graphql-federation"><a class="header" href="#graphql-federation">GraphQL Federation</a></h2>
+<h3 id="overview-2"><a class="header" href="#overview-2">Overview</a></h3>
+<p><strong>GraphQL Federation</strong>: Compose multiple GraphQL services into single unified graph</p>
+<h4 id="traditional-approach"><a class="header" href="#traditional-approach">Traditional Approach</a></h4>
+<pre><code>Single GraphQL server
+- Monolithic schema
+- All resolvers in one codebase
+- Doesn't scale for large teams
+</code></pre>
+<h4 id="federated-approach"><a class="header" href="#federated-approach">Federated Approach</a></h4>
+<pre><code>Multiple GraphQL services (subgraphs)
+- Each owns part of schema
+- Gateway composes and routes queries
+- Teams work independently
+</code></pre>
+<h3 id="architecture-2"><a class="header" href="#architecture-2">Architecture</a></h3>
+<p><strong>Subgraphs</strong>: Individual GraphQL services</p>
+<ul>
+<li>Own domain-specific types and fields</li>
+<li>Extend types from other subgraphs</li>
+<li>Independent deployment</li>
+</ul>
+<p><strong>Gateway</strong>: Composes and executes federated queries</p>
+<ul>
+<li>Schema composition</li>
+<li>Query planning</li>
+<li>Request routing</li>
+</ul>
+<h3 id="apollo-federation"><a class="header" href="#apollo-federation">Apollo Federation</a></h3>
+<h4 id="key-concepts-1"><a class="header" href="#key-concepts-1">Key Concepts</a></h4>
+<p><strong>1. Entities</strong>: Types shared across subgraphs</p>
+<pre><code class="language-graphql"># Products subgraph
+type Product @key(fields: "id") {
+  id: ID!
+  name: String!
+  price: Float!
+}
+
+# Reviews subgraph (extends Product)
+extend type Product @key(fields: "id") {
+  id: ID! @external
+  reviews: [Review!]!
+}
+</code></pre>
+<p><strong>2. @key Directive</strong>: Identifies entity</p>
+<ul>
+<li>Tells gateway how to uniquely identify object</li>
+<li>Enables cross-service joins</li>
+</ul>
+<p><strong>3. @external</strong>: Field defined in another subgraph</p>
+<p><strong>4. @requires</strong>: Field requires other fields to resolve</p>
+<p><strong>5. @provides</strong>: Field can provide additional fields</p>
+<h4 id="query-planning"><a class="header" href="#query-planning">Query Planning</a></h4>
+<p><strong>Example</strong>:</p>
+<pre><code class="language-graphql">query {
+  product(id: "123") {
+    name       # Products subgraph
+    price      # Products subgraph
+    reviews {  # Reviews subgraph
+      rating
+      comment
+    }
+  }
+}
+</code></pre>
+<p><strong>Execution</strong>:</p>
+<ol>
+<li>Gateway queries Products subgraph for product(id: "123")</li>
+<li>Returns: { id: "123", name: "Widget", price: 29.99, __typename: "Product" }</li>
+<li>Gateway queries Reviews subgraph with Product entity reference</li>
+<li>Returns reviews</li>
+<li>Gateway merges results</li>
+</ol>
+<h3 id="schema-stitching-vs-federation"><a class="header" href="#schema-stitching-vs-federation">Schema Stitching vs Federation</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Aspect</th><th>Schema Stitching</th><th>Federation</th></tr></thead><tbody>
+<tr><td><strong>Ownership</strong></td><td>Gateway owns schema</td><td>Subgraphs own schema</td></tr>
+<tr><td><strong>Composition</strong></td><td>Manual stitching</td><td>Automatic composition</td></tr>
+<tr><td><strong>Type extension</strong></td><td>Limited</td><td>Native support</td></tr>
+<tr><td><strong>Performance</strong></td><td>More round trips</td><td>Optimized query plans</td></tr>
+<tr><td><strong>Best for</strong></td><td>Combining 3rd party APIs</td><td>Microservices architecture</td></tr>
+</tbody></table>
+</div>
+<h3 id="benefits"><a class="header" href="#benefits">Benefits</a></h3>
+<ol>
+<li><strong>Team Autonomy</strong>: Teams own their subgraphs</li>
+<li><strong>Independent Deployment</strong>: Deploy subgraphs separately</li>
+<li><strong>Incremental Adoption</strong>: Gradually migrate to federation</li>
+<li><strong>Type Safety</strong>: Shared types across services</li>
+<li><strong>Unified API</strong>: Single GraphQL endpoint for clients</li>
+</ol>
+<h3 id="challenges-1"><a class="header" href="#challenges-1">Challenges</a></h3>
+<ol>
+<li><strong>Complexity</strong>: More moving parts</li>
+<li><strong>Debugging</strong>: Distributed query execution</li>
+<li><strong>Schema Coordination</strong>: Avoid breaking changes</li>
+<li><strong>Gateway Performance</strong>: Single point of failure</li>
+</ol>
 <h2 id="best-practices-1"><a class="header" href="#best-practices-1">Best Practices</a></h2>
 <ol>
 <li><strong>Design for Failure</strong>: Assume everything will fail</li>
@@ -1854,6 +2956,11 @@ On write: Invalidate cache (or update)
 <li><strong>Bulkheads</strong>: Isolate failures</li>
 <li><strong>Rate Limiting</strong>: Protect from overload</li>
 <li><strong>Caching</strong>: Reduce load, improve performance</li>
+<li><strong>Immutable Infrastructure</strong>: Treat servers as disposable</li>
+<li><strong>Infrastructure as Code</strong>: Version control infra changes</li>
+<li><strong>Zero Trust Security</strong>: Never trust, always verify</li>
+<li><strong>Multi-Region</strong>: Plan for regional failures</li>
+<li><strong>Cost Optimization</strong>: Right-size resources, use spot instances</li>
 </ol>
 <h2 id="observability"><a class="header" href="#observability">Observability</a></h2>
 <h3 id="the-three-pillars"><a class="header" href="#the-three-pillars">The Three Pillars</a></h3>

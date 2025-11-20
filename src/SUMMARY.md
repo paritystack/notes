@@ -45,6 +45,7 @@
     - [Netfilter](linux/netfilter.md)
     - [TC](linux/tc.md)
     - [IPTables](linux/iptables.md)
+    - [nftables](linux/nftables.md)
     - [systemd](linux/systemd.md)
     - [sysctl](linux/sysctl.md)
     - [sysfs](linux/sysfs.md)

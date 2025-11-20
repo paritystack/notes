@@ -27,6 +27,60 @@ SPI uses four main signal lines:
 
 Unlike I2C's two-wire design, SPI uses separate data lines for sending and receiving, enabling full-duplex communication. Each slave device needs its own chip select line, which can increase pin count when multiple slaves are used.
 
+## Protocol Specifications
+
+### Electrical Characteristics
+
+| Parameter | Typical Range | Notes |
+|-----------|---------------|-------|
+| **Logic Levels (3.3V)** | LOW: 0-0.8V, HIGH: 2.0-3.3V | CMOS levels |
+| **Logic Levels (5V)** | LOW: 0-1.5V, HIGH: 3.5-5V | TTL levels |
+| **Output Current** | 4-25 mA | Varies by MCU |
+| **Input Impedance** | 10kΩ - 1MΩ | High impedance |
+| **Capacitive Load** | < 30 pF | For high-speed operation |
+
+### Timing Requirements
+
+| Parameter | Symbol | Min | Typical | Max | Unit | Description |
+|-----------|--------|-----|---------|-----|------|-------------|
+| Clock Frequency | f_SCLK | 0 | - | 50+ | MHz | Master clock rate |
+| Clock Period | t_CLK | 20 | - | ∞ | ns | Minimum at 50 MHz |
+| Setup Time | t_SU | 5 | 10 | - | ns | Data valid before clock edge |
+| Hold Time | t_H | 5 | 10 | - | ns | Data valid after clock edge |
+| CS to Clock | t_CSS | 10 | 50 | - | ns | CS active to first clock |
+| Clock to CS | t_CSH | 10 | 50 | - | ns | Last clock to CS inactive |
+| CS High Time | t_CSW | 50 | 100 | - | ns | Between transmissions |
+| Rise/Fall Time | t_r/t_f | - | - | 10 | ns | Signal edge rates |
+
+**Important Notes:**
+- Timing values vary significantly by device - always check datasheets
+- Higher speeds require careful PCB layout and impedance matching
+- Setup and hold times must be met for reliable data transfer
+- Temperature and voltage affect timing margins
+
+### Signal Integrity Considerations
+
+#### PCB Layout Guidelines
+- **Trace Impedance**: Target 50Ω for controlled impedance
+- **Trace Spacing**: Minimum 3x trace width between signals
+- **Ground Plane**: Continuous ground plane under SPI traces
+- **Via Count**: Minimize vias in high-speed paths
+- **Trace Length Matching**: Within 5mm for speeds > 10 MHz
+
+#### Termination
+```
+For high-speed SPI (> 20 MHz):
+- Series termination: 22-33Ω resistor near source
+- Parallel termination: 50Ω to VCC/GND on long lines
+- RC termination: For mixed impedance environments
+```
+
+#### Noise Mitigation
+- **Decoupling capacitors**: 100nF ceramic + 10µF bulk per IC
+- **Ferrite beads**: On power lines for sensitive sensors
+- **Shielding**: For EMI-sensitive applications
+- **Twisted pairs**: MOSI/GND and MISO/GND for cable runs
+
 ## How It Works
 
 ### Basic Communication Flow
@@ -59,6 +113,121 @@ SPI has four modes determined by two settings:
 | 3 | 1 | 1 | HIGH | Trailing (rising) edge |
 
 **Important**: Master and slave must use the same mode for successful communication!
+
+### Hardware Timing Diagrams
+
+Understanding SPI timing is crucial for debugging and high-speed designs. Below are timing diagrams for all four SPI modes.
+
+#### SPI Mode 0 (CPOL=0, CPHA=0)
+```
+         ___     ___     ___     ___     ___     ___     ___     ___
+SCLK  __|   |___|   |___|   |___|   |___|   |___|   |___|   |___|   |___
+         ^       ^       ^       ^       ^       ^       ^       ^
+         |       |       |       |       |       |       |       |
+      Sample  Sample  Sample  Sample  Sample  Sample  Sample  Sample
+      (rising edge)
+
+CS    ___                                                             ___
+         |___________________________________________________________|
+
+         ____    ____    ____    ____    ____    ____    ____    ____
+MOSI  __|_D7_|__|_D6_|__|_D5_|__|_D4_|__|_D3_|__|_D2_|__|_D1_|__|_D0_|__
+      (MSB)                                                     (LSB)
+
+         ____    ____    ____    ____    ____    ____    ____    ____
+MISO  __|_D7_|__|_D6_|__|_D5_|__|_D4_|__|_D3_|__|_D2_|__|_D1_|__|_D0_|__
+
+      Setup on falling edge, Sample on rising edge
+```
+
+#### SPI Mode 1 (CPOL=0, CPHA=1)
+```
+         ___     ___     ___     ___     ___     ___     ___     ___
+SCLK  __|   |___|   |___|   |___|   |___|   |___|   |___|   |___|   |___
+             ^       ^       ^       ^       ^       ^       ^       ^
+             |       |       |       |       |       |       |       |
+          Sample  Sample  Sample  Sample  Sample  Sample  Sample  Sample
+          (falling edge)
+
+CS    ___                                                             ___
+         |___________________________________________________________|
+
+      ________    ____    ____    ____    ____    ____    ____    _____
+MOSI          |__|_D7_|__|_D6_|__|_D5_|__|_D4_|__|_D3_|__|_D2_|__|_D1_|_D0
+
+      ________    ____    ____    ____    ____    ____    ____    _____
+MISO          |__|_D7_|__|_D6_|__|_D5_|__|_D4_|__|_D3_|__|_D2_|__|_D1_|_D0
+
+      Setup on rising edge, Sample on falling edge
+```
+
+#### SPI Mode 2 (CPOL=1, CPHA=0)
+```
+      ___     ___     ___     ___     ___     ___     ___     ___
+SCLK     |___|   |___|   |___|   |___|   |___|   |___|   |___|   |___
+             ^       ^       ^       ^       ^       ^       ^       ^
+             |       |       |       |       |       |       |       |
+          Sample  Sample  Sample  Sample  Sample  Sample  Sample  Sample
+          (falling edge)
+
+CS    ___                                                             ___
+         |___________________________________________________________|
+
+         ____    ____    ____    ____    ____    ____    ____    ____
+MOSI  __|_D7_|__|_D6_|__|_D5_|__|_D4_|__|_D3_|__|_D2_|__|_D1_|__|_D0_|__
+
+         ____    ____    ____    ____    ____    ____    ____    ____
+MISO  __|_D7_|__|_D6_|__|_D5_|__|_D4_|__|_D3_|__|_D2_|__|_D1_|__|_D0_|__
+
+      Setup on rising edge, Sample on falling edge
+```
+
+#### SPI Mode 3 (CPOL=1, CPHA=1)
+```
+      ___     ___     ___     ___     ___     ___     ___     ___
+SCLK     |___|   |___|   |___|   |___|   |___|   |___|   |___|   |___
+         ^       ^       ^       ^       ^       ^       ^       ^
+         |       |       |       |       |       |       |       |
+      Sample  Sample  Sample  Sample  Sample  Sample  Sample  Sample
+      (rising edge)
+
+CS    ___                                                             ___
+         |___________________________________________________________|
+
+      ________    ____    ____    ____    ____    ____    ____    _____
+MOSI          |__|_D7_|__|_D6_|__|_D5_|__|_D4_|__|_D3_|__|_D2_|__|_D1_|_D0
+
+      ________    ____    ____    ____    ____    ____    ____    _____
+MISO          |__|_D7_|__|_D6_|__|_D5_|__|_D4_|__|_D3_|__|_D2_|__|_D1_|_D0
+
+      Setup on falling edge, Sample on rising edge
+```
+
+#### Timing Parameter Diagram
+```
+         t_CSS      t_CLK       t_SU  t_H     t_CSH     t_CSW
+         <-->       <--->       <-> <->       <-->      <--->
+CS    ___    ________________________    __________________________    ___
+         |__|                        |__|                          |__|
+
+              ___     ___     ___           ___     ___     ___
+SCLK  _______|   |___|   |___|   |_________|   |___|   |___|   |________
+
+                  _______________                 _______________
+MOSI  ___________|     DATA      |_______________|     DATA      |________
+                  <------------->
+                   Valid Window
+
+              t_r: Rise time
+              t_f: Fall time
+```
+
+**Key Timing Relationships:**
+- **Setup Time (t_SU)**: Data must be stable this long before clock edge
+- **Hold Time (t_H)**: Data must remain stable this long after clock edge
+- **CS Setup (t_CSS)**: Delay from CS active to first clock edge
+- **CS Hold (t_CSH)**: Delay from last clock edge to CS inactive
+- **CS Width (t_CSW)**: Minimum time CS must be high between transfers
 
 ## Code Examples
 
@@ -159,6 +328,629 @@ void writeRegister(uint8_t reg, uint8_t value) {
   digitalWrite(CS_PIN, HIGH);
 }
 ```
+
+### Raspberry Pi Python (spidev)
+
+```python
+import spidev
+import time
+
+# Initialize SPI
+spi = spidev.SpiDev()
+spi.open(0, 0)  # Bus 0, Device 0 (CE0)
+
+# Configure SPI
+spi.max_speed_hz = 1000000  # 1 MHz
+spi.mode = 0  # SPI Mode 0 (CPOL=0, CPHA=0)
+spi.bits_per_word = 8
+spi.lsbfirst = False  # MSB first
+
+def read_register(reg_addr):
+    """Read a single register from SPI device"""
+    # Send register address with read bit
+    response = spi.xfer2([reg_addr | 0x80, 0x00])
+    return response[1]
+
+def write_register(reg_addr, value):
+    """Write a single register to SPI device"""
+    spi.xfer2([reg_addr & 0x7F, value])
+
+def read_multiple_bytes(reg_addr, num_bytes):
+    """Read multiple consecutive bytes"""
+    command = [reg_addr | 0x80] + [0x00] * num_bytes
+    response = spi.xfer2(command)
+    return response[1:]  # Skip first byte (command echo)
+
+# Example: Read WHO_AM_I register (common in sensors)
+device_id = read_register(0x0F)
+print(f"Device ID: 0x{device_id:02X}")
+
+# Example: Write configuration
+write_register(0x20, 0x47)  # Enable device, set data rate
+
+# Cleanup
+spi.close()
+```
+
+### Raspberry Pi C (bcm2835 library)
+
+```c
+#include <bcm2835.h>
+#include <stdio.h>
+
+#define CS_PIN RPI_GPIO_P1_24  // CE0
+
+void setup_spi() {
+    if (!bcm2835_init()) {
+        printf("bcm2835_init failed\n");
+        return;
+    }
+
+    if (!bcm2835_spi_begin()) {
+        printf("bcm2835_spi_begin failed\n");
+        return;
+    }
+
+    // Configure SPI
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_256);  // ~1 MHz
+    bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
+    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
+}
+
+uint8_t read_register(uint8_t reg) {
+    uint8_t tx_data[2] = {reg | 0x80, 0x00};
+    uint8_t rx_data[2];
+
+    bcm2835_spi_transfern((char*)tx_data, (char*)rx_data, 2);
+    return rx_data[1];
+}
+
+void write_register(uint8_t reg, uint8_t value) {
+    uint8_t data[2] = {reg & 0x7F, value};
+    bcm2835_spi_writenb((char*)data, 2);
+}
+
+int main() {
+    setup_spi();
+
+    // Read device ID
+    uint8_t id = read_register(0x0F);
+    printf("Device ID: 0x%02X\n", id);
+
+    // Write configuration
+    write_register(0x20, 0x47);
+
+    // Cleanup
+    bcm2835_spi_end();
+    bcm2835_close();
+    return 0;
+}
+```
+
+### Linux Userspace SPI (/dev/spidev)
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <linux/spi/spidev.h>
+#include <string.h>
+
+int spi_fd;
+
+int spi_init(const char *device) {
+    uint8_t mode = SPI_MODE_0;
+    uint8_t bits = 8;
+    uint32_t speed = 1000000;  // 1 MHz
+
+    spi_fd = open(device, O_RDWR);
+    if (spi_fd < 0) {
+        perror("Failed to open SPI device");
+        return -1;
+    }
+
+    // Set SPI mode
+    if (ioctl(spi_fd, SPI_IOC_WR_MODE, &mode) < 0) {
+        perror("Failed to set SPI mode");
+        return -1;
+    }
+
+    // Set bits per word
+    if (ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &bits) < 0) {
+        perror("Failed to set bits per word");
+        return -1;
+    }
+
+    // Set max speed
+    if (ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed) < 0) {
+        perror("Failed to set max speed");
+        return -1;
+    }
+
+    return 0;
+}
+
+int spi_transfer(uint8_t *tx_data, uint8_t *rx_data, int length) {
+    struct spi_ioc_transfer transfer = {
+        .tx_buf = (unsigned long)tx_data,
+        .rx_buf = (unsigned long)rx_data,
+        .len = length,
+        .speed_hz = 1000000,
+        .bits_per_word = 8,
+        .delay_usecs = 0,
+    };
+
+    return ioctl(spi_fd, SPI_IOC_MESSAGE(1), &transfer);
+}
+
+int main() {
+    uint8_t tx_data[2] = {0x0F | 0x80, 0x00};
+    uint8_t rx_data[2] = {0};
+
+    if (spi_init("/dev/spidev0.0") < 0) {
+        return -1;
+    }
+
+    // Transfer data
+    if (spi_transfer(tx_data, rx_data, 2) < 0) {
+        perror("SPI transfer failed");
+        close(spi_fd);
+        return -1;
+    }
+
+    printf("Device ID: 0x%02X\n", rx_data[1]);
+
+    close(spi_fd);
+    return 0;
+}
+```
+
+### Bare-Metal ARM (No HAL)
+
+```c
+#include <stdint.h>
+
+// STM32F4 SPI1 register definitions
+#define SPI1_BASE     0x40013000
+#define SPI1_CR1      (*(volatile uint32_t *)(SPI1_BASE + 0x00))
+#define SPI1_CR2      (*(volatile uint32_t *)(SPI1_BASE + 0x04))
+#define SPI1_SR       (*(volatile uint32_t *)(SPI1_BASE + 0x08))
+#define SPI1_DR       (*(volatile uint32_t *)(SPI1_BASE + 0x0C))
+
+// SPI Control Register bits
+#define SPI_CR1_MSTR    (1 << 2)   // Master mode
+#define SPI_CR1_SPE     (1 << 6)   // SPI enable
+#define SPI_CR1_BR_DIV2 (0 << 3)   // Baud rate prescaler
+#define SPI_CR1_BR_DIV16 (3 << 3)
+#define SPI_CR1_CPOL    (1 << 1)   // Clock polarity
+#define SPI_CR1_CPHA    (1 << 0)   // Clock phase
+#define SPI_CR1_SSM     (1 << 9)   // Software slave management
+#define SPI_CR1_SSI     (1 << 8)   // Internal slave select
+
+// SPI Status Register bits
+#define SPI_SR_TXE      (1 << 1)   // Transmit buffer empty
+#define SPI_SR_RXNE     (1 << 0)   // Receive buffer not empty
+#define SPI_SR_BSY      (1 << 7)   // Busy flag
+
+void spi1_init(void) {
+    // Enable SPI1 clock (assuming RCC already configured)
+    // Configure as master, Mode 0, 1 MHz
+    SPI1_CR1 = SPI_CR1_MSTR | SPI_CR1_BR_DIV16 | SPI_CR1_SSM | SPI_CR1_SSI;
+    SPI1_CR1 |= SPI_CR1_SPE;  // Enable SPI
+}
+
+uint8_t spi1_transfer(uint8_t data) {
+    // Wait for TX buffer empty
+    while (!(SPI1_SR & SPI_SR_TXE));
+
+    // Write data to transmit
+    SPI1_DR = data;
+
+    // Wait for receive buffer not empty
+    while (!(SPI1_SR & SPI_SR_RXNE));
+
+    // Read received data
+    return (uint8_t)SPI1_DR;
+}
+
+void spi1_wait_busy(void) {
+    while (SPI1_SR & SPI_SR_BSY);
+}
+```
+
+### W25Q Flash Memory Example
+
+Complete example for reading/writing SPI flash memory (W25Q128, W25Q64, etc.):
+
+```cpp
+#include <SPI.h>
+
+// W25Q Flash Commands
+#define CMD_WRITE_ENABLE    0x06
+#define CMD_WRITE_DISABLE   0x04
+#define CMD_READ_STATUS_1   0x05
+#define CMD_READ_STATUS_2   0x35
+#define CMD_PAGE_PROGRAM    0x02
+#define CMD_READ_DATA       0x03
+#define CMD_SECTOR_ERASE    0x20
+#define CMD_CHIP_ERASE      0xC7
+#define CMD_JEDEC_ID        0x9F
+
+const int CS_PIN = 10;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(CS_PIN, OUTPUT);
+  digitalWrite(CS_PIN, HIGH);
+
+  SPI.begin();
+  SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
+
+  // Read JEDEC ID
+  uint32_t jedec_id = readJEDECID();
+  Serial.print("JEDEC ID: 0x");
+  Serial.println(jedec_id, HEX);
+}
+
+uint32_t readJEDECID() {
+  digitalWrite(CS_PIN, LOW);
+  SPI.transfer(CMD_JEDEC_ID);
+  uint32_t id = SPI.transfer(0) << 16;
+  id |= SPI.transfer(0) << 8;
+  id |= SPI.transfer(0);
+  digitalWrite(CS_PIN, HIGH);
+  return id;
+}
+
+uint8_t readStatusRegister() {
+  digitalWrite(CS_PIN, LOW);
+  SPI.transfer(CMD_READ_STATUS_1);
+  uint8_t status = SPI.transfer(0);
+  digitalWrite(CS_PIN, HIGH);
+  return status;
+}
+
+void waitBusy() {
+  while (readStatusRegister() & 0x01) {
+    delay(1);
+  }
+}
+
+void writeEnable() {
+  digitalWrite(CS_PIN, LOW);
+  SPI.transfer(CMD_WRITE_ENABLE);
+  digitalWrite(CS_PIN, HIGH);
+}
+
+void readData(uint32_t address, uint8_t *buffer, uint16_t length) {
+  waitBusy();
+
+  digitalWrite(CS_PIN, LOW);
+  SPI.transfer(CMD_READ_DATA);
+  SPI.transfer((address >> 16) & 0xFF);
+  SPI.transfer((address >> 8) & 0xFF);
+  SPI.transfer(address & 0xFF);
+
+  for (uint16_t i = 0; i < length; i++) {
+    buffer[i] = SPI.transfer(0);
+  }
+  digitalWrite(CS_PIN, HIGH);
+}
+
+void writePage(uint32_t address, uint8_t *data, uint16_t length) {
+  // Length must be <= 256 bytes and not cross page boundary
+  waitBusy();
+  writeEnable();
+
+  digitalWrite(CS_PIN, LOW);
+  SPI.transfer(CMD_PAGE_PROGRAM);
+  SPI.transfer((address >> 16) & 0xFF);
+  SPI.transfer((address >> 8) & 0xFF);
+  SPI.transfer(address & 0xFF);
+
+  for (uint16_t i = 0; i < length; i++) {
+    SPI.transfer(data[i]);
+  }
+  digitalWrite(CS_PIN, HIGH);
+
+  waitBusy();
+}
+
+void eraseSector(uint32_t address) {
+  // Erases 4KB sector at address
+  waitBusy();
+  writeEnable();
+
+  digitalWrite(CS_PIN, LOW);
+  SPI.transfer(CMD_SECTOR_ERASE);
+  SPI.transfer((address >> 16) & 0xFF);
+  SPI.transfer((address >> 8) & 0xFF);
+  SPI.transfer(address & 0xFF);
+  digitalWrite(CS_PIN, HIGH);
+
+  waitBusy();
+}
+
+void loop() {
+  // Example usage
+  uint8_t write_data[] = "Hello, SPI Flash!";
+  uint8_t read_buffer[32];
+
+  // Erase sector 0
+  eraseSector(0x000000);
+
+  // Write data to page 0
+  writePage(0x000000, write_data, sizeof(write_data));
+
+  // Read data back
+  readData(0x000000, read_buffer, sizeof(write_data));
+
+  Serial.print("Read: ");
+  Serial.println((char*)read_buffer);
+
+  delay(5000);
+}
+```
+
+## Advanced Topics
+
+### DMA-Based SPI Transfers
+
+DMA (Direct Memory Access) allows SPI transfers without CPU intervention, crucial for high-throughput applications.
+
+#### STM32 HAL DMA SPI Example
+
+```c
+#include "stm32f4xx_hal.h"
+
+SPI_HandleTypeDef hspi1;
+DMA_HandleTypeDef hdma_spi1_tx;
+DMA_HandleTypeDef hdma_spi1_rx;
+
+volatile uint8_t transfer_complete = 0;
+
+void SPI1_DMA_Init(void) {
+    // Enable DMA clocks
+    __HAL_RCC_DMA2_CLK_ENABLE();
+
+    // Configure DMA for SPI TX
+    hdma_spi1_tx.Instance = DMA2_Stream3;
+    hdma_spi1_tx.Init.Channel = DMA_CHANNEL_3;
+    hdma_spi1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_spi1_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_spi1_tx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_spi1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_spi1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_spi1_tx.Init.Mode = DMA_NORMAL;
+    hdma_spi1_tx.Init.Priority = DMA_PRIORITY_HIGH;
+    HAL_DMA_Init(&hdma_spi1_tx);
+    __HAL_LINKDMA(&hspi1, hdmatx, hdma_spi1_tx);
+
+    // Configure DMA for SPI RX
+    hdma_spi1_rx.Instance = DMA2_Stream2;
+    hdma_spi1_rx.Init.Channel = DMA_CHANNEL_3;
+    hdma_spi1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_spi1_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_spi1_rx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_spi1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_spi1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_spi1_rx.Init.Mode = DMA_NORMAL;
+    hdma_spi1_rx.Init.Priority = DMA_PRIORITY_HIGH;
+    HAL_DMA_Init(&hdma_spi1_rx);
+    __HAL_LINKDMA(&hspi1, hdmarx, hdma_spi1_rx);
+
+    // Enable DMA interrupts
+    HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+    HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+}
+
+void SPI_DMA_TransmitReceive(uint8_t *tx_data, uint8_t *rx_data, uint16_t size) {
+    transfer_complete = 0;
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);  // CS LOW
+    HAL_SPI_TransmitReceive_DMA(&hspi1, tx_data, rx_data, size);
+
+    // Wait for transfer to complete (or use interrupt callback)
+    while (!transfer_complete);
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);    // CS HIGH
+}
+
+// DMA transfer complete callback
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
+    transfer_complete = 1;
+}
+
+// DMA interrupt handlers
+void DMA2_Stream3_IRQHandler(void) {
+    HAL_DMA_IRQHandler(&hdma_spi1_tx);
+}
+
+void DMA2_Stream2_IRQHandler(void) {
+    HAL_DMA_IRQHandler(&hdma_spi1_rx);
+}
+```
+
+**Benefits of DMA:**
+- CPU is free for other tasks during transfer
+- Consistent timing without interrupt latency
+- Higher throughput for large data transfers
+- Essential for high-speed displays and data logging
+
+### Quad SPI (QSPI)
+
+Quad SPI uses 4 data lines instead of 2, quadrupling throughput for compatible devices.
+
+```
+Standard SPI:  1 bit/clock (MOSI or MISO)
+Dual SPI:      2 bits/clock (IO0, IO1)
+Quad SPI:      4 bits/clock (IO0, IO1, IO2, IO3)
+```
+
+#### QSPI Signal Lines
+
+| Signal | Description |
+|--------|-------------|
+| CLK | Clock |
+| CS | Chip Select |
+| IO0 | Data 0 (MOSI in single mode) |
+| IO1 | Data 1 (MISO in single mode) |
+| IO2 | Data 2 (WP in single mode) |
+| IO3 | Data 3 (HOLD in single mode) |
+
+#### STM32 QSPI Example
+
+```c
+#include "stm32f4xx_hal.h"
+
+QSPI_HandleTypeDef hqspi;
+
+void QSPI_Init(void) {
+    hqspi.Instance = QUADSPI;
+    hqspi.Init.ClockPrescaler = 1;
+    hqspi.Init.FifoThreshold = 4;
+    hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
+    hqspi.Init.FlashSize = 23;  // 2^(23+1) = 16MB
+    hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_1_CYCLE;
+    hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
+    HAL_QSPI_Init(&hqspi);
+}
+
+void QSPI_ReadFast(uint32_t address, uint8_t *data, uint32_t size) {
+    QSPI_CommandTypeDef cmd;
+
+    cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
+    cmd.Instruction = 0xEB;  // Fast Read Quad I/O
+    cmd.AddressMode = QSPI_ADDRESS_4_LINES;
+    cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+    cmd.Address = address;
+    cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_4_LINES;
+    cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
+    cmd.AlternateBytes = 0x00;
+    cmd.DummyCycles = 4;
+    cmd.DataMode = QSPI_DATA_4_LINES;
+    cmd.NbData = size;
+    cmd.DdrMode = QSPI_DDR_MODE_DISABLE;
+    cmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
+
+    HAL_QSPI_Command(&hqspi, &cmd, HAL_QPSI_TIMEOUT_DEFAULT_VALUE);
+    HAL_QSPI_Receive(&hqspi, data, HAL_QPSI_TIMEOUT_DEFAULT_VALUE);
+}
+```
+
+**QSPI Speed Comparison:**
+- Standard SPI @ 50 MHz: 6.25 MB/s
+- Quad SPI @ 50 MHz: 25 MB/s (4x faster)
+- Ideal for: Flash memory, high-resolution displays
+
+### Interrupt-Driven SPI
+
+For efficient CPU usage without DMA complexity:
+
+```c
+#include "stm32f4xx_hal.h"
+
+SPI_HandleTypeDef hspi1;
+volatile uint8_t spi_rx_buffer[256];
+volatile uint8_t spi_tx_buffer[256];
+volatile uint16_t spi_rx_index = 0;
+volatile uint16_t spi_tx_index = 0;
+volatile uint16_t spi_transfer_size = 0;
+volatile uint8_t spi_busy = 0;
+
+void SPI_IT_Init(void) {
+    hspi1.Instance = SPI1;
+    hspi1.Init.Mode = SPI_MODE_MASTER;
+    hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+    hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+    hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+    hspi1.Init.NSS = SPI_NSS_SOFT;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    HAL_SPI_Init(&hspi1);
+
+    // Enable SPI interrupt
+    HAL_NVIC_SetPriority(SPI1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(SPI1_IRQn);
+}
+
+void SPI_IT_TransmitReceive(uint8_t *tx_data, uint8_t *rx_data, uint16_t size) {
+    spi_rx_index = 0;
+    spi_tx_index = 0;
+    spi_transfer_size = size;
+    spi_busy = 1;
+
+    memcpy((void*)spi_tx_buffer, tx_data, size);
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);  // CS LOW
+    HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t*)spi_tx_buffer,
+                               (uint8_t*)spi_rx_buffer, size);
+}
+
+// SPI transfer complete callback
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);  // CS HIGH
+    spi_busy = 0;
+}
+
+void SPI1_IRQHandler(void) {
+    HAL_SPI_IRQHandler(&hspi1);
+}
+```
+
+### Multi-Master SPI
+
+While uncommon, multi-master SPI is possible with careful arbitration:
+
+```cpp
+// Simple token-passing multi-master SPI
+const int CS_PIN = 10;
+const int TOKEN_PIN = 8;  // Token indicates bus ownership
+
+bool spi_acquire_bus(uint16_t timeout_ms) {
+  uint32_t start = millis();
+
+  // Wait for token
+  while (digitalRead(TOKEN_PIN) == HIGH) {
+    if (millis() - start > timeout_ms) {
+      return false;  // Timeout
+    }
+    delay(1);
+  }
+
+  // Claim token
+  pinMode(TOKEN_PIN, OUTPUT);
+  digitalWrite(TOKEN_PIN, HIGH);
+  return true;
+}
+
+void spi_release_bus() {
+  digitalWrite(TOKEN_PIN, LOW);
+  pinMode(TOKEN_PIN, INPUT);
+}
+
+// Usage
+if (spi_acquire_bus(100)) {
+  digitalWrite(CS_PIN, LOW);
+  SPI.transfer(data);
+  digitalWrite(CS_PIN, HIGH);
+  spi_release_bus();
+} else {
+  Serial.println("Bus acquisition timeout");
+}
+```
+
+**Multi-Master Challenges:**
+- Collision detection and arbitration required
+- I2C is better suited for multi-master applications
+- Typically only used in specialized industrial systems
 
 ## Common Use Cases
 

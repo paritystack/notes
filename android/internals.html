@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-c8b3b484.js";
+            window.path_to_searchindex_js = "../searchindex-91648d44.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-525481d4.js"></script>
+        <script src="../toc-a4fa5267.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -179,40 +179,1434 @@
                         <h1 id="android-internals"><a class="header" href="#android-internals">Android Internals</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <p>Android is an open-source operating system primarily designed for mobile devices such as smartphones and tablets. It is based on the Linux kernel and developed by Google. Understanding Android internals is crucial for developers who want to create efficient and optimized applications or modify the operating system itself.</p>
-<h2 id="key-components"><a class="header" href="#key-components">Key Components</a></h2>
+<p>This document provides deep technical insights into Android’s architecture, from low-level kernel operations to high-level application frameworks.</p>
+<h2 id="system-architecture--boot-process"><a class="header" href="#system-architecture--boot-process">System Architecture &amp; Boot Process</a></h2>
+<h3 id="boot-sequence"><a class="header" href="#boot-sequence">Boot Sequence</a></h3>
+<p>The Android boot process involves several stages, each building upon the previous one to create a fully functional operating system.</p>
+<h4 id="1-boot-rom"><a class="header" href="#1-boot-rom">1. Boot ROM</a></h4>
+<p>When a device is powered on, the CPU executes code from the Boot ROM (Read-Only Memory), which is hard-wired into the SoC (System on Chip). The Boot ROM code:</p>
+<ul>
+<li>Initializes basic hardware (CPU, RAM)</li>
+<li>Locates the bootloader in flash memory</li>
+<li>Loads and verifies the bootloader</li>
+<li>Transfers control to the bootloader</li>
+</ul>
+<h4 id="2-bootloader"><a class="header" href="#2-bootloader">2. Bootloader</a></h4>
+<p>The bootloader is device-specific and runs in two stages:</p>
+<p><strong>Primary Bootloader</strong>: Minimal code that initializes essential hardware and loads the secondary bootloader.</p>
+<p><strong>Secondary Bootloader</strong> (e.g., U-Boot, LK):</p>
+<ul>
+<li>Initializes additional hardware components</li>
+<li>Sets up memory and loads the Linux kernel</li>
+<li>Loads the device tree blob (DTB) which describes hardware configuration</li>
+<li>Verifies boot image integrity (in verified boot)</li>
+<li>Passes control to the kernel with boot parameters</li>
+</ul>
+<h4 id="3-linux-kernel-initialization"><a class="header" href="#3-linux-kernel-initialization">3. Linux Kernel Initialization</a></h4>
+<p>The kernel startup process:</p>
+<pre><code class="language-c">// Simplified kernel boot flow
+start_kernel()
+  ├─ setup_arch()          // Architecture-specific setup
+  ├─ mm_init()             // Memory management initialization
+  ├─ sched_init()          // Scheduler initialization
+  ├─ init_IRQ()            // Interrupt handling
+  ├─ time_init()           // Timekeeping
+  └─ rest_init()
+       └─ kernel_thread(kernel_init)  // Creates init process (PID 1)
+</code></pre>
+<p>The kernel:</p>
+<ul>
+<li>Initializes core subsystems (memory, scheduling, drivers)</li>
+<li>Mounts the root filesystem</li>
+<li>Executes <code>/init</code> (Android’s init process)</li>
+</ul>
+<h4 id="4-init-process"><a class="header" href="#4-init-process">4. Init Process</a></h4>
+<p>The init process (<code>/system/bin/init</code>) is the first user-space process (PID 1) and is responsible for:</p>
+<p><strong>Parsing Init Scripts</strong>: Reads <code>init.rc</code> and device-specific <code>.rc</code> files using the Android Init Language (AIL).</p>
+<pre><code class="language-bash"># Example init.rc snippet
+on boot
+    # Set memory parameters
+    write /proc/sys/vm/overcommit_memory 1
+    write /proc/sys/vm/min_free_order_shift 4
+
+    # Start essential services
+    start servicemanager
+    start surfaceflinger
+
+service servicemanager /system/bin/servicemanager
+    class core
+    user system
+    critical
+    onrestart restart healthd
+    onrestart restart zygote
+</code></pre>
+<p><strong>Device Node Creation</strong>: Creates <code>/dev</code> nodes for hardware devices.</p>
+<p><strong>Property Service</strong>: Manages system properties (similar to environment variables) accessible via <code>getprop</code>/<code>setprop</code>.</p>
+<p><strong>Service Management</strong>: Starts, stops, and monitors system services defined in <code>.rc</code> files.</p>
+<h4 id="5-zygote-process"><a class="header" href="#5-zygote-process">5. Zygote Process</a></h4>
+<p>Zygote is a specialized daemon that serves as the parent process for all Android applications.</p>
+<p><strong>Why Zygote?</strong></p>
+<ul>
+<li>Pre-loads common classes and resources</li>
+<li>Forks new processes quickly without reloading shared libraries</li>
+<li>Reduces memory footprint through copy-on-write (COW)</li>
+</ul>
+<p><strong>Zygote Initialization</strong>:</p>
+<pre><code class="language-java">// Simplified Zygote startup
+public static void main(String argv[]) {
+    // 1. Preload classes and resources
+    preload();
+
+    // 2. Start system server
+    if (startSystemServer) {
+        Runnable r = forkSystemServer(/* args */);
+    }
+
+    // 3. Listen for new app requests on socket
+    caller = zygoteServer.runSelectLoop();
+}
+
+private static void preload() {
+    // Preload ~4000 classes from /system/etc/preloaded-classes
+    preloadClasses();
+
+    // Preload drawable resources, color state lists
+    preloadResources();
+
+    // Load shared libraries (libjavacore, libopenjdk, etc.)
+    preloadSharedLibraries();
+
+    // Preload HAL implementations
+    preloadHAL();
+}
+</code></pre>
+<p>When a new app needs to launch:</p>
+<ol>
+<li>ActivityManagerService sends request to Zygote via socket</li>
+<li>Zygote forks itself using <code>fork()</code></li>
+<li>Child process specializes (sets UID, GID, SELinux context)</li>
+<li>Child loads the application code</li>
+<li>Application’s <code>ActivityThread.main()</code> executes</li>
+</ol>
+<h4 id="6-system-server"><a class="header" href="#6-system-server">6. System Server</a></h4>
+<p>System Server is forked from Zygote and hosts most Android framework services:</p>
+<pre><code class="language-java">// System Server service categories
+private void startBootstrapServices() {
+    // Core services needed for other services
+    ActivityManagerService
+    PowerManagerService
+    PackageManagerService
+    UserManagerService
+}
+
+private void startCoreServices() {
+    BatteryService
+    UsageStatsService
+    WebViewUpdateService
+}
+
+private void startOtherServices() {
+    // 60+ services including:
+    WindowManagerService
+    InputManagerService
+    NetworkManagementService
+    ConnectivityService
+    WifiService
+    BluetoothService
+    LocationManagerService
+    NotificationManagerService
+    // ... and many more
+}
+</code></pre>
+<p>Each service:</p>
+<ul>
+<li>Runs in the System Server process</li>
+<li>Registers with ServiceManager</li>
+<li>Communicates via Binder IPC</li>
+<li>Has specific permissions and capabilities</li>
+</ul>
+<h3 id="complete-boot-timeline"><a class="header" href="#complete-boot-timeline">Complete Boot Timeline</a></h3>
+<pre><code>Power On
+  ↓ (~100ms)
+Boot ROM → Bootloader
+  ↓ (~2s)
+Kernel Init → /init
+  ↓ (~1s)
+Init Process → Parse .rc files → Start Services
+  ↓ (~500ms)
+Zygote → Preload → Fork System Server
+  ↓ (~3s)
+System Server → Start Framework Services
+  ↓ (~2s)
+Boot Animation → Launcher → User Space
+  ↓ (~1s)
+Boot Complete (typically 8-10 seconds total)
+</code></pre>
+<h2 id="binder-ipc-mechanism"><a class="header" href="#binder-ipc-mechanism">Binder IPC Mechanism</a></h2>
+<p>Binder is Android’s custom Inter-Process Communication (IPC) mechanism, designed for efficient and secure communication between processes.</p>
+<h3 id="why-binder"><a class="header" href="#why-binder">Why Binder?</a></h3>
+<p>Traditional Linux IPC mechanisms (pipes, sockets, shared memory) have limitations:</p>
+<ul>
+<li><strong>Performance</strong>: Multiple copy operations, context switches</li>
+<li><strong>Security</strong>: No built-in object-level permissions</li>
+<li><strong>Object-oriented</strong>: Not designed for remote method invocation</li>
+</ul>
+<p>Binder provides:</p>
+<ul>
+<li>Single data copy (client → kernel → server)</li>
+<li>Object reference counting</li>
+<li>Thread pool management</li>
+<li>Death notifications</li>
+<li>Built-in security (UID/PID verification)</li>
+</ul>
+<h3 id="binder-architecture"><a class="header" href="#binder-architecture">Binder Architecture</a></h3>
+<pre><code>┌─────────────────────┐         ┌─────────────────────┐
+│   Client Process    │         │   Server Process    │
+│                     │         │                     │
+│  ┌───────────────┐  │         │  ┌───────────────┐  │
+│  │  Proxy Object │  │         │  │ Native Object │  │
+│  └───────┬───────┘  │         │  └───────▲───────┘  │
+│          │          │         │          │          │
+│  ┌───────▼───────┐  │         │  ┌───────┴───────┐  │
+│  │ Binder Driver │◄─┼────────►│  │ Binder Driver │  │
+│  │   (libbinder) │  │         │  │   (libbinder) │  │
+│  └───────┬───────┘  │         │  └───────▲───────┘  │
+└──────────┼──────────┘         └──────────┼──────────┘
+           │                               │
+           │    ┌─────────────────────┐   │
+           └───►│  Binder Kernel      │◄──┘
+                │  Driver (/dev/binder)│
+                └─────────────────────┘
+</code></pre>
+<h3 id="binder-components"><a class="header" href="#binder-components">Binder Components</a></h3>
+<h4 id="1-binder-driver"><a class="header" href="#1-binder-driver">1. Binder Driver</a></h4>
+<p>A kernel module (<code>/dev/binder</code>) that:</p>
+<ul>
+<li>Manages IPC transactions</li>
+<li>Maps memory between processes</li>
+<li>Handles object references</li>
+<li>Manages thread pools</li>
+<li>Implements death notifications</li>
+</ul>
+<p><strong>Key IOCTLs</strong>:</p>
+<pre><code class="language-c">// Client/Server interaction with /dev/binder
+BINDER_WRITE_READ      // Read/write transaction data
+BINDER_SET_MAX_THREADS // Configure thread pool
+BINDER_VERSION         // Get driver version
+BINDER_SET_CONTEXT_MGR // Become ServiceManager
+</code></pre>
+<h4 id="2-binder-protocol"><a class="header" href="#2-binder-protocol">2. Binder Protocol</a></h4>
+<p><strong>Transaction Structure</strong>:</p>
+<pre><code class="language-c">struct binder_transaction_data {
+    union {
+        size_t handle;   // Binder handle (client side)
+        void *ptr;       // Binder pointer (server side)
+    } target;
+
+    void *cookie;        // Object cookie
+    unsigned int code;   // Method code
+
+    unsigned int flags;  // Transaction flags
+    pid_t sender_pid;    // Sender process ID
+    uid_t sender_euid;   // Sender user ID
+
+    size_t data_size;    // Data buffer size
+    size_t offsets_size; // Offsets buffer size
+
+    union {
+        struct {
+            const void *buffer;  // Data buffer
+            const void *offsets; // Object offsets
+        } ptr;
+        uint8_t buf[8];
+    } data;
+};
+</code></pre>
+<p><strong>Transaction Flow</strong>:</p>
+<ol>
+<li>Client calls method on proxy object</li>
+<li>Proxy marshals parameters into Parcel</li>
+<li>Proxy issues <code>BINDER_WRITE_READ</code> ioctl</li>
+<li>Kernel copies data to target process</li>
+<li>Server thread reads transaction</li>
+<li>Server unmarshals Parcel</li>
+<li>Server executes method</li>
+<li>Server marshals reply into Parcel</li>
+<li>Kernel copies reply to client</li>
+<li>Client unmarshals reply</li>
+</ol>
+<h4 id="3-servicemanager"><a class="header" href="#3-servicemanager">3. ServiceManager</a></h4>
+<p>ServiceManager is the Binder “name service” (context manager):</p>
+<ul>
+<li>Runs as a separate process</li>
+<li>First process to open <code>/dev/binder</code></li>
+<li>Handle 0 is reserved for ServiceManager</li>
+<li>Maintains registry of system services</li>
+</ul>
+<pre><code class="language-cpp">// Service registration
+int main() {
+    sp&lt;ProcessState&gt; ps = ProcessState::self();
+    ps-&gt;setThreadPoolMaxThreads(0);
+    ps-&gt;setContextManager(true);  // Become handle 0
+    ps-&gt;giveThreadPoolName();
+
+    sp&lt;ServiceManager&gt; manager = new ServiceManager();
+    sp&lt;BnServiceManager&gt; bnManager = new BnServiceManager(manager);
+
+    // Wait for service registration/lookup requests
+    IPCThreadState::self()-&gt;joinThreadPool();
+}
+
+// Service lookup
+sp&lt;IBinder&gt; getService(const String16&amp; name) {
+    sp&lt;IServiceManager&gt; sm = defaultServiceManager();
+    return sm-&gt;checkService(name);  // Returns IBinder handle
+}
+</code></pre>
+<p><strong>Common System Services</strong>:</p>
+<pre><code class="language-bash"># List all registered services
+$ adb shell service list
+0    package: [android.content.pm.IPackageManager]
+1    activity: [android.app.IActivityManager]
+2    window: [android.view.IWindowManager]
+3    input: [android.hardware.input.IInputManager]
+...
+</code></pre>
+<h4 id="4-aidl-android-interface-definition-language"><a class="header" href="#4-aidl-android-interface-definition-language">4. AIDL (Android Interface Definition Language)</a></h4>
+<p>AIDL defines interfaces for Binder communication:</p>
+<pre><code class="language-java">// IMyService.aidl
+package com.example;
+
+interface IMyService {
+    int add(int a, int b);
+    String getName();
+    void setCallback(IMyCallback callback);
+}
+
+// IMyCallback.aidl
+package com.example;
+
+interface IMyCallback {
+    void onEvent(String event);
+}
+</code></pre>
+<p><strong>Generated Code</strong>:</p>
+<pre><code class="language-java">// Auto-generated IMyService.java
+public interface IMyService extends android.os.IInterface {
+    // Stub class (server side)
+    public static abstract class Stub extends android.os.Binder
+        implements IMyService {
+
+        @Override
+        public boolean onTransact(int code, Parcel data,
+                                  Parcel reply, int flags) {
+            switch (code) {
+                case TRANSACTION_add: {
+                    int a = data.readInt();
+                    int b = data.readInt();
+                    int result = this.add(a, b);
+                    reply.writeInt(result);
+                    return true;
+                }
+                // ... other methods
+            }
+        }
+
+        // Proxy class (client side)
+        private static class Proxy implements IMyService {
+            private IBinder mRemote;
+
+            @Override
+            public int add(int a, int b) throws RemoteException {
+                Parcel data = Parcel.obtain();
+                Parcel reply = Parcel.obtain();
+                try {
+                    data.writeInt(a);
+                    data.writeInt(b);
+                    mRemote.transact(TRANSACTION_add, data, reply, 0);
+                    reply.readException();
+                    return reply.readInt();
+                } finally {
+                    data.recycle();
+                    reply.recycle();
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="parcels-and-serialization"><a class="header" href="#parcels-and-serialization">Parcels and Serialization</a></h3>
+<p>Parcels are containers for marshaling data:</p>
+<pre><code class="language-java">// Writing data
+Parcel p = Parcel.obtain();
+p.writeInt(42);
+p.writeString("Hello");
+p.writeStrongBinder(binder);  // Binder object reference
+
+byte[] data = p.marshall();
+
+// Reading data
+Parcel p2 = Parcel.obtain();
+p2.unmarshall(data, 0, data.length);
+p2.setDataPosition(0);
+int value = p2.readInt();
+String str = p2.readString();
+IBinder b = p2.readStrongBinder();
+</code></pre>
+<p><strong>Supported Types</strong>:</p>
+<ul>
+<li>Primitives: int, long, float, double, boolean, char</li>
+<li>Strings and CharSequences</li>
+<li>Parcelable objects (custom serialization)</li>
+<li>Serializable objects (Java serialization)</li>
+<li>Binder references</li>
+<li>File descriptors</li>
+<li>Arrays and Lists</li>
+</ul>
+<h3 id="binder-thread-pool"><a class="header" href="#binder-thread-pool">Binder Thread Pool</a></h3>
+<p>Each process maintains a thread pool for handling incoming Binder calls:</p>
+<pre><code class="language-cpp">// Configure thread pool
+ProcessState::self()-&gt;setThreadPoolMaxThreads(15);
+
+// Start thread pool
+ProcessState::self()-&gt;startThreadPool();
+
+// Join main thread to pool
+IPCThreadState::self()-&gt;joinThreadPool();
+</code></pre>
+<p><strong>Thread Management</strong>:</p>
+<ul>
+<li>Kernel spawns threads as needed</li>
+<li>Threads block waiting for transactions</li>
+<li>Nested transactions supported (re-entrant calls)</li>
+<li>Thread limits prevent DoS attacks</li>
+</ul>
+<h3 id="security-model"><a class="header" href="#security-model">Security Model</a></h3>
+<p>Binder enforces security at multiple levels:</p>
+<pre><code class="language-java">// Service can check caller identity
+int callerUid = Binder.getCallingUid();
+int callerPid = Binder.getCallingPid();
+
+// Verify caller has permission
+if (callerUid != Process.SYSTEM_UID) {
+    context.enforceCallingPermission(
+        android.Manifest.permission.BLUETOOTH_ADMIN,
+        "Need BLUETOOTH_ADMIN permission");
+}
+
+// Clear/restore identity for nested calls
+long token = Binder.clearCallingIdentity();
+try {
+    // Call as local UID, not caller's UID
+    doPrivilegedOperation();
+} finally {
+    Binder.restoreCallingIdentity(token);
+}
+</code></pre>
+<h2 id="memory--process-management"><a class="header" href="#memory--process-management">Memory &amp; Process Management</a></h2>
+<p>Android’s memory management is designed for constrained mobile environments with limited RAM.</p>
+<h3 id="process-lifecycle-states"><a class="header" href="#process-lifecycle-states">Process Lifecycle States</a></h3>
+<p>Android categorizes processes by importance:</p>
+<h4 id="1-foreground-process-oom_adj-0"><a class="header" href="#1-foreground-process-oom_adj-0">1. Foreground Process (oom_adj: 0)</a></h4>
+<ul>
+<li>Has visible activity with user interaction</li>
+<li>Has service bound by foreground activity</li>
+<li>Has <code>Service.startForeground()</code> running</li>
+<li>Has BroadcastReceiver executing <code>onReceive()</code></li>
+</ul>
+<h4 id="2-visible-process-oom_adj-100"><a class="header" href="#2-visible-process-oom_adj-100">2. Visible Process (oom_adj: 100)</a></h4>
+<ul>
+<li>Has visible but not foreground activity (e.g., behind dialog)</li>
+<li>Has service bound to visible activity</li>
+</ul>
+<h4 id="3-service-process-oom_adj-300-500"><a class="header" href="#3-service-process-oom_adj-300-500">3. Service Process (oom_adj: 300-500)</a></h4>
+<ul>
+<li>Has started service via <code>startService()</code></li>
+<li>Not directly visible but performing user-aware work</li>
+</ul>
+<h4 id="4-cached-process-oom_adj-900-906"><a class="header" href="#4-cached-process-oom_adj-900-906">4. Cached Process (oom_adj: 900-906)</a></h4>
+<ul>
+<li>Not currently needed</li>
+<li>Kept for faster restart</li>
+<li>First to be killed when memory is low</li>
+</ul>
+<p><strong>Process State Tracking</strong>:</p>
+<pre><code class="language-java">// ActivityManager importance constants
+IMPORTANCE_FOREGROUND = 100;
+IMPORTANCE_FOREGROUND_SERVICE = 125;
+IMPORTANCE_VISIBLE = 200;
+IMPORTANCE_SERVICE = 300;
+IMPORTANCE_CACHED = 400;
+IMPORTANCE_GONE = 1000;
+</code></pre>
+<h3 id="oom-adjuster"><a class="header" href="#oom-adjuster">OOM Adjuster</a></h3>
+<p>The OOM (Out of Memory) Adjuster dynamically calculates process importance:</p>
+<p><strong>Score Calculation Algorithm</strong>:</p>
+<pre><code class="language-java">// Simplified OOM score calculation
+int computeOomAdjLocked(ProcessRecord app) {
+    int adj = ProcessList.UNKNOWN_ADJ;
+
+    // Check activities
+    if (app.activities.size() &gt; 0) {
+        for (ActivityRecord ar : app.activities) {
+            if (ar.visible) {
+                adj = Math.min(adj, ProcessList.VISIBLE_APP_ADJ);
+            }
+            if (ar.state == ActivityState.RESUMED) {
+                adj = Math.min(adj, ProcessList.FOREGROUND_APP_ADJ);
+            }
+        }
+    }
+
+    // Check services
+    for (ServiceRecord sr : app.services) {
+        if (sr.isForeground) {
+            adj = Math.min(adj, ProcessList.PERCEPTIBLE_APP_ADJ);
+        }
+    }
+
+    // Check providers
+    if (app.hasClientActivities) {
+        adj = Math.min(adj, ProcessList.FOREGROUND_APP_ADJ);
+    }
+
+    return adj;
+}
+</code></pre>
+<p><strong>OOM Score in Kernel</strong>:</p>
+<pre><code class="language-bash"># View process OOM scores
+$ adb shell cat /proc/$(pidof system_server)/oom_score_adj
+-900
+
+$ adb shell cat /proc/$(pidof com.android.systemui)/oom_score_adj
+-800
+
+$ adb shell cat /proc/$(pidof com.android.launcher3)/oom_score_adj
+100
+</code></pre>
+<h3 id="low-memory-killer-lmk"><a class="header" href="#low-memory-killer-lmk">Low Memory Killer (LMK)</a></h3>
+<p>Android uses LMK to kill processes when memory is low.</p>
+<p><strong>Traditional LMK (Kernel Driver)</strong>:</p>
+<pre><code class="language-c">// Kernel LMK thresholds (in pages, 1 page = 4KB)
+static short lowmem_adj[] = {
+    0,      // Foreground
+    100,    // Visible
+    200,    // Secondary server
+    300,    // Hidden
+    900,    // Content provider
+    906     // Empty
+};
+
+static int lowmem_minfree[] = {
+    3 * 512,   // 6MB   - foreground
+    2 * 1024,  // 8MB   - visible
+    4 * 1024,  // 16MB  - secondary
+    16 * 1024, // 64MB  - hidden
+    18 * 1024, // 72MB  - content provider
+    20 * 1024  // 80MB  - empty
+};
+</code></pre>
+<p><strong>Modern LMKD (User-space Daemon)</strong>:</p>
+<p>Android 9+ moved LMK to user-space daemon (<code>lmkd</code>) for better control:</p>
+<pre><code class="language-c">// lmkd monitors pressure stall information (PSI)
+// /proc/pressure/memory
+some avg10=0.00 avg60=0.00 avg300=0.00 total=0
+full avg10=0.00 avg60=0.00 avg300=0.00 total=0
+
+// When pressure increases, lmkd kills cached processes
+// Priority: highest oom_adj first
+int find_and_kill_process(int min_score_adj) {
+    for (int i = OOM_SCORE_ADJ_MAX; i &gt;= min_score_adj; i--) {
+        ProcessRecord proc = findProcessWithAdj(i);
+        if (proc != null) {
+            kill(proc.pid, SIGKILL);
+            return proc.pid;
+        }
+    }
+}
+</code></pre>
+<p><strong>Memory Pressure Levels</strong>:</p>
+<ul>
+<li><strong>Low</strong>: Kill cached apps (oom_adj &gt;= 900)</li>
+<li><strong>Medium</strong>: Kill background services (oom_adj &gt;= 600)</li>
+<li><strong>Critical</strong>: Kill visible apps (oom_adj &gt;= 200)</li>
+</ul>
+<h3 id="memory-management-strategies"><a class="header" href="#memory-management-strategies">Memory Management Strategies</a></h3>
+<h4 id="1-process-reclamation"><a class="header" href="#1-process-reclamation">1. Process Reclamation</a></h4>
+<pre><code class="language-java">// Application.onTrimMemory() callbacks
+TRIM_MEMORY_RUNNING_MODERATE     // Device running low, app running
+TRIM_MEMORY_RUNNING_LOW          // Device very low, app running
+TRIM_MEMORY_RUNNING_CRITICAL     // Device critical, app running
+
+TRIM_MEMORY_UI_HIDDEN            // UI no longer visible
+
+TRIM_MEMORY_BACKGROUND           // App in background, low memory
+TRIM_MEMORY_MODERATE             // App in middle of LRU list
+TRIM_MEMORY_COMPLETE             // App first to be killed
+
+// Example handling
+@Override
+public void onTrimMemory(int level) {
+    switch (level) {
+        case TRIM_MEMORY_RUNNING_CRITICAL:
+            // Release all possible memory
+            clearCaches();
+            releaseNonEssentialResources();
+            break;
+        case TRIM_MEMORY_UI_HIDDEN:
+            // Release UI resources
+            releaseBitmaps();
+            break;
+    }
+}
+</code></pre>
+<h4 id="2-zygote-memory-sharing"><a class="header" href="#2-zygote-memory-sharing">2. Zygote Memory Sharing</a></h4>
+<p>Zygote preloads classes and resources, then forks. Child processes share read-only memory:</p>
+<pre><code class="language-bash"># View memory maps
+$ adb shell cat /proc/$(pidof system_server)/maps | grep framework
+# Many regions marked as shared (copy-on-write)
+
+# Check shared/private memory
+$ adb shell dumpsys meminfo com.android.systemui
+                   Pss  Private  Shared
+                 ------  ------  ------
+  Native Heap    10432   10384      48
+  Dalvik Heap     8456    8420      36
+  Dalvik Other    1234      800     434  # Shared from Zygote
+</code></pre>
+<h4 id="3-kernel-memory-reclamation"><a class="header" href="#3-kernel-memory-reclamation">3. Kernel Memory Reclamation</a></h4>
+<p>Linux kernel mechanisms used by Android:</p>
+<p><strong>Page Cache</strong>: Caches file contents in RAM</p>
+<pre><code class="language-bash">$ adb shell cat /proc/meminfo
+MemTotal:        3870720 kB
+MemFree:          123456 kB
+Cached:          1234567 kB  # Can be freed if needed
+</code></pre>
+<p><strong>KSM (Kernel Samepage Merging)</strong>: Merges identical memory pages</p>
+<pre><code class="language-bash">$ adb shell cat /sys/kernel/mm/ksm/pages_sharing
+12345  # Pages deduped
+</code></pre>
+<p><strong>zRAM</strong>: Compressed swap in RAM</p>
+<pre><code class="language-bash">$ adb shell cat /proc/swaps
+Filename        Type      Size      Used    Priority
+/dev/block/zram0 partition 1048576  524288  32758
+</code></pre>
+<h3 id="memory-optimization-techniques"><a class="header" href="#memory-optimization-techniques">Memory Optimization Techniques</a></h3>
+<h4 id="1-bitmap-management"><a class="header" href="#1-bitmap-management">1. Bitmap Management</a></h4>
+<pre><code class="language-java">// Use appropriate bitmap config
+BitmapFactory.Options options = new BitmapFactory.Options();
+options.inPreferredConfig = Bitmap.Config.RGB_565;  // 2 bytes/pixel vs 4
+
+// Subsample large images
+options.inSampleSize = 2;  // 1/4 memory usage
+
+// Reuse bitmaps
+options.inBitmap = reusableBitmap;
+options.inMutable = true;
+</code></pre>
+<h4 id="2-memory-leaks-prevention"><a class="header" href="#2-memory-leaks-prevention">2. Memory Leaks Prevention</a></h4>
+<pre><code class="language-java">// Avoid static references to Context
+private static Context sContext;  // LEAK!
+
+// Use WeakReference for callbacks
+private WeakReference&lt;Activity&gt; mActivityRef;
+
+// Unregister listeners
+@Override
+protected void onDestroy() {
+    locationManager.removeUpdates(listener);
+    super.onDestroy();
+}
+</code></pre>
+<h4 id="3-native-memory-management"><a class="header" href="#3-native-memory-management">3. Native Memory Management</a></h4>
+<pre><code class="language-cpp">// JNI memory is not tracked by Dalvik GC
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_NativeLib_allocate(JNIEnv* env, jobject obj) {
+    // Allocate native memory
+    void* buffer = malloc(1024 * 1024);  // 1 MB
+
+    // MUST manually free
+    free(buffer);
+}
+
+// Use Android NDK memory allocator
+#include &lt;android/native_memory.h&gt;
+ANativeWindow_Buffer buffer;
+</code></pre>
+<h2 id="security--permissions"><a class="header" href="#security--permissions">Security &amp; Permissions</a></h2>
+<p>Android implements defense-in-depth security through multiple layers.</p>
+<h3 id="application-sandboxing"><a class="header" href="#application-sandboxing">Application Sandboxing</a></h3>
+<p>Each app runs in its own security sandbox:</p>
+<h4 id="1-uid-isolation"><a class="header" href="#1-uid-isolation">1. UID Isolation</a></h4>
+<p>Every app gets a unique Linux user ID:</p>
+<pre><code class="language-bash"># App UIDs start at 10000
+$ adb shell ps -u | grep com.android.chrome
+u0_a123   12345  ... com.android.chrome
+
+# System apps use special UIDs
+$ adb shell ps -u | grep system_server
+system     1234  ... system_server
+</code></pre>
+<p><strong>UID Assignment</strong>:</p>
+<pre><code class="language-java">// PackageManagerService assigns UIDs
+private int acquireAndRegisterNewUserIdLPw(Package pkg) {
+    // User apps: 10000 - 19999
+    // Secondary users: 100000+ (userId * 100000 + appId)
+    int uid = Process.FIRST_APPLICATION_UID + mNextAppId++;
+    return uid;
+}
+</code></pre>
+<h4 id="2-filesystem-permissions"><a class="header" href="#2-filesystem-permissions">2. Filesystem Permissions</a></h4>
+<p>Each app has a private directory:</p>
+<pre><code class="language-bash"># App data directories
+$ adb shell ls -l /data/data/
+drwx------  5 u0_a123 u0_a123  4096 com.android.chrome
+drwx------  4 u0_a124 u0_a124  4096 com.google.android.gms
+
+# Only the app's UID can access its directory
+$ adb shell cat /data/data/com.android.chrome/databases/webdata
+cat: permission denied
+
+# Shared storage accessible by all apps
+$ adb shell ls -l /sdcard/
+drwxrwx--x 2 root sdcard_rw 4096 DCIM
+drwxrwx--x 3 root sdcard_rw 4096 Download
+</code></pre>
+<h4 id="3-process-isolation"><a class="header" href="#3-process-isolation">3. Process Isolation</a></h4>
+<p>Each app runs in its own process:</p>
+<ul>
+<li>Separate memory space</li>
+<li>Cannot access other app’s memory</li>
+<li>Communication only via Binder IPC</li>
+<li>Crash isolation (one app crash doesn’t affect others)</li>
+</ul>
+<h3 id="selinux-security-enhanced-linux"><a class="header" href="#selinux-security-enhanced-linux">SELinux (Security-Enhanced Linux)</a></h3>
+<p>Android uses SELinux to enforce mandatory access control (MAC).</p>
+<h4 id="selinux-modes"><a class="header" href="#selinux-modes">SELinux Modes</a></h4>
+<pre><code class="language-bash"># Check SELinux mode
+$ adb shell getenforce
+Enforcing  # or Permissive
+
+# SELinux can be:
+# - Enforcing: Denials are blocked and logged
+# - Permissive: Denials are logged but allowed (debugging)
+</code></pre>
+<h4 id="security-contexts"><a class="header" href="#security-contexts">Security Contexts</a></h4>
+<p>Every process, file, and object has an SELinux context:</p>
+<pre><code class="language-bash"># View process contexts
+$ adb shell ps -Z
+u:r:init:s0                root      1     0   /init
+u:r:kernel:s0              root      2     0   kthreadd
+u:r:system_server:s0       system    1234  567 system_server
+u:r:untrusted_app:s0:c123  u0_a123   5678  567 com.example.app
+
+# Context format: user:role:type:sensitivity[:categories]
+# - user: SELinux user (usually 'u')
+# - role: SELinux role (usually 'r')
+# - type: Domain for processes, type for files
+# - sensitivity: MLS/MCS level
+# - categories: MLS/MCS categories (app isolation)
+</code></pre>
+<pre><code class="language-bash"># View file contexts
+$ adb shell ls -Z /system/bin/
+u:object_r:system_file:s0           app_process64
+u:object_r:surfaceflinger_exec:s0   surfaceflinger
+u:object_r:zygote_exec:s0           app_process
+</code></pre>
+<h4 id="policy-rules"><a class="header" href="#policy-rules">Policy Rules</a></h4>
+<p>SELinux policies define what operations are allowed:</p>
+<pre><code># Example policy (simplified)
+# Allow system_server to use binder with apps
+allow system_server untrusted_app:binder { call transfer };
+
+# Allow apps to read system properties
+allow untrusted_app property_type:file { read getattr };
+
+# Deny apps from accessing kernel messages
+neverallow untrusted_app kernel:system module_request;
+</code></pre>
+<p><strong>Domain Transitions</strong>:</p>
+<pre><code># When zygote forks app, domain transitions
+# /system/bin/app_process (zygote context)
+#   → executes app code
+#   → transitions to untrusted_app context
+
+type_transition zygote untrusted_app_exec:process untrusted_app;
+</code></pre>
+<h4 id="selinux-debugging"><a class="header" href="#selinux-debugging">SELinux Debugging</a></h4>
+<pre><code class="language-bash"># View denials
+$ adb shell dmesg | grep avc:
+avc: denied { read write } for pid=1234 comm="app_process" \
+  name="binder" dev="tmpfs" ino=1234 \
+  scontext=u:r:untrusted_app:s0 \
+  tcontext=u:object_r:device:s0 \
+  tclass=chr_file permissive=0
+
+# Analyze denials
+$ adb shell audit2allow -i /dev/kmsg
+# Generates policy to allow the operation
+</code></pre>
+<h3 id="permission-model"><a class="header" href="#permission-model">Permission Model</a></h3>
+<p>Android has two permission types:</p>
+<h4 id="1-install-time-permissions-normal"><a class="header" href="#1-install-time-permissions-normal">1. Install-Time Permissions (Normal)</a></h4>
+<p>Automatically granted, low-risk permissions:</p>
+<pre><code class="language-xml">&lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+&lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
+&lt;uses-permission android:name="android.permission.VIBRATE" /&gt;
+</code></pre>
+<h4 id="2-runtime-permissions-dangerous"><a class="header" href="#2-runtime-permissions-dangerous">2. Runtime Permissions (Dangerous)</a></h4>
+<p>Require explicit user approval:</p>
+<pre><code class="language-java">// Check permission
+if (ContextCompat.checkSelfPermission(this,
+        Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+    // Request permission
+    ActivityCompat.requestPermissions(this,
+        new String[]{Manifest.permission.CAMERA},
+        REQUEST_CAMERA_PERMISSION);
+}
+
+// Handle result
+@Override
+public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                       int[] grantResults) {
+    if (requestCode == REQUEST_CAMERA_PERMISSION) {
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            openCamera();
+        }
+    }
+}
+</code></pre>
+<p><strong>Permission Groups</strong>:</p>
+<pre><code>CALENDAR      - READ_CALENDAR, WRITE_CALENDAR
+CAMERA        - CAMERA
+CONTACTS      - READ_CONTACTS, WRITE_CONTACTS, GET_ACCOUNTS
+LOCATION      - ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION
+MICROPHONE    - RECORD_AUDIO
+PHONE         - READ_PHONE_STATE, CALL_PHONE, READ_CALL_LOG, ...
+SENSORS       - BODY_SENSORS
+SMS           - SEND_SMS, RECEIVE_SMS, READ_SMS, ...
+STORAGE       - READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
+</code></pre>
+<h4 id="protection-levels"><a class="header" href="#protection-levels">Protection Levels</a></h4>
+<pre><code class="language-xml">&lt;!-- normal: Low-risk, auto-granted --&gt;
+&lt;permission android:name="com.example.permission.NORMAL"
+    android:protectionLevel="normal" /&gt;
+
+&lt;!-- dangerous: Requires runtime request --&gt;
+&lt;permission android:name="android.permission.CAMERA"
+    android:protectionLevel="dangerous" /&gt;
+
+&lt;!-- signature: Only apps signed with same key --&gt;
+&lt;permission android:name="com.example.permission.SIGNATURE"
+    android:protectionLevel="signature" /&gt;
+
+&lt;!-- privileged: System apps in /system/priv-app --&gt;
+&lt;permission android:name="android.permission.INSTALL_PACKAGES"
+    android:protectionLevel="signature|privileged" /&gt;
+
+&lt;!-- development: Granted to development builds --&gt;
+&lt;permission android:name="android.permission.SET_DEBUG_APP"
+    android:protectionLevel="signature|development" /&gt;
+</code></pre>
+<h4 id="permission-enforcement"><a class="header" href="#permission-enforcement">Permission Enforcement</a></h4>
+<pre><code class="language-java">// System service checks caller permission
+public void performPrivilegedOperation() {
+    // Throws SecurityException if caller lacks permission
+    mContext.enforceCallingPermission(
+        android.Manifest.permission.WRITE_SETTINGS,
+        "Need WRITE_SETTINGS permission");
+
+    // Or check manually
+    if (mContext.checkCallingPermission(
+            android.Manifest.permission.BLUETOOTH_ADMIN)
+            != PackageManager.PERMISSION_GRANTED) {
+        throw new SecurityException("Requires BLUETOOTH_ADMIN");
+    }
+
+    // Do privileged work
+    doPrivilegedOperation();
+}
+</code></pre>
+<h3 id="verified-boot"><a class="header" href="#verified-boot">Verified Boot</a></h3>
+<p>Verified Boot ensures system integrity from bootloader to kernel to system partition.</p>
+<h4 id="boot-chain-of-trust"><a class="header" href="#boot-chain-of-trust">Boot Chain of Trust</a></h4>
+<pre><code>┌─────────────────────┐
+│   Boot ROM          │ Verifies bootloader signature
+│   (Hardware root)   │ with embedded public key
+└──────────┬──────────┘
+           ↓ (verified)
+┌──────────┴──────────┐
+│   Bootloader        │ Verifies boot/recovery partition
+│   (Locked)          │ with embedded certificate
+└──────────┬──────────┘
+           ↓ (verified)
+┌──────────┴──────────┐
+│   Boot Image        │ Contains kernel + ramdisk
+│   (Signed)          │ Verified by bootloader
+└──────────┬──────────┘
+           ↓ (verified)
+┌──────────┴──────────┐
+│   dm-verity         │ Verifies /system partition
+│   (Kernel)          │ block-by-block at runtime
+└─────────────────────┘
+</code></pre>
+<h4 id="dm-verity"><a class="header" href="#dm-verity">dm-verity</a></h4>
+<p>Device-mapper verity provides transparent block-level verification:</p>
+<pre><code class="language-bash"># dm-verity hash tree
+$ adb shell cat /proc/mounts | grep dm
+/dev/block/dm-0 /system ext4 ro,verity ...
+
+# Verification in action
+# 1. Each 4KB block has SHA-256 hash
+# 2. Hashes stored in tree structure
+# 3. Root hash signed and verified by bootloader
+# 4. Any corruption detected → kernel panic or read error
+
+# Verity metadata
+$ adb shell cat /verity_key
+&lt;public key for /system verification&gt;
+</code></pre>
+<p><strong>Hash Tree Structure</strong>:</p>
+<pre><code>┌─────────────────────────┐
+│   Root Hash (Signed)    │
+└────────────┬────────────┘
+             ↓
+┌────────────┴────────────┐
+│   Level 1 Hashes        │
+│   [H1][H2][H3][H4]      │
+└────┬───┬───┬───┬────────┘
+     ↓   ↓   ↓   ↓
+┌────┴───┴───┴───┴────────┐
+│   Level 0 (Data Blocks) │
+│   [B1][B2][B3][B4]...   │
+└─────────────────────────┘
+</code></pre>
+<h4 id="verified-boot-states"><a class="header" href="#verified-boot-states">Verified Boot States</a></h4>
+<pre><code class="language-bash"># Green: Fully verified, locked bootloader
+# Yellow: Verified but bootloader unlocked
+# Orange: Custom OS, unlocked bootloader
+# Red: Verification failed
+
+# Check bootloader status
+$ adb shell getprop ro.boot.verifiedbootstate
+green
+
+$ adb shell getprop ro.boot.veritymode
+enforcing
+</code></pre>
+<h3 id="keystore-and-cryptography"><a class="header" href="#keystore-and-cryptography">KeyStore and Cryptography</a></h3>
+<p>Android KeyStore provides secure key storage and cryptographic operations.</p>
+<h4 id="hardware-backed-keystore"><a class="header" href="#hardware-backed-keystore">Hardware-Backed KeyStore</a></h4>
+<pre><code class="language-java">// Generate key in hardware-backed KeyStore
+KeyGenerator keyGen = KeyGenerator.getInstance(
+    KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+
+KeyGenParameterSpec spec = new KeyGenParameterSpec.Builder(
+        "my_key",
+        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+    .setUserAuthenticationRequired(true)  // Requires unlock
+    .setUserAuthenticationValidityDurationSeconds(30)
+    .setInvalidatedByBiometricEnrollment(true)  // Invalidate on fingerprint change
+    .build();
+
+keyGen.init(spec);
+SecretKey key = keyGen.generateKey();
+
+// Key never leaves secure hardware
+// All crypto operations performed in TEE/SE
+</code></pre>
+<h4 id="trusted-execution-environment-tee"><a class="header" href="#trusted-execution-environment-tee">Trusted Execution Environment (TEE)</a></h4>
+<pre><code>┌─────────────────────────────────────┐
+│     Normal World (REE)              │
+│  ┌──────────────────────────────┐   │
+│  │  Android OS                  │   │
+│  │  - Apps                      │   │
+│  │  - Frameworks                │   │
+│  │  - KeyStore API              │   │
+│  └──────────┬───────────────────┘   │
+└─────────────┼───────────────────────┘
+              ↓ (Secure monitor call)
+┌─────────────┴───────────────────────┐
+│     Secure World (TEE)              │
+│  ┌──────────────────────────────┐   │
+│  │  Trusted OS (e.g., Trusty)   │   │
+│  │  - KeyStore HAL              │   │
+│  │  - Gatekeeper (PIN/pattern)  │   │
+│  │  - Fingerprint HAL           │   │
+│  │  - DRM                       │   │
+│  └──────────────────────────────┘   │
+│  ┌──────────────────────────────┐   │
+│  │  Secure Storage              │   │
+│  │  - Encrypted keys            │   │
+│  │  - Crypto operations         │   │
+│  └──────────────────────────────┘   │
+└─────────────────────────────────────┘
+</code></pre>
+<p><strong>Key Features</strong>:</p>
+<ul>
+<li>Keys generated and stored in TEE</li>
+<li>Private keys never exposed to Android OS</li>
+<li>Cryptographic operations in secure hardware</li>
+<li>Isolated from Android vulnerabilities</li>
+</ul>
+<h4 id="attestation"><a class="header" href="#attestation">Attestation</a></h4>
+<p>Key attestation proves keys are hardware-backed:</p>
+<pre><code class="language-java">// Request attestation
+KeyGenParameterSpec spec = new KeyGenParameterSpec.Builder(...)
+    .setAttestationChallenge(challenge)  // Nonce from server
+    .build();
+
+// Get attestation certificate chain
+KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+ks.load(null);
+Certificate[] chain = ks.getCertificateChain("my_key");
+
+// Chain format:
+// [0] Leaf cert - key attestation
+// [1] Intermediate cert - TEE attestation
+// [2] Root cert - OEM key
+
+// Server verifies:
+// 1. Chain validity
+// 2. Challenge matches
+// 3. Hardware attestation (vs software)
+// 4. Device integrity
+</code></pre>
+<h2 id="key-components-enhanced"><a class="header" href="#key-components-enhanced">Key Components (Enhanced)</a></h2>
 <h3 id="1-linux-kernel"><a class="header" href="#1-linux-kernel">1. Linux Kernel</a></h3>
-<p>The Linux kernel is the core of the Android operating system. It provides essential system services such as process management, memory management, security, and hardware abstraction. The kernel also includes drivers for various hardware components like display, camera, and audio.</p>
+<p>The Linux kernel is the core of the Android operating system, providing essential system services.</p>
+<p><strong>Key Subsystems</strong>:</p>
+<p><strong>Process Management</strong>:</p>
+<ul>
+<li>CFS (Completely Fair Scheduler) for process scheduling</li>
+<li>Process groups (cgroups) for resource management</li>
+<li>Android-specific cpusets for big.LITTLE architectures</li>
+</ul>
+<pre><code class="language-bash"># View CPU sets
+$ adb shell cat /dev/cpuset/foreground/cpus
+0-7  # All cores for foreground apps
+
+$ adb shell cat /dev/cpuset/background/cpus
+0-3  # Only little cores for background
+</code></pre>
+<p><strong>Memory Management</strong>:</p>
+<ul>
+<li>Page allocation and virtual memory</li>
+<li>Slab allocator for kernel objects</li>
+<li>ION allocator for shared buffers (camera, display)</li>
+</ul>
+<p><strong>Hardware Drivers</strong>:</p>
+<ul>
+<li>Display driver (framebuffer, DRM)</li>
+<li>Input driver (touchscreen, keyboard)</li>
+<li>Power management (suspend/resume)</li>
+<li>Thermal management</li>
+<li>GPU driver</li>
+</ul>
+<p><strong>Android-Specific Kernel Features</strong>:</p>
+<pre><code class="language-c">// Binder IPC driver
+CONFIG_ANDROID_BINDER_IPC=y
+
+// Ashmem (Anonymous Shared Memory)
+CONFIG_ASHMEM=y
+
+// Low Memory Killer
+CONFIG_ANDROID_LOW_MEMORY_KILLER=y
+
+// ION memory allocator
+CONFIG_ION=y
+
+// Process accounting
+CONFIG_ANDROID_INTF_ALARM_DEV=y
+</code></pre>
 <h3 id="2-hardware-abstraction-layer-hal"><a class="header" href="#2-hardware-abstraction-layer-hal">2. Hardware Abstraction Layer (HAL)</a></h3>
-<p>The Hardware Abstraction Layer (HAL) defines a standard interface for hardware vendors to implement. It allows Android to communicate with the hardware-specific drivers in the Linux kernel. HAL modules are implemented as shared libraries and loaded by the Android system at runtime.</p>
+<p>The HAL provides a standard interface between Android framework and hardware-specific drivers.</p>
+<p><strong>HAL Architecture</strong>:</p>
+<pre><code>┌───────────────────────────────────┐
+│  Android Framework (Java/Kotlin)  │
+└───────────────┬───────────────────┘
+                ↓ JNI
+┌───────────────┴───────────────────┐
+│  Framework Native (C++)           │
+│  - CameraService                  │
+│  - AudioFlinger                   │
+└───────────────┬───────────────────┘
+                ↓ dlopen
+┌───────────────┴───────────────────┐
+│  HAL Interface (HIDL/AIDL)        │
+│  - Versioned interfaces           │
+│  - Binder-based communication     │
+└───────────────┬───────────────────┘
+                ↓
+┌───────────────┴───────────────────┐
+│  HAL Implementation (.so)         │
+│  - Vendor-specific code           │
+│  - Hardware drivers interaction   │
+└───────────────┬───────────────────┘
+                ↓
+┌───────────────┴───────────────────┐
+│  Kernel Drivers                   │
+└───────────────────────────────────┘
+</code></pre>
+<p><strong>Camera HAL Example</strong>:</p>
+<pre><code class="language-cpp">// Camera HAL interface (HIDL)
+// hardware/interfaces/camera/device/3.2/ICameraDevice.hal
+
+interface ICameraDevice {
+    open(ICameraDeviceCallback callback)
+        generates (Status status, ICameraDeviceSession session);
+
+    getCameraCharacteristics()
+        generates (Status status, CameraMetadata chars);
+
+    setTorchMode(TorchMode mode)
+        generates (Status status);
+};
+
+// Vendor implementation
+class CameraDeviceImpl : public ICameraDevice {
+    Return&lt;void&gt; open(const sp&lt;ICameraDeviceCallback&gt;&amp; callback,
+                      open_cb _hidl_cb) override {
+        // Open camera hardware
+        camera3_device_t* device;
+        int ret = mModule-&gt;open_device(mCameraId, &amp;device);
+
+        // Create session
+        sp&lt;ICameraDeviceSession&gt; session =
+            new CameraDeviceSession(device, callback);
+
+        _hidl_cb(Status::OK, session);
+        return Void();
+    }
+};
+</code></pre>
+<p><strong>Audio HAL Example</strong>:</p>
+<pre><code class="language-cpp">// Audio HAL interface
+// hardware/interfaces/audio/7.0/IDevice.hal
+
+interface IDevice {
+    openOutputStream(
+        int32_t ioHandle,
+        DeviceAddress device,
+        AudioConfig config,
+        AudioOutputFlags flags
+    ) generates (
+        Result result,
+        IStreamOut stream,
+        AudioConfig suggestedConfig
+    );
+
+    openInputStream(...) generates (...);
+};
+
+// Implementation handles hardware-specific audio routing
+class AudioDeviceImpl : public IDevice {
+    // Routes to ALSA, TinyALSA, or proprietary drivers
+    // Handles DSP configuration, effects, routing
+};
+</code></pre>
 <h3 id="3-android-runtime-art"><a class="header" href="#3-android-runtime-art">3. Android Runtime (ART)</a></h3>
-<p>The Android Runtime (ART) is the managed runtime used by applications and some system services on Android. ART executes the Dalvik Executable (DEX) bytecode, which is compiled from Java source code. ART includes features like ahead-of-time (AOT) compilation, just-in-time (JIT) compilation, and garbage collection to improve performance and memory management.</p>
+<p>ART is the managed runtime that executes app code.</p>
+<p><strong>Compilation Pipeline</strong>:</p>
+<pre><code>Java/Kotlin Source Code
+        ↓ javac/kotlinc
+Java Bytecode (.class)
+        ↓ d8/r8 (dex compiler)
+DEX Bytecode (.dex)
+        ↓ dexopt/dex2oat (at install time)
+┌──────────────────────────┐
+│ OAT File (.odex)         │
+│ - Native code (AOT)      │
+│ - Quick code             │
+│ - Metadata               │
+└──────────────────────────┘
+        ↓ (at runtime)
+┌──────────────────────────┐
+│ Execution                │
+│ - AOT compiled code      │
+│ - JIT for hot methods    │
+│ - Interpreter (fallback) │
+└──────────────────────────┘
+</code></pre>
+<p><strong>Compilation Modes</strong>:</p>
+<pre><code class="language-java">// Speed: Full AOT compilation (largest code size, fastest)
+$ pm compile -m speed com.example.app
+
+// Speed-profile: AOT compile hot methods only (balanced)
+$ pm compile -m speed-profile com.example.app
+
+// Quicken: Optimized interpreter (fast install, slower execution)
+$ pm compile -m quicken com.example.app
+
+// Verify: No compilation, verification only
+$ pm compile -m verify com.example.app
+
+// Check compilation status
+$ adb shell dumpsys package dexopt
+</code></pre>
+<p><strong>JIT (Just-In-Time) Compilation</strong>:</p>
+<pre><code class="language-cpp">// ART JIT workflow
+while (executing bytecode) {
+    // Count method invocations
+    if (method.hotness_count &gt; JIT_THRESHOLD) {
+        // Add to JIT queue
+        jit_compiler.enqueue(method);
+    }
+
+    // Execute
+    if (method.has_compiled_code()) {
+        execute_native_code(method);
+    } else {
+        interpret(method);
+    }
+}
+
+// Background JIT compilation thread
+void JitCompiler::compile(ArtMethod* method) {
+    // Compile to native code
+    CompiledMethod* compiled = compiler.compile(method);
+
+    // Add to profile for future AOT
+    profile_saver.addHotMethod(method);
+
+    // Install compiled code
+    method-&gt;setEntryPoint(compiled-&gt;code);
+}
+</code></pre>
+<p><strong>Garbage Collection</strong>:</p>
+<p>ART uses concurrent, generational GC:</p>
+<pre><code>┌──────────────────────────────────┐
+│  Heap Organization               │
+├──────────────────────────────────┤
+│  Image Space (preloaded classes) │
+│  - Read-only                     │
+│  - Shared across processes       │
+├──────────────────────────────────┤
+│  Zygote Space (zygote objects)   │
+│  - Shared until written (COW)    │
+├──────────────────────────────────┤
+│  Allocation Space (new objects)  │
+│  - Young generation (nursery)    │
+│  - Old generation                │
+├──────────────────────────────────┤
+│  Large Object Space (&gt;12KB)      │
+│  - Directly allocated            │
+└──────────────────────────────────┘
+</code></pre>
+<p><strong>GC Types</strong>:</p>
+<pre><code class="language-cpp">// Concurrent mark-sweep (background GC)
+void ConcurrentMarkSweep() {
+    // 1. Mark roots (pause)
+    mark_roots();
+
+    // 2. Mark live objects (concurrent)
+    concurrent_mark();
+
+    // 3. Remark (short pause)
+    remark();
+
+    // 4. Sweep dead objects (concurrent)
+    concurrent_sweep();
+}
+
+// Generational GC (young generation)
+void MinorGC() {
+    // Fast collection of young objects
+    // Most objects die young (generational hypothesis)
+}
+
+// Compacting GC (reduces fragmentation)
+void CompactingGC() {
+    // Move live objects together
+    // Update all references
+    // Reduces memory fragmentation
+}
+</code></pre>
 <h3 id="4-native-cc-libraries"><a class="header" href="#4-native-cc-libraries">4. Native C/C++ Libraries</a></h3>
-<p>Android provides a set of native libraries written in C and C++ that are used by various components of the system. These libraries include:</p>
+<p>Enhanced details on key native libraries:</p>
+<p><strong>Bionic</strong>:</p>
 <ul>
-<li><strong>Bionic</strong>: The standard C library (libc) for Android, derived from BSD’s libc.</li>
-<li><strong>SurfaceFlinger</strong>: A compositing window manager that renders the display surface.</li>
-<li><strong>Media Framework</strong>: Provides support for playing and recording audio and video.</li>
-<li><strong>SQLite</strong>: A lightweight relational database engine used for data storage.</li>
+<li>Android’s C library (libc), optimized for mobile</li>
+<li>Smaller than glibc (~200KB vs ~2MB)</li>
+<li>Fast property access via <code>__system_property_get()</code></li>
+<li>DNS resolution with multi-network support</li>
 </ul>
+<p><strong>SurfaceFlinger</strong>:</p>
+<pre><code class="language-cpp">// Composites all window surfaces
+class SurfaceFlinger : public BnSurfaceComposer {
+    void onVsync() {
+        // 1. Latch new buffers from clients
+        for (Layer* layer : mLayers) {
+            layer-&gt;latchBuffer();
+        }
+
+        // 2. Compute layer visibility and transforms
+        computeVisibleRegions();
+
+        // 3. Composite layers (GPU or HWC)
+        if (hwc_available) {
+            hwc-&gt;prepare(mLayers);
+            hwc-&gt;commit();
+        } else {
+            gpu_composite(mLayers);
+        }
+
+        // 4. Post framebuffer
+        postFramebuffer();
+    }
+};
+</code></pre>
+<p><strong>Media Framework</strong>:</p>
+<ul>
+<li>Stagefright (media playback engine)</li>
+<li>MediaCodec API (hardware encoding/decoding)</li>
+<li>OpenMAX IL (codec interface)</li>
+</ul>
+<pre><code class="language-cpp">// MediaCodec architecture
+App → MediaCodec (Java)
+        ↓ JNI
+      MediaCodec (C++)
+        ↓ Binder
+      MediaCodecService
+        ↓
+      Codec2 or OMX
+        ↓
+      Hardware Codec (HAL)
+</code></pre>
 <h3 id="5-application-framework"><a class="header" href="#5-application-framework">5. Application Framework</a></h3>
-<p>The Application Framework provides a set of higher-level services and APIs that developers use to build applications. Key components of the application framework include:</p>
-<ul>
-<li><strong>Activity Manager</strong>: Manages the lifecycle of applications and activities.</li>
-<li><strong>Content Providers</strong>: Manage access to structured data and provide a way to share data between applications.</li>
-<li><strong>Resource Manager</strong>: Handles resources like strings, graphics, and layout files.</li>
-<li><strong>Notification Manager</strong>: Allows applications to display notifications to the user.</li>
-<li><strong>View System</strong>: Provides a set of UI components for building user interfaces.</li>
-</ul>
+<p>Enhanced details on framework services:</p>
+<p><strong>Activity Manager Service</strong>:</p>
+<pre><code class="language-java">// Manages app lifecycle
+class ActivityManagerService {
+    // Start activity
+    int startActivity(Intent intent, String callingPackage) {
+        // 1. Resolve intent
+        ActivityInfo ai = resolveActivity(intent);
+
+        // 2. Check permissions
+        checkPermissions(ai);
+
+        // 3. Start process if needed
+        if (!isProcessRunning(ai.processName)) {
+            startProcessLocked(ai.processName, ai.uid);
+        }
+
+        // 4. Create activity record
+        ActivityRecord r = new ActivityRecord(ai, intent);
+
+        // 5. Add to task stack
+        mTaskStack.addActivity(r);
+
+        // 6. Resume activity
+        resumeActivity(r);
+    }
+
+    // Process lifecycle
+    void updateOomAdjLocked() {
+        // Calculate OOM scores for all processes
+        for (ProcessRecord app : mProcessList) {
+            int oomAdj = computeOomAdj(app);
+            setOomAdj(app.pid, oomAdj);
+        }
+    }
+}
+</code></pre>
+<p><strong>Window Manager Service</strong>:</p>
+<pre><code class="language-java">// Manages window layout and focus
+class WindowManagerService {
+    void relayoutWindow(Session session, IWindow client,
+                        WindowManager.LayoutParams attrs) {
+        // 1. Find window state
+        WindowState win = windowForClientLocked(client);
+
+        // 2. Apply layout parameters
+        win.mAttrs = attrs;
+
+        // 3. Compute layout
+        performLayoutAndPlaceSurfacesLocked();
+
+        // 4. Update surface
+        win.prepareSurfaceLocked();
+    }
+
+    // Input focus
+    void setFocusedWindow(WindowState win) {
+        if (mCurrentFocus != win) {
+            mCurrentFocus = win;
+            mInputMonitor.setInputFocusLw(win);
+        }
+    }
+}
+</code></pre>
+<p><strong>Package Manager Service</strong>:</p>
+<pre><code class="language-java">// Manages app installation and package info
+class PackageManagerService {
+    void installPackage(String apkPath, int uid) {
+        // 1. Parse APK (AndroidManifest.xml)
+        Package pkg = parsePackage(apkPath);
+
+        // 2. Verify signatures
+        verifySignatures(pkg);
+
+        // 3. Check permissions
+        grantPermissions(pkg);
+
+        // 4. dexopt (compile to native code)
+        mDexOptimizer.performDexOpt(pkg);
+
+        // 5. Create app data directory
+        createDataDirectory(pkg, uid);
+
+        // 6. Register package
+        mPackages.put(pkg.packageName, pkg);
+    }
+}
+</code></pre>
 <h3 id="6-system-applications"><a class="header" href="#6-system-applications">6. System Applications</a></h3>
-<p>Android includes a set of core system applications that provide basic functionality to the user. These applications are written using the same APIs available to third-party developers. Examples of system applications include:</p>
+<p>System apps provide core functionality:</p>
+<p><strong>Launcher</strong>:</p>
 <ul>
-<li><strong>Phone</strong>: Manages phone calls and contacts.</li>
-<li><strong>Messages</strong>: Handles SMS and MMS messaging.</li>
-<li><strong>Browser</strong>: Provides web browsing capabilities.</li>
-<li><strong>Settings</strong>: Allows users to configure system settings.</li>
+<li>Home screen</li>
+<li>App drawer</li>
+<li>Widgets</li>
+<li>Icon management</li>
+</ul>
+<p><strong>SystemUI</strong>:</p>
+<ul>
+<li>Status bar</li>
+<li>Quick settings</li>
+<li>Notifications</li>
+<li>Navigation bar</li>
+<li>Lock screen</li>
+</ul>
+<p><strong>Settings</strong>:</p>
+<ul>
+<li>Configuration UI</li>
+<li>Manages SharedPreferences</li>
+<li>Communicates with system services</li>
 </ul>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Understanding Android internals is essential for developers who want to create high-performance applications or contribute to the Android open-source project. By familiarizing yourself with the key components of the Android operating system, you can gain a deeper insight into how Android works and how to optimize your applications for better performance and user experience.</p>
+<p>Android’s architecture is a sophisticated stack built on the Linux kernel, with multiple layers providing abstraction, security, and performance. Understanding these internals—from the boot process and Binder IPC to memory management and security mechanisms—is essential for developers who want to:</p>
+<ul>
+<li>Build high-performance applications</li>
+<li>Debug complex issues</li>
+<li>Contribute to AOSP (Android Open Source Project)</li>
+<li>Develop system-level services</li>
+<li>Optimize for specific hardware</li>
+</ul>
+<p>Key takeaways:</p>
+<ul>
+<li><strong>Boot process</strong> involves multiple stages with verification at each level</li>
+<li><strong>Binder IPC</strong> provides efficient, secure inter-process communication</li>
+<li><strong>Memory management</strong> uses aggressive reclamation for constrained environments</li>
+<li><strong>Security</strong> employs defense-in-depth: sandboxing, SELinux, permissions, verified boot</li>
+<li><strong>ART runtime</strong> uses AOT, JIT, and advanced GC for performance</li>
+<li><strong>HAL</strong> enables hardware abstraction while maintaining stability</li>
+</ul>
+<p>This deep technical knowledge empowers developers to create optimized, secure, and efficient Android applications.</p>
 
                     </main>
 

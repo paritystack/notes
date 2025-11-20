@@ -16,7 +16,7 @@
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
         <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-9dfbd86b.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b2dc8d76.js";
+            window.path_to_searchindex_js = "../searchindex-7e2d92cb.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-728509bc.js"></script>
+        <script src="../toc-525481d4.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,31 +177,204 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="ethernet"><a class="header" href="#ethernet">Ethernet</a></h1>
-<p>Ethernet is a widely used networking technology that enables devices to communicate over a local area network (LAN). It is a fundamental technology for connecting computers, printers, and other devices in homes and businesses.</p>
+<p>Ethernet is a widely used networking technology that enables devices to communicate over a local area network (LAN). It is a fundamental technology for connecting computers, printers, and other devices in homes and businesses. In embedded systems, Ethernet provides reliable, high-speed connectivity for industrial automation, IoT devices, and networked embedded applications.</p>
 <h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
 <ul>
 <li>
 <p><strong>Frames</strong>: Ethernet transmits data in packets called frames. Each frame contains source and destination MAC addresses, as well as the data being transmitted.</p>
 </li>
 <li>
-<p><strong>MAC Address</strong>: A Media Access Control (MAC) address is a unique identifier assigned to network interfaces for communication on the physical network segment.</p>
+<p><strong>MAC Address</strong>: A Media Access Control (MAC) address is a unique identifier (48 bits / 6 bytes) assigned to network interfaces for communication on the physical network segment. Format: XX:XX:XX:XX:XX:XX (hexadecimal).</p>
 </li>
 <li>
 <p><strong>Switching</strong>: Ethernet switches are devices that connect multiple devices on a LAN and use MAC addresses to forward frames to the correct destination.</p>
 </li>
 </ul>
+<h2 id="ethernet-frame-structure"><a class="header" href="#ethernet-frame-structure">Ethernet Frame Structure</a></h2>
+<p>An Ethernet II frame consists of the following fields:</p>
+<pre><code>| Preamble | SFD | Dest MAC | Src MAC | EtherType | Payload | FCS |
+| 7 bytes  | 1   | 6 bytes  | 6 bytes | 2 bytes   | 46-1500 | 4   |
+</code></pre>
+<ul>
+<li><strong>Preamble</strong>: 7 bytes of alternating 1s and 0s (10101010) for synchronization</li>
+<li><strong>Start Frame Delimiter (SFD)</strong>: 1 byte (10101011) marks the start of the frame</li>
+<li><strong>Destination MAC Address</strong>: 6 bytes - target device address</li>
+<li><strong>Source MAC Address</strong>: 6 bytes - sender device address</li>
+<li><strong>EtherType</strong>: 2 bytes - indicates the protocol in the payload (e.g., 0x0800 for IPv4, 0x0806 for ARP)</li>
+<li><strong>Payload</strong>: 46-1500 bytes - actual data being transmitted</li>
+<li><strong>Frame Check Sequence (FCS)</strong>: 4 bytes - CRC32 checksum for error detection</li>
+</ul>
+<p><strong>Total Frame Size</strong>: 64 to 1518 bytes (without preamble/SFD)</p>
+<h3 id="ieee-8023-frame-alternative"><a class="header" href="#ieee-8023-frame-alternative">IEEE 802.3 Frame (Alternative)</a></h3>
+<p>The 802.3 frame replaces EtherType with a Length field and uses LLC/SNAP headers in the payload.</p>
+<h2 id="osi-layers-and-ethernet"><a class="header" href="#osi-layers-and-ethernet">OSI Layers and Ethernet</a></h2>
+<p>Ethernet operates at two layers:</p>
+<ul>
+<li><strong>Physical Layer (Layer 1)</strong>: Handles signal transmission, voltage levels, timing, and physical connectors</li>
+<li><strong>Data Link Layer (Layer 2)</strong>: Divided into two sublayers:
+<ul>
+<li><strong>MAC (Media Access Control)</strong>: Handles frame assembly, addressing, and channel access</li>
+<li><strong>LLC (Logical Link Control)</strong>: Provides interface to network layer</li>
+</ul>
+</li>
+</ul>
 <h2 id="common-standards"><a class="header" href="#common-standards">Common Standards</a></h2>
+<h3 id="ieee-8023-variants"><a class="header" href="#ieee-8023-variants">IEEE 802.3 Variants</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Standard</th><th>Speed</th><th>Name</th><th>Medium</th><th>Distance</th></tr>
+</thead>
+<tbody>
+<tr><td>802.3</td><td>10 Mbps</td><td>10BASE-T</td><td>Cat3/Cat5 UTP</td><td>100m</td></tr>
+<tr><td>802.3u</td><td>100 Mbps</td><td>100BASE-TX</td><td>Cat5 UTP</td><td>100m</td></tr>
+<tr><td>802.3ab</td><td>1 Gbps</td><td>1000BASE-T</td><td>Cat5e/Cat6 UTP</td><td>100m</td></tr>
+<tr><td>802.3an</td><td>10 Gbps</td><td>10GBASE-T</td><td>Cat6a/Cat7 UTP</td><td>100m</td></tr>
+<tr><td>802.3z</td><td>1 Gbps</td><td>1000BASE-X</td><td>Fiber optic</td><td>550m-5km</td></tr>
+<tr><td>802.3ae</td><td>10 Gbps</td><td>10GBASE-SR/LR</td><td>Fiber optic</td><td>300m-40km</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Naming Convention</strong>: <code>&lt;Speed&gt;BASE-&lt;Signaling&gt;</code></p>
+<ul>
+<li>Speed: 10, 100, 1000 (Mbps) or 10G, 40G, 100G (Gbps)</li>
+<li>BASE: Baseband signaling</li>
+<li>Signaling: T (twisted pair), X (fiber), etc.</li>
+</ul>
+<h3 id="communication-modes"><a class="header" href="#communication-modes">Communication Modes</a></h3>
 <ol>
 <li>
-<p><strong>IEEE 802.3</strong>: This is the standard that defines the physical and data link layers for Ethernet networks. It includes specifications for various speeds, such as 10 Mbps, 100 Mbps, 1 Gbps, and 10 Gbps.</p>
+<p><strong>Full Duplex</strong>: Modern Ethernet supports full duplex communication, allowing devices to send and receive data simultaneously on separate wire pairs, which eliminates collisions and improves network efficiency. Most common in switched networks.</p>
 </li>
 <li>
-<p><strong>Full Duplex</strong>: Modern Ethernet supports full duplex communication, allowing devices to send and receive data simultaneously, which improves network efficiency.</p>
-</li>
-<li>
-<p><strong>VLANs</strong>: Virtual Local Area Networks (VLANs) allow network administrators to segment a single physical network into multiple logical networks for improved security and performance.</p>
+<p><strong>Half Duplex</strong>: Devices can either send or receive at any given time, but not both. Uses CSMA/CD (Carrier Sense Multiple Access with Collision Detection). Legacy mode, rare in modern networks.</p>
 </li>
 </ol>
+<h3 id="advanced-features"><a class="header" href="#advanced-features">Advanced Features</a></h3>
+<ul>
+<li>
+<p><strong>VLANs (802.1Q)</strong>: Virtual Local Area Networks allow network administrators to segment a single physical network into multiple logical networks for improved security and performance. VLAN tags add 4 bytes to the Ethernet frame.</p>
+</li>
+<li>
+<p><strong>Auto-Negotiation</strong>: Automatically detects and configures the best common speed and duplex mode between connected devices.</p>
+</li>
+<li>
+<p><strong>Flow Control (802.3x)</strong>: Pause frames allow receivers to signal transmitters to temporarily stop sending data when buffers are full.</p>
+</li>
+</ul>
+<h2 id="phy-and-mac-architecture"><a class="header" href="#phy-and-mac-architecture">PHY and MAC Architecture</a></h2>
+<p>In embedded systems, Ethernet is typically implemented as two distinct components:</p>
+<h3 id="mac-media-access-control-controller"><a class="header" href="#mac-media-access-control-controller">MAC (Media Access Control) Controller</a></h3>
+<p>The MAC controller handles:</p>
+<ul>
+<li>Frame assembly and parsing</li>
+<li>MAC address filtering</li>
+<li>CRC generation and checking</li>
+<li>Buffer management (TX/RX FIFOs)</li>
+<li>DMA operations for efficient data transfer</li>
+<li>Collision detection (half-duplex)</li>
+</ul>
+<p>Usually integrated into the microcontroller/SoC.</p>
+<h3 id="phy-physical-layer-transceiver"><a class="header" href="#phy-physical-layer-transceiver">PHY (Physical Layer) Transceiver</a></h3>
+<p>The PHY chip handles:</p>
+<ul>
+<li>Signal encoding/decoding (MLT-3, 4B5B, 8B10B, etc.)</li>
+<li>Line drivers and receivers</li>
+<li>Clock recovery</li>
+<li>Link status detection</li>
+<li>Auto-negotiation</li>
+<li>Analog signal processing</li>
+</ul>
+<p>External IC connected to MAC via standard interfaces.</p>
+<h3 id="mac-phy-interfaces"><a class="header" href="#mac-phy-interfaces">MAC-PHY Interfaces</a></h3>
+<p>Common interfaces between MAC and PHY:</p>
+<ol>
+<li>
+<p><strong>MII (Media Independent Interface)</strong></p>
+<ul>
+<li>Speed: 10/100 Mbps</li>
+<li>Signals: 16 data/control lines</li>
+<li>Clock: 25 MHz (100 Mbps) / 2.5 MHz (10 Mbps)</li>
+<li>Parallel interface</li>
+</ul>
+</li>
+<li>
+<p><strong>RMII (Reduced MII)</strong></p>
+<ul>
+<li>Speed: 10/100 Mbps</li>
+<li>Signals: 9 lines (reduced pin count)</li>
+<li>Clock: 50 MHz (external reference clock required)</li>
+<li>More common in embedded systems due to fewer pins</li>
+</ul>
+</li>
+<li>
+<p><strong>GMII (Gigabit MII)</strong></p>
+<ul>
+<li>Speed: 10/100/1000 Mbps</li>
+<li>Signals: 24 data/control lines</li>
+<li>Clock: 125 MHz at 1 Gbps</li>
+<li>Parallel interface for Gigabit speeds</li>
+</ul>
+</li>
+<li>
+<p><strong>RGMII (Reduced GMII)</strong></p>
+<ul>
+<li>Speed: 10/100/1000 Mbps</li>
+<li>Signals: 12 lines</li>
+<li>Clock: 125 MHz with DDR (Double Data Rate)</li>
+<li>Common in modern embedded systems</li>
+</ul>
+</li>
+<li>
+<p><strong>SGMII (Serial GMII)</strong></p>
+<ul>
+<li>Speed: 10/100/1000 Mbps</li>
+<li>Signals: 4 differential pairs (TX+/-, RX+/-)</li>
+<li>Serial interface, fewer pins</li>
+<li>Common in SoCs and networking equipment</li>
+</ul>
+</li>
+</ol>
+<h3 id="mdiomdc-management-interface"><a class="header" href="#mdiomdc-management-interface">MDIO/MDC Management Interface</a></h3>
+<p>The MAC communicates with the PHY for configuration and status monitoring via:</p>
+<ul>
+<li><strong>MDIO (Management Data Input/Output)</strong>: Bidirectional data line</li>
+<li><strong>MDC (Management Data Clock)</strong>: Clock signal (typically &lt; 2.5 MHz)</li>
+</ul>
+<p>This 2-wire serial interface allows:</p>
+<ul>
+<li>Reading/writing PHY registers</li>
+<li>Checking link status</li>
+<li>Configuring speed and duplex</li>
+<li>Reading PHY ID and capabilities</li>
+</ul>
+<h2 id="embedded-ethernet-controllers"><a class="header" href="#embedded-ethernet-controllers">Embedded Ethernet Controllers</a></h2>
+<h3 id="common-integrated-mac-controllers"><a class="header" href="#common-integrated-mac-controllers">Common Integrated MAC Controllers</a></h3>
+<p>Many microcontrollers include built-in Ethernet MAC:</p>
+<ul>
+<li><strong>STM32F4/F7/H7</strong>: ARM Cortex-M with 10/100 Mbps MAC</li>
+<li><strong>i.MX RT Series</strong>: ARM Cortex-M7 with 10/100/1000 Mbps MAC</li>
+<li><strong>SAM E70/V71</strong>: ARM Cortex-M7 with 10/100 Mbps MAC</li>
+<li><strong>ESP32</strong>: Built-in MAC (requires external PHY)</li>
+<li><strong>Microchip PIC32</strong>: MIPS-based with MAC</li>
+<li><strong>TI Sitara AM335x</strong>: ARM Cortex-A with dual MACs</li>
+</ul>
+<h3 id="popular-external-phy-chips"><a class="header" href="#popular-external-phy-chips">Popular External PHY Chips</a></h3>
+<ul>
+<li><strong>LAN8720A</strong>: 10/100 Mbps, RMII, low cost, common in embedded</li>
+<li><strong>DP83848</strong>: 10/100 Mbps, MII/RMII, TI</li>
+<li><strong>KSZ8081</strong>: 10/100 Mbps, MII/RMII, Microchip</li>
+<li><strong>RTL8211F</strong>: 10/100/1000 Mbps, RGMII, Realtek</li>
+<li><strong>KSZ9031</strong>: 10/100/1000 Mbps, RGMII, Microchip</li>
+</ul>
+<h3 id="integrated-ethernet-solutions"><a class="header" href="#integrated-ethernet-solutions">Integrated Ethernet Solutions</a></h3>
+<p>For microcontrollers without MAC:</p>
+<ul>
+<li><strong>W5500</strong>: SPI-to-Ethernet with hardwired TCP/IP stack</li>
+<li><strong>ENC28J60</strong>: SPI-to-Ethernet, 10 Mbps</li>
+<li><strong>W5100S</strong>: SPI/parallel, hardwired TCP/IP</li>
+</ul>
+<p>These provide complete Ethernet solutions with MAC, PHY, and protocol handling.</p>
 <h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
 <p>Ethernet is used in various applications, including:</p>
 <ul>
@@ -212,34 +385,302 @@
 <p><strong>Data Centers</strong>: Providing high-speed connections between servers and storage devices.</p>
 </li>
 <li>
-<p><strong>Industrial Automation</strong>: Enabling communication between machines and control systems in manufacturing environments.</p>
+<p><strong>Industrial Automation</strong>: Enabling communication between machines and control systems in manufacturing environments (EtherCAT, PROFINET, Ethernet/IP).</p>
+</li>
+<li>
+<p><strong>Embedded IoT Devices</strong>: Network-connected sensors, cameras, and control systems.</p>
+</li>
+<li>
+<p><strong>Automotive Ethernet</strong>: In-vehicle networking (100BASE-T1, 1000BASE-T1 standards).</p>
 </li>
 </ul>
-<h2 id="different-signals-in-ethernet"><a class="header" href="#different-signals-in-ethernet">Different Signals in Ethernet</a></h2>
-<p>Ethernet communication relies on various signals to transmit data over the network. These signals include:</p>
+<h2 id="physical-layer-signaling"><a class="header" href="#physical-layer-signaling">Physical Layer Signaling</a></h2>
+<h3 id="twisted-pair-cable-configuration"><a class="header" href="#twisted-pair-cable-configuration">Twisted Pair Cable Configuration</a></h3>
+<p>Standard Ethernet uses 8-wire (4 pairs) twisted pair cables:</p>
+<p><strong>10/100BASE-T (Fast Ethernet)</strong>:</p>
+<ul>
+<li>Uses 2 pairs: Pairs 2 and 3 (pins 1,2,3,6)</li>
+<li>Pair 2 (Orange): Pins 1,2 - TX+/TX- or RX+/RX-</li>
+<li>Pair 3 (Green): Pins 3,6 - RX+/RX- or TX+/TX-</li>
+<li>Pairs 1 and 4 unused in standard implementation</li>
+</ul>
+<p><strong>1000BASE-T (Gigabit Ethernet)</strong>:</p>
+<ul>
+<li>Uses all 4 pairs simultaneously</li>
+<li>Each pair transmits and receives (full duplex)</li>
+<li>Bidirectional signaling on each pair</li>
+</ul>
+<p><strong>T568A vs T568B Wiring Standards</strong>:</p>
+<ul>
+<li>Both are valid standards with different color codes</li>
+<li>Straight-through cables: Same standard both ends</li>
+<li>Crossover cables: T568A one end, T568B other (legacy, auto-MDIX eliminates need)</li>
+</ul>
+<h3 id="voltage-levels-and-signaling"><a class="header" href="#voltage-levels-and-signaling">Voltage Levels and Signaling</a></h3>
+<p><strong>100BASE-TX Signaling</strong>:</p>
+<ul>
+<li>Voltage: ±1V differential signaling</li>
+<li>Encoding: 4B5B (4 data bits encoded as 5 signal bits) + MLT-3</li>
+<li>Common mode: 0V ±25mV</li>
+<li>Transformer isolation: Magnetic coupling (1:1 transformer)</li>
+</ul>
+<p><strong>1000BASE-T Signaling</strong>:</p>
+<ul>
+<li>Voltage: ±1V peak differential</li>
+<li>Encoding: PAM-5 (5-level Pulse Amplitude Modulation)</li>
+<li>Symbol rate: 125 Mbaud per pair × 4 pairs = 1000 Mbps</li>
+<li>Hybrid circuits for simultaneous TX/RX</li>
+</ul>
+<h3 id="key-ethernet-signals"><a class="header" href="#key-ethernet-signals">Key Ethernet Signals</a></h3>
 <ol>
 <li>
-<p><strong>Carrier Sense</strong>: Ethernet devices use carrier sense to detect if the network medium is idle or busy before transmitting data. This helps prevent collisions on the network.</p>
+<p><strong>Carrier Sense</strong>: Detection of signal energy on the medium (half-duplex only)</p>
+<ul>
+<li>CRS (Carrier Sense) signal in MII interface</li>
+<li>Prevents transmission when medium is busy</li>
+</ul>
 </li>
 <li>
-<p><strong>Collision Detection</strong>: In half-duplex Ethernet, devices use collision detection to identify when two devices transmit data simultaneously, causing a collision. When a collision is detected, devices stop transmitting and wait for a random backoff period before attempting to retransmit.</p>
+<p><strong>Collision Detection (CSMA/CD)</strong>: Half-duplex mode</p>
+<ul>
+<li>COL (Collision) signal in MII interface</li>
+<li>Detected when simultaneous transmit/receive occurs</li>
+<li>Random backoff algorithm after collision</li>
+</ul>
 </li>
 <li>
-<p><strong>Preamble</strong>: Each Ethernet frame begins with a preamble, a sequence of alternating 1s and 0s, which allows devices to synchronize their clocks and prepare for the incoming data.</p>
+<p><strong>Link Integrity</strong>:</p>
+<ul>
+<li><strong>10BASE-T</strong>: Link pulses (NLP - Normal Link Pulse) every 16ms</li>
+<li><strong>100BASE-TX</strong>: Idle symbols continuously transmitted</li>
+<li><strong>Auto-negotiation</strong>: FLP (Fast Link Pulse) bursts for capability exchange</li>
+</ul>
 </li>
 <li>
-<p><strong>Start Frame Delimiter (SFD)</strong>: Following the preamble, the SFD is a specific pattern that indicates the start of the actual Ethernet frame.</p>
+<p><strong>Preamble and SFD</strong>:</p>
+<ul>
+<li>Preamble: 7 bytes (0xAA) for clock synchronization</li>
+<li>SFD: 1 byte (0xAB) marks frame start</li>
+<li>Allows receiver to lock onto signal timing</li>
+</ul>
 </li>
 <li>
-<p><strong>Clock Signals</strong>: Ethernet devices use clock signals to maintain synchronization between the transmitter and receiver, ensuring accurate data transmission.</p>
-</li>
-<li>
-<p><strong>Link Pulse</strong>: In 10BASE-T Ethernet, link pulses are used to establish and maintain a connection between devices. These pulses are sent periodically to indicate that the link is active.</p>
+<p><strong>Inter-Frame Gap (IFG)</strong>:</p>
+<ul>
+<li>Minimum 96 bit-times between frames</li>
+<li>9.6µs at 10 Mbps, 960ns at 100 Mbps, 96ns at 1 Gbps</li>
+<li>Ensures receivers can process previous frame</li>
+</ul>
 </li>
 </ol>
-<p>Understanding these signals is crucial for diagnosing and troubleshooting Ethernet network issues, as well as for designing and implementing reliable Ethernet communication systems.</p>
+<h2 id="hardware-design-considerations"><a class="header" href="#hardware-design-considerations">Hardware Design Considerations</a></h2>
+<h3 id="crystaloscillator-requirements"><a class="header" href="#crystaloscillator-requirements">Crystal/Oscillator Requirements</a></h3>
+<ul>
+<li><strong>25 MHz</strong>: Common for 10/100 Ethernet MAC</li>
+<li><strong>50 MHz</strong>: For RMII interface (often external)</li>
+<li><strong>125 MHz</strong>: For Gigabit Ethernet (RGMII)</li>
+<li>Accuracy: ±50 ppm typical requirement</li>
+</ul>
+<h3 id="magnetics-transformers"><a class="header" href="#magnetics-transformers">Magnetics (Transformers)</a></h3>
+<p>Purpose:</p>
+<ul>
+<li>Electrical isolation (safety)</li>
+<li>Common-mode noise rejection</li>
+<li>Impedance matching (75Ω to 100Ω differential)</li>
+<li>Protects against voltage transients</li>
+</ul>
+<p>Types:</p>
+<ul>
+<li>Discrete transformers + common-mode chokes</li>
+<li>Integrated RJ45 connectors with built-in magnetics</li>
+</ul>
+<h3 id="power-supply"><a class="header" href="#power-supply">Power Supply</a></h3>
+<ul>
+<li>PHY chips typically require multiple voltage rails:
+<ul>
+<li>3.3V or 2.5V for digital I/O</li>
+<li>1.2V or 1.8V for core logic</li>
+<li>Sometimes separate analog supply</li>
+</ul>
+</li>
+<li>MAC usually powered from MCU supply (1.8V or 3.3V)</li>
+</ul>
+<h3 id="pcb-layout-guidelines"><a class="header" href="#pcb-layout-guidelines">PCB Layout Guidelines</a></h3>
+<ul>
+<li>Maintain differential pair impedance (typically 100Ω)</li>
+<li>Keep TX and RX pairs separated</li>
+<li>Minimize distance between MAC and PHY</li>
+<li>Use ground plane</li>
+<li>Place magnetics close to RJ45 connector</li>
+<li>Add ESD protection on RJ45 pins</li>
+</ul>
+<h3 id="reset-and-boot-configuration"><a class="header" href="#reset-and-boot-configuration">Reset and Boot Configuration</a></h3>
+<ul>
+<li>PHY chips often have:
+<ul>
+<li>Hardware reset pin (active low)</li>
+<li>Bootstrap pins to configure address, mode</li>
+<li>Configuration resistors/straps</li>
+</ul>
+</li>
+<li>MAC reset via MCU reset system</li>
+</ul>
+<h2 id="network-protocols-and-layers"><a class="header" href="#network-protocols-and-layers">Network Protocols and Layers</a></h2>
+<h3 id="common-layer-2-protocols"><a class="header" href="#common-layer-2-protocols">Common Layer 2 Protocols</a></h3>
+<ul>
+<li><strong>ARP (Address Resolution Protocol)</strong>: Maps IP addresses to MAC addresses</li>
+<li><strong>LLDP (Link Layer Discovery Protocol)</strong>: Device discovery and capability advertisement</li>
+<li><strong>STP/RSTP</strong>: Spanning Tree Protocol for loop prevention</li>
+<li><strong>802.1X</strong>: Port-based network access control</li>
+</ul>
+<h3 id="layer-3-and-above"><a class="header" href="#layer-3-and-above">Layer 3 and Above</a></h3>
+<p>Ethernet carries higher-layer protocols:</p>
+<ul>
+<li><strong>IPv4/IPv6</strong>: Internet Protocol</li>
+<li><strong>TCP/UDP</strong>: Transport layer protocols</li>
+<li><strong>ICMP</strong>: Internet Control Message Protocol</li>
+<li><strong>DHCP</strong>: Dynamic Host Configuration Protocol</li>
+</ul>
+<h3 id="embedded-tcpip-stacks"><a class="header" href="#embedded-tcpip-stacks">Embedded TCP/IP Stacks</a></h3>
+<p>Software stacks for embedded Ethernet:</p>
+<ul>
+<li><strong>lwIP</strong>: Lightweight IP stack, widely used, open source</li>
+<li><strong>uIP</strong>: Micro IP, very small footprint</li>
+<li><strong>FreeRTOS+TCP</strong>: Integrated with FreeRTOS</li>
+<li><strong>Zephyr networking</strong>: Part of Zephyr RTOS</li>
+<li><strong>Embedded Wizard</strong>: Commercial stack</li>
+<li><strong>Proprietary vendor stacks</strong>: From STM32, NXP, etc.</li>
+</ul>
+<h2 id="power-over-ethernet-poe"><a class="header" href="#power-over-ethernet-poe">Power over Ethernet (PoE)</a></h2>
+<p>PoE allows electrical power to be transmitted over Ethernet cables along with data, eliminating the need for separate power cables.</p>
+<h3 id="poe-standards"><a class="header" href="#poe-standards">PoE Standards</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Standard</th><th>Power</th><th>Voltage</th><th>Max Current</th><th>Power Pairs</th></tr>
+</thead>
+<tbody>
+<tr><td>802.3af (PoE)</td><td>15.4W (13W device)</td><td>44-57V DC</td><td>350 mA</td><td>2 pairs</td></tr>
+<tr><td>802.3at (PoE+)</td><td>30W (25.5W device)</td><td>50-57V DC</td><td>600 mA</td><td>2 pairs</td></tr>
+<tr><td>802.3bt (PoE++) Type 3</td><td>60W (51W device)</td><td>50-57V DC</td><td>600 mA</td><td>4 pairs</td></tr>
+<tr><td>802.3bt (PoE++) Type 4</td><td>100W (71W device)</td><td>52-57V DC</td><td>960 mA</td><td>4 pairs</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="poe-components"><a class="header" href="#poe-components">PoE Components</a></h3>
+<ul>
+<li><strong>PSE (Power Sourcing Equipment)</strong>: PoE switch or injector that provides power</li>
+<li><strong>PD (Powered Device)</strong>: Device receiving power (IP camera, VoIP phone, embedded device)</li>
+<li><strong>PoE Controller</strong>: IC that negotiates power and manages PD side (e.g., TI TPS2375, LTC4267)</li>
+</ul>
+<h3 id="poe-detection-and-classification"><a class="header" href="#poe-detection-and-classification">PoE Detection and Classification</a></h3>
+<ol>
+<li><strong>Detection</strong>: PSE applies 2.7-10V to detect if PD is present (25kΩ signature resistance)</li>
+<li><strong>Classification</strong>: PSE determines power class needed (0-8)</li>
+<li><strong>Power-up</strong>: PSE applies full voltage if valid PD detected</li>
+<li><strong>Operation</strong>: Continuous power delivery with monitoring</li>
+</ol>
+<h3 id="poe-in-embedded-systems"><a class="header" href="#poe-in-embedded-systems">PoE in Embedded Systems</a></h3>
+<ul>
+<li>Simplifies deployment (single cable for data + power)</li>
+<li>Common for IoT devices, sensors, IP cameras</li>
+<li>Reduces installation cost and complexity</li>
+<li>Enables remote power cycling via software</li>
+</ul>
+<h2 id="performance-and-optimization"><a class="header" href="#performance-and-optimization">Performance and Optimization</a></h2>
+<h3 id="throughput-considerations"><a class="header" href="#throughput-considerations">Throughput Considerations</a></h3>
+<p><strong>Theoretical vs Actual</strong>:</p>
+<ul>
+<li>100 Mbps Fast Ethernet: ~94 Mbps actual (overhead from preamble, IFG, headers)</li>
+<li>1 Gbps Gigabit: ~940 Mbps actual</li>
+<li>Jumbo frames (&gt;1500 bytes MTU) can improve efficiency</li>
+</ul>
+<h3 id="latency"><a class="header" href="#latency">Latency</a></h3>
+<p>Typical latencies:</p>
+<ul>
+<li>Switch latency: 5-50 µs (cut-through) to 50-200 µs (store-and-forward)</li>
+<li>Cable delay: ~5 ns/m</li>
+<li>Processing in embedded system: depends on CPU, DMA, interrupt handling</li>
+</ul>
+<h3 id="buffer-management"><a class="header" href="#buffer-management">Buffer Management</a></h3>
+<ul>
+<li><strong>TX buffers</strong>: Hold outgoing frames before transmission</li>
+<li><strong>RX buffers</strong>: Store received frames before processing</li>
+<li><strong>DMA</strong>: Efficiently transfers data between memory and MAC</li>
+<li>Insufficient buffering leads to dropped packets</li>
+</ul>
+<h3 id="common-issues-and-debugging"><a class="header" href="#common-issues-and-debugging">Common Issues and Debugging</a></h3>
+<ol>
+<li>
+<p><strong>No Link</strong>:</p>
+<ul>
+<li>Check cable connection</li>
+<li>Verify PHY power and reset</li>
+<li>Check MDIO communication</li>
+<li>Verify clock signals (oscillator)</li>
+<li>Check PHY address configuration</li>
+</ul>
+</li>
+<li>
+<p><strong>Link Up but No Data</strong>:</p>
+<ul>
+<li>Verify MAC configuration (speed/duplex match)</li>
+<li>Check TX/RX buffer setup</li>
+<li>Verify DMA configuration</li>
+<li>Check firewall/filtering rules</li>
+<li>Inspect ARP resolution</li>
+</ul>
+</li>
+<li>
+<p><strong>Packet Loss</strong>:</p>
+<ul>
+<li>Buffer overflow (increase buffer size)</li>
+<li>CRC errors (cable quality, noise)</li>
+<li>Collision in half-duplex (switch to full-duplex)</li>
+<li>CPU not processing packets fast enough</li>
+</ul>
+</li>
+<li>
+<p><strong>Performance Issues</strong>:</p>
+<ul>
+<li>Interrupt storm (use interrupt coalescing)</li>
+<li>Inefficient buffer management</li>
+<li>Memory bandwidth limitations</li>
+<li>CPU bottleneck in packet processing</li>
+</ul>
+</li>
+</ol>
+<h3 id="debug-tools"><a class="header" href="#debug-tools">Debug Tools</a></h3>
+<ul>
+<li><strong>PHY registers</strong>: Read via MDIO to check link status, speed, duplex</li>
+<li><strong>Wireshark/tcpdump</strong>: Capture and analyze packets</li>
+<li><strong>Logic analyzer</strong>: Observe MII/RMII signals</li>
+<li><strong>Oscilloscope</strong>: Check signal quality, voltage levels</li>
+<li><strong>Built-in counters</strong>: MAC statistics for TX/RX errors, collisions</li>
+</ul>
+<h2 id="industrial-ethernet-protocols"><a class="header" href="#industrial-ethernet-protocols">Industrial Ethernet Protocols</a></h2>
+<p>Specialized protocols for industrial automation:</p>
+<ul>
+<li><strong>EtherCAT</strong>: Ethernet for Control Automation Technology, real-time, daisy-chain topology</li>
+<li><strong>PROFINET</strong>: Industrial Ethernet by Siemens, real-time communication</li>
+<li><strong>Ethernet/IP</strong>: Industrial Protocol, used with CIP (Common Industrial Protocol)</li>
+<li><strong>Modbus TCP</strong>: Modbus protocol over TCP/IP</li>
+<li><strong>POWERLINK</strong>: Real-time protocol by B&amp;R Automation</li>
+<li><strong>EtherNet/IP</strong>: Managed by ODVA</li>
+</ul>
+<p>These protocols add deterministic, real-time capabilities on top of standard Ethernet.</p>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Ethernet remains a cornerstone of modern networking, providing reliable and high-speed communication for a wide range of applications. Understanding Ethernet’s principles and standards is essential for network engineers and IT professionals.</p>
+<p>Ethernet remains a cornerstone of modern networking, providing reliable and high-speed communication for a wide range of applications. In embedded systems, understanding the hardware architecture (MAC/PHY separation), interface standards (MII, RMII, RGMII), and protocol details is essential for successful implementation. From selecting appropriate controllers and PHY chips to proper PCB layout and software stack integration, Ethernet design requires attention to both hardware and software aspects.</p>
+<p>Key takeaways for embedded Ethernet design:</p>
+<ul>
+<li>Choose appropriate MAC-PHY interface based on speed and pin count requirements</li>
+<li>Follow PCB layout best practices for signal integrity</li>
+<li>Select suitable TCP/IP stack for your RTOS and application</li>
+<li>Implement proper error handling and buffer management</li>
+<li>Consider PoE for simplified deployment</li>
+<li>Use debugging tools effectively for troubleshooting</li>
+</ul>
+<p>With proper design and implementation, Ethernet provides robust, high-performance networking for embedded applications ranging from simple IoT devices to complex industrial automation systems.</p>
 
                     </main>
 

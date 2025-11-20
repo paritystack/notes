@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-91648d44.js";
+            window.path_to_searchindex_js = "../searchindex-2685738a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -178,20 +178,80 @@
                     <main>
                         <h1 id="sorting-algorithms"><a class="header" href="#sorting-algorithms">Sorting Algorithms</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>Sorting arranges elements in order. Different algorithms have different trade-offs in speed, memory, and stability.</p>
+<p>Sorting arranges elements in order (ascending or descending). Different algorithms have different trade-offs in speed, memory usage, and stability. Understanding these trade-offs helps you choose the right algorithm for your specific use case.</p>
+<h2 id="algorithm-characteristics"><a class="header" href="#algorithm-characteristics">Algorithm Characteristics</a></h2>
+<p>Before diving into specific algorithms, it’s important to understand key characteristics:</p>
+<h3 id="stability"><a class="header" href="#stability">Stability</a></h3>
+<p>A sorting algorithm is <strong>stable</strong> if it preserves the relative order of elements with equal keys. For example, if you sort student records by grade, stable algorithms keep students with the same grade in their original order.</p>
+<p><strong>Stable</strong>: Bubble Sort, Insertion Sort, Merge Sort, Tim Sort, Counting Sort, Radix Sort
+<strong>Unstable</strong>: Selection Sort, Quick Sort, Heap Sort</p>
+<h3 id="in-place-vs-out-of-place"><a class="header" href="#in-place-vs-out-of-place">In-Place vs Out-of-Place</a></h3>
+<p><strong>In-place</strong> algorithms sort with O(1) or O(log n) extra space, modifying the input array directly.
+<strong>Out-of-place</strong> algorithms require O(n) or more additional space.</p>
+<h3 id="adaptiveness"><a class="header" href="#adaptiveness">Adaptiveness</a></h3>
+<p><strong>Adaptive</strong> algorithms perform better on partially sorted data. They can achieve better than their worst-case complexity when input has some order.</p>
+<p><strong>Adaptive</strong>: Bubble Sort, Insertion Sort, Tim Sort
+<strong>Non-adaptive</strong>: Selection Sort, Merge Sort, Heap Sort, Quick Sort (standard)</p>
+<h3 id="comparison-based-vs-non-comparison"><a class="header" href="#comparison-based-vs-non-comparison">Comparison-Based vs Non-Comparison</a></h3>
+<p><strong>Comparison-based</strong> algorithms can only compare elements. They have a theoretical lower bound of O(n log n) for average complexity.
+<strong>Non-comparison</strong> algorithms use properties like integer values to achieve linear time in certain cases.</p>
 <h2 id="common-algorithms"><a class="header" href="#common-algorithms">Common Algorithms</a></h2>
 <h3 id="bubble-sort"><a class="header" href="#bubble-sort">Bubble Sort</a></h3>
-<p><strong>Time</strong>: $O(n^2)$ | <strong>Space</strong>: $O(1)$</p>
+<p><strong>Time</strong>: $O(n^2)$ average/worst, $O(n)$ best | <strong>Space</strong>: $O(1)$ | <strong>Stable</strong>: ✓ | <strong>Adaptive</strong>: ✓</p>
+<h4 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h4>
+<p>Bubble Sort repeatedly steps through the list, comparing adjacent elements and swapping them if they’re in the wrong order. The algorithm gets its name because smaller elements “bubble” to the top (beginning) of the list. After each pass, the largest unsorted element “bubbles” to its correct position at the end.</p>
+<p>The algorithm continues until no more swaps are needed, indicating the array is sorted. An optimization adds a flag to detect when the array becomes sorted early, giving O(n) best-case performance on already-sorted data.</p>
+<p><strong>Why it’s stable</strong>: Equal elements are never swapped (we only swap when <code>arr[j] &gt; arr[j+1]</code>), preserving their original order.</p>
+<p><strong>When to use</strong>: Educational purposes, very small datasets (&lt; 10 elements), or when you need a simple implementation and performance isn’t critical.</p>
+<p><strong>When NOT to use</strong>: Any practical application with more than a handful of elements. It’s one of the slowest sorting algorithms.</p>
 <pre><code class="language-python">def bubble_sort(arr):
     n = len(arr)
     for i in range(n):
+        swapped = False
         for j in range(0, n - i - 1):
             if arr[j] &gt; arr[j + 1]:
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
+        if not swapped:  # Optimization: stop if no swaps occurred
+            break
     return arr
 </code></pre>
+<h4 id="step-by-step-example"><a class="header" href="#step-by-step-example">Step-by-Step Example</a></h4>
+<p>Sorting <code>[64, 34, 25, 12, 22]</code>:</p>
+<p><strong>Pass 1:</strong></p>
+<ul>
+<li>[<strong>64, 34</strong>, 25, 12, 22] → [34, 64, 25, 12, 22] (swap)</li>
+<li>[34, <strong>64, 25</strong>, 12, 22] → [34, 25, 64, 12, 22] (swap)</li>
+<li>[34, 25, <strong>64, 12</strong>, 22] → [34, 25, 12, 64, 22] (swap)</li>
+<li>[34, 25, 12, <strong>64, 22</strong>] → [34, 25, 12, 22, 64] (swap)</li>
+<li>Result: [34, 25, 12, 22, <strong>64</strong>] (64 is now in final position)</li>
+</ul>
+<p><strong>Pass 2:</strong></p>
+<ul>
+<li>[<strong>34, 25</strong>, 12, 22, 64] → [25, 34, 12, 22, 64] (swap)</li>
+<li>[25, <strong>34, 12</strong>, 22, 64] → [25, 12, 34, 22, 64] (swap)</li>
+<li>[25, 12, <strong>34, 22</strong>, 64] → [25, 12, 22, 34, 64] (swap)</li>
+<li>Result: [25, 12, 22, <strong>34, 64</strong>] (34 is now in final position)</li>
+</ul>
+<p><strong>Pass 3:</strong></p>
+<ul>
+<li>[<strong>25, 12</strong>, 22, 34, 64] → [12, 25, 22, 34, 64] (swap)</li>
+<li>[12, <strong>25, 22</strong>, 34, 64] → [12, 22, 25, 34, 64] (swap)</li>
+<li>Result: [12, 22, <strong>25, 34, 64</strong>]</li>
+</ul>
+<p><strong>Pass 4:</strong></p>
+<ul>
+<li>[<strong>12, 22</strong>, 25, 34, 64] → [12, 22, 25, 34, 64] (no swap)</li>
+<li>Result: [<strong>12, 22, 25, 34, 64</strong>] (sorted!)</li>
+</ul>
 <h3 id="selection-sort"><a class="header" href="#selection-sort">Selection Sort</a></h3>
-<p><strong>Time</strong>: $O(n^2)$ | <strong>Space</strong>: $O(1)$</p>
+<p><strong>Time</strong>: $O(n^2)$ all cases | <strong>Space</strong>: $O(1)$ | <strong>Stable</strong>: ✗ | <strong>Adaptive</strong>: ✗</p>
+<h4 id="how-it-works-1"><a class="header" href="#how-it-works-1">How It Works</a></h4>
+<p>Selection Sort divides the array into sorted and unsorted regions. It repeatedly finds the minimum element from the unsorted region and places it at the beginning of that region. Unlike Bubble Sort, Selection Sort performs exactly n-1 passes regardless of input, making it non-adaptive.</p>
+<p>The algorithm maintains two subarrays: the sorted portion (at the start) and the unsorted portion (the rest). In each iteration, it selects the smallest element from the unsorted portion and swaps it with the first unsorted element.</p>
+<p><strong>Why it’s unstable</strong>: The long-distance swaps can change the relative order of equal elements. For example, [5a, 5b, 2] becomes [2, 5b, 5a] after the first pass.</p>
+<p><strong>When to use</strong>: When write operations are expensive (like EEPROM) since it minimizes the number of swaps (at most n-1). Also useful when you need predictable performance regardless of input order.</p>
+<p><strong>When NOT to use</strong>: When stability matters, or when you have a better algorithm available (which is almost always).</p>
 <pre><code class="language-python">def selection_sort(arr):
     for i in range(len(arr)):
         min_idx = i
@@ -201,8 +261,42 @@
         arr[i], arr[min_idx] = arr[min_idx], arr[i]
     return arr
 </code></pre>
+<h4 id="step-by-step-example-1"><a class="header" href="#step-by-step-example-1">Step-by-Step Example</a></h4>
+<p>Sorting <code>[64, 25, 12, 22, 11]</code>:</p>
+<p><strong>Pass 1:</strong> Find minimum in [64, 25, 12, 22, 11]</p>
+<ul>
+<li>Minimum is <strong>11</strong> at index 4</li>
+<li>Swap with position 0: [<strong>11</strong>, 25, 12, 22, 64]</li>
+<li>Sorted: [11] | Unsorted: [25, 12, 22, 64]</li>
+</ul>
+<p><strong>Pass 2:</strong> Find minimum in [25, 12, 22, 64]</p>
+<ul>
+<li>Minimum is <strong>12</strong> at index 2</li>
+<li>Swap with position 1: [11, <strong>12</strong>, 25, 22, 64]</li>
+<li>Sorted: [11, 12] | Unsorted: [25, 22, 64]</li>
+</ul>
+<p><strong>Pass 3:</strong> Find minimum in [25, 22, 64]</p>
+<ul>
+<li>Minimum is <strong>22</strong> at index 3</li>
+<li>Swap with position 2: [11, 12, <strong>22</strong>, 25, 64]</li>
+<li>Sorted: [11, 12, 22] | Unsorted: [25, 64]</li>
+</ul>
+<p><strong>Pass 4:</strong> Find minimum in [25, 64]</p>
+<ul>
+<li>Minimum is <strong>25</strong> at index 3 (already in place)</li>
+<li>Swap with itself: [11, 12, 22, <strong>25</strong>, 64]</li>
+<li>Sorted: [11, 12, 22, 25] | Unsorted: [64]</li>
+</ul>
+<p><strong>Final:</strong> [11, 12, 22, 25, 64] (sorted!)</p>
 <h3 id="insertion-sort"><a class="header" href="#insertion-sort">Insertion Sort</a></h3>
-<p><strong>Time</strong>: $O(n^2)$ | <strong>Space</strong>: $O(1)$ | <strong>Best</strong>: $O(n)$</p>
+<p><strong>Time</strong>: $O(n^2)$ average/worst, $O(n)$ best | <strong>Space</strong>: $O(1)$ | <strong>Stable</strong>: ✓ | <strong>Adaptive</strong>: ✓</p>
+<h4 id="how-it-works-2"><a class="header" href="#how-it-works-2">How It Works</a></h4>
+<p>Insertion Sort builds the final sorted array one element at a time. It works similarly to how you might sort playing cards in your hands. The algorithm maintains a sorted subarray and repeatedly picks the next element from the unsorted portion, inserting it into the correct position in the sorted portion.</p>
+<p>For each element, the algorithm shifts all larger elements in the sorted portion one position to the right, then inserts the current element into the gap created. This makes it very efficient for nearly sorted data (O(n) when array is already sorted or has few inversions).</p>
+<p><strong>Why it’s stable</strong>: Elements are only moved when they’re strictly greater than the key, never when equal. This preserves the original order of equal elements.</p>
+<p><strong>Why it’s adaptive</strong>: On nearly sorted data, the inner while loop performs very few iterations, approaching O(n) total time.</p>
+<p><strong>When to use</strong>: Small arrays (&lt; 50 elements), nearly sorted data, online sorting (elements arrive one at a time), or as the base case in hybrid algorithms like Tim Sort.</p>
+<p><strong>When NOT to use</strong>: Large arrays with random data (use Quick Sort or Merge Sort instead).</p>
 <pre><code class="language-python">def insertion_sort(arr):
     for i in range(1, len(arr)):
         key = arr[i]
@@ -213,8 +307,55 @@
         arr[j + 1] = key
     return arr
 </code></pre>
+<h4 id="step-by-step-example-2"><a class="header" href="#step-by-step-example-2">Step-by-Step Example</a></h4>
+<p>Sorting <code>[12, 11, 13, 5, 6]</code>:</p>
+<p><strong>Initial:</strong> [<strong>12</strong>] | [11, 13, 5, 6]</p>
+<ul>
+<li>Sorted: [12] (first element is trivially sorted)</li>
+</ul>
+<p><strong>Step 1:</strong> Insert 11</p>
+<ul>
+<li>[<strong>12</strong>, 11, 13, 5, 6] → key = 11</li>
+<li>12 &gt; 11, shift 12 right: [_, <strong>12</strong>, 13, 5, 6]</li>
+<li>Insert 11: [<strong>11, 12</strong>] | [13, 5, 6]</li>
+</ul>
+<p><strong>Step 2:</strong> Insert 13</p>
+<ul>
+<li>[11, 12, <strong>13</strong>, 5, 6] → key = 13</li>
+<li>12 &lt; 13, no shift needed</li>
+<li>Result: [<strong>11, 12, 13</strong>] | [5, 6]</li>
+</ul>
+<p><strong>Step 3:</strong> Insert 5</p>
+<ul>
+<li>[11, 12, 13, <strong>5</strong>, 6] → key = 5</li>
+<li>13 &gt; 5, shift right: [11, 12, _, <strong>13</strong>, 6]</li>
+<li>12 &gt; 5, shift right: [11, _, <strong>12</strong>, 13, 6]</li>
+<li>11 &gt; 5, shift right: [_, <strong>11</strong>, 12, 13, 6]</li>
+<li>Insert 5: [<strong>5, 11, 12, 13</strong>] | [6]</li>
+</ul>
+<p><strong>Step 4:</strong> Insert 6</p>
+<ul>
+<li>[5, 11, 12, 13, <strong>6</strong>] → key = 6</li>
+<li>13 &gt; 6, shift right: [5, 11, 12, _, <strong>13</strong>]</li>
+<li>12 &gt; 6, shift right: [5, 11, _, <strong>12</strong>, 13]</li>
+<li>11 &gt; 6, shift right: [5, _, <strong>11</strong>, 12, 13]</li>
+<li>5 &lt; 6, stop</li>
+<li>Insert 6: [<strong>5, 6, 11, 12, 13</strong>] (sorted!)</li>
+</ul>
 <h3 id="merge-sort"><a class="header" href="#merge-sort">Merge Sort</a></h3>
-<p><strong>Time</strong>: $O(n \log n)$ | <strong>Space</strong>: $O(n)$ | <strong>Stable</strong>: ✓</p>
+<p><strong>Time</strong>: $O(n \log n)$ all cases | <strong>Space</strong>: $O(n)$ | <strong>Stable</strong>: ✓ | <strong>Adaptive</strong>: ✗</p>
+<h4 id="how-it-works-3"><a class="header" href="#how-it-works-3">How It Works</a></h4>
+<p>Merge Sort is a divide-and-conquer algorithm that divides the array into two halves, recursively sorts them, and then merges the two sorted halves. The recursion continues until subarrays of size 1 are reached (which are trivially sorted).</p>
+<p>The magic happens in the merge step: two sorted arrays are combined by repeatedly taking the smaller of the two front elements. This guarantees O(n log n) time in all cases because:</p>
+<ul>
+<li>Dividing takes O(log n) levels (binary division)</li>
+<li>Merging at each level processes all n elements</li>
+<li>Total: O(n) × O(log n) = O(n log n)</li>
+</ul>
+<p><strong>Why it’s stable</strong>: When merging, if elements are equal, we take from the left array first, preserving original order.</p>
+<p><strong>Why it uses O(n) space</strong>: The merge operation needs temporary arrays to store the merged result. In-place merge sort exists but is complex and slower.</p>
+<p><strong>When to use</strong>: When you need guaranteed O(n log n) time, stability is required, working with linked lists (can be done in O(1) extra space), external sorting (data doesn’t fit in memory), or parallelization is needed.</p>
+<p><strong>When NOT to use</strong>: Space is extremely constrained (use Heap Sort), or you need the fastest average-case performance (use Quick Sort).</p>
 <pre><code class="language-python">def merge_sort(arr):
     if len(arr) &lt;= 1:
         return arr
@@ -229,7 +370,7 @@ def merge(left, right):
     result = []
     i = j = 0
     while i &lt; len(left) and j &lt; len(right):
-        if left[i] &lt; right[j]:
+        if left[i] &lt;= right[j]:  # &lt;= ensures stability
             result.append(left[i])
             i += 1
         else:
@@ -239,8 +380,83 @@ def merge(left, right):
     result.extend(right[j:])
     return result
 </code></pre>
+<h4 id="step-by-step-example-3"><a class="header" href="#step-by-step-example-3">Step-by-Step Example</a></h4>
+<p>Sorting <code>[38, 27, 43, 3]</code>:</p>
+<p><strong>Divide Phase:</strong></p>
+<pre><code>                [38, 27, 43, 3]
+                /              \
+        [38, 27]                [43, 3]
+        /      \                /      \
+     [38]     [27]           [43]     [3]
+</code></pre>
+<p><strong>Conquer Phase (Merge):</strong></p>
+<p><strong>Level 1:</strong> Merge single elements</p>
+<ul>
+<li>
+<p>Merge [38] and [27]:</p>
+<ul>
+<li>Compare 38 vs 27 → take 27: [27]</li>
+<li>Take remaining 38: [<strong>27, 38</strong>]</li>
+</ul>
+</li>
+<li>
+<p>Merge [43] and [3]:</p>
+<ul>
+<li>Compare 43 vs 3 → take 3: [3]</li>
+<li>Take remaining 43: [<strong>3, 43</strong>]</li>
+</ul>
+</li>
+</ul>
+<p><strong>Level 2:</strong> Merge sorted pairs</p>
+<ul>
+<li>Merge [27, 38] and [3, 43]:
+<ul>
+<li>Compare 27 vs 3 → take 3: [3]</li>
+<li>Compare 27 vs 43 → take 27: [3, 27]</li>
+<li>Compare 38 vs 43 → take 38: [3, 27, 38]</li>
+<li>Take remaining 43: [<strong>3, 27, 38, 43</strong>]</li>
+</ul>
+</li>
+</ul>
+<p><strong>Result:</strong> [3, 27, 38, 43] (sorted!)</p>
+<p><strong>Detailed merge of [27, 38] and [3, 43]:</strong></p>
+<pre><code>Left:  [27, 38]    Right: [3, 43]    Result: []
+       ^                   ^
+       i                   j
+Compare 27 vs 3 → take 3
+
+Left:  [27, 38]    Right: [3, 43]    Result: [3]
+       ^                      ^
+       i                      j
+Compare 27 vs 43 → take 27
+
+Left:  [27, 38]    Right: [3, 43]    Result: [3, 27]
+           ^                   ^
+           i                   j
+Compare 38 vs 43 → take 38
+
+Left:  [27, 38]    Right: [3, 43]    Result: [3, 27, 38]
+               ^               ^
+               i               j
+Left exhausted, take remaining 43: [3, 27, 38, 43]
+</code></pre>
 <h3 id="quick-sort"><a class="header" href="#quick-sort">Quick Sort</a></h3>
-<p><strong>Time</strong>: $O(n \log n)$ avg, $O(n^2)$ worst | <strong>Space</strong>: $O(\log n)$</p>
+<p><strong>Time</strong>: $O(n \log n)$ average, $O(n^2)$ worst | <strong>Space</strong>: $O(\log n)$ | <strong>Stable</strong>: ✗ | <strong>Adaptive</strong>: ✗</p>
+<h4 id="how-it-works-4"><a class="header" href="#how-it-works-4">How It Works</a></h4>
+<p>Quick Sort is a divide-and-conquer algorithm that selects a ‘pivot’ element and partitions the array around it. All elements smaller than the pivot go to its left, all larger elements go to its right. The algorithm then recursively sorts the left and right partitions.</p>
+<p>The key insight is that after partitioning, the pivot is in its final sorted position. The efficiency comes from this in-place partitioning and the fact that average-case behavior divides the array roughly in half each time.</p>
+<p><strong>Pivot selection strategies:</strong></p>
+<ul>
+<li>First/last element: Simple but O(n²) on sorted data</li>
+<li>Middle element: Better than first/last</li>
+<li>Random: Good average case, avoids worst-case patterns</li>
+<li>Median-of-three: Takes median of first, middle, last elements</li>
+</ul>
+<p><strong>Why it’s unstable</strong>: The partitioning process makes long-distance swaps that can change relative order of equal elements.</p>
+<p><strong>Why O(n²) worst case</strong>: When pivot is always the smallest/largest element (e.g., sorted array with poor pivot choice), we get unbalanced partitions: n + (n-1) + (n-2) + … = O(n²).</p>
+<p><strong>Why O(log n) space</strong>: Recursion depth is log n on average (balanced partitions), but can be O(n) worst case.</p>
+<p><strong>When to use</strong>: General-purpose sorting, large datasets, when average-case performance matters most, or when you need in-place sorting with good cache locality.</p>
+<p><strong>When NOT to use</strong>: Worst-case guarantees are critical (use Heap Sort or Merge Sort), stability is required, or data is already sorted/nearly sorted without randomization.</p>
 <pre><code class="language-python">def quick_sort(arr):
     if len(arr) &lt;= 1:
         return arr
@@ -251,9 +467,106 @@ def merge(left, right):
     right = [x for x in arr if x &gt; pivot]
 
     return quick_sort(left) + middle + quick_sort(right)
+
+# In-place version (more efficient)
+def quick_sort_inplace(arr, low=0, high=None):
+    if high is None:
+        high = len(arr) - 1
+
+    if low &lt; high:
+        pi = partition(arr, low, high)
+        quick_sort_inplace(arr, low, pi - 1)
+        quick_sort_inplace(arr, pi + 1, high)
+    return arr
+
+def partition(arr, low, high):
+    pivot = arr[high]
+    i = low - 1
+    for j in range(low, high):
+        if arr[j] &lt;= pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return i + 1
 </code></pre>
+<h4 id="step-by-step-example-4"><a class="header" href="#step-by-step-example-4">Step-by-Step Example</a></h4>
+<p>Sorting <code>[10, 7, 8, 9, 1, 5]</code> with last element as pivot:</p>
+<p><strong>Initial:</strong> [10, 7, 8, 9, 1, 5]</p>
+<ul>
+<li>Pivot = 5 (last element)</li>
+</ul>
+<p><strong>Partition around 5:</strong></p>
+<ul>
+<li>i = -1 (tracks position of smaller elements)</li>
+<li>j scans from left:
+<ul>
+<li>j=0: 10 &gt; 5, skip</li>
+<li>j=1: 7 &gt; 5, skip</li>
+<li>j=2: 8 &gt; 5, skip</li>
+<li>j=3: 9 &gt; 5, skip</li>
+<li>j=4: 1 ≤ 5, i=0, swap arr[0] and arr[4]: [<strong>1</strong>, 7, 8, 9, 10, 5]</li>
+</ul>
+</li>
+<li>Place pivot: swap arr[i+1] and arr[high]: [1, <strong>5</strong>, 8, 9, 10, 7]</li>
+<li>Pivot 5 is now at index 1 in final position</li>
+</ul>
+<p><strong>Recursion tree:</strong></p>
+<pre><code>[1, 5, 8, 9, 10, 7]
+   ↓      ↓
+  [1]   [8, 9, 10, 7]
+</code></pre>
+<p><strong>Sort [8, 9, 10, 7]:</strong></p>
+<ul>
+<li>Pivot = 7</li>
+<li>Partition: i=-1
+<ul>
+<li>j=0: 8 &gt; 7, skip</li>
+<li>j=1: 9 &gt; 7, skip</li>
+<li>j=2: 10 &gt; 7, skip</li>
+</ul>
+</li>
+<li>Place pivot: [<strong>7</strong>, 9, 10, 8] (pivot at index 0)</li>
+<li>Sort [] and [9, 10, 8]</li>
+</ul>
+<p><strong>Sort [9, 10, 8]:</strong></p>
+<ul>
+<li>Pivot = 8</li>
+<li>Partition: [<strong>8</strong>, 10, 9]</li>
+<li>Sort [] and [10, 9]</li>
+</ul>
+<p><strong>Sort [10, 9]:</strong></p>
+<ul>
+<li>Pivot = 9</li>
+<li>Partition: [<strong>9</strong>, 10]</li>
+</ul>
+<p><strong>Final result:</strong> [1, 5, 7, 8, 9, 10]</p>
 <h3 id="heap-sort"><a class="header" href="#heap-sort">Heap Sort</a></h3>
-<p><strong>Time</strong>: $O(n \log n)$ | <strong>Space</strong>: $O(1)$</p>
+<p><strong>Time</strong>: $O(n \log n)$ all cases | <strong>Space</strong>: $O(1)$ | <strong>Stable</strong>: ✗ | <strong>Adaptive</strong>: ✗</p>
+<h4 id="how-it-works-5"><a class="header" href="#how-it-works-5">How It Works</a></h4>
+<p>Heap Sort uses a binary heap data structure (specifically a max-heap) to sort elements. The algorithm has two main phases:</p>
+<ol>
+<li>
+<p><strong>Build Max-Heap</strong> (O(n)): Transform the array into a max-heap where each parent node is greater than its children. This ensures the largest element is at the root (index 0).</p>
+</li>
+<li>
+<p><strong>Extract Max and Heapify</strong> (O(n log n)): Repeatedly swap the root (maximum) with the last element, reduce heap size by 1, and restore the heap property by “heapifying” down from the root.</p>
+</li>
+</ol>
+<p><strong>Binary heap properties:</strong></p>
+<ul>
+<li>For element at index i:
+<ul>
+<li>Left child at 2i + 1</li>
+<li>Right child at 2i + 2</li>
+<li>Parent at (i - 1) / 2</li>
+</ul>
+</li>
+<li>Max-heap: Every parent ≥ its children</li>
+</ul>
+<p><strong>Why it’s unstable</strong>: Elements are moved long distances during heap operations, losing their relative order.</p>
+<p><strong>Why it’s not adaptive</strong>: The algorithm always builds the heap and performs n heap extractions regardless of input order.</p>
+<p><strong>When to use</strong>: Guaranteed O(n log n) time with O(1) space, embedded systems with memory constraints, or when you need predictable performance without recursion overhead.</p>
+<p><strong>When NOT to use</strong>: Stability matters, you need the fastest average case (Quick Sort is faster), or you’re implementing a priority queue (use heap data structure directly, not heap sort).</p>
 <pre><code class="language-python">def heap_sort(arr):
     def heapify(arr, n, i):
         largest = i
@@ -270,58 +583,829 @@ def merge(left, right):
             heapify(arr, n, largest)
 
     n = len(arr)
+
+    # Build max heap
     for i in range(n // 2 - 1, -1, -1):
         heapify(arr, n, i)
 
+    # Extract elements one by one
     for i in range(n - 1, 0, -1):
-        arr[0], arr[i] = arr[i], arr[0]
-        heapify(arr, i, 0)
+        arr[0], arr[i] = arr[i], arr[0]  # Swap max to end
+        heapify(arr, i, 0)  # Heapify reduced heap
 
     return arr
 </code></pre>
+<h4 id="step-by-step-example-5"><a class="header" href="#step-by-step-example-5">Step-by-Step Example</a></h4>
+<p>Sorting <code>[4, 10, 3, 5, 1]</code>:</p>
+<p><strong>Phase 1: Build Max-Heap</strong></p>
+<p>Initial array: [4, 10, 3, 5, 1]</p>
+<pre><code>       4
+      / \
+    10   3
+   / \
+  5   1
+</code></pre>
+<p>Start from last non-leaf node (index n//2 - 1 = 1):</p>
+<p><strong>Heapify at index 1 (value 10):</strong></p>
+<ul>
+<li>Children: 5 (left), 1 (right)</li>
+<li>10 &gt; 5 and 10 &gt; 1, no change</li>
+<li>[4, <strong>10</strong>, 3, 5, 1]</li>
+</ul>
+<p><strong>Heapify at index 0 (value 4):</strong></p>
+<ul>
+<li>Children: 10 (left), 3 (right)</li>
+<li>10 &gt; 4, swap with 10: [<strong>10</strong>, 4, 3, 5, 1]</li>
+<li>Now heapify at index 1 (value 4):
+<ul>
+<li>Children: 5 (left), 1 (right)</li>
+<li>5 &gt; 4, swap with 5: [10, <strong>5</strong>, 3, 4, 1]</li>
+</ul>
+</li>
+</ul>
+<p>Max-heap built: [10, 5, 3, 4, 1]</p>
+<pre><code>       10
+      /  \
+     5    3
+    / \
+   4   1
+</code></pre>
+<p><strong>Phase 2: Sort by extracting max</strong></p>
+<p><strong>Iteration 1:</strong></p>
+<ul>
+<li>Swap 10 and 1: [1, 5, 3, 4, | <strong>10</strong>]</li>
+<li>Heapify first 4 elements:
+<ul>
+<li>1 &lt; max(5, 3), swap with 5: [5, 1, 3, 4, | 10]</li>
+<li>1 &lt; 4, swap with 4: [5, 4, 3, 1, | 10]</li>
+</ul>
+</li>
+</ul>
+<p><strong>Iteration 2:</strong></p>
+<ul>
+<li>Swap 5 and 1: [1, 4, 3, | <strong>5, 10</strong>]</li>
+<li>Heapify first 3 elements:
+<ul>
+<li>1 &lt; max(4, 3), swap with 4: [4, 1, 3, | 5, 10]</li>
+</ul>
+</li>
+</ul>
+<p><strong>Iteration 3:</strong></p>
+<ul>
+<li>Swap 4 and 3: [3, 1, | <strong>4, 5, 10</strong>]</li>
+<li>Heapify first 2 elements:
+<ul>
+<li>3 &gt; 1, no change: [3, 1, | 4, 5, 10]</li>
+</ul>
+</li>
+</ul>
+<p><strong>Iteration 4:</strong></p>
+<ul>
+<li>Swap 3 and 1: [1, | <strong>3, 4, 5, 10</strong>]</li>
+</ul>
+<p><strong>Final sorted array:</strong> [1, 3, 4, 5, 10]</p>
+<h3 id="counting-sort"><a class="header" href="#counting-sort">Counting Sort</a></h3>
+<p><strong>Time</strong>: $O(n + k)$ where k = range | <strong>Space</strong>: $O(k)$ | <strong>Stable</strong>: ✓ | <strong>Comparison</strong>: ✗</p>
+<h4 id="how-it-works-6"><a class="header" href="#how-it-works-6">How It Works</a></h4>
+<p>Counting Sort is a non-comparison sorting algorithm that works by counting the occurrences of each distinct element. It then uses arithmetic to determine the positions of elements in the output array. This algorithm exploits the fact that if you know there are 3 elements less than x, then x belongs at position 4.</p>
+<p><strong>Algorithm steps:</strong></p>
+<ol>
+<li>Find the range: determine min and max values</li>
+<li>Count occurrences: create a count array where count[i] = number of times (min + i) appears</li>
+<li>Compute cumulative counts: convert counts to positions by making each count[i] = sum of all previous counts</li>
+<li>Place elements: iterate through input array backwards (for stability), place each element at its position, and decrement position counter</li>
+</ol>
+<p><strong>Why it’s stable</strong>: By iterating backwards and carefully managing positions, equal elements maintain their relative order.</p>
+<p><strong>Why O(n + k)</strong>: We scan the array O(n), create and process count array O(k), and place elements O(n).</p>
+<p><strong>When to use</strong>: Integers within a small range, frequency counting, as a subroutine in Radix Sort, or when you need linear time sorting and know the range is reasonable.</p>
+<p><strong>When NOT to use</strong>: Large range (k &gt;&gt; n) wastes memory and time, floating-point numbers, strings (use Radix Sort), or when you don’t know the range in advance.</p>
+<pre><code class="language-python">def counting_sort(arr):
+    if not arr:
+        return arr
+
+    # Find range
+    min_val = min(arr)
+    max_val = max(arr)
+    range_size = max_val - min_val + 1
+
+    # Count occurrences
+    count = [0] * range_size
+    for num in arr:
+        count[num - min_val] += 1
+
+    # Compute cumulative counts (positions)
+    for i in range(1, len(count)):
+        count[i] += count[i - 1]
+
+    # Place elements in output (iterate backwards for stability)
+    output = [0] * len(arr)
+    for i in range(len(arr) - 1, -1, -1):
+        num = arr[i]
+        pos = count[num - min_val] - 1
+        output[pos] = num
+        count[num - min_val] -= 1
+
+    return output
+
+# Simplified version (not stable, but easier to understand)
+def counting_sort_simple(arr):
+    if not arr:
+        return arr
+
+    min_val = min(arr)
+    max_val = max(arr)
+    count = [0] * (max_val - min_val + 1)
+
+    # Count occurrences
+    for num in arr:
+        count[num - min_val] += 1
+
+    # Reconstruct array
+    result = []
+    for i, freq in enumerate(count):
+        result.extend([i + min_val] * freq)
+
+    return result
+</code></pre>
+<h4 id="step-by-step-example-6"><a class="header" href="#step-by-step-example-6">Step-by-Step Example</a></h4>
+<p>Sorting <code>[4, 2, 2, 8, 3, 3, 1]</code>:</p>
+<p><strong>Step 1: Find range</strong></p>
+<ul>
+<li>min = 1, max = 8</li>
+<li>range = 8 - 1 + 1 = 8</li>
+</ul>
+<p><strong>Step 2: Count occurrences</strong></p>
+<pre><code>Original: [4, 2, 2, 8, 3, 3, 1]
+Value:     1  2  3  4  5  6  7  8
+Count:    [1, 2, 2, 1, 0, 0, 0, 1]
+           ↑  ↑  ↑  ↑           ↑
+          (1)(2)(3)(4)         (8)
+</code></pre>
+<p><strong>Step 3: Compute cumulative counts (positions)</strong></p>
+<pre><code>Before: [1, 2, 2, 1, 0, 0, 0, 1]
+After:  [1, 3, 5, 6, 6, 6, 6, 7]
+         ↑  ↑  ↑  ↑           ↑
+    1 goes  2 goes  3 goes  4 goes  8 goes
+    at pos 0 at 1-2  at 3-4  at 5   at 6
+</code></pre>
+<p>Interpretation: count[i] = “how many elements are ≤ value i”</p>
+<p><strong>Step 4: Place elements (backwards for stability)</strong></p>
+<p>Initialize output: [_, _, _, _, _, _, _]</p>
+<p>Process from right to left:</p>
+<ul>
+<li><code>arr[6] = 1</code>: count[0] = 1, place at pos 0: [<strong>1</strong>, _, _, _, _, _, _], count[0] = 0</li>
+<li><code>arr[5] = 3</code>: count[2] = 5, place at pos 4: [1, _, _, _, <strong>3</strong>, _, _], count[2] = 4</li>
+<li><code>arr[4] = 3</code>: count[2] = 4, place at pos 3: [1, _, _, <strong>3</strong>, 3, _, _], count[2] = 3</li>
+<li><code>arr[3] = 8</code>: count[7] = 7, place at pos 6: [1, _, _, 3, 3, _, <strong>8</strong>], count[7] = 6</li>
+<li><code>arr[2] = 2</code>: count[1] = 3, place at pos 2: [1, _, <strong>2</strong>, 3, 3, _, 8], count[1] = 2</li>
+<li><code>arr[1] = 2</code>: count[1] = 2, place at pos 1: [1, <strong>2</strong>, 2, 3, 3, _, 8], count[1] = 1</li>
+<li><code>arr[0] = 4</code>: count[3] = 6, place at pos 5: [1, 2, 2, 3, 3, <strong>4</strong>, 8], count[3] = 5</li>
+</ul>
+<p><strong>Final sorted array:</strong> [1, 2, 2, 3, 3, 4, 8]</p>
+<h3 id="radix-sort"><a class="header" href="#radix-sort">Radix Sort</a></h3>
+<p><strong>Time</strong>: $O(d \cdot (n + k))$ where d = digits, k = base | <strong>Space</strong>: $O(n + k)$ | <strong>Stable</strong>: ✓ | <strong>Comparison</strong>: ✗</p>
+<h4 id="how-it-works-7"><a class="header" href="#how-it-works-7">How It Works</a></h4>
+<p>Radix Sort sorts numbers by processing individual digits. It uses a stable sorting algorithm (typically Counting Sort) as a subroutine to sort by each digit position, starting from the least significant digit (LSD) to the most significant digit (MSD).</p>
+<p><strong>Why it works:</strong> Stable sorting is crucial. When we sort by a less significant digit, elements with equal values in that position maintain their relative order (which was determined by even less significant digits). By the time we finish processing all digits, the array is fully sorted.</p>
+<p><strong>Two variants:</strong></p>
+<ul>
+<li><strong>LSD (Least Significant Digit)</strong>: Start from rightmost digit, more common, simpler</li>
+<li><strong>MSD (Most Significant Digit)</strong>: Start from leftmost digit, can short-circuit on strings</li>
+</ul>
+<p><strong>Choosing the base (k):</strong></p>
+<ul>
+<li>Binary (base 2): Many passes but simple</li>
+<li>Decimal (base 10): Natural for humans</li>
+<li>Base 256: Often optimal for computer implementations (process byte by byte)</li>
+</ul>
+<p><strong>Time complexity:</strong> For n numbers with d digits in base k:</p>
+<ul>
+<li>Each pass: O(n + k) using Counting Sort</li>
+<li>Total passes: d</li>
+<li>Overall: O(d × (n + k))</li>
+</ul>
+<p>For fixed-length integers (d constant), this is effectively O(n).</p>
+<p><strong>When to use</strong>: Integers with fixed or known maximum digits, strings of similar length, when all values fit in memory, or when you need linear time for fixed-range integers.</p>
+<p><strong>When NOT to use</strong>: Variable-length data with large variations, floating-point numbers (need special handling), small datasets (overhead not worth it), or when memory for counting arrays is limited.</p>
+<pre><code class="language-python">def radix_sort(arr):
+    if not arr:
+        return arr
+
+    # Find maximum to determine number of digits
+    max_val = max(arr)
+
+    # Do counting sort for every digit
+    exp = 1  # 10^0, 10^1, 10^2, ...
+    while max_val // exp &gt; 0:
+        counting_sort_by_digit(arr, exp)
+        exp *= 10
+
+    return arr
+
+def counting_sort_by_digit(arr, exp):
+    n = len(arr)
+    output = [0] * n
+    count = [0] * 10  # Digits 0-9
+
+    # Count occurrences of digits
+    for num in arr:
+        digit = (num // exp) % 10
+        count[digit] += 1
+
+    # Cumulative count
+    for i in range(1, 10):
+        count[i] += count[i - 1]
+
+    # Build output array (backwards for stability)
+    for i in range(n - 1, -1, -1):
+        digit = (arr[i] // exp) % 10
+        output[count[digit] - 1] = arr[i]
+        count[digit] -= 1
+
+    # Copy output to original array
+    for i in range(n):
+        arr[i] = output[i]
+</code></pre>
+<h4 id="step-by-step-example-7"><a class="header" href="#step-by-step-example-7">Step-by-Step Example</a></h4>
+<p>Sorting <code>[170, 45, 75, 90, 802, 24, 2, 66]</code>:</p>
+<p><strong>Pass 1: Sort by ones digit (exp = 1)</strong></p>
+<pre><code>Numbers:  170  45  75  90  802  24   2  66
+Ones:       0   5   5   0    2   4   2   6
+           ↓   ↓   ↓   ↓    ↓   ↓   ↓   ↓
+Result:   170  90 802   2  24  45  75  66
+</code></pre>
+<p>Grouped by ones digit: 170,90 (0) → 802,2 (2) → 24 (4) → 45,75 (5) → 66 (6)</p>
+<p><strong>Pass 2: Sort by tens digit (exp = 10)</strong></p>
+<pre><code>Numbers:  170  90  802   2  24  45  75  66
+Tens:       7   9    0   0   2   4   7   6
+           ↓   ↓    ↓   ↓   ↓   ↓   ↓   ↓
+Result:   802   2  24  45  66 170  75  90
+</code></pre>
+<p>Grouped by tens digit: 802,2 (0) → 24 (2) → 45 (4) → 66 (6) → 170,75 (7) → 90 (9)</p>
+<p><strong>Pass 3: Sort by hundreds digit (exp = 100)</strong></p>
+<pre><code>Numbers:  802   2  24  45  66 170  75  90
+Hundreds:   8   0   0   0   0   1   0   0
+           ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓
+Result:     2  24  45  66  75  90 170 802
+</code></pre>
+<p>Grouped by hundreds digit: 2,24,45,66,75,90 (0) → 170 (1) → 802 (8)</p>
+<p><strong>Final sorted array:</strong> [2, 24, 45, 66, 75, 90, 170, 802]</p>
+<p><strong>Detailed Pass 1 using Counting Sort:</strong></p>
+<pre><code>Input: [170, 45, 75, 90, 802, 24, 2, 66]
+Extract ones digits: [0, 5, 5, 0, 2, 4, 2, 6]
+
+Count array (digit frequency):
+Digit: 0  1  2  3  4  5  6  7  8  9
+Count: 2  0  2  0  1  2  1  0  0  0
+
+Cumulative count:
+       2  2  4  4  5  7  8  8  8  8
+
+Place elements (backwards):
+66 → digit 6 → position 7 → output[7] = 66
+2 → digit 2 → position 3 → output[3] = 2
+24 → digit 4 → position 4 → output[4] = 24
+802 → digit 2 → position 2 → output[2] = 802
+90 → digit 0 → position 1 → output[1] = 90
+75 → digit 5 → position 6 → output[6] = 75
+45 → digit 5 → position 5 → output[5] = 45
+170 → digit 0 → position 0 → output[0] = 170
+
+Output: [170, 90, 802, 2, 24, 45, 75, 66]
+</code></pre>
+<h3 id="bucket-sort"><a class="header" href="#bucket-sort">Bucket Sort</a></h3>
+<p><strong>Time</strong>: $O(n + k)$ average, $O(n^2)$ worst | <strong>Space</strong>: $O(n + k)$ | <strong>Stable</strong>: ✓ | <strong>Comparison</strong>: ✗</p>
+<h4 id="how-it-works-8"><a class="header" href="#how-it-works-8">How It Works</a></h4>
+<p>Bucket Sort distributes elements into several “buckets” (usually arrays or lists), sorts each bucket individually (often with insertion sort), and then concatenates the buckets. It works best when input is uniformly distributed across a range.</p>
+<p><strong>Algorithm steps:</strong></p>
+<ol>
+<li>Create k empty buckets</li>
+<li>Distribute elements into buckets based on a mapping function (e.g., floor(n * value / max_value))</li>
+<li>Sort each bucket individually (often using insertion sort since buckets are small)</li>
+<li>Concatenate all buckets in order</li>
+</ol>
+<p><strong>Why it’s fast on uniform data:</strong> If n elements are evenly distributed into k buckets, each bucket has ~n/k elements. Sorting each with insertion sort (O(m²)) gives O((n/k)²) per bucket, total O(k × (n/k)²) = O(n²/k). When k = n, this becomes O(n).</p>
+<p><strong>Why worst case is O(n²):</strong> If all elements go into one bucket, we’re just doing insertion sort on n elements.</p>
+<p><strong>Choosing bucket count:</strong></p>
+<ul>
+<li>k = n gives best average case</li>
+<li>k too small: buckets become large, slow to sort</li>
+<li>k too large: overhead from many empty buckets</li>
+</ul>
+<p><strong>When to use</strong>: Data is uniformly distributed (e.g., random floats between 0 and 1), external sorting, parallel processing (buckets can be sorted independently), or when you need stable linear-time sorting for uniform data.</p>
+<p><strong>When NOT to use</strong>: Data has skewed distribution (many elements in few buckets), data range unknown, or small datasets (overhead not worth it).</p>
+<pre><code class="language-python">def bucket_sort(arr):
+    if not arr:
+        return arr
+
+    # Create buckets
+    bucket_count = len(arr)
+    max_val = max(arr)
+    min_val = min(arr)
+
+    # Handle edge case of all same values
+    if max_val == min_val:
+        return arr
+
+    bucket_range = (max_val - min_val) / bucket_count
+    buckets = [[] for _ in range(bucket_count)]
+
+    # Distribute elements into buckets
+    for num in arr:
+        # Calculate bucket index
+        index = int((num - min_val) / bucket_range)
+        # Handle edge case where num == max_val
+        if index == bucket_count:
+            index -= 1
+        buckets[index].append(num)
+
+    # Sort individual buckets and concatenate
+    result = []
+    for bucket in buckets:
+        # Use insertion sort for small buckets
+        result.extend(insertion_sort(bucket))
+
+    return result
+
+# For floating-point numbers in [0, 1)
+def bucket_sort_normalized(arr):
+    if not arr:
+        return arr
+
+    n = len(arr)
+    buckets = [[] for _ in range(n)]
+
+    # Distribute into buckets
+    for num in arr:
+        index = int(n * num)
+        if index == n:  # Handle 1.0
+            index = n - 1
+        buckets[index].append(num)
+
+    # Sort and concatenate
+    result = []
+    for bucket in buckets:
+        result.extend(sorted(bucket))  # Can use insertion_sort
+
+    return result
+</code></pre>
+<h4 id="step-by-step-example-8"><a class="header" href="#step-by-step-example-8">Step-by-Step Example</a></h4>
+<p>Sorting <code>[0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68]</code> (normalized floats):</p>
+<p>Using 5 buckets for n=10:</p>
+<p><strong>Step 1: Create buckets</strong></p>
+<pre><code>Bucket 0: [0.0, 0.2) → []
+Bucket 1: [0.2, 0.4) → []
+Bucket 2: [0.4, 0.6) → []
+Bucket 3: [0.6, 0.8) → []
+Bucket 4: [0.8, 1.0] → []
+</code></pre>
+<p><strong>Step 2: Distribute elements</strong></p>
+<ul>
+<li>0.78 → index = 10 * 0.78 = 7 → bucket[3]</li>
+<li>0.17 → index = 10 * 0.17 = 1 → bucket[0]</li>
+<li>0.39 → index = 10 * 0.39 = 3 → bucket[1]</li>
+<li>0.26 → index = 10 * 0.26 = 2 → bucket[1]</li>
+<li>0.72 → index = 10 * 0.72 = 7 → bucket[3]</li>
+<li>0.94 → index = 10 * 0.94 = 9 → bucket[4]</li>
+<li>0.21 → index = 10 * 0.21 = 2 → bucket[1]</li>
+<li>0.12 → index = 10 * 0.12 = 1 → bucket[0]</li>
+<li>0.23 → index = 10 * 0.23 = 2 → bucket[1]</li>
+<li>0.68 → index = 10 * 0.68 = 6 → bucket[3]</li>
+</ul>
+<pre><code>Bucket 0: [0.17, 0.12]
+Bucket 1: [0.39, 0.26, 0.21, 0.23]
+Bucket 2: []
+Bucket 3: [0.78, 0.72, 0.68]
+Bucket 4: [0.94]
+</code></pre>
+<p><strong>Step 3: Sort each bucket (using insertion sort)</strong></p>
+<p>Bucket 0: [0.17, 0.12] → [0.12, 0.17]
+Bucket 1: [0.39, 0.26, 0.21, 0.23]</p>
+<ul>
+<li>Insert 0.26: [0.26, 0.39, 0.21, 0.23]</li>
+<li>Insert 0.21: [0.21, 0.26, 0.39, 0.23]</li>
+<li>Insert 0.23: [0.21, 0.23, 0.26, 0.39]</li>
+</ul>
+<p>Bucket 2: [] → []
+Bucket 3: [0.78, 0.72, 0.68]</p>
+<ul>
+<li>Insert 0.72: [0.72, 0.78, 0.68]</li>
+<li>Insert 0.68: [0.68, 0.72, 0.78]</li>
+</ul>
+<p>Bucket 4: [0.94] → [0.94]</p>
+<p><strong>Step 4: Concatenate</strong></p>
+<pre><code>[0.12, 0.17] + [0.21, 0.23, 0.26, 0.39] + [] + [0.68, 0.72, 0.78] + [0.94]
+= [0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94]
+</code></pre>
+<p><strong>Final sorted array:</strong> [0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94]</p>
+<h3 id="tim-sort"><a class="header" href="#tim-sort">Tim Sort</a></h3>
+<p><strong>Time</strong>: $O(n \log n)$ worst, $O(n)$ best | <strong>Space</strong>: $O(n)$ | <strong>Stable</strong>: ✓ | <strong>Adaptive</strong>: ✓</p>
+<h4 id="how-it-works-9"><a class="header" href="#how-it-works-9">How It Works</a></h4>
+<p>Tim Sort is a hybrid stable sorting algorithm derived from Merge Sort and Insertion Sort. It’s the default sorting algorithm in Python and Java because it performs exceptionally well on real-world data, which often has some inherent order.</p>
+<p><strong>Key concepts:</strong></p>
+<ol>
+<li><strong>Runs</strong>: Natural runs (already sorted subsequences) are identified in the data. Minimum run length is calculated based on array size (typically 32-64).</li>
+<li><strong>Insertion Sort</strong>: Short runs are extended to minimum length using insertion sort (very efficient for small arrays).</li>
+<li><strong>Merge</strong>: Runs are merged using an optimized merge sort strategy, using galloping mode when one run consistently “wins” comparisons.</li>
+<li><strong>Stack invariants</strong>: Maintains rules about run sizes on a stack to ensure balanced merges.</li>
+</ol>
+<p><strong>Why it’s adaptive:</strong> It takes advantage of existing order in the data. Already sorted data requires O(n) time because no merging is needed.</p>
+<p><strong>Why it’s complex but effective:</strong> The algorithm has many optimizations:</p>
+<ul>
+<li>Galloping mode: Binary search when merging highly imbalanced runs</li>
+<li>Minimum run size prevents worst-case behavior</li>
+<li>Merge only when beneficial based on stack invariants</li>
+</ul>
+<p><strong>When to use</strong>: You’re using Python/Java (it’s the default!), real-world data with partial order, need stability with good performance, or when you want the best general-purpose sort.</p>
+<p><strong>When NOT to use</strong>: You need a simple algorithm for educational purposes, working with uniformly random data (Quick Sort might be slightly faster), or space is extremely constrained.</p>
+<pre><code class="language-python">def tim_sort(arr):
+    min_run = 32
+    n = len(arr)
+
+    # Sort individual runs using insertion sort
+    for start in range(0, n, min_run):
+        end = min(start + min_run, n)
+        insertion_sort_range(arr, start, end)
+
+    # Merge sorted runs
+    size = min_run
+    while size &lt; n:
+        for start in range(0, n, size * 2):
+            mid = start + size
+            end = min(start + size * 2, n)
+            if mid &lt; end:
+                merge_tim(arr, start, mid, end)
+        size *= 2
+
+    return arr
+
+def insertion_sort_range(arr, left, right):
+    for i in range(left + 1, right):
+        key = arr[i]
+        j = i - 1
+        while j &gt;= left and arr[j] &gt; key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+
+def merge_tim(arr, left, mid, right):
+    left_part = arr[left:mid]
+    right_part = arr[mid:right]
+
+    i = j = 0
+    k = left
+
+    while i &lt; len(left_part) and j &lt; len(right_part):
+        if left_part[i] &lt;= right_part[j]:
+            arr[k] = left_part[i]
+            i += 1
+        else:
+            arr[k] = right_part[j]
+            j += 1
+        k += 1
+
+    while i &lt; len(left_part):
+        arr[k] = left_part[i]
+        i += 1
+        k += 1
+
+    while j &lt; len(right_part):
+        arr[k] = right_part[j]
+        j += 1
+        k += 1
+
+# Note: This is a simplified version. Real Tim Sort has additional
+# optimizations like galloping mode and sophisticated run merging strategies.
+</code></pre>
+<h4 id="step-by-step-example-9"><a class="header" href="#step-by-step-example-9">Step-by-Step Example</a></h4>
+<p>Sorting <code>[5, 21, 7, 23, 19, 3, 15, 28, 11, 17]</code> with min_run = 4:</p>
+<p><strong>Phase 1: Create and sort initial runs</strong></p>
+<p><strong>Run 1 [0:4]:</strong> [5, 21, 7, 23]</p>
+<ul>
+<li>Insertion sort:
+<ul>
+<li>Insert 21: [5, 21, 7, 23]</li>
+<li>Insert 7: [5, 7, 21, 23]</li>
+<li>Insert 23: [5, 7, 21, 23]</li>
+</ul>
+</li>
+<li>Result: [<strong>5, 7, 21, 23</strong>, 19, 3, 15, 28, 11, 17]</li>
+</ul>
+<p><strong>Run 2 [4:8]:</strong> [19, 3, 15, 28]</p>
+<ul>
+<li>Insertion sort:
+<ul>
+<li>Insert 3: [3, 19, 15, 28]</li>
+<li>Insert 15: [3, 15, 19, 28]</li>
+<li>Insert 28: [3, 15, 19, 28]</li>
+</ul>
+</li>
+<li>Result: [5, 7, 21, 23, <strong>3, 15, 19, 28</strong>, 11, 17]</li>
+</ul>
+<p><strong>Run 3 [8:10]:</strong> [11, 17]</p>
+<ul>
+<li>Insertion sort:
+<ul>
+<li>Insert 17: [11, 17]</li>
+</ul>
+</li>
+<li>Result: [5, 7, 21, 23, 3, 15, 19, 28, <strong>11, 17</strong>]</li>
+</ul>
+<p><strong>Phase 2: Merge runs</strong></p>
+<p><strong>Merge Run 1 and Run 2:</strong></p>
+<pre><code>Left:  [5, 7, 21, 23]    Right: [3, 15, 19, 28]
+
+Compare 5 vs 3 → take 3:  [3]
+Compare 5 vs 15 → take 5: [3, 5]
+Compare 7 vs 15 → take 7: [3, 5, 7]
+Compare 21 vs 15 → take 15: [3, 5, 7, 15]
+Compare 21 vs 19 → take 19: [3, 5, 7, 15, 19]
+Compare 21 vs 28 → take 21: [3, 5, 7, 15, 19, 21]
+Compare 23 vs 28 → take 23: [3, 5, 7, 15, 19, 21, 23]
+Take remaining 28: [3, 5, 7, 15, 19, 21, 23, 28]
+</code></pre>
+<p>Result: [<strong>3, 5, 7, 15, 19, 21, 23, 28</strong>, 11, 17]</p>
+<p><strong>Merge combined run with Run 3:</strong></p>
+<pre><code>Left:  [3, 5, 7, 15, 19, 21, 23, 28]    Right: [11, 17]
+
+Compare 3 vs 11 → take 3: [3]
+Compare 5 vs 11 → take 5: [3, 5]
+Compare 7 vs 11 → take 7: [3, 5, 7]
+Compare 15 vs 11 → take 11: [3, 5, 7, 11]
+Compare 15 vs 17 → take 15: [3, 5, 7, 11, 15]
+Compare 19 vs 17 → take 17: [3, 5, 7, 11, 15, 17]
+Take remaining: [3, 5, 7, 11, 15, 17, 19, 21, 23, 28]
+</code></pre>
+<p><strong>Final sorted array:</strong> [3, 5, 7, 11, 15, 17, 19, 21, 23, 28]</p>
+<p><strong>Why Tim Sort excels here:</strong></p>
+<ul>
+<li>If the input had natural runs (e.g., [5, 7, 21, 23, 3, 15, 19, 28, 11, 17]), it would detect them directly</li>
+<li>For partially sorted data like [3, 5, 7, 11, 19, 15, 17, 21, 23, 28], it would need fewer operations</li>
+<li>The algorithm adapts to the existing order in the data</li>
+</ul>
 <h2 id="comparison"><a class="header" href="#comparison">Comparison</a></h2>
 <div class="table-wrapper">
 <table>
 <thead>
-<tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable</th></tr>
+<tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable</th><th>Adaptive</th></tr>
 </thead>
 <tbody>
-<tr><td><strong>Bubble</strong></td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>✓</td></tr>
-<tr><td><strong>Selection</strong></td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>✗</td></tr>
-<tr><td><strong>Insertion</strong></td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>✓</td></tr>
-<tr><td><strong>Merge</strong></td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n)$</td><td>✓</td></tr>
-<tr><td><strong>Quick</strong></td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n^2)$</td><td>$O(\log n)$</td><td>✗</td></tr>
-<tr><td><strong>Heap</strong></td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(1)$</td><td>✗</td></tr>
+<tr><td><strong>Bubble</strong></td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>✓</td><td>✓</td></tr>
+<tr><td><strong>Selection</strong></td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>✗</td><td>✗</td></tr>
+<tr><td><strong>Insertion</strong></td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>✓</td><td>✓</td></tr>
+<tr><td><strong>Merge</strong></td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n)$</td><td>✓</td><td>✗</td></tr>
+<tr><td><strong>Quick</strong></td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n^2)$</td><td>$O(\log n)$</td><td>✗</td><td>✗</td></tr>
+<tr><td><strong>Heap</strong></td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(1)$</td><td>✗</td><td>✗</td></tr>
+<tr><td><strong>Counting</strong></td><td>$O(n + k)$</td><td>$O(n + k)$</td><td>$O(n + k)$</td><td>$O(k)$</td><td>✓</td><td>N/A</td></tr>
+<tr><td><strong>Radix</strong></td><td>$O(d(n + k))$</td><td>$O(d(n + k))$</td><td>$O(d(n + k))$</td><td>$O(n + k)$</td><td>✓</td><td>N/A</td></tr>
+<tr><td><strong>Bucket</strong></td><td>$O(n + k)$</td><td>$O(n + k)$</td><td>$O(n^2)$</td><td>$O(n + k)$</td><td>✓</td><td>✗</td></tr>
+<tr><td><strong>Tim</strong></td><td>$O(n)$</td><td>$O(n \log n)$</td><td>$O(n \log n)$</td><td>$O(n)$</td><td>✓</td><td>✓</td></tr>
 </tbody>
 </table>
 </div>
-<h2 id="when-to-use"><a class="header" href="#when-to-use">When to Use</a></h2>
+<p><strong>Legend:</strong></p>
 <ul>
-<li><strong>Insertion Sort</strong>: Small arrays, nearly sorted</li>
-<li><strong>Merge Sort</strong>: Need stability, external sorting</li>
-<li><strong>Quick Sort</strong>: General purpose, good cache</li>
-<li><strong>Heap Sort</strong>: Guaranteed $O(n \log n)$, no extra space</li>
+<li>k = range of input values (for counting/radix) or number of buckets</li>
+<li>d = number of digits/characters</li>
+<li>N/A = concept doesn’t apply to non-comparison algorithms</li>
+</ul>
+<h2 id="when-to-use-each-algorithm"><a class="header" href="#when-to-use-each-algorithm">When to Use Each Algorithm</a></h2>
+<h3 id="by-use-case"><a class="header" href="#by-use-case">By Use Case</a></h3>
+<p><strong>Small arrays (n &lt; 50):</strong></p>
+<ul>
+<li><strong>Insertion Sort</strong>: Best choice, simple and efficient for small n</li>
+</ul>
+<p><strong>Nearly sorted data:</strong></p>
+<ul>
+<li><strong>Insertion Sort</strong>: O(n) on nearly sorted data</li>
+<li><strong>Tim Sort</strong>: Designed for this, O(n) best case</li>
+<li><strong>Bubble Sort</strong>: Works but slower than insertion sort</li>
+</ul>
+<p><strong>General purpose (unknown data patterns):</strong></p>
+<ul>
+<li><strong>Tim Sort</strong>: Best overall (Python/Java default)</li>
+<li><strong>Quick Sort</strong>: Fastest average case, but needs randomization</li>
+<li><strong>Merge Sort</strong>: Consistent performance, use if stability matters</li>
+</ul>
+<p><strong>Guaranteed O(n log n), O(1) space:</strong></p>
+<ul>
+<li><strong>Heap Sort</strong>: Only option meeting both constraints</li>
+</ul>
+<p><strong>Need stability:</strong></p>
+<ul>
+<li><strong>Merge Sort</strong>: Classic stable O(n log n)</li>
+<li><strong>Tim Sort</strong>: Better in practice</li>
+<li><strong>Insertion Sort</strong>: For small n</li>
+<li>Avoid: Quick Sort, Selection Sort, Heap Sort</li>
+</ul>
+<p><strong>Integers in known small range:</strong></p>
+<ul>
+<li><strong>Counting Sort</strong>: O(n + k) when k is small</li>
+<li><strong>Radix Sort</strong>: When k is large but digits d is small</li>
+</ul>
+<p><strong>Floating-point uniformly distributed:</strong></p>
+<ul>
+<li><strong>Bucket Sort</strong>: Near-linear time with uniform distribution</li>
+</ul>
+<p><strong>External sorting (data doesn’t fit in memory):</strong></p>
+<ul>
+<li><strong>Merge Sort</strong>: Natural fit for tape/disk access patterns</li>
+<li><strong>Tim Sort</strong>: Modern choice with optimizations</li>
+</ul>
+<p><strong>Parallel processing:</strong></p>
+<ul>
+<li><strong>Merge Sort</strong>: Easy to parallelize</li>
+<li><strong>Quick Sort</strong>: Can be parallelized</li>
+<li><strong>Bucket Sort</strong>: Buckets can be sorted independently</li>
+</ul>
+<p><strong>Embedded systems (memory constrained):</strong></p>
+<ul>
+<li><strong>Heap Sort</strong>: O(1) space, guaranteed O(n log n)</li>
+<li><strong>Insertion Sort</strong>: If n is small</li>
+<li><strong>Quick Sort</strong>: With iterative implementation to avoid recursion stack</li>
+</ul>
+<h3 id="by-data-characteristics"><a class="header" href="#by-data-characteristics">By Data Characteristics</a></h3>
+<p><strong>Data Type:</strong></p>
+<ul>
+<li><strong>Integers (small range)</strong>: Counting Sort → Radix Sort → Tim Sort</li>
+<li><strong>Integers (large range)</strong>: Tim Sort → Quick Sort</li>
+<li><strong>Floats (uniform)</strong>: Bucket Sort → Tim Sort</li>
+<li><strong>Floats (arbitrary)</strong>: Tim Sort → Quick Sort</li>
+<li><strong>Strings (variable length)</strong>: Tim Sort → Merge Sort → MSD Radix</li>
+<li><strong>Records (complex objects)</strong>: Tim Sort → Merge Sort (if stable needed)</li>
+</ul>
+<p><strong>Data Pattern:</strong></p>
+<ul>
+<li><strong>Random</strong>: Quick Sort → Tim Sort → Heap Sort</li>
+<li><strong>Sorted</strong>: Insertion Sort → Tim Sort → Bubble Sort</li>
+<li><strong>Reverse sorted</strong>: Tim Sort → Merge Sort</li>
+<li><strong>Nearly sorted</strong>: Insertion Sort → Tim Sort</li>
+<li><strong>Many duplicates</strong>: Quick Sort (3-way partition) → Tim Sort</li>
+</ul>
+<p><strong>Dataset Size:</strong></p>
+<ul>
+<li><strong>Tiny (&lt; 10)</strong>: Insertion Sort</li>
+<li><strong>Small (10-50)</strong>: Insertion Sort → Quick Sort</li>
+<li><strong>Medium (50-10K)</strong>: Quick Sort → Tim Sort</li>
+<li><strong>Large (10K-1M)</strong>: Quick Sort → Tim Sort → Merge Sort</li>
+<li><strong>Very large (1M+)</strong>: Tim Sort → Quick Sort → External Merge Sort</li>
+</ul>
+<h3 id="when-not-to-use"><a class="header" href="#when-not-to-use">When NOT to Use</a></h3>
+<p><strong>Don’t use Bubble Sort when:</strong> n &gt; 10 or performance matters (use anything else)</p>
+<p><strong>Don’t use Selection Sort when:</strong> You need stability or have a better option (almost always)</p>
+<p><strong>Don’t use Insertion Sort when:</strong> n &gt; 100 and data isn’t nearly sorted (use O(n log n) algorithm)</p>
+<p><strong>Don’t use Merge Sort when:</strong> Space is constrained (use Heap Sort) or you need fastest average case (use Quick Sort)</p>
+<p><strong>Don’t use Quick Sort when:</strong> Worst-case guarantees matter (use Heap Sort), you need stability (use Merge/Tim Sort), or data is already sorted without randomization</p>
+<p><strong>Don’t use Heap Sort when:</strong> Stability matters, you want fastest average case, or you’re using a modern language (use Tim Sort)</p>
+<p><strong>Don’t use Counting Sort when:</strong> Range k &gt;&gt; n (wastes space/time) or data isn’t integers</p>
+<p><strong>Don’t use Radix Sort when:</strong> Variable-length data with huge variations or floating-point without preprocessing</p>
+<p><strong>Don’t use Bucket Sort when:</strong> Distribution is skewed (many elements in few buckets)</p>
+<p><strong>Don’t use Tim Sort when:</strong> You’re learning algorithms (too complex) or implementing in resource-constrained environments</p>
+<h2 id="practical-considerations"><a class="header" href="#practical-considerations">Practical Considerations</a></h2>
+<h3 id="cache-performance"><a class="header" href="#cache-performance">Cache Performance</a></h3>
+<p>Modern CPUs have multiple levels of cache. Algorithms that access memory sequentially have better cache performance:</p>
+<ul>
+<li><strong>Best</strong>: Insertion Sort, Heap Sort (works on array in-place)</li>
+<li><strong>Good</strong>: Quick Sort (good locality within partitions)</li>
+<li><strong>Poor</strong>: Merge Sort (jumps between arrays), Bucket Sort (scattered buckets)</li>
+</ul>
+<h3 id="real-world-performance"><a class="header" href="#real-world-performance">Real-World Performance</a></h3>
+<p>Big-O notation doesn’t tell the whole story. Real performance depends on:</p>
+<ul>
+<li><strong>Constants</strong>: Quick Sort has smaller constants than Merge Sort</li>
+<li><strong>Memory access patterns</strong>: Cache-friendly algorithms are faster</li>
+<li><strong>Branch prediction</strong>: Modern CPUs predict branches; predictable patterns help</li>
+<li><strong>Hardware</strong>: Quick Sort benefits from good caching, Radix Sort benefits from parallel processing</li>
+</ul>
+<h3 id="hybrid-approaches"><a class="header" href="#hybrid-approaches">Hybrid Approaches</a></h3>
+<p>Many practical implementations use multiple algorithms:</p>
+<ul>
+<li><strong>Intro Sort</strong> (C++ std::sort): Quick Sort → Heap Sort if recursion too deep</li>
+<li><strong>Tim Sort</strong> (Python/Java): Merge Sort + Insertion Sort for runs</li>
+<li><strong>Quick Sort variants</strong>: Use Insertion Sort for subarrays below threshold (often 10-20 elements)</li>
 </ul>
 <h2 id="python-built-in"><a class="header" href="#python-built-in">Python Built-in</a></h2>
-<pre><code class="language-python"># Best for most cases
-arr.sort()  # In-place, O(n log n)
-sorted(arr)  # Returns new list
+<p>Python uses Tim Sort for its built-in sorting, which is optimal for most cases:</p>
+<pre><code class="language-python"># In-place sort (modifies original list)
+arr.sort()  # O(n log n) average and worst case
 
-# Custom comparator
-arr.sort(key=lambda x: x['age'])
+# Return new sorted list (original unchanged)
+sorted_arr = sorted(arr)
+
+# Reverse sort
+arr.sort(reverse=True)
+sorted_arr = sorted(arr, reverse=True)
+
+# Custom comparator using key function
+students = [{'name': 'Alice', 'age': 25}, {'name': 'Bob', 'age': 20}]
+students.sort(key=lambda x: x['age'])  # Sort by age
+
+# Multiple sort keys (age, then name)
+students.sort(key=lambda x: (x['age'], x['name']))
+
+# Sort with custom comparison (descending by absolute value)
+numbers = [-4, 2, -8, 3, 1]
+numbers.sort(key=abs, reverse=True)  # [8, -4, 3, 2, 1]
+
+# Stability matters: sort by multiple fields
+# Sort by grade (descending), then name (ascending) for ties
+students.sort(key=lambda x: x['name'])  # Secondary sort first
+students.sort(key=lambda x: x['grade'], reverse=True)  # Primary sort second
 </code></pre>
-<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
-<p>Different sorting strategies:</p>
+<p><strong>Performance tips:</strong></p>
 <ul>
-<li><strong>Bubble</strong>: Compare neighbors (slow)</li>
-<li><strong>Quick</strong>: Pick pivot, divide and conquer (fast)</li>
-<li><strong>Merge</strong>: Split in half, merge back (reliable)</li>
+<li><code>list.sort()</code> is faster than <code>sorted(list)</code> if you don’t need the original</li>
+<li>Key functions are called once per element (efficient)</li>
+<li>Use <code>functools.cmp_to_key</code> only if you really need comparison function</li>
+<li>For large datasets, consider if you actually need full sort (maybe <code>heapq.nlargest(k)</code> is enough)</li>
 </ul>
-<p>Use built-in sorts unless learning!</p>
+<h2 id="eli10-explain-like-im-10"><a class="header" href="#eli10-explain-like-im-10">ELI10 (Explain Like I’m 10)</a></h2>
+<p>Imagine sorting a deck of cards. Different strategies work better in different situations:</p>
+<h3 id="simple-methods-slow-but-easy"><a class="header" href="#simple-methods-slow-but-easy">Simple Methods (Slow but Easy)</a></h3>
+<p><strong>Bubble Sort</strong> - Like bubbles rising in soda:</p>
+<ul>
+<li>Compare two cards next to each other</li>
+<li>If the left one is bigger, swap them</li>
+<li>Keep doing this until no more swaps needed</li>
+<li>The biggest card “bubbles” to the end each time</li>
+<li>Very slow for lots of cards!</li>
+</ul>
+<p><strong>Selection Sort</strong> - Like picking the smallest card repeatedly:</p>
+<ul>
+<li>Look through all cards to find the smallest</li>
+<li>Put it in first position</li>
+<li>Look through remaining cards for the next smallest</li>
+<li>Put it in second position</li>
+<li>Continue until done</li>
+</ul>
+<p><strong>Insertion Sort</strong> - Like organizing cards in your hand:</p>
+<ul>
+<li>Take cards one by one</li>
+<li>Insert each new card in the right spot among sorted cards</li>
+<li>Shift other cards to make room</li>
+<li>Great when cards are almost sorted already!</li>
+</ul>
+<h3 id="fast-methods-complex-but-quick"><a class="header" href="#fast-methods-complex-but-quick">Fast Methods (Complex but Quick)</a></h3>
+<p><strong>Merge Sort</strong> - Divide and conquer:</p>
+<ul>
+<li>Split the deck in half repeatedly until you have single cards</li>
+<li>Merge pairs of single cards into sorted pairs</li>
+<li>Merge sorted pairs into sorted groups of 4</li>
+<li>Keep merging until all cards are back together</li>
+<li>Like organizing two pre-sorted decks into one</li>
+</ul>
+<p><strong>Quick Sort</strong> - Pick a pivot and partition:</p>
+<ul>
+<li>Pick a “pivot” card (say, the 7)</li>
+<li>Put all smaller cards to the left, bigger cards to the right</li>
+<li>Now the 7 is in its final position!</li>
+<li>Do the same thing for the left and right piles</li>
+<li>Fast and commonly used</li>
+</ul>
+<p><strong>Heap Sort</strong> - Using a special tree structure:</p>
+<ul>
+<li>Imagine arranging cards in a tree where parents are bigger than children</li>
+<li>Keep taking the biggest card (always at top)</li>
+<li>Reorganize the tree after each take</li>
+<li>Guaranteed to be fast, uses no extra space</li>
+</ul>
+<h3 id="special-methods-super-fast-for-specific-cases"><a class="header" href="#special-methods-super-fast-for-specific-cases">Special Methods (Super Fast for Specific Cases)</a></h3>
+<p><strong>Counting Sort</strong> - For numbered cards only:</p>
+<ul>
+<li>Make piles for each possible number (Ace, 2, 3, …)</li>
+<li>Put each card in its number’s pile</li>
+<li>Collect piles in order</li>
+<li>Lightning fast if you don’t have too many different numbers!</li>
+</ul>
+<p><strong>Bucket Sort</strong> - For evenly spread numbers:</p>
+<ul>
+<li>Make several buckets for ranges (0-10, 11-20, 21-30…)</li>
+<li>Toss each card in the right bucket</li>
+<li>Sort each small bucket</li>
+<li>Collect buckets in order</li>
+<li>Great when cards are spread out evenly</li>
+</ul>
+<p><strong>Tim Sort</strong> (Python’s choice) - Smart combination:</p>
+<ul>
+<li>Look for parts that are already sorted</li>
+<li>Use insertion sort for small groups</li>
+<li>Use merge sort to combine groups</li>
+<li>Adapts to partially sorted data</li>
+<li>This is what Python uses because real data is often partially sorted!</li>
+</ul>
+<h3 id="which-should-you-use"><a class="header" href="#which-should-you-use">Which Should You Use?</a></h3>
+<p><strong>For homework/learning:</strong> Start with Bubble or Insertion Sort (easy to understand)</p>
+<p><strong>For real programs:</strong> Use your language’s built-in sort (like Python’s <code>sorted()</code>) - it’s Tim Sort and super optimized!</p>
+<p><strong>For fun/interviews:</strong> Learn Quick Sort and Merge Sort - they’re fast and commonly asked about</p>
+<p><strong>For special cases:</strong> If you’re sorting millions of ages (numbers 0-120), Counting Sort is perfect!</p>
+<p>Remember: Don’t write your own sort unless you have a good reason. Built-in sorts are faster and bug-free!</p>
 <h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
 <ul>
-<li><a href="https://www.sortvisualizer.com/">Sorting Algorithms Visualized</a></li>
-<li><a href="https://www.bigocheatsheet.com/">Big-O Cheatsheet</a></li>
+<li><a href="https://www.sortvisualizer.com/">Sorting Algorithms Visualized</a> - Watch algorithms in action</li>
+<li><a href="https://www.bigocheatsheet.com/">Big-O Cheatsheet</a> - Quick complexity reference</li>
+<li><a href="https://visualgo.net/en/sorting">VisuAlgo</a> - Interactive visualizations with step-by-step execution</li>
+<li><a href="https://www.toptal.com/developers/sorting-algorithms">Sorting Algorithm Animations</a> - Compare algorithm performance</li>
+<li><a href="https://github.com/python/cpython/blob/main/Objects/listsort.txt">Tim Sort Explained</a> - Original documentation by Tim Peters</li>
 </ul>
 
                     </main>

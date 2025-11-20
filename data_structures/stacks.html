@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-91648d44.js";
+            window.path_to_searchindex_js = "../searchindex-2685738a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -179,18 +179,46 @@
                         <h1 id="stacks"><a class="header" href="#stacks">Stacks</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <p>A stack is a Last-In-First-Out (LIFO) data structure where elements are added and removed from the same end, called the top. Think of it like a stack of dinner plates - you put plates on top and take them from the top.</p>
+<h3 id="when-to-use-stacks"><a class="header" href="#when-to-use-stacks">When to Use Stacks</a></h3>
+<ul>
+<li><strong>Reversing</strong>: Need to process elements in reverse order</li>
+<li><strong>Backtracking</strong>: Undo operations, browser history, text editor undo</li>
+<li><strong>Parsing</strong>: Expression evaluation, syntax checking, matching brackets</li>
+<li><strong>Function Calls</strong>: Call stack in programming languages</li>
+<li><strong>DFS Traversal</strong>: Depth-first search in graphs and trees</li>
+<li><strong>Maintaining State</strong>: When you need to remember previous states</li>
+</ul>
 <h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
 <h3 id="lifo-principle"><a class="header" href="#lifo-principle">LIFO Principle</a></h3>
-<pre><code>Push: 1 -&gt; 2 -&gt; 3
+<p>Last-In-First-Out means the most recently added element is the first one to be removed.</p>
+<p><strong>Step-by-Step Example:</strong></p>
+<pre><code>Initial: Empty Stack
+         []
 
-     3     Top (Last In)
+Push(1): Add 1 to top
+         [1]  &lt;- Top
 
-     2
+Push(2): Add 2 to top
+         [2]  &lt;- Top
+         [1]
 
-     1     First In
+Push(3): Add 3 to top
+         [3]  &lt;- Top (Last In)
+         [2]
+         [1]  &lt;- Bottom (First In)
 
+Pop(): Remove and return 3
+       Returns: 3
+         [2]  &lt;- Top
+         [1]
 
-Pop: Returns 3 (First Out)
+Pop(): Remove and return 2
+       Returns: 2
+         [1]  &lt;- Top
+
+Peek(): View top without removing
+        Returns: 1
+         [1]  &lt;- Top (unchanged)
 </code></pre>
 <h2 id="operations--time-complexity"><a class="header" href="#operations--time-complexity">Operations &amp; Time Complexity</a></h2>
 <div class="table-wrapper">
@@ -207,31 +235,166 @@ Pop: Returns 3 (First Out)
 </tbody>
 </table>
 </div>
-<h2 id="implementation-python"><a class="header" href="#implementation-python">Implementation (Python)</a></h2>
-<pre><code class="language-python">class Stack:
-    def __init__(self):
-        self.items = []
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<h3 id="python-implementation"><a class="header" href="#python-implementation">Python Implementation</a></h3>
+<pre><code class="language-python">from typing import Optional, List
+from collections import deque
 
-    def push(self, data):
+class Stack:
+    """
+    Stack implementation using Python list.
+    All operations are O(1) amortized time.
+    """
+
+    def __init__(self):
+        self.items: List = []
+
+    def push(self, data) -&gt; None:
+        """Add element to top. Time: O(1) amortized"""
         self.items.append(data)
 
-    def pop(self):
-        return self.items.pop() if not self.is_empty() else None
+    def pop(self) -&gt; Optional[int]:
+        """Remove and return top element. Time: O(1)"""
+        if self.is_empty():
+            raise IndexError("pop from empty stack")
+        return self.items.pop()
 
-    def peek(self):
-        return self.items[-1] if not self.is_empty() else None
+    def peek(self) -&gt; Optional[int]:
+        """Return top element without removing. Time: O(1)"""
+        if self.is_empty():
+            raise IndexError("peek from empty stack")
+        return self.items[-1]
 
-    def is_empty(self):
+    def is_empty(self) -&gt; bool:
+        """Check if stack is empty. Time: O(1)"""
         return len(self.items) == 0
 
-    def size(self):
+    def size(self) -&gt; int:
+        """Return number of elements. Time: O(1)"""
         return len(self.items)
 
-# Using deque for $O(1)$ operations
-from collections import deque
+# Using deque for guaranteed O(1) operations
 stack = deque()
-stack.append(1)  # Push $O(1)$
-stack.pop()      # Pop $O(1)$
+stack.append(1)    # Push O(1)
+stack.pop()        # Pop O(1)
+</code></pre>
+<h3 id="java-implementation"><a class="header" href="#java-implementation">Java Implementation</a></h3>
+<pre><code class="language-java">import java.util.EmptyStackException;
+import java.util.ArrayList;
+import java.util.Stack; // Built-in Stack class
+
+/**
+ * Generic Stack implementation using ArrayList
+ * All operations are O(1) amortized time
+ */
+public class StackImpl&lt;T&gt; {
+    private ArrayList&lt;T&gt; items;
+
+    public StackImpl() {
+        items = new ArrayList&lt;&gt;();
+    }
+
+    /**
+     * Add element to top
+     * Time: O(1) amortized
+     */
+    public void push(T data) {
+        items.add(data);
+    }
+
+    /**
+     * Remove and return top element
+     * Time: O(1)
+     * @throws EmptyStackException if stack is empty
+     */
+    public T pop() {
+        if (isEmpty()) {
+            throw new EmptyStackException();
+        }
+        return items.remove(items.size() - 1);
+    }
+
+    /**
+     * Return top element without removing
+     * Time: O(1)
+     */
+    public T peek() {
+        if (isEmpty()) {
+            throw new EmptyStackException();
+        }
+        return items.get(items.size() - 1);
+    }
+
+    /**
+     * Check if stack is empty
+     * Time: O(1)
+     */
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
+    /**
+     * Return number of elements
+     * Time: O(1)
+     */
+    public int size() {
+        return items.size();
+    }
+}
+
+// Using built-in Stack class
+Stack&lt;Integer&gt; stack = new Stack&lt;&gt;();
+stack.push(1);     // Push O(1)
+stack.pop();       // Pop O(1)
+stack.peek();      // Peek O(1)
+</code></pre>
+<h3 id="linked-list-implementation-python"><a class="header" href="#linked-list-implementation-python">Linked List Implementation (Python)</a></h3>
+<pre><code class="language-python">class Node:
+    """Node for linked list stack"""
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class LinkedStack:
+    """
+    Stack using linked list
+    O(1) for all operations, no amortization
+    Better for frequent push/pop, worse for memory
+    """
+
+    def __init__(self):
+        self.head: Optional[Node] = None
+        self._size: int = 0
+
+    def push(self, data) -&gt; None:
+        """Time: O(1), Space: O(1)"""
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+        self._size += 1
+
+    def pop(self):
+        """Time: O(1), Space: O(1)"""
+        if self.is_empty():
+            raise IndexError("pop from empty stack")
+        data = self.head.data
+        self.head = self.head.next
+        self._size -= 1
+        return data
+
+    def peek(self):
+        """Time: O(1), Space: O(1)"""
+        if self.is_empty():
+            raise IndexError("peek from empty stack")
+        return self.head.data
+
+    def is_empty(self) -&gt; bool:
+        """Time: O(1), Space: O(1)"""
+        return self.head is None
+
+    def size(self) -&gt; int:
+        """Time: O(1), Space: O(1)"""
+        return self._size
 </code></pre>
 <h2 id="common-problems"><a class="header" href="#common-problems">Common Problems</a></h2>
 <h3 id="valid-parentheses"><a class="header" href="#valid-parentheses">Valid Parentheses</a></h3>
@@ -262,8 +425,51 @@ stack.pop()      # Pop $O(1)$
 
     return result
 </code></pre>
+<h3 id="infix-to-postfix-conversion"><a class="header" href="#infix-to-postfix-conversion">Infix to Postfix Conversion</a></h3>
+<p>Convert infix expressions (like <code>3 + 4 * 2</code>) to postfix notation (like <code>3 4 2 * +</code>).</p>
+<pre><code class="language-python">def infix_to_postfix(expression):
+    """
+    Convert infix to postfix using operator precedence
+    Example: "3 + 4 * 2" -&gt; "3 4 2 * +"
+    """
+    precedence = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3}
+    output = []
+    stack = []
+
+    for token in expression.split():
+        if token.isdigit():
+            # Operand: add to output
+            output.append(token)
+        elif token == '(':
+            # Left paren: push to stack
+            stack.append(token)
+        elif token == ')':
+            # Right paren: pop until matching '('
+            while stack and stack[-1] != '(':
+                output.append(stack.pop())
+            stack.pop()  # Remove '('
+        else:
+            # Operator: pop higher/equal precedence operators
+            while (stack and stack[-1] != '(' and
+                   stack[-1] in precedence and
+                   precedence[stack[-1]] &gt;= precedence[token]):
+                output.append(stack.pop())
+            stack.append(token)
+
+    # Pop remaining operators
+    while stack:
+        output.append(stack.pop())
+
+    return ' '.join(output)
+
+# Example: "( 3 + 4 ) * 2" -&gt; "3 4 + 2 *"
+</code></pre>
 <h3 id="postfix-evaluation"><a class="header" href="#postfix-evaluation">Postfix Evaluation</a></h3>
 <pre><code class="language-python">def evaluate_postfix(expr):
+    """
+    Evaluate postfix expression
+    Example: "3 4 2 * +" -&gt; 11
+    """
     stack = []
     ops = {'+', '-', '*', '/'}
 
@@ -280,13 +486,452 @@ stack.pop()      # Pop $O(1)$
 
     return stack[0]
 </code></pre>
+<h2 id="monotonic-stacks"><a class="header" href="#monotonic-stacks">Monotonic Stacks</a></h2>
+<p>A monotonic stack maintains elements in either increasing or decreasing order. Used for finding next/previous greater/smaller elements efficiently.</p>
+<h3 id="monotonic-decreasing-stack"><a class="header" href="#monotonic-decreasing-stack">Monotonic Decreasing Stack</a></h3>
+<p>Elements decrease from bottom to top. Used to find next greater element.</p>
+<pre><code class="language-python">def next_greater_element(nums):
+    """Find next greater element for each number"""
+    n = len(nums)
+    result = [-1] * n
+    stack = []  # Stores indices
+
+    for i in range(n):
+        # Pop smaller elements - they found their next greater
+        while stack and nums[stack[-1]] &lt; nums[i]:
+            idx = stack.pop()
+            result[idx] = nums[i]
+        stack.append(i)
+
+    return result
+
+# Example: [2, 1, 2, 4, 3] -&gt; [4, 2, 4, -1, -1]
+</code></pre>
+<h3 id="monotonic-increasing-stack"><a class="header" href="#monotonic-increasing-stack">Monotonic Increasing Stack</a></h3>
+<p>Elements increase from bottom to top. Used to find next smaller element.</p>
+<pre><code class="language-python">def next_smaller_element(nums):
+    """Find next smaller element for each number"""
+    n = len(nums)
+    result = [-1] * n
+    stack = []
+
+    for i in range(n):
+        # Pop larger elements - they found their next smaller
+        while stack and nums[stack[-1]] &gt; nums[i]:
+            idx = stack.pop()
+            result[idx] = nums[i]
+        stack.append(i)
+
+    return result
+
+# Example: [4, 2, 1, 5, 3] -&gt; [2, 1, -1, 3, -1]
+</code></pre>
+<h3 id="common-monotonic-stack-problems"><a class="header" href="#common-monotonic-stack-problems">Common Monotonic Stack Problems</a></h3>
+<ul>
+<li><strong>Next Greater Element</strong>: Use decreasing stack</li>
+<li><strong>Next Smaller Element</strong>: Use increasing stack</li>
+<li><strong>Largest Rectangle in Histogram</strong>: Use increasing stack</li>
+<li><strong>Trapping Rain Water</strong>: Use stacks to track water boundaries</li>
+<li><strong>Daily Temperatures</strong>: Find next warmer day</li>
+</ul>
+<h2 id="advanced-stack-problems"><a class="header" href="#advanced-stack-problems">Advanced Stack Problems</a></h2>
+<h3 id="daily-temperatures"><a class="header" href="#daily-temperatures">Daily Temperatures</a></h3>
+<p>Find how many days until a warmer temperature.</p>
+<pre><code class="language-python">def daily_temperatures(temps):
+    """
+    Given [73,74,75,71,69,72,76,73]
+    Return [1,1,4,2,1,1,0,0]
+    Time: O(n), Space: O(n)
+    """
+    n = len(temps)
+    result = [0] * n
+    stack = []  # Stores indices
+
+    for i in range(n):
+        # Pop all colder days - they found a warmer day
+        while stack and temps[stack[-1]] &lt; temps[i]:
+            idx = stack.pop()
+            result[idx] = i - idx
+        stack.append(i)
+
+    return result
+</code></pre>
+<h3 id="largest-rectangle-in-histogram"><a class="header" href="#largest-rectangle-in-histogram">Largest Rectangle in Histogram</a></h3>
+<p>Find the largest rectangle area in a histogram.</p>
+<pre><code class="language-python">def largest_rectangle(heights):
+    """
+    Given heights [2,1,5,6,2,3]
+    Return 10 (rectangle from index 2-3 with height 5)
+    Time: O(n), Space: O(n)
+    """
+    stack = []  # Monotonic increasing stack
+    max_area = 0
+    heights.append(0)  # Add sentinel
+
+    for i, h in enumerate(heights):
+        # Pop higher bars and calculate area
+        while stack and heights[stack[-1]] &gt; h:
+            height_idx = stack.pop()
+            height = heights[height_idx]
+            # Width: from after previous bar to before current
+            width = i if not stack else i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+
+    heights.pop()  # Remove sentinel
+    return max_area
+</code></pre>
+<h3 id="trapping-rain-water"><a class="header" href="#trapping-rain-water">Trapping Rain Water</a></h3>
+<p>Calculate water trapped between bars after raining.</p>
+<pre><code class="language-python">def trap_rain_water(height):
+    """
+    Given [0,1,0,2,1,0,1,3,2,1,2,1]
+    Return 6 units of water
+    Time: O(n), Space: O(n)
+    """
+    stack = []
+    water = 0
+
+    for i, h in enumerate(height):
+        while stack and height[stack[-1]] &lt; h:
+            bottom = stack.pop()
+            if not stack:
+                break
+            # Water bounded by left wall (stack[-1]) and right wall (i)
+            width = i - stack[-1] - 1
+            bounded_height = min(height[stack[-1]], h) - height[bottom]
+            water += width * bounded_height
+        stack.append(i)
+
+    return water
+</code></pre>
+<h3 id="basic-calculator"><a class="header" href="#basic-calculator">Basic Calculator</a></h3>
+<p>Implement a calculator for expressions with +, -, and parentheses.</p>
+<pre><code class="language-python">def calculate(s):
+    """
+    Evaluate "1 + (2 - (3 + 4))" = -4
+    Time: O(n), Space: O(n)
+    """
+    stack = []
+    num = 0
+    sign = 1  # 1 for +, -1 for -
+    result = 0
+
+    for char in s:
+        if char.isdigit():
+            num = num * 10 + int(char)
+        elif char == '+':
+            result += sign * num
+            num = 0
+            sign = 1
+        elif char == '-':
+            result += sign * num
+            num = 0
+            sign = -1
+        elif char == '(':
+            # Push current result and sign to stack
+            stack.append(result)
+            stack.append(sign)
+            result = 0
+            sign = 1
+        elif char == ')':
+            result += sign * num
+            num = 0
+            # Pop sign and previous result
+            result *= stack.pop()  # Sign before '('
+            result += stack.pop()  # Result before '('
+
+    return result + sign * num
+</code></pre>
+<h3 id="decode-string"><a class="header" href="#decode-string">Decode String</a></h3>
+<p>Decode string with pattern “k[encoded_string]”.</p>
+<pre><code class="language-python">def decode_string(s):
+    """
+    "3[a2[c]]" -&gt; "accaccacc"
+    Time: O(n), Space: O(n)
+    """
+    stack = []
+    current_str = ""
+    current_num = 0
+
+    for char in s:
+        if char.isdigit():
+            current_num = current_num * 10 + int(char)
+        elif char == '[':
+            # Push current state to stack
+            stack.append(current_str)
+            stack.append(current_num)
+            current_str = ""
+            current_num = 0
+        elif char == ']':
+            # Pop and decode
+            num = stack.pop()
+            prev_str = stack.pop()
+            current_str = prev_str + num * current_str
+        else:
+            current_str += char
+
+    return current_str
+</code></pre>
+<h3 id="asteroid-collision"><a class="header" href="#asteroid-collision">Asteroid Collision</a></h3>
+<p>Asteroids moving left (-) and right (+) collide.</p>
+<pre><code class="language-python">def asteroid_collision(asteroids):
+    """
+    [5, 10, -5] -&gt; [5, 10] (10 destroys -5)
+    [8, -8] -&gt; [] (both destroy each other)
+    Time: O(n), Space: O(n)
+    """
+    stack = []
+
+    for ast in asteroids:
+        while stack and ast &lt; 0 &lt; stack[-1]:
+            # Collision: positive moving right meets negative moving left
+            if stack[-1] &lt; -ast:
+                stack.pop()  # Right asteroid destroyed
+                continue
+            elif stack[-1] == -ast:
+                stack.pop()  # Both destroyed
+            break  # Left asteroid destroyed or both destroyed
+        else:
+            stack.append(ast)  # No collision
+
+    return stack
+</code></pre>
+<h2 id="min-stack-design-problem"><a class="header" href="#min-stack-design-problem">Min Stack (Design Problem)</a></h2>
+<p>Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.</p>
+<h3 id="approach-1-two-stacks"><a class="header" href="#approach-1-two-stacks">Approach 1: Two Stacks</a></h3>
+<pre><code class="language-python">class MinStack:
+    """Stack with O(1) getMin() using auxiliary stack"""
+
+    def __init__(self):
+        self.stack = []      # Main stack
+        self.min_stack = []  # Tracks minimum values
+
+    def push(self, val: int) -&gt; None:
+        """Time: O(1), Space: O(1)"""
+        self.stack.append(val)
+        # Push current min to min_stack
+        if not self.min_stack:
+            self.min_stack.append(val)
+        else:
+            self.min_stack.append(min(val, self.min_stack[-1]))
+
+    def pop(self) -&gt; None:
+        """Time: O(1), Space: O(1)"""
+        self.stack.pop()
+        self.min_stack.pop()
+
+    def top(self) -&gt; int:
+        """Time: O(1), Space: O(1)"""
+        return self.stack[-1]
+
+    def getMin(self) -&gt; int:
+        """Time: O(1), Space: O(1)"""
+        return self.min_stack[-1]
+</code></pre>
+<h3 id="approach-2-single-stack-with-tuples"><a class="header" href="#approach-2-single-stack-with-tuples">Approach 2: Single Stack with Tuples</a></h3>
+<pre><code class="language-python">class MinStack:
+    """Space-optimized: store (value, current_min) pairs"""
+
+    def __init__(self):
+        self.stack = []  # Stores (val, min_so_far) tuples
+
+    def push(self, val: int) -&gt; None:
+        if not self.stack:
+            self.stack.append((val, val))
+        else:
+            current_min = min(val, self.stack[-1][1])
+            self.stack.append((val, current_min))
+
+    def pop(self) -&gt; None:
+        self.stack.pop()
+
+    def top(self) -&gt; int:
+        return self.stack[-1][0]
+
+    def getMin(self) -&gt; int:
+        return self.stack[-1][1]
+</code></pre>
+<h3 id="key-insight"><a class="header" href="#key-insight">Key Insight</a></h3>
+<p>Both approaches maintain the invariant: <strong>at any point, we can access the minimum of all elements currently in the stack in O(1) time</strong>.</p>
+<h2 id="stack-vs-recursion"><a class="header" href="#stack-vs-recursion">Stack vs Recursion</a></h2>
+<p>Every recursive algorithm can be converted to an iterative one using an explicit stack. The call stack IS a stack!</p>
+<h3 id="recursive-tree-traversal"><a class="header" href="#recursive-tree-traversal">Recursive Tree Traversal</a></h3>
+<pre><code class="language-python">def inorder_recursive(root):
+    """Recursive inorder traversal"""
+    if not root:
+        return
+    inorder_recursive(root.left)    # Implicit stack: push left
+    print(root.val)                  # Process
+    inorder_recursive(root.right)   # Implicit stack: push right
+</code></pre>
+<h3 id="iterative-with-explicit-stack"><a class="header" href="#iterative-with-explicit-stack">Iterative with Explicit Stack</a></h3>
+<pre><code class="language-python">def inorder_iterative(root):
+    """Iterative inorder using explicit stack"""
+    stack = []
+    current = root
+
+    while current or stack:
+        # Go left as far as possible
+        while current:
+            stack.append(current)
+            current = current.left
+
+        # Process node
+        current = stack.pop()
+        print(current.val)
+
+        # Move to right subtree
+        current = current.right
+</code></pre>
+<h3 id="when-to-use-each"><a class="header" href="#when-to-use-each">When to Use Each</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Recursive</th><th>Iterative + Stack</th></tr>
+</thead>
+<tbody>
+<tr><td>Cleaner, more readable</td><td>More control over execution</td></tr>
+<tr><td>Risk of stack overflow</td><td>Explicit memory management</td></tr>
+<tr><td>Hidden complexity</td><td>Visible complexity</td></tr>
+<tr><td>Good for small inputs</td><td>Better for large inputs</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="converting-recursion-to-stack"><a class="header" href="#converting-recursion-to-stack">Converting Recursion to Stack</a></h3>
+<ol>
+<li>Create an explicit stack</li>
+<li>Push initial state onto stack</li>
+<li>Loop while stack is not empty:
+<ul>
+<li>Pop from stack</li>
+<li>Process current state</li>
+<li>Push next states onto stack</li>
+</ul>
+</li>
+</ol>
+<h2 id="common-stack-patterns"><a class="header" href="#common-stack-patterns">Common Stack Patterns</a></h2>
+<p>Recognizing these patterns helps identify when to use a stack:</p>
+<h3 id="1-matchingbalancing-pattern"><a class="header" href="#1-matchingbalancing-pattern">1. Matching/Balancing Pattern</a></h3>
+<p><strong>Use Case</strong>: Parentheses, brackets, tags, quotes
+<strong>Key</strong>: Push opening symbols, pop when closing found
+<strong>Examples</strong>: Valid Parentheses, HTML/XML validation</p>
+<pre><code class="language-python"># Template
+stack = []
+pairs = {'(': ')', '[': ']', '{': '}'}
+
+for char in string:
+    if char in pairs:  # Opening
+        stack.append(char)
+    else:  # Closing
+        if not stack or pairs[stack.pop()] != char:
+            return False
+return len(stack) == 0
+</code></pre>
+<h3 id="2-monotonic-stack-pattern"><a class="header" href="#2-monotonic-stack-pattern">2. Monotonic Stack Pattern</a></h3>
+<p><strong>Use Case</strong>: Next/Previous greater/smaller element
+<strong>Key</strong>: Maintain increasing or decreasing order
+<strong>Examples</strong>: Daily Temperatures, Stock Span, Largest Rectangle</p>
+<pre><code class="language-python"># Template for Next Greater
+stack = []  # Stores indices
+result = [-1] * len(arr)
+
+for i in range(len(arr)):
+    while stack and arr[stack[-1]] &lt; arr[i]:
+        idx = stack.pop()
+        result[idx] = arr[i]
+    stack.append(i)
+</code></pre>
+<h3 id="3-state-saving-pattern"><a class="header" href="#3-state-saving-pattern">3. State Saving Pattern</a></h3>
+<p><strong>Use Case</strong>: Backtracking, undo operations, nested contexts
+<strong>Key</strong>: Push state before change, pop to restore
+<strong>Examples</strong>: Calculator with parentheses, Decode String, Text editor undo</p>
+<pre><code class="language-python"># Template
+stack = []
+
+# Before entering new context
+stack.append(current_state)
+current_state = new_state
+
+# When exiting context
+current_state = stack.pop()
+</code></pre>
+<h3 id="4-reversebacktrack-pattern"><a class="header" href="#4-reversebacktrack-pattern">4. Reverse/Backtrack Pattern</a></h3>
+<p><strong>Use Case</strong>: Process in reverse order, path tracking
+<strong>Key</strong>: Push during forward pass, pop for reverse
+<strong>Examples</strong>: Reverse Polish Notation, DFS path tracking</p>
+<pre><code class="language-python"># Template
+stack = []
+
+# Forward pass
+for item in items:
+    stack.append(process(item))
+
+# Reverse pass
+while stack:
+    result = combine(result, stack.pop())
+</code></pre>
+<h3 id="5-two-stack-pattern"><a class="header" href="#5-two-stack-pattern">5. Two-Stack Pattern</a></h3>
+<p><strong>Use Case</strong>: Min/Max tracking, queue implementation
+<strong>Key</strong>: One stack for data, another for metadata
+<strong>Examples</strong>: Min Stack, Implement Queue using Stacks</p>
+<pre><code class="language-python"># Template
+main_stack = []
+aux_stack = []  # Tracks min/max or other property
+
+def push(val):
+    main_stack.append(val)
+    # Update auxiliary stack
+    if not aux_stack or val &lt;= aux_stack[-1]:
+        aux_stack.append(val)
+</code></pre>
+<h3 id="pattern-recognition-checklist"><a class="header" href="#pattern-recognition-checklist">Pattern Recognition Checklist</a></h3>
+<ul>
+<li>✅ <strong>Need to match pairs?</strong> → Matching Pattern</li>
+<li>✅ <strong>Find next greater/smaller?</strong> → Monotonic Stack</li>
+<li>✅ <strong>Nested contexts/scopes?</strong> → State Saving Pattern</li>
+<li>✅ <strong>Process in reverse?</strong> → Reverse/Backtrack Pattern</li>
+<li>✅ <strong>Track min/max?</strong> → Two-Stack Pattern</li>
+<li>✅ <strong>Replace recursion?</strong> → Explicit Stack Pattern</li>
+</ul>
 <h2 id="real-world-uses"><a class="header" href="#real-world-uses">Real-World Uses</a></h2>
 <ul>
-<li><strong>Browser Back Button</strong>: Last visited page is first to go back to</li>
-<li><strong>Function Call Stack</strong>: Each function call pushed, returns pop</li>
-<li><strong>Undo/Redo</strong>: Last action undone first</li>
-<li><strong>Expression Parsing</strong>: Manage operator precedence</li>
-<li><strong>DFS (Depth-First Search)</strong>: Graph traversal</li>
+<li><strong>Browser Navigation</strong>: Back/forward buttons using two stacks</li>
+<li><strong>Function Call Stack</strong>: Every program execution uses a stack</li>
+<li><strong>Undo/Redo Operations</strong>: Text editors, image editors, games</li>
+<li><strong>Expression Parsing</strong>: Compilers, calculators, formula evaluation</li>
+<li><strong>DFS Traversal</strong>: Graph algorithms, maze solving, tree traversal</li>
+<li><strong>Memory Management</strong>: Stack allocation for local variables</li>
+<li><strong>Backtracking Algorithms</strong>: Chess engines, puzzle solvers, constraint satisfaction</li>
+<li><strong>Syntax Checking</strong>: IDEs checking matching brackets, code formatters</li>
+</ul>
+<h2 id="interview-tips"><a class="header" href="#interview-tips">Interview Tips</a></h2>
+<h3 id="recognition"><a class="header" href="#recognition">Recognition</a></h3>
+<ul>
+<li>Keywords: “balanced”, “matching”, “nested”, “nearest”, “next greater/smaller”</li>
+<li>Recursion can often be converted to iterative with a stack</li>
+<li>Multiple levels of nesting suggest a stack</li>
+</ul>
+<h3 id="common-mistakes"><a class="header" href="#common-mistakes">Common Mistakes</a></h3>
+<ul>
+<li>❌ Forgetting to check if stack is empty before pop/peek</li>
+<li>❌ Not handling edge cases (empty input, single element)</li>
+<li>❌ Using index when value is needed (or vice versa)</li>
+<li>❌ Wrong order in monotonic stack (increasing vs decreasing)</li>
+</ul>
+<h3 id="optimization-tips"><a class="header" href="#optimization-tips">Optimization Tips</a></h3>
+<ul>
+<li>Use indices instead of values when you need position</li>
+<li>Deque in Python is faster than list for stack operations</li>
+<li>Consider space-time tradeoffs (two stacks vs tuples)</li>
+<li>Monotonic stacks reduce O(n²) to O(n) for many problems</li>
+</ul>
+<h3 id="time-complexity-analysis"><a class="header" href="#time-complexity-analysis">Time Complexity Analysis</a></h3>
+<p>Most stack problems are <strong>O(n)</strong> even with nested loops:</p>
+<ul>
+<li>Each element is pushed once: O(n)</li>
+<li>Each element is popped once: O(n)</li>
+<li>Total: O(n) + O(n) = O(n)</li>
 </ul>
 <h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
 <p>Imagine a stack of dinner plates - you:</p>

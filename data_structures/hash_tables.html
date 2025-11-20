@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-91648d44.js";
+            window.path_to_searchindex_js = "../searchindex-2685738a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -187,15 +187,74 @@ hash(123) = 2
 hash("email") = 5  (collision!)
 </code></pre>
 <h3 id="collision-resolution"><a class="header" href="#collision-resolution">Collision Resolution</a></h3>
-<p><strong>Chaining</strong>: Store multiple values at same index</p>
-<pre><code>Index 0: None
-Index 1: None
-Index 2: 123 -&gt; "John"
-Index 3: 456 -&gt; "Jane" -&gt; 789 -&gt; "Jack"
+<p>When two keys hash to the same index, we need a strategy to handle the collision.</p>
+<h4 id="1-chaining-separate-chaining"><a class="header" href="#1-chaining-separate-chaining">1. Chaining (Separate Chaining)</a></h4>
+<p>Store multiple values at same index using linked lists or arrays.</p>
+<pre><code>Index 0: []
+Index 1: []
+Index 2: [123 -&gt; "John"]
+Index 3: [456 -&gt; "Jane", 789 -&gt; "Jack"]
+Index 4: []
 </code></pre>
-<p><strong>Open Addressing</strong>: Find next empty slot</p>
-<pre><code>hash("a") = 5 (occupied)
-Try 6, 7, 8... until empty
+<p><strong>Pros</strong>: Simple, handles high load factors well
+<strong>Cons</strong>: Extra memory for pointers, cache performance</p>
+<h4 id="2-linear-probing"><a class="header" href="#2-linear-probing">2. Linear Probing</a></h4>
+<p>Find next empty slot by checking sequentially: <code>(hash(key) + i) % size</code></p>
+<pre><code>Insert "cat" at index 5 (occupied)
+Try: index 5 → 6 → 7 (empty, insert here)
+</code></pre>
+<p><strong>Example sequence</strong>:</p>
+<pre><code>hash("cat") = 5, hash("dog") = 5
+Insert "cat": table[5] = "cat"
+Insert "dog": table[5] occupied → try table[6] → insert
+</code></pre>
+<p><strong>Pros</strong>: Good cache locality, no extra memory
+<strong>Cons</strong>: Primary clustering (consecutive filled slots)</p>
+<h4 id="3-quadratic-probing"><a class="header" href="#3-quadratic-probing">3. Quadratic Probing</a></h4>
+<p>Probe using quadratic increments: <code>(hash(key) + i²) % size</code></p>
+<pre><code>Insert "cat" at index 5 (occupied)
+Try: 5 → 5+1² → 5+2² → 5+3² ...
+     5 → 6 → 9 → 14 ...
+</code></pre>
+<p><strong>Pros</strong>: Reduces primary clustering
+<strong>Cons</strong>: Secondary clustering, may not probe all slots</p>
+<h4 id="4-double-hashing"><a class="header" href="#4-double-hashing">4. Double Hashing</a></h4>
+<p>Use second hash function for step size: <code>(hash1(key) + i × hash2(key)) % size</code></p>
+<pre><code>hash1("cat") = 5, hash2("cat") = 3
+Try: 5 → 5+3 → 5+6 → 5+9 ...
+     5 → 8 → 11 → 14 ...
+</code></pre>
+<p><strong>Pros</strong>: Minimizes clustering
+<strong>Cons</strong>: Requires two hash functions</p>
+<h3 id="hash-function-design"><a class="header" href="#hash-function-design">Hash Function Design</a></h3>
+<p>A good hash function should have these properties:</p>
+<ol>
+<li><strong>Deterministic</strong>: Same key always produces same hash</li>
+<li><strong>Uniform Distribution</strong>: Spreads keys evenly across table</li>
+<li><strong>Fast Computation</strong>: $O(1)$ time complexity</li>
+<li><strong>Minimize Collisions</strong>: Different keys rarely produce same hash</li>
+</ol>
+<h4 id="common-hash-techniques"><a class="header" href="#common-hash-techniques">Common Hash Techniques</a></h4>
+<p><strong>Division Method</strong>: <code>hash(key) = key % table_size</code></p>
+<pre><code class="language-python"># Best with prime number table sizes
+hash(123) = 123 % 11 = 2
+</code></pre>
+<p><strong>Multiplication Method</strong>: <code>hash(key) = floor(m × (key × A mod 1))</code></p>
+<pre><code class="language-python"># A ≈ 0.6180339887 (golden ratio), m = table size
+A = 0.6180339887
+hash(123) = floor(10 * (123 * A % 1)) = 6
+</code></pre>
+<p><strong>Universal Hashing</strong>: Random selection from hash function family</p>
+<pre><code class="language-python"># Reduces worst-case collision probability
+# h(k) = ((a*k + b) mod p) mod m
+# where p is prime, a,b are random
+</code></pre>
+<p><strong>String Hashing</strong>: Polynomial rolling hash</p>
+<pre><code class="language-python">def hash_string(s, prime=31, mod=10**9+7):
+    h = 0
+    for char in s:
+        h = (h * prime + ord(char)) % mod
+    return h
 </code></pre>
 <h2 id="operations"><a class="header" href="#operations">Operations</a></h2>
 <div class="table-wrapper">
@@ -207,9 +266,40 @@ Try 6, 7, 8... until empty
 <tr><td><strong>Get</strong></td><td>$O(1)$</td><td>$O(n)$</td></tr>
 <tr><td><strong>Set</strong></td><td>$O(1)$</td><td>$O(n)$</td></tr>
 <tr><td><strong>Delete</strong></td><td>$O(1)$</td><td>$O(n)$</td></tr>
+<tr><td><strong>Space</strong></td><td>$O(n)$</td><td>$O(n)$</td></tr>
 </tbody>
 </table>
 </div>
+<p><strong>Note</strong>: Worst case occurs when all keys hash to same index (all collisions). With good hash function and proper load factor, average case is maintained.</p>
+<h3 id="load-factor--resizing"><a class="header" href="#load-factor--resizing">Load Factor &amp; Resizing</a></h3>
+<p><strong>Load Factor</strong> (α) measures how full the hash table is:
+$$\alpha = \frac{n}{m}$$
+where $n$ = number of elements, $m$ = table size</p>
+<h4 id="performance-impact"><a class="header" href="#performance-impact">Performance Impact</a></h4>
+<pre><code>α = 0.5  →  Fast lookups, more memory
+α = 0.75 →  Balanced (typical threshold)
+α = 1.0  →  Table full (chaining only)
+α &gt; 1.0  →  More collisions, slower ops
+</code></pre>
+<h4 id="resizing-strategy"><a class="header" href="#resizing-strategy">Resizing Strategy</a></h4>
+<p>When load factor exceeds threshold (typically 0.75):</p>
+<ol>
+<li>Create new table (usually 2× size)</li>
+<li>Rehash all existing entries</li>
+<li>Insert into new table</li>
+</ol>
+<pre><code class="language-python">def resize(self):
+    old_table = self.table
+    self.size *= 2
+    self.table = [[] for _ in range(self.size)]
+    self.count = 0
+
+    # Rehash all entries
+    for bucket in old_table:
+        for key, value in bucket:
+            self.set(key, value)
+</code></pre>
+<p><strong>Cost</strong>: $O(n)$ for resize, but amortized $O(1)$ per operation</p>
 <h2 id="python-implementation"><a class="header" href="#python-implementation">Python Implementation</a></h2>
 <pre><code class="language-python"># Built-in dict
 d = {"key": "value"}
@@ -217,25 +307,76 @@ d.get("key")  # $O(1)$
 d["key"] = "new_value"
 del d["key"]
 
-# Custom
+# Custom with chaining, resizing, and load factor
 class HashTable:
-    def __init__(self, size=10):
+    def __init__(self, size=10, load_factor_threshold=0.75):
+        self.size = size
         self.table = [[] for _ in range(size)]
+        self.count = 0
+        self.load_factor_threshold = load_factor_threshold
+
+    def _hash(self, key):
+        """Hash function: O(1)"""
+        return hash(key) % self.size
+
+    def _load_factor(self):
+        """Calculate current load factor"""
+        return self.count / self.size
+
+    def _resize(self):
+        """Resize and rehash when load factor exceeds threshold: O(n)"""
+        old_table = self.table
+        self.size *= 2
+        self.table = [[] for _ in range(self.size)]
+        self.count = 0
+
+        for bucket in old_table:
+            for key, value in bucket:
+                self.set(key, value)
 
     def set(self, key, value):
-        index = hash(key) % len(self.table)
+        """Insert or update: O(1) average"""
+        index = self._hash(key)
+
+        # Update if key exists
         for i, (k, v) in enumerate(self.table[index]):
             if k == key:
                 self.table[index][i] = (key, value)
                 return
+
+        # Insert new key-value
         self.table[index].append((key, value))
+        self.count += 1
+
+        # Resize if needed
+        if self._load_factor() &gt; self.load_factor_threshold:
+            self._resize()
 
     def get(self, key):
-        index = hash(key) % len(self.table)
+        """Retrieve value: O(1) average"""
+        index = self._hash(key)
         for k, v in self.table[index]:
             if k == key:
                 return v
         return None
+
+    def delete(self, key):
+        """Remove key-value pair: O(1) average"""
+        index = self._hash(key)
+        bucket = self.table[index]
+
+        for i, (k, v) in enumerate(bucket):
+            if k == key:
+                bucket.pop(i)
+                self.count -= 1
+                return True
+        return False
+
+    def __len__(self):
+        return self.count
+
+    def __contains__(self, key):
+        return self.get(key) is not None
 </code></pre>
 <h2 id="common-problems"><a class="header" href="#common-problems">Common Problems</a></h2>
 <h3 id="two-sum"><a class="header" href="#two-sum">Two Sum</a></h3>
@@ -250,6 +391,85 @@ class HashTable:
 <h3 id="duplicate-detection"><a class="header" href="#duplicate-detection">Duplicate Detection</a></h3>
 <pre><code class="language-python">def has_duplicates(arr):
     return len(arr) != len(set(arr))
+</code></pre>
+<h3 id="group-anagrams"><a class="header" href="#group-anagrams">Group Anagrams</a></h3>
+<pre><code class="language-python">def group_anagrams(strs):
+    """Group strings that are anagrams: O(n*k) where k=avg string length"""
+    anagrams = {}
+    for s in strs:
+        # Sort string as key (or use char count tuple)
+        key = ''.join(sorted(s))
+        if key not in anagrams:
+            anagrams[key] = []
+        anagrams[key].append(s)
+    return list(anagrams.values())
+
+# Example: ["eat", "tea", "tan", "ate", "nat", "bat"]
+# Output: [["eat", "tea", "ate"], ["tan", "nat"], ["bat"]]
+</code></pre>
+<h3 id="longest-consecutive-sequence"><a class="header" href="#longest-consecutive-sequence">Longest Consecutive Sequence</a></h3>
+<pre><code class="language-python">def longest_consecutive(nums):
+    """Find longest consecutive sequence: O(n)"""
+    if not nums:
+        return 0
+
+    num_set = set(nums)
+    longest = 0
+
+    for num in num_set:
+        # Only start counting if num is start of sequence
+        if num - 1 not in num_set:
+            current = num
+            streak = 1
+
+            while current + 1 in num_set:
+                current += 1
+                streak += 1
+
+            longest = max(longest, streak)
+
+    return longest
+
+# Example: [100, 4, 200, 1, 3, 2] → 4 (sequence: 1,2,3,4)
+</code></pre>
+<h3 id="subarray-sum-equals-k"><a class="header" href="#subarray-sum-equals-k">Subarray Sum Equals K</a></h3>
+<pre><code class="language-python">def subarray_sum(nums, k):
+    """Count subarrays with sum = k: O(n)"""
+    count = 0
+    prefix_sum = 0
+    sum_freq = {0: 1}  # Handle subarrays starting at index 0
+
+    for num in nums:
+        prefix_sum += num
+
+        # If (prefix_sum - k) exists, we found subarray(s)
+        if prefix_sum - k in sum_freq:
+            count += sum_freq[prefix_sum - k]
+
+        sum_freq[prefix_sum] = sum_freq.get(prefix_sum, 0) + 1
+
+    return count
+
+# Example: [1, 2, 3], k=3 → 2 (subarrays: [3], [1,2])
+</code></pre>
+<h3 id="first-non-repeating-character"><a class="header" href="#first-non-repeating-character">First Non-Repeating Character</a></h3>
+<pre><code class="language-python">def first_unique_char(s):
+    """Find first non-repeating character index: O(n)"""
+    char_count = {}
+
+    # Count frequencies
+    for char in s:
+        char_count[char] = char_count.get(char, 0) + 1
+
+    # Find first with count 1
+    for i, char in enumerate(s):
+        if char_count[char] == 1:
+            return i
+
+    return -1
+
+# Example: "leetcode" → 0 (char 'l')
+# Example: "loveleetcode" → 2 (char 'v')
 </code></pre>
 <h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
 <p>Think of hash tables like library catalogs:</p>

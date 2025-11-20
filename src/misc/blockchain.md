@@ -101,7 +101,7 @@ Each block contains:
 ```
 Block 1         Block 2         Block 3
 +-------+      +-------+      +-------+
-| Hash  |  ê-- | Prev  |  ê-- | Prev  |
+| Hash  |  <-- | Prev  |  <-- | Prev  |
 | Data  |      | Hash  |      | Hash  |
 | Txs   |      | Data  |      | Data  |
 +-------+      +-------+      +-------+
@@ -134,19 +134,19 @@ Block 1         Block 2         Block 3
 
 ```
 1. User initiates transaction
-   ì
+   ‚Üì
 2. Transaction broadcast to network
-   ì
+   ‚Üì
 3. Nodes validate transaction
-   ì
+   ‚Üì
 4. Valid transactions added to mempool
-   ì
+   ‚Üì
 5. Miners select transactions for new block
-   ì
+   ‚Üì
 6. Block mined and broadcast to network
-   ì
+   ‚Üì
 7. Nodes validate and add block to chain
-   ì
+   ‚Üì
 8. Transaction confirmed
 ```
 
@@ -414,12 +414,12 @@ Runtime environment for smart contracts:
 #### Gas System
 
 ```
-Transaction Cost = Gas Used ◊ Gas Price
+Transaction Cost = Gas Used √ó Gas Price
 
 Example:
 - Simple transfer: 21,000 gas
 - Gas price: 50 gwei
-- Cost: 21,000 ◊ 50 = 1,050,000 gwei = 0.00105 ETH
+- Cost: 21,000 √ó 50 = 1,050,000 gwei = 0.00105 ETH
 ```
 
 ### Solana
@@ -991,11 +991,11 @@ contract MyToken is ERC20 {
 
 ```
 Frontend (Web UI)
-       ì
+       ‚Üì
    Web3 Library
-       ì
+       ‚Üì
   Blockchain Node
-       ì
+       ‚Üì
   Smart Contracts
 ```
 
@@ -1308,8 +1308,8 @@ echidna-test contracts/MyContract.sol
 
 **Example: Food Traceability**
 ```
-Farm í Processing í Distribution í Retail í Consumer
- ì         ì            ì           ì         ì
+Farm ‚Üí Processing ‚Üí Distribution ‚Üí Retail ‚Üí Consumer
+ ‚Üì         ‚Üì            ‚Üì           ‚Üì         ‚Üì
 [All steps recorded on blockchain with timestamps and locations]
 ```
 

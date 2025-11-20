@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-2685738a.js";
+            window.path_to_searchindex_js = "../searchindex-7b268d28.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -177,73 +177,749 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="sysfs"><a class="header" href="#sysfs">sysfs</a></h1>
-<p>sysfs is a virtual filesystem that exports information about kernel subsystems, hardware devices, and associated device drivers to userspace.</p>
+<p>sysfs is a virtual filesystem that exports information about kernel subsystems, hardware devices, and associated device drivers to userspace. Introduced in Linux 2.6, sysfs provides a structured, hierarchical view of the system’s device model and allows both reading device information and configuring device/kernel parameters dynamically.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <p>sysfs is mounted at <code>/sys</code> and provides:</p>
 <ul>
-<li>Device information</li>
-<li>Driver parameters</li>
-<li>Kernel configuration</li>
-<li>Power management settings</li>
+<li>Device information and topology</li>
+<li>Driver parameters and configuration</li>
+<li>Kernel configuration and runtime parameters</li>
+<li>Power management settings and controls</li>
+<li>Hardware monitoring and thermal management</li>
+<li>Resource allocation and cgroups</li>
+<li>Firmware and UEFI variables</li>
+</ul>
+<h2 id="fundamentals"><a class="header" href="#fundamentals">Fundamentals</a></h2>
+<h3 id="file-types-and-attributes"><a class="header" href="#file-types-and-attributes">File Types and Attributes</a></h3>
+<p>sysfs exposes information through files that can be:</p>
+<ul>
+<li><strong>Read-only</strong>: Information files (most device attributes)</li>
+<li><strong>Write-only</strong>: Control files (some security/admin functions)</li>
+<li><strong>Read-write</strong>: Configurable parameters</li>
+</ul>
+<h3 id="reading-attributes"><a class="header" href="#reading-attributes">Reading Attributes</a></h3>
+<pre><code class="language-bash"># Reading values
+cat /sys/class/net/eth0/address
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+
+# Some files contain multiple values
+cat /sys/class/net/eth0/statistics/rx_bytes
+</code></pre>
+<h3 id="writing-attributes"><a class="header" href="#writing-attributes">Writing Attributes</a></h3>
+<pre><code class="language-bash"># Most write operations require root privileges
+echo "performance" | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# Direct redirection (must be running as root)
+sudo sh -c 'echo 1 &gt; /sys/class/leds/led0/brightness'
+</code></pre>
+<h3 id="important-characteristics"><a class="header" href="#important-characteristics">Important Characteristics</a></h3>
+<ul>
+<li><strong>Temporary Changes</strong>: All sysfs modifications are temporary and lost on reboot</li>
+<li><strong>Permissions</strong>: Write operations typically require root/sudo</li>
+<li><strong>One Value Per File</strong>: Each file generally contains a single value or closely related values</li>
+<li><strong>ASCII Format</strong>: Values are human-readable ASCII strings</li>
+<li><strong>Symlinks</strong>: Many entries are symlinks to actual device locations</li>
 </ul>
 <h2 id="structure"><a class="header" href="#structure">Structure</a></h2>
 <pre><code class="language-bash">/sys/
-├── block/          # Block devices
-├── bus/            # Bus types (pci, usb, etc.)
-├── class/          # Device classes (network, input, etc.)
-├── devices/        # Device tree
-├── firmware/       # Firmware information
-├── fs/             # Filesystem information
-├── kernel/         # Kernel parameters
-├── module/         # Loaded kernel modules
-└── power/          # Power management
+├── block/          # Block devices (disks, partitions)
+├── bus/            # Bus types (pci, usb, i2c, spi, etc.)
+├── class/          # Device classes (network, input, graphics, etc.)
+├── dev/            # Device number mappings (char/ and block/)
+├── devices/        # Actual device hierarchy (the real device tree)
+├── firmware/       # Firmware interfaces (acpi, dmi, efi, devicetree)
+├── fs/             # Filesystem information (ext4, btrfs, cgroup, etc.)
+├── hypervisor/     # Hypervisor information (if running in VM)
+├── kernel/         # Kernel parameters and information
+├── module/         # Loaded kernel modules and their parameters
+└── power/          # System-wide power management
 </code></pre>
+<h3 id="understanding-the-hierarchy"><a class="header" href="#understanding-the-hierarchy">Understanding the Hierarchy</a></h3>
+<ul>
+<li><strong><code>/sys/devices/</code></strong>: The canonical device tree, organized by how devices are connected</li>
+<li><strong><code>/sys/class/</code></strong>: Devices grouped by functionality (all network interfaces, all input devices)</li>
+<li><strong><code>/sys/bus/</code></strong>: Devices organized by bus type (all PCI devices, all USB devices)</li>
+</ul>
+<p>Most entries in <code>/sys/class/</code> and <code>/sys/bus/</code> are symlinks pointing to <code>/sys/devices/</code>.</p>
 <h2 id="common-usage"><a class="header" href="#common-usage">Common Usage</a></h2>
-<pre><code class="language-bash"># List block devices
+<h3 id="block-devices"><a class="header" href="#block-devices">Block Devices</a></h3>
+<pre><code class="language-bash"># List all block devices
 ls /sys/block/
+# Output: sda sdb nvme0n1 ...
 
 # Device information
-cat /sys/class/net/eth0/address      # MAC address
-cat /sys/class/net/eth0/speed        # Link speed
-cat /sys/class/net/eth0/operstate    # Interface state
+cat /sys/block/sda/size              # Size in 512-byte sectors
+cat /sys/block/sda/queue/scheduler   # I/O scheduler
+cat /sys/block/sda/device/model      # Drive model
+cat /sys/block/sda/removable         # 1 if removable, 0 otherwise
 
-# CPU information
+# Partition information
+ls /sys/block/sda/
+cat /sys/block/sda/sda1/size
+
+# Change I/O scheduler
+echo "mq-deadline" | sudo tee /sys/block/sda/queue/scheduler
+
+# Disk statistics
+cat /sys/block/sda/stat
+# Format: read IOs, read merges, sectors read, time reading (ms),
+#         write IOs, write merges, sectors written, time writing (ms), ...
+</code></pre>
+<h3 id="network-devices"><a class="header" href="#network-devices">Network Devices</a></h3>
+<p>Modern Linux uses predictable network interface names (not eth0):</p>
+<ul>
+<li><strong>ens0, eno1</strong>: Onboard Ethernet</li>
+<li><strong>enp3s0</strong>: PCI Ethernet</li>
+<li><strong>wlan0, wlp2s0</strong>: Wireless</li>
+<li><strong>eth0</strong>: Legacy naming (older systems or manual configuration)</li>
+</ul>
+<pre><code class="language-bash"># List network interfaces
+ls /sys/class/net/
+# Output: lo ens0 wlp2s0 ...
+
+# Interface information
+cat /sys/class/net/ens0/address           # MAC address
+cat /sys/class/net/ens0/speed             # Link speed (Mbps)
+cat /sys/class/net/ens0/operstate         # up/down/unknown
+cat /sys/class/net/ens0/carrier           # 1 if link detected, 0 otherwise
+cat /sys/class/net/ens0/mtu               # MTU size
+cat /sys/class/net/ens0/type              # Hardware type (1=Ethernet)
+
+# Statistics
+cat /sys/class/net/ens0/statistics/rx_bytes
+cat /sys/class/net/ens0/statistics/tx_bytes
+cat /sys/class/net/ens0/statistics/rx_packets
+cat /sys/class/net/ens0/statistics/rx_errors
+cat /sys/class/net/ens0/statistics/rx_dropped
+
+# Wireless information (if wireless device)
+cat /sys/class/net/wlp2s0/wireless/status
+
+# Change MTU
+echo 9000 | sudo tee /sys/class/net/ens0/mtu
+</code></pre>
+<h3 id="cpu-information"><a class="header" href="#cpu-information">CPU Information</a></h3>
+<pre><code class="language-bash"># List CPUs
+ls /sys/devices/system/cpu/
+# Output: cpu0 cpu1 cpu2 cpu3 ... cpufreq/ cpuidle/ ...
+
+# Current frequency
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq    # In KHz
+cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq    # Hardware max
+cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq    # Hardware min
+
+# Available frequencies
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+
+# Governor (power policy)
 cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-ls /sys/devices/system/cpu/cpu*/topology/
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+# Common governors: performance, powersave, ondemand, conservative, schedutil
 
-# GPU information
-cat /sys/class/drm/card0/device/vendor
-cat /sys/class/drm/card0/device/device
+# CPU topology
+cat /sys/devices/system/cpu/cpu0/topology/physical_package_id  # Socket
+cat /sys/devices/system/cpu/cpu0/topology/core_id              # Core ID
+cat /sys/devices/system/cpu/cpu0/topology/thread_siblings_list # HT siblings
 
-# USB devices
+# Online/offline status
+cat /sys/devices/system/cpu/cpu1/online
+echo 0 | sudo tee /sys/devices/system/cpu/cpu1/online  # Disable CPU1
+
+# Cache information
+ls /sys/devices/system/cpu/cpu0/cache/
+cat /sys/devices/system/cpu/cpu0/cache/index0/size     # L1 cache
+cat /sys/devices/system/cpu/cpu0/cache/index2/size     # L3 cache
+</code></pre>
+<h3 id="gpugraphics-devices"><a class="header" href="#gpugraphics-devices">GPU/Graphics Devices</a></h3>
+<pre><code class="language-bash"># List graphics cards
+ls /sys/class/drm/
+# Output: card0 card1 ...
+
+# GPU vendor and device ID
+cat /sys/class/drm/card0/device/vendor    # 0x8086 (Intel), 0x10de (NVIDIA), 0x1002 (AMD)
+cat /sys/class/drm/card0/device/device    # Device ID
+
+# GPU power state (if supported)
+cat /sys/class/drm/card0/device/power_state
+
+# Current GPU frequency (Intel)
+cat /sys/class/drm/card0/gt_cur_freq_mhz
+
+# Display outputs
+ls /sys/class/drm/card0-*
+# Output: card0-HDMI-A-1 card0-DP-1 card0-eDP-1 ...
+
+# Display status
+cat /sys/class/drm/card0-HDMI-A-1/status    # connected/disconnected
+cat /sys/class/drm/card0-HDMI-A-1/enabled   # enabled/disabled
+cat /sys/class/drm/card0-eDP-1/dpms         # Display power management
+
+# Framebuffer information
+ls /sys/class/graphics/fb0/
+cat /sys/class/graphics/fb0/name
+cat /sys/class/graphics/fb0/virtual_size
+</code></pre>
+<h3 id="usb-devices"><a class="header" href="#usb-devices">USB Devices</a></h3>
+<pre><code class="language-bash"># List USB devices
 ls /sys/bus/usb/devices/
+# Output: 1-0:1.0 1-1 1-1:1.0 2-0:1.0 ...
 
-# Module parameters
-ls /sys/module/*/parameters/
-cat /sys/module/bluetooth/parameters/disable_esco
+# Device tree navigation
+# Format: bus-port.subport:config.interface
+# Example: 1-2.3 = bus 1, port 2, subport 3
+
+# Device information
+cat /sys/bus/usb/devices/1-2/manufacturer
+cat /sys/bus/usb/devices/1-2/product
+cat /sys/bus/usb/devices/1-2/serial
+cat /sys/bus/usb/devices/1-2/version         # USB version
+cat /sys/bus/usb/devices/1-2/speed           # Speed in Mbps
+
+# USB IDs
+cat /sys/bus/usb/devices/1-2/idVendor        # Vendor ID
+cat /sys/bus/usb/devices/1-2/idProduct       # Product ID
+cat /sys/bus/usb/devices/1-2/bDeviceClass    # Device class
+
+# Power management
+cat /sys/bus/usb/devices/1-2/power/autosuspend_delay_ms
+cat /sys/bus/usb/devices/1-2/power/control   # auto/on
+echo "on" | sudo tee /sys/bus/usb/devices/1-2/power/control  # Disable autosuspend
+
+# Authorized (security)
+cat /sys/bus/usb/devices/1-2/authorized      # 1=authorized, 0=not authorized
+echo 0 | sudo tee /sys/bus/usb/devices/1-2/authorized  # Disable device
+</code></pre>
+<h3 id="pci-devices"><a class="header" href="#pci-devices">PCI Devices</a></h3>
+<pre><code class="language-bash"># List PCI devices
+ls /sys/bus/pci/devices/
+# Output: 0000:00:00.0 0000:00:02.0 ...
+
+# Device information
+cat /sys/bus/pci/devices/0000:00:02.0/vendor
+cat /sys/bus/pci/devices/0000:00:02.0/device
+cat /sys/bus/pci/devices/0000:00:02.0/class
+cat /sys/bus/pci/devices/0000:00:02.0/resource  # Memory/IO resources
+
+# Power management
+cat /sys/bus/pci/devices/0000:00:02.0/power/control
+
+# Remove/rescan devices (useful for hotplug)
+echo 1 | sudo tee /sys/bus/pci/devices/0000:00:02.0/remove
+echo 1 | sudo tee /sys/bus/pci/rescan
+</code></pre>
+<h2 id="thermal-management"><a class="header" href="#thermal-management">Thermal Management</a></h2>
+<pre><code class="language-bash"># List thermal zones
+ls /sys/class/thermal/
+# Output: cooling_device0 thermal_zone0 thermal_zone1 ...
+
+# Temperature reading
+cat /sys/class/thermal/thermal_zone0/type    # Type of sensor (acpitz, x86_pkg_temp)
+cat /sys/class/thermal/thermal_zone0/temp    # Temperature in millidegrees Celsius
+# Example output: 45000 = 45.0°C
+
+# All thermal zones at once
+for zone in /sys/class/thermal/thermal_zone*/; do
+    echo -n "$(cat ${zone}type): "
+    echo "scale=1; $(cat ${zone}temp)/1000" | bc
+done
+
+# Thermal trip points (thresholds)
+cat /sys/class/thermal/thermal_zone0/trip_point_0_type  # passive/active/critical
+cat /sys/class/thermal/thermal_zone0/trip_point_0_temp  # Threshold in millidegrees
+
+# Cooling devices
+ls /sys/class/thermal/cooling_device*/
+cat /sys/class/thermal/cooling_device0/type             # Fan, processor
+cat /sys/class/thermal/cooling_device0/max_state        # Maximum cooling state
+cat /sys/class/thermal/cooling_device0/cur_state        # Current cooling state
+
+# Manual fan control (if supported)
+echo 5 | sudo tee /sys/class/thermal/cooling_device0/cur_state
+
+# Hardware monitoring (hwmon)
+ls /sys/class/hwmon/
+cat /sys/class/hwmon/hwmon0/name
+cat /sys/class/hwmon/hwmon0/temp1_input    # Temperature sensor 1
+cat /sys/class/hwmon/hwmon0/temp1_label
+cat /sys/class/hwmon/hwmon0/fan1_input     # Fan speed in RPM
 </code></pre>
 <h2 id="power-management"><a class="header" href="#power-management">Power Management</a></h2>
-<pre><code class="language-bash"># CPU frequency scaling
+<h3 id="cpu-frequency-scaling"><a class="header" href="#cpu-frequency-scaling">CPU Frequency Scaling</a></h3>
+<pre><code class="language-bash"># Set governor for all CPUs
 echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+echo "powersave" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
-# Device power state
-cat /sys/class/net/eth0/device/power/runtime_status
+# Set specific frequency (if using userspace governor)
+echo "userspace" | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo "2400000" | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_setspeed
 
-# Display brightness
-echo 50 | sudo tee /sys/class/backlight/*/brightness
+# Maximum/minimum frequencies
+echo "3000000" | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+echo "1200000" | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+</code></pre>
+<h3 id="device-power-states"><a class="header" href="#device-power-states">Device Power States</a></h3>
+<pre><code class="language-bash"># Runtime power management status
+cat /sys/class/net/ens0/device/power/runtime_status
+# Values: active, suspended, suspending, resuming, unsupported
+
+cat /sys/class/net/ens0/device/power/control
+# Values: auto (enable runtime PM), on (disable runtime PM)
+
+# Enable runtime power management
+echo "auto" | sudo tee /sys/class/net/ens0/device/power/control
+
+# Disable runtime power management
+echo "on" | sudo tee /sys/class/net/ens0/device/power/control
+
+# Wakeup capability
+cat /sys/class/net/ens0/device/power/wakeup
+echo "enabled" | sudo tee /sys/class/net/ens0/device/power/wakeup
+</code></pre>
+<h3 id="display-brightness"><a class="header" href="#display-brightness">Display Brightness</a></h3>
+<pre><code class="language-bash"># List backlight devices
+ls /sys/class/backlight/
+# Output: intel_backlight acpi_video0 ...
+
+# Current and maximum brightness
+cat /sys/class/backlight/intel_backlight/brightness
+cat /sys/class/backlight/intel_backlight/max_brightness
+cat /sys/class/backlight/intel_backlight/actual_brightness
+
+# Set brightness (0 to max_brightness)
+echo 500 | sudo tee /sys/class/backlight/intel_backlight/brightness
+
+# Set percentage (calculate from max_brightness)
+MAX=$(cat /sys/class/backlight/intel_backlight/max_brightness)
+echo $((MAX * 50 / 100)) | sudo tee /sys/class/backlight/intel_backlight/brightness
+</code></pre>
+<h3 id="system-power-state"><a class="header" href="#system-power-state">System Power State</a></h3>
+<pre><code class="language-bash"># Available sleep states
+cat /sys/power/state
+# Output: freeze mem disk
+
+# Enter suspend to RAM
+echo "mem" | sudo tee /sys/power/state
+
+# Enter hibernate
+echo "disk" | sudo tee /sys/power/state
+
+# Wakeup sources
+cat /sys/power/wakeup_count
+cat /sys/kernel/wakeup_reasons
 </code></pre>
 <h2 id="led-control"><a class="header" href="#led-control">LED Control</a></h2>
 <pre><code class="language-bash"># List LEDs
 ls /sys/class/leds/
+# Output: input3::capslock input3::numlock platform::mute ...
+
+# LED information
+cat /sys/class/leds/input3::capslock/brightness    # 0=off, 1=on
+cat /sys/class/leds/input3::capslock/max_brightness
 
 # Control LED
-echo 1 &gt; /sys/class/leds/led0/brightness
-echo 0 &gt; /sys/class/leds/led0/brightness
+echo 1 | sudo tee /sys/class/leds/input3::capslock/brightness
+echo 0 | sudo tee /sys/class/leds/input3::capslock/brightness
 
-# LED trigger
-echo "heartbeat" &gt; /sys/class/leds/led0/trigger
+# Available triggers
+cat /sys/class/leds/led0/trigger
+# Output: [none] kbd-scrolllock kbd-numlock ... heartbeat cpu mmc0 ...
+
+# Set trigger
+echo "heartbeat" | sudo tee /sys/class/leds/led0/trigger
+echo "cpu" | sudo tee /sys/class/leds/led0/trigger
+echo "none" | sudo tee /sys/class/leds/led0/trigger  # Manual control
+
+# Blinking (if trigger supports it)
+echo "timer" | sudo tee /sys/class/leds/led0/trigger
+echo 500 | sudo tee /sys/class/leds/led0/delay_on    # milliseconds on
+echo 500 | sudo tee /sys/class/leds/led0/delay_off   # milliseconds off
 </code></pre>
-<p>sysfs provides a unified interface for interacting with kernel and hardware information.</p>
+<h2 id="kernel-parameters"><a class="header" href="#kernel-parameters">Kernel Parameters</a></h2>
+<pre><code class="language-bash"># Kernel version and information
+cat /sys/kernel/osrelease
+cat /sys/kernel/ostype
+cat /sys/kernel/version
+
+# Boot command line
+cat /sys/kernel/cmdline
+
+# Kernel debugging
+ls /sys/kernel/debug/     # Requires debugfs mount and root access
+
+# Kernel configuration (if CONFIG_IKCONFIG enabled)
+zcat /sys/kernel/config.gz
+
+# Kexec (kernel crash dumps)
+ls /sys/kernel/kexec_crash_loaded
+cat /sys/kernel/kexec_crash_size
+
+# Kernel messages
+cat /sys/kernel/printk
+# Format: console_loglevel default_message_loglevel minimum_console_loglevel default_console_loglevel
+
+# Security modules
+ls /sys/kernel/security/
+cat /sys/kernel/security/lsm  # Loaded security modules
+
+# Memory management
+cat /sys/kernel/mm/transparent_hugepage/enabled
+cat /sys/kernel/mm/transparent_hugepage/defrag
+
+# Profiling
+cat /sys/kernel/profiling
+
+# RCU (Read-Copy-Update)
+ls /sys/kernel/rcu_expedited
+ls /sys/kernel/rcu_normal
+</code></pre>
+<h2 id="module-parameters"><a class="header" href="#module-parameters">Module Parameters</a></h2>
+<p>Kernel modules can expose configurable parameters through sysfs.</p>
+<pre><code class="language-bash"># List all loaded modules
+ls /sys/module/
+
+# List parameters for a specific module
+ls /sys/module/bluetooth/parameters/
+# Output: disable_esco disable_ertm ...
+
+# Read parameter value
+cat /sys/module/bluetooth/parameters/disable_esco
+
+# Modify parameter (if writable)
+echo "Y" | sudo tee /sys/module/bluetooth/parameters/disable_esco
+echo "N" | sudo tee /sys/module/bluetooth/parameters/disable_esco
+
+# Check if parameter is writable
+ls -l /sys/module/bluetooth/parameters/disable_esco
+# -rw-r--r-- = writable
+# -r--r--r-- = read-only
+
+# Common module parameters
+
+# Sound (snd_hda_intel)
+cat /sys/module/snd_hda_intel/parameters/power_save
+echo 1 | sudo tee /sys/module/snd_hda_intel/parameters/power_save
+
+# Networking (e1000e)
+cat /sys/module/e1000e/parameters/InterruptThrottleRate
+
+# KVM
+cat /sys/module/kvm/parameters/halt_poll_ns
+cat /sys/module/kvm_intel/parameters/nested
+
+# Make parameters persistent (add to kernel command line or modprobe.conf)
+# /etc/modprobe.d/audio.conf:
+# options snd_hda_intel power_save=1
+</code></pre>
+<h2 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h2>
+<pre><code class="language-bash"># Memory information
+ls /sys/devices/system/memory/
+
+# Hugepages
+ls /sys/kernel/mm/hugepages/
+cat /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+cat /sys/kernel/mm/hugepages/hugepages-2048kB/free_hugepages
+
+# Allocate hugepages
+echo 512 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+
+# Transparent Hugepage (THP)
+cat /sys/kernel/mm/transparent_hugepage/enabled
+# Output: [always] madvise never
+echo "madvise" | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+
+cat /sys/kernel/mm/transparent_hugepage/defrag
+echo "defer" | sudo tee /sys/kernel/mm/transparent_hugepage/defrag
+
+# NUMA information
+ls /sys/devices/system/node/
+cat /sys/devices/system/node/node0/meminfo
+cat /sys/devices/system/node/node0/cpulist
+cat /sys/devices/system/node/node0/distance  # NUMA distances
+
+# Memory compaction
+cat /sys/kernel/mm/compaction/order
+cat /sys/kernel/mm/compaction/node-*-zone-*/
+
+# Page allocation debugging
+cat /sys/kernel/debug/extfrag/extfrag_index  # Requires debugfs
+
+# OOM (Out of Memory) control
+cat /sys/fs/cgroup/memory/memory.oom_control
+</code></pre>
+<h2 id="cgroups-control-groups"><a class="header" href="#cgroups-control-groups">Cgroups (Control Groups)</a></h2>
+<p>Modern systems use cgroups v2 at <code>/sys/fs/cgroup/</code>.</p>
+<pre><code class="language-bash"># Cgroup controllers
+cat /sys/fs/cgroup/cgroup.controllers
+# Output: cpuset cpu io memory hugetlb pids rdma misc
+
+# Current process cgroup
+cat /proc/self/cgroup
+
+# CPU controller
+cat /sys/fs/cgroup/user.slice/cpu.max      # quota and period
+cat /sys/fs/cgroup/user.slice/cpu.weight   # CPU shares (1-10000)
+cat /sys/fs/cgroup/user.slice/cpu.stat
+
+# Memory controller
+cat /sys/fs/cgroup/user.slice/memory.current    # Current usage
+cat /sys/fs/cgroup/user.slice/memory.max        # Memory limit
+cat /sys/fs/cgroup/user.slice/memory.high       # Throttle threshold
+cat /sys/fs/cgroup/user.slice/memory.stat       # Detailed statistics
+
+# Set memory limit
+echo "1G" | sudo tee /sys/fs/cgroup/mygroup/memory.max
+
+# IO controller
+cat /sys/fs/cgroup/user.slice/io.max
+cat /sys/fs/cgroup/user.slice/io.stat
+
+# Process IDs controller
+cat /sys/fs/cgroup/user.slice/pids.current      # Current PIDs
+cat /sys/fs/cgroup/user.slice/pids.max          # PID limit
+</code></pre>
+<h2 id="firmware-and-uefi"><a class="header" href="#firmware-and-uefi">Firmware and UEFI</a></h2>
+<pre><code class="language-bash"># DMI/SMBIOS information
+ls /sys/firmware/dmi/tables/
+cat /sys/firmware/dmi/tables/DMI              # Raw DMI table
+ls /sys/devices/virtual/dmi/id/
+cat /sys/devices/virtual/dmi/id/board_vendor
+cat /sys/devices/virtual/dmi/id/board_name
+cat /sys/devices/virtual/dmi/id/board_version
+cat /sys/devices/virtual/dmi/id/bios_version
+cat /sys/devices/virtual/dmi/id/bios_date
+cat /sys/devices/virtual/dmi/id/product_name   # System model
+
+# ACPI information
+ls /sys/firmware/acpi/tables/
+cat /sys/firmware/acpi/tables/DSDT &gt; dsdt.dat
+
+# EFI variables (requires efivarfs)
+ls /sys/firmware/efi/efivars/
+# Note: Modifying EFI variables can brick your system!
+
+# EFI system information
+cat /sys/firmware/efi/systab
+ls /sys/firmware/efi/fw_platform_size    # 32 or 64 bit
+cat /sys/firmware/efi/runtime-map/*/type
+
+# Devicetree (ARM/embedded systems)
+ls /sys/firmware/devicetree/base/
+cat /sys/firmware/devicetree/base/model
+cat /sys/firmware/devicetree/base/compatible
+</code></pre>
+<h2 id="device-discovery-and-debugging"><a class="header" href="#device-discovery-and-debugging">Device Discovery and Debugging</a></h2>
+<h3 id="finding-device-information"><a class="header" href="#finding-device-information">Finding Device Information</a></h3>
+<pre><code class="language-bash"># Find device by name
+find /sys/devices -name "*usb*" -type d
+
+# Find network interface real path
+readlink -f /sys/class/net/ens0
+
+# Find all devices of a driver
+ls /sys/bus/pci/drivers/e1000e/
+
+# Find device driver
+basename $(readlink /sys/class/net/ens0/device/driver)
+
+# Device uevent information
+cat /sys/class/net/ens0/uevent
+# Output:
+# INTERFACE=ens0
+# IFINDEX=2
+# DEVTYPE=...
+
+# Modalias (for driver matching)
+cat /sys/class/net/ens0/device/modalias
+</code></pre>
+<h3 id="triggering-udev-events"><a class="header" href="#triggering-udev-events">Triggering udev Events</a></h3>
+<pre><code class="language-bash"># Trigger udev event for a device
+echo "add" | sudo tee /sys/class/net/ens0/uevent
+echo "change" | sudo tee /sys/class/net/ens0/uevent
+
+# Monitor udev events
+udevadm monitor --environment --udev
+
+# Force device rescan
+echo "- - -" | sudo tee /sys/class/scsi_host/host*/scan  # SCSI rescan
+echo 1 | sudo tee /sys/bus/pci/rescan                      # PCI rescan
+</code></pre>
+<h3 id="interrupt-information"><a class="header" href="#interrupt-information">Interrupt Information</a></h3>
+<pre><code class="language-bash"># Per-IRQ information
+ls /sys/kernel/irq/
+cat /sys/kernel/irq/0/chip_name
+cat /sys/kernel/irq/0/hwirq
+cat /sys/kernel/irq/0/type
+cat /sys/kernel/irq/0/wakeup
+cat /sys/kernel/irq/0/name
+
+# Actions and affinity
+cat /sys/kernel/irq/0/actions
+cat /sys/kernel/irq/0/smp_affinity          # Bitmask
+cat /sys/kernel/irq/0/smp_affinity_list     # CPU list
+
+# Set IRQ affinity
+echo "0,1" | sudo tee /sys/kernel/irq/0/smp_affinity_list
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h3 id="making-changes-persistent"><a class="header" href="#making-changes-persistent">Making Changes Persistent</a></h3>
+<p>All sysfs changes are temporary and lost on reboot. To make them persistent:</p>
+<p><strong>1. Using systemd-tmpfiles</strong></p>
+<p>Create <code>/etc/tmpfiles.d/custom-sysfs.conf</code>:</p>
+<pre><code># Set I/O scheduler for sda
+w /sys/block/sda/queue/scheduler - - - - mq-deadline
+
+# Set CPU governor
+w /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor - - - - performance
+</code></pre>
+<p><strong>2. Using udev rules</strong></p>
+<p>Create <code>/etc/udev/rules.d/99-custom.rules</code>:</p>
+<pre><code># Set network MTU
+SUBSYSTEM=="net", ACTION=="add", KERNEL=="ens0", ATTR{mtu}="9000"
+
+# Disable USB autosuspend for specific device
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c52b", ATTR{power/autosuspend}="-1"
+</code></pre>
+<p><strong>3. Using systemd service</strong></p>
+<p>Create <code>/etc/systemd/system/custom-sysfs.service</code>:</p>
+<pre><code class="language-ini">[Unit]
+Description=Custom sysfs settings
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo performance &gt; /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor'
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p><strong>4. Using /etc/rc.local (legacy)</strong></p>
+<p>Add commands to <code>/etc/rc.local</code> (if supported):</p>
+<pre><code class="language-bash">#!/bin/sh
+echo performance &gt; /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+exit 0
+</code></pre>
+<h3 id="safety-warnings"><a class="header" href="#safety-warnings">Safety Warnings</a></h3>
+<ul>
+<li><strong>Critical values</strong>: Changing some values can crash your system or damage hardware</li>
+<li><strong>Temperature limits</strong>: Don’t disable thermal throttling without adequate cooling</li>
+<li><strong>Voltage/frequency</strong>: Incorrect CPU/GPU settings can cause instability or hardware damage</li>
+<li><strong>EFI variables</strong>: Modifying EFI variables incorrectly can brick your motherboard</li>
+<li><strong>Device authorization</strong>: Disabling devices can leave your system unbootable</li>
+<li><strong>Always test</strong>: Test changes before making them persistent</li>
+<li><strong>Document changes</strong>: Keep track of what you modify for troubleshooting</li>
+</ul>
+<h3 id="when-to-use-sysfs-vs-other-tools"><a class="header" href="#when-to-use-sysfs-vs-other-tools">When to Use sysfs vs Other Tools</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Task</th><th>Prefer sysfs</th><th>Prefer other tool</th></tr>
+</thead>
+<tbody>
+<tr><td>Reading device info</td><td>✓ Direct, scriptable</td><td><code>lspci</code>, <code>lsusb</code> for formatted output</td></tr>
+<tr><td>Network config</td><td>Basic info only</td><td><code>ip</code>, <code>nmcli</code> for full configuration</td></tr>
+<tr><td>CPU frequency</td><td>✓ Fine-grained control</td><td><code>cpupower</code> for convenience</td></tr>
+<tr><td>Power management</td><td>✓ Device-specific</td><td><code>systemctl suspend</code> for system-wide</td></tr>
+<tr><td>Block devices</td><td>✓ Live monitoring</td><td><code>lsblk</code>, <code>blkid</code> for overview</td></tr>
+<tr><td>Kernel parameters</td><td>✓ Runtime changes</td><td><code>/etc/sysctl.conf</code> for persistence</td></tr>
+<tr><td>Module parameters</td><td>Reading values</td><td><code>modprobe</code> for loading with params</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="permission-denied"><a class="header" href="#permission-denied">Permission Denied</a></h3>
+<pre><code class="language-bash"># Problem: Cannot write to sysfs file
+echo "performance" &gt; /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+# bash: /sys/.../scaling_governor: Permission denied
+
+# Solutions:
+# 1. Use sudo with tee
+echo "performance" | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# 2. Use sudo with sh -c
+sudo sh -c 'echo "performance" &gt; /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor'
+
+# 3. Become root
+sudo -i
+echo "performance" &gt; /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+</code></pre>
+<h3 id="invalid-argument-errors"><a class="header" href="#invalid-argument-errors">Invalid Argument Errors</a></h3>
+<pre><code class="language-bash"># Problem: Write fails with invalid argument
+echo "3000000" | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+# tee: /sys/.../scaling_max_freq: Invalid argument
+
+# Causes:
+# 1. Value out of range - check available values
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+
+# 2. Wrong format - check what format the file expects
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq  # See current format
+
+# 3. Hardware doesn't support the value
+cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq  # Check hardware limits
+</code></pre>
+<h3 id="finding-missing-devices"><a class="header" href="#finding-missing-devices">Finding Missing Devices</a></h3>
+<pre><code class="language-bash"># Device doesn't appear in expected location
+ls /sys/class/net/eth0
+# ls: cannot access '/sys/class/net/eth0': No such file or directory
+
+# Solutions:
+# 1. List all devices of that class
+ls /sys/class/net/
+
+# 2. Check if driver is loaded
+lsmod | grep e1000e
+
+# 3. Check kernel messages
+dmesg | grep -i network
+
+# 4. Check hardware presence
+lspci | grep -i ethernet
+lsusb  # For USB devices
+</code></pre>
+<h3 id="read-only-files"><a class="header" href="#read-only-files">Read-Only Files</a></h3>
+<pre><code class="language-bash"># Problem: File exists but can't be written
+ls -l /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq
+# -r--r--r-- 1 root root 4096 ...
+
+# This is intentional - cpuinfo_* files are read-only (hardware limits)
+# Use scaling_* files instead:
+echo "3000000" | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+</code></pre>
+<h3 id="tracing-device-paths"><a class="header" href="#tracing-device-paths">Tracing Device Paths</a></h3>
+<pre><code class="language-bash"># Follow symlinks to find real device
+ls -l /sys/class/net/ens0
+# lrwxrwxrwx ... /sys/class/net/ens0 -&gt; ../../devices/pci0000:00/0000:00:1f.6/net/ens0
+
+# Get full real path
+realpath /sys/class/net/ens0
+
+# Find parent devices
+readlink /sys/class/net/ens0/device
+# ../../0000:00:1f.6
+
+# Find which driver controls device
+basename $(readlink /sys/class/net/ens0/device/driver)
+# e1000e
+</code></pre>
+<h3 id="files-disappearing"><a class="header" href="#files-disappearing">Files Disappearing</a></h3>
+<pre><code class="language-bash"># Problem: sysfs path exists but files are missing
+ls /sys/class/net/ens0/statistics/
+# (some files missing)
+
+# Causes:
+# 1. Driver doesn't implement all statistics
+# 2. Feature not supported by hardware
+# 3. Device in wrong state (down vs up)
+
+# Check device state
+cat /sys/class/net/ens0/operstate
+
+# Bring device up if needed
+sudo ip link set ens0 up
+</code></pre>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>sysfs provides a unified, hierarchical interface for interacting with kernel subsystems and hardware. It enables both monitoring and configuration of system parameters, making it invaluable for system administration, debugging, performance tuning, and automation. Remember that changes are temporary unless made persistent through systemd, udev, or other initialization mechanisms.</p>
+<p>For most use cases, prefer high-level tools (<code>ip</code>, <code>cpupower</code>, <code>ethtool</code>) for convenience, but use sysfs directly when you need fine-grained control, are writing scripts, or troubleshooting at a low level.</p>
 
                     </main>
 

@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-843a62d1.js";
+            window.path_to_searchindex_js = "../searchindex-b2dc8d76.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f349561e.js"></script>
+        <script src="../toc-728509bc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -202,15 +202,67 @@
                  higher term
 </code></pre>
 <h2 id="leader-election"><a class="header" href="#leader-election">Leader Election</a></h2>
+<h3 id="election-process"><a class="header" href="#election-process">Election Process</a></h3>
 <ol>
-<li>Follower times out (150-300ms)</li>
-<li>Becomes candidate, increments term</li>
-<li>Votes for itself</li>
-<li>Requests votes from other servers</li>
-<li>If majority votes: becomes leader</li>
-<li>If another leader found: becomes follower</li>
+<li><strong>Follower times out</strong> (randomized 150-300ms)
+<ul>
+<li>Each server has randomized election timeout to prevent split votes</li>
+<li>Timeout resets on receiving AppendEntries from valid leader</li>
+</ul>
+</li>
+<li><strong>Becomes candidate</strong>, increments current term
+<ul>
+<li>Transitions from follower → candidate state</li>
+<li>Increments <code>currentTerm</code> by 1</li>
+</ul>
+</li>
+<li><strong>Votes for itself</strong>
+<ul>
+<li>Sets <code>votedFor</code> to its own server ID</li>
+</ul>
+</li>
+<li><strong>Requests votes</strong> from other servers (RequestVote RPC)</li>
+<li><strong>Election outcomes:</strong>
+<ul>
+<li><strong>Wins</strong>: Receives votes from majority → becomes leader</li>
+<li><strong>Loses</strong>: Receives AppendEntries from valid leader → becomes follower</li>
+<li><strong>Times out</strong>: No winner (split vote) → increment term, retry</li>
+</ul>
+</li>
 </ol>
+<h3 id="requestvote-rpc"><a class="header" href="#requestvote-rpc">RequestVote RPC</a></h3>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><code>term</code>: Candidate’s term number</li>
+<li><code>candidateId</code>: Candidate requesting vote</li>
+<li><code>lastLogIndex</code>: Index of candidate’s last log entry</li>
+<li><code>lastLogTerm</code>: Term of candidate’s last log entry</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>term</code>: Current term (for candidate to update itself)</li>
+<li><code>voteGranted</code>: true if candidate received vote</li>
+</ul>
+<p><strong>Receiver Implementation:</strong></p>
+<ol>
+<li>Reply false if <code>term &lt; currentTerm</code></li>
+<li>If <code>votedFor</code> is null or candidateId, and candidate’s log is at least as up-to-date as receiver’s log, grant vote</li>
+</ol>
+<p><strong>Up-to-date log check:</strong></p>
+<ul>
+<li>If logs have different term numbers for last entry, log with later term is more up-to-date</li>
+<li>If logs end with same term, whichever log is longer is more up-to-date</li>
+</ul>
+<h3 id="split-vote-handling"><a class="header" href="#split-vote-handling">Split Vote Handling</a></h3>
+<p>When no candidate receives majority:</p>
+<ul>
+<li>Multiple candidates split votes</li>
+<li>Each candidate times out independently</li>
+<li>Randomized timeouts (150-300ms) make it unlikely same split occurs twice</li>
+<li>Failed candidates increment term and retry election</li>
+</ul>
 <h2 id="log-replication"><a class="header" href="#log-replication">Log Replication</a></h2>
+<h3 id="replication-flow"><a class="header" href="#replication-flow">Replication Flow</a></h3>
 <pre><code>Leader receives command from client
   ↓
 Append to local log
@@ -223,14 +275,289 @@ Apply to state machine
   ↓
 Return result to client
 </code></pre>
-<h2 id="safety-rules"><a class="header" href="#safety-rules">Safety Rules</a></h2>
+<h3 id="appendentries-rpc"><a class="header" href="#appendentries-rpc">AppendEntries RPC</a></h3>
+<p>Used for log replication and as heartbeat (empty entries).</p>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><code>term</code>: Leader’s term number</li>
+<li><code>leaderId</code>: So followers can redirect clients</li>
+<li><code>prevLogIndex</code>: Index of log entry immediately preceding new ones</li>
+<li><code>prevLogTerm</code>: Term of prevLogIndex entry</li>
+<li><code>entries[]</code>: Log entries to store (empty for heartbeat)</li>
+<li><code>leaderCommit</code>: Leader’s commitIndex</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>term</code>: Current term (for leader to update itself)</li>
+<li><code>success</code>: true if follower contained entry matching prevLogIndex and prevLogTerm</li>
+</ul>
+<p><strong>Receiver Implementation:</strong></p>
 <ol>
-<li><strong>Election Safety</strong>: At most one leader per term</li>
-<li><strong>Leader Append-Only</strong>: Leader never overwrites entries</li>
-<li><strong>Log Matching</strong>: If two logs contain entry with same index/term, entries are identical</li>
-<li><strong>Leader Completeness</strong>: If entry committed in term, it’s in leader’s log</li>
-<li><strong>State Machine Safety</strong>: If server applies entry at index, no other server applies different entry at that index</li>
+<li>Reply false if <code>term &lt; currentTerm</code></li>
+<li>Reply false if log doesn’t contain entry at <code>prevLogIndex</code> whose term matches <code>prevLogTerm</code> (consistency check)</li>
+<li>If existing entry conflicts with new one (same index, different terms), delete existing entry and all that follow</li>
+<li>Append any new entries not already in log</li>
+<li>If <code>leaderCommit &gt; commitIndex</code>, set <code>commitIndex = min(leaderCommit, index of last new entry)</code></li>
 </ol>
+<h3 id="consistency-checking"><a class="header" href="#consistency-checking">Consistency Checking</a></h3>
+<p>The <strong>Log Matching Property</strong> ensures:</p>
+<ul>
+<li>If two entries in different logs have same index and term, they store same command</li>
+<li>If two entries in different logs have same index and term, logs are identical in all preceding entries</li>
+</ul>
+<p><strong>How it’s enforced:</strong></p>
+<ol>
+<li>Leader sends <code>prevLogIndex</code> and <code>prevLogTerm</code> with each AppendEntries</li>
+<li>Follower checks if it has entry at <code>prevLogIndex</code> with term <code>prevLogTerm</code></li>
+<li>If check fails, follower rejects AppendEntries</li>
+<li>Leader decrements <code>nextIndex</code> for that follower and retries</li>
+<li>Eventually finds point where logs match, then follower’s log matches leader’s from that point forward</li>
+</ol>
+<h3 id="conflict-resolution"><a class="header" href="#conflict-resolution">Conflict Resolution</a></h3>
+<p>When follower’s log conflicts with leader’s:</p>
+<ol>
+<li><strong>Leader never overwrites</strong> its own log entries</li>
+<li><strong>Follower’s conflicting entries are deleted</strong></li>
+<li>Leader maintains <code>nextIndex[]</code> for each follower (initially set to leader’s last log index + 1)</li>
+<li>On AppendEntries rejection:
+<ul>
+<li>Leader decrements <code>nextIndex</code> for that follower</li>
+<li>Retries AppendEntries with earlier entries</li>
+</ul>
+</li>
+<li>When AppendEntries succeeds:
+<ul>
+<li>Follower’s log now matches leader’s up to that point</li>
+<li>Leader updates <code>nextIndex</code> and <code>matchIndex</code> for follower</li>
+</ul>
+</li>
+</ol>
+<h3 id="commitment-rules"><a class="header" href="#commitment-rules">Commitment Rules</a></h3>
+<p>An entry is <strong>committed</strong> when:</p>
+<ol>
+<li>Leader has stored it on majority of servers</li>
+<li>At least one entry from current term is also stored on majority (prevents committing entries from previous terms directly)</li>
+</ol>
+<p><strong>Commitment process:</strong></p>
+<ol>
+<li>Leader tracks highest committed entry in <code>commitIndex</code></li>
+<li>Once entry committed, leader applies it to state machine</li>
+<li>Leader includes <code>commitIndex</code> in AppendEntries RPCs</li>
+<li>Followers apply committed entries to their state machines</li>
+<li>Entries are applied in log order to ensure state machine consistency</li>
+</ol>
+<h2 id="safety-rules"><a class="header" href="#safety-rules">Safety Rules</a></h2>
+<p>Raft guarantees the following properties hold at all times:</p>
+<h3 id="1-election-safety"><a class="header" href="#1-election-safety">1. Election Safety</a></h3>
+<p><strong>Property:</strong> At most one leader can be elected in a given term.</p>
+<p><strong>How it’s enforced:</strong></p>
+<ul>
+<li>Each server votes for at most one candidate per term</li>
+<li>Server stores <code>votedFor</code> and persists it to stable storage</li>
+<li>Candidate needs majority of votes to win</li>
+<li>Two different candidates cannot both get majority in same term</li>
+</ul>
+<h3 id="2-leader-append-only"><a class="header" href="#2-leader-append-only">2. Leader Append-Only</a></h3>
+<p><strong>Property:</strong> A leader never overwrites or deletes entries in its log; it only appends new entries.</p>
+<p><strong>Why it matters:</strong></p>
+<ul>
+<li>Simplifies reasoning about log consistency</li>
+<li>Once leader commits entry, it remains in leader’s log forever</li>
+<li>Leader’s log is always “truth” for its term</li>
+</ul>
+<h3 id="3-log-matching-property"><a class="header" href="#3-log-matching-property">3. Log Matching Property</a></h3>
+<p><strong>Property:</strong> If two logs contain an entry with the same index and term, then:</p>
+<ul>
+<li>The logs are identical in all entries up through that index</li>
+<li>The entries store the same command</li>
+</ul>
+<p><strong>How it’s enforced:</strong></p>
+<ul>
+<li>Leader creates at most one entry per log index in a given term</li>
+<li>Log entries never change position</li>
+<li>AppendEntries consistency check verifies log matching before accepting new entries</li>
+</ul>
+<p><strong>Implications:</strong></p>
+<ul>
+<li>When AppendEntries returns success, leader knows follower’s log is identical to its own through new entries</li>
+<li>Transitive property: if A matches B and B matches C, then A matches C</li>
+</ul>
+<h3 id="4-leader-completeness-property"><a class="header" href="#4-leader-completeness-property">4. Leader Completeness Property</a></h3>
+<p><strong>Property:</strong> If a log entry is committed in a given term, then that entry will be present in the logs of leaders for all higher-numbered terms.</p>
+<p><strong>How it’s enforced:</strong></p>
+<ul>
+<li>Voting restriction: candidate cannot win election unless its log contains all committed entries</li>
+<li>RequestVote RPC includes <code>lastLogIndex</code> and <code>lastLogTerm</code></li>
+<li>Voter denies vote if its own log is “more up-to-date” than candidate’s</li>
+<li>“More up-to-date” defined as: later term number or same term but longer log</li>
+</ul>
+<p><strong>Why it matters:</strong></p>
+<ul>
+<li>Leaders never need to look at previous terms to determine which entries are committed</li>
+<li>Committed entries flow forward through leaders</li>
+<li>Ensures linearizable consistency</li>
+</ul>
+<h3 id="5-state-machine-safety"><a class="header" href="#5-state-machine-safety">5. State Machine Safety</a></h3>
+<p><strong>Property:</strong> If a server has applied a log entry at a given index to its state machine, no other server will ever apply a different log entry for the same index.</p>
+<p><strong>How it’s enforced:</strong></p>
+<ul>
+<li>Servers only apply committed entries</li>
+<li>Leader Completeness ensures committed entries present in all future leaders</li>
+<li>Log Matching ensures all servers apply same sequence of commands</li>
+<li>Entries applied to state machine in log order</li>
+</ul>
+<p><strong>Result:</strong> All servers execute same sequence of commands in same order, maintaining identical state machines (assuming deterministic commands).</p>
+<h3 id="key-invariants"><a class="header" href="#key-invariants">Key Invariants</a></h3>
+<p>Throughout normal operation, Raft maintains:</p>
+<ul>
+<li><strong>Leader has most complete log</strong>: Among servers in its term, leader’s committed entries form superset</li>
+<li><strong>Committed entries are durable</strong>: Once committed, entry present in majority; will survive into future leaders</li>
+<li><strong>Applied entries are consistent</strong>: All servers apply same entries at each index</li>
+<li><strong>Terms increase monotonically</strong>: Servers never decrease currentTerm</li>
+</ul>
+<h2 id="cluster-membership-changes"><a class="header" href="#cluster-membership-changes">Cluster Membership Changes</a></h2>
+<p>Raft supports changing cluster membership (adding/removing servers) without taking the cluster offline.</p>
+<h3 id="the-problem"><a class="header" href="#the-problem">The Problem</a></h3>
+<p>Directly switching from old configuration to new configuration is unsafe:</p>
+<ul>
+<li>Different servers may switch at different times</li>
+<li>Could have two independent majorities during transition</li>
+<li>Violates election safety (two leaders in same term)</li>
+</ul>
+<p><strong>Example of unsafe direct switch:</strong></p>
+<pre><code>Old config: Server1, Server2, Server3 (majority = 2)
+New config: Server1, Server2, Server3, Server4, Server5 (majority = 3)
+
+During transition, could have:
+- Old majority: Server1, Server2 elect LeaderA
+- New majority: Server3, Server4, Server5 elect LeaderB
+→ Two leaders in same term! ✗
+</code></pre>
+<h3 id="joint-consensus-approach"><a class="header" href="#joint-consensus-approach">Joint Consensus Approach</a></h3>
+<p>Raft uses a two-phase approach with <strong>joint consensus</strong> configuration (C-old,new):</p>
+<p><strong>Phase 1: Enter joint consensus</strong></p>
+<ol>
+<li>Leader receives configuration change request</li>
+<li>Creates C-old,new configuration (includes both old and new servers)</li>
+<li>Replicates C-old,new as log entry</li>
+<li>Once C-old,new committed, cluster operates under joint consensus rules</li>
+</ol>
+<p><strong>Phase 2: Move to new configuration</strong></p>
+<ol>
+<li>Leader creates C-new configuration</li>
+<li>Replicates C-new as log entry</li>
+<li>Once C-new committed, cluster operates under new configuration</li>
+</ol>
+<h3 id="joint-consensus-rules"><a class="header" href="#joint-consensus-rules">Joint Consensus Rules</a></h3>
+<p>While in C-old,new state:</p>
+<ul>
+<li><strong>Log entries must be replicated to majority of BOTH old and new configs</strong></li>
+<li><strong>Elections require majority of BOTH old and new configs</strong></li>
+<li>Any server from either configuration can serve as leader</li>
+<li>Ensures safety: impossible to have two leaders</li>
+</ul>
+<p><strong>Why it works:</strong></p>
+<ul>
+<li>Cannot make decisions without majority of old configuration</li>
+<li>Cannot make decisions without majority of new configuration</li>
+<li>Any two majorities must overlap → consensus maintained</li>
+</ul>
+<h3 id="configuration-change-protocol"><a class="header" href="#configuration-change-protocol">Configuration Change Protocol</a></h3>
+<p><strong>Detailed steps:</strong></p>
+<ol>
+<li>
+<p><strong>Client requests membership change</strong> (add/remove servers)</p>
+</li>
+<li>
+<p><strong>Leader creates C-old,new entry</strong></p>
+<ul>
+<li>Log entry containing both configurations</li>
+<li>Leader applies C-old,new immediately when creating it</li>
+</ul>
+</li>
+<li>
+<p><strong>C-old,new is replicated</strong></p>
+<ul>
+<li>Sent to all servers in both old and new configurations</li>
+<li>Servers apply C-old,new as soon as they receive it (before commitment)</li>
+<li>System now requires dual majorities for all decisions</li>
+</ul>
+</li>
+<li>
+<p><strong>C-old,new is committed</strong></p>
+<ul>
+<li>Once replicated to majority of both old and new configurations</li>
+<li>Leader knows it’s safe to proceed to C-new</li>
+</ul>
+</li>
+<li>
+<p><strong>Leader creates C-new entry</strong></p>
+<ul>
+<li>Contains only new configuration</li>
+<li>Replicates to all servers in new configuration</li>
+</ul>
+</li>
+<li>
+<p><strong>C-new is committed</strong></p>
+<ul>
+<li>Configuration change complete</li>
+<li>Servers not in C-new can shut down</li>
+</ul>
+</li>
+</ol>
+<h3 id="single-server-changes"><a class="header" href="#single-server-changes">Single-Server Changes</a></h3>
+<p><strong>Simplified approach:</strong> Change only one server at a time.</p>
+<p><strong>Why it’s safe:</strong></p>
+<ul>
+<li>Majorities of any two consecutive configurations always overlap</li>
+<li>No possibility of disjoint majorities</li>
+<li>Simpler to implement than joint consensus</li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>Slower for adding/removing multiple servers</li>
+<li>May not maintain desired replication level during changes</li>
+<li>Still needs to handle special cases (see below)</li>
+</ul>
+<h3 id="special-considerations"><a class="header" href="#special-considerations">Special Considerations</a></h3>
+<p><strong>Adding new servers:</strong></p>
+<ul>
+<li>New servers start with empty logs</li>
+<li>Would take time to catch up</li>
+<li>During catch-up, availability could be impacted</li>
+<li><strong>Solution:</strong> Add servers in non-voting mode first
+<ul>
+<li>Leader replicates log entries to them</li>
+<li>Once caught up (within threshold), promote to voting member</li>
+<li>Ensures availability maintained</li>
+</ul>
+</li>
+</ul>
+<p><strong>Removing current leader:</strong></p>
+<ul>
+<li>Leader could be removed from new configuration</li>
+<li>Leader must step down after committing C-new</li>
+<li><strong>Leader’s steps:</strong>
+<ol>
+<li>Commit C-new (in which leader is not present)</li>
+<li>Step down to follower state</li>
+<li>Stop sending heartbeats</li>
+<li>New election occurs among remaining servers</li>
+</ol>
+</li>
+</ul>
+<p><strong>Disruptive servers:</strong></p>
+<ul>
+<li>Removed servers don’t receive heartbeats</li>
+<li>Will timeout and start elections</li>
+<li>Can disrupt cluster with higher term numbers</li>
+<li><strong>Solution:</strong> Servers ignore RequestVote RPCs when they believe current leader exists
+<ul>
+<li>Specifically: if received AppendEntries within minimum election timeout</li>
+<li>Prevents disruption from removed servers</li>
+</ul>
+</li>
+</ul>
 <h2 id="example-python-like-pseudocode"><a class="header" href="#example-python-like-pseudocode">Example (Python-like pseudocode)</a></h2>
 <pre><code class="language-python">class RaftNode:
     def __init__(self):

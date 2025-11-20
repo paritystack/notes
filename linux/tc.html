@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-843a62d1.js";
+            window.path_to_searchindex_js = "../searchindex-b2dc8d76.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f349561e.js"></script>
+        <script src="../toc-728509bc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -176,26 +176,515 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="tc"><a class="header" href="#tc">tc</a></h1>
-<p><code>tc</code> (traffic control) is a utility in the Linux kernel used to configure Traffic Control in the network stack. It allows administrators to configure the queuing discipline (qdisc), which determines how packets are enqueued and dequeued from the network interface.</p>
-<h3 id="important-components-of-tc"><a class="header" href="#important-components-of-tc">Important Components of <code>tc</code></a></h3>
-<ol>
-<li><strong>qdisc (Queuing Discipline)</strong>: The core component of <code>tc</code>, which defines the algorithm used to manage the packet queue. Examples include <code>pfifo_fast</code>, <code>fq_codel</code>, and <code>netem</code>.</li>
-<li><strong>class</strong>: A way to create a hierarchy within a qdisc, allowing for more granular control over traffic. Classes can be used to apply different rules to different types of traffic.</li>
-<li><strong>filter</strong>: Used to classify packets into different classes. Filters can match on various packet attributes, such as IP address, port number, or protocol.</li>
-<li><strong>action</strong>: Defines what to do with packets that match a filter. Actions can include marking, mirroring, or redirecting packets.</li>
-</ol>
-<h3 id="uses-of-tc"><a class="header" href="#uses-of-tc">Uses of <code>tc</code></a></h3>
+                        <h1 id="tc-traffic-control"><a class="header" href="#tc-traffic-control">tc (Traffic Control)</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
 <ul>
-<li><strong>Traffic Shaping</strong>: Control the rate of outgoing traffic to ensure that the network is not overwhelmed. This can be useful for managing bandwidth usage and ensuring fair distribution of network resources.</li>
-<li><strong>Traffic Policing</strong>: Enforce limits on the rate of incoming traffic, dropping packets that exceed the specified rate. This can help protect against network abuse or attacks.</li>
-<li><strong>Network Emulation</strong>: Simulate various network conditions, such as latency, packet loss, and jitter, to test the performance of applications under different scenarios.</li>
-<li><strong>Quality of Service (QoS)</strong>: Prioritize certain types of traffic to ensure that critical applications receive the necessary bandwidth and low latency.</li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#important-components">Important Components</a></li>
+<li><a href="#command-syntax">Command Syntax</a></li>
+<li><a href="#common-queuing-disciplines-qdiscs">Common Queuing Disciplines (qdiscs)</a></li>
+<li><a href="#uses-of-tc">Uses of tc</a></li>
+<li><a href="#tc-vs-netfilter-iptablesnftables">tc vs Netfilter (iptables/nftables)</a>
+<ul>
+<li><a href="#overview-of-netfilter">Overview of Netfilter</a></li>
+<li><a href="#key-differences">Key Differences</a></li>
+<li><a href="#working-together">Working Together</a></li>
+<li><a href="#choosing-the-right-tool">Choosing the Right Tool</a></li>
 </ul>
-<p>By using <code>tc</code>, administrators can fine-tune network performance, improve reliability, and ensure that critical applications have the necessary resources to function optimally.</p>
-<p>Add delay to all traffic on eth0</p>
+</li>
+<li><a href="#practical-examples">Practical Examples</a>
+<ul>
+<li><a href="#basic-network-emulation">Basic Network Emulation</a></li>
+<li><a href="#bandwidth-limiting">Bandwidth Limiting</a></li>
+<li><a href="#traffic-shaping-with-htb">Traffic Shaping with HTB</a></li>
+<li><a href="#qos-prioritization">QoS Prioritization</a></li>
+<li><a href="#advanced-network-emulation">Advanced Network Emulation</a></li>
+</ul>
+</li>
+<li><a href="#viewing-and-managing-configurations">Viewing and Managing Configurations</a></li>
+<li><a href="#real-world-scenarios">Real-World Scenarios</a></li>
+<li><a href="#troubleshooting-tips">Troubleshooting Tips</a></li>
+</ul>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p><code>tc</code> (traffic control) is a powerful utility in the Linux kernel used to configure Traffic Control in the network stack. It allows administrators to configure the queuing discipline (qdisc), which determines how packets are enqueued and dequeued from network interfaces.</p>
+<p>Traffic control enables you to:</p>
+<ul>
+<li>Control bandwidth usage</li>
+<li>Prioritize specific types of traffic</li>
+<li>Simulate various network conditions</li>
+<li>Implement Quality of Service (QoS) policies</li>
+<li>Test application performance under different network scenarios</li>
+</ul>
+<h2 id="important-components"><a class="header" href="#important-components">Important Components</a></h2>
+<ol>
+<li>
+<p><strong>qdisc (Queuing Discipline)</strong>: The core component of <code>tc</code>, which defines the algorithm used to manage the packet queue. Examples include <code>pfifo_fast</code>, <code>fq_codel</code>, <code>htb</code>, and <code>netem</code>.</p>
+</li>
+<li>
+<p><strong>class</strong>: A way to create a hierarchy within a qdisc, allowing for more granular control over traffic. Classes can be used to apply different rules to different types of traffic.</p>
+</li>
+<li>
+<p><strong>filter</strong>: Used to classify packets into different classes. Filters can match on various packet attributes, such as IP address, port number, or protocol.</p>
+</li>
+<li>
+<p><strong>action</strong>: Defines what to do with packets that match a filter. Actions can include marking, mirroring, or redirecting packets.</p>
+</li>
+</ol>
+<h2 id="command-syntax"><a class="header" href="#command-syntax">Command Syntax</a></h2>
+<p>Basic <code>tc</code> command structure:</p>
+<pre><code class="language-bash">tc qdisc [ add | del | replace | change | show ] dev DEVICE [ parent QHANDLE ] [ handle QHANDLE ] [ QDISC ]
+tc class [ add | del | change | show ] dev DEVICE parent QHANDLE [ classid CLASSID ] [ QDISC ]
+tc filter [ add | del | change | show ] dev DEVICE [ parent QHANDLE ] protocol PROTOCOL prio PRIORITY filtertype [ filtertype-specific-parameters ]
+</code></pre>
+<p>Key components:</p>
+<ul>
+<li><strong>dev</strong>: Network interface (e.g., eth0, wlan0)</li>
+<li><strong>parent</strong>: Parent qdisc or class handle</li>
+<li><strong>handle</strong>: Identifier for the qdisc or class</li>
+<li><strong>root</strong>: Top-level qdisc (no parent)</li>
+</ul>
+<h2 id="common-queuing-disciplines-qdiscs"><a class="header" href="#common-queuing-disciplines-qdiscs">Common Queuing Disciplines (qdiscs)</a></h2>
+<h3 id="pfifo_fast-default"><a class="header" href="#pfifo_fast-default">pfifo_fast (Default)</a></h3>
+<p>The default qdisc for most interfaces. It has three priority bands and uses a simple FIFO algorithm.</p>
+<h3 id="htb-hierarchical-token-bucket"><a class="header" href="#htb-hierarchical-token-bucket">HTB (Hierarchical Token Bucket)</a></h3>
+<p>Allows creating a hierarchy of rate-limited classes. Excellent for bandwidth shaping and guaranteeing rates.</p>
+<h3 id="fq_codel-fair-queuing-with-controlled-delay"><a class="header" href="#fq_codel-fair-queuing-with-controlled-delay">fq_codel (Fair Queuing with Controlled Delay)</a></h3>
+<p>Modern queue management algorithm that combines fair queuing with active queue management. Good for reducing bufferbloat.</p>
+<h3 id="netem-network-emulator"><a class="header" href="#netem-network-emulator">netem (Network Emulator)</a></h3>
+<p>Used to emulate network conditions like delay, packet loss, duplication, and reordering.</p>
+<h3 id="tbf-token-bucket-filter"><a class="header" href="#tbf-token-bucket-filter">TBF (Token Bucket Filter)</a></h3>
+<p>Simple qdisc for rate limiting. Packets are transmitted only when tokens are available.</p>
+<h3 id="prio-priority-scheduler"><a class="header" href="#prio-priority-scheduler">prio (Priority Scheduler)</a></h3>
+<p>Similar to pfifo_fast but allows more control over priority bands.</p>
+<h2 id="uses-of-tc"><a class="header" href="#uses-of-tc">Uses of tc</a></h2>
+<ul>
+<li>
+<p><strong>Traffic Shaping</strong>: Control the rate of outgoing traffic to ensure that the network is not overwhelmed. This can be useful for managing bandwidth usage and ensuring fair distribution of network resources.</p>
+</li>
+<li>
+<p><strong>Traffic Policing</strong>: Enforce limits on the rate of incoming traffic, dropping packets that exceed the specified rate. This can help protect against network abuse or attacks.</p>
+</li>
+<li>
+<p><strong>Network Emulation</strong>: Simulate various network conditions, such as latency, packet loss, and jitter, to test the performance of applications under different scenarios.</p>
+</li>
+<li>
+<p><strong>Quality of Service (QoS)</strong>: Prioritize certain types of traffic to ensure that critical applications receive the necessary bandwidth and low latency.</p>
+</li>
+</ul>
+<h2 id="tc-vs-netfilter-iptablesnftables"><a class="header" href="#tc-vs-netfilter-iptablesnftables">tc vs Netfilter (iptables/nftables)</a></h2>
+<p>Understanding the differences between <code>tc</code> and netfilter (implemented via <code>iptables</code> or <code>nftables</code>) is crucial for effective network management in Linux. While both tools can manipulate network traffic, they serve different purposes and operate at different layers of the network stack.</p>
+<h3 id="overview-of-netfilter"><a class="header" href="#overview-of-netfilter">Overview of Netfilter</a></h3>
+<p><strong>Netfilter</strong> is a packet filtering framework in the Linux kernel. It’s primarily accessed through user-space tools like:</p>
+<ul>
+<li><strong>iptables</strong>: Traditional tool for IPv4 packet filtering</li>
+<li><strong>ip6tables</strong>: IPv4’s counterpart for IPv6</li>
+<li><strong>nftables</strong>: Modern replacement for iptables, offering improved performance and syntax</li>
+</ul>
+<p>Netfilter operates at the network layer (Layer 3) and is primarily used for:</p>
+<ul>
+<li>Packet filtering (firewall rules)</li>
+<li>Network Address Translation (NAT)</li>
+<li>Port forwarding</li>
+<li>Packet mangling (modifying packet headers)</li>
+<li>Connection tracking</li>
+</ul>
+<h3 id="key-differences"><a class="header" href="#key-differences">Key Differences</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>tc (Traffic Control)</th><th>Netfilter (iptables/nftables)</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Primary Purpose</strong></td><td>Traffic shaping and QoS</td><td>Packet filtering and firewalling</td></tr>
+<tr><td><strong>Operating Layer</strong></td><td>Layer 2 (Link) and Layer 3 (Network)</td><td>Layer 3 (Network) and Layer 4 (Transport)</td></tr>
+<tr><td><strong>Default Direction</strong></td><td>Egress (outgoing) traffic</td><td>Both ingress and egress</td></tr>
+<tr><td><strong>Bandwidth Control</strong></td><td>Native and sophisticated</td><td>Limited, requires additional modules</td></tr>
+<tr><td><strong>Packet Filtering</strong></td><td>Basic classification</td><td>Advanced and flexible</td></tr>
+<tr><td><strong>Queue Management</strong></td><td>Extensive (multiple qdiscs)</td><td>Not applicable</td></tr>
+<tr><td><strong>NAT/Port Forwarding</strong></td><td>Not supported</td><td>Native support</td></tr>
+<tr><td><strong>Performance Impact</strong></td><td>Lower for shaping tasks</td><td>Lower for filtering tasks</td></tr>
+<tr><td><strong>Configuration</strong></td><td>Complex syntax</td><td>Relatively straightforward rules</td></tr>
+<tr><td><strong>State Tracking</strong></td><td>Limited</td><td>Connection tracking (conntrack)</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="detailed-comparison"><a class="header" href="#detailed-comparison">Detailed Comparison</a></h3>
+<h4 id="operating-in-the-network-stack"><a class="header" href="#operating-in-the-network-stack">Operating in the Network Stack</a></h4>
+<p><strong>tc</strong> operates primarily at the <strong>egress</strong> (outgoing) side of network interfaces:</p>
+<ul>
+<li>Processes packets as they leave the interface</li>
+<li>Controls queuing disciplines and scheduling</li>
+<li>For ingress control, requires IFB (Intermediate Functional Block) devices</li>
+<li>Works at the queueing layer</li>
+</ul>
+<p><strong>Netfilter</strong> operates at multiple <strong>hook points</strong> in the network stack:</p>
+<ul>
+<li>PREROUTING: Before routing decision</li>
+<li>INPUT: For packets destined to local system</li>
+<li>FORWARD: For packets being routed through the system</li>
+<li>OUTPUT: For locally generated packets</li>
+<li>POSTROUTING: After routing decision</li>
+</ul>
+<h4 id="primary-use-cases"><a class="header" href="#primary-use-cases">Primary Use Cases</a></h4>
+<p><strong>Use tc when you need to:</strong></p>
+<ul>
+<li>Limit bandwidth for specific applications or interfaces</li>
+<li>Implement Quality of Service (QoS) policies</li>
+<li>Shape traffic to prevent network congestion</li>
+<li>Guarantee minimum bandwidth for critical services</li>
+<li>Simulate network conditions (latency, packet loss, jitter)</li>
+<li>Control bufferbloat</li>
+<li>Implement hierarchical bandwidth allocation</li>
+<li>Prioritize traffic based on complex criteria</li>
+</ul>
+<p><strong>Use netfilter when you need to:</strong></p>
+<ul>
+<li>Filter packets based on IP, port, protocol, or state</li>
+<li>Implement firewall rules</li>
+<li>Perform Network Address Translation (NAT)</li>
+<li>Forward ports to different hosts</li>
+<li>Block or allow specific traffic</li>
+<li>Implement connection tracking</li>
+<li>Protect against network attacks</li>
+<li>Route packets differently based on criteria</li>
+<li>Log network traffic</li>
+</ul>
+<h3 id="working-together"><a class="header" href="#working-together">Working Together</a></h3>
+<p><code>tc</code> and netfilter complement each other and can work together effectively. A common pattern is to use <strong>netfilter to mark packets</strong> and <strong>tc to classify and shape</strong> based on those marks.</p>
+<h4 id="example-mark-packets-with-iptables-shape-with-tc"><a class="header" href="#example-mark-packets-with-iptables-shape-with-tc">Example: Mark packets with iptables, shape with tc</a></h4>
+<pre><code class="language-bash"># 1. Mark SSH traffic with iptables
+sudo iptables -t mangle -A OUTPUT -p tcp --sport 22 -j MARK --set-mark 1
+sudo iptables -t mangle -A OUTPUT -p tcp --dport 22 -j MARK --set-mark 1
+
+# 2. Mark HTTP traffic with iptables
+sudo iptables -t mangle -A OUTPUT -p tcp --sport 80 -j MARK --set-mark 2
+sudo iptables -t mangle -A OUTPUT -p tcp --dport 80 -j MARK --set-mark 2
+
+# 3. Setup tc HTB qdisc
+sudo tc qdisc add dev eth0 root handle 1: htb default 30
+
+# 4. Create classes
+sudo tc class add dev eth0 parent 1: classid 1:1 htb rate 10mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 6mbit ceil 10mbit prio 1  # SSH
+sudo tc class add dev eth0 parent 1:1 classid 1:20 htb rate 3mbit ceil 8mbit prio 2   # HTTP
+sudo tc class add dev eth0 parent 1:1 classid 1:30 htb rate 1mbit ceil 5mbit prio 3   # Other
+
+# 5. Create tc filters based on iptables marks
+sudo tc filter add dev eth0 parent 1: protocol ip prio 1 handle 1 fw flowid 1:10  # SSH
+sudo tc filter add dev eth0 parent 1: protocol ip prio 2 handle 2 fw flowid 1:20  # HTTP
+</code></pre>
+<h4 id="example-filter-with-iptables-then-shape-with-tc"><a class="header" href="#example-filter-with-iptables-then-shape-with-tc">Example: Filter with iptables, then shape with tc</a></h4>
+<pre><code class="language-bash"># 1. Allow only specific traffic through firewall
+sudo iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --dport 22 -j ACCEPT
+sudo iptables -A OUTPUT -j DROP
+
+# 2. Shape the allowed traffic with tc
+sudo tc qdisc add dev eth0 root handle 1: htb default 10
+sudo tc class add dev eth0 parent 1: classid 1:1 htb rate 100mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 50mbit ceil 100mbit
+</code></pre>
+<h4 id="example-nat-with-iptables-bandwidth-limit-with-tc"><a class="header" href="#example-nat-with-iptables-bandwidth-limit-with-tc">Example: NAT with iptables, bandwidth limit with tc</a></h4>
+<pre><code class="language-bash"># 1. Setup NAT for local network (iptables handles routing)
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+# 2. Limit total bandwidth for NATed traffic (tc handles shaping)
+sudo tc qdisc add dev eth0 root handle 1: htb default 10
+sudo tc class add dev eth0 parent 1: classid 1:1 htb rate 50mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 50mbit ceil 50mbit
+</code></pre>
+<h3 id="choosing-the-right-tool"><a class="header" href="#choosing-the-right-tool">Choosing the Right Tool</a></h3>
+<p><strong>Use tc alone when:</strong></p>
+<ul>
+<li>You need sophisticated bandwidth management</li>
+<li>Implementing QoS is the primary goal</li>
+<li>Testing application performance under various network conditions</li>
+<li>Controlling buffer bloat</li>
+<li>No packet filtering is required</li>
+</ul>
+<p><strong>Use netfilter alone when:</strong></p>
+<ul>
+<li>You need to filter packets (firewall)</li>
+<li>Implementing NAT or port forwarding</li>
+<li>Packet filtering based on connection state</li>
+<li>Logging network traffic</li>
+<li>No bandwidth control is needed</li>
+</ul>
+<p><strong>Use both together when:</strong></p>
+<ul>
+<li>You need both firewalling and traffic shaping</li>
+<li>Complex QoS with packet classification based on multiple criteria</li>
+<li>Implementing enterprise-grade network policies</li>
+<li>Need to mark packets for classification in tc</li>
+<li>Building a router or gateway with QoS</li>
+</ul>
+<h3 id="performance-considerations"><a class="header" href="#performance-considerations">Performance Considerations</a></h3>
+<ul>
+<li><strong>tc</strong> is more efficient for bandwidth limiting and queuing operations</li>
+<li><strong>Netfilter</strong> is more efficient for packet filtering and state tracking</li>
+<li>Using both together adds some overhead but provides maximum flexibility</li>
+<li>For simple rate limiting without complex rules, tc alone is often sufficient</li>
+<li>For complex packet filtering without bandwidth control, netfilter alone is appropriate</li>
+</ul>
+<h3 id="common-misconceptions"><a class="header" href="#common-misconceptions">Common Misconceptions</a></h3>
+<ol>
+<li>
+<p><strong>“tc can replace iptables”</strong>: False. tc cannot filter packets or provide firewall functionality.</p>
+</li>
+<li>
+<p><strong>“iptables can do traffic shaping”</strong>: Partially true. While iptables has some rate limiting capabilities (like <code>limit</code> and <code>hashlimit</code> modules), they are far less sophisticated than tc’s QoS features.</p>
+</li>
+<li>
+<p><strong>“tc only works on outgoing traffic”</strong>: Mostly true. tc primarily controls egress traffic, but can be configured for ingress using IFB devices or ingress qdiscs.</p>
+</li>
+<li>
+<p><strong>“Netfilter can control bandwidth as well as tc”</strong>: False. Netfilter’s rate limiting is packet-based and much simpler than tc’s queue-based traffic control.</p>
+</li>
+</ol>
+<h2 id="practical-examples"><a class="header" href="#practical-examples">Practical Examples</a></h2>
+<h3 id="basic-network-emulation"><a class="header" href="#basic-network-emulation">Basic Network Emulation</a></h3>
+<h4 id="add-delay-to-all-traffic"><a class="header" href="#add-delay-to-all-traffic">Add delay to all traffic</a></h4>
 <pre><code class="language-bash">sudo tc qdisc add dev eth0 root netem delay 100ms
 </code></pre>
+<h4 id="add-delay-with-variation-jitter"><a class="header" href="#add-delay-with-variation-jitter">Add delay with variation (jitter)</a></h4>
+<pre><code class="language-bash">sudo tc qdisc add dev eth0 root netem delay 100ms 20ms
+</code></pre>
+<h4 id="simulate-packet-loss"><a class="header" href="#simulate-packet-loss">Simulate packet loss</a></h4>
+<pre><code class="language-bash"># 10% packet loss
+sudo tc qdisc add dev eth0 root netem loss 10%
+</code></pre>
+<h4 id="combine-delay-and-packet-loss"><a class="header" href="#combine-delay-and-packet-loss">Combine delay and packet loss</a></h4>
+<pre><code class="language-bash">sudo tc qdisc add dev eth0 root netem delay 100ms loss 5%
+</code></pre>
+<h3 id="bandwidth-limiting"><a class="header" href="#bandwidth-limiting">Bandwidth Limiting</a></h3>
+<h4 id="limit-bandwidth-using-tbf"><a class="header" href="#limit-bandwidth-using-tbf">Limit bandwidth using TBF</a></h4>
+<pre><code class="language-bash"># Limit to 1mbit/s with burst of 32kbit and latency of 400ms
+sudo tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms
+</code></pre>
+<h4 id="simple-rate-limiting"><a class="header" href="#simple-rate-limiting">Simple rate limiting</a></h4>
+<pre><code class="language-bash"># Limit to 10mbit/s
+sudo tc qdisc add dev eth0 root tbf rate 10mbit burst 32kbit latency 400ms
+</code></pre>
+<h3 id="traffic-shaping-with-htb"><a class="header" href="#traffic-shaping-with-htb">Traffic Shaping with HTB</a></h3>
+<h4 id="create-htb-qdisc-with-rate-limits"><a class="header" href="#create-htb-qdisc-with-rate-limits">Create HTB qdisc with rate limits</a></h4>
+<pre><code class="language-bash"># Add root HTB qdisc
+sudo tc qdisc add dev eth0 root handle 1: htb default 30
+
+# Create root class with 10mbit ceiling
+sudo tc class add dev eth0 parent 1: classid 1:1 htb rate 10mbit
+
+# Create child classes
+sudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 5mbit ceil 10mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:20 htb rate 3mbit ceil 10mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:30 htb rate 2mbit ceil 10mbit
+</code></pre>
+<h4 id="add-filters-to-classify-traffic"><a class="header" href="#add-filters-to-classify-traffic">Add filters to classify traffic</a></h4>
+<pre><code class="language-bash"># Send traffic to port 80 to class 1:10
+sudo tc filter add dev eth0 protocol ip parent 1: prio 1 u32 \
+    match ip dport 80 0xffff flowid 1:10
+
+# Send traffic to port 22 to class 1:20 (prioritize SSH)
+sudo tc filter add dev eth0 protocol ip parent 1: prio 1 u32 \
+    match ip dport 22 0xffff flowid 1:20
+</code></pre>
+<h3 id="qos-prioritization"><a class="header" href="#qos-prioritization">QoS Prioritization</a></h3>
+<h4 id="using-prio-qdisc-for-priority-bands"><a class="header" href="#using-prio-qdisc-for-priority-bands">Using prio qdisc for priority bands</a></h4>
+<pre><code class="language-bash"># Create prio qdisc with 3 bands
+sudo tc qdisc add dev eth0 root handle 1: prio bands 3
+
+# Add filters to classify traffic
+# High priority: SSH (port 22)
+sudo tc filter add dev eth0 parent 1: protocol ip prio 1 u32 \
+    match ip dport 22 0xffff flowid 1:1
+
+# Medium priority: HTTP/HTTPS (ports 80, 443)
+sudo tc filter add dev eth0 parent 1: protocol ip prio 2 u32 \
+    match ip dport 80 0xffff flowid 1:2
+
+# Low priority: everything else (default band 3)
+</code></pre>
+<h3 id="advanced-network-emulation"><a class="header" href="#advanced-network-emulation">Advanced Network Emulation</a></h3>
+<h4 id="simulate-mobile-network-conditions-3g"><a class="header" href="#simulate-mobile-network-conditions-3g">Simulate mobile network conditions (3G)</a></h4>
+<pre><code class="language-bash"># Typical 3G: 2mbit, 100ms latency, 1% loss
+sudo tc qdisc add dev eth0 root netem rate 2mbit delay 100ms loss 1%
+</code></pre>
+<h4 id="simulate-high-latency-satellite-connection"><a class="header" href="#simulate-high-latency-satellite-connection">Simulate high-latency satellite connection</a></h4>
+<pre><code class="language-bash"># Satellite: 500ms delay with 50ms variation
+sudo tc qdisc add dev eth0 root netem delay 500ms 50ms
+</code></pre>
+<h4 id="packet-reordering"><a class="header" href="#packet-reordering">Packet reordering</a></h4>
+<pre><code class="language-bash"># 25% of packets will be delayed by 10ms causing reordering
+sudo tc qdisc add dev eth0 root netem delay 10ms reorder 25% 50%
+</code></pre>
+<h4 id="packet-duplication"><a class="header" href="#packet-duplication">Packet duplication</a></h4>
+<pre><code class="language-bash"># Duplicate 1% of packets
+sudo tc qdisc add dev eth0 root netem duplicate 1%
+</code></pre>
+<h4 id="packet-corruption"><a class="header" href="#packet-corruption">Packet corruption</a></h4>
+<pre><code class="language-bash"># Corrupt 0.1% of packets
+sudo tc qdisc add dev eth0 root netem corrupt 0.1%
+</code></pre>
+<h4 id="complex-scenario-combining-multiple-effects"><a class="header" href="#complex-scenario-combining-multiple-effects">Complex scenario combining multiple effects</a></h4>
+<pre><code class="language-bash"># Simulate degraded network: 5mbit, 200ms delay, 5% loss, occasional duplicates
+sudo tc qdisc add dev eth0 root netem rate 5mbit delay 200ms 50ms loss 5% duplicate 1%
+</code></pre>
+<h2 id="viewing-and-managing-configurations"><a class="header" href="#viewing-and-managing-configurations">Viewing and Managing Configurations</a></h2>
+<h3 id="view-current-qdisc-configuration"><a class="header" href="#view-current-qdisc-configuration">View current qdisc configuration</a></h3>
+<pre><code class="language-bash"># Show all qdiscs
+sudo tc qdisc show
+
+# Show qdiscs for specific interface
+sudo tc qdisc show dev eth0
+</code></pre>
+<h3 id="view-class-configuration"><a class="header" href="#view-class-configuration">View class configuration</a></h3>
+<pre><code class="language-bash"># Show all classes
+sudo tc class show dev eth0
+
+# Show with statistics
+sudo tc -s class show dev eth0
+</code></pre>
+<h3 id="view-filter-configuration"><a class="header" href="#view-filter-configuration">View filter configuration</a></h3>
+<pre><code class="language-bash">sudo tc filter show dev eth0
+</code></pre>
+<h3 id="view-detailed-statistics"><a class="header" href="#view-detailed-statistics">View detailed statistics</a></h3>
+<pre><code class="language-bash"># Detailed qdisc statistics
+sudo tc -s qdisc show dev eth0
+
+# More detailed statistics with timestamps
+sudo tc -s -d qdisc show dev eth0
+</code></pre>
+<h3 id="remove-qdisc"><a class="header" href="#remove-qdisc">Remove qdisc</a></h3>
+<pre><code class="language-bash"># Remove root qdisc (removes all classes and filters too)
+sudo tc qdisc del dev eth0 root
+
+# Remove specific qdisc
+sudo tc qdisc del dev eth0 parent 1:1 handle 10:
+</code></pre>
+<h3 id="replace-existing-qdisc"><a class="header" href="#replace-existing-qdisc">Replace existing qdisc</a></h3>
+<pre><code class="language-bash"># Replace root qdisc
+sudo tc qdisc replace dev eth0 root netem delay 50ms
+</code></pre>
+<h3 id="change-existing-qdisc-parameters"><a class="header" href="#change-existing-qdisc-parameters">Change existing qdisc parameters</a></h3>
+<pre><code class="language-bash"># Change delay from 100ms to 200ms
+sudo tc qdisc change dev eth0 root netem delay 200ms
+</code></pre>
+<h2 id="real-world-scenarios"><a class="header" href="#real-world-scenarios">Real-World Scenarios</a></h2>
+<h3 id="scenario-1-prioritize-ssh-over-bulk-downloads"><a class="header" href="#scenario-1-prioritize-ssh-over-bulk-downloads">Scenario 1: Prioritize SSH over bulk downloads</a></h3>
+<pre><code class="language-bash"># Setup HTB with two classes
+sudo tc qdisc add dev eth0 root handle 1: htb default 20
+sudo tc class add dev eth0 parent 1: classid 1:1 htb rate 10mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 0
+sudo tc class add dev eth0 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 1
+
+# Prioritize SSH
+sudo tc filter add dev eth0 parent 1: protocol ip prio 1 u32 \
+    match ip dport 22 0xffff flowid 1:10
+</code></pre>
+<h3 id="scenario-2-limit-download-speed-from-specific-subnet"><a class="header" href="#scenario-2-limit-download-speed-from-specific-subnet">Scenario 2: Limit download speed from specific subnet</a></h3>
+<pre><code class="language-bash"># Create HTB with rate limit
+sudo tc qdisc add dev eth0 root handle 1: htb default 20
+sudo tc class add dev eth0 parent 1: classid 1:1 htb rate 100mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 1mbit ceil 2mbit
+
+# Match traffic from 192.168.1.0/24
+sudo tc filter add dev eth0 parent 1: protocol ip prio 1 u32 \
+    match ip src 192.168.1.0/24 flowid 1:10
+</code></pre>
+<h3 id="scenario-3-test-application-resilience-to-network-issues"><a class="header" href="#scenario-3-test-application-resilience-to-network-issues">Scenario 3: Test application resilience to network issues</a></h3>
+<pre><code class="language-bash"># Simulate unreliable network
+sudo tc qdisc add dev eth0 root netem delay 150ms 50ms loss 3% corrupt 0.1% duplicate 0.5%
+
+# Run your tests...
+
+# Remove when done
+sudo tc qdisc del dev eth0 root
+</code></pre>
+<h3 id="scenario-4-bandwidth-allocation-for-web-server"><a class="header" href="#scenario-4-bandwidth-allocation-for-web-server">Scenario 4: Bandwidth allocation for web server</a></h3>
+<pre><code class="language-bash"># Setup HTB for web server with guaranteed bandwidth
+sudo tc qdisc add dev eth0 root handle 1: htb default 30
+
+# Root class - total bandwidth
+sudo tc class add dev eth0 parent 1: classid 1:1 htb rate 100mbit
+
+# HTTP traffic - guaranteed 50mbit, can use up to 80mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 50mbit ceil 80mbit prio 1
+
+# HTTPS traffic - guaranteed 40mbit, can use up to 80mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:20 htb rate 40mbit ceil 80mbit prio 1
+
+# Other traffic - guaranteed 10mbit, can use up to 20mbit
+sudo tc class add dev eth0 parent 1:1 classid 1:30 htb rate 10mbit ceil 20mbit prio 2
+
+# Add filters
+sudo tc filter add dev eth0 parent 1: protocol ip prio 1 u32 \
+    match ip sport 80 0xffff flowid 1:10
+sudo tc filter add dev eth0 parent 1: protocol ip prio 1 u32 \
+    match ip sport 443 0xffff flowid 1:20
+</code></pre>
+<h2 id="troubleshooting-tips"><a class="header" href="#troubleshooting-tips">Troubleshooting Tips</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<ol>
+<li>
+<p><strong>Permission Denied</strong>: Most <code>tc</code> commands require root privileges. Use <code>sudo</code>.</p>
+</li>
+<li>
+<p><strong>Device Not Found</strong>: Ensure the network interface exists and is spelled correctly.</p>
+<pre><code class="language-bash">ip link show  # List all interfaces
+</code></pre>
+</li>
+<li>
+<p><strong>Cannot add qdisc (File exists)</strong>: A qdisc already exists. Delete it first or use <code>replace</code>.</p>
+<pre><code class="language-bash">sudo tc qdisc del dev eth0 root
+</code></pre>
+</li>
+<li>
+<p><strong>Changes not taking effect</strong>:</p>
+<ul>
+<li>Verify the qdisc is actually applied: <code>tc -s qdisc show dev eth0</code></li>
+<li>Check filter rules: <code>tc filter show dev eth0</code></li>
+<li>Ensure you’re testing with the correct interface</li>
+</ul>
+</li>
+<li>
+<p><strong>HTB not working as expected</strong>:</p>
+<ul>
+<li>Verify class hierarchy is correct</li>
+<li>Check that filters are properly directing traffic to classes</li>
+<li>Use <code>tc -s class show dev eth0</code> to see which classes are receiving traffic</li>
+</ul>
+</li>
+</ol>
+<h3 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h3>
+<ul>
+<li>Always test traffic control rules in a non-production environment first</li>
+<li>Document your tc configurations as they don’t persist across reboots</li>
+<li>Use <code>tc -s</code> to monitor actual traffic through classes and qdiscs</li>
+<li>Start with simple configurations and gradually add complexity</li>
+<li>Remember that tc only controls egress (outgoing) traffic by default</li>
+<li>For ingress (incoming) traffic control, use IFB (Intermediate Functional Block) devices</li>
+</ul>
+<h3 id="making-tc-rules-persistent"><a class="header" href="#making-tc-rules-persistent">Making tc Rules Persistent</a></h3>
+<p>Traffic control rules are not persistent across reboots. To make them persistent:</p>
+<ol>
+<li><strong>Using systemd service</strong>: Create a systemd service that runs your tc script at boot</li>
+<li><strong>Using network manager scripts</strong>: Add tc commands to network-up scripts</li>
+<li><strong>Using rc.local</strong>: Add commands to <code>/etc/rc.local</code> (on systems that support it)</li>
+</ol>
+<p>Example systemd service:</p>
+<pre><code class="language-bash"># /etc/systemd/system/tc-setup.service
+[Unit]
+Description=Traffic Control Setup
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/tc-setup.sh
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>By using <code>tc</code>, administrators can fine-tune network performance, improve reliability, and ensure that critical applications have the necessary resources to function optimally.</p>
 
                     </main>
 

@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-843a62d1.js";
+            window.path_to_searchindex_js = "../searchindex-b2dc8d76.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f349561e.js"></script>
+        <script src="../toc-728509bc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -196,6 +196,242 @@
 <li><strong>CAN 2.0B</strong>: This standard extends the identifier length to 29 bits, allowing for more unique message identifiers.</li>
 <li><strong>CAN FD (Flexible Data-rate)</strong>: This standard allows for higher data rates and larger data payloads compared to traditional CAN.</li>
 </ol>
+<h2 id="frame-formats-and-bit-timing"><a class="header" href="#frame-formats-and-bit-timing">Frame Formats and Bit Timing</a></h2>
+<h3 id="can-20a-standard-frame---11-bit-identifier"><a class="header" href="#can-20a-standard-frame---11-bit-identifier">CAN 2.0A (Standard Frame - 11-bit Identifier)</a></h3>
+<p>The standard CAN frame consists of the following fields:</p>
+<pre><code>[SOF][Arbitration Field][Control Field][Data Field][CRC Field][ACK Field][EOF]
+</code></pre>
+<p><strong>Detailed Breakdown:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Bits</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>SOF</strong> (Start of Frame)</td><td>1</td><td>Single dominant bit indicating frame start</td></tr>
+<tr><td><strong>Identifier</strong></td><td>11</td><td>Message priority (lower = higher priority)</td></tr>
+<tr><td><strong>RTR</strong> (Remote Transmission Request)</td><td>1</td><td>0=Data frame, 1=Remote frame</td></tr>
+<tr><td><strong>IDE</strong> (Identifier Extension)</td><td>1</td><td>0=Standard frame, 1=Extended frame</td></tr>
+<tr><td><strong>r0</strong> (Reserved)</td><td>1</td><td>Reserved bit (must be dominant)</td></tr>
+<tr><td><strong>DLC</strong> (Data Length Code)</td><td>4</td><td>Number of data bytes (0-8)</td></tr>
+<tr><td><strong>Data Field</strong></td><td>0-64</td><td>Actual payload data (0-8 bytes)</td></tr>
+<tr><td><strong>CRC</strong> (Cyclic Redundancy Check)</td><td>15</td><td>Error detection code</td></tr>
+<tr><td><strong>CRC Delimiter</strong></td><td>1</td><td>Recessive bit separating CRC</td></tr>
+<tr><td><strong>ACK Slot</strong></td><td>1</td><td>Receiver writes dominant if frame OK</td></tr>
+<tr><td><strong>ACK Delimiter</strong></td><td>1</td><td>Recessive bit</td></tr>
+<tr><td><strong>EOF</strong> (End of Frame)</td><td>7</td><td>Seven recessive bits</td></tr>
+<tr><td><strong>IFS</strong> (Interframe Space)</td><td>3</td><td>Three recessive bits (minimum)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Total Standard Frame Size:</strong></p>
+<ul>
+<li>Minimum (0 data bytes): 47 bits</li>
+<li>Maximum (8 data bytes): 111 bits</li>
+<li>Plus bit stuffing overhead (approximately 20% max)</li>
+</ul>
+<p><strong>Example Standard Frame (ID=0x123, 2 data bytes: 0xAB, 0xCD):</strong></p>
+<pre><code>SOF | 00100100011 | 0 | 0 | 0 | 0010 | 10101011 11001101 | CRC(15) | 1 | ACK | 1 | 1111111
+     \_________/   RTR IDE r0  DLC    \_______________/
+       ID=0x123                        Data=0xABCD
+</code></pre>
+<h3 id="can-20b-extended-frame---29-bit-identifier"><a class="header" href="#can-20b-extended-frame---29-bit-identifier">CAN 2.0B (Extended Frame - 29-bit Identifier)</a></h3>
+<p>Extended frames support longer identifiers for more complex networks:</p>
+<pre><code>[SOF][Base ID(11)][SRR][IDE][Extended ID(18)][RTR][r1][r0][DLC][Data][CRC][ACK][EOF]
+</code></pre>
+<p><strong>Key Differences:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Bits</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Base Identifier</strong></td><td>11</td><td>Most significant 11 bits of 29-bit ID</td></tr>
+<tr><td><strong>SRR</strong> (Substitute Remote Request)</td><td>1</td><td>Always recessive (replaces RTR)</td></tr>
+<tr><td><strong>IDE</strong></td><td>1</td><td>1=Extended frame</td></tr>
+<tr><td><strong>Extended Identifier</strong></td><td>18</td><td>Least significant 18 bits of ID</td></tr>
+<tr><td><strong>RTR</strong></td><td>1</td><td>0=Data frame, 1=Remote frame</td></tr>
+<tr><td><strong>r1, r0</strong></td><td>2</td><td>Reserved bits</td></tr>
+<tr><td><strong>DLC</strong></td><td>4</td><td>Data length (0-8 bytes)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Total Extended Frame Size:</strong></p>
+<ul>
+<li>Minimum (0 data bytes): 67 bits</li>
+<li>Maximum (8 data bytes): 131 bits</li>
+<li>Plus bit stuffing overhead</li>
+</ul>
+<p><strong>29-bit ID Format:</strong></p>
+<pre><code>Base ID (11 bits) | Extended ID (18 bits)
+MSB           LSB | MSB              LSB
+</code></pre>
+<p><strong>Arbitration Priority:</strong></p>
+<ul>
+<li>Standard frames have higher priority than extended frames with same base ID</li>
+<li>During arbitration, IDE bit gives standard frame priority</li>
+</ul>
+<h3 id="can-fd-flexible-data-rate"><a class="header" href="#can-fd-flexible-data-rate">CAN FD (Flexible Data-rate)</a></h3>
+<p>CAN FD extends classical CAN with:</p>
+<p><strong>Key Enhancements:</strong></p>
+<ol>
+<li><strong>Larger Payload</strong>: Up to 64 bytes (vs 8 bytes in classic CAN)</li>
+<li><strong>Faster Data Phase</strong>: Up to 5 Mbps for data (vs 1 Mbps max for classic)</li>
+<li><strong>Improved CRC</strong>: Better error detection with longer CRC sequences</li>
+</ol>
+<p><strong>CAN FD Frame Structure:</strong></p>
+<pre><code>[Arbitration Phase - same speed] | [Data Phase - faster speed] | [ACK/EOF - same speed]
+</code></pre>
+<p><strong>Additional Control Bits:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>FDF</strong> (FD Format)</td><td>1=CAN FD frame, 0=Classic CAN</td></tr>
+<tr><td><strong>res</strong> (Reserved)</td><td>Reserved bit (replaces r0)</td></tr>
+<tr><td><strong>BRS</strong> (Bit Rate Switch)</td><td>1=Switch to faster bit rate for data phase</td></tr>
+<tr><td><strong>ESI</strong> (Error State Indicator)</td><td>Error state of transmitting node</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>DLC to Data Length Mapping (CAN FD):</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>DLC</th><th>Data Bytes</th><th>DLC</th><th>Data Bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>0-8</td><td>0-8 (same)</td><td>12</td><td>48</td></tr>
+<tr><td>9</td><td>12</td><td>13</td><td>64</td></tr>
+<tr><td>10</td><td>16</td><td>14</td><td>Reserved</td></tr>
+<tr><td>11</td><td>24</td><td>15</td><td>Reserved</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Example CAN FD Advantages:</strong></p>
+<pre><code>Classic CAN: 8 bytes @ 500 kbps = 134 μs transmission time
+CAN FD:      64 bytes @ 2 Mbps data = 210 μs transmission time
+             (8x more data in ~1.5x time)
+</code></pre>
+<h3 id="bit-stuffing"><a class="header" href="#bit-stuffing">Bit Stuffing</a></h3>
+<p>CAN uses bit stuffing to ensure sufficient transitions for synchronization:</p>
+<p><strong>Rules:</strong></p>
+<ul>
+<li>After 5 consecutive bits of the same polarity, insert complementary bit</li>
+<li>Applies from SOF to CRC (excluding CRC delimiter, ACK, EOF)</li>
+<li>Receiver automatically removes stuffed bits</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>Original data:    1 1 1 1 1 0 0 0 1
+After stuffing:   1 1 1 1 1 0 0 0 0 0 1
+                           ↑       ↑
+                      Stuff bits added
+</code></pre>
+<p><strong>Implications:</strong></p>
+<ul>
+<li>Maximum overhead: ~20% (worst case)</li>
+<li>Ensures no more than 5 consecutive identical bits</li>
+<li>Bit stuffing error if violation detected</li>
+</ul>
+<h3 id="bit-timing-and-synchronization"><a class="header" href="#bit-timing-and-synchronization">Bit Timing and Synchronization</a></h3>
+<p>A single CAN bit is divided into four time segments:</p>
+<pre><code>|&lt;-- Sync Seg --&gt;|&lt;-- Prop Seg --&gt;|&lt;-- Phase Seg 1 --&gt;|&lt;-- Phase Seg 2 --&gt;|
+|      1 TQ      |    1-8 TQ      |     1-8 TQ        |     1-8 TQ        |
+                                   ^
+                              Sample Point
+</code></pre>
+<p><strong>Time Segments:</strong></p>
+<ol>
+<li>
+<p><strong>Sync Segment (Sync_Seg)</strong>: 1 Time Quantum (TQ)</p>
+<ul>
+<li>Used to synchronize nodes on bus</li>
+<li>Always 1 TQ</li>
+</ul>
+</li>
+<li>
+<p><strong>Propagation Segment (Prop_Seg)</strong>: 1-8 TQ</p>
+<ul>
+<li>Compensates for physical delay on bus</li>
+<li>Accounts for transceiver delays</li>
+</ul>
+</li>
+<li>
+<p><strong>Phase Segment 1 (Phase_Seg1)</strong>: 1-8 TQ</p>
+<ul>
+<li>Can be lengthened during resynchronization</li>
+</ul>
+</li>
+<li>
+<p><strong>Phase Segment 2 (Phase_Seg2)</strong>: 1-8 TQ</p>
+<ul>
+<li>Can be shortened during resynchronization</li>
+</ul>
+</li>
+<li>
+<p><strong>Sample Point</strong>: Between Phase_Seg1 and Phase_Seg2</p>
+<ul>
+<li>Where bit value is read</li>
+<li>Typically 75-87.5% through bit time</li>
+</ul>
+</li>
+</ol>
+<p><strong>Baud Rate Calculation:</strong></p>
+<pre><code>Bit_Time = Sync_Seg + Prop_Seg + Phase_Seg1 + Phase_Seg2
+Bit_Time = 1 TQ + Prop_Seg + Phase_Seg1 + Phase_Seg2
+
+Baud_Rate = 1 / Bit_Time
+Baud_Rate = f_clk / (BRP × Bit_Time_in_TQ)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>f_clk</code>: CAN controller clock frequency</li>
+<li><code>BRP</code>: Baud Rate Prescaler (divider)</li>
+<li><code>Bit_Time_in_TQ</code>: Total time quanta per bit</li>
+</ul>
+<p><strong>Example Calculation (500 kbps with 8 MHz clock):</strong></p>
+<pre><code>Target: 500 kbps (2 μs bit time)
+
+Choose:
+- BRP = 2
+- Sync_Seg = 1 TQ
+- Prop_Seg = 2 TQ
+- Phase_Seg1 = 3 TQ
+- Phase_Seg2 = 2 TQ
+- Total = 8 TQ
+
+TQ = 2 × (1/8MHz) = 0.25 μs
+Bit_Time = 8 × 0.25 μs = 2 μs
+Baud_Rate = 1 / 2 μs = 500 kbps ✓
+
+Sample Point = (1+2+3) / 8 = 75%
+</code></pre>
+<p><strong>Common CAN Baud Rates:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Baud Rate</th><th>Bit Time</th><th>Max Bus Length*</th></tr>
+</thead>
+<tbody>
+<tr><td>1 Mbps</td><td>1 μs</td><td>40 m</td></tr>
+<tr><td>500 kbps</td><td>2 μs</td><td>100 m</td></tr>
+<tr><td>250 kbps</td><td>4 μs</td><td>250 m</td></tr>
+<tr><td>125 kbps</td><td>8 μs</td><td>500 m</td></tr>
+<tr><td>100 kbps</td><td>10 μs</td><td>600 m</td></tr>
+<tr><td>50 kbps</td><td>20 μs</td><td>1000 m</td></tr>
+</tbody>
+</table>
+</div>
+<p>*Approximate values, depends on cable quality and transceiver</p>
+<p><strong>Synchronization Jump Width (SJW):</strong></p>
+<ul>
+<li>Maximum adjustment allowed during resynchronization</li>
+<li>Typically 1-4 TQ</li>
+<li>Used to adjust for phase errors</li>
+<li>Should be min(4, Phase_Seg1, Phase_Seg2)</li>
+</ul>
 <h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
 <p>CAN is used in various applications, including:</p>
 <ul>
@@ -203,6 +439,1179 @@
 <li><strong>Industrial Automation</strong>: Facilitating communication between sensors, actuators, and controllers in manufacturing and process control systems.</li>
 <li><strong>Medical Equipment</strong>: Ensuring reliable data exchange between different components of medical devices.</li>
 </ul>
+<h2 id="physical-layer-and-electrical-characteristics"><a class="header" href="#physical-layer-and-electrical-characteristics">Physical Layer and Electrical Characteristics</a></h2>
+<h3 id="bus-topology"><a class="header" href="#bus-topology">Bus Topology</a></h3>
+<p>CAN uses a <strong>linear bus topology</strong> with termination resistors at both ends:</p>
+<pre><code>   120Ω                                                              120Ω
+    ┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬
+    │         │         │         │         │         │         │
+  Node 1    Node 2    Node 3    Node 4    Node 5    Node 6    Node 7
+</code></pre>
+<p><strong>Characteristics:</strong></p>
+<ul>
+<li>Linear bus with stub connections</li>
+<li>Maximum stub length: 0.3 m at 1 Mbps (shorter is better)</li>
+<li>All nodes connected in parallel</li>
+<li>Both ends must have termination resistors</li>
+</ul>
+<p><strong>Important Notes:</strong></p>
+<ul>
+<li>Star or ring topologies are NOT recommended</li>
+<li>Minimize stub lengths to reduce reflections</li>
+<li>Total bus length depends on baud rate</li>
+</ul>
+<h3 id="differential-signaling"><a class="header" href="#differential-signaling">Differential Signaling</a></h3>
+<p>CAN uses <strong>differential signaling</strong> with two wires:</p>
+<p><strong>CAN_H (CAN High)</strong> and <strong>CAN_L (CAN Low)</strong></p>
+<p><strong>Principle:</strong></p>
+<ul>
+<li>Signal is the voltage difference between CAN_H and CAN_L</li>
+<li>Provides excellent noise immunity</li>
+<li>Common-mode noise rejection</li>
+</ul>
+<p><strong>Bus States:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>State</th><th>CAN_H</th><th>CAN_L</th><th>Differential Voltage</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Dominant (0)</strong></td><td>~3.5V</td><td>~1.5V</td><td>~2.0V</td><td>Logical 0</td></tr>
+<tr><td><strong>Recessive (1)</strong></td><td>~2.5V</td><td>~2.5V</td><td>~0V</td><td>Logical 1</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Voltage Levels (ISO 11898):</strong></p>
+<p><strong>Dominant State:</strong></p>
+<ul>
+<li>CAN_H: 2.75V - 4.5V (typical 3.5V)</li>
+<li>CAN_L: 0.5V - 2.25V (typical 1.5V)</li>
+<li>Differential: 1.5V - 3.0V (typical 2.0V)</li>
+</ul>
+<p><strong>Recessive State:</strong></p>
+<ul>
+<li>CAN_H: 2.0V - 3.0V (typical 2.5V)</li>
+<li>CAN_L: 2.0V - 3.0V (typical 2.5V)</li>
+<li>Differential: -0.5V to +0.5V (typical 0V)</li>
+</ul>
+<p><strong>Wired-AND Logic:</strong></p>
+<ul>
+<li>Any node can drive the bus dominant</li>
+<li>Recessive state only when ALL nodes release the bus</li>
+<li>This enables non-destructive arbitration</li>
+</ul>
+<pre><code>Node A: Recessive (1) |------|_______|------|  Dominant wins
+Node B: Dominant  (0) |______|_______|______|
+Bus Result:           |______|_______|______|
+</code></pre>
+<h3 id="termination-resistors"><a class="header" href="#termination-resistors">Termination Resistors</a></h3>
+<p>Termination resistors are <strong>critical</strong> for proper CAN operation:</p>
+<p><strong>Purpose:</strong></p>
+<ul>
+<li>Prevent signal reflections</li>
+<li>Ensure proper bus biasing</li>
+<li>Reduce ringing and overshoot</li>
+</ul>
+<p><strong>Standard Value:</strong> 120Ω at each end of the bus</p>
+<p><strong>Why 120Ω?</strong></p>
+<ul>
+<li>Matches characteristic impedance of twisted pair cable</li>
+<li>Two 120Ω resistors in parallel = 60Ω bus impedance</li>
+<li>Optimal for reflection-free transmission</li>
+</ul>
+<p><strong>Verification:</strong>
+With bus powered off, measure resistance between CAN_H and CAN_L:</p>
+<ul>
+<li>Correct: ~60Ω (two 120Ω in parallel)</li>
+<li>One terminator only: ~120Ω</li>
+<li>No terminators: Open circuit (infinite resistance)</li>
+</ul>
+<p><strong>Split Termination (Advanced):</strong>
+For improved EMC performance:</p>
+<pre><code>       CAN_H ──┬── 60Ω ──┬── 100nF ── GND
+                         │
+       CAN_L ──┴── 60Ω ──┘
+</code></pre>
+<h3 id="cable-specifications"><a class="header" href="#cable-specifications">Cable Specifications</a></h3>
+<p><strong>Recommended Cable Types:</strong></p>
+<ul>
+<li><strong>Twisted pair cable</strong> (essential for noise immunity)</li>
+<li>Characteristic impedance: 120Ω</li>
+<li>Common standards: DeviceNet, CANopen cables</li>
+</ul>
+<p><strong>Cable Parameters:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Parameter</th><th>Specification</th></tr>
+</thead>
+<tbody>
+<tr><td>Characteristic Impedance</td><td>120Ω ± 5Ω</td></tr>
+<tr><td>Twist Rate</td><td>10-50 twists/meter</td></tr>
+<tr><td>Cross-sectional Area</td><td>0.25 - 0.75 mm² (AWG 24-18)</td></tr>
+<tr><td>Maximum Capacitance</td><td>60 pF/m</td></tr>
+<tr><td>Shield</td><td>Optional but recommended for EMI</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Cable Length vs Baud Rate:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Baud Rate</th><th>Max Length</th><th>Signal Propagation Delay</th></tr>
+</thead>
+<tbody>
+<tr><td>1 Mbps</td><td>40 m</td><td>5 ns/m</td></tr>
+<tr><td>500 kbps</td><td>100 m</td><td>5 ns/m</td></tr>
+<tr><td>250 kbps</td><td>250 m</td><td>5 ns/m</td></tr>
+<tr><td>125 kbps</td><td>500 m</td><td>5 ns/m</td></tr>
+<tr><td>50 kbps</td><td>1000 m</td><td>5 ns/m</td></tr>
+<tr><td>10 kbps</td><td>6000 m</td><td>5 ns/m</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Calculation Rule:</strong></p>
+<pre><code>Max_Length = (Bit_Time - 2 × Delays) / (2 × Propagation_Delay)
+
+Where:
+- Bit_Time: Time for one bit (1/Baud_Rate)
+- Delays: Transceiver + Node delays (~200-250 ns total)
+- Propagation_Delay: ~5 ns/m for typical cable
+</code></pre>
+<h3 id="can-transceivers"><a class="header" href="#can-transceivers">CAN Transceivers</a></h3>
+<p>CAN transceivers convert logic-level signals to differential bus signals:</p>
+<p><strong>Popular Transceiver ICs:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Part Number</th><th>Speed</th><th>Voltage</th><th>Features</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>MCP2551</strong></td><td>1 Mbps</td><td>5V</td><td>Industry standard, slope control</td></tr>
+<tr><td><strong>TJA1050</strong></td><td>1 Mbps</td><td>5V</td><td>NXP, low EME</td></tr>
+<tr><td><strong>SN65HVD230</strong></td><td>1 Mbps</td><td>3.3V</td><td>TI, low power, standby mode</td></tr>
+<tr><td><strong>MCP2562</strong></td><td>1 Mbps</td><td>5V</td><td>Improved EMC over MCP2551</td></tr>
+<tr><td><strong>TCAN1051</strong></td><td>5 Mbps</td><td>3.3/5V</td><td>CAN FD capable</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Typical Transceiver Connections:</strong></p>
+<pre><code>Microcontroller                Transceiver               CAN Bus
+┌─────────────┐               ┌──────────┐
+│             │               │          │
+│ CAN_TX ─────┼───────────────┼→ TXD    │
+│             │               │          │
+│ CAN_RX ←────┼───────────────┼← RXD    │
+│             │               │          │       120Ω
+│ GND ────────┼───────────────┼─ GND    │   ┬─────/\/\/\/\─┬
+│             │               │          │   │              │
+│ VCC ────────┼───────────────┼─ VCC  CANH ─┼─────────────┼─ CAN_H
+└─────────────┘               │        │    │              │
+                              │      CANL ─┼─────────────┼─ CAN_L
+                              │        │    │              │
+                              └──────────┘   │              │
+                                             ┴              ┴
+                                            GND         120Ω + GND
+</code></pre>
+<p><strong>Transceiver Modes:</strong></p>
+<ol>
+<li><strong>Normal Mode</strong>: Transmit and receive enabled</li>
+<li><strong>Silent/Listen-Only Mode</strong>: Receive only, no ACK transmission</li>
+<li><strong>Standby/Sleep Mode</strong>: Low power consumption</li>
+</ol>
+<p><strong>Silent Mode Use Cases:</strong></p>
+<ul>
+<li>Bus monitoring/sniffing</li>
+<li>Network analysis</li>
+<li>Hot-plugging new nodes</li>
+<li>Debugging without affecting bus</li>
+</ul>
+<h3 id="electrical-specifications-iso-11898-2"><a class="header" href="#electrical-specifications-iso-11898-2">Electrical Specifications (ISO 11898-2)</a></h3>
+<p><strong>Common-Mode Range:</strong></p>
+<ul>
+<li>-2V to +7V (transceiver must handle)</li>
+<li>Allows ground potential differences between nodes</li>
+</ul>
+<p><strong>Maximum Propagation Delay:</strong></p>
+<ul>
+<li>Transceiver: 120 ns (typical)</li>
+<li>Cable: 5 ns/m</li>
+<li>Node: ~50 ns (controller + driver delays)</li>
+</ul>
+<p><strong>Input Thresholds:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Parameter</th><th>Min</th><th>Typ</th><th>Max</th><th>Unit</th></tr>
+</thead>
+<tbody>
+<tr><td>Dominant Threshold (VTH_DOM)</td><td>0.9</td><td>1.2</td><td>1.4</td><td>V</td></tr>
+<tr><td>Recessive Threshold (VTH_REC)</td><td>0.5</td><td>0.6</td><td>0.9</td><td>V</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Output Drive:</strong></p>
+<ul>
+<li>Dominant state: 40-70 mA drive capability</li>
+<li>Recessive state: High impedance (only pull-ups drive bus)</li>
+</ul>
+<h3 id="power-supply-and-grounding"><a class="header" href="#power-supply-and-grounding">Power Supply and Grounding</a></h3>
+<p><strong>Best Practices:</strong></p>
+<ol>
+<li>
+<p><strong>Decoupling Capacitors:</strong></p>
+<ul>
+<li>100nF ceramic close to each transceiver VCC</li>
+<li>10-100μF bulk capacitor per module</li>
+</ul>
+</li>
+<li>
+<p><strong>Ground Connections:</strong></p>
+<ul>
+<li>Connect all node grounds through shield or separate ground wire</li>
+<li>Minimize ground loops</li>
+<li>Keep ground impedance low</li>
+</ul>
+</li>
+<li>
+<p><strong>Galvanic Isolation (optional):</strong></p>
+<ul>
+<li>Use isolated DC-DC converter for power</li>
+<li>Use digital isolators for CAN signals</li>
+<li>Common in industrial and automotive applications</li>
+<li>Protects from ground loops and high voltages</li>
+</ul>
+</li>
+</ol>
+<p><strong>Isolated CAN Interface:</strong></p>
+<pre><code>MCU Side         Isolation Barrier        Bus Side
+┌──────┐         ┌───────────┐           ┌──────────┐
+│ TX ──┼────────→│ ISO7221   │──────────→│ TXD      │
+│      │         │ (Digital  │           │          │
+│ RX ←─┼─────────│  Isolator)│←──────────│ RXD   MCP2551
+│      │         └───────────┘           │          │
+│ GND ─┤                                 │ GND CANH/L
+└──────┘                                 └──────────┘
+ Isolated                               Isolated
+  Power                                  Ground
+</code></pre>
+<h3 id="fault-protection"><a class="header" href="#fault-protection">Fault Protection</a></h3>
+<p><strong>Protection Features in Transceivers:</strong></p>
+<ol>
+<li><strong>Thermal Shutdown</strong>: Prevents overheating</li>
+<li><strong>Short Circuit Protection</strong>: CAN_H/CAN_L to GND or VCC</li>
+<li><strong>ESD Protection</strong>: Electrostatic discharge protection (±8kV typical)</li>
+<li><strong>Undervoltage Lockout</strong>: Prevents operation at low VCC</li>
+</ol>
+<p><strong>External Protection (recommended):</strong></p>
+<ul>
+<li>TVS diodes on CAN_H and CAN_L</li>
+<li>Common-mode choke for additional EMI filtering</li>
+<li>Polyfuse or current-limiting resistor</li>
+</ul>
+<h2 id="error-detection-and-fault-confinement"><a class="header" href="#error-detection-and-fault-confinement">Error Detection and Fault Confinement</a></h2>
+<p>CAN has sophisticated error detection and handling mechanisms that ensure high reliability.</p>
+<h3 id="five-error-detection-mechanisms"><a class="header" href="#five-error-detection-mechanisms">Five Error Detection Mechanisms</a></h3>
+<p>CAN implements five independent error detection methods:</p>
+<h4 id="1-bit-monitoring"><a class="header" href="#1-bit-monitoring">1. Bit Monitoring</a></h4>
+<p><strong>Mechanism:</strong></p>
+<ul>
+<li>Each transmitter monitors the bus while transmitting</li>
+<li>Compares transmitted bit with actual bus state</li>
+<li>Exception: During arbitration and ACK slot (recessive allowed to become dominant)</li>
+</ul>
+<p><strong>Error Condition:</strong></p>
+<ul>
+<li>Transmitted bit ≠ Observed bit (outside allowed exceptions)</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>Node transmits: 1 (Recessive)
+Bus reads:      0 (Dominant) ← Another node pulling bus down
+Result: Bit Error detected (unless during arbitration/ACK)
+</code></pre>
+<h4 id="2-bit-stuffing"><a class="header" href="#2-bit-stuffing">2. Bit Stuffing</a></h4>
+<p><strong>Mechanism:</strong></p>
+<ul>
+<li>After 5 consecutive identical bits, a complementary bit is inserted</li>
+<li>Receiver expects and removes stuff bits</li>
+<li>Applies from SOF to CRC</li>
+</ul>
+<p><strong>Error Condition:</strong></p>
+<ul>
+<li>Six consecutive identical bits detected by receiver</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>Received: 1 1 1 1 1 1 0 ← Six consecutive 1s
+Result: Stuff Error detected
+</code></pre>
+<h4 id="3-frame-check-format-error"><a class="header" href="#3-frame-check-format-error">3. Frame Check (Format Error)</a></h4>
+<p><strong>Mechanism:</strong></p>
+<ul>
+<li>Certain bit fields must have fixed values</li>
+<li>CRC Delimiter, ACK Delimiter, EOF must be recessive</li>
+</ul>
+<p><strong>Error Condition:</strong></p>
+<ul>
+<li>Fixed-format bits have wrong value</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>Expected EOF: 1 1 1 1 1 1 1 (seven recessive bits)
+Received:     1 1 0 1 1 1 1 ← Dominant bit in EOF
+Result: Form Error detected
+</code></pre>
+<h4 id="4-ack-error"><a class="header" href="#4-ack-error">4. ACK Error</a></h4>
+<p><strong>Mechanism:</strong></p>
+<ul>
+<li>Transmitter sends recessive bit in ACK slot</li>
+<li>At least one receiver must write dominant bit if frame correct</li>
+<li>Transmitter monitors ACK slot</li>
+</ul>
+<p><strong>Error Condition:</strong></p>
+<ul>
+<li>ACK slot remains recessive (no receiver acknowledged)</li>
+</ul>
+<p><strong>Causes:</strong></p>
+<ul>
+<li>No other nodes on bus</li>
+<li>All receivers detected errors</li>
+<li>Receiver hardware failure</li>
+<li>Bus disconnected</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>Transmitter sends ACK slot: 1 (Recessive)
+Expected from receiver:     0 (Dominant) ← Acknowledgment
+Bus remains:                1 (Recessive) ← No ACK!
+Result: ACK Error detected
+</code></pre>
+<h4 id="5-crc-error"><a class="header" href="#5-crc-error">5. CRC Error</a></h4>
+<p><strong>Mechanism:</strong></p>
+<ul>
+<li>Transmitter calculates 15-bit CRC over data</li>
+<li>Receiver performs same calculation</li>
+<li>Both must match</li>
+</ul>
+<p><strong>Error Condition:</strong></p>
+<ul>
+<li>Calculated CRC ≠ Received CRC</li>
+</ul>
+<p><strong>CRC Polynomial:</strong></p>
+<pre><code>CAN 2.0: x^15 + x^14 + x^10 + x^8 + x^7 + x^4 + x^3 + 1
+</code></pre>
+<h3 id="error-frames"><a class="header" href="#error-frames">Error Frames</a></h3>
+<p>When a node detects an error, it transmits an <strong>Error Frame</strong> to notify all nodes:</p>
+<p><strong>Error Frame Structure:</strong></p>
+<pre><code>[Error Flag] + [Error Delimiter]
+</code></pre>
+<p><strong>Error Flag Types:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Node State</th><th>Error Flag</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Error-Active</strong></td><td>6 dominant bits</td><td>Active Error Flag</td></tr>
+<tr><td><strong>Error-Passive</strong></td><td>6 recessive bits</td><td>Passive Error Flag</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Error Frame Sequence:</strong></p>
+<ol>
+<li>Node detects error</li>
+<li>Node transmits Error Flag (violates bit stuffing rule)</li>
+<li>All other nodes detect stuff error</li>
+<li>Other nodes also send Error Flags (Error Flag Superposition)</li>
+<li>Results in 6-12 dominant bits total</li>
+<li>All nodes send Error Delimiter (8 recessive bits)</li>
+<li>Original transmitter retransmits the frame</li>
+</ol>
+<p><strong>Example Error Sequence:</strong></p>
+<pre><code>Normal frame: [SOF][ID]....[Data]...[CRC] ← Error detected here
+                                     ↓
+Error Frame:                    [000000][11111111]
+                                 ↑        ↑
+                            Error Flag  Delimiter
+
+Retransmission: [SOF][ID]....[Data]...[CRC][ACK][EOF] ← Retry
+</code></pre>
+<h3 id="error-counters-and-states"><a class="header" href="#error-counters-and-states">Error Counters and States</a></h3>
+<p>Each CAN node maintains two error counters:</p>
+<p><strong>TEC (Transmit Error Counter):</strong></p>
+<ul>
+<li>Incremented when transmission errors occur</li>
+<li>Decremented when successful transmission</li>
+</ul>
+<p><strong>REC (Receive Error Counter):</strong></p>
+<ul>
+<li>Incremented when reception errors occur</li>
+<li>Decremented when successful reception</li>
+</ul>
+<p><strong>Counter Rules:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Event</th><th>TEC Change</th><th>REC Change</th></tr>
+</thead>
+<tbody>
+<tr><td>Transmitter detects error</td><td>+8</td><td>-</td></tr>
+<tr><td>Receiver detects error</td><td>-</td><td>+1</td></tr>
+<tr><td>Successful transmission</td><td>-1</td><td>-</td></tr>
+<tr><td>Successful reception</td><td>-</td><td>-1*</td></tr>
+<tr><td>Transmit dominant during error flag</td><td>+8</td><td>-</td></tr>
+</tbody>
+</table>
+</div>
+<p>*REC decremented by 1 if between 1-127, otherwise set to 119-127 range</p>
+<h3 id="node-states"><a class="header" href="#node-states">Node States</a></h3>
+<p>CAN nodes operate in one of three states based on error counter values:</p>
+<pre><code>                  TEC or REC &gt; 127           TEC &gt; 255
+Error-Active  ────────────────────→  Error-Passive  ─────────→  Bus-Off
+              ←────────────────────
+                 Both counters &lt; 128
+</code></pre>
+<h4 id="1-error-active-state"><a class="header" href="#1-error-active-state">1. Error-Active State</a></h4>
+<p><strong>Conditions:</strong></p>
+<ul>
+<li>TEC ≤ 127 AND REC ≤ 127</li>
+</ul>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Normal operation</li>
+<li>Can transmit and receive</li>
+<li>Sends <strong>Active Error Flags</strong> (6 dominant bits)</li>
+<li>Immediately interrupts faulty transmissions</li>
+</ul>
+<p><strong>Characteristics:</strong></p>
+<ul>
+<li>Most common operational state</li>
+<li>Node actively participates in bus communication</li>
+<li>Can dominate the bus during error signaling</li>
+</ul>
+<h4 id="2-error-passive-state"><a class="header" href="#2-error-passive-state">2. Error-Passive State</a></h4>
+<p><strong>Conditions:</strong></p>
+<ul>
+<li>TEC &gt; 127 OR REC &gt; 127</li>
+<li>AND TEC ≤ 255</li>
+</ul>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Can still transmit and receive</li>
+<li>Sends <strong>Passive Error Flags</strong> (6 recessive bits)</li>
+<li>Must wait for <strong>Suspend Transmission Time</strong> (8 recessive bits) after error</li>
+<li>Cannot interrupt other nodes’ transmissions</li>
+</ul>
+<p><strong>Purpose:</strong></p>
+<ul>
+<li>Prevents faulty node from disrupting bus</li>
+<li>Node is “quarantined” but can still monitor and transmit</li>
+<li>Reduces impact of malfunctioning node</li>
+</ul>
+<p><strong>Suspend Transmission:</strong>
+After transmitting error flag, error-passive node must wait:</p>
+<pre><code>[Passive Error Flag][Error Delimiter][Suspend Transmission]
+     6 recessive         8 recessive        8 recessive
+</code></pre>
+<h4 id="3-bus-off-state"><a class="header" href="#3-bus-off-state">3. Bus-Off State</a></h4>
+<p><strong>Conditions:</strong></p>
+<ul>
+<li>TEC &gt; 255</li>
+</ul>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Node is <strong>disconnected</strong> from bus</li>
+<li>Cannot transmit or receive</li>
+<li>Does not send ACK bits</li>
+<li>Must wait for recovery</li>
+</ul>
+<p><strong>Entry:</strong></p>
+<ul>
+<li>Only transmit errors can cause Bus-Off</li>
+<li>Indicates serious problem with node or connection</li>
+</ul>
+<p><strong>Recovery Process:</strong></p>
+<ol>
+<li><strong>TEC exceeds 255</strong> → Node enters Bus-Off</li>
+<li><strong>Wait for recovery</strong>: Monitor bus for 128 × 11 recessive bits (128 idle frames)</li>
+<li><strong>Automatic reset</strong>: After recovery period, node can rejoin</li>
+<li><strong>Software intervention</strong>: Some systems require explicit reset</li>
+</ol>
+<pre><code>Bus-Off Recovery:
+TEC = 256+ → Bus-Off State
+             ↓
+        Wait 128 × 11 recessive bits
+             ↓
+        TEC = 0, REC = 0
+             ↓
+        Error-Active State
+</code></pre>
+<h3 id="state-transition-diagram"><a class="header" href="#state-transition-diagram">State Transition Diagram</a></h3>
+<pre><code>┌─────────────────┐
+│  Error-Active   │  Normal operation
+│  TEC ≤ 127      │  Active Error Flags (6 dominant bits)
+│  REC ≤ 127      │
+└────────┬────────┘
+         │
+         │ TEC &gt; 127 or REC &gt; 127
+         ↓
+┌─────────────────┐
+│ Error-Passive   │  Reduced participation
+│  TEC ≤ 255      │  Passive Error Flags (6 recessive bits)
+│  REC &gt; 127      │  Suspend Transmission delay
+└────────┬────────┘
+         │
+         │ TEC &gt; 255
+         ↓
+┌─────────────────┐
+│    Bus-Off      │  Disconnected from bus
+│   TEC &gt; 255     │  Cannot transmit/receive
+│                 │  Requires recovery period
+└────────┬────────┘
+         │
+         │ 128 × 11 recessive bits observed
+         ↓
+┌─────────────────┐
+│  Error-Active   │  Return to normal (counters reset)
+└─────────────────┘
+</code></pre>
+<h3 id="fault-confinement-philosophy"><a class="header" href="#fault-confinement-philosophy">Fault Confinement Philosophy</a></h3>
+<p><strong>Goal:</strong> Prevent faulty nodes from disrupting the entire network</p>
+<p><strong>Mechanisms:</strong></p>
+<ol>
+<li><strong>Error Counters</strong>: Track node reliability</li>
+<li><strong>State Transitions</strong>: Progressive isolation of faulty nodes</li>
+<li><strong>Exponential Penalty</strong>: Repeated errors increase counter faster</li>
+<li><strong>Automatic Recovery</strong>: Nodes can rejoin after proving stability</li>
+</ol>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li>Self-healing network</li>
+<li>Faulty nodes automatically isolated</li>
+<li>Good nodes continue operating</li>
+<li>No external intervention needed (in most cases)</li>
+</ul>
+<h3 id="practical-error-scenarios"><a class="header" href="#practical-error-scenarios">Practical Error Scenarios</a></h3>
+<h4 id="scenario-1-broken-cable-connection"><a class="header" href="#scenario-1-broken-cable-connection">Scenario 1: Broken Cable Connection</a></h4>
+<pre><code>Node A (disconnected) tries to transmit:
+1. Sends frame, gets no ACK → ACK Error
+2. TEC += 8
+3. Retransmits, gets no ACK → ACK Error
+4. TEC += 8
+5. After ~32 failed transmissions: TEC &gt; 255 → Bus-Off
+6. Node A automatically disconnects from bus
+</code></pre>
+<h4 id="scenario-2-noisy-environment"><a class="header" href="#scenario-2-noisy-environment">Scenario 2: Noisy Environment</a></h4>
+<pre><code>Receiver detects corrupted frame:
+1. CRC Error detected
+2. REC += 1
+3. Sends Error Frame
+4. Transmitter retransmits
+5. If errors persist: REC grows
+6. At REC &gt; 127: Node becomes Error-Passive
+7. Reduces its impact on bus while still receiving
+</code></pre>
+<h4 id="scenario-3-incorrect-baud-rate"><a class="header" href="#scenario-3-incorrect-baud-rate">Scenario 3: Incorrect Baud Rate</a></h4>
+<pre><code>Node with wrong baud rate:
+1. Detects constant bit errors
+2. TEC/REC increment rapidly
+3. Quickly enters Error-Passive
+4. Eventually Bus-Off
+5. Does not disrupt properly configured nodes
+</code></pre>
+<h3 id="error-statistics-monitoring"><a class="header" href="#error-statistics-monitoring">Error Statistics Monitoring</a></h3>
+<p><strong>Best Practices:</strong></p>
+<ol>
+<li><strong>Monitor Error Counters</strong>: Read TEC and REC periodically</li>
+<li><strong>Log Error Types</strong>: Track which errors occur most</li>
+<li><strong>Set Thresholds</strong>: Alert when counters exceed limits</li>
+<li><strong>Trend Analysis</strong>: Increasing errors indicate problems</li>
+</ol>
+<p><strong>Typical Monitoring:</strong></p>
+<pre><code class="language-c">// Pseudocode for error monitoring
+if (TEC &gt; 96 || REC &gt; 96) {
+    // Warning: Node approaching Error-Passive
+    log_warning("High error count");
+}
+
+if (node_state == ERROR_PASSIVE) {
+    // Error: Node in degraded state
+    log_error("Node Error-Passive");
+    // Investigate: wiring, termination, baud rate
+}
+
+if (node_state == BUS_OFF) {
+    // Critical: Node offline
+    log_critical("Node Bus-Off");
+    // Check: physical connection, transceiver
+}
+</code></pre>
+<h3 id="common-causes-of-errors"><a class="header" href="#common-causes-of-errors">Common Causes of Errors</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Error Type</th><th>Common Causes</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>ACK Error</strong></td><td>No other nodes, all nodes off, disconnected bus</td></tr>
+<tr><td><strong>Bit Error</strong></td><td>Bus contention, faulty transceiver, wrong termination</td></tr>
+<tr><td><strong>Stuff Error</strong></td><td>Noise, incorrect baud rate, EMI</td></tr>
+<tr><td><strong>CRC Error</strong></td><td>Noise, bit errors during transmission, EMI</td></tr>
+<tr><td><strong>Form Error</strong></td><td>Incorrect baud rate, synchronization issues</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Troubleshooting Checklist:</strong></p>
+<ul>
+<li>✓ Verify 120Ω termination at both ends</li>
+<li>✓ Check all nodes have same baud rate configuration</li>
+<li>✓ Measure voltage levels on CAN_H and CAN_L</li>
+<li>✓ Ensure twisted-pair cable used</li>
+<li>✓ Check for EMI sources near cable</li>
+<li>✓ Verify transceiver power supply stable</li>
+<li>✓ Test cable continuity and resistance</li>
+</ul>
+<h2 id="programming-examples"><a class="header" href="#programming-examples">Programming Examples</a></h2>
+<h3 id="socketcan-linux"><a class="header" href="#socketcan-linux">SocketCAN (Linux)</a></h3>
+<p>SocketCAN is the standard CAN interface for Linux systems.</p>
+<p><strong>Setup CAN Interface:</strong></p>
+<pre><code class="language-bash"># Load kernel modules
+sudo modprobe can
+sudo modprobe can_raw
+sudo modprobe vcan  # Virtual CAN for testing
+
+# Create virtual CAN interface (for testing)
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
+
+# For real hardware (e.g., Raspberry Pi with MCP2515)
+sudo ip link set can0 type can bitrate 500000
+sudo ip link set up can0
+
+# Verify interface is up
+ip -details link show can0
+</code></pre>
+<p><strong>Using can-utils:</strong></p>
+<pre><code class="language-bash"># Install can-utils
+sudo apt-get install can-utils
+
+# Send a CAN frame (ID=0x123, data=0x11 0x22 0x33)
+cansend can0 123#112233
+
+# Send extended frame (ID=0x12345678)
+cansend can0 12345678#DEADBEEF
+
+# Receive and display CAN frames
+candump can0
+
+# Filter specific ID
+candump can0,123:7FF  # Receive only ID 0x123
+
+# Generate random traffic (testing)
+cangen can0 -I 100 -L 8 -D r -g 100
+
+# Display statistics
+canfdtest can0 -v
+</code></pre>
+<p><strong>C Programming with SocketCAN:</strong></p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;net/if.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;linux/can.h&gt;
+#include &lt;linux/can/raw.h&gt;
+
+int main() {
+    int s;
+    struct sockaddr_can addr;
+    struct ifreq ifr;
+    struct can_frame frame;
+
+    // Create socket
+    if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) &lt; 0) {
+        perror("Socket");
+        return 1;
+    }
+
+    // Specify can0 interface
+    strcpy(ifr.ifr_name, "can0");
+    ioctl(s, SIOCGIFINDEX, &amp;ifr);
+
+    // Bind socket to can0
+    memset(&amp;addr, 0, sizeof(addr));
+    addr.can_family = AF_CAN;
+    addr.can_ifindex = ifr.ifr_ifindex;
+
+    if (bind(s, (struct sockaddr *)&amp;addr, sizeof(addr)) &lt; 0) {
+        perror("Bind");
+        return 1;
+    }
+
+    // Prepare frame
+    frame.can_id = 0x123;       // Standard ID
+    frame.can_dlc = 4;          // Data length
+    frame.data[0] = 0x11;
+    frame.data[1] = 0x22;
+    frame.data[2] = 0x33;
+    frame.data[3] = 0x44;
+
+    // Send frame
+    if (write(s, &amp;frame, sizeof(struct can_frame)) != sizeof(struct can_frame)) {
+        perror("Write");
+        return 1;
+    }
+
+    printf("Sent CAN frame: ID=0x%X, Data=", frame.can_id);
+    for (int i = 0; i &lt; frame.can_dlc; i++) {
+        printf("%02X ", frame.data[i]);
+    }
+    printf("\n");
+
+    // Receive frame
+    struct can_frame rx_frame;
+    int nbytes = read(s, &amp;rx_frame, sizeof(struct can_frame));
+
+    if (nbytes &lt; 0) {
+        perror("Read");
+        return 1;
+    }
+
+    printf("Received CAN frame: ID=0x%X, DLC=%d, Data=",
+           rx_frame.can_id, rx_frame.can_dlc);
+    for (int i = 0; i &lt; rx_frame.can_dlc; i++) {
+        printf("%02X ", rx_frame.data[i]);
+    }
+    printf("\n");
+
+    close(s);
+    return 0;
+}
+</code></pre>
+<p><strong>Compile:</strong></p>
+<pre><code class="language-bash">gcc socketcan_example.c -o socketcan_example
+./socketcan_example
+</code></pre>
+<p><strong>CAN Filtering:</strong></p>
+<pre><code class="language-c">// Filter example: only receive ID 0x100-0x1FF
+struct can_filter rfilter[1];
+rfilter[0].can_id   = 0x100;
+rfilter[0].can_mask = 0x700;  // Mask bits 8-10
+
+setsockopt(s, SOL_CAN_RAW, CAN_RAW_FILTER, &amp;rfilter, sizeof(rfilter));
+</code></pre>
+<h3 id="arduino-with-mcp2515"><a class="header" href="#arduino-with-mcp2515">Arduino with MCP2515</a></h3>
+<p>The MCP2515 is a popular SPI-based CAN controller for Arduino.</p>
+<p><strong>Hardware Setup:</strong></p>
+<pre><code>Arduino Uno         MCP2515 Module
+Pin 13 (SCK)   →    SCK
+Pin 12 (MISO)  ←    SO
+Pin 11 (MOSI)  →    SI
+Pin 10 (SS)    →    CS
+5V             →    VCC
+GND            →    GND
+                    CANH → CAN Bus High
+                    CANL → CAN Bus Low
+</code></pre>
+<p><strong>Library Installation:</strong></p>
+<pre><code>Arduino IDE: Library Manager → Install "mcp2515" by autowp
+</code></pre>
+<p><strong>Basic Send Example:</strong></p>
+<pre><code class="language-cpp">#include &lt;mcp2515.h&gt;
+
+MCP2515 mcp2515(10);  // CS pin 10
+
+struct can_frame canMsg;
+
+void setup() {
+  Serial.begin(115200);
+
+  // Initialize MCP2515 at 500kbps with 8MHz crystal
+  mcp2515.reset();
+  mcp2515.setBitrate(CAN_500KBPS, MCP_8MHZ);
+  mcp2515.setNormalMode();
+
+  Serial.println("MCP2515 Initialized");
+}
+
+void loop() {
+  // Prepare message
+  canMsg.can_id  = 0x123;
+  canMsg.can_dlc = 4;
+  canMsg.data[0] = 0xAA;
+  canMsg.data[1] = 0xBB;
+  canMsg.data[2] = 0xCC;
+  canMsg.data[3] = 0xDD;
+
+  // Send message
+  mcp2515.sendMessage(&amp;canMsg);
+
+  Serial.println("Message sent: ID=0x123");
+  delay(1000);
+}
+</code></pre>
+<p><strong>Receive Example:</strong></p>
+<pre><code class="language-cpp">#include &lt;mcp2515.h&gt;
+
+MCP2515 mcp2515(10);
+
+void setup() {
+  Serial.begin(115200);
+
+  mcp2515.reset();
+  mcp2515.setBitrate(CAN_500KBPS, MCP_8MHZ);
+  mcp2515.setNormalMode();
+
+  Serial.println("Waiting for CAN messages...");
+}
+
+void loop() {
+  struct can_frame canMsg;
+
+  // Check if message available
+  if (mcp2515.readMessage(&amp;canMsg) == MCP2515::ERROR_OK) {
+    Serial.print("ID: 0x");
+    Serial.print(canMsg.can_id, HEX);
+    Serial.print(" DLC: ");
+    Serial.print(canMsg.can_dlc);
+    Serial.print(" Data: ");
+
+    for (int i = 0; i &lt; canMsg.can_dlc; i++) {
+      Serial.print("0x");
+      Serial.print(canMsg.data[i], HEX);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
+}
+</code></pre>
+<p><strong>Using Filters (Receive only specific IDs):</strong></p>
+<pre><code class="language-cpp">void setup() {
+  Serial.begin(115200);
+
+  mcp2515.reset();
+  mcp2515.setBitrate(CAN_500KBPS, MCP_8MHZ);
+
+  // Filter to receive only ID 0x100-0x10F
+  struct can_filter filter;
+  filter.can_id = 0x100;
+  filter.can_mask = 0x7F0;  // Mask lower 4 bits
+
+  mcp2515.setFilter(filter);
+  mcp2515.setNormalMode();
+
+  Serial.println("Listening for IDs 0x100-0x10F");
+}
+</code></pre>
+<h3 id="raspberry-pi-with-mcp2515"><a class="header" href="#raspberry-pi-with-mcp2515">Raspberry Pi with MCP2515</a></h3>
+<p><strong>Hardware Setup:</strong></p>
+<pre><code>Raspberry Pi    MCP2515
+BCM 11 (SCLK)  → SCK
+BCM 10 (MOSI)  → SI
+BCM 9  (MISO)  ← SO
+BCM 8  (CE0)   → CS
+BCM 25         → INT (optional)
+3.3V           → VCC
+GND            → GND
+</code></pre>
+<p><strong>Enable SPI and Configure:</strong></p>
+<pre><code class="language-bash"># Enable SPI interface
+sudo raspi-config
+# Interface Options → SPI → Enable
+
+# Edit boot config
+sudo nano /boot/config.txt
+
+# Add these lines:
+dtparam=spi=on
+dtoverlay=mcp2515-can0,oscillator=8000000,interrupt=25
+dtoverlay=spi0-hw-cs
+
+# Reboot
+sudo reboot
+</code></pre>
+<p><strong>Configure Interface:</strong></p>
+<pre><code class="language-bash"># Bring up CAN interface at 500 kbps
+sudo ip link set can0 up type can bitrate 500000
+
+# Auto-start on boot
+sudo nano /etc/network/interfaces
+# Add:
+auto can0
+iface can0 inet manual
+    pre-up /sbin/ip link set can0 type can bitrate 500000
+    up /sbin/ifconfig can0 up
+    down /sbin/ifconfig can0 down
+</code></pre>
+<p><strong>Use can-utils or Python</strong> (see SocketCAN and Python-CAN sections)</p>
+<h3 id="stm32-hal"><a class="header" href="#stm32-hal">STM32 HAL</a></h3>
+<p>STM32 microcontrollers have built-in CAN peripherals (bxCAN or FDCAN).</p>
+<p><strong>CubeMX Configuration:</strong></p>
+<ul>
+<li>Enable CAN1 peripheral</li>
+<li>Set bit timing: Prescaler, BS1, BS2, SJW for desired baud rate</li>
+<li>Configure pins (e.g., PA11=CAN_RX, PA12=CAN_TX)</li>
+<li>Enable interrupts if needed</li>
+</ul>
+<p><strong>Initialization Code:</strong></p>
+<pre><code class="language-c">#include "main.h"
+
+CAN_HandleTypeDef hcan1;
+
+// Configure CAN
+void CAN_Config(void) {
+    CAN_FilterTypeDef canFilterConfig;
+
+    // Configure filter to accept all messages
+    canFilterConfig.FilterBank = 0;
+    canFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    canFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    canFilterConfig.FilterIdHigh = 0x0000;
+    canFilterConfig.FilterIdLow = 0x0000;
+    canFilterConfig.FilterMaskIdHigh = 0x0000;
+    canFilterConfig.FilterMaskIdLow = 0x0000;
+    canFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+    canFilterConfig.FilterActivation = ENABLE;
+
+    HAL_CAN_ConfigFilter(&amp;hcan1, &amp;canFilterConfig);
+
+    // Start CAN
+    HAL_CAN_Start(&amp;hcan1);
+
+    // Enable RX interrupt
+    HAL_CAN_ActivateNotification(&amp;hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+}
+
+// Send CAN message
+void CAN_Send(uint32_t id, uint8_t *data, uint8_t len) {
+    CAN_TxHeaderTypeDef txHeader;
+    uint32_t txMailbox;
+
+    txHeader.StdId = id;              // Standard ID
+    txHeader.ExtId = 0;
+    txHeader.RTR = CAN_RTR_DATA;      // Data frame
+    txHeader.IDE = CAN_ID_STD;        // Standard ID
+    txHeader.DLC = len;               // Data length
+    txHeader.TransmitGlobalTime = DISABLE;
+
+    // Transmit message
+    if (HAL_CAN_AddTxMessage(&amp;hcan1, &amp;txHeader, data, &amp;txMailbox) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+// Receive interrupt callback
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+    CAN_RxHeaderTypeDef rxHeader;
+    uint8_t rxData[8];
+
+    // Receive message
+    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &amp;rxHeader, rxData) == HAL_OK) {
+        // Process received message
+        printf("Received ID: 0x%lX, DLC: %lu, Data: ",
+               rxHeader.StdId, rxHeader.DLC);
+        for (int i = 0; i &lt; rxHeader.DLC; i++) {
+            printf("%02X ", rxData[i]);
+        }
+        printf("\n");
+    }
+}
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_CAN1_Init();
+
+    CAN_Config();
+
+    uint8_t txData[4] = {0x11, 0x22, 0x33, 0x44};
+
+    while (1) {
+        CAN_Send(0x123, txData, 4);
+        HAL_Delay(1000);
+    }
+}
+</code></pre>
+<p><strong>Message Filtering Example:</strong></p>
+<pre><code class="language-c">// Accept only ID 0x100-0x1FF
+canFilterConfig.FilterIdHigh = 0x100 &lt;&lt; 5;      // ID in upper bits
+canFilterConfig.FilterIdLow = 0x0000;
+canFilterConfig.FilterMaskIdHigh = 0x700 &lt;&lt; 5;  // Mask
+canFilterConfig.FilterMaskIdLow = 0x0000;
+</code></pre>
+<h3 id="python-can"><a class="header" href="#python-can">Python-CAN</a></h3>
+<p>Python-CAN provides a high-level interface for CAN communication.</p>
+<p><strong>Installation:</strong></p>
+<pre><code class="language-bash">pip install python-can
+</code></pre>
+<p><strong>Basic Send/Receive:</strong></p>
+<pre><code class="language-python">import can
+import time
+
+# Create bus instance (SocketCAN interface)
+bus = can.interface.Bus(channel='can0', bustype='socketcan')
+
+# Send a message
+msg = can.Message(
+    arbitration_id=0x123,
+    data=[0x11, 0x22, 0x33, 0x44, 0x55],
+    is_extended_id=False
+)
+
+try:
+    bus.send(msg)
+    print(f"Message sent on {bus.channel_info}")
+except can.CanError:
+    print("Message NOT sent")
+
+# Receive messages
+print("Waiting for messages...")
+for message in bus:
+    print(f"ID: 0x{message.arbitration_id:X} "
+          f"DLC: {message.dlc} "
+          f"Data: {message.data.hex()}")
+
+    # Exit after 10 messages
+    if message.arbitration_id == 0x200:
+        break
+
+bus.shutdown()
+</code></pre>
+<p><strong>Using Filters:</strong></p>
+<pre><code class="language-python"># Filter to receive only specific IDs
+filters = [
+    {"can_id": 0x100, "can_mask": 0x7F0, "extended": False},  # 0x100-0x10F
+    {"can_id": 0x200, "can_mask": 0x7FF, "extended": False},  # Exact 0x200
+]
+
+bus = can.interface.Bus(channel='can0', bustype='socketcan',
+                        can_filters=filters)
+</code></pre>
+<p><strong>Periodic Transmission:</strong></p>
+<pre><code class="language-python">from can import Message
+from can.interfaces.socketcan import SocketcanBus
+
+bus = SocketcanBus(channel='can0')
+
+# Create periodic message (every 100ms)
+msg = Message(arbitration_id=0x123,
+              data=[0xAA, 0xBB, 0xCC, 0xDD],
+              is_extended_id=False)
+
+task = bus.send_periodic(msg, 0.1)  # 100ms period
+
+time.sleep(5)  # Send for 5 seconds
+
+task.stop()
+bus.shutdown()
+</code></pre>
+<p><strong>Logging to File:</strong></p>
+<pre><code class="language-python">import can
+
+bus = can.interface.Bus(channel='can0', bustype='socketcan')
+
+# Log to ASC format
+logger = can.ASCWriter('logfile.asc')
+
+for message in bus:
+    logger(message)
+
+logger.stop()
+bus.shutdown()
+</code></pre>
+<p><strong>Virtual CAN for Testing:</strong></p>
+<pre><code class="language-python"># Setup virtual CAN first (bash):
+# sudo ip link add dev vcan0 type vcan
+# sudo ip link set up vcan0
+
+import can
+import threading
+import time
+
+def sender():
+    bus = can.interface.Bus(channel='vcan0', bustype='socketcan')
+    msg = can.Message(arbitration_id=0x123, data=[1, 2, 3, 4])
+
+    while True:
+        bus.send(msg)
+        time.sleep(1)
+
+def receiver():
+    bus = can.interface.Bus(channel='vcan0', bustype='socketcan')
+
+    for message in bus:
+        print(f"Received: {message}")
+
+# Run sender and receiver in parallel
+t1 = threading.Thread(target=sender, daemon=True)
+t2 = threading.Thread(target=receiver, daemon=True)
+
+t1.start()
+t2.start()
+
+time.sleep(10)  # Run for 10 seconds
+</code></pre>
+<h3 id="obd-ii-example-automotive"><a class="header" href="#obd-ii-example-automotive">OBD-II Example (Automotive)</a></h3>
+<p>Reading vehicle data using CAN:</p>
+<pre><code class="language-python">import can
+import time
+
+# OBD-II uses CAN ID 0x7DF for requests, 0x7E8+ for responses
+bus = can.interface.Bus(channel='can0', bustype='socketcan')
+
+# Request engine RPM (PID 0x0C)
+request = can.Message(
+    arbitration_id=0x7DF,
+    data=[0x02, 0x01, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00],
+    is_extended_id=False
+)
+
+bus.send(request)
+
+# Wait for response
+response = bus.recv(timeout=1.0)
+
+if response and response.arbitration_id == 0x7E8:
+    # Parse RPM from response
+    # Response format: [bytes_returned, 0x41, PID, data_A, data_B, ...]
+    rpm = ((response.data[3] &lt;&lt; 8) + response.data[4]) / 4
+    print(f"Engine RPM: {rpm}")
+
+bus.shutdown()
+</code></pre>
+<h3 id="message-priority-example"><a class="header" href="#message-priority-example">Message Priority Example</a></h3>
+<p>Demonstrating arbitration (lower ID wins):</p>
+<pre><code class="language-python">import can
+import threading
+
+bus = can.interface.Bus(channel='vcan0', bustype='socketcan')
+
+def send_high_priority():
+    msg = can.Message(arbitration_id=0x100, data=[0xFF])
+    bus.send(msg)
+    print("High priority (0x100) sent")
+
+def send_low_priority():
+    msg = can.Message(arbitration_id=0x700, data=[0xAA])
+    bus.send(msg)
+    print("Low priority (0x700) sent")
+
+# Send simultaneously - 0x100 will win arbitration
+t1 = threading.Thread(target=send_high_priority)
+t2 = threading.Thread(target=send_low_priority)
+
+t1.start()
+t2.start()
+
+t1.join()
+t2.join()
+
+# Monitor order received
+for i in range(2):
+    msg = bus.recv()
+    print(f"Received ID: 0x{msg.arbitration_id:X}")
+
+bus.shutdown()
+</code></pre>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
 <p>CAN is a critical communication protocol in automotive and industrial systems, providing reliable and efficient data exchange. Understanding CAN’s principles and standards is essential for engineers working in these fields.</p>
 

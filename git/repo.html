@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-843a62d1.js";
+            window.path_to_searchindex_js = "../searchindex-b2dc8d76.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f349561e.js"></script>
+        <script src="../toc-728509bc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -176,1203 +176,737 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="git-repository-management"><a class="header" href="#git-repository-management">Git Repository Management</a></h1>
-<p>A comprehensive guide to Git repository operations, patterns, and best practices for effective repository management.</p>
+                        <h1 id="repo---multi-repository-management-tool"><a class="header" href="#repo---multi-repository-management-tool">Repo - Multi-Repository Management Tool</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>A Git repository is a data structure that stores metadata and object database for a project’s version history. Understanding repository management is crucial for efficient collaboration, maintenance, and scaling of software projects.</p>
-<p><strong>Key Concepts:</strong></p>
+<p>Repo is a repository management tool built by Google on top of Git. It simplifies working with multiple Git repositories by managing version control, uploading changes, and automating workflows. Repo doesn’t replace Gitit complements it by making multi-repository management easier.</p>
+<p><strong>Primary Use Case:</strong> Android Open Source Project (AOSP), which consists of hundreds of Git repositories.</p>
+<h3 id="why-repo"><a class="header" href="#why-repo">Why Repo?</a></h3>
+<ol>
+<li><strong>Manages Multiple Repositories</strong>: AOSP has 800+ Git repositories; repo manages them as a single entity</li>
+<li><strong>Unified Workflow</strong>: Single command to sync, branch, or query across all repositories</li>
+<li><strong>Gerrit Integration</strong>: Built-in support for uploading to Gerrit code review system</li>
+<li><strong>Manifest-Based</strong>: XML manifests define repository structure and versions</li>
+<li><strong>Automation</strong>: Automates repetitive tasks across many repositories</li>
+</ol>
+<h3 id="repo-vs-git"><a class="header" href="#repo-vs-git">Repo vs Git</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>Git</th><th>Repo</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Scope</strong></td><td>Single repository</td><td>Multiple repositories</td></tr>
+<tr><td><strong>Level</strong></td><td>Low-level VCS</td><td>High-level orchestration</td></tr>
+<tr><td><strong>Replaces Git?</strong></td><td>N/A</td><td>No, built on top of Git</td></tr>
+<tr><td><strong>Best for</strong></td><td>Single project</td><td>Large multi-repo projects</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<pre><code class="language-bash"># Python 3.6 or later
+python3 --version
+
+# Git 2.0 or later
+git --version
+
+# curl or wget
+curl --version
+</code></pre>
+<h3 id="install-repo"><a class="header" href="#install-repo">Install Repo</a></h3>
+<pre><code class="language-bash"># Create bin directory in home (if not exists)
+mkdir -p ~/bin
+
+# Download repo launcher script
+curl https://storage.googleapis.com/git-repo-downloads/repo &gt; ~/bin/repo
+
+# Make it executable
+chmod a+x ~/bin/repo
+
+# Add to PATH (add to ~/.bashrc or ~/.zshrc)
+export PATH=~/bin:$PATH
+
+# Verify installation
+repo version
+</code></pre>
+<h3 id="alternative-distribution-package"><a class="header" href="#alternative-distribution-package">Alternative: Distribution Package</a></h3>
+<pre><code class="language-bash"># Debian/Ubuntu
+sudo apt install repo
+
+# Arch Linux
+sudo pacman -S repo
+
+# macOS (via Homebrew)
+brew install repo
+</code></pre>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="the-repo-directory"><a class="header" href="#the-repo-directory">The .repo Directory</a></h3>
+<p>When you run <code>repo init</code>, it creates a <code>.repo/</code> directory containing:</p>
+<pre><code>.repo/
+   manifests/          # Git repo with manifest files
+      default.xml     # Main manifest
+   manifests.git/      # Bare Git repo of manifests
+   manifest.xml        # Symlink to active manifest
+   repo/               # Repo tool source code
+   projects/           # Object storage for all Git repos
+   project-objects/    # Shared Git objects
+</code></pre>
+<h3 id="manifestxml"><a class="header" href="#manifestxml">manifest.xml</a></h3>
+<p>The manifest file defines:</p>
 <ul>
-<li><strong>Repository</strong>: Complete project history and metadata</li>
-<li><strong>Working Tree</strong>: Current checkout of project files</li>
-<li><strong>Index (Staging Area)</strong>: Preparation area for commits</li>
-<li><strong>Bare Repository</strong>: Repository without working tree</li>
-<li><strong>Clone</strong>: Local copy of a repository</li>
-<li><strong>Remote</strong>: Reference to another repository</li>
+<li><strong>Remotes</strong>: Where repositories are hosted</li>
+<li><strong>Projects</strong>: Which repositories to clone and where to place them</li>
+<li><strong>Default settings</strong>: Branch, remote, sync options</li>
 </ul>
-<h2 id="repository-anatomy"><a class="header" href="#repository-anatomy">Repository Anatomy</a></h2>
-<h3 id="repository-structure"><a class="header" href="#repository-structure">Repository Structure</a></h3>
-<pre><code>.git/
-├── HEAD               # Points to current branch
-├── config             # Repository-specific configuration
-├── description        # Repository description (for GitWeb)
-├── hooks/             # Client and server-side hook scripts
-├── info/              # Global exclude patterns
-│   └── exclude
-├── objects/           # All Git objects (commits, trees, blobs)
-│   ├── info/
-│   └── pack/          # Packed objects for efficiency
-├── refs/              # References to commits
-│   ├── heads/         # Local branches
-│   ├── remotes/       # Remote branches
-│   └── tags/          # Tags
-├── logs/              # Reference logs
-├── index              # Staging area (binary)
-└── packed-refs        # Packed references for efficiency
+<p><strong>Basic manifest structure:</strong></p>
+<pre><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;manifest&gt;
+  &lt;!-- Define remote servers --&gt;
+  &lt;remote name="aosp"
+          fetch="https://android.googlesource.com/"
+          review="https://android-review.googlesource.com/" /&gt;
+
+  &lt;!-- Default settings for projects --&gt;
+  &lt;default remote="aosp"
+           revision="main"
+           sync-j="4" /&gt;
+
+  &lt;!-- Individual projects --&gt;
+  &lt;project path="build" name="platform/build" /&gt;
+  &lt;project path="frameworks/base" name="platform/frameworks/base" /&gt;
+  &lt;project path="external/sqlite" name="platform/external/sqlite" /&gt;
+&lt;/manifest&gt;
 </code></pre>
-<h3 id="understanding-key-components"><a class="header" href="#understanding-key-components">Understanding Key Components</a></h3>
-<pre><code class="language-bash"># View current HEAD
-cat .git/HEAD
+<h3 id="how-repo-works"><a class="header" href="#how-repo-works">How Repo Works</a></h3>
+<ol>
+<li><strong>Repo launcher</strong> (<code>~/bin/repo</code>) is a Python script bootstrap</li>
+<li><strong>Full repo tool</strong> is cloned into <code>.repo/repo/</code></li>
+<li><strong>Manifest</strong> defines repository structure</li>
+<li><strong>Each project</strong> is a standard Git repository</li>
+<li><strong>Repo commands</strong> operate across all projects</li>
+</ol>
+<h2 id="essential-commands"><a class="header" href="#essential-commands">Essential Commands</a></h2>
+<h3 id="repo-init"><a class="header" href="#repo-init">repo init</a></h3>
+<p>Initialize repo in the current directory.</p>
+<pre><code class="language-bash"># Basic initialization
+repo init -u &lt;manifest-url&gt;
 
-# List all references
-git show-ref
+# Specify branch/tag
+repo init -u &lt;manifest-url&gt; -b &lt;branch&gt;
 
-# View repository config
-cat .git/config
+# AOSP example - latest Android
+repo init -u https://android.googlesource.com/platform/manifest
 
-# Inspect staging area
-git ls-files --stage
+# AOSP example - specific version (Android 14)
+repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r1
 
-# View object database
-find .git/objects -type f
+# Specify manifest file
+repo init -u &lt;manifest-url&gt; -m &lt;manifest-file.xml&gt;
+
+# Shallow clone (save space, recent history only)
+repo init -u &lt;manifest-url&gt; --depth=1
 </code></pre>
-<h2 id="repository-initialization"><a class="header" href="#repository-initialization">Repository Initialization</a></h2>
-<h3 id="creating-a-new-repository"><a class="header" href="#creating-a-new-repository">Creating a New Repository</a></h3>
-<pre><code class="language-bash"># Initialize new repository
-git init
-git init project-name
-git init --bare repo.git  # Bare repository (no working tree)
-
-# Initialize with specific branch name
-git init --initial-branch=main
-git init -b main
-
-# Initialize with template
-git init --template=/path/to/template
-
-# Reinitialize existing repository (safe operation)
-git init
-</code></pre>
-<h3 id="repository-configuration"><a class="header" href="#repository-configuration">Repository Configuration</a></h3>
-<pre><code class="language-bash"># Local (repository-specific)
-git config user.name "John Doe"
-git config user.email "john@example.com"
-
-# Global (user-level)
-git config --global core.editor "vim"
-git config --global init.defaultBranch main
-
-# System (all users)
-git config --system core.compression 9
-
-# View configuration hierarchy
-git config --list --show-origin
-
-# Edit config file directly
-git config --edit
-git config --global --edit
-git config --system --edit
-</code></pre>
-<h3 id="essential-repository-settings"><a class="header" href="#essential-repository-settings">Essential Repository Settings</a></h3>
-<pre><code class="language-bash"># Set file permissions
-git config core.fileMode true
-
-# Handle line endings
-git config core.autocrlf input     # Linux/macOS
-git config core.autocrlf true      # Windows
-
-# Ignore file permissions
-git config core.fileMode false
-
-# Set default push behavior
-git config push.default simple
-
-# Enable rerere (reuse recorded resolution)
-git config rerere.enabled true
-
-# Set default pull strategy
-git config pull.rebase false   # Merge (default)
-git config pull.rebase true    # Rebase
-git config pull.ff only        # Fast-forward only
-</code></pre>
-<h2 id="cloning-repositories"><a class="header" href="#cloning-repositories">Cloning Repositories</a></h2>
-<h3 id="basic-cloning"><a class="header" href="#basic-cloning">Basic Cloning</a></h3>
-<pre><code class="language-bash"># Clone via HTTPS
-git clone https://github.com/user/repo.git
-git clone https://github.com/user/repo.git myproject
-
-# Clone via SSH
-git clone git@github.com:user/repo.git
-
-# Clone specific branch
-git clone -b develop https://github.com/user/repo.git
-
-# Shallow clone (limited history)
-git clone --depth 1 https://github.com/user/repo.git
-git clone --shallow-since=2023-01-01 https://github.com/user/repo.git
-
-# Clone single branch
-git clone --single-branch --branch main https://github.com/user/repo.git
-</code></pre>
-<h3 id="advanced-cloning-options"><a class="header" href="#advanced-cloning-options">Advanced Cloning Options</a></h3>
-<pre><code class="language-bash"># Clone bare repository
-git clone --bare https://github.com/user/repo.git repo.git
-
-# Clone mirror (complete copy including all refs)
-git clone --mirror https://github.com/user/repo.git
-
-# Clone with submodules
-git clone --recursive https://github.com/user/repo.git
-git clone --recurse-submodules https://github.com/user/repo.git
-
-# Partial clone (lazy fetch)
-git clone --filter=blob:none https://github.com/user/repo.git
-git clone --filter=tree:0 https://github.com/user/repo.git
-
-# Clone with sparse checkout
-git clone --sparse https://github.com/user/repo.git
-cd repo
-git sparse-checkout init --cone
-git sparse-checkout set src/ docs/
-</code></pre>
-<h3 id="shallow-clone-operations"><a class="header" href="#shallow-clone-operations">Shallow Clone Operations</a></h3>
-<pre><code class="language-bash"># Deepen shallow clone
-git fetch --deepen=100
-git fetch --unshallow  # Fetch complete history
-
-# Fetch specific branch in shallow repo
-git remote set-branches origin 'feature/*'
-git fetch --depth 1 origin feature/new
-
-# Prune old history
-git fetch --depth=1
-</code></pre>
-<h2 id="remote-repository-management"><a class="header" href="#remote-repository-management">Remote Repository Management</a></h2>
-<h3 id="working-with-remotes"><a class="header" href="#working-with-remotes">Working with Remotes</a></h3>
-<pre><code class="language-bash"># Add remote
-git remote add origin https://github.com/user/repo.git
-git remote add upstream https://github.com/original/repo.git
-
-# List remotes
-git remote -v
-git remote show origin
-
-# Rename remote
-git remote rename origin upstream
-
-# Change remote URL
-git remote set-url origin git@github.com:user/repo.git
-git remote set-url --add origin https://gitlab.com/user/repo.git
-
-# Remove remote
-git remote remove origin
-git remote rm origin
-</code></pre>
-<h3 id="remote-tracking"><a class="header" href="#remote-tracking">Remote Tracking</a></h3>
-<pre><code class="language-bash"># View remote branches
-git branch -r
-git branch -a  # All branches (local + remote)
-
-# Track remote branch
-git checkout -b feature origin/feature
-git checkout --track origin/feature
-git branch -u origin/feature  # Set upstream for current branch
-
-# View tracking relationships
-git branch -vv
-
-# Fetch from remote
-git fetch origin
-git fetch --all  # Fetch from all remotes
-git fetch --prune  # Remove deleted remote branches
-
-# Pull changes
-git pull origin main
-git pull --rebase origin main
-
-# Push to remote
-git push origin main
-git push -u origin feature  # Set upstream and push
-git push --all origin  # Push all branches
-git push --tags  # Push tags
-git push --force-with-lease  # Safer force push
-</code></pre>
-<h3 id="multiple-remotes"><a class="header" href="#multiple-remotes">Multiple Remotes</a></h3>
-<pre><code class="language-bash"># Setup multiple remotes for push
-git remote set-url --add --push origin git@github.com:user/repo.git
-git remote set-url --add --push origin git@gitlab.com:user/repo.git
-
-# Verify configuration
-git remote -v
-
-# Push to specific remote
-git push github main
-git push gitlab main
-
-# Pull from specific remote
-git pull upstream main
-</code></pre>
-<h3 id="remote-branches-management"><a class="header" href="#remote-branches-management">Remote Branches Management</a></h3>
-<pre><code class="language-bash"># Delete remote branch
-git push origin --delete feature-branch
-git push origin :feature-branch  # Older syntax
-
-# Clean up stale remote references
-git remote prune origin
-git fetch --prune
-
-# Update remote branch
-git push origin main:main
-git push origin local-branch:remote-branch
-
-# Push all tags
-git push origin --tags
-
-# Delete remote tag
-git push origin --delete tag-name
-git push origin :refs/tags/tag-name
-</code></pre>
-<h2 id="repository-patterns"><a class="header" href="#repository-patterns">Repository Patterns</a></h2>
-<h3 id="monorepo-pattern"><a class="header" href="#monorepo-pattern">Monorepo Pattern</a></h3>
-<p>A single repository containing multiple projects or services.</p>
-<p><strong>Advantages:</strong></p>
+<p><strong>What it does:</strong></p>
 <ul>
-<li>Unified versioning</li>
-<li>Atomic commits across projects</li>
-<li>Simplified dependency management</li>
-<li>Easier code sharing and refactoring</li>
+<li>Creates <code>.repo/</code> directory</li>
+<li>Clones manifest repository</li>
+<li>Clones repo tool source</li>
+<li>Sets up configuration</li>
 </ul>
-<p><strong>Structure:</strong></p>
-<pre><code>monorepo/
-├── services/
-│   ├── api/
-│   ├── web/
-│   └── mobile/
-├── packages/
-│   ├── shared-ui/
-│   └── utils/
-├── tools/
-└── docs/
-</code></pre>
-<p><strong>Best Practices:</strong></p>
-<pre><code class="language-bash"># Use sparse checkout for large monorepos
-git sparse-checkout init --cone
-git sparse-checkout set services/api packages/shared-ui
+<h3 id="repo-sync"><a class="header" href="#repo-sync">repo sync</a></h3>
+<p>Synchronize local repositories with remote.</p>
+<pre><code class="language-bash"># Sync all projects
+repo sync
 
-# Use shallow clone for CI/CD
-git clone --depth 1 --filter=blob:none https://repo.git
+# Sync specific projects
+repo sync &lt;project1&gt; &lt;project2&gt;
 
-# Tag strategy for monorepos
-git tag api-v1.2.0
-git tag web-v2.0.0
-git tag shared-ui-v0.5.0
+# Parallel sync (4 jobs)
+repo sync -j4
+
+# Force sync (discard local changes)
+repo sync -d
+
+# Sync only current branch
+repo sync -c
+
+# Quiet mode
+repo sync -q
+
+# Network-only (no checkout)
+repo sync -n
 </code></pre>
-<h3 id="multi-repo-pattern"><a class="header" href="#multi-repo-pattern">Multi-Repo Pattern</a></h3>
-<p>Separate repositories for each project or service.</p>
-<p><strong>Advantages:</strong></p>
+<p><strong>What it does:</strong></p>
 <ul>
-<li>Independent versioning</li>
-<li>Smaller repositories</li>
-<li>Clearer access control</li>
-<li>Service isolation</li>
+<li>Runs <code>git fetch</code> across all projects</li>
+<li>Updates working files to match manifest revision</li>
+<li>Checks out appropriate branches</li>
 </ul>
-<p><strong>Management:</strong></p>
-<pre><code class="language-bash"># Use git submodules
-git submodule add https://github.com/user/lib.git libs/lib
+<h3 id="repo-start"><a class="header" href="#repo-start">repo start</a></h3>
+<p>Start a new branch in one or more projects.</p>
+<pre><code class="language-bash"># Start branch in specific projects
+repo start &lt;branch-name&gt; &lt;project1&gt; &lt;project2&gt;
 
-# Use meta-repositories
-git clone https://github.com/org/meta-repo.git
-cd meta-repo
-./scripts/clone-all.sh
+# Start branch in all projects
+repo start &lt;branch-name&gt; --all
 
-# Use repo tool (Android-style)
-repo init -u https://github.com/org/manifest.git
+# Example: new feature branch
+repo start feature-xyz frameworks/base system/core
+</code></pre>
+<p><strong>What it does:</strong></p>
+<ul>
+<li>Creates new branch in specified projects</li>
+<li>Checks out the new branch</li>
+<li>Tracks remote branch specified in manifest</li>
+</ul>
+<h3 id="repo-upload"><a class="header" href="#repo-upload">repo upload</a></h3>
+<p>Upload changes to Gerrit for code review.</p>
+<pre><code class="language-bash"># Upload all projects with changes
+repo upload
+
+# Upload specific projects
+repo upload &lt;project1&gt; &lt;project2&gt;
+
+# Upload without prompts (current branch)
+repo upload --cbr
+
+# Upload to specific reviewers
+repo upload --re=reviewer@example.com
+
+# Set topic
+repo upload -t &lt;topic-name&gt;
+</code></pre>
+<p><strong>Interactive flow:</strong></p>
+<pre><code>$ repo upload
+Upload project frameworks/base/ to remote branch main:
+  branch feature-xyz ( 3 commits, Wed Nov 19 15:30:00 2025):
+         a1b2c3d Fix crash in ActivityManager
+         d4e5f6g Add new API for notifications
+         g7h8i9j Update documentation
+to https://android-review.googlesource.com/ (y/N)? y
+</code></pre>
+<h3 id="repo-download"><a class="header" href="#repo-download">repo download</a></h3>
+<p>Download and checkout a change from Gerrit.</p>
+<pre><code class="language-bash"># Download specific change
+repo download &lt;project&gt; &lt;change-number&gt;/&lt;patch-set&gt;
+
+# Example
+repo download frameworks/base 12345/2
+</code></pre>
+<h3 id="repo-status"><a class="header" href="#repo-status">repo status</a></h3>
+<p>Show working tree status across all projects.</p>
+<pre><code class="language-bash"># Status of all projects
+repo status
+
+# Status of specific projects
+repo status &lt;project1&gt; &lt;project2&gt;
+
+# Short output (only project names)
+repo status -j1
+</code></pre>
+<p><strong>Output format:</strong></p>
+<pre><code>project frameworks/base/                branch feature-xyz
+ -m     ActivityManager.java
+ -m     NotificationManager.java
+ --     new_file.java
+
+Legend:
+ -m = modified
+ -d = deleted
+ -a = added
+ -- = untracked
+</code></pre>
+<h3 id="repo-diff"><a class="header" href="#repo-diff">repo diff</a></h3>
+<p>Show changes in working tree.</p>
+<pre><code class="language-bash"># Diff all projects
+repo diff
+
+# Diff specific projects
+repo diff &lt;project1&gt; &lt;project2&gt;
+</code></pre>
+<h3 id="repo-forall"><a class="header" href="#repo-forall">repo forall</a></h3>
+<p>Execute a command in each project.</p>
+<pre><code class="language-bash"># Run git command in all projects
+repo forall -c '&lt;command&gt;'
+
+# Example: show branch in all projects
+repo forall -c 'git branch'
+
+# Example: clean all projects
+repo forall -c 'git clean -fd'
+
+# Example: show status with project name
+repo forall -c 'echo $REPO_PROJECT; git status -s'
+
+# With project filter
+repo forall frameworks/* -c 'git log --oneline -5'
+</code></pre>
+<p><strong>Environment variables available:</strong></p>
+<ul>
+<li><code>$REPO_PROJECT</code> - project name</li>
+<li><code>$REPO_PATH</code> - path relative to root</li>
+<li><code>$REPO_REMOTE</code> - remote name</li>
+<li><code>$REPO_RREV</code> - manifest revision</li>
+</ul>
+<h3 id="other-useful-commands"><a class="header" href="#other-useful-commands">Other Useful Commands</a></h3>
+<pre><code class="language-bash"># List all projects
+repo list
+
+# Show repo info
+repo info
+
+# Prune (delete) merged branches
+repo prune
+
+# Abandon (delete) branches
+repo abandon &lt;branch-name&gt; &lt;project&gt;
+
+# Show manifest
+repo manifest
+
+# Show current version
+repo version
+
+# Self-update repo tool
+repo selfupdate
+</code></pre>
+<h2 id="typical-aosp-workflow"><a class="header" href="#typical-aosp-workflow">Typical AOSP Workflow</a></h2>
+<h3 id="1-initial-setup"><a class="header" href="#1-initial-setup">1. Initial Setup</a></h3>
+<pre><code class="language-bash"># Create workspace directory
+mkdir aosp
+cd aosp
+
+# Initialize for latest Android
+repo init -u https://android.googlesource.com/platform/manifest -b main
+
+# Or initialize for specific version (Android 14)
+repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r1
+
+# Sync (this will take a while - 100GB+)
+repo sync -j$(nproc)
+</code></pre>
+<h3 id="2-making-changes"><a class="header" href="#2-making-changes">2. Making Changes</a></h3>
+<pre><code class="language-bash"># Start a new branch for your work
+repo start feature-my-changes frameworks/base system/core
+
+# Make your changes
+cd frameworks/base
+# ... edit files ...
+
+# Check what changed
+repo status
+repo diff
+
+# Commit in each project
+cd frameworks/base
+git add .
+git commit -m "Add new feature to framework"
+
+cd ../../system/core
+git add .
+git commit -m "Add corresponding changes to system"
+</code></pre>
+<h3 id="3-uploading-for-review"><a class="header" href="#3-uploading-for-review">3. Uploading for Review</a></h3>
+<pre><code class="language-bash"># Upload changes to Gerrit
+cd ~/aosp
+repo upload
+
+# Or upload specific projects
+repo upload frameworks/base system/core
+</code></pre>
+<h3 id="4-syncing-latest-changes"><a class="header" href="#4-syncing-latest-changes">4. Syncing Latest Changes</a></h3>
+<pre><code class="language-bash"># Get latest updates
+repo sync -j$(nproc)
+
+# Sync only current branch (faster)
+repo sync -c -j$(nproc)
+</code></pre>
+<h3 id="5-switching-versions"><a class="header" href="#5-switching-versions">5. Switching Versions</a></h3>
+<pre><code class="language-bash"># Switch to different Android version
+repo init -b android-13.0.0_r1
+repo sync -j$(nproc)
+</code></pre>
+<h2 id="manifestxml-deep-dive"><a class="header" href="#manifestxml-deep-dive">manifest.xml Deep Dive</a></h2>
+<h3 id="complete-manifest-example"><a class="header" href="#complete-manifest-example">Complete Manifest Example</a></h3>
+<pre><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;manifest&gt;
+  &lt;!-- Remote definitions --&gt;
+  &lt;remote name="aosp"
+          fetch="https://android.googlesource.com/"
+          review="https://android-review.googlesource.com/" /&gt;
+
+  &lt;remote name="github"
+          fetch="https://github.com/" /&gt;
+
+  &lt;!-- Default settings --&gt;
+  &lt;default remote="aosp"
+           revision="refs/heads/main"
+           sync-j="4"
+           sync-c="true" /&gt;
+
+  &lt;!-- Projects --&gt;
+  &lt;project path="build" name="platform/build" groups="pdk"&gt;
+    &lt;copyfile src="core/root.mk" dest="Makefile" /&gt;
+    &lt;linkfile src="CleanSpec.mk" dest="build/CleanSpec.mk" /&gt;
+  &lt;/project&gt;
+
+  &lt;project path="frameworks/base"
+           name="platform/frameworks/base"
+           groups="pdk-cw-fs,pdk-fs" /&gt;
+
+  &lt;project path="external/sqlite"
+           name="platform/external/sqlite"
+           groups="pdk" /&gt;
+
+  &lt;!-- Project from different remote --&gt;
+  &lt;project path="external/mylib"
+           name="username/mylib"
+           remote="github"
+           revision="v1.0" /&gt;
+
+  &lt;!-- Project with specific branch --&gt;
+  &lt;project path="vendor/custom"
+           name="platform/vendor/custom"
+           revision="refs/heads/custom-branch" /&gt;
+&lt;/manifest&gt;
+</code></pre>
+<h3 id="manifest-elements"><a class="header" href="#manifest-elements">Manifest Elements</a></h3>
+<p><strong><code>&lt;remote&gt;</code></strong>: Defines a remote server</p>
+<ul>
+<li><code>name</code> - identifier for this remote</li>
+<li><code>fetch</code> - base URL for repositories</li>
+<li><code>review</code> - URL for Gerrit code review (optional)</li>
+</ul>
+<p><strong><code>&lt;default&gt;</code></strong>: Default values for projects</p>
+<ul>
+<li><code>remote</code> - default remote name</li>
+<li><code>revision</code> - default branch/tag</li>
+<li><code>sync-j</code> - number of parallel sync jobs</li>
+<li><code>sync-c</code> - sync only current branch</li>
+</ul>
+<p><strong><code>&lt;project&gt;</code></strong>: Individual repository</p>
+<ul>
+<li><code>path</code> - where to place in workspace</li>
+<li><code>name</code> - repository name (appended to remote fetch URL)</li>
+<li><code>remote</code> - which remote to use (optional, uses default)</li>
+<li><code>revision</code> - branch/tag/commit (optional, uses default)</li>
+<li><code>groups</code> - project groups for filtering</li>
+</ul>
+<p><strong><code>&lt;copyfile&gt;</code></strong>: Copy file after sync</p>
+<ul>
+<li><code>src</code> - source path in project</li>
+<li><code>dest</code> - destination path in workspace</li>
+</ul>
+<p><strong><code>&lt;linkfile&gt;</code></strong>: Create symlink after sync</p>
+<ul>
+<li><code>src</code> - source path in project</li>
+<li><code>dest</code> - destination path in workspace</li>
+</ul>
+<h3 id="local-manifests"><a class="header" href="#local-manifests">Local Manifests</a></h3>
+<p>Add custom projects without modifying main manifest:</p>
+<pre><code class="language-bash"># Create local manifests directory
+mkdir -p .repo/local_manifests
+
+# Create custom manifest
+cat &gt; .repo/local_manifests/myprojects.xml &lt;&lt; 'EOF'
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;manifest&gt;
+  &lt;remote name="github"
+          fetch="https://github.com/" /&gt;
+
+  &lt;project path="external/myapp"
+           name="username/myapp"
+           remote="github"
+           revision="main" /&gt;
+
+  &lt;!-- Remove a project from main manifest --&gt;
+  &lt;remove-project name="platform/external/sqlite" /&gt;
+&lt;/manifest&gt;
+EOF
+
+# Sync to apply changes
 repo sync
 </code></pre>
-<h3 id="fork-workflow-pattern"><a class="header" href="#fork-workflow-pattern">Fork Workflow Pattern</a></h3>
-<p>Standard open-source contribution model.</p>
-<pre><code class="language-bash"># 1. Fork repository on GitHub
+<h3 id="manifest-commands"><a class="header" href="#manifest-commands">Manifest Commands</a></h3>
+<pre><code class="language-bash"># Show effective manifest (with all includes)
+repo manifest -o current.xml
 
-# 2. Clone your fork
-git clone git@github.com:yourname/repo.git
-cd repo
-
-# 3. Add upstream remote
-git remote add upstream https://github.com/original/repo.git
-
-# 4. Create feature branch
-git checkout -b feature/new-feature
-
-# 5. Keep fork updated
-git fetch upstream
-git checkout main
-git merge upstream/main
-git push origin main
-
-# 6. Work on feature
-git add .
-git commit -m "Add new feature"
-git push origin feature/new-feature
-
-# 7. Create pull request on GitHub
-
-# 8. Update PR with upstream changes
-git fetch upstream
-git rebase upstream/main
-git push --force-with-lease origin feature/new-feature
+# Show revision manifest (locked to specific commits)
+repo manifest -r -o snapshot.xml
 </code></pre>
-<h3 id="gitflow-pattern"><a class="header" href="#gitflow-pattern">Gitflow Pattern</a></h3>
-<p>Structured branching model for releases.</p>
-<pre><code class="language-bash"># Branch structure
-main          # Production code
-develop       # Integration branch
-feature/*     # Feature branches
-release/*     # Release preparation
-hotfix/*      # Production fixes
+<h2 id="local-manifest-use-cases"><a class="header" href="#local-manifest-use-cases">Local Manifest Use Cases</a></h2>
+<h3 id="1-add-custom-repositories"><a class="header" href="#1-add-custom-repositories">1. Add Custom Repositories</a></h3>
+<pre><code class="language-xml">&lt;!-- .repo/local_manifests/custom.xml --&gt;
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;manifest&gt;
+  &lt;remote name="gitlab"
+          fetch="https://gitlab.com/" /&gt;
 
-# Start feature
-git checkout -b feature/user-auth develop
-
-# Finish feature
-git checkout develop
-git merge --no-ff feature/user-auth
-git branch -d feature/user-auth
-git push origin develop
-
-# Start release
-git checkout -b release/1.0.0 develop
-# Bump version, update changelog
-git commit -m "Prepare release 1.0.0"
-
-# Finish release
-git checkout main
-git merge --no-ff release/1.0.0
-git tag -a v1.0.0 -m "Release 1.0.0"
-git checkout develop
-git merge --no-ff release/1.0.0
-git branch -d release/1.0.0
-
-# Hotfix
-git checkout -b hotfix/1.0.1 main
-# Fix critical bug
-git commit -m "Fix critical bug"
-git checkout main
-git merge --no-ff hotfix/1.0.1
-git tag -a v1.0.1
-git checkout develop
-git merge --no-ff hotfix/1.0.1
-git branch -d hotfix/1.0.1
+  &lt;project path="vendor/mycompany/app"
+           name="mycompany/android-app"
+           remote="gitlab"
+           revision="develop" /&gt;
+&lt;/manifest&gt;
 </code></pre>
-<h3 id="trunk-based-development"><a class="header" href="#trunk-based-development">Trunk-Based Development</a></h3>
-<p>Single main branch with short-lived feature branches.</p>
-<pre><code class="language-bash"># Main workflow
-git checkout main
-git pull origin main
-git checkout -b feature/quick-fix
-# Make changes
-git commit -m "Quick fix"
-git push origin feature/quick-fix
-# Create PR, review, merge quickly
+<h3 id="2-replace-projects-with-forks"><a class="header" href="#2-replace-projects-with-forks">2. Replace Projects with Forks</a></h3>
+<pre><code class="language-xml">&lt;!-- .repo/local_manifests/forks.xml --&gt;
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;manifest&gt;
+  &lt;remote name="myfork"
+          fetch="https://github.com/myusername/" /&gt;
 
-# Feature flags for incomplete features
-if (featureFlags.newUI) {
-  // New UI code
-} else {
-  // Old UI code
-}
+  &lt;!-- Remove original --&gt;
+  &lt;remove-project name="platform/frameworks/base" /&gt;
 
-# Continuous integration
-# All commits must pass tests before merge
+  &lt;!-- Add fork --&gt;
+  &lt;project path="frameworks/base"
+           name="android-frameworks-base"
+           remote="myfork"
+           revision="my-custom-changes" /&gt;
+&lt;/manifest&gt;
 </code></pre>
-<h2 id="submodules"><a class="header" href="#submodules">Submodules</a></h2>
-<h3 id="working-with-submodules"><a class="header" href="#working-with-submodules">Working with Submodules</a></h3>
-<pre><code class="language-bash"># Add submodule
-git submodule add https://github.com/user/lib.git libs/lib
-git submodule add -b main https://github.com/user/lib.git libs/lib
+<h3 id="3-work-with-subset-of-projects"><a class="header" href="#3-work-with-subset-of-projects">3. Work with Subset of Projects</a></h3>
+<pre><code class="language-bash"># Initialize with groups
+repo init -u &lt;url&gt; -g "pdk,pdk-cw-fs"
 
-# Clone repository with submodules
-git clone --recursive https://github.com/user/repo.git
-
-# Initialize submodules after clone
-git submodule init
-git submodule update
-
-# Update submodules
-git submodule update --remote
-git submodule update --remote --merge
-
-# Update specific submodule
-git submodule update --remote libs/lib
-
-# Execute command in all submodules
-git submodule foreach git pull origin main
-git submodule foreach 'git checkout main &amp;&amp; git pull'
+# Sync only specified groups
+repo sync -g "pdk"
 </code></pre>
-<h3 id="advanced-submodule-operations"><a class="header" href="#advanced-submodule-operations">Advanced Submodule Operations</a></h3>
-<pre><code class="language-bash"># Remove submodule
-git submodule deinit libs/lib
-git rm libs/lib
-rm -rf .git/modules/libs/lib
-
-# Change submodule URL
-git config submodule.libs/lib.url https://new-url.git
-git submodule sync libs/lib
-git submodule update --remote libs/lib
-
-# Pin submodule to specific commit
-cd libs/lib
-git checkout abc1234
-cd ../..
-git add libs/lib
-git commit -m "Pin lib to specific version"
-
-# View submodule status
-git submodule status
-git submodule summary
-
-# Recursive submodule operations
-git clone --recursive --shallow-submodules https://github.com/user/repo.git
-git submodule update --init --recursive
-</code></pre>
-<h3 id="submodule-configuration"><a class="header" href="#submodule-configuration">Submodule Configuration</a></h3>
-<pre><code class="language-bash"># .gitmodules file
-[submodule "libs/lib"]
-    path = libs/lib
-    url = https://github.com/user/lib.git
-    branch = main
-    update = merge
-
-# Ignore changes in submodule
-git config submodule.libs/lib.ignore dirty
-git config submodule.libs/lib.ignore untracked
-git config submodule.libs/lib.ignore all
-
-# Set default update strategy
-git config submodule.recurse true
-git config submodule.libs/lib.update merge
-</code></pre>
-<h2 id="subtrees"><a class="header" href="#subtrees">Subtrees</a></h2>
-<h3 id="using-subtrees"><a class="header" href="#using-subtrees">Using Subtrees</a></h3>
-<pre><code class="language-bash"># Add subtree
-git subtree add --prefix=lib https://github.com/user/lib.git main --squash
-
-# Pull updates from subtree
-git subtree pull --prefix=lib https://github.com/user/lib.git main --squash
-
-# Push changes to subtree
-git subtree push --prefix=lib https://github.com/user/lib.git main
-
-# Split subtree into separate branch
-git subtree split --prefix=lib -b lib-only
-
-# Add subtree from existing code
-git remote add lib-origin https://github.com/user/lib.git
-git subtree add --prefix=lib lib-origin main
-</code></pre>
-<h3 id="subtree-vs-submodule"><a class="header" href="#subtree-vs-submodule">Subtree vs Submodule</a></h3>
-<p><strong>Submodules:</strong></p>
+<h2 id="comparison-with-alternatives"><a class="header" href="#comparison-with-alternatives">Comparison with Alternatives</a></h2>
+<h3 id="when-to-use-repo"><a class="header" href="#when-to-use-repo">When to Use Repo</a></h3>
+<p> <strong>Use Repo when:</strong></p>
 <ul>
-<li>Separate repositories</li>
-<li>Track specific commits</li>
-<li>Require initialization</li>
-<li>Better for independent projects</li>
-<li>Smaller parent repo size</li>
+<li>Working with AOSP or similar large multi-repo projects</li>
+<li>Need Gerrit integration</li>
+<li>Following established manifest-based workflow</li>
+<li>Managing 10+ related repositories</li>
 </ul>
-<p><strong>Subtrees:</strong></p>
+<p>L <strong>Don’t use Repo when:</strong></p>
 <ul>
-<li>Merged into parent repository</li>
-<li>No special commands needed for cloning</li>
-<li>Simplified workflow</li>
-<li>Better for vendoring</li>
-<li>Larger parent repo size</li>
+<li>Working with single repository (use Git)</li>
+<li>Need custom workflow (repo enforces Android workflow)</li>
+<li>Want simpler tool (consider git submodules, subtree, or alternatives)</li>
 </ul>
-<pre><code class="language-bash"># Migrate from submodule to subtree
-git submodule deinit libs/lib
-git rm libs/lib
-rm -rf .git/modules/libs/lib
-git subtree add --prefix=libs/lib https://github.com/user/lib.git main --squash
-</code></pre>
-<h2 id="repository-maintenance"><a class="header" href="#repository-maintenance">Repository Maintenance</a></h2>
-<h3 id="optimization"><a class="header" href="#optimization">Optimization</a></h3>
-<pre><code class="language-bash"># Garbage collection
-git gc
-git gc --aggressive  # More thorough, slower
-
-# Prune unreachable objects
-git prune
-git prune --dry-run  # See what would be deleted
-
-# Clean up repository
-git clean -n   # Dry run
-git clean -fd  # Remove untracked files and directories
-git clean -fdx # Include ignored files
-
-# Repack objects
-git repack
-git repack -a -d -f --depth=250 --window=250
-
-# Optimize repository
-git gc --aggressive --prune=now
-
-# Reduce repository size
-git reflog expire --expire=now --all
-git gc --prune=now --aggressive
-</code></pre>
-<h3 id="repository-verification"><a class="header" href="#repository-verification">Repository Verification</a></h3>
-<pre><code class="language-bash"># Verify repository integrity
-git fsck
-git fsck --full
-git fsck --unreachable
-
-# Check object database
-git count-objects -v
-git count-objects -vH  # Human-readable
-
-# Verify connectivity
-git fsck --connectivity-only
-
-# Find corrupted objects
-git fsck --lost-found
-</code></pre>
-<h3 id="repository-statistics"><a class="header" href="#repository-statistics">Repository Statistics</a></h3>
-<pre><code class="language-bash"># Repository size
-du -sh .git/
-
-# Object count and size
-git count-objects -v
-
-# Largest objects
-git rev-list --objects --all |
-  git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' |
-  sed -n 's/^blob //p' |
-  sort -rnk2 |
-  head -20
-
-# Commit count by author
-git shortlog -sn
-
-# Repository activity
-git log --all --oneline --graph --decorate
-
-# File change frequency
-git log --all --format=format: --name-only | sort | uniq -c | sort -rn | head -20
-</code></pre>
-<h3 id="backup-and-recovery"><a class="header" href="#backup-and-recovery">Backup and Recovery</a></h3>
-<pre><code class="language-bash"># Create backup
-git bundle create repo-backup.bundle --all
-git clone repo-backup.bundle repo-restored
-
-# Incremental backup
-git bundle create repo-incremental.bundle main ^backup-branch
-git bundle verify repo-backup.bundle
-
-# Mirror repository
-git clone --mirror https://github.com/user/repo.git backup-repo.git
-cd backup-repo.git
-git remote update
-
-# Export repository
-git fast-export --all &gt; repo-export.txt
-git fast-import &lt; repo-export.txt
-
-# Recover deleted branch
-git reflog
-git checkout -b recovered-branch abc1234
-
-# Recover deleted commits
-git fsck --lost-found
-git show &lt;dangling-commit-hash&gt;
-git cherry-pick &lt;hash&gt;
-</code></pre>
-<h2 id="repository-templates"><a class="header" href="#repository-templates">Repository Templates</a></h2>
-<h3 id="creating-templates"><a class="header" href="#creating-templates">Creating Templates</a></h3>
-<pre><code class="language-bash"># Create template directory
-mkdir -p ~/.git-templates/hooks
-
-# Add template files
-cat &gt; ~/.git-templates/hooks/pre-commit &lt;&lt; 'EOF'
-#!/bin/bash
-# Run linter before commit
-npm run lint
-EOF
-chmod +x ~/.git-templates/hooks/pre-commit
-
-# Configure Git to use template
-git config --global init.templateDir ~/.git-templates
-
-# Initialize with template
-git init  # Uses global template
-git init --template=/path/to/template
-</code></pre>
-<h3 id="template-structure"><a class="header" href="#template-structure">Template Structure</a></h3>
-<pre><code>.git-templates/
-├── hooks/
-│   ├── pre-commit
-│   ├── commit-msg
-│   ├── pre-push
-│   └── post-merge
-├── info/
-│   └── exclude
-└── description
-</code></pre>
-<h3 id="common-template-files"><a class="header" href="#common-template-files">Common Template Files</a></h3>
-<p><strong><code>.git-templates/info/exclude</code>:</strong></p>
-<pre><code>*.swp
-*.swo
-*~
-.DS_Store
-.idea/
-.vscode/
-</code></pre>
-<p><strong><code>.git-templates/hooks/commit-msg</code>:</strong></p>
-<pre><code class="language-bash">#!/bin/bash
-# Enforce commit message format
-commit_msg=$(cat "$1")
-pattern="^(feat|fix|docs|style|refactor|test|chore):"
-
-if ! echo "$commit_msg" | grep -qE "$pattern"; then
-    echo "Error: Commit message must start with type (feat|fix|docs|...)"
-    exit 1
-fi
-</code></pre>
-<h2 id="migration-and-conversion"><a class="header" href="#migration-and-conversion">Migration and Conversion</a></h2>
-<h3 id="migrating-from-other-vcs"><a class="header" href="#migrating-from-other-vcs">Migrating from Other VCS</a></h3>
-<p><strong>From SVN:</strong></p>
-<pre><code class="language-bash"># Clone SVN repository
-git svn clone https://svn.example.com/repo --stdlayout
-
-# Or with custom layout
-git svn clone https://svn.example.com/repo \
-  --trunk=main \
-  --branches=branches \
-  --tags=tags
-
-# Convert authors
-cat &gt; authors.txt &lt;&lt; EOF
-svnuser = Git User &lt;user@example.com&gt;
-EOF
-git svn clone --authors-file=authors.txt https://svn.example.com/repo
-
-# Clean up
-git remote add origin https://github.com/user/repo.git
-git push -u origin main
-</code></pre>
-<p><strong>From Mercurial:</strong></p>
-<pre><code class="language-bash"># Use hg-git plugin
-hg bookmark -r default main
-git clone hg::https://hg.example.com/repo
-
-# Or use fast-export
-git init repo
-cd repo
-hg-fast-export.sh -r /path/to/hg/repo
-git remote add origin https://github.com/user/repo.git
-git push -u origin main
-</code></pre>
-<h3 id="repository-splitting"><a class="header" href="#repository-splitting">Repository Splitting</a></h3>
-<pre><code class="language-bash"># Split subdirectory into new repo
-git filter-branch --subdirectory-filter subdir -- --all
-
-# Or use filter-repo (faster, recommended)
-git filter-repo --path subdir/
-
-# Create new repository
-git remote add origin https://github.com/user/new-repo.git
-git push -u origin main
-
-# Split by path patterns
-git filter-repo --path src/module1/ --path docs/module1/
-</code></pre>
-<h3 id="repository-merging"><a class="header" href="#repository-merging">Repository Merging</a></h3>
-<pre><code class="language-bash"># Merge multiple repos into one
-git remote add repo1 https://github.com/user/repo1.git
-git fetch repo1
-git merge repo1/main --allow-unrelated-histories
-
-# Move to subdirectory
-git filter-repo --to-subdirectory-filter repo1/
-
-# Repeat for other repositories
-git remote add repo2 https://github.com/user/repo2.git
-git fetch repo2
-git filter-repo --to-subdirectory-filter repo2/
-git merge repo2/main --allow-unrelated-histories
-</code></pre>
-<h3 id="history-rewriting"><a class="header" href="#history-rewriting">History Rewriting</a></h3>
-<pre><code class="language-bash"># Remove sensitive data
-git filter-branch --tree-filter 'rm -f passwords.txt' HEAD
-# Better: use filter-repo
-git filter-repo --invert-paths --path passwords.txt
-
-# Change author information
-git filter-branch --env-filter '
-if [ "$GIT_COMMITTER_EMAIL" = "old@example.com" ]; then
-    export GIT_COMMITTER_NAME="New Name"
-    export GIT_COMMITTER_EMAIL="new@example.com"
-fi
-if [ "$GIT_AUTHOR_EMAIL" = "old@example.com" ]; then
-    export GIT_AUTHOR_NAME="New Name"
-    export GIT_AUTHOR_EMAIL="new@example.com"
-fi
-' --tag-name-filter cat -- --branches --tags
-
-# Remove large files
-git filter-repo --strip-blobs-bigger-than 10M
-
-# Simplify history
-git filter-branch --commit-filter '
-    if [ "$GIT_AUTHOR_NAME" = "Temporary User" ]; then
-        skip_commit "$@"
-    else
-        git commit-tree "$@"
-    fi
-' HEAD
-</code></pre>
-<h2 id="advanced-repository-operations"><a class="header" href="#advanced-repository-operations">Advanced Repository Operations</a></h2>
-<h3 id="worktrees"><a class="header" href="#worktrees">Worktrees</a></h3>
-<p>Work on multiple branches simultaneously.</p>
-<pre><code class="language-bash"># Add worktree
-git worktree add ../project-feature1 feature1
-git worktree add -b feature2 ../project-feature2
-
-# List worktrees
-git worktree list
-
-# Remove worktree
-git worktree remove ../project-feature1
-git worktree prune
-
-# Lock/unlock worktree
-git worktree lock ../project-feature1
-git worktree unlock ../project-feature1
-
-# Move worktree
-git worktree move ../project-feature1 ../new-location
-</code></pre>
-<h3 id="sparse-checkout"><a class="header" href="#sparse-checkout">Sparse Checkout</a></h3>
-<p>Checkout only specific directories.</p>
-<pre><code class="language-bash"># Enable sparse checkout
-git sparse-checkout init
-git sparse-checkout init --cone  # Cone mode (recommended)
-
-# Set patterns
-git sparse-checkout set src/ docs/
-git sparse-checkout add tests/
-
-# View patterns
-git sparse-checkout list
-
-# Disable sparse checkout
-git sparse-checkout disable
-</code></pre>
-<h3 id="partial-clone"><a class="header" href="#partial-clone">Partial Clone</a></h3>
-<p>Clone without all objects (lazy loading).</p>
-<pre><code class="language-bash"># Blob-less clone
-git clone --filter=blob:none https://github.com/user/huge-repo.git
-
-# Tree-less clone
-git clone --filter=tree:0 https://github.com/user/huge-repo.git
-
-# Combine with shallow clone
-git clone --depth=1 --filter=blob:none https://github.com/user/repo.git
-
-# Fetch missing objects
-git fetch origin
-</code></pre>
-<h3 id="reference-repository"><a class="header" href="#reference-repository">Reference Repository</a></h3>
-<p>Share objects between repositories.</p>
-<pre><code class="language-bash"># Clone with reference
-git clone --reference /path/to/original /path/to/clone
-
-# Add reference to existing repo
-git repack -a -d
-git clone --reference /path/to/reference https://github.com/user/repo.git
-
-# Dissociate from reference
-git repack -a -d
-rm -rf .git/objects/info/alternates
-</code></pre>
-<h2 id="repository-configuration-1"><a class="header" href="#repository-configuration-1">Repository Configuration</a></h2>
-<h3 id="config-scopes"><a class="header" href="#config-scopes">Config Scopes</a></h3>
-<pre><code class="language-bash"># System-wide (/etc/gitconfig)
-git config --system core.editor vim
-
-# User-level (~/.gitconfig)
-git config --global user.name "John Doe"
-
-# Repository-level (.git/config)
-git config user.email john@project.com
-
-# Worktree-level (.git/config.worktree)
-git config --worktree core.sparseCheckout true
-
-# View all configs with origin
-git config --list --show-origin
-git config --list --show-scope
-</code></pre>
-<h3 id="conditional-configuration"><a class="header" href="#conditional-configuration">Conditional Configuration</a></h3>
-<p><strong>~/.gitconfig:</strong></p>
-<pre><code class="language-ini">[user]
-    name = John Doe
-    email = personal@example.com
-
-[includeIf "gitdir:~/work/"]
-    path = ~/.gitconfig-work
-
-[includeIf "gitdir:~/projects/opensource/"]
-    path = ~/.gitconfig-opensource
-</code></pre>
-<p><strong>~/.gitconfig-work:</strong></p>
-<pre><code class="language-ini">[user]
-    email = john.doe@company.com
-</code></pre>
-<h3 id="advanced-settings"><a class="header" href="#advanced-settings">Advanced Settings</a></h3>
-<pre><code class="language-bash"># Reuse recorded resolutions
-git config rerere.enabled true
-git config rerere.autoUpdate true
-
-# Default merge strategy
-git config merge.strategy recursive
-git config merge.conflictStyle diff3
-
-# Commit signing
-git config commit.gpgSign true
-git config user.signingKey ABC123
-
-# Push configuration
-git config push.default simple
-git config push.followTags true
-git config push.autoSetupRemote true
-
-# Diff and merge tools
-git config diff.tool vimdiff
-git config merge.tool meld
-git config mergetool.keepBackup false
-
-# Performance settings
-git config core.preloadIndex true
-git config core.fscache true
-git config gc.auto 256
-
-# Security
-git config transfer.fsckObjects true
-git config receive.fsckObjects true
-git config fetch.fsckObjects true
-</code></pre>
-<h3 id="repository-attributes"><a class="header" href="#repository-attributes">Repository Attributes</a></h3>
-<p><strong>.gitattributes:</strong></p>
-<pre><code># Line endings
-* text=auto
-*.sh text eol=lf
-*.bat text eol=crlf
-
-# Binary files
-*.png binary
-*.jpg binary
-*.pdf binary
-
-# Diff drivers
-*.ipynb diff=jupyternotebook
-*.json diff=json
-
-# Merge strategies
-Makefile merge=union
-CHANGELOG.md merge=union
-
-# Export settings
-.gitattributes export-ignore
-.gitignore export-ignore
-tests/ export-ignore
-
-# Language statistics
-docs/* linguist-documentation
-vendor/* linguist-vendored
-*.js linguist-language=JavaScript
-</code></pre>
-<h2 id="repository-hooks"><a class="header" href="#repository-hooks">Repository Hooks</a></h2>
-<h3 id="client-side-hooks"><a class="header" href="#client-side-hooks">Client-Side Hooks</a></h3>
-<pre><code class="language-bash"># Pre-commit: Run before commit
-.git/hooks/pre-commit
-
-# Prepare-commit-msg: Modify commit message
-.git/hooks/prepare-commit-msg
-
-# Commit-msg: Validate commit message
-.git/hooks/commit-msg
-
-# Post-commit: Run after commit
-.git/hooks/post-commit
-
-# Pre-push: Run before push
-.git/hooks/pre-push
-
-# Post-checkout: Run after checkout
-.git/hooks/post-checkout
-
-# Post-merge: Run after merge
-.git/hooks/post-merge
-
-# Pre-rebase: Run before rebase
-.git/hooks/pre-rebase
-</code></pre>
-<h3 id="server-side-hooks"><a class="header" href="#server-side-hooks">Server-Side Hooks</a></h3>
-<pre><code class="language-bash"># Pre-receive: Run before accepting push
-.git/hooks/pre-receive
-
-# Update: Run for each branch being updated
-.git/hooks/update
-
-# Post-receive: Run after accepting push
-.git/hooks/post-receive
-
-# Post-update: Run after all refs updated
-.git/hooks/post-update
-</code></pre>
-<h3 id="hook-examples"><a class="header" href="#hook-examples">Hook Examples</a></h3>
-<p><strong>Pre-commit: Run tests</strong></p>
-<pre><code class="language-bash">#!/bin/bash
-npm test
-if [ $? -ne 0 ]; then
-    echo "Tests failed. Commit aborted."
-    exit 1
-fi
-</code></pre>
-<p><strong>Commit-msg: Enforce format</strong></p>
-<pre><code class="language-bash">#!/bin/bash
-commit_msg_file=$1
-commit_msg=$(cat "$commit_msg_file")
-pattern="^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+"
-
-if ! echo "$commit_msg" | grep -qE "$pattern"; then
-    echo "Invalid commit message format"
-    echo "Format: &lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;"
-    exit 1
-fi
-</code></pre>
-<p><strong>Pre-push: Prevent force push to main</strong></p>
-<pre><code class="language-bash">#!/bin/bash
-while read local_ref local_sha remote_ref remote_sha; do
-    if [[ "$remote_ref" == "refs/heads/main" ]] &amp;&amp; [[ "$local_sha" != "$remote_sha" ]]; then
-        echo "Error: Cannot force push to main branch"
-        exit 1
-    fi
-done
-</code></pre>
-<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
-<h3 id="repository-organization"><a class="header" href="#repository-organization">Repository Organization</a></h3>
+<h3 id="alternatives"><a class="header" href="#alternatives">Alternatives</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Tool</th><th>Use Case</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Git Submodules</strong></td><td>Include specific versions of external repos</td></tr>
+<tr><td><strong>Git Subtree</strong></td><td>Merge external repos into subdirectories</td></tr>
+<tr><td><strong>mu-repo</strong></td><td>Simple multi-repo command runner</td></tr>
+<tr><td><strong>gr</strong></td><td>Auto-discovery multi-repo tool</td></tr>
+<tr><td><strong>mani</strong></td><td>Modern multi-repo CLI</td></tr>
+<tr><td><strong>myrepos (mr)</strong></td><td>Flexible multi-VCS tool</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="limitations"><a class="header" href="#limitations">Limitations</a></h3>
 <ol>
-<li><strong>Consistent structure</strong>: Use standard directory layout</li>
-<li><strong>Clear documentation</strong>: Maintain README, CONTRIBUTING, and docs</li>
-<li><strong>Ignore correctly</strong>: Use .gitignore for build artifacts</li>
-<li><strong>Small commits</strong>: Atomic, focused changes</li>
-<li><strong>Meaningful messages</strong>: Descriptive commit messages</li>
-<li><strong>Branch protection</strong>: Protect main branches</li>
-<li><strong>Code reviews</strong>: Require reviews before merge</li>
-<li><strong>CI/CD integration</strong>: Automated testing and deployment</li>
+<li><strong>Designed for Android workflow</strong>: May not fit other workflows</li>
+<li><strong>Requires manifest</strong>: Cannot work without manifest.xml</li>
+<li><strong>Python dependency</strong>: Needs Python 3.6+</li>
+<li><strong>Learning curve</strong>: More complex than single-repo Git</li>
+<li><strong>Large downloads</strong>: AOSP sync is 100GB+</li>
 </ol>
+<h2 id="tips--best-practices"><a class="header" href="#tips--best-practices">Tips &amp; Best Practices</a></h2>
 <h3 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h3>
-<pre><code class="language-bash"># Enable filesystem cache
-git config core.fscache true
+<pre><code class="language-bash"># Use parallel jobs (adjust to CPU cores)
+repo sync -j$(nproc)
 
-# Enable preload index
-git config core.preloadIndex true
+# Sync only current branch (faster, smaller)
+repo sync -c
 
-# Use protocol v2
-git config protocol.version 2
+# Use shallow clones (less history, smaller)
+repo init --depth=1
 
-# Optimize garbage collection
-git config gc.auto 256
-git config gc.autoPackLimit 50
+# Partial clone (Git 2.19+)
+repo init --partial-clone
 
-# Use commit graph
-git config core.commitGraph true
-git config gc.writeCommitGraph true
-git commit-graph write --reachable
-
-# Enable parallel processing
-git config pack.threads 0  # Auto-detect CPU count
+# Use local mirror for multiple workspaces
+repo init -u &lt;url&gt; --reference=/path/to/mirror
 </code></pre>
-<h3 id="security-best-practices"><a class="header" href="#security-best-practices">Security Best Practices</a></h3>
-<pre><code class="language-bash"># Enable fsck on fetch
-git config fetch.fsckObjects true
-git config receive.fsckObjects true
-git config transfer.fsckObjects true
+<h3 id="creating-a-local-mirror"><a class="header" href="#creating-a-local-mirror">Creating a Local Mirror</a></h3>
+<p>Save bandwidth when working with multiple AOSP checkouts:</p>
+<pre><code class="language-bash"># Create mirror
+mkdir aosp-mirror
+cd aosp-mirror
+repo init -u https://android.googlesource.com/platform/manifest --mirror
+repo sync -j$(nproc)
 
-# Sign commits
-git config commit.gpgSign true
-
-# Protect against tag replacement
-git config receive.denyNonFastForwards true
-git config receive.denyDeletes true
-
-# Verify commit signatures
-git log --show-signature
-git verify-commit HEAD
-
-# Scan for secrets before commit
-# Use tools like git-secrets or gitleaks
-git secrets --scan
+# Use mirror for workspace
+cd ~/aosp-workspace
+repo init -u https://android.googlesource.com/platform/manifest \
+  --reference=/path/to/aosp-mirror
+repo sync -j$(nproc)  # Much faster, uses mirror objects
 </code></pre>
-<h3 id="collaboration-best-practices"><a class="header" href="#collaboration-best-practices">Collaboration Best Practices</a></h3>
+<h3 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h3>
 <ol>
-<li><strong>Clear branch naming</strong>: Use consistent naming conventions</li>
-<li><strong>Protected branches</strong>: Require reviews and tests</li>
-<li><strong>Rebase vs merge</strong>: Choose strategy consistently</li>
-<li><strong>Force push carefully</strong>: Use –force-with-lease</li>
-<li><strong>Clean history</strong>: Squash/rebase before merging</li>
-<li><strong>Tag releases</strong>: Use semantic versioning</li>
-<li><strong>Document changes</strong>: Maintain CHANGELOG</li>
-<li><strong>Code owners</strong>: Use CODEOWNERS file</li>
+<li>
+<p><strong>Detached HEAD state</strong>: After <code>repo sync</code>, projects are in detached HEAD</p>
+<pre><code class="language-bash"># Start a branch to work
+repo start my-branch &lt;project&gt;
+</code></pre>
+</li>
+<li>
+<p><strong>Local changes overwritten</strong>: <code>repo sync -d</code> discards local changes</p>
+<pre><code class="language-bash"># Safe sync (won't discard changes)
+repo sync
+
+# Check what will be lost before -d
+repo status
+repo diff
+</code></pre>
+</li>
+<li>
+<p><strong>Large disk usage</strong>: AOSP is huge</p>
+<pre><code class="language-bash"># Use shallow clone
+repo init --depth=1
+
+# Use sparse checkout (advanced)
+# Edit .repo/manifests/default.xml groups
+</code></pre>
+</li>
+<li>
+<p><strong>Slow sync</strong>: Network/disk bottleneck</p>
+<pre><code class="language-bash"># Adjust parallel jobs
+repo sync -j4  # Lower if network is bottleneck
+repo sync -j16 # Higher if CPU/disk can handle
+</code></pre>
+</li>
 </ol>
-<h3 id="repository-hygiene"><a class="header" href="#repository-hygiene">Repository Hygiene</a></h3>
-<pre><code class="language-bash"># Regular maintenance
-git fetch --prune
-git remote prune origin
-git gc --auto
+<h3 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h3>
+<pre><code class="language-bash"># Repo command fails
+repo selfupdate  # Update repo tool
+rm -rf .repo/repo &amp;&amp; repo sync  # Reinstall repo
 
-# Clean up branches
-git branch --merged | grep -v "\*" | xargs -n 1 git branch -d
+# Sync fails on specific project
+repo sync &lt;project&gt;  # Sync just that project
+repo forall &lt;project&gt; -c 'git reset --hard'  # Reset project
 
-# Update submodules
-git submodule update --remote --merge
+# Fix corrupt Git repository
+cd &lt;project&gt;
+rm -rf .git
+cd ../..
+repo sync &lt;project&gt;  # Re-clone
 
-# Verify repository health
-git fsck --full
-
-# Optimize periodically
-git repack -a -d -f --depth=250 --window=250
-git gc --aggressive
+# Check repo status
+repo info
+repo version
+repo manifest -o current.xml  # Verify manifest
 </code></pre>
-<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
-<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
-<p><strong>Repository corruption:</strong></p>
-<pre><code class="language-bash"># Verify integrity
-git fsck --full
+<h3 id="working-with-branches"><a class="header" href="#working-with-branches">Working with Branches</a></h3>
+<pre><code class="language-bash"># List all branches across projects
+repo forall -c 'git branch -v'
 
-# Recover from corruption
-git reflog expire --expire=now --all
-git gc --prune=now
+# Find projects with uncommitted changes
+repo status
 
-# Clone fresh copy if needed
-git clone --mirror corrupt-repo fresh-repo
+# Create feature branch in multiple projects
+repo start feature-x frameworks/* system/*
+
+# Abandon (delete) branch
+repo abandon feature-x --all
+
+# Prune merged branches
+repo prune
 </code></pre>
-<p><strong>Large repository size:</strong></p>
-<pre><code class="language-bash"># Find large files
-git rev-list --objects --all |
-  git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' |
-  awk '/^blob/ {print substr($0,6)}' |
-  sort -nk2 |
-  tail -20
+<h3 id="code-review-workflow"><a class="header" href="#code-review-workflow">Code Review Workflow</a></h3>
+<pre><code class="language-bash"># Make changes and commit
+cd &lt;project&gt;
+git add .
+git commit -m "Fix issue #123"
 
-# Remove large files
-git filter-repo --strip-blobs-bigger-than 10M
+# Upload for review
+cd ~/workspace
+repo upload &lt;project&gt;
 
-# Reduce pack size
-git repack -a -d -f --depth=250 --window=250
-</code></pre>
-<p><strong>Submodule issues:</strong></p>
-<pre><code class="language-bash"># Reset submodules
-git submodule deinit --all -f
-git submodule update --init --recursive
-
-# Fix detached HEAD in submodule
-cd submodule
-git checkout main
+# Address review comments
+cd &lt;project&gt;
+git add .
+git commit --amend  # Amend the commit
 cd ..
-git add submodule
-</code></pre>
-<p><strong>Merge conflicts in binary files:</strong></p>
-<pre><code class="language-bash"># Use ours or theirs
-git checkout --ours file.bin
-git checkout --theirs file.bin
+repo upload &lt;project&gt;  # Upload new patch set
 
-# Configure merge driver
-git config merge.ours.driver true
-# In .gitattributes:
-# *.bin merge=ours
+# Download someone else's change for testing
+repo download &lt;project&gt; &lt;change&gt;/&lt;patchset&gt;
 </code></pre>
-<p><strong>Detached HEAD state:</strong></p>
-<pre><code class="language-bash"># Create branch from detached HEAD
-git checkout -b recovery-branch
+<h2 id="advanced-usage"><a class="header" href="#advanced-usage">Advanced Usage</a></h2>
+<h3 id="custom-manifest-repository"><a class="header" href="#custom-manifest-repository">Custom Manifest Repository</a></h3>
+<p>Create your own manifest repository:</p>
+<pre><code class="language-bash"># Create manifest repo
+mkdir my-manifests
+cd my-manifests
+git init
 
-# Return to previous branch
-git checkout -
+# Create default.xml
+cat &gt; default.xml &lt;&lt; 'EOF'
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;manifest&gt;
+  &lt;remote name="origin" fetch="https://github.com/myorg/" /&gt;
+  &lt;default remote="origin" revision="main" /&gt;
 
-# Recover lost commits
-git reflog
-git checkout -b recovery &lt;commit-hash&gt;
-</code></pre>
-<h3 id="recovery-operations"><a class="header" href="#recovery-operations">Recovery Operations</a></h3>
-<p><strong>Recover deleted branch:</strong></p>
-<pre><code class="language-bash">git reflog
-git checkout -b recovered-branch &lt;commit-hash&gt;
-</code></pre>
-<p><strong>Recover from hard reset:</strong></p>
-<pre><code class="language-bash">git reflog
-git reset --hard &lt;commit-before-reset&gt;
-</code></pre>
-<p><strong>Undo published commits:</strong></p>
-<pre><code class="language-bash"># Create revert commit
-git revert &lt;commit-hash&gt;
+  &lt;project path="project-a" name="project-a" /&gt;
+  &lt;project path="project-b" name="project-b" /&gt;
+&lt;/manifest&gt;
+EOF
 
-# Or revert multiple commits
-git revert &lt;oldest-hash&gt;..&lt;newest-hash&gt;
-</code></pre>
-<p><strong>Fix wrong commit message:</strong></p>
-<pre><code class="language-bash"># Last commit (not pushed)
-git commit --amend -m "Corrected message"
+git add default.xml
+git commit -m "Initial manifest"
+git remote add origin &lt;manifest-repo-url&gt;
+git push -u origin main
 
-# Older commit
-git rebase -i &lt;commit-before&gt;^
-# Change "pick" to "reword" for commit
+# Use your manifest
+repo init -u &lt;manifest-repo-url&gt;
+repo sync
 </code></pre>
-<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
-<h3 id="repository-commands"><a class="header" href="#repository-commands">Repository Commands</a></h3>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>Command</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td><code>git init</code></td><td>Initialize repository</td></tr>
-<tr><td><code>git clone</code></td><td>Clone repository</td></tr>
-<tr><td><code>git remote</code></td><td>Manage remotes</td></tr>
-<tr><td><code>git fetch</code></td><td>Fetch from remote</td></tr>
-<tr><td><code>git pull</code></td><td>Fetch and merge</td></tr>
-<tr><td><code>git push</code></td><td>Push to remote</td></tr>
-<tr><td><code>git submodule</code></td><td>Manage submodules</td></tr>
-<tr><td><code>git subtree</code></td><td>Manage subtrees</td></tr>
-<tr><td><code>git worktree</code></td><td>Manage worktrees</td></tr>
-<tr><td><code>git gc</code></td><td>Garbage collection</td></tr>
-<tr><td><code>git fsck</code></td><td>Verify repository</td></tr>
-<tr><td><code>git bundle</code></td><td>Create repository bundle</td></tr>
-<tr><td><code>git filter-repo</code></td><td>Rewrite history</td></tr>
-</tbody>
-</table>
-</div>
-<h3 id="configuration-levels"><a class="header" href="#configuration-levels">Configuration Levels</a></h3>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>Scope</th><th>Flag</th><th>File</th><th>Priority</th></tr>
-</thead>
-<tbody>
-<tr><td>System</td><td><code>--system</code></td><td><code>/etc/gitconfig</code></td><td>Lowest</td></tr>
-<tr><td>Global</td><td><code>--global</code></td><td><code>~/.gitconfig</code></td><td>Medium</td></tr>
-<tr><td>Local</td><td><code>--local</code></td><td><code>.git/config</code></td><td>High</td></tr>
-<tr><td>Worktree</td><td><code>--worktree</code></td><td><code>.git/config.worktree</code></td><td>Highest</td></tr>
-</tbody>
-</table>
-</div>
-<h3 id="repository-health-checklist"><a class="header" href="#repository-health-checklist">Repository Health Checklist</a></h3>
+<h3 id="manifest-includes"><a class="header" href="#manifest-includes">Manifest Includes</a></h3>
+<p>Split large manifests into multiple files:</p>
+<pre><code class="language-xml">&lt;!-- default.xml --&gt;
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;manifest&gt;
+  &lt;include name="remotes.xml" /&gt;
+  &lt;include name="core-projects.xml" /&gt;
+  &lt;include name="optional-projects.xml" /&gt;
+&lt;/manifest&gt;
+</code></pre>
+<h3 id="project-groups"><a class="header" href="#project-groups">Project Groups</a></h3>
+<p>Organize projects into logical groups:</p>
+<pre><code class="language-xml">&lt;!-- In manifest --&gt;
+&lt;project path="frameworks/base" name="..." groups="pdk,pdk-fs" /&gt;
+&lt;project path="packages/apps/Camera" name="..." groups="apps" /&gt;
+
+&lt;!-- Sync only specific groups --&gt;
+</code></pre>
+<pre><code class="language-bash">repo init -u &lt;url&gt; -g "pdk,apps"  # Only pdk and apps groups
+repo init -u &lt;url&gt; -g "all,-notdefault"  # All except notdefault
+</code></pre>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
 <ul>
-<li><input disabled="" type="checkbox"> Repository size is reasonable</li>
-<li><input disabled="" type="checkbox"> No large binary files in history</li>
-<li><input disabled="" type="checkbox"> .gitignore is comprehensive</li>
-<li><input disabled="" type="checkbox"> Branches are up to date</li>
-<li><input disabled="" type="checkbox"> Remote references are clean</li>
-<li><input disabled="" type="checkbox"> Hooks are configured correctly</li>
-<li><input disabled="" type="checkbox"> Tests pass on all branches</li>
-<li><input disabled="" type="checkbox"> Documentation is current</li>
-<li><input disabled="" type="checkbox"> Security scanning enabled</li>
-<li><input disabled="" type="checkbox"> Backup strategy in place</li>
+<li><strong>Official Repo Source</strong>: https://gerrit.googlesource.com/git-repo/</li>
+<li><strong>AOSP Repo Docs</strong>: https://source.android.com/docs/setup/reference/repo</li>
+<li><strong>AOSP Download Guide</strong>: https://source.android.com/docs/setup/download</li>
+<li><strong>Gerrit Code Review</strong>: https://www.gerritcodereview.com/</li>
 </ul>
-<p>Effective repository management ensures smooth collaboration, optimal performance, and long-term maintainability of your projects.</p>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Repo is a powerful tool for managing multi-repository projects like AOSP. While it has a learning curve, it provides essential functionality for working with large-scale distributed projects:</p>
+<p><strong>Key Takeaways:</strong></p>
+<ul>
+<li>Repo orchestrates multiple Git repositories via manifest files</li>
+<li>Core commands: <code>init</code>, <code>sync</code>, <code>start</code>, <code>upload</code>, <code>download</code></li>
+<li>Designed for Android development but adaptable to other projects</li>
+<li>Use local manifests to customize without modifying main manifest</li>
+<li>Performance can be optimized with parallel jobs and local mirrors</li>
+</ul>
+<p>For single repositories or simple multi-repo setups, stick with plain Git or lighter alternatives. For AOSP-scale projects, repo is indispensable.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../git/github.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../git/git_config.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
@@ -1386,7 +920,7 @@ git rebase -i &lt;commit-before&gt;^
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../git/github.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../git/git_config.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 

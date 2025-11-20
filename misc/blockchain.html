@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-843a62d1.js";
+            window.path_to_searchindex_js = "../searchindex-b2dc8d76.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f349561e.js"></script>
+        <script src="../toc-728509bc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -176,1425 +176,1381 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="blockchain-website-crawling-guide"><a class="header" href="#blockchain-website-crawling-guide">Blockchain Website Crawling Guide</a></h1>
-<p>This guide provides best practices and configuration examples for crawling blockchain-related websites using this crawler library.</p>
-<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>Blockchain websites (explorers, DeFi platforms, documentation sites) often have unique characteristics that require special consideration when crawling:</p>
-<ul>
-<li>Dynamic content loaded via JavaScript</li>
-<li>Real-time data updates</li>
-<li>Rate limiting and API quotas</li>
-<li>Complex URL structures</li>
-<li>Large datasets</li>
-<li>WebSocket connections for live data</li>
-<li>Anti-bot protections (Cloudflare, etc.)</li>
-<li>High-frequency content updates</li>
-<li>Decentralized architectures</li>
-</ul>
+                        <h1 id="blockchain"><a class="header" href="#blockchain">Blockchain</a></h1>
+<p>A comprehensive guide to blockchain technology, cryptocurrencies, smart contracts, and decentralized applications.</p>
 <h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
 <ol>
-<li><a href="#common-blockchain-website-types">Common Blockchain Website Types</a></li>
-<li><a href="#best-practices">Best Practices</a></li>
-<li><a href="#advanced-crawling-techniques">Advanced Crawling Techniques</a></li>
-<li><a href="#platform-specific-guides">Platform-Specific Guides</a></li>
-<li><a href="#example-configurations">Example Configurations</a></li>
-<li><a href="#data-extraction-patterns">Data Extraction Patterns</a></li>
-<li><a href="#performance-optimization">Performance Optimization</a></li>
-<li><a href="#troubleshooting">Troubleshooting</a></li>
-<li><a href="#security-and-privacy">Security and Privacy</a></li>
-<li><a href="#ethical-considerations">Ethical Considerations</a></li>
+<li><a href="#blockchain-fundamentals">Blockchain Fundamentals</a></li>
+<li><a href="#blockchain-architecture">Blockchain Architecture</a></li>
+<li><a href="#cryptographic-foundations">Cryptographic Foundations</a></li>
+<li><a href="#consensus-mechanisms">Consensus Mechanisms</a></li>
+<li><a href="#major-blockchain-platforms">Major Blockchain Platforms</a></li>
+<li><a href="#smart-contracts">Smart Contracts</a></li>
+<li><a href="#blockchain-development">Blockchain Development</a></li>
+<li><a href="#decentralized-applications-dapps">Decentralized Applications (DApps)</a></li>
+<li><a href="#security-and-best-practices">Security and Best Practices</a></li>
+<li><a href="#use-cases-and-applications">Use Cases and Applications</a></li>
+<li><a href="#resources-and-tools">Resources and Tools</a></li>
 </ol>
-<h2 id="common-blockchain-website-types"><a class="header" href="#common-blockchain-website-types">Common Blockchain Website Types</a></h2>
-<h3 id="block-explorers"><a class="header" href="#block-explorers">Block Explorers</a></h3>
-<p>Block explorers (Etherscan, Blockchain.com, BscScan, etc.) display blockchain data through web interfaces, providing human-readable access to transaction data, smart contract information, and network statistics.</p>
-<p><strong>Challenges:</strong></p>
+<hr>
+<h2 id="blockchain-fundamentals"><a class="header" href="#blockchain-fundamentals">Blockchain Fundamentals</a></h2>
+<p><strong>Blockchain</strong> is a distributed, immutable ledger that records transactions across a network of computers in a way that makes it difficult to change, hack, or cheat the system.</p>
+<h3 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h3>
+<ol>
+<li><strong>Decentralization</strong>: No single point of control; network is distributed across nodes</li>
+<li><strong>Immutability</strong>: Once data is recorded, it cannot be altered retroactively</li>
+<li><strong>Transparency</strong>: All transactions are visible to network participants</li>
+<li><strong>Consensus</strong>: Agreement mechanism for validating transactions</li>
+<li><strong>Cryptography</strong>: Ensures security and integrity of data</li>
+</ol>
+<h3 id="key-characteristics"><a class="header" href="#key-characteristics">Key Characteristics</a></h3>
 <ul>
-<li>Heavy JavaScript rendering (React, Vue.js applications)</li>
-<li>Infinite scroll patterns for transaction lists</li>
-<li>Aggressive rate limiting (often 1-5 requests/second)</li>
-<li>Dynamic content updates via WebSockets</li>
-<li>Anti-bot protections (Cloudflare, reCAPTCHA)</li>
-<li>Pagination tokens that expire quickly</li>
-<li>Content loaded asynchronously after initial page load</li>
+<li><strong>Distributed Ledger</strong>: Shared database replicated across multiple nodes</li>
+<li><strong>Peer-to-Peer Network</strong>: Direct interaction between parties without intermediaries</li>
+<li><strong>Trustless System</strong>: Cryptographic verification replaces need for trusted third parties</li>
+<li><strong>Tamper-Resistant</strong>: Cryptographic chaining makes alteration extremely difficult</li>
 </ul>
-<p><strong>Recommended Settings:</strong></p>
-<pre><code class="language-toml">[fetcher]
-mode = "dynamic"  # Most explorers require JavaScript
-required_element = "div.transaction-list"  # Validate content loaded
-wait_time = 3.0  # Wait for async content to load
-user_agent = "Mozilla/5.0 (compatible; ResearchBot/1.0)"
-
-[network]
-min_delay = 2.0
-max_delay = 5.0  # Respect rate limits
-retry_attempts = 3
-timeout = 30.0  # Some pages take time to render
-
-[patterns]
-# Avoid crawling individual transaction/address pages
-exclude = [
-    ".*\\/tx\\/0x[a-fA-F0-9]{64}$",
-    ".*\\/address\\/0x[a-fA-F0-9]{40}$",
-    ".*\\/block\\/\\d+$"
-]
+<h3 id="benefits"><a class="header" href="#benefits">Benefits</a></h3>
+<ul>
+<li><strong>Enhanced Security</strong>: Cryptographic protection and distributed nature</li>
+<li><strong>Reduced Costs</strong>: Elimination of intermediaries</li>
+<li><strong>Improved Traceability</strong>: Complete audit trail of transactions</li>
+<li><strong>Increased Efficiency</strong>: Faster settlement times</li>
+<li><strong>Greater Transparency</strong>: Visible transaction history</li>
+</ul>
+<h3 id="limitations"><a class="header" href="#limitations">Limitations</a></h3>
+<ul>
+<li><strong>Scalability Challenges</strong>: Limited transaction throughput</li>
+<li><strong>Energy Consumption</strong>: Some consensus mechanisms require significant power</li>
+<li><strong>Irreversibility</strong>: Mistakes cannot be easily undone</li>
+<li><strong>Regulatory Uncertainty</strong>: Evolving legal landscape</li>
+<li><strong>Storage Requirements</strong>: Growing blockchain size</li>
+</ul>
+<hr>
+<h2 id="blockchain-architecture"><a class="header" href="#blockchain-architecture">Blockchain Architecture</a></h2>
+<h3 id="block-structure"><a class="header" href="#block-structure">Block Structure</a></h3>
+<p>Each block contains:</p>
+<pre><code>+----------------------------------+
+|         Block Header             |
+|----------------------------------|
+| - Version                        |
+| - Previous Block Hash            |
+| - Merkle Root                    |
+| - Timestamp                      |
+| - Difficulty Target              |
+| - Nonce                          |
+|----------------------------------|
+|      Transaction Data            |
+|----------------------------------|
+| - Transaction 1                  |
+| - Transaction 2                  |
+| - Transaction 3                  |
+| - ...                            |
++----------------------------------+
 </code></pre>
-<p><strong>Specific Explorer Notes:</strong></p>
-<p><strong>Etherscan (Ethereum):</strong></p>
+<h3 id="block-components"><a class="header" href="#block-components">Block Components</a></h3>
+<h4 id="1-block-header"><a class="header" href="#1-block-header">1. Block Header</a></h4>
 <ul>
-<li>Heavily JavaScript-dependent</li>
-<li>Requires dynamic mode for most pages</li>
-<li>Consider using their API instead for bulk data</li>
-<li>Free tier: 5 calls/second</li>
+<li><strong>Version</strong>: Block version number</li>
+<li><strong>Previous Block Hash</strong>: Links to preceding block (creates the chain)</li>
+<li><strong>Merkle Root</strong>: Hash of all transactions in the block</li>
+<li><strong>Timestamp</strong>: When block was created</li>
+<li><strong>Difficulty Target</strong>: Mining difficulty</li>
+<li><strong>Nonce</strong>: Number used once for mining</li>
 </ul>
-<p><strong>BscScan (Binance Smart Chain):</strong></p>
+<h4 id="2-transaction-data"><a class="header" href="#2-transaction-data">2. Transaction Data</a></h4>
 <ul>
-<li>Similar structure to Etherscan (same codebase)</li>
-<li>Apply same patterns and delays</li>
+<li>List of validated transactions</li>
+<li>Organized in Merkle tree structure</li>
+<li>Enables efficient verification</li>
 </ul>
-<p><strong>Blockchain.com:</strong></p>
-<ul>
-<li>Mixed static/dynamic content</li>
-<li>Use auto mode for flexibility</li>
-<li>Better tolerance for static fetching on older pages</li>
-</ul>
-<h3 id="blockchain-documentation-sites"><a class="header" href="#blockchain-documentation-sites">Blockchain Documentation Sites</a></h3>
-<p>Documentation for blockchain protocols, APIs, and development tools. These sites typically use static site generators (Docusaurus, VuePress, GitBook) making them easier to crawl than dynamic explorers.</p>
-<p><strong>Common Platforms:</strong></p>
-<ul>
-<li>Ethereum.org (Ethereum documentation)</li>
-<li>Solana Docs (Solana development guides)</li>
-<li>Polkadot Wiki (Substrate and Polkadot)</li>
-<li>Cosmos Hub Docs (Cosmos SDK)</li>
-<li>Hyperledger documentation</li>
-<li>Web3.js, Ethers.js, and other library docs</li>
-</ul>
-<p><strong>Challenges:</strong></p>
-<ul>
-<li>Version-specific documentation paths</li>
-<li>Multiple language variants</li>
-<li>Deep navigation hierarchies</li>
-<li>Search pages with minimal content value</li>
-<li>API reference pages with generated content</li>
-</ul>
-<p><strong>Example Configuration:</strong></p>
-<pre><code class="language-toml">[crawler]
-name = "blockchain_docs"
-start_urls = ["https://ethereum.org/en/developers/docs/"]
-max_depth = 5
-follow_redirects = true
-
-[fetcher]
-mode = "static"  # Docs often work with static fetching
-user_agent = "DocumentationBot/1.0"
-
-[patterns]
-include = ["^https://ethereum\\.org/en/developers/.*"]
-exclude = [
-    ".*\\#.*",  # Exclude anchor links
-    ".*\\/translations/.*",  # Exclude translation files
-    ".*\\.pdf$",  # Exclude PDF downloads
-    ".*\\/search\\?.*"  # Exclude search result pages
-]
-
-[network]
-min_delay = 0.5
-max_delay = 1.5  # Docs sites typically more tolerant
+<h3 id="how-blocks-are-linked"><a class="header" href="#how-blocks-are-linked">How Blocks are Linked</a></h3>
+<pre><code>Block 1         Block 2         Block 3
++-------+      +-------+      +-------+
+| Hash  |  &lt;-- | Prev  |  &lt;-- | Prev  |
+| Data  |      | Hash  |      | Hash  |
+| Txs   |      | Data  |      | Data  |
++-------+      +-------+      +-------+
 </code></pre>
-<p><strong>Best Practices:</strong></p>
+<h3 id="network-architecture"><a class="header" href="#network-architecture">Network Architecture</a></h3>
+<h4 id="node-types"><a class="header" href="#node-types">Node Types</a></h4>
+<ol>
+<li>
+<p><strong>Full Nodes</strong></p>
 <ul>
-<li>Check for versioned documentation (v1, v2, latest)</li>
-<li>Look for sidebar navigation to identify main sections</li>
-<li>Exclude community/forum sections if only docs needed</li>
-<li>Save markdown sources if available</li>
+<li>Store complete blockchain history</li>
+<li>Validate all transactions and blocks</li>
+<li>Enforce consensus rules</li>
 </ul>
-<h3 id="defi-platforms"><a class="header" href="#defi-platforms">DeFi Platforms</a></h3>
-<p>Decentralized finance platforms with protocol information and analytics. These include DEXs (decentralized exchanges), lending protocols, yield aggregators, and DeFi analytics dashboards.</p>
-<p><strong>Examples:</strong></p>
+</li>
+<li>
+<p><strong>Light Nodes (SPV)</strong></p>
 <ul>
-<li>Uniswap (DEX)</li>
-<li>Aave (Lending protocol)</li>
-<li>DeFi Llama (Analytics)</li>
-<li>DeFi Pulse (DeFi tracking)</li>
-<li>Yearn Finance (Yield aggregator)</li>
+<li>Store only block headers</li>
+<li>Rely on full nodes for validation</li>
+<li>Suitable for mobile/resource-constrained devices</li>
 </ul>
-<p><strong>Considerations:</strong></p>
+</li>
+<li>
+<p><strong>Mining Nodes</strong></p>
 <ul>
-<li>Often heavily JavaScript-dependent (React SPAs)</li>
-<li>May require wallet connection (not crawlable via web scraping)</li>
-<li>Focus on informational pages only (about, docs, blog)</li>
-<li>Real-time price data via WebSocket (can’t be scraped effectively)</li>
-<li>Many features are dApp-only (skip interactive features)</li>
+<li>Create new blocks</li>
+<li>Compete to solve cryptographic puzzles</li>
+<li>Receive block rewards</li>
 </ul>
-<p><strong>Recommended Approach:</strong></p>
-<pre><code class="language-toml">[crawler]
-name = "defi_info"
-start_urls = ["https://docs.uniswap.org/"]
-max_depth = 3
-
-[fetcher]
-mode = "auto"
-required_element = "main"
-
-[patterns]
-include = [
-    ".*\\/docs/.*",
-    ".*\\/blog/.*",
-    ".*\\/about.*"
-]
-exclude = [
-    ".*\\/app/.*",  # Exclude dApp pages
-    ".*\\/swap.*",  # Exclude interactive features
-    ".*\\/pool.*"
-]
-
-[network]
-min_delay = 2.0
-max_delay = 4.0
+</li>
+<li>
+<p><strong>Archive Nodes</strong></p>
+<ul>
+<li>Store complete blockchain and all historical states</li>
+<li>Used for analytics and historical queries</li>
+</ul>
+</li>
+</ol>
+<h3 id="transaction-flow"><a class="header" href="#transaction-flow">Transaction Flow</a></h3>
+<pre><code>1. User initiates transaction
+   ↓
+2. Transaction broadcast to network
+   ↓
+3. Nodes validate transaction
+   ↓
+4. Valid transactions added to mempool
+   ↓
+5. Miners select transactions for new block
+   ↓
+6. Block mined and broadcast to network
+   ↓
+7. Nodes validate and add block to chain
+   ↓
+8. Transaction confirmed
 </code></pre>
-<p><strong>Note:</strong> For real protocol data, use blockchain APIs or subgraphs instead of web scraping.</p>
-<h3 id="nft-marketplaces"><a class="header" href="#nft-marketplaces">NFT Marketplaces</a></h3>
-<p>NFT platforms like OpenSea, Rarible, and Magic Eden display digital collectibles and marketplace data.</p>
-<p><strong>Challenges:</strong></p>
-<ul>
-<li>Heavy reliance on JavaScript and Web3</li>
-<li>Wallet-gated content</li>
-<li>Large image assets</li>
-<li>Infinite scroll collections</li>
-<li>Rate limiting</li>
-</ul>
-<p><strong>Configuration:</strong></p>
-<pre><code class="language-toml">[crawler]
-name = "nft_marketplace"
-start_urls = ["https://opensea.io/learn"]
-max_depth = 2
+<hr>
+<h2 id="cryptographic-foundations"><a class="header" href="#cryptographic-foundations">Cryptographic Foundations</a></h2>
+<h3 id="hash-functions"><a class="header" href="#hash-functions">Hash Functions</a></h3>
+<p><strong>Cryptographic hash function</strong>: Converts input data into fixed-size output (hash/digest)</p>
+<h4 id="properties"><a class="header" href="#properties">Properties</a></h4>
+<ol>
+<li><strong>Deterministic</strong>: Same input always produces same output</li>
+<li><strong>Quick Computation</strong>: Fast to calculate hash</li>
+<li><strong>Pre-image Resistance</strong>: Impossible to reverse hash to get input</li>
+<li><strong>Small Change Avalanche</strong>: Tiny input change drastically changes output</li>
+<li><strong>Collision Resistance</strong>: Infeasible to find two inputs with same hash</li>
+</ol>
+<h4 id="common-hash-algorithms"><a class="header" href="#common-hash-algorithms">Common Hash Algorithms</a></h4>
+<pre><code class="language-bash"># SHA-256 (used in Bitcoin)
+echo -n "Hello, Blockchain!" | sha256sum
+# Output: 32-byte (256-bit) hash
 
-[fetcher]
-mode = "dynamic"
-wait_time = 4.0
-
-[patterns]
-include = [
-    ".*\\/learn/.*",
-    ".*\\/blog/.*",
-    ".*\\/resources/.*"
-]
-exclude = [
-    ".*\\/assets/.*",  # Skip individual NFT pages
-    ".*\\/collection/.*"  # Skip collection pages
-]
-
-[network]
-min_delay = 3.0
-max_delay = 6.0
+# Keccak-256 (used in Ethereum)
+# Output: 32-byte (256-bit) hash
 </code></pre>
-<h3 id="layer-2-and-sidechain-sites"><a class="header" href="#layer-2-and-sidechain-sites">Layer 2 and Sidechain Sites</a></h3>
-<p>Layer 2 solutions (Optimism, Arbitrum, Polygon) and their documentation.</p>
-<p><strong>Characteristics:</strong></p>
-<ul>
-<li>Similar to L1 documentation</li>
-<li>Bridge interfaces (avoid crawling interactive tools)</li>
-<li>Network status dashboards</li>
-</ul>
 <p><strong>Example:</strong></p>
-<pre><code class="language-toml">[crawler]
-name = "layer2_docs"
-start_urls = ["https://docs.optimism.io/"]
-max_depth = 4
+<pre><code>Input: "Hello"
+SHA-256: 185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969
 
-[fetcher]
-mode = "static"
-
-[patterns]
-include = ["^https://docs\\.optimism\\.io/.*"]
-exclude = [".*\\/bridge.*", ".*\\/gateway.*"]
+Input: "hello"  (only case change)
+SHA-256: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
 </code></pre>
-<h3 id="blockchain-news-and-media"><a class="header" href="#blockchain-news-and-media">Blockchain News and Media</a></h3>
-<p>CoinDesk, CoinTelegraph, The Block, and other crypto news sites.</p>
-<p><strong>Considerations:</strong></p>
+<h3 id="digital-signatures"><a class="header" href="#digital-signatures">Digital Signatures</a></h3>
+<p>Digital signatures provide:</p>
 <ul>
-<li>Standard news site structure</li>
-<li>Heavy advertising (may slow page loads)</li>
-<li>Paywalls on some content</li>
-<li>Newsletter signup modals</li>
+<li><strong>Authentication</strong>: Verify sender identity</li>
+<li><strong>Integrity</strong>: Ensure message hasn’t been altered</li>
+<li><strong>Non-repudiation</strong>: Sender cannot deny sending</li>
 </ul>
-<p><strong>Configuration:</strong></p>
-<pre><code class="language-toml">[crawler]
-name = "crypto_news"
-start_urls = ["https://www.coindesk.com/"]
-max_depth = 3
-
-[fetcher]
-mode = "auto"
-required_element = "article"
-
-[patterns]
-include = [".*\\/\\d{4}\\/\\d{2}\\/\\d{2}/.*"]  # Date-based URLs
-exclude = [
-    ".*\\/tag/.*",
-    ".*\\/author/.*",
-    ".*\\/newsletter.*",
-    ".*\\/sponsored.*"
-]
-
-[network]
-min_delay = 1.5
-max_delay = 3.0
+<h4 id="ecdsa-elliptic-curve-digital-signature-algorithm"><a class="header" href="#ecdsa-elliptic-curve-digital-signature-algorithm">ECDSA (Elliptic Curve Digital Signature Algorithm)</a></h4>
+<p>Used in Bitcoin and Ethereum for signing transactions.</p>
+<pre><code>Process:
+1. Generate private key (random 256-bit number)
+2. Derive public key from private key
+3. Create signature using private key + transaction data
+4. Anyone can verify signature using public key
 </code></pre>
-<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
-<h3 id="1-respect-rate-limits"><a class="header" href="#1-respect-rate-limits">1. Respect Rate Limits</a></h3>
-<p>Blockchain services often have strict rate limiting due to infrastructure costs and abuse prevention:</p>
-<pre><code class="language-toml">[network]
-min_delay = 3.0
-max_delay = 10.0
-concurrent_requests = 1  # Avoid parallel requests to same domain
+<p><strong>Key Properties:</strong></p>
+<ul>
+<li>Private key: Secret, used to sign transactions</li>
+<li>Public key: Derived from private key, shared publicly</li>
+<li>Address: Hash of public key, used as account identifier</li>
+</ul>
+<h3 id="merkle-trees"><a class="header" href="#merkle-trees">Merkle Trees</a></h3>
+<p><strong>Merkle tree</strong>: Binary tree of hashes used to efficiently verify data integrity</p>
+<pre><code>        Root Hash
+           |
+    +------+------+
+    |             |
+  Hash01       Hash23
+    |             |
+  +--+--+      +--+--+
+  |     |      |     |
+Hash0 Hash1 Hash2 Hash3
+  |     |      |     |
+ Tx0   Tx1    Tx2   Tx3
 </code></pre>
-<p><strong>Rate Limit Guidelines by Platform:</strong></p>
+<p><strong>Benefits:</strong></p>
 <ul>
-<li><strong>Etherscan/BscScan</strong>: 5 req/sec (free), 15 req/sec (premium)</li>
-<li><strong>Blockchain.com</strong>: ~10 req/min recommended</li>
-<li><strong>Documentation sites</strong>: 1-2 req/sec typically safe</li>
-<li><strong>News sites</strong>: 2-5 req/sec usually acceptable</li>
+<li>Efficient verification (O(log n))</li>
+<li>Only need to verify path from transaction to root</li>
+<li>Enables light clients (SPV)</li>
 </ul>
-<p><strong>Detecting Rate Limits:</strong></p>
+<hr>
+<h2 id="consensus-mechanisms"><a class="header" href="#consensus-mechanisms">Consensus Mechanisms</a></h2>
+<p><strong>Consensus</strong>: Protocol for nodes to agree on blockchain state</p>
+<h3 id="1-proof-of-work-pow"><a class="header" href="#1-proof-of-work-pow">1. Proof of Work (PoW)</a></h3>
+<p><strong>Concept</strong>: Miners compete to solve computational puzzle; first to solve creates block</p>
+<h4 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h4>
+<ol>
+<li>Miner collects transactions from mempool</li>
+<li>Creates block with transactions</li>
+<li>Finds nonce that makes block hash meet difficulty target</li>
+<li>Broadcasts block to network</li>
+<li>Other nodes verify and add to chain</li>
+<li>Miner receives block reward</li>
+</ol>
+<p><strong>Mining Example:</strong></p>
+<pre><code>Target: Hash must start with certain number of zeros
+Block data: "transactions + nonce"
+
+Attempt 1: hash(data + 1) = 8a3f2c... (invalid)
+Attempt 2: hash(data + 2) = 7b4e1d... (invalid)
+...
+Attempt 173947: hash(data + 173947) = 0000a3... (valid!)
+</code></pre>
+<p><strong>Advantages:</strong></p>
 <ul>
-<li>HTTP 429 (Too Many Requests)</li>
-<li>HTTP 403 (Forbidden) - may indicate blocking</li>
-<li>Cloudflare challenge pages</li>
-<li>Empty/error responses</li>
+<li>Proven security (Bitcoin since 2009)</li>
+<li>Simple to understand</li>
+<li>High attack cost</li>
 </ul>
-<h3 id="2-use-appropriate-fetching-mode"><a class="header" href="#2-use-appropriate-fetching-mode">2. Use Appropriate Fetching Mode</a></h3>
+<p><strong>Disadvantages:</strong></p>
 <ul>
+<li>Energy intensive</li>
+<li>Slower transaction speed</li>
+<li>Expensive hardware required</li>
+</ul>
+<p><strong>Used By:</strong> Bitcoin, Ethereum (before merge), Litecoin, Dogecoin</p>
+<h3 id="2-proof-of-stake-pos"><a class="header" href="#2-proof-of-stake-pos">2. Proof of Stake (PoS)</a></h3>
+<p><strong>Concept</strong>: Validators stake cryptocurrency; selected based on stake to create blocks</p>
+<h4 id="how-it-works-1"><a class="header" href="#how-it-works-1">How It Works</a></h4>
+<ol>
+<li>Validators lock up (stake) coins as collateral</li>
+<li>Validator selected based on stake amount + other factors</li>
+<li>Selected validator proposes block</li>
+<li>Other validators attest to block validity</li>
+<li>Validator receives transaction fees as reward</li>
+<li>Malicious behavior results in stake slashing</li>
+</ol>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Energy efficient (99%+ less than PoW)</li>
+<li>Lower barrier to entry</li>
+<li>Faster finality</li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul>
+<li>“Rich get richer” potential</li>
+<li>Nothing-at-stake problem (solved with slashing)</li>
+<li>Newer, less battle-tested</li>
+</ul>
+<p><strong>Used By:</strong> Ethereum (post-merge), Cardano, Polkadot, Solana</p>
+<h3 id="3-delegated-proof-of-stake-dpos"><a class="header" href="#3-delegated-proof-of-stake-dpos">3. Delegated Proof of Stake (DPoS)</a></h3>
+<p><strong>Concept</strong>: Token holders vote for delegates who validate transactions</p>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Fast transaction speeds</li>
+<li>Democratic voting system</li>
+<li>Energy efficient</li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul>
+<li>More centralized</li>
+<li>Cartel formation risk</li>
+</ul>
+<p><strong>Used By:</strong> EOS, Tron, Cosmos</p>
+<h3 id="4-practical-byzantine-fault-tolerance-pbft"><a class="header" href="#4-practical-byzantine-fault-tolerance-pbft">4. Practical Byzantine Fault Tolerance (PBFT)</a></h3>
+<p><strong>Concept</strong>: Consensus through voting among known validators</p>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>No mining required</li>
+<li>Fast finality</li>
+<li>Energy efficient</li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul>
+<li>Limited scalability</li>
+<li>Requires known validators</li>
+</ul>
+<p><strong>Used By:</strong> Hyperledger Fabric, Zilliqa (hybrid)</p>
+<h3 id="5-other-mechanisms"><a class="header" href="#5-other-mechanisms">5. Other Mechanisms</a></h3>
+<ul>
+<li><strong>Proof of Authority (PoA)</strong>: Validators are pre-approved authorities</li>
+<li><strong>Proof of Space</strong>: Uses disk space instead of computation</li>
+<li><strong>Proof of History (PoH)</strong>: Cryptographic timestamp for ordering events (Solana)</li>
+</ul>
+<hr>
+<h2 id="major-blockchain-platforms"><a class="header" href="#major-blockchain-platforms">Major Blockchain Platforms</a></h2>
+<h3 id="bitcoin"><a class="header" href="#bitcoin">Bitcoin</a></h3>
+<p><strong>Purpose</strong>: Peer-to-peer electronic cash system</p>
+<h4 id="key-features"><a class="header" href="#key-features">Key Features</a></h4>
+<ul>
+<li>First cryptocurrency (2009)</li>
+<li>Proof of Work consensus</li>
+<li>Limited supply (21 million BTC)</li>
+<li>Block time: ~10 minutes</li>
+<li>Block size: ~1-4 MB</li>
+</ul>
+<h4 id="transaction-structure"><a class="header" href="#transaction-structure">Transaction Structure</a></h4>
+<pre><code class="language-python"># Simplified Bitcoin transaction
+{
+    "inputs": [
+        {
+            "previous_tx": "abc123...",
+            "output_index": 0,
+            "signature": "signature_data"
+        }
+    ],
+    "outputs": [
+        {
+            "amount": 0.5,  # BTC
+            "recipient": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
+        }
+    ]
+}
+</code></pre>
+<h4 id="bitcoin-script"><a class="header" href="#bitcoin-script">Bitcoin Script</a></h4>
+<p>Simple, stack-based scripting language for transactions:</p>
+<pre><code># Pay-to-Public-Key-Hash (P2PKH)
+OP_DUP OP_HASH160 &lt;pubKeyHash&gt; OP_EQUALVERIFY OP_CHECKSIG
+</code></pre>
+<h3 id="ethereum"><a class="header" href="#ethereum">Ethereum</a></h3>
+<p><strong>Purpose</strong>: Decentralized platform for smart contracts and DApps</p>
+<h4 id="key-features-1"><a class="header" href="#key-features-1">Key Features</a></h4>
+<ul>
+<li>Launched 2015</li>
+<li>Turing-complete smart contracts</li>
+<li>Proof of Stake (since September 2022)</li>
+<li>Block time: ~12 seconds</li>
+<li>Native cryptocurrency: Ether (ETH)</li>
+</ul>
+<h4 id="ethereum-virtual-machine-evm"><a class="header" href="#ethereum-virtual-machine-evm">Ethereum Virtual Machine (EVM)</a></h4>
+<p>Runtime environment for smart contracts:</p>
+<ul>
+<li>Isolated execution environment</li>
+<li>Deterministic computation</li>
+<li>Gas-based execution cost</li>
+</ul>
+<h4 id="account-types"><a class="header" href="#account-types">Account Types</a></h4>
+<ol>
 <li>
-<p><strong>Static mode</strong>: Documentation, blogs, static content</p>
+<p><strong>Externally Owned Accounts (EOA)</strong></p>
 <ul>
-<li>Faster and more efficient</li>
-<li>Lower resource usage</li>
-<li>Works for server-rendered pages</li>
+<li>Controlled by private keys</li>
+<li>Can initiate transactions</li>
+<li>No code</li>
 </ul>
 </li>
 <li>
-<p><strong>Dynamic mode</strong>: Explorers, dashboards, real-time data</p>
+<p><strong>Contract Accounts</strong></p>
 <ul>
-<li>Required for JavaScript-heavy SPAs</li>
-<li>Waits for content to render</li>
-<li>Higher resource usage (headless browser)</li>
+<li>Controlled by smart contract code</li>
+<li>Cannot initiate transactions</li>
+<li>Can store state</li>
 </ul>
 </li>
-<li>
-<p><strong>Auto mode</strong>: Mixed content types</p>
-<ul>
-<li>Automatically detects need for JavaScript</li>
-<li>Good for diverse content</li>
-<li>Balances speed and compatibility</li>
-</ul>
-</li>
-</ul>
-<p><strong>Decision Matrix:</strong></p>
-<pre><code>Static:  Docs sites, blogs, simple news sites
-Dynamic: Block explorers, DeFi dashboards, NFT marketplaces
-Auto:    Mixed content, unknown site structure
-</code></pre>
-<h3 id="3-pattern-matching"><a class="header" href="#3-pattern-matching">3. Pattern Matching</a></h3>
-<p>Blockchain URLs often contain hashes and addresses. Use careful pattern matching to avoid crawling millions of transaction/address pages:</p>
-<pre><code class="language-toml">[patterns]
-# Include specific sections
-include = [
-    "^https://etherscan\\.io/blocks.*",
-    "^https://etherscan\\.io/txs.*",
-    "^https://etherscan\\.io/charts.*"
-]
-
-# Exclude specific transaction/address pages to avoid infinite crawling
-exclude = [
-    ".*\\/tx\\/0x[a-fA-F0-9]{64}$",  # Individual transactions
-    ".*\\/address\\/0x[a-fA-F0-9]{40}$",  # Ethereum addresses
-    ".*\\/block\\/\\d+$",  # Individual blocks
-    ".*\\/token/0x[a-fA-F0-9]{40}$",  # Token contract pages
-    ".*\\/nft/.*",  # Individual NFT pages
-    ".*\\?.*page=\\d+$"  # Pagination (if you don't want all pages)
-]
-</code></pre>
-<p><strong>Common Blockchain Address Formats:</strong></p>
-<pre><code class="language-toml"># Ethereum/EVM: 0x + 40 hex chars
-".*\\/0x[a-fA-F0-9]{40}.*"
-
-# Bitcoin: varies, often starts with 1, 3, or bc1
-".*\\/[13][a-km-zA-HJ-NP-Z1-9]{25,34}.*"
-".*\\/bc1[a-z0-9]{39,87}.*"
-
-# Solana: base58, typically 32-44 chars
-".*\\/[1-9A-HJ-NP-Za-km-z]{32,44}.*"
-
-# Transaction hashes (64 hex chars)
-".*\\/tx\\/0x[a-fA-F0-9]{64}.*"
-</code></pre>
-<h3 id="4-content-validation"><a class="header" href="#4-content-validation">4. Content Validation</a></h3>
-<p>Ensure critical elements are loaded before saving:</p>
-<pre><code class="language-toml">[fetcher]
-required_element = "div.container"  # Adjust based on target site
-wait_time = 3.0  # Wait for async content
-</code></pre>
-<p><strong>Common validation elements:</strong></p>
-<ul>
-<li>Block explorers: <code>"div.transaction-list"</code>, <code>"table.transactions"</code></li>
-<li>Documentation: <code>"article"</code>, <code>"main.content"</code></li>
-<li>News sites: <code>"article.post"</code>, <code>"div.article-body"</code></li>
-</ul>
-<h3 id="5-storage-considerations"><a class="header" href="#5-storage-considerations">5. Storage Considerations</a></h3>
-<p>Blockchain data can be large. Monitor disk space and organize output:</p>
-<pre><code class="language-toml">[storage]
-output_dir = "/path/to/large/storage/blockchain_data"
-compress = true  # Enable compression if supported
-max_file_size = 10485760  # 10MB limit per file
-</code></pre>
-<p><strong>Storage Tips:</strong></p>
-<ul>
-<li>Separate crawls by blockchain (ethereum/, solana/, etc.)</li>
-<li>Use date-based directories for news content</li>
-<li>Consider database storage for structured data</li>
-<li>Regular cleanup of old/duplicate content</li>
-</ul>
-<h3 id="6-user-agent-identification"><a class="header" href="#6-user-agent-identification">6. User Agent Identification</a></h3>
-<p>Use descriptive user agents to help site operators understand your bot:</p>
-<pre><code class="language-toml">[fetcher]
-user_agent = "ResearchBot/1.0 (+https://yoursite.com/bot-info)"
-</code></pre>
-<p><strong>Best practices:</strong></p>
-<ul>
-<li>Include bot name and version</li>
-<li>Provide contact URL or email</li>
-<li>Be honest about your purpose</li>
-<li>Don’t impersonate regular browsers for evasion</li>
-</ul>
-<h3 id="7-handle-javascript-heavy-sites"><a class="header" href="#7-handle-javascript-heavy-sites">7. Handle JavaScript-Heavy Sites</a></h3>
-<p>Many blockchain sites are SPAs (Single Page Applications):</p>
-<pre><code class="language-toml">[fetcher]
-mode = "dynamic"
-wait_time = 5.0
-wait_for_network_idle = true  # Wait for API calls to complete
-</code></pre>
-<p><strong>Additional considerations:</strong></p>
-<ul>
-<li>Increase timeouts for slow-loading content</li>
-<li>Watch for infinite scroll (may never complete)</li>
-<li>Some content may require user interaction (skip it)</li>
-</ul>
-<h3 id="8-monitor-and-log"><a class="header" href="#8-monitor-and-log">8. Monitor and Log</a></h3>
-<p>Enable comprehensive logging to track issues:</p>
-<pre><code class="language-toml">[logging]
-level = "INFO"
-log_file = "blockchain_crawler.log"
-log_errors = true
-</code></pre>
-<p><strong>What to monitor:</strong></p>
-<ul>
-<li>Rate limit errors (HTTP 429)</li>
-<li>Timeout errors</li>
-<li>Content validation failures</li>
-<li>Redirect chains</li>
-<li>Storage usage</li>
-</ul>
-<h2 id="advanced-crawling-techniques"><a class="header" href="#advanced-crawling-techniques">Advanced Crawling Techniques</a></h2>
-<h3 id="handling-infinite-scroll"><a class="header" href="#handling-infinite-scroll">Handling Infinite Scroll</a></h3>
-<p>Many blockchain sites use infinite scroll for transaction lists and other data:</p>
-<p><strong>Problem:</strong> Page never “completes” loading as new content continuously loads.</p>
-<p><strong>Solutions:</strong></p>
-<ol>
-<li><strong>Set maximum scroll depth:</strong></li>
 </ol>
-<pre><code class="language-toml">[fetcher]
-mode = "dynamic"
-max_scroll_depth = 5  # Scroll 5 times maximum
-scroll_delay = 2.0  # Wait 2s between scrolls
+<h4 id="gas-system"><a class="header" href="#gas-system">Gas System</a></h4>
+<pre><code>Transaction Cost = Gas Used × Gas Price
+
+Example:
+- Simple transfer: 21,000 gas
+- Gas price: 50 gwei
+- Cost: 21,000 × 50 = 1,050,000 gwei = 0.00105 ETH
 </code></pre>
-<ol start="2">
-<li><strong>Use pagination URLs instead:</strong></li>
-</ol>
-<pre><code class="language-toml">[patterns]
-# Target paginated URLs instead of infinite scroll
-include = [".*\\?page=\\d+$"]
-</code></pre>
-<ol start="3">
-<li><strong>Extract API endpoints:</strong></li>
-</ol>
+<h3 id="solana"><a class="header" href="#solana">Solana</a></h3>
+<p><strong>Purpose</strong>: High-performance blockchain for DeFi and DApps</p>
+<h4 id="key-features-2"><a class="header" href="#key-features-2">Key Features</a></h4>
 <ul>
-<li>Inspect network traffic to find API endpoints</li>
-<li>Use API directly instead of web scraping</li>
+<li>Proof of History + Proof of Stake</li>
+<li>~65,000 TPS theoretical</li>
+<li>Sub-second finality</li>
+<li>Low transaction fees</li>
 </ul>
-<h3 id="bypassing-anti-bot-protections"><a class="header" href="#bypassing-anti-bot-protections">Bypassing Anti-Bot Protections</a></h3>
-<p><strong>Cloudflare and Similar Services:</strong></p>
-<p>Some blockchain sites use Cloudflare or other anti-bot services.</p>
-<p><strong>Approaches:</strong></p>
-<pre><code class="language-toml">[fetcher]
-mode = "dynamic"
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-wait_time = 5.0  # Wait for Cloudflare check
-</code></pre>
-<p><strong>Important:</strong></p>
+<h3 id="cardano"><a class="header" href="#cardano">Cardano</a></h3>
+<p><strong>Purpose</strong>: Research-driven blockchain platform</p>
+<h4 id="key-features-3"><a class="header" href="#key-features-3">Key Features</a></h4>
 <ul>
-<li>Respect site terms of service</li>
-<li>Don’t attempt to evade protections for malicious purposes</li>
-<li>Consider using official APIs instead</li>
-<li>Some protections are legitimate abuse prevention</li>
+<li>Proof of Stake (Ouroboros)</li>
+<li>Layered architecture</li>
+<li>Formal verification</li>
+<li>Native token: ADA</li>
 </ul>
-<h3 id="dealing-with-websocket-data"><a class="header" href="#dealing-with-websocket-data">Dealing with WebSocket Data</a></h3>
-<p>Real-time blockchain data often uses WebSockets for live updates.</p>
-<p><strong>Reality:</strong> Web crawlers can’t effectively capture WebSocket streams.</p>
-<p><strong>Alternatives:</strong></p>
+<h3 id="polkadot"><a class="header" href="#polkadot">Polkadot</a></h3>
+<p><strong>Purpose</strong>: Multi-chain interoperability platform</p>
+<h4 id="key-features-4"><a class="header" href="#key-features-4">Key Features</a></h4>
 <ul>
-<li>Focus on historical/static data</li>
-<li>Use blockchain node APIs (web3, ethers.js)</li>
-<li>Query indexing services (The Graph, Alchemy)</li>
-<li>Use exchange APIs for price data</li>
+<li>Relay chain + parachains architecture</li>
+<li>Cross-chain communication</li>
+<li>Shared security</li>
+<li>On-chain governance</li>
 </ul>
-<h3 id="multi-chain-crawling"><a class="header" href="#multi-chain-crawling">Multi-Chain Crawling</a></h3>
-<p>Crawling multiple blockchain ecosystems simultaneously:</p>
-<pre><code class="language-toml"># ethereum_config.toml
-[crawler]
-name = "ethereum_crawler"
-start_urls = ["https://ethereum.org/en/"]
-
-# solana_config.toml
-[crawler]
-name = "solana_crawler"
-start_urls = ["https://solana.com/docs"]
-
-# Run multiple crawlers:
-# ./crawler --config ethereum_config.toml &amp;
-# ./crawler --config solana_config.toml &amp;
-</code></pre>
-<p><strong>Coordination strategies:</strong></p>
-<ul>
-<li>Separate configuration files per chain</li>
-<li>Separate output directories</li>
-<li>Shared rate limit pool if crawling same domain</li>
-<li>Centralized logging for monitoring</li>
-</ul>
-<h3 id="api-integration"><a class="header" href="#api-integration">API Integration</a></h3>
-<p>Many blockchain sites have APIs that are more reliable than web scraping:</p>
-<p><strong>When to use APIs instead:</strong></p>
-<ul>
-<li>Transaction data (use block explorer APIs)</li>
-<li>Token prices (use CoinGecko, CoinMarketCap APIs)</li>
-<li>Protocol metrics (use protocol-specific APIs)</li>
-<li>DeFi data (use DeFi Llama, The Graph)</li>
-</ul>
-<p><strong>Hybrid approach:</strong></p>
-<pre><code>Documentation → Web crawling
-Real-time data → APIs
-Historical data → APIs or web scraping
-Static content → Web crawling
-</code></pre>
-<h2 id="platform-specific-guides"><a class="header" href="#platform-specific-guides">Platform-Specific Guides</a></h2>
-<h3 id="ethereum-ecosystem"><a class="header" href="#ethereum-ecosystem">Ethereum Ecosystem</a></h3>
-<p><strong>Key Sites:</strong></p>
-<ul>
-<li>ethereum.org (documentation)</li>
-<li>etherscan.io (block explorer)</li>
-<li>docs.soliditylang.org (Solidity docs)</li>
-</ul>
-<p><strong>Configuration:</strong></p>
-<pre><code class="language-toml">[crawler]
-name = "ethereum_ecosystem"
-start_urls = [
-    "https://ethereum.org/en/developers/",
-    "https://docs.soliditylang.org/en/latest/"
-]
-max_depth = 4
-
-[fetcher]
-mode = "static"
-
-[patterns]
-include = [
-    "^https://ethereum\\.org/en/developers/.*",
-    "^https://docs\\.soliditylang\\.org/.*"
-]
-exclude = [".*\\/translations/.*"]
-
-[network]
-min_delay = 1.0
-max_delay = 2.0
-</code></pre>
-<h3 id="solana-ecosystem"><a class="header" href="#solana-ecosystem">Solana Ecosystem</a></h3>
-<p><strong>Key Sites:</strong></p>
-<ul>
-<li>solana.com/docs</li>
-<li>solscan.io (block explorer)</li>
-<li>docs.metaplex.com (NFT standard)</li>
-</ul>
-<p><strong>Considerations:</strong></p>
-<ul>
-<li>Heavily JavaScript-dependent sites</li>
-<li>Use dynamic mode for explorers</li>
-<li>Documentation uses modern static generators</li>
-</ul>
-<pre><code class="language-toml">[crawler]
-name = "solana_docs"
-start_urls = ["https://solana.com/docs"]
-max_depth = 4
-
-[fetcher]
-mode = "static"
-
-[patterns]
-include = ["^https://solana\\.com/docs/.*"]
-
-[network]
-min_delay = 1.0
-max_delay = 2.0
-</code></pre>
-<h3 id="bitcoin-ecosystem"><a class="header" href="#bitcoin-ecosystem">Bitcoin Ecosystem</a></h3>
-<p><strong>Key Sites:</strong></p>
-<ul>
-<li>bitcoin.org/en/developer-documentation</li>
-<li>blockchain.com</li>
-<li>developer.bitcoin.org</li>
-</ul>
-<p><strong>Characteristics:</strong></p>
-<ul>
-<li>More static content than newer blockchains</li>
-<li>Well-established documentation</li>
-<li>Block explorers with traditional pagination</li>
-</ul>
-<pre><code class="language-toml">[crawler]
-name = "bitcoin_docs"
-start_urls = ["https://developer.bitcoin.org/"]
-max_depth = 3
-
-[fetcher]
-mode = "static"
-
-[patterns]
-include = ["^https://developer\\.bitcoin\\.org/.*"]
-</code></pre>
-<h3 id="polkadotsubstrate-ecosystem"><a class="header" href="#polkadotsubstrate-ecosystem">Polkadot/Substrate Ecosystem</a></h3>
-<p><strong>Key Sites:</strong></p>
-<ul>
-<li>wiki.polkadot.network</li>
-<li>docs.substrate.io</li>
-<li>polkadot.js.org</li>
-</ul>
-<p><strong>Configuration:</strong></p>
-<pre><code class="language-toml">[crawler]
-name = "polkadot_ecosystem"
-start_urls = [
-    "https://wiki.polkadot.network/",
-    "https://docs.substrate.io/"
-]
-max_depth = 5
-
-[fetcher]
-mode = "static"
-
-[patterns]
-include = [
-    "^https://wiki\\.polkadot\\.network/.*",
-    "^https://docs\\.substrate\\.io/.*"
-]
-exclude = [".*\\/en/.*"]  # If limiting to English only
-</code></pre>
-<h2 id="data-extraction-patterns"><a class="header" href="#data-extraction-patterns">Data Extraction Patterns</a></h2>
-<h3 id="extracting-structured-data"><a class="header" href="#extracting-structured-data">Extracting Structured Data</a></h3>
-<p>Beyond just saving HTML, you may want to extract specific data.</p>
-<p><strong>Common extractions:</strong></p>
-<ol>
-<li><strong>Documentation code examples:</strong></li>
-</ol>
-<pre><code class="language-javascript">// Look for code blocks
-document.querySelectorAll('pre code')
-</code></pre>
-<ol start="2">
-<li><strong>Transaction lists (if crawling lists):</strong></li>
-</ol>
-<pre><code class="language-javascript">// Extract transaction data from tables
-document.querySelectorAll('table.transactions tr')
-</code></pre>
-<ol start="3">
-<li><strong>Token/Protocol metadata:</strong></li>
-</ol>
-<pre><code class="language-javascript">// Extract protocol stats from pages
-document.querySelector('.protocol-stats')
-</code></pre>
-<p><strong>Post-processing:</strong></p>
-<ul>
-<li>Parse HTML with BeautifulSoup, lxml, or similar</li>
-<li>Extract text, links, code blocks</li>
-<li>Store in structured format (JSON, CSV, database)</li>
-</ul>
-<h3 id="url-pattern-analysis"><a class="header" href="#url-pattern-analysis">URL Pattern Analysis</a></h3>
-<p>Understanding blockchain URL structures:</p>
-<p><strong>Block Explorer Patterns:</strong></p>
-<pre><code>Transactions: /tx/[hash]
-Addresses:    /address/[address]
-Blocks:       /block/[number]
-Tokens:       /token/[address]
-Charts:       /chart/[metric]
-</code></pre>
-<p><strong>Documentation Patterns:</strong></p>
-<pre><code>Guides:       /docs/guides/[topic]
-API Ref:      /docs/api/[endpoint]
-Tutorials:    /docs/tutorials/[tutorial]
-</code></pre>
-<p><strong>Strategy:</strong> Focus on list/index pages, avoid individual item pages.</p>
-<h3 id="content-deduplication"><a class="header" href="#content-deduplication">Content Deduplication</a></h3>
-<p>Blockchain sites often have duplicate content:</p>
-<p><strong>Common duplicates:</strong></p>
-<ul>
-<li>Multiple language versions</li>
-<li>Versioned documentation (v1, v2, latest)</li>
-<li>Mirror sites</li>
-<li>Archived content</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<pre><code class="language-toml">[patterns]
-exclude = [
-    ".*\\/v[0-9]+/.*",  # Exclude old versions
-    ".*\\/[a-z]{2}/.*",  # Exclude non-English (adjust as needed)
-    ".*\\/archive/.*"
-]
-</code></pre>
-<h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
-<h3 id="crawl-speed-vs-politeness"><a class="header" href="#crawl-speed-vs-politeness">Crawl Speed vs. Politeness</a></h3>
-<p>Balance between speed and being a good web citizen:</p>
-<p><strong>Aggressive (use cautiously):</strong></p>
-<pre><code class="language-toml">[network]
-min_delay = 0.5
-max_delay = 1.0
-concurrent_requests = 3
-</code></pre>
-<p><strong>Polite (recommended):</strong></p>
-<pre><code class="language-toml">[network]
-min_delay = 2.0
-max_delay = 5.0
-concurrent_requests = 1
-</code></pre>
-<p><strong>Very polite (for sensitive sites):</strong></p>
-<pre><code class="language-toml">[network]
-min_delay = 5.0
-max_delay = 10.0
-concurrent_requests = 1
-</code></pre>
-<h3 id="resource-management"><a class="header" href="#resource-management">Resource Management</a></h3>
-<p><strong>Memory optimization:</strong></p>
-<ul>
-<li>Limit maximum depth to prevent explosion</li>
-<li>Use pagination limits</li>
-<li>Clear browser cache periodically (dynamic mode)</li>
-</ul>
-<p><strong>Disk optimization:</strong></p>
-<ul>
-<li>Enable compression</li>
-<li>Limit file sizes</li>
-<li>Periodic cleanup of old data</li>
-</ul>
-<p><strong>Network optimization:</strong></p>
-<ul>
-<li>Reuse connections where possible</li>
-<li>Enable HTTP/2 if supported</li>
-<li>Use conditional requests (If-Modified-Since)</li>
-</ul>
-<h3 id="parallel-crawling"><a class="header" href="#parallel-crawling">Parallel Crawling</a></h3>
-<p>Crawl multiple domains in parallel:</p>
-<pre><code class="language-bash"># Terminal 1
-./crawler --config ethereum.toml
-
-# Terminal 2
-./crawler --config solana.toml
-
-# Terminal 3
-./crawler --config bitcoin.toml
-</code></pre>
-<p><strong>Important:</strong> Don’t parallelize requests to the same domain (respect rate limits).</p>
-<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
-<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
-<h4 id="1-empty-pages-saved"><a class="header" href="#1-empty-pages-saved">1. Empty Pages Saved</a></h4>
-<p><strong>Symptom:</strong> HTML files saved but content missing.</p>
-<p><strong>Causes:</strong></p>
-<ul>
-<li>JavaScript not executed (using static mode on dynamic site)</li>
-<li>Content not loaded before save</li>
-<li>Required element not found</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<pre><code class="language-toml">[fetcher]
-mode = "dynamic"  # Switch to dynamic
-wait_time = 5.0  # Increase wait time
-required_element = "main"  # Adjust validation element
-</code></pre>
-<h4 id="2-rate-limited--blocked"><a class="header" href="#2-rate-limited--blocked">2. Rate Limited / Blocked</a></h4>
-<p><strong>Symptom:</strong> HTTP 429, 403, or Cloudflare challenges.</p>
-<p><strong>Solutions:</strong></p>
-<pre><code class="language-toml">[network]
-min_delay = 5.0  # Increase delays
-max_delay = 10.0
-
-[fetcher]
-user_agent = "YourBot/1.0 (+contact@email.com)"  # Identify yourself
-</code></pre>
-<ul>
-<li>Check robots.txt</li>
-<li>Review site terms of service</li>
-<li>Consider using official API</li>
-</ul>
-<h4 id="3-timeouts"><a class="header" href="#3-timeouts">3. Timeouts</a></h4>
-<p><strong>Symptom:</strong> Requests timing out, incomplete pages.</p>
-<p><strong>Causes:</strong></p>
-<ul>
-<li>Slow site or network</li>
-<li>Site is overloaded</li>
-<li>Infinite loading content</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<pre><code class="language-toml">[network]
-timeout = 60.0  # Increase timeout
-
-[fetcher]
-wait_time = 10.0  # Wait longer for content
-</code></pre>
-<h4 id="4-too-many-urls"><a class="header" href="#4-too-many-urls">4. Too Many URLs</a></h4>
-<p><strong>Symptom:</strong> Crawler finds millions of URLs.</p>
-<p><strong>Cause:</strong> Not excluding transaction/address pages.</p>
-<p><strong>Solution:</strong></p>
-<pre><code class="language-toml">[patterns]
-exclude = [
-    ".*\\/tx\\/.*",
-    ".*\\/address\\/.*",
-    ".*\\/block\\/\\d+$"
-]
-
-[crawler]
-max_depth = 3  # Limit depth
-max_pages = 10000  # Set maximum pages
-</code></pre>
-<h4 id="5-duplicate-content"><a class="header" href="#5-duplicate-content">5. Duplicate Content</a></h4>
-<p><strong>Symptom:</strong> Same content saved multiple times.</p>
-<p><strong>Causes:</strong></p>
-<ul>
-<li>Multiple URLs for same content</li>
-<li>Query parameters</li>
-<li>Trailing slashes</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<pre><code class="language-toml">[crawler]
-normalize_urls = true  # Remove trailing slashes, etc.
-
-[patterns]
-exclude = [".*\\?.*"]  # Exclude query strings if not needed
-</code></pre>
-<h3 id="debugging-tips"><a class="header" href="#debugging-tips">Debugging Tips</a></h3>
-<ol>
-<li><strong>Start small:</strong></li>
-</ol>
-<pre><code class="language-toml">[crawler]
-max_depth = 1  # Test with limited depth first
-max_pages = 10
-</code></pre>
-<ol start="2">
-<li><strong>Enable verbose logging:</strong></li>
-</ol>
-<pre><code class="language-toml">[logging]
-level = "DEBUG"
-log_file = "debug.log"
-</code></pre>
-<ol start="3">
-<li><strong>Test pattern matching:</strong></li>
-</ol>
-<pre><code class="language-bash"># Check what URLs match your patterns
-./crawler --test-patterns --config yourconfig.toml
-</code></pre>
-<ol start="4">
-<li><strong>Inspect saved content:</strong></li>
-</ol>
-<pre><code class="language-bash"># Verify pages saved correctly
-ls -lh output/
-head -n 50 output/page1.html
-</code></pre>
-<ol start="5">
-<li><strong>Monitor in real-time:</strong></li>
-</ol>
-<pre><code class="language-bash"># Watch log file
-tail -f blockchain_crawler.log
-</code></pre>
-<h2 id="security-and-privacy"><a class="header" href="#security-and-privacy">Security and Privacy</a></h2>
-<h3 id="data-handling"><a class="header" href="#data-handling">Data Handling</a></h3>
-<p><strong>Sensitive information in blockchain data:</strong></p>
-<ul>
-<li>Wallet addresses (public but can be tracked)</li>
-<li>Transaction amounts and patterns</li>
-<li>User behavior on platforms</li>
-<li>IP addresses (in logs)</li>
-</ul>
-<p><strong>Best practices:</strong></p>
-<ul>
-<li>Don’t republish scraped wallet addresses without context</li>
-<li>Respect user privacy even for public blockchain data</li>
-<li>Secure your scraped data storage</li>
-<li>Follow GDPR and data protection regulations</li>
-</ul>
-<h3 id="scraping-ethics"><a class="header" href="#scraping-ethics">Scraping Ethics</a></h3>
-<p><strong>Do:</strong></p>
-<ul>
-<li>Respect robots.txt</li>
-<li>Use reasonable rate limits</li>
-<li>Identify your bot with user agent</li>
-<li>Provide contact information</li>
-<li>Honor site terms of service</li>
-<li>Use official APIs when available</li>
-</ul>
-<p><strong>Don’t:</strong></p>
-<ul>
-<li>Overwhelm sites with requests</li>
-<li>Evade anti-bot protections maliciously</li>
-<li>Scrape wallet-gated or authenticated content</li>
-<li>Republish copyrighted content without permission</li>
-<li>Use scraped data for harassment or tracking</li>
-</ul>
-<h3 id="legal-considerations"><a class="header" href="#legal-considerations">Legal Considerations</a></h3>
-<p><strong>Important notes:</strong></p>
-<ul>
-<li>Web scraping legality varies by jurisdiction</li>
-<li>Review site terms of service</li>
-<li>Public data != license to republish</li>
-<li>Consider copyright on content</li>
-<li>Some sites explicitly forbid scraping</li>
-</ul>
-<p><strong>Safer alternatives:</strong></p>
-<ul>
-<li>Use official APIs</li>
-<li>Request data access from site owners</li>
-<li>Use publicly available datasets</li>
-<li>Access blockchain data directly via nodes</li>
-</ul>
-<h3 id="secure-configuration"><a class="header" href="#secure-configuration">Secure Configuration</a></h3>
-<p><strong>Protect your crawler configuration:</strong></p>
-<pre><code class="language-toml">[auth]
-# Never commit API keys to version control
-api_key = "${ENV_API_KEY}"  # Use environment variables
-
-[network]
-# Use secure connections
-https_only = true
-verify_ssl = true
-</code></pre>
-<p><strong>Secure data storage:</strong></p>
-<ul>
-<li>Encrypt sensitive scraped data</li>
-<li>Limit file permissions (chmod 600)</li>
-<li>Use secure storage locations</li>
-<li>Regular backups with encryption</li>
-</ul>
-<h2 id="example-configurations"><a class="header" href="#example-configurations">Example Configurations</a></h2>
-<h3 id="ethereum-documentation-crawler"><a class="header" href="#ethereum-documentation-crawler">Ethereum Documentation Crawler</a></h3>
-<p>Comprehensive configuration for crawling Ethereum developer documentation:</p>
-<pre><code class="language-toml">[crawler]
-name = "ethereum_docs"
-start_urls = ["https://ethereum.org/en/"]
-max_depth = 4
-max_pages = 5000
-
-[fetcher]
-mode = "static"
-user_agent = "EthereumDocsCrawler/1.0 (+https://yoursite.com)"
-
-[patterns]
-include = [
-    "^https://ethereum\\.org/en/developers/.*",
-    "^https://ethereum\\.org/en/whitepaper.*"
-]
-exclude = [
-    ".*\\/translations/.*",
-    ".*\\.pdf$",
-    ".*\\/contributing/.*"
-]
-
-[network]
-min_delay = 1.0
-max_delay = 3.0
-timeout = 30.0
-retry_attempts = 3
-
-[storage]
-output_dir = "./ethereum_docs"
-db_path = "./ethereum_docs.db"
-
-[logging]
-level = "INFO"
-log_file = "ethereum_crawler.log"
-</code></pre>
-<h3 id="multi-chain-block-explorer-read-only-pages"><a class="header" href="#multi-chain-block-explorer-read-only-pages">Multi-Chain Block Explorer (Read-Only Pages)</a></h3>
-<p>For crawling informational pages on block explorers (not transaction/address pages):</p>
-<pre><code class="language-toml">[crawler]
-name = "explorer_info"
-start_urls = [
-    "https://etherscan.io/charts",
-    "https://etherscan.io/apis"
-]
-max_depth = 2
-max_pages = 500
-
-[fetcher]
-mode = "dynamic"
-required_element = "main"
-wait_time = 4.0
-
-[patterns]
-include = [
-    "^https://etherscan\\.io/charts/.*",
-    "^https://etherscan\\.io/apis.*",
-    "^https://etherscan\\.io/tokencheck.*"
-]
-exclude = [
-    ".*\\/tx\\/0x[a-fA-F0-9]{64}$",
-    ".*\\/address\\/0x[a-fA-F0-9]{40}$",
-    ".*\\/block\\/\\d+$",
-    ".*\\/txs\\?.*"  # Exclude transaction list pages
-]
-
-[network]
-min_delay = 3.0
-max_delay = 6.0
-timeout = 45.0
-
-[storage]
-output_dir = "./explorer_data"
-</code></pre>
-<h3 id="defi-documentation-aggregator"><a class="header" href="#defi-documentation-aggregator">DeFi Documentation Aggregator</a></h3>
-<p>Crawling documentation from multiple DeFi protocols:</p>
-<pre><code class="language-toml">[crawler]
-name = "defi_docs"
-start_urls = [
-    "https://docs.uniswap.org/",
-    "https://docs.aave.com/",
-    "https://docs.compound.finance/"
-]
-max_depth = 3
-
-[fetcher]
-mode = "static"
-
-[patterns]
-include = [
-    "^https://docs\\.uniswap\\.org/.*",
-    "^https://docs\\.aave\\.com/.*",
-    "^https://docs\\.compound\\.finance/.*"
-]
-exclude = [
-    ".*\\/api/.*",  # Exclude API reference if too large
-    ".*\\/v1/.*"    # Exclude old versions
-]
-
-[network]
-min_delay = 1.5
-max_delay = 3.0
-
-[storage]
-output_dir = "./defi_docs"
-</code></pre>
-<h3 id="blockchain-news-archive"><a class="header" href="#blockchain-news-archive">Blockchain News Archive</a></h3>
-<p>For archiving blockchain news articles:</p>
-<pre><code class="language-toml">[crawler]
-name = "crypto_news"
-start_urls = ["https://www.coindesk.com/"]
-max_depth = 3
-max_pages = 2000
-
-[fetcher]
-mode = "auto"
-required_element = "article"
-
-[patterns]
-include = [
-    ".*\\/\\d{4}\\/\\d{2}\\/\\d{2}/.*"  # Date-based article URLs
-]
-exclude = [
-    ".*\\/tag/.*",
-    ".*\\/author/.*",
-    ".*\\/newsletter.*",
-    ".*\\/sponsored.*",
-    ".*\\/press-releases/.*"
-]
-
-[network]
-min_delay = 2.0
-max_delay = 5.0
-timeout = 30.0
-
-[storage]
-output_dir = "./crypto_news"
-db_path = "./crypto_news.db"
-
-[logging]
-level = "INFO"
-log_file = "news_crawler.log"
-</code></pre>
-<h3 id="nft-marketplace-educational-content"><a class="header" href="#nft-marketplace-educational-content">NFT Marketplace Educational Content</a></h3>
-<p>Crawling learning resources from NFT marketplaces (not marketplace listings):</p>
-<pre><code class="language-toml">[crawler]
-name = "nft_education"
-start_urls = [
-    "https://opensea.io/learn",
-    "https://support.opensea.io/"
-]
-max_depth = 2
-
-[fetcher]
-mode = "dynamic"
-wait_time = 3.0
-
-[patterns]
-include = [
-    "^https://opensea\\.io/learn/.*",
-    "^https://support\\.opensea\\.io/.*"
-]
-exclude = [
-    ".*\\/collection/.*",
-    ".*\\/assets/.*",
-    ".*\\/account/.*"
-]
-
-[network]
-min_delay = 2.5
-max_delay = 5.0
-
-[storage]
-output_dir = "./nft_education"
-</code></pre>
-<h3 id="layer-2-documentation-complete"><a class="header" href="#layer-2-documentation-complete">Layer 2 Documentation Complete</a></h3>
-<p>Comprehensive Layer 2 documentation crawl:</p>
-<pre><code class="language-toml">[crawler]
-name = "layer2_comprehensive"
-start_urls = [
-    "https://docs.optimism.io/",
-    "https://docs.arbitrum.io/",
-    "https://wiki.polygon.technology/"
-]
-max_depth = 5
-
-[fetcher]
-mode = "static"
-
-[patterns]
-include = [
-    "^https://docs\\.optimism\\.io/.*",
-    "^https://docs\\.arbitrum\\.io/.*",
-    "^https://wiki\\.polygon\\.technology/.*"
-]
-exclude = [
-    ".*\\/bridge/.*",  # Exclude bridge interfaces
-    ".*\\/translations/.*"
-]
-
-[network]
-min_delay = 1.0
-max_delay = 2.0
-
-[storage]
-output_dir = "./layer2_docs"
-db_path = "./layer2_docs.db"
-</code></pre>
-<h3 id="research-focused-configuration"><a class="header" href="#research-focused-configuration">Research-Focused Configuration</a></h3>
-<p>For academic/research purposes with maximum detail:</p>
-<pre><code class="language-toml">[crawler]
-name = "blockchain_research"
-start_urls = [
-    "https://ethereum.org/en/",
-    "https://bitcoin.org/en/developer-documentation"
-]
-max_depth = 6  # Deeper crawl
-max_pages = 10000
-
-[fetcher]
-mode = "auto"
-save_screenshots = true  # Save screenshots for analysis
-
-[patterns]
-include = [
-    "^https://ethereum\\.org/en/developers/.*",
-    "^https://ethereum\\.org/en/whitepaper.*",
-    "^https://bitcoin\\.org/en/developer-.*"
-]
-
-[network]
-min_delay = 2.0
-max_delay = 4.0
-timeout = 60.0
-
-[storage]
-output_dir = "./blockchain_research"
-save_metadata = true  # Save crawl metadata
-
-[logging]
-level = "DEBUG"  # Verbose logging for research
-log_file = "research_crawler.log"
-</code></pre>
-<h2 id="ethical-considerations"><a class="header" href="#ethical-considerations">Ethical Considerations</a></h2>
-<p>When crawling blockchain-related websites:</p>
-<h3 id="1-respect-robotstxt"><a class="header" href="#1-respect-robotstxt">1. Respect robots.txt</a></h3>
-<p>Always check and respect robots.txt directives:</p>
-<pre><code class="language-bash"># Check robots.txt before crawling
-curl https://etherscan.io/robots.txt
-</code></pre>
-<p><strong>Important:</strong></p>
-<ul>
-<li>Some sites disallow all crawlers</li>
-<li>Others specify allowed paths</li>
-<li>Ignoring robots.txt may violate terms of service</li>
-<li>Can lead to IP bans or legal issues</li>
-</ul>
-<h3 id="2-review-terms-of-service"><a class="header" href="#2-review-terms-of-service">2. Review Terms of Service</a></h3>
-<p>Many blockchain sites have specific ToS regarding automated access:</p>
-<p><strong>Common restrictions:</strong></p>
-<ul>
-<li>Maximum request rates</li>
-<li>Prohibited content usage</li>
-<li>Attribution requirements</li>
-<li>Commercial use limitations</li>
-</ul>
-<p><strong>Before crawling:</strong></p>
-<ul>
-<li>Read the site’s terms of service</li>
-<li>Check for “API Terms” or “Developer Terms”</li>
-<li>Look for explicit scraping policies</li>
-<li>Consider contacting site operators for permission</li>
-</ul>
-<h3 id="3-rate-limiting-and-server-load"><a class="header" href="#3-rate-limiting-and-server-load">3. Rate Limiting and Server Load</a></h3>
-<p>Don’t overload services, especially free public infrastructure:</p>
-<p><strong>Impact of aggressive crawling:</strong></p>
-<ul>
-<li>Increased server costs for operators</li>
-<li>Degraded service for legitimate users</li>
-<li>Potential service outages</li>
-<li>IP blocking or legal action</li>
-</ul>
-<p><strong>Best practices:</strong></p>
-<ul>
-<li>Use conservative delays (2-5 seconds minimum)</li>
-<li>Crawl during off-peak hours</li>
-<li>Limit concurrent requests</li>
-<li>Monitor for error responses (429, 503)</li>
-</ul>
-<h3 id="4-data-usage-and-copyright"><a class="header" href="#4-data-usage-and-copyright">4. Data Usage and Copyright</a></h3>
-<p>Respect copyright and licensing of crawled content:</p>
-<p><strong>Considerations:</strong></p>
-<ul>
-<li>Documentation may be copyrighted</li>
-<li>Code examples may have specific licenses</li>
-<li>Images and graphics have separate rights</li>
-<li>Commercial use may require permission</li>
-</ul>
-<p><strong>Proper usage:</strong></p>
-<ul>
-<li>Attribute sources appropriately</li>
-<li>Respect license terms (MIT, GPL, etc.)</li>
-<li>Don’t republish as your own work</li>
-<li>Link back to original sources</li>
-</ul>
-<h3 id="5-privacy-and-blockchain-data"><a class="header" href="#5-privacy-and-blockchain-data">5. Privacy and Blockchain Data</a></h3>
-<p>Be cautious with addresses and transaction data:</p>
-<p><strong>Privacy concerns:</strong></p>
-<ul>
-<li>Wallet addresses are pseudonymous, not anonymous</li>
-<li>Transaction patterns can reveal identities</li>
-<li>Aggregate data can deanonymize users</li>
-<li>GDPR and privacy laws may apply</li>
-</ul>
-<p><strong>Responsible handling:</strong></p>
-<ul>
-<li>Don’t republish address/transaction mappings</li>
-<li>Aggregate data to protect privacy</li>
-<li>Follow data protection regulations</li>
-<li>Consider ethical implications of deanonymization</li>
-</ul>
-<h3 id="6-community-impact"><a class="header" href="#6-community-impact">6. Community Impact</a></h3>
-<p>Your crawling affects the broader blockchain community:</p>
-<p><strong>Positive contributions:</strong></p>
-<ul>
-<li>Archive important documentation</li>
-<li>Enable research and analysis</li>
-<li>Improve search and discovery</li>
-<li>Preserve historical data</li>
-</ul>
-<p><strong>Negative impacts:</strong></p>
-<ul>
-<li>Strain on community resources</li>
-<li>Potential abuse of scraped data</li>
-<li>Violation of community trust</li>
-<li>Reduced availability for others</li>
-</ul>
-<h3 id="7-alternative-approaches"><a class="header" href="#7-alternative-approaches">7. Alternative Approaches</a></h3>
-<p>Consider alternatives to web scraping:</p>
-<p><strong>Better options:</strong></p>
-<ul>
-<li><strong>Official APIs</strong>: Most sites provide APIs (Etherscan API, CoinGecko API)</li>
-<li><strong>GraphQL endpoints</strong>: The Graph protocol for blockchain data</li>
-<li><strong>Node access</strong>: Direct blockchain node queries (Infura, Alchemy)</li>
-<li><strong>Data services</strong>: Paid data providers with proper licensing</li>
-<li><strong>Public datasets</strong>: Existing archived datasets (Kaggle, etc.)</li>
-<li><strong>Partnerships</strong>: Contact site operators for data access</li>
-</ul>
-<h3 id="8-transparency"><a class="header" href="#8-transparency">8. Transparency</a></h3>
-<p>Be transparent about your bot:</p>
-<p><strong>User agent:</strong></p>
-<pre><code class="language-toml">[fetcher]
-user_agent = "ResearchBot/1.0 (+https://yoursite.com/bot-info; contact@email.com)"
-</code></pre>
-<p><strong>Bot info page should include:</strong></p>
-<ul>
-<li>Purpose of crawling</li>
-<li>Contact information</li>
-<li>Crawl frequency and scope</li>
-<li>Data usage policy</li>
-<li>Opt-out instructions</li>
-</ul>
-<h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
-<p>This crawler is designed for <strong>public web content</strong> only. It cannot and should not be used to:</p>
-<h3 id="technical-limitations"><a class="header" href="#technical-limitations">Technical Limitations</a></h3>
-<ul>
-<li><strong>Interact with blockchain networks directly</strong> - Use web3 libraries instead</li>
-<li><strong>Access wallet-gated content</strong> - Requires authentication not suitable for crawlers</li>
-<li><strong>Execute smart contracts</strong> - Use blockchain SDKs (web3.js, ethers.js)</li>
-<li><strong>Crawl APIs</strong> - Use proper API clients with authentication</li>
-<li><strong>Capture WebSocket streams</strong> - Real-time data requires different tools</li>
-<li><strong>Bypass CAPTCHAs</strong> - Don’t attempt to evade security measures</li>
-<li><strong>Handle infinite scroll effectively</strong> - May miss dynamically loaded content</li>
-</ul>
-<h3 id="ethical-limitations"><a class="header" href="#ethical-limitations">Ethical Limitations</a></h3>
-<ul>
-<li><strong>Don’t scrape private/gated content</strong> - Respect access controls</li>
-<li><strong>Don’t evade rate limits</strong> - Respect site protections</li>
-<li><strong>Don’t impersonate users</strong> - Use honest user agents</li>
-<li><strong>Don’t crawl during attacks</strong> - Avoid adding load during incidents</li>
-<li><strong>Don’t sell scraped data</strong> - Check licensing terms</li>
-</ul>
-<h3 id="legal-limitations"><a class="header" href="#legal-limitations">Legal Limitations</a></h3>
-<ul>
-<li><strong>Comply with local laws</strong> - Web scraping legality varies by jurisdiction</li>
-<li><strong>Respect intellectual property</strong> - Don’t violate copyright</li>
-<li><strong>Follow data protection laws</strong> - GDPR, CCPA, etc.</li>
-<li><strong>Honor contracts</strong> - ToS are often legally binding</li>
-</ul>
-<h2 id="additional-resources"><a class="header" href="#additional-resources">Additional Resources</a></h2>
-<h3 id="blockchain-documentation"><a class="header" href="#blockchain-documentation">Blockchain Documentation</a></h3>
-<ul>
-<li><a href="https://ethereum.org/en/developers/">Ethereum Developer Documentation</a></li>
-<li><a href="https://developer.bitcoin.org/">Bitcoin Developer Guide</a></li>
-<li><a href="https://solana.com/docs">Solana Documentation</a></li>
-<li><a href="https://wiki.polkadot.network/">Polkadot Wiki</a></li>
-<li><a href="https://docs.cosmos.network/">Cosmos Documentation</a></li>
-</ul>
-<h3 id="apis-and-data-services"><a class="header" href="#apis-and-data-services">APIs and Data Services</a></h3>
-<ul>
-<li><a href="https://docs.etherscan.io/">Etherscan API</a></li>
-<li><a href="https://thegraph.com/">The Graph Protocol</a></li>
-<li><a href="https://www.alchemy.com/">Alchemy API</a></li>
-<li><a href="https://www.infura.io/">Infura API</a></li>
-<li><a href="https://www.coingecko.com/en/api">CoinGecko API</a></li>
-<li><a href="https://defillama.com/docs/api">DeFi Llama API</a></li>
-</ul>
-<h3 id="web-scraping-best-practices"><a class="header" href="#web-scraping-best-practices">Web Scraping Best Practices</a></h3>
-<ul>
-<li><a href="https://www.scraperapi.com/blog/web-scraping-best-practices/">Web Scraping Best Practices</a></li>
-<li><a href="https://towardsdatascience.com/ethics-in-web-scraping-b96b18136f01">Ethical Web Scraping Guide</a></li>
-<li><a href="https://www.robotstxt.org/">robots.txt Specification</a></li>
-</ul>
-<h3 id="legal-and-ethical-resources"><a class="header" href="#legal-and-ethical-resources">Legal and Ethical Resources</a></h3>
-<ul>
-<li><a href="https://www.eff.org/">EFF on Web Scraping</a></li>
-<li><a href="https://gdpr.eu/">GDPR Compliance</a></li>
-<li><a href="https://creativecommons.org/licenses/">Creative Commons Licenses</a></li>
-</ul>
-<h2 id="support"><a class="header" href="#support">Support</a></h2>
-<p>For issues specific to blockchain website crawling, please provide:</p>
-<p><strong>Required information:</strong></p>
-<ol>
-<li><strong>Target website URL</strong> - Full URL you’re trying to crawl</li>
-<li><strong>Configuration file</strong> - Your complete TOML configuration</li>
-<li><strong>Error messages</strong> - Exact error text and log output</li>
-<li><strong>Content type</strong> - Static or JavaScript-rendered</li>
-<li><strong>Crawl scope</strong> - How many pages, what depth</li>
-</ol>
-<p><strong>Helpful additional info:</strong></p>
-<ul>
-<li>Browser DevTools network tab screenshot</li>
-<li>robots.txt content from target site</li>
-<li>Example URLs that fail/succeed</li>
-<li>Your crawler version</li>
-<li>Operating system and environment</li>
-</ul>
-<p><strong>Getting help:</strong></p>
-<ul>
-<li>Check documentation first</li>
-<li>Search existing issues</li>
-<li>Provide minimal reproducible example</li>
-<li>Include relevant logs (not entire log dump)</li>
-<li>Describe what you’ve already tried</li>
-</ul>
-<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
-<h3 id="blockchain-url-patterns-to-exclude"><a class="header" href="#blockchain-url-patterns-to-exclude">Blockchain URL Patterns to Exclude</a></h3>
-<pre><code class="language-toml">[patterns]
-exclude = [
-    # Ethereum-style addresses and transactions
-    ".*\\/tx\\/0x[a-fA-F0-9]{64}$",
-    ".*\\/address\\/0x[a-fA-F0-9]{40}$",
-    ".*\\/token\\/0x[a-fA-F0-9]{40}$",
-    ".*\\/block\\/\\d+$",
-
-    # Bitcoin addresses
-    ".*\\/address/[13][a-km-zA-HJ-NP-Z1-9]{25,34}$",
-    ".*\\/address/bc1[a-z0-9]{39,87}$",
-
-    # Solana addresses
-    ".*\\/address/[1-9A-HJ-NP-Za-km-z]{32,44}$",
-
-    # Common excludes
-    ".*\\/search\\?.*",
-    ".*\\/translations/.*",
-    ".*\\#.*",  # Anchors
-    ".*\\.pdf$"
-]
-</code></pre>
-<h3 id="recommended-delays-by-site-type"><a class="header" href="#recommended-delays-by-site-type">Recommended Delays by Site Type</a></h3>
+<h3 id="comparison"><a class="header" href="#comparison">Comparison</a></h3>
 <div class="table-wrapper">
 <table>
 <thead>
-<tr><th>Site Type</th><th>Min Delay</th><th>Max Delay</th><th>Notes</th></tr>
+<tr><th>Platform</th><th>Consensus</th><th>TPS</th><th>Smart Contracts</th><th>Launch Year</th></tr>
 </thead>
 <tbody>
-<tr><td>Documentation</td><td>0.5s</td><td>1.5s</td><td>Usually tolerant</td></tr>
-<tr><td>News sites</td><td>1.5s</td><td>3.0s</td><td>Standard politeness</td></tr>
-<tr><td>Block explorers</td><td>3.0s</td><td>6.0s</td><td>Heavily rate limited</td></tr>
-<tr><td>DeFi platforms</td><td>2.0s</td><td>4.0s</td><td>Moderate protection</td></tr>
-<tr><td>NFT marketplaces</td><td>3.0s</td><td>6.0s</td><td>Heavy JavaScript</td></tr>
+<tr><td>Bitcoin</td><td>PoW</td><td>7</td><td>Limited</td><td>2009</td></tr>
+<tr><td>Ethereum</td><td>PoS</td><td>15-30</td><td>Yes (Solidity)</td><td>2015</td></tr>
+<tr><td>Solana</td><td>PoH+PoS</td><td>65,000</td><td>Yes (Rust)</td><td>2020</td></tr>
+<tr><td>Cardano</td><td>PoS</td><td>250+</td><td>Yes (Plutus)</td><td>2017</td></tr>
+<tr><td>Polkadot</td><td>PoS</td><td>1,000+</td><td>Yes</td><td>2020</td></tr>
 </tbody>
 </table>
 </div>
-<h3 id="fetcher-mode-selection"><a class="header" href="#fetcher-mode-selection">Fetcher Mode Selection</a></h3>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>Site Type</th><th>Mode</th><th>Reason</th></tr>
-</thead>
-<tbody>
-<tr><td>Docs (Docusaurus, GitBook)</td><td>static</td><td>Server-rendered</td></tr>
-<tr><td>Block explorers</td><td>dynamic</td><td>React/Vue SPAs</td></tr>
-<tr><td>News sites</td><td>auto</td><td>Mixed content</td></tr>
-<tr><td>DeFi dashboards</td><td>dynamic</td><td>Heavy JavaScript</td></tr>
-<tr><td>Blogs</td><td>static</td><td>Traditional HTML</td></tr>
-</tbody>
-</table>
-</div>
-<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Blockchain website crawling requires careful consideration of technical, ethical, and legal factors. Always prioritize:</p>
+<hr>
+<h2 id="smart-contracts"><a class="header" href="#smart-contracts">Smart Contracts</a></h2>
+<p><strong>Smart Contract</strong>: Self-executing code that runs on blockchain when conditions are met</p>
+<h3 id="core-concepts-1"><a class="header" href="#core-concepts-1">Core Concepts</a></h3>
+<ul>
+<li><strong>Deterministic</strong>: Same inputs always produce same outputs</li>
+<li><strong>Immutable</strong>: Cannot be changed after deployment</li>
+<li><strong>Transparent</strong>: Code is publicly visible</li>
+<li><strong>Trustless</strong>: Execution guaranteed by blockchain</li>
+</ul>
+<h3 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h3>
 <ol>
-<li><strong>Respect</strong> - For site operators, users, and community</li>
-<li><strong>Transparency</strong> - Identify your bot and purpose</li>
-<li><strong>Moderation</strong> - Use conservative rate limits</li>
-<li><strong>Legality</strong> - Comply with laws and terms of service</li>
-<li><strong>Alternatives</strong> - Consider APIs and official data sources</li>
+<li>
+<p><strong>Decentralized Finance (DeFi)</strong></p>
+<ul>
+<li>Lending/borrowing platforms</li>
+<li>Decentralized exchanges</li>
+<li>Yield farming</li>
+</ul>
+</li>
+<li>
+<p><strong>NFTs (Non-Fungible Tokens)</strong></p>
+<ul>
+<li>Digital art</li>
+<li>Gaming items</li>
+<li>Collectibles</li>
+</ul>
+</li>
+<li>
+<p><strong>Supply Chain</strong></p>
+<ul>
+<li>Tracking and verification</li>
+<li>Automated payments</li>
+</ul>
+</li>
+<li>
+<p><strong>DAOs (Decentralized Autonomous Organizations)</strong></p>
+<ul>
+<li>Governance</li>
+<li>Treasury management</li>
+</ul>
+</li>
 </ol>
-<p>When in doubt, err on the side of caution and reach out to site operators for permission.</p>
-<p>Happy (ethical) crawling!</p>
+<h3 id="solidity-basics"><a class="header" href="#solidity-basics">Solidity Basics</a></h3>
+<p><strong>Solidity</strong>: Primary language for Ethereum smart contracts</p>
+<h4 id="hello-world-contract"><a class="header" href="#hello-world-contract">Hello World Contract</a></h4>
+<pre><code class="language-solidity">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract HelloWorld {
+    string public message;
+
+    constructor() {
+        message = "Hello, Blockchain!";
+    }
+
+    function setMessage(string memory newMessage) public {
+        message = newMessage;
+    }
+
+    function getMessage() public view returns (string memory) {
+        return message;
+    }
+}
+</code></pre>
+<h4 id="erc-20-token-standard"><a class="header" href="#erc-20-token-standard">ERC-20 Token Standard</a></h4>
+<p>Standard interface for fungible tokens:</p>
+<pre><code class="language-solidity">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+interface IERC20 {
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address to, uint256 amount) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+contract MyToken is IERC20 {
+    string public name = "MyToken";
+    string public symbol = "MTK";
+    uint8 public decimals = 18;
+    uint256 private _totalSupply;
+
+    mapping(address =&gt; uint256) private _balances;
+    mapping(address =&gt; mapping(address =&gt; uint256)) private _allowances;
+
+    constructor(uint256 initialSupply) {
+        _totalSupply = initialSupply * 10**decimals;
+        _balances[msg.sender] = _totalSupply;
+    }
+
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupply;
+    }
+
+    function balanceOf(address account) external view override returns (uint256) {
+        return _balances[account];
+    }
+
+    function transfer(address to, uint256 amount) external override returns (bool) {
+        require(_balances[msg.sender] &gt;= amount, "Insufficient balance");
+        _balances[msg.sender] -= amount;
+        _balances[to] += amount;
+        emit Transfer(msg.sender, to, amount);
+        return true;
+    }
+
+    function allowance(address owner, address spender) external view override returns (uint256) {
+        return _allowances[owner][spender];
+    }
+
+    function approve(address spender, uint256 amount) external override returns (bool) {
+        _allowances[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
+        return true;
+    }
+
+    function transferFrom(address from, address to, uint256 amount) external override returns (bool) {
+        require(_balances[from] &gt;= amount, "Insufficient balance");
+        require(_allowances[from][msg.sender] &gt;= amount, "Insufficient allowance");
+
+        _balances[from] -= amount;
+        _balances[to] += amount;
+        _allowances[from][msg.sender] -= amount;
+
+        emit Transfer(from, to, amount);
+        return true;
+    }
+}
+</code></pre>
+<h4 id="erc-721-nft-standard"><a class="header" href="#erc-721-nft-standard">ERC-721 NFT Standard</a></h4>
+<p>Standard interface for non-fungible tokens:</p>
+<pre><code class="language-solidity">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+interface IERC721 {
+    function balanceOf(address owner) external view returns (uint256);
+    function ownerOf(uint256 tokenId) external view returns (address);
+    function transferFrom(address from, address to, uint256 tokenId) external;
+    function approve(address to, uint256 tokenId) external;
+    function getApproved(uint256 tokenId) external view returns (address);
+
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+}
+</code></pre>
+<h3 id="solidity-data-types"><a class="header" href="#solidity-data-types">Solidity Data Types</a></h3>
+<pre><code class="language-solidity">// Value Types
+bool public isActive = true;
+uint256 public number = 42;
+int256 public signedNumber = -10;
+address public owner = 0x1234...;
+bytes32 public data;
+
+// Reference Types
+string public name = "Token";
+uint[] public numbers;
+mapping(address =&gt; uint256) public balances;
+
+// Structs
+struct User {
+    string name;
+    uint256 age;
+    bool active;
+}
+
+// Enums
+enum State { Pending, Active, Inactive }
+</code></pre>
+<h3 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h3>
+<h4 id="1-access-control"><a class="header" href="#1-access-control">1. Access Control</a></h4>
+<pre><code class="language-solidity">contract Ownable {
+    address public owner;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function restrictedFunction() public onlyOwner {
+        // Only owner can call
+    }
+}
+</code></pre>
+<h4 id="2-reentrancy-guard"><a class="header" href="#2-reentrancy-guard">2. Reentrancy Guard</a></h4>
+<pre><code class="language-solidity">contract ReentrancyGuard {
+    bool private locked;
+
+    modifier noReentrant() {
+        require(!locked, "No reentrancy");
+        locked = true;
+        _;
+        locked = false;
+    }
+
+    function withdraw() public noReentrant {
+        // Safe from reentrancy attacks
+    }
+}
+</code></pre>
+<h4 id="3-pausable"><a class="header" href="#3-pausable">3. Pausable</a></h4>
+<pre><code class="language-solidity">contract Pausable {
+    bool public paused;
+
+    modifier whenNotPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
+    function pause() public {
+        paused = true;
+    }
+
+    function unpause() public {
+        paused = false;
+    }
+}
+</code></pre>
+<hr>
+<h2 id="blockchain-development"><a class="header" href="#blockchain-development">Blockchain Development</a></h2>
+<h3 id="development-environment-setup"><a class="header" href="#development-environment-setup">Development Environment Setup</a></h3>
+<h4 id="installing-nodejs-and-npm"><a class="header" href="#installing-nodejs-and-npm">Installing Node.js and npm</a></h4>
+<pre><code class="language-bash"># Install Node.js (LTS version recommended)
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Verify installation
+node --version
+npm --version
+</code></pre>
+<h4 id="hardhat-setup"><a class="header" href="#hardhat-setup">Hardhat Setup</a></h4>
+<p>Hardhat is a popular Ethereum development environment.</p>
+<pre><code class="language-bash"># Create project directory
+mkdir my-blockchain-project
+cd my-blockchain-project
+
+# Initialize npm project
+npm init -y
+
+# Install Hardhat
+npm install --save-dev hardhat
+
+# Initialize Hardhat project
+npx hardhat init
+</code></pre>
+<p><strong>hardhat.config.js:</strong></p>
+<pre><code class="language-javascript">require("@nomiclabs/hardhat-waffle");
+require("@nomiclabs/hardhat-ethers");
+
+module.exports = {
+  solidity: "0.8.20",
+  networks: {
+    hardhat: {},
+    sepolia: {
+      url: "https://sepolia.infura.io/v3/YOUR_INFURA_KEY",
+      accounts: ["YOUR_PRIVATE_KEY"]
+    }
+  }
+};
+</code></pre>
+<h4 id="truffle-setup"><a class="header" href="#truffle-setup">Truffle Setup</a></h4>
+<p>Alternative development framework.</p>
+<pre><code class="language-bash"># Install Truffle globally
+npm install -g truffle
+
+# Create new project
+mkdir truffle-project
+cd truffle-project
+truffle init
+
+# Compile contracts
+truffle compile
+
+# Deploy contracts
+truffle migrate
+</code></pre>
+<h3 id="web3-libraries"><a class="header" href="#web3-libraries">Web3 Libraries</a></h3>
+<h4 id="web3js"><a class="header" href="#web3js">Web3.js</a></h4>
+<pre><code class="language-javascript">const Web3 = require('web3');
+
+// Connect to Ethereum node
+const web3 = new Web3('https://mainnet.infura.io/v3/YOUR_KEY');
+
+// Get latest block
+const block = await web3.eth.getBlock('latest');
+console.log(block);
+
+// Get account balance
+const balance = await web3.eth.getBalance('0x742d35Cc6634C0532925a3b844Bc454e4438f44e');
+console.log(web3.utils.fromWei(balance, 'ether'), 'ETH');
+
+// Send transaction
+const tx = await web3.eth.sendTransaction({
+  from: '0xYourAddress',
+  to: '0xRecipientAddress',
+  value: web3.utils.toWei('0.1', 'ether')
+});
+</code></pre>
+<h4 id="ethersjs"><a class="header" href="#ethersjs">Ethers.js</a></h4>
+<p>Modern, lightweight alternative to Web3.js.</p>
+<pre><code class="language-javascript">const { ethers } = require('ethers');
+
+// Connect to provider
+const provider = new ethers.JsonRpcProvider('https://mainnet.infura.io/v3/YOUR_KEY');
+
+// Get balance
+const balance = await provider.getBalance('0x742d35Cc6634C0532925a3b844Bc454e4438f44e');
+console.log(ethers.formatEther(balance), 'ETH');
+
+// Create wallet
+const wallet = new ethers.Wallet('YOUR_PRIVATE_KEY', provider);
+
+// Interact with contract
+const contract = new ethers.Contract(contractAddress, abi, wallet);
+const result = await contract.someFunction();
+</code></pre>
+<h4 id="web3py-python"><a class="header" href="#web3py-python">Web3.py (Python)</a></h4>
+<pre><code class="language-python">from web3 import Web3
+
+# Connect to node
+w3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/YOUR_KEY'))
+
+# Check connection
+print(w3.is_connected())
+
+# Get balance
+balance = w3.eth.get_balance('0x742d35Cc6634C0532925a3b844Bc454e4438f44e')
+print(w3.from_wei(balance, 'ether'))
+
+# Send transaction
+tx = {
+    'from': '0xYourAddress',
+    'to': '0xRecipientAddress',
+    'value': w3.to_wei(0.1, 'ether'),
+    'gas': 21000,
+    'gasPrice': w3.eth.gas_price
+}
+</code></pre>
+<h3 id="testing-smart-contracts"><a class="header" href="#testing-smart-contracts">Testing Smart Contracts</a></h3>
+<h4 id="hardhat-test-example"><a class="header" href="#hardhat-test-example">Hardhat Test Example</a></h4>
+<pre><code class="language-javascript">const { expect } = require("chai");
+const { ethers } = require("hardhat");
+
+describe("MyToken", function () {
+  let myToken;
+  let owner;
+  let addr1;
+  let addr2;
+
+  beforeEach(async function () {
+    [owner, addr1, addr2] = await ethers.getSigners();
+
+    const MyToken = await ethers.getContractFactory("MyToken");
+    myToken = await MyToken.deploy(1000000);
+    await myToken.waitForDeployment();
+  });
+
+  it("Should assign total supply to owner", async function () {
+    const ownerBalance = await myToken.balanceOf(owner.address);
+    expect(await myToken.totalSupply()).to.equal(ownerBalance);
+  });
+
+  it("Should transfer tokens between accounts", async function () {
+    // Transfer 50 tokens from owner to addr1
+    await myToken.transfer(addr1.address, 50);
+    expect(await myToken.balanceOf(addr1.address)).to.equal(50);
+
+    // Transfer 50 tokens from addr1 to addr2
+    await myToken.connect(addr1).transfer(addr2.address, 50);
+    expect(await myToken.balanceOf(addr2.address)).to.equal(50);
+  });
+
+  it("Should fail if sender doesn't have enough tokens", async function () {
+    const initialBalance = await myToken.balanceOf(owner.address);
+
+    await expect(
+      myToken.connect(addr1).transfer(owner.address, 1)
+    ).to.be.revertedWith("Insufficient balance");
+
+    expect(await myToken.balanceOf(owner.address)).to.equal(initialBalance);
+  });
+});
+</code></pre>
+<h3 id="deployment"><a class="header" href="#deployment">Deployment</a></h3>
+<h4 id="deploy-with-hardhat"><a class="header" href="#deploy-with-hardhat">Deploy with Hardhat</a></h4>
+<pre><code class="language-javascript">// scripts/deploy.js
+async function main() {
+  const [deployer] = await ethers.getSigners();
+
+  console.log("Deploying contracts with:", deployer.address);
+  console.log("Account balance:", (await deployer.getBalance()).toString());
+
+  const MyToken = await ethers.getContractFactory("MyToken");
+  const myToken = await MyToken.deploy(1000000);
+
+  await myToken.waitForDeployment();
+  console.log("MyToken deployed to:", await myToken.getAddress());
+}
+
+main()
+  .then(() =&gt; process.exit(0))
+  .catch((error) =&gt; {
+    console.error(error);
+    process.exit(1);
+  });
+</code></pre>
+<pre><code class="language-bash"># Deploy to local network
+npx hardhat run scripts/deploy.js
+
+# Deploy to testnet
+npx hardhat run scripts/deploy.js --network sepolia
+
+# Verify contract on Etherscan
+npx hardhat verify --network sepolia DEPLOYED_CONTRACT_ADDRESS "constructor args"
+</code></pre>
+<h3 id="development-tools"><a class="header" href="#development-tools">Development Tools</a></h3>
+<h4 id="1-remix-ide"><a class="header" href="#1-remix-ide">1. Remix IDE</a></h4>
+<ul>
+<li>Browser-based IDE</li>
+<li>No installation required</li>
+<li>Built-in compiler and debugger</li>
+<li>URL: https://remix.ethereum.org</li>
+</ul>
+<h4 id="2-metamask"><a class="header" href="#2-metamask">2. MetaMask</a></h4>
+<ul>
+<li>Browser wallet extension</li>
+<li>Interact with DApps</li>
+<li>Manage accounts and assets</li>
+</ul>
+<h4 id="3-ganache"><a class="header" href="#3-ganache">3. Ganache</a></h4>
+<ul>
+<li>Local blockchain for testing</li>
+</ul>
+<pre><code class="language-bash">npm install -g ganache
+ganache
+</code></pre>
+<h4 id="4-etherscan"><a class="header" href="#4-etherscan">4. Etherscan</a></h4>
+<ul>
+<li>Block explorer</li>
+<li>Contract verification</li>
+<li>Transaction tracking</li>
+<li>URL: https://etherscan.io</li>
+</ul>
+<h4 id="5-openzeppelin"><a class="header" href="#5-openzeppelin">5. OpenZeppelin</a></h4>
+<ul>
+<li>Secure smart contract library</li>
+</ul>
+<pre><code class="language-bash">npm install @openzeppelin/contracts
+</code></pre>
+<pre><code class="language-solidity">import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract MyToken is ERC20 {
+    constructor() ERC20("MyToken", "MTK") {
+        _mint(msg.sender, 1000000 * 10**18);
+    }
+}
+</code></pre>
+<hr>
+<h2 id="decentralized-applications-dapps"><a class="header" href="#decentralized-applications-dapps">Decentralized Applications (DApps)</a></h2>
+<p><strong>DApp</strong>: Application that runs on decentralized network (blockchain)</p>
+<h3 id="architecture"><a class="header" href="#architecture">Architecture</a></h3>
+<pre><code>Frontend (Web UI)
+       ↓
+   Web3 Library
+       ↓
+  Blockchain Node
+       ↓
+  Smart Contracts
+</code></pre>
+<h3 id="building-a-simple-dapp"><a class="header" href="#building-a-simple-dapp">Building a Simple DApp</a></h3>
+<h4 id="frontend-with-react-and-ethersjs"><a class="header" href="#frontend-with-react-and-ethersjs">Frontend with React and Ethers.js</a></h4>
+<pre><code class="language-javascript">import { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
+
+function App() {
+  const [account, setAccount] = useState('');
+  const [contract, setContract] = useState(null);
+  const [balance, setBalance] = useState('0');
+
+  // Connect to MetaMask
+  async function connectWallet() {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts'
+        });
+        setAccount(accounts[0]);
+
+        // Setup provider and contract
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+
+        const contractAddress = '0xYourContractAddress';
+        const abi = [ /* Your contract ABI */ ];
+
+        const tokenContract = new ethers.Contract(contractAddress, abi, signer);
+        setContract(tokenContract);
+
+        // Get balance
+        const bal = await tokenContract.balanceOf(accounts[0]);
+        setBalance(ethers.formatEther(bal));
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      alert('Please install MetaMask!');
+    }
+  }
+
+  // Transfer tokens
+  async function transfer(recipient, amount) {
+    if (contract) {
+      try {
+        const tx = await contract.transfer(
+          recipient,
+          ethers.parseEther(amount)
+        );
+        await tx.wait();
+        alert('Transfer successful!');
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;My Token DApp&lt;/h1&gt;
+      {!account ? (
+        &lt;button onClick={connectWallet}&gt;Connect Wallet&lt;/button&gt;
+      ) : (
+        &lt;div&gt;
+          &lt;p&gt;Account: {account}&lt;/p&gt;
+          &lt;p&gt;Balance: {balance} MTK&lt;/p&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<h3 id="ipfs-integration"><a class="header" href="#ipfs-integration">IPFS Integration</a></h3>
+<p><strong>IPFS (InterPlanetary File System)</strong>: Decentralized storage network</p>
+<pre><code class="language-bash"># Install IPFS
+npm install ipfs-http-client
+
+# Upload file to IPFS
+const { create } = require('ipfs-http-client');
+const ipfs = create({ url: 'https://ipfs.infura.io:5001' });
+
+async function uploadToIPFS(file) {
+  const added = await ipfs.add(file);
+  const url = `https://ipfs.io/ipfs/${added.path}`;
+  return url;
+}
+</code></pre>
+<h3 id="the-graph"><a class="header" href="#the-graph">The Graph</a></h3>
+<p><strong>The Graph</strong>: Indexing protocol for querying blockchain data</p>
+<pre><code class="language-graphql"># Example query
+{
+  tokens(first: 5) {
+    id
+    name
+    symbol
+    decimals
+  }
+
+  transfers(orderBy: timestamp, orderDirection: desc) {
+    id
+    from
+    to
+    value
+  }
+}
+</code></pre>
+<hr>
+<h2 id="security-and-best-practices"><a class="header" href="#security-and-best-practices">Security and Best Practices</a></h2>
+<h3 id="common-vulnerabilities"><a class="header" href="#common-vulnerabilities">Common Vulnerabilities</a></h3>
+<h4 id="1-reentrancy-attack"><a class="header" href="#1-reentrancy-attack">1. Reentrancy Attack</a></h4>
+<p><strong>Problem</strong>: External call allows attacker to recursively call function</p>
+<pre><code class="language-solidity">// VULNERABLE
+function withdraw() public {
+    uint amount = balances[msg.sender];
+    // External call before state update!
+    (bool success,) = msg.sender.call{value: amount}("");
+    require(success);
+    balances[msg.sender] = 0;  // Too late!
+}
+
+// SECURE: Checks-Effects-Interactions pattern
+function withdraw() public {
+    uint amount = balances[msg.sender];
+    balances[msg.sender] = 0;  // Update state first
+    (bool success,) = msg.sender.call{value: amount}("");
+    require(success);
+}
+</code></pre>
+<h4 id="2-integer-overflowunderflow"><a class="header" href="#2-integer-overflowunderflow">2. Integer Overflow/Underflow</a></h4>
+<pre><code class="language-solidity">// VULNERABLE (Solidity &lt; 0.8.0)
+uint8 x = 255;
+x = x + 1;  // Overflows to 0
+
+// SECURE: Use Solidity 0.8.0+ (automatic checks)
+// Or use SafeMath library for older versions
+</code></pre>
+<h4 id="3-access-control-issues"><a class="header" href="#3-access-control-issues">3. Access Control Issues</a></h4>
+<pre><code class="language-solidity">// VULNERABLE: Missing access control
+function withdraw() public {
+    // Anyone can call!
+}
+
+// SECURE
+address public owner;
+
+modifier onlyOwner() {
+    require(msg.sender == owner, "Not authorized");
+    _;
+}
+
+function withdraw() public onlyOwner {
+    // Only owner can call
+}
+</code></pre>
+<h4 id="4-front-running"><a class="header" href="#4-front-running">4. Front-Running</a></h4>
+<p><strong>Problem</strong>: Attacker sees pending transaction and submits their own with higher gas</p>
+<p><strong>Mitigation:</strong></p>
+<ul>
+<li>Commit-reveal schemes</li>
+<li>Submarine sends</li>
+<li>Batch auctions</li>
+</ul>
+<h4 id="5-timestamp-dependence"><a class="header" href="#5-timestamp-dependence">5. Timestamp Dependence</a></h4>
+<pre><code class="language-solidity">// RISKY: Miners can manipulate timestamp slightly
+require(block.timestamp &gt; deadline);
+
+// Better: Use block numbers for critical logic
+require(block.number &gt; deadlineBlock);
+</code></pre>
+<h3 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h3>
+<h4 id="1-security-principles"><a class="header" href="#1-security-principles">1. Security Principles</a></h4>
+<ul>
+<li><strong>Checks-Effects-Interactions</strong>: Check conditions, update state, then interact</li>
+<li><strong>Fail Loudly</strong>: Use <code>require()</code> for validation</li>
+<li><strong>Favor Pull Over Push</strong>: Let users withdraw rather than auto-sending</li>
+<li><strong>Rate Limiting</strong>: Implement withdrawal limits</li>
+<li><strong>Circuit Breakers</strong>: Emergency pause functionality</li>
+</ul>
+<h4 id="2-code-quality"><a class="header" href="#2-code-quality">2. Code Quality</a></h4>
+<pre><code class="language-solidity">// Use latest Solidity version
+pragma solidity ^0.8.20;
+
+// Use OpenZeppelin libraries
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+// Clear naming and documentation
+/// @notice Transfers tokens to recipient
+/// @param to The recipient address
+/// @param amount The amount to transfer
+function transfer(address to, uint256 amount) public returns (bool) {
+    // Implementation
+}
+</code></pre>
+<h4 id="3-testing"><a class="header" href="#3-testing">3. Testing</a></h4>
+<ul>
+<li>Write comprehensive unit tests</li>
+<li>Test edge cases</li>
+<li>Use fuzzing tools</li>
+<li>Perform integration tests</li>
+<li>Test on testnet before mainnet</li>
+</ul>
+<h4 id="4-auditing"><a class="header" href="#4-auditing">4. Auditing</a></h4>
+<ul>
+<li>Get professional security audit</li>
+<li>Use automated tools:
+<ul>
+<li>Slither</li>
+<li>Mythril</li>
+<li>Echidna</li>
+</ul>
+</li>
+<li>Bug bounty programs</li>
+</ul>
+<h4 id="5-monitoring"><a class="header" href="#5-monitoring">5. Monitoring</a></h4>
+<ul>
+<li>Monitor contract events</li>
+<li>Set up alerts for unusual activity</li>
+<li>Track gas usage</li>
+<li>Monitor balances</li>
+</ul>
+<h3 id="security-tools"><a class="header" href="#security-tools">Security Tools</a></h3>
+<pre><code class="language-bash"># Slither - Static analyzer
+pip3 install slither-analyzer
+slither contracts/MyContract.sol
+
+# Mythril - Security analysis
+pip3 install mythril
+myth analyze contracts/MyContract.sol
+
+# Echidna - Fuzzer
+echidna-test contracts/MyContract.sol
+</code></pre>
+<hr>
+<h2 id="use-cases-and-applications"><a class="header" href="#use-cases-and-applications">Use Cases and Applications</a></h2>
+<h3 id="1-decentralized-finance-defi"><a class="header" href="#1-decentralized-finance-defi">1. Decentralized Finance (DeFi)</a></h3>
+<h4 id="decentralized-exchanges-dex"><a class="header" href="#decentralized-exchanges-dex">Decentralized Exchanges (DEX)</a></h4>
+<ul>
+<li><strong>Uniswap</strong>: Automated market maker</li>
+<li><strong>SushiSwap</strong>: Community-driven DEX</li>
+<li><strong>Curve</strong>: Stablecoin-focused DEX</li>
+</ul>
+<h4 id="lending-protocols"><a class="header" href="#lending-protocols">Lending Protocols</a></h4>
+<ul>
+<li><strong>Aave</strong>: Decentralized lending/borrowing</li>
+<li><strong>Compound</strong>: Algorithmic money markets</li>
+<li><strong>MakerDAO</strong>: Decentralized stablecoin (DAI)</li>
+</ul>
+<h4 id="yield-farming"><a class="header" href="#yield-farming">Yield Farming</a></h4>
+<ul>
+<li>Provide liquidity to earn rewards</li>
+<li>Stake tokens in pools</li>
+<li>Earn interest on deposits</li>
+</ul>
+<h3 id="2-non-fungible-tokens-nfts"><a class="header" href="#2-non-fungible-tokens-nfts">2. Non-Fungible Tokens (NFTs)</a></h3>
+<h4 id="use-cases-1"><a class="header" href="#use-cases-1">Use Cases</a></h4>
+<ul>
+<li>Digital art and collectibles</li>
+<li>Gaming items and avatars</li>
+<li>Virtual real estate</li>
+<li>Music and media rights</li>
+<li>Ticketing and memberships</li>
+</ul>
+<h4 id="popular-platforms"><a class="header" href="#popular-platforms">Popular Platforms</a></h4>
+<ul>
+<li><strong>OpenSea</strong>: NFT marketplace</li>
+<li><strong>Rarible</strong>: Community-owned marketplace</li>
+<li><strong>Foundation</strong>: Curated art platform</li>
+</ul>
+<h3 id="3-supply-chain-management"><a class="header" href="#3-supply-chain-management">3. Supply Chain Management</a></h3>
+<ul>
+<li>Product tracking and provenance</li>
+<li>Anti-counterfeiting</li>
+<li>Automated payments</li>
+<li>Quality assurance</li>
+</ul>
+<p><strong>Example: Food Traceability</strong></p>
+<pre><code>Farm → Processing → Distribution → Retail → Consumer
+ ↓         ↓            ↓           ↓         ↓
+[All steps recorded on blockchain with timestamps and locations]
+</code></pre>
+<h3 id="4-identity-management"><a class="header" href="#4-identity-management">4. Identity Management</a></h3>
+<ul>
+<li>Self-sovereign identity</li>
+<li>Decentralized identifiers (DIDs)</li>
+<li>Verifiable credentials</li>
+<li>Privacy-preserving authentication</li>
+</ul>
+<h3 id="5-voting-and-governance"><a class="header" href="#5-voting-and-governance">5. Voting and Governance</a></h3>
+<ul>
+<li>Transparent voting systems</li>
+<li>DAO governance</li>
+<li>Token-based voting rights</li>
+<li>Immutable vote records</li>
+</ul>
+<h3 id="6-gaming"><a class="header" href="#6-gaming">6. Gaming</a></h3>
+<ul>
+<li>Play-to-earn models</li>
+<li>True asset ownership</li>
+<li>Cross-game interoperability</li>
+<li>Decentralized gaming economies</li>
+</ul>
+<p><strong>Popular Blockchain Games:</strong></p>
+<ul>
+<li>Axie Infinity</li>
+<li>The Sandbox</li>
+<li>Decentraland</li>
+<li>Gods Unchained</li>
+</ul>
+<h3 id="7-healthcare"><a class="header" href="#7-healthcare">7. Healthcare</a></h3>
+<ul>
+<li>Medical record management</li>
+<li>Drug traceability</li>
+<li>Clinical trial data</li>
+<li>Insurance claims</li>
+</ul>
+<h3 id="8-real-estate"><a class="header" href="#8-real-estate">8. Real Estate</a></h3>
+<ul>
+<li>Property tokenization</li>
+<li>Fractional ownership</li>
+<li>Transparent transactions</li>
+<li>Smart contract escrow</li>
+</ul>
+<h3 id="9-intellectual-property"><a class="header" href="#9-intellectual-property">9. Intellectual Property</a></h3>
+<ul>
+<li>Copyright registration</li>
+<li>Royalty distribution</li>
+<li>Licensing management</li>
+<li>Proof of ownership</li>
+</ul>
+<hr>
+<h2 id="resources-and-tools"><a class="header" href="#resources-and-tools">Resources and Tools</a></h2>
+<h3 id="learning-resources"><a class="header" href="#learning-resources">Learning Resources</a></h3>
+<h4 id="documentation"><a class="header" href="#documentation">Documentation</a></h4>
+<ul>
+<li><strong>Ethereum.org</strong>: https://ethereum.org/en/developers/</li>
+<li><strong>Solidity Docs</strong>: https://docs.soliditylang.org/</li>
+<li><strong>Hardhat Docs</strong>: https://hardhat.org/docs</li>
+<li><strong>Web3.js</strong>: https://web3js.readthedocs.io/</li>
+</ul>
+<h4 id="tutorials"><a class="header" href="#tutorials">Tutorials</a></h4>
+<ul>
+<li><strong>CryptoZombies</strong>: Interactive Solidity tutorial</li>
+<li><strong>Buildspace</strong>: Web3 development courses</li>
+<li><strong>Alchemy University</strong>: Free blockchain development courses</li>
+<li><strong>Speedrun Ethereum</strong>: Hands-on challenges</li>
+</ul>
+<h4 id="books"><a class="header" href="#books">Books</a></h4>
+<ul>
+<li>“Mastering Bitcoin” by Andreas Antonopoulos</li>
+<li>“Mastering Ethereum” by Andreas Antonopoulos &amp; Gavin Wood</li>
+<li>“The Infinite Machine” by Camila Russo</li>
+</ul>
+<h3 id="development-tools-1"><a class="header" href="#development-tools-1">Development Tools</a></h3>
+<h4 id="ides-and-editors"><a class="header" href="#ides-and-editors">IDEs and Editors</a></h4>
+<ul>
+<li><strong>Remix</strong>: Browser-based Solidity IDE</li>
+<li><strong>VS Code</strong>: With Solidity extensions</li>
+<li><strong>Hardhat</strong>: Development environment</li>
+<li><strong>Truffle</strong>: Development framework</li>
+</ul>
+<h4 id="testing-and-debugging"><a class="header" href="#testing-and-debugging">Testing and Debugging</a></h4>
+<ul>
+<li><strong>Hardhat</strong>: Testing framework</li>
+<li><strong>Waffle</strong>: Smart contract testing</li>
+<li><strong>Tenderly</strong>: Monitoring and debugging</li>
+<li><strong>Ganache</strong>: Local blockchain</li>
+</ul>
+<h4 id="security"><a class="header" href="#security">Security</a></h4>
+<ul>
+<li><strong>Slither</strong>: Static analyzer</li>
+<li><strong>Mythril</strong>: Security scanner</li>
+<li><strong>Echidna</strong>: Fuzzing tool</li>
+<li><strong>MythX</strong>: Automated security service</li>
+</ul>
+<h4 id="libraries"><a class="header" href="#libraries">Libraries</a></h4>
+<ul>
+<li><strong>OpenZeppelin</strong>: Secure smart contracts</li>
+<li><strong>Ethers.js</strong>: Ethereum library</li>
+<li><strong>Web3.js</strong>: Ethereum JavaScript API</li>
+<li><strong>Web3.py</strong>: Python library</li>
+</ul>
+<h3 id="blockchain-explorers"><a class="header" href="#blockchain-explorers">Blockchain Explorers</a></h3>
+<ul>
+<li><strong>Etherscan</strong>: https://etherscan.io (Ethereum)</li>
+<li><strong>Blockchain.com</strong>: https://blockchain.com (Bitcoin)</li>
+<li><strong>Solscan</strong>: https://solscan.io (Solana)</li>
+<li><strong>Cardanoscan</strong>: https://cardanoscan.io (Cardano)</li>
+</ul>
+<h3 id="test-networks-testnets"><a class="header" href="#test-networks-testnets">Test Networks (Testnets)</a></h3>
+<pre><code class="language-bash"># Ethereum Testnets
+- Sepolia (recommended)
+- Goerli (being deprecated)
+- Holesky (for staking)
+
+# Get test ETH from faucets:
+- https://sepoliafaucet.com/
+- https://faucet.quicknode.com/
+</code></pre>
+<h3 id="apis-and-services"><a class="header" href="#apis-and-services">APIs and Services</a></h3>
+<ul>
+<li><strong>Infura</strong>: Ethereum node infrastructure</li>
+<li><strong>Alchemy</strong>: Blockchain development platform</li>
+<li><strong>The Graph</strong>: Indexing and querying</li>
+<li><strong>Moralis</strong>: Web3 backend</li>
+<li><strong>Chainlink</strong>: Decentralized oracles</li>
+</ul>
+<h3 id="community-and-forums"><a class="header" href="#community-and-forums">Community and Forums</a></h3>
+<ul>
+<li><strong>Ethereum Stack Exchange</strong>: Q&amp;A</li>
+<li><strong>r/ethereum</strong>: Reddit community</li>
+<li><strong>Discord/Telegram</strong>: Project-specific channels</li>
+<li><strong>Twitter</strong>: Follow developers and projects</li>
+<li><strong>GitHub</strong>: Open source projects</li>
+</ul>
+<h3 id="token-standards-reference"><a class="header" href="#token-standards-reference">Token Standards Reference</a></h3>
+<h4 id="ethereum-erc"><a class="header" href="#ethereum-erc">Ethereum (ERC)</a></h4>
+<ul>
+<li><strong>ERC-20</strong>: Fungible tokens</li>
+<li><strong>ERC-721</strong>: Non-fungible tokens (NFTs)</li>
+<li><strong>ERC-1155</strong>: Multi-token standard</li>
+<li><strong>ERC-777</strong>: Advanced fungible token</li>
+<li><strong>ERC-4626</strong>: Tokenized vaults</li>
+</ul>
+<h4 id="other-platforms"><a class="header" href="#other-platforms">Other Platforms</a></h4>
+<ul>
+<li><strong>BEP-20</strong>: Binance Smart Chain tokens</li>
+<li><strong>SPL</strong>: Solana token standard</li>
+<li><strong>TRC-20</strong>: Tron tokens</li>
+</ul>
+<h3 id="development-checklist"><a class="header" href="#development-checklist">Development Checklist</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Set up development environment (Hardhat/Truffle)</li>
+<li><input disabled="" type="checkbox"> Install Web3 library (Ethers.js/Web3.js)</li>
+<li><input disabled="" type="checkbox"> Create wallet (MetaMask)</li>
+<li><input disabled="" type="checkbox"> Get testnet tokens from faucet</li>
+<li><input disabled="" type="checkbox"> Write smart contract</li>
+<li><input disabled="" type="checkbox"> Write tests (aim for 100% coverage)</li>
+<li><input disabled="" type="checkbox"> Run security analysis</li>
+<li><input disabled="" type="checkbox"> Deploy to testnet</li>
+<li><input disabled="" type="checkbox"> Test DApp on testnet</li>
+<li><input disabled="" type="checkbox"> Get security audit</li>
+<li><input disabled="" type="checkbox"> Deploy to mainnet</li>
+<li><input disabled="" type="checkbox"> Verify contract on explorer</li>
+<li><input disabled="" type="checkbox"> Monitor and maintain</li>
+</ul>
+<hr>
+<h2 id="glossary"><a class="header" href="#glossary">Glossary</a></h2>
+<ul>
+<li><strong>Block</strong>: Container of transactions</li>
+<li><strong>Blockchain</strong>: Chain of blocks linked cryptographically</li>
+<li><strong>Consensus</strong>: Agreement mechanism for network state</li>
+<li><strong>DApp</strong>: Decentralized application</li>
+<li><strong>Gas</strong>: Fee for transaction execution</li>
+<li><strong>Hash</strong>: Fixed-size output from hash function</li>
+<li><strong>Mining</strong>: Process of creating new blocks (PoW)</li>
+<li><strong>Node</strong>: Computer running blockchain software</li>
+<li><strong>Private Key</strong>: Secret key for signing transactions</li>
+<li><strong>Public Key</strong>: Derived from private key, shared publicly</li>
+<li><strong>Smart Contract</strong>: Self-executing code on blockchain</li>
+<li><strong>Staking</strong>: Locking tokens to participate in consensus (PoS)</li>
+<li><strong>Token</strong>: Digital asset on blockchain</li>
+<li><strong>Wallet</strong>: Software for managing keys and transactions</li>
+<li><strong>Wei</strong>: Smallest unit of Ether (10^-18 ETH)</li>
+</ul>
+<hr>
+<p><strong>Last Updated</strong>: 2025-01-19</p>
 
                     </main>
 
@@ -1604,7 +1560,7 @@ exclude = [
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../misc/operating_systems.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../misc/ble.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -1618,7 +1574,7 @@ exclude = [
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../misc/operating_systems.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../misc/ble.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

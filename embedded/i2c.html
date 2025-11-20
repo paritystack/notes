@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-843a62d1.js";
+            window.path_to_searchindex_js = "../searchindex-b2dc8d76.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f349561e.js"></script>
+        <script src="../toc-728509bc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -216,6 +216,601 @@
 </li>
 </ul>
 <p>These signals are essential for establishing communication, ensuring data integrity, and managing the flow of information between devices on the I2C bus.</p>
+<h2 id="protocol-details"><a class="header" href="#protocol-details">Protocol Details</a></h2>
+<h3 id="message-format"><a class="header" href="#message-format">Message Format</a></h3>
+<p>An I2C transaction consists of the following bit-level structure:</p>
+<pre><code>[START] [7-bit Address] [R/W] [ACK] [8-bit Data] [ACK] ... [8-bit Data] [ACK/NACK] [STOP]
+</code></pre>
+<p><strong>Breakdown:</strong></p>
+<ol>
+<li><strong>START Condition (S)</strong>: Master pulls SDA LOW while SCL is HIGH</li>
+<li><strong>Address Frame</strong>: 7 bits identifying the target slave device</li>
+<li><strong>R/W Bit</strong>: 0 = Write, 1 = Read</li>
+<li><strong>ACK Bit</strong>: Slave pulls SDA LOW if ready (ACK), or leaves HIGH (NACK)</li>
+<li><strong>Data Frames</strong>: 8 bits transmitted MSB first</li>
+<li><strong>STOP Condition (P)</strong>: Master releases SDA to HIGH while SCL is HIGH</li>
+</ol>
+<h3 id="start-and-stop-conditions"><a class="header" href="#start-and-stop-conditions">START and STOP Conditions</a></h3>
+<p><strong>START Condition:</strong></p>
+<ul>
+<li>Occurs when SDA transitions from HIGH to LOW while SCL is HIGH</li>
+<li>Indicates beginning of transmission</li>
+<li>Master device initiates this condition</li>
+<li>Can also be used as a <strong>Repeated START (Sr)</strong> to change direction without releasing the bus</li>
+</ul>
+<p><strong>STOP Condition:</strong></p>
+<ul>
+<li>Occurs when SDA transitions from LOW to HIGH while SCL is HIGH</li>
+<li>Indicates end of transmission</li>
+<li>Releases the bus for other masters</li>
+</ul>
+<p><strong>Timing Requirements:</strong></p>
+<ul>
+<li>Setup time (tSU;STA): Minimum time SDA must be HIGH before START (Standard: 4.7μs, Fast: 0.6μs)</li>
+<li>Hold time (tHD;STA): Minimum time SDA held LOW after SCL goes LOW (Standard: 4.0μs, Fast: 0.6μs)</li>
+<li>Setup time (tSU;STO): Minimum time before STOP (Standard: 4.0μs, Fast: 0.6μs)</li>
+</ul>
+<h3 id="data-transfer-sequence"><a class="header" href="#data-transfer-sequence">Data Transfer Sequence</a></h3>
+<p><strong>Write Transaction Example:</strong></p>
+<pre><code>S | Slave Addr (7-bit) | W(0) | ACK | Data Byte | ACK | Data Byte | ACK | P
+</code></pre>
+<p><strong>Read Transaction Example:</strong></p>
+<pre><code>S | Slave Addr (7-bit) | R(1) | ACK | Data Byte | ACK | Data Byte | NACK | P
+</code></pre>
+<p><strong>Combined Format (Write then Read):</strong></p>
+<pre><code>S | Slave Addr | W(0) | ACK | Register Addr | ACK | Sr | Slave Addr | R(1) | ACK | Data | NACK | P
+</code></pre>
+<h3 id="clock-stretching"><a class="header" href="#clock-stretching">Clock Stretching</a></h3>
+<p>Clock stretching allows slave devices to slow down the master if they need more time to process data:</p>
+<ul>
+<li><strong>Mechanism</strong>: Slave holds SCL line LOW</li>
+<li><strong>When used</strong>: During data processing, EEPROM write cycles, or ADC conversions</li>
+<li><strong>Master behavior</strong>: Must wait for slave to release SCL before continuing</li>
+<li><strong>Duration</strong>: No specified maximum; depends on slave implementation</li>
+<li><strong>Note</strong>: Some master implementations (like bit-banged I2C) may not support clock stretching</li>
+</ul>
+<p><strong>Example Scenario:</strong></p>
+<pre><code>Master writes data → Slave ACKs → Slave holds SCL LOW →
+Slave processes data → Slave releases SCL → Transfer continues
+</code></pre>
+<h3 id="timing-parameters"><a class="header" href="#timing-parameters">Timing Parameters</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Parameter</th><th>Standard Mode</th><th>Fast Mode</th><th>Fast Mode Plus</th><th>High-Speed Mode</th></tr>
+</thead>
+<tbody>
+<tr><td>Clock Frequency</td><td>100 kHz</td><td>400 kHz</td><td>1 MHz</td><td>3.4 MHz</td></tr>
+<tr><td>SCL Low Time</td><td>4.7 μs</td><td>1.3 μs</td><td>0.5 μs</td><td>0.16 μs</td></tr>
+<tr><td>SCL High Time</td><td>4.0 μs</td><td>0.6 μs</td><td>0.26 μs</td><td>0.06 μs</td></tr>
+<tr><td>SDA Setup Time</td><td>250 ns</td><td>100 ns</td><td>50 ns</td><td>10 ns</td></tr>
+<tr><td>SDA Hold Time</td><td>0 ns*</td><td>0 ns*</td><td>0 ns*</td><td>0 ns*</td></tr>
+<tr><td>Rise Time (max)</td><td>1000 ns</td><td>300 ns</td><td>120 ns</td><td>80 ns</td></tr>
+<tr><td>Fall Time (max)</td><td>300 ns</td><td>300 ns</td><td>120 ns</td><td>80 ns</td></tr>
+</tbody>
+</table>
+</div>
+<p>*Minimum hold time is device-dependent but guaranteed to be at least 0 ns after falling edge of SCL</p>
+<h2 id="electrical-characteristics"><a class="header" href="#electrical-characteristics">Electrical Characteristics</a></h2>
+<h3 id="open-drain-configuration"><a class="header" href="#open-drain-configuration">Open-Drain Configuration</a></h3>
+<p>I2C uses an <strong>open-drain</strong> (or open-collector) bus configuration:</p>
+<ul>
+<li><strong>Both SDA and SCL lines</strong> use open-drain drivers</li>
+<li>Devices can only pull lines LOW, not drive them HIGH</li>
+<li><strong>Pull-up resistors</strong> are required to pull lines to HIGH state</li>
+<li>This enables <strong>wired-AND</strong> logic: any device can pull the line LOW</li>
+</ul>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li>Prevents bus contention (no device fights to drive HIGH)</li>
+<li>Enables multi-master operation</li>
+<li>Allows different voltage levels (with level shifters)</li>
+</ul>
+<h3 id="pull-up-resistor-selection"><a class="header" href="#pull-up-resistor-selection">Pull-up Resistor Selection</a></h3>
+<p>Pull-up resistors are critical for proper I2C operation. The value must balance between:</p>
+<ul>
+<li><strong>Too low</strong>: Excessive current draw, potential VOL violations</li>
+<li><strong>Too high</strong>: Slow rise times, communication errors</li>
+</ul>
+<p><strong>Calculation Formula:</strong></p>
+<pre><code>Rp(min) = (VDD - VOL(max)) / IOL
+Rp(max) = tr / (0.8473 × Cb)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>VDD</code>: Supply voltage (e.g., 3.3V or 5V)</li>
+<li><code>VOL(max)</code>: Maximum LOW-level output voltage (typically 0.4V)</li>
+<li><code>IOL</code>: LOW-level output current (typically 3mA for standard mode)</li>
+<li><code>tr</code>: Maximum rise time (1000ns for standard, 300ns for fast mode)</li>
+<li><code>Cb</code>: Total bus capacitance (pF)</li>
+</ul>
+<p><strong>Practical Guidelines:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Bus Speed</th><th>Typical Resistor Value</th><th>Capacitance Load</th></tr>
+</thead>
+<tbody>
+<tr><td>Standard Mode (100 kHz)</td><td>4.7 kΩ - 10 kΩ</td><td>Up to 400 pF</td></tr>
+<tr><td>Fast Mode (400 kHz)</td><td>2.2 kΩ - 4.7 kΩ</td><td>Up to 400 pF</td></tr>
+<tr><td>Fast Mode Plus (1 MHz)</td><td>1 kΩ - 2.2 kΩ</td><td>Up to 550 pF</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Example Calculation (Standard Mode, 3.3V, 200pF bus):</strong></p>
+<pre><code>Rp(min) = (3.3V - 0.4V) / 3mA = 967Ω
+Rp(max) = 1000ns / (0.8473 × 200pF) = 5.9kΩ
+
+Choose: 4.7kΩ (within range)
+</code></pre>
+<h3 id="voltage-levels"><a class="header" href="#voltage-levels">Voltage Levels</a></h3>
+<p>I2C supports multiple voltage levels, but all devices on the bus must be compatible:</p>
+<p><strong>Standard Specifications (5V logic):</strong></p>
+<ul>
+<li>VIL (Input LOW): &lt; 1.5V</li>
+<li>VIH (Input HIGH): &gt; 3.0V</li>
+<li>VOL (Output LOW): &lt; 0.4V @ 3mA</li>
+</ul>
+<p><strong>3.3V Logic:</strong></p>
+<ul>
+<li>VIL (Input LOW): &lt; 0.99V (0.3 × VDD)</li>
+<li>VIH (Input HIGH): &gt; 2.31V (0.7 × VDD)</li>
+<li>VOL (Output LOW): &lt; 0.4V @ 3mA</li>
+</ul>
+<p><strong>Level Shifting:</strong>
+When mixing voltage levels (e.g., 5V master with 3.3V slaves):</p>
+<ul>
+<li>Use bidirectional level shifters (e.g., TXS0102, PCA9306)</li>
+<li>Or use separate pull-ups on each voltage domain with FET-based shifters</li>
+<li><strong>Never</strong> directly connect devices with different logic levels</li>
+</ul>
+<h3 id="bus-capacitance"><a class="header" href="#bus-capacitance">Bus Capacitance</a></h3>
+<p>Total bus capacitance affects maximum bus speed and required pull-up values:</p>
+<p><strong>Capacitance Sources:</strong></p>
+<ul>
+<li>Wire/trace capacitance: ~10-30 pF/meter</li>
+<li>Input capacitance per device: ~5-10 pF</li>
+<li>PCB pad capacitance: ~2-5 pF per connection</li>
+</ul>
+<p><strong>Maximum Capacitance:</strong></p>
+<ul>
+<li>Standard/Fast Mode: 400 pF</li>
+<li>Fast Mode Plus: 550 pF</li>
+<li>High-Speed Mode: 100 pF (on high-speed segment)</li>
+</ul>
+<p><strong>Reducing Capacitance:</strong></p>
+<ul>
+<li>Keep traces short</li>
+<li>Minimize number of devices on bus</li>
+<li>Use smaller pull-up resistors (within limits)</li>
+<li>Buffer long lines with I2C bus extenders/repeaters</li>
+</ul>
+<h3 id="signal-integrity"><a class="header" href="#signal-integrity">Signal Integrity</a></h3>
+<p><strong>Best Practices:</strong></p>
+<ol>
+<li><strong>Trace Routing</strong>: Keep SDA and SCL traces parallel and equal length</li>
+<li><strong>Grounding</strong>: Ensure solid ground plane for return current</li>
+<li><strong>Termination</strong>: Place pull-up resistors close to master or at midpoint of long buses</li>
+<li><strong>Filtering</strong>: Add small capacitors (100-330 pF) at master/slave inputs for noise immunity</li>
+<li><strong>EMI Protection</strong>: Use series resistors (100-300Ω) on long external cables</li>
+<li><strong>Isolation</strong>: Use I2C isolators (digital isolators) when crossing isolation barriers</li>
+</ol>
+<p><strong>Common Issues:</strong></p>
+<ul>
+<li><strong>Ringing</strong>: Reduce pull-up resistor value or add small capacitor</li>
+<li><strong>Slow rise times</strong>: Decrease pull-up resistor value</li>
+<li><strong>Ground bounce</strong>: Improve grounding, add decoupling capacitors</li>
+<li><strong>Crosstalk</strong>: Increase spacing between I2C and noisy signals</li>
+</ul>
+<h2 id="addressing-and-arbitration"><a class="header" href="#addressing-and-arbitration">Addressing and Arbitration</a></h2>
+<h3 id="7-bit-addressing"><a class="header" href="#7-bit-addressing">7-bit Addressing</a></h3>
+<p>The standard I2C addressing scheme uses <strong>7 bits</strong>, allowing 128 possible addresses (0x00 to 0x7F):</p>
+<p><strong>Address Frame Format:</strong></p>
+<pre><code>[A6 A5 A4 A3 A2 A1 A0 R/W]
+</code></pre>
+<ul>
+<li><strong>A6-A0</strong>: 7-bit device address</li>
+<li><strong>R/W</strong>: Read (1) or Write (0) bit</li>
+</ul>
+<p><strong>Example Addresses:</strong></p>
+<ul>
+<li><code>0x50</code>: EEPROM (AT24Cxx series)</li>
+<li><code>0x68</code>: MPU6050 accelerometer/gyroscope (default)</li>
+<li><code>0x76</code> or <code>0x77</code>: BME280 sensor</li>
+<li><code>0x3C</code> or <code>0x3D</code>: OLED displays (SSD1306)</li>
+</ul>
+<p><strong>Address Configuration:</strong>
+Many devices have configurable address bits (typically the 3 LSBs) set by hardware pins (A0, A1, A2):</p>
+<pre><code>Device Base: 0x50 (0b1010000)
+With A0=1:    0x51 (0b1010001)
+With A1=1:    0x52 (0b1010010)
+With A0=A1=1: 0x53 (0b1010011)
+</code></pre>
+<h3 id="10-bit-addressing"><a class="header" href="#10-bit-addressing">10-bit Addressing</a></h3>
+<p>For applications requiring more addresses, I2C supports <strong>10-bit addressing</strong>:</p>
+<p><strong>Address Frame Format:</strong></p>
+<pre><code>[11110 A9 A8 R/W] [ACK] [A7 A6 A5 A4 A3 A2 A1 A0] [ACK]
+</code></pre>
+<ul>
+<li>First byte: <code>11110</code> prefix + 2 MSBs of address + R/W</li>
+<li>Second byte: 8 LSBs of address</li>
+</ul>
+<p><strong>Addressing Range:</strong> 0x000 to 0x3FF (1024 addresses)</p>
+<p><strong>Example (Address 0x2A5):</strong></p>
+<pre><code>Binary: 10 1010 0101
+First byte:  11110 10 0 = 0xF4 (Write)
+Second byte: 1010 0101 = 0xA5
+</code></pre>
+<p><strong>Compatibility:</strong></p>
+<ul>
+<li>10-bit devices can coexist with 7-bit devices</li>
+<li>Masters must support 10-bit addressing to use 10-bit slaves</li>
+<li>Not all I2C implementations support 10-bit mode</li>
+</ul>
+<h3 id="reserved-addresses"><a class="header" href="#reserved-addresses">Reserved Addresses</a></h3>
+<p>Certain addresses are reserved for special functions:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Address</th><th>R/W</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>0x00</td><td>0</td><td>General Call Address (broadcast)</td></tr>
+<tr><td>0x00</td><td>1</td><td>START byte</td></tr>
+<tr><td>0x01</td><td>X</td><td>CBUS address</td></tr>
+<tr><td>0x02</td><td>X</td><td>Reserved for different bus format</td></tr>
+<tr><td>0x03</td><td>X</td><td>Reserved for future use</td></tr>
+<tr><td>0x04-0x07</td><td>X</td><td>Hs-mode master code</td></tr>
+<tr><td>0x78-0x7B</td><td>X</td><td>10-bit slave addressing</td></tr>
+<tr><td>0x7C-0x7F</td><td>X</td><td>Reserved for future use</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>General Call (0x00):</strong></p>
+<ul>
+<li>Broadcast to all devices</li>
+<li>Slaves can choose to respond or ignore</li>
+<li>Used for software reset or programming all devices simultaneously</li>
+</ul>
+<h3 id="multi-master-arbitration"><a class="header" href="#multi-master-arbitration">Multi-Master Arbitration</a></h3>
+<p>I2C supports multiple masters on the same bus through <strong>arbitration</strong>:</p>
+<p><strong>Arbitration Mechanism:</strong></p>
+<ol>
+<li><strong>Clock Synchronization</strong>: All masters monitor SCL; the slowest master wins</li>
+<li><strong>Data Arbitration</strong>: Masters compare SDA after each bit transmitted</li>
+<li><strong>Loss Detection</strong>: If a master writes ‘1’ but reads ‘0’, it loses and backs off</li>
+<li><strong>Winner Continues</strong>: The master that successfully transmits continues</li>
+</ol>
+<p><strong>Arbitration Example:</strong></p>
+<pre><code>Master A transmits: 1 0 1 0 1 1 0
+Master B transmits: 1 0 1 0 0 1 1
+                            ↑
+Master B loses (wrote 0, stays on bus)
+Master A loses (wrote 1, saw 0, backs off)
+Master B continues as bus master
+</code></pre>
+<p><strong>Key Points:</strong></p>
+<ul>
+<li>Arbitration occurs during address and data transmission</li>
+<li>Non-destructive: no data is lost</li>
+<li>Lower addresses have priority (more 0s)</li>
+<li>Masters re-attempt when bus becomes free</li>
+</ul>
+<h3 id="clock-synchronization"><a class="header" href="#clock-synchronization">Clock Synchronization</a></h3>
+<p>When multiple masters generate clock signals:</p>
+<p><strong>Synchronization Rules:</strong></p>
+<ol>
+<li>Masters count HIGH period only when SCL is actually HIGH</li>
+<li>SCL LOW period determined by master with longest LOW period</li>
+<li>SCL HIGH period determined by master with shortest HIGH period</li>
+</ol>
+<p><strong>Process:</strong></p>
+<pre><code>Master 1 pulls SCL LOW  ────┐        ┌────
+                            │        │
+Master 2 pulls SCL LOW  ────┘        └────
+                            ↑        ↑
+                        Both LOW  Both released
+</code></pre>
+<p>This ensures all masters stay synchronized even with different clock speeds.</p>
+<h2 id="programming-examples"><a class="header" href="#programming-examples">Programming Examples</a></h2>
+<h3 id="arduino-wire-library"><a class="header" href="#arduino-wire-library">Arduino (Wire Library)</a></h3>
+<p><strong>Master Write Example:</strong></p>
+<pre><code class="language-cpp">#include &lt;Wire.h&gt;
+
+#define SLAVE_ADDR 0x68  // MPU6050 address
+
+void setup() {
+  Wire.begin();        // Join I2C bus as master
+  Serial.begin(9600);
+
+  // Wake up MPU6050
+  Wire.beginTransmission(SLAVE_ADDR);
+  Wire.write(0x6B);    // PWR_MGMT_1 register
+  Wire.write(0);       // Set to 0 to wake up
+  Wire.endTransmission(true);
+}
+
+void loop() {
+  // Read accelerometer X-axis (registers 0x3B, 0x3C)
+  Wire.beginTransmission(SLAVE_ADDR);
+  Wire.write(0x3B);    // Starting register
+  Wire.endTransmission(false);  // Repeated START
+
+  Wire.requestFrom(SLAVE_ADDR, 2, true);  // Request 2 bytes
+
+  if (Wire.available() == 2) {
+    int16_t accelX = Wire.read() &lt;&lt; 8 | Wire.read();
+    Serial.print("Accel X: ");
+    Serial.println(accelX);
+  }
+
+  delay(1000);
+}
+</code></pre>
+<p><strong>Slave Device Example:</strong></p>
+<pre><code class="language-cpp">#include &lt;Wire.h&gt;
+
+#define SLAVE_ADDR 0x08
+
+volatile byte dataToSend = 42;
+
+void setup() {
+  Wire.begin(SLAVE_ADDR);     // Join as slave
+  Wire.onRequest(requestEvent);
+  Wire.onReceive(receiveEvent);
+  Serial.begin(9600);
+}
+
+void loop() {
+  delay(100);
+}
+
+// Called when master requests data
+void requestEvent() {
+  Wire.write(dataToSend);
+  Serial.println("Data sent to master");
+}
+
+// Called when master sends data
+void receiveEvent(int numBytes) {
+  while (Wire.available()) {
+    byte received = Wire.read();
+    Serial.print("Received: ");
+    Serial.println(received);
+  }
+}
+</code></pre>
+<h3 id="linux-i2c-tools"><a class="header" href="#linux-i2c-tools">Linux i2c-tools</a></h3>
+<p><strong>Detect I2C Devices:</strong></p>
+<pre><code class="language-bash"># Install tools
+sudo apt-get install i2c-tools
+
+# List I2C buses
+i2cdetect -l
+
+# Scan bus 1 for devices (shows addresses)
+i2cdetect -y 1
+</code></pre>
+<p><strong>Read/Write Operations:</strong></p>
+<pre><code class="language-bash"># Read byte from register 0x00 of device at 0x68 on bus 1
+i2cget -y 1 0x68 0x00 b
+
+# Write byte 0x01 to register 0x6B of device at 0x68
+i2cset -y 1 0x68 0x6B 0x01 b
+
+# Read 6 bytes starting from register 0x3B (block read)
+i2cget -y 1 0x68 0x3B i
+
+# Dump all registers of device at 0x68
+i2cdump -y 1 0x68 b
+</code></pre>
+<p><strong>C Programming with Linux i2c-dev:</strong></p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;linux/i2c-dev.h&gt;
+
+#define I2C_BUS "/dev/i2c-1"
+#define DEVICE_ADDR 0x68
+
+int main() {
+    int file;
+    char buffer[2];
+
+    // Open I2C bus
+    if ((file = open(I2C_BUS, O_RDWR)) &lt; 0) {
+        perror("Failed to open I2C bus");
+        return 1;
+    }
+
+    // Set slave address
+    if (ioctl(file, I2C_SLAVE, DEVICE_ADDR) &lt; 0) {
+        perror("Failed to acquire bus access");
+        return 1;
+    }
+
+    // Write to register 0x6B
+    buffer[0] = 0x6B;  // Register address
+    buffer[1] = 0x00;  // Data to write
+    if (write(file, buffer, 2) != 2) {
+        perror("Failed to write");
+        return 1;
+    }
+
+    // Read from register 0x3B
+    buffer[0] = 0x3B;
+    if (write(file, buffer, 1) != 1) {
+        perror("Failed to set register");
+        return 1;
+    }
+
+    if (read(file, buffer, 1) != 1) {
+        perror("Failed to read");
+        return 1;
+    }
+
+    printf("Read value: 0x%02X\n", buffer[0]);
+
+    close(file);
+    return 0;
+}
+</code></pre>
+<h3 id="stm32-hal"><a class="header" href="#stm32-hal">STM32 HAL</a></h3>
+<p><strong>I2C Configuration (CubeMX):</strong></p>
+<pre><code class="language-c">// In main.c (generated by CubeMX)
+hi2c1.Instance = I2C1;
+hi2c1.Init.ClockSpeed = 100000;      // 100 kHz
+hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+hi2c1.Init.OwnAddress1 = 0;
+hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+HAL_I2C_Init(&amp;hi2c1);
+</code></pre>
+<p><strong>Read/Write Operations:</strong></p>
+<pre><code class="language-c">#define MPU6050_ADDR (0x68 &lt;&lt; 1)  // Shifted for HAL
+#define PWR_MGMT_1   0x6B
+#define ACCEL_XOUT_H 0x3B
+
+uint8_t data;
+uint8_t buffer[6];
+HAL_StatusTypeDef status;
+
+// Write single byte to register
+data = 0x00;
+status = HAL_I2C_Mem_Write(&amp;hi2c1, MPU6050_ADDR, PWR_MGMT_1,
+                           I2C_MEMADD_SIZE_8BIT, &amp;data, 1, HAL_MAX_DELAY);
+
+if (status != HAL_OK) {
+    // Handle error
+}
+
+// Read 6 bytes from register
+status = HAL_I2C_Mem_Read(&amp;hi2c1, MPU6050_ADDR, ACCEL_XOUT_H,
+                          I2C_MEMADD_SIZE_8BIT, buffer, 6, HAL_MAX_DELAY);
+
+if (status == HAL_OK) {
+    int16_t accelX = (buffer[0] &lt;&lt; 8) | buffer[1];
+    int16_t accelY = (buffer[2] &lt;&lt; 8) | buffer[3];
+    int16_t accelZ = (buffer[4] &lt;&lt; 8) | buffer[5];
+}
+
+// Master transmit (no register address)
+uint8_t txData[] = {0x01, 0x02, 0x03};
+HAL_I2C_Master_Transmit(&amp;hi2c1, MPU6050_ADDR, txData, 3, HAL_MAX_DELAY);
+
+// Master receive
+uint8_t rxData[4];
+HAL_I2C_Master_Receive(&amp;hi2c1, MPU6050_ADDR, rxData, 4, HAL_MAX_DELAY);
+</code></pre>
+<h3 id="raspberry-pi-python-smbus"><a class="header" href="#raspberry-pi-python-smbus">Raspberry Pi (Python smbus)</a></h3>
+<p><strong>Installation:</strong></p>
+<pre><code class="language-bash"># Enable I2C interface
+sudo raspi-config  # Interface Options -&gt; I2C -&gt; Enable
+
+# Install Python library
+sudo apt-get install python3-smbus
+</code></pre>
+<p><strong>Python Code:</strong></p>
+<pre><code class="language-python">import smbus
+import time
+
+# Create I2C bus (1 for RPi 3/4, 0 for older models)
+bus = smbus.SMBus(1)
+
+# MPU6050 address
+MPU6050_ADDR = 0x68
+
+# Registers
+PWR_MGMT_1 = 0x6B
+ACCEL_XOUT_H = 0x3B
+
+# Wake up MPU6050
+bus.write_byte_data(MPU6050_ADDR, PWR_MGMT_1, 0)
+time.sleep(0.1)
+
+# Read accelerometer data
+def read_accel():
+    # Read 6 bytes starting from ACCEL_XOUT_H
+    data = bus.read_i2c_block_data(MPU6050_ADDR, ACCEL_XOUT_H, 6)
+
+    # Convert to 16-bit signed values
+    accel_x = (data[0] &lt;&lt; 8) | data[1]
+    accel_y = (data[2] &lt;&lt; 8) | data[3]
+    accel_z = (data[4] &lt;&lt; 8) | data[5]
+
+    # Convert to signed
+    if accel_x &gt; 32767:
+        accel_x -= 65536
+    if accel_y &gt; 32767:
+        accel_y -= 65536
+    if accel_z &gt; 32767:
+        accel_z -= 65536
+
+    return accel_x, accel_y, accel_z
+
+# Main loop
+try:
+    while True:
+        x, y, z = read_accel()
+        print(f"Accel X: {x:6d}  Y: {y:6d}  Z: {z:6d}")
+        time.sleep(0.5)
+
+except KeyboardInterrupt:
+    print("\nExiting...")
+    bus.close()
+</code></pre>
+<p><strong>Advanced Example (BME280 Sensor):</strong></p>
+<pre><code class="language-python">import smbus
+import time
+
+bus = smbus.SMBus(1)
+BME280_ADDR = 0x76
+
+# BME280 registers
+REG_ID = 0xD0
+REG_CTRL_MEAS = 0xF4
+REG_TEMP_MSB = 0xFA
+
+# Check device ID
+chip_id = bus.read_byte_data(BME280_ADDR, REG_ID)
+print(f"Chip ID: 0x{chip_id:02X} (should be 0x60)")
+
+# Configure sensor: normal mode, temp/pressure oversampling x1
+bus.write_byte_data(BME280_ADDR, REG_CTRL_MEAS, 0x27)
+
+# Read temperature (raw)
+def read_temperature():
+    data = bus.read_i2c_block_data(BME280_ADDR, REG_TEMP_MSB, 3)
+    temp_raw = (data[0] &lt;&lt; 12) | (data[1] &lt;&lt; 4) | (data[2] &gt;&gt; 4)
+    return temp_raw
+
+while True:
+    temp = read_temperature()
+    print(f"Raw temperature: {temp}")
+    time.sleep(1)
+</code></pre>
+<p><strong>Scanning for Devices:</strong></p>
+<pre><code class="language-python">import smbus
+
+bus = smbus.SMBus(1)
+
+print("Scanning I2C bus...")
+devices = []
+
+for addr in range(0x03, 0x78):  # Valid 7-bit addresses
+    try:
+        bus.read_byte(addr)
+        devices.append(addr)
+        print(f"Found device at 0x{addr:02X}")
+    except:
+        pass
+
+print(f"\nTotal devices found: {len(devices)}")
+bus.close()
+</code></pre>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
 <p>I2C is a versatile and efficient communication protocol that is essential in embedded systems and electronic devices. Its simplicity and flexibility make it a popular choice for connecting various components in a wide range of applications.</p>
 

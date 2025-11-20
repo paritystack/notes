@@ -9,6 +9,7 @@
     - [Git Commands](git/commands.md)
     - [Git Internals](git/internals.md)
     - [Github](git/github.md)
+    - [Git Config](git/git_config.md)
     - [Repo](git/repo.md)
 
 - [Programming Languages](programming/README.md)
@@ -47,7 +48,6 @@
     - [systemd](linux/systemd.md)
     - [sysctl](linux/sysctl.md)
     - [sysfs](linux/sysfs.md)
-    - [Rtp](networking/rtp.md)
     - [Filesystems](linux/filesystems.md)
     - [Namespace](linux/namespace.md)
     - [Selinux](linux/selinux.md)
@@ -60,6 +60,7 @@
     - [Binder](android/binder.md)
     - [adb](android/adb.md)
     - [Platform Dev](android/platform_dev.md)
+    - [Jetpack](android/jetpack.md)
 
 - [Data Structures](data_structures/README.md)
     - [Arrays](data_structures/arrays.md)
@@ -221,6 +222,7 @@
     - [UPnP](networking/upnp.md)
     - [WebSocket](networking/websocket.md)
     - [WebRTC](networking/webrtc.md)
+    - [Rtp](networking/rtp.md)
 
 - [Finance](finance/README.md)
     - [General](finance/general.md)
@@ -311,10 +313,12 @@
     - [Matplotlib](misc/matplotlib.md)
     - [Pandas](misc/pandas.md)
     - [Blockchain](misc/blockchain.md)
+    - [Bluetooth BLE](misc/ble.md)
     - [Operating Systems](misc/operating_systems.md)
     - [Computer Graphics](misc/computer_graphics.md)
     - [Uboot](misc/uboot.md)
     - [Ubuntu](misc/ubuntu.md)
+    - [Solana](misc/solana.md)
 
 - [RTOS](rtos/README.md)
     - [FreeRTOS](rtos/freertos.md)

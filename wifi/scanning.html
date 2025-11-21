@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-93581825.js";
+            window.path_to_searchindex_js = "../searchindex-56f85b31.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -200,23 +200,192 @@ The device compiles a list of available networks based on the received probe res
 The user or device selects a network from the list to connect to. The selection can be based on various factors, such as signal strength, network name, or security requirements.</p>
 </li>
 </ol>
+<h3 id="scanning-modes-and-technical-details"><a class="header" href="#scanning-modes-and-technical-details">Scanning Modes and Technical Details</a></h3>
+<h4 id="active-vs-passive-scanning"><a class="header" href="#active-vs-passive-scanning">Active vs. Passive Scanning</a></h4>
+<ul>
+<li>
+<p><strong>Active Scanning</strong>: The device actively sends probe request frames on each channel and waits for probe responses from APs. This method is faster and more reliable but reveals the device’s presence and can expose privacy information through probe requests.</p>
+</li>
+<li>
+<p><strong>Passive Scanning</strong>: The device listens for beacon frames broadcasted by APs without sending any probe requests. This method is slower but more stealthy and preserves privacy. Passive scanning is commonly used in monitoring mode.</p>
+</li>
+</ul>
+<h4 id="frequency-bands-and-channels"><a class="header" href="#frequency-bands-and-channels">Frequency Bands and Channels</a></h4>
+<p>Modern Wi-Fi operates on multiple frequency bands:</p>
+<ul>
+<li><strong>2.4 GHz Band</strong>: Channels 1-14 (channel availability varies by country). More crowded but better range and wall penetration.</li>
+<li><strong>5 GHz Band</strong>: Multiple channels (36, 40, 44, 48, 149, 153, 157, 161, 165, etc.). Less congested with higher throughput but shorter range.</li>
+<li><strong>6 GHz Band (Wi-Fi 6E)</strong>: Channels from 1-233. Newest band with the most available spectrum and least interference.</li>
+</ul>
+<p>During scanning, the device typically hops through channels in sequence to discover all available networks across different bands.</p>
+<h4 id="scan-types"><a class="header" href="#scan-types">Scan Types</a></h4>
+<ul>
+<li><strong>Broadcast Probe Request</strong>: Sent with an empty SSID field to discover all networks within range.</li>
+<li><strong>Directed Probe Request</strong>: Sent with a specific SSID to discover a particular network. Used when connecting to known networks or hidden SSIDs.</li>
+</ul>
 <h3 id="tools-for-wi-fi-scanning"><a class="header" href="#tools-for-wi-fi-scanning">Tools for Wi-Fi Scanning</a></h3>
-<p>Several tools and utilities can be used for Wi-Fi scanning, including:</p>
+<h4 id="gui-tools"><a class="header" href="#gui-tools">GUI Tools</a></h4>
 <ul>
 <li><strong>Wireshark</strong>: A network protocol analyzer that can capture and analyze Wi-Fi packets, including probe requests, probe responses, and beacon frames.</li>
 <li><strong>NetSpot</strong>: A Wi-Fi survey and analysis tool that provides detailed information about available networks, including signal strength, channel usage, and security settings.</li>
 <li><strong>inSSIDer</strong>: A Wi-Fi scanner that displays information about nearby networks, such as SSID, signal strength, channel, and security type.</li>
 <li><strong>Acrylic Wi-Fi</strong>: A Wi-Fi scanner and analyzer that provides real-time information about available networks, including signal strength, channel usage, and network performance metrics.</li>
+<li><strong>WiFi Analyzer</strong> (Mobile): Popular Android app for visualizing Wi-Fi networks, signal strength, and channel overlap.</li>
+<li><strong>Network Analyzer</strong> (Mobile): iOS and Android app for scanning and analyzing Wi-Fi networks.</li>
 </ul>
+<h4 id="command-line-tools"><a class="header" href="#command-line-tools">Command-Line Tools</a></h4>
+<ul>
+<li><strong>iwlist</strong>: Legacy Linux tool for scanning wireless networks and displaying detailed information about available APs.</li>
+<li><strong>iw</strong>: Modern replacement for iwlist with more features and better support for newer Wi-Fi standards.</li>
+<li><strong>nmcli</strong>: NetworkManager command-line interface that can scan and manage Wi-Fi connections on Linux systems.</li>
+<li><strong>wpa_cli</strong>: Command-line interface for wpa_supplicant, useful for scanning and connecting to networks.</li>
+<li><strong>airodump-ng</strong>: Part of the Aircrack-ng suite, used for packet capture and network analysis in monitor mode.</li>
+<li><strong>netsh</strong> (Windows): Built-in Windows command for managing and scanning wireless networks.</li>
+</ul>
+<h4 id="programming-libraries-and-frameworks"><a class="header" href="#programming-libraries-and-frameworks">Programming Libraries and Frameworks</a></h4>
+<ul>
+<li><strong>Scapy</strong> (Python): Powerful packet manipulation library that can be used to craft custom scanning tools and analyze Wi-Fi traffic.</li>
+<li><strong>pywifi</strong> (Python): Simple Python library for controlling Wi-Fi interfaces and scanning networks.</li>
+<li><strong>CoreWLAN</strong> (macOS): Native macOS framework for Wi-Fi scanning and management.</li>
+<li><strong>WlanAPI</strong> (Windows): Native Windows API for wireless network scanning and management.</li>
+</ul>
+<h3 id="code-examples"><a class="header" href="#code-examples">Code Examples</a></h3>
+<h4 id="linux---using-iwlist"><a class="header" href="#linux---using-iwlist">Linux - Using iwlist</a></h4>
+<pre><code class="language-bash"># Scan for available networks (requires root/sudo)
+sudo iwlist wlan0 scan
+
+# Scan and filter for specific information
+sudo iwlist wlan0 scan | grep -E "ESSID|Quality|Encryption"
+
+# Get brief scan results
+sudo iwlist wlan0 scan | grep ESSID
+</code></pre>
+<h4 id="linux---using-iw"><a class="header" href="#linux---using-iw">Linux - Using iw</a></h4>
+<pre><code class="language-bash"># Scan for networks (modern tool)
+sudo iw dev wlan0 scan
+
+# Scan and show only SSIDs and signal strength
+sudo iw dev wlan0 scan | grep -E "SSID|signal"
+
+# Scan specific frequency band (5GHz)
+sudo iw dev wlan0 scan freq 5180 5240 5320
+</code></pre>
+<h4 id="linux---using-nmcli"><a class="header" href="#linux---using-nmcli">Linux - Using nmcli</a></h4>
+<pre><code class="language-bash"># Scan and list all available networks
+nmcli device wifi list
+
+# Rescan for networks
+nmcli device wifi rescan
+
+# List with specific columns
+nmcli -f SSID,SIGNAL,SECURITY device wifi list
+
+# Connect to a network
+nmcli device wifi connect "SSID_Name" password "your_password"
+</code></pre>
+<h4 id="windows---using-netsh"><a class="header" href="#windows---using-netsh">Windows - Using netsh</a></h4>
+<pre><code class="language-cmd"># Display available wireless networks
+netsh wlan show networks
+
+# Show detailed network information including security type
+netsh wlan show networks mode=bssid
+
+# Show wireless interface information
+netsh wlan show interfaces
+</code></pre>
+<h4 id="python---using-scapy"><a class="header" href="#python---using-scapy">Python - Using Scapy</a></h4>
+<pre><code class="language-python">from scapy.all import *
+
+def scan_wifi():
+    """Scan for Wi-Fi networks using Scapy"""
+    # Sniff for beacon frames
+    packets = sniff(iface="wlan0", count=100,
+                   filter="type mgt subtype beacon")
+
+    networks = set()
+    for packet in packets:
+        if packet.haslayer(Dot11Beacon):
+            # Extract SSID
+            ssid = packet[Dot11Elt].info.decode('utf-8', errors='ignore')
+            # Extract MAC address
+            bssid = packet[Dot11].addr2
+            # Extract channel
+            channel = int(ord(packet[Dot11Elt:3].info))
+
+            networks.add((ssid, bssid, channel))
+
+    for ssid, bssid, channel in sorted(networks):
+        print(f"SSID: {ssid:30} BSSID: {bssid} Channel: {channel}")
+
+# Note: Requires monitor mode
+# sudo ip link set wlan0 down
+# sudo iw wlan0 set monitor none
+# sudo ip link set wlan0 up
+</code></pre>
+<h4 id="shell-script---automated-scanning"><a class="header" href="#shell-script---automated-scanning">Shell Script - Automated Scanning</a></h4>
+<pre><code class="language-bash">#!/bin/bash
+# wifi_scanner.sh - Automated Wi-Fi scanning script
+
+INTERFACE="wlan0"
+OUTPUT_FILE="wifi_scan_$(date +%Y%m%d_%H%M%S).txt"
+
+echo "Wi-Fi Scan Report - $(date)" &gt; "$OUTPUT_FILE"
+echo "================================" &gt;&gt; "$OUTPUT_FILE"
+echo "" &gt;&gt; "$OUTPUT_FILE"
+
+# Perform scan
+nmcli -f SSID,SIGNAL,CHAN,SECURITY device wifi list | while read -r line; do
+    echo "$line" &gt;&gt; "$OUTPUT_FILE"
+done
+
+echo "" &gt;&gt; "$OUTPUT_FILE"
+echo "Scan completed. Results saved to $OUTPUT_FILE"
+cat "$OUTPUT_FILE"
+</code></pre>
+<h3 id="security-considerations"><a class="header" href="#security-considerations">Security Considerations</a></h3>
+<p>Wi-Fi scanning involves several important security aspects that users and administrators should be aware of:</p>
+<h4 id="privacy-concerns"><a class="header" href="#privacy-concerns">Privacy Concerns</a></h4>
+<ul>
+<li><strong>Probe Request Leakage</strong>: When devices perform active scanning, they broadcast probe requests that may contain previously connected SSIDs, potentially revealing location history and network associations.</li>
+<li><strong>MAC Address Tracking</strong>: Each probe request contains the device’s MAC address, which can be used to track device movement across different locations.</li>
+<li><strong>MAC Randomization</strong>: Modern devices implement MAC address randomization during scanning to enhance privacy by using random MAC addresses instead of the device’s true hardware address.</li>
+</ul>
+<h4 id="security-protocols-detection"><a class="header" href="#security-protocols-detection">Security Protocols Detection</a></h4>
+<p>When scanning, it’s important to identify the security protocols used by networks:</p>
+<ul>
+<li><strong>Open Networks</strong>: No encryption - all traffic is sent in plaintext and can be easily intercepted.</li>
+<li><strong>WEP (Wired Equivalent Privacy)</strong>: Deprecated and easily crackable - should never be used.</li>
+<li><strong>WPA/WPA2-PSK</strong>: Common personal network security using pre-shared keys. WPA2 is secure with strong passwords.</li>
+<li><strong>WPA2-Enterprise</strong>: Uses 802.1X authentication with RADIUS servers - more secure for organizational use.</li>
+<li><strong>WPA3</strong>: Latest security protocol with improved encryption (SAE) and protection against offline dictionary attacks.</li>
+<li><strong>WPA3-Enterprise</strong>: Enhanced security for enterprise networks with 192-bit encryption option.</li>
+</ul>
+<h4 id="rogue-access-point-detection"><a class="header" href="#rogue-access-point-detection">Rogue Access Point Detection</a></h4>
+<p>Scanning can help identify rogue or malicious access points:</p>
+<ul>
+<li><strong>Evil Twin Attacks</strong>: Malicious APs mimicking legitimate networks with the same SSID.</li>
+<li><strong>Unauthorized APs</strong>: Devices connected to the network creating unauthorized wireless access points.</li>
+<li><strong>Detection Methods</strong>: Regular scanning to maintain an inventory of authorized APs and identify unknown devices.</li>
+</ul>
+<h4 id="best-practices-for-secure-scanning"><a class="header" href="#best-practices-for-secure-scanning">Best Practices for Secure Scanning</a></h4>
+<ol>
+<li><strong>Use Passive Scanning</strong> when possible to minimize information disclosure.</li>
+<li><strong>Enable MAC Randomization</strong> on your devices to protect against tracking.</li>
+<li><strong>Disable Auto-Connect</strong> to prevent automatic connection to potentially malicious networks.</li>
+<li><strong>Monitor for Rogue APs</strong> regularly in enterprise environments.</li>
+<li><strong>Verify Network Authenticity</strong> before connecting, especially in public spaces.</li>
+<li><strong>Use VPN</strong> when connecting to untrusted networks, even after careful scanning.</li>
+</ol>
 <h3 id="importance-of-wi-fi-scanning"><a class="header" href="#importance-of-wi-fi-scanning">Importance of Wi-Fi Scanning</a></h3>
 <p>Wi-Fi scanning is crucial for several reasons:</p>
 <ul>
 <li><strong>Network Discovery</strong>: It allows users to discover available networks and choose the best one to connect to.</li>
 <li><strong>Troubleshooting</strong>: It helps identify connectivity issues, such as weak signals, interference, or misconfigured settings.</li>
 <li><strong>Optimization</strong>: It provides insights into network performance and helps optimize the configuration, such as selecting the best channel to minimize interference.</li>
-<li><strong>Security</strong>: It helps identify unauthorized or rogue access points that may pose a security threat to the network.</li>
+<li><strong>Security Auditing</strong>: It helps identify unauthorized or rogue access points, detect security protocol weaknesses, and ensure network infrastructure compliance.</li>
+<li><strong>Site Surveys</strong>: Essential for planning Wi-Fi deployments, identifying coverage gaps, and optimizing AP placement.</li>
 </ul>
-<p>By understanding and utilizing Wi-Fi scanning techniques, users and network administrators can ensure reliable and efficient wireless connectivity.</p>
+<p>By understanding and utilizing Wi-Fi scanning techniques, users and network administrators can ensure reliable, efficient, and secure wireless connectivity.</p>
 
                     </main>
 

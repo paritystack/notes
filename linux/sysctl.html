@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-7b268d28.js";
+            window.path_to_searchindex_js = "../searchindex-78b9311f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -177,63 +177,342 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="sysctl"><a class="header" href="#sysctl">sysctl</a></h1>
-<p>sysctl is a tool for examining and changing kernel parameters at runtime. It’s used to modify kernel behavior without rebooting.</p>
+<p>sysctl is a powerful tool for examining and changing kernel parameters at runtime. It allows system administrators to modify kernel behavior without rebooting, making it essential for performance tuning, security hardening, and troubleshooting.</p>
 <h2 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h2>
 <pre><code class="language-bash"># List all parameters
 sysctl -a
 
+# Search for specific parameters
+sysctl -a | grep net.ipv4
+
 # Get specific parameter
 sysctl net.ipv4.ip_forward
 
-# Set parameter (temporary)
+# Set parameter (temporary - lost on reboot)
 sudo sysctl -w net.ipv4.ip_forward=1
 
 # Load from configuration file
 sudo sysctl -p /etc/sysctl.conf
+
+# Load from specific file
+sudo sysctl -p /etc/sysctl.d/99-custom.conf
+
+# Apply all files from sysctl.d
+sudo sysctl --system
 </code></pre>
 <h2 id="common-parameters"><a class="header" href="#common-parameters">Common Parameters</a></h2>
-<pre><code class="language-bash"># Network settings
-net.ipv4.ip_forward = 1                    # Enable IP forwarding
-net.ipv4.tcp_syncookies = 1                # SYN flood protection
-net.core.somaxconn = 1024                  # Connection backlog
-net.ipv4.tcp_max_syn_backlog = 2048        # SYN backlog
+<h3 id="network-settings"><a class="header" href="#network-settings">Network Settings</a></h3>
+<pre><code class="language-bash"># IP Forwarding - enables routing between network interfaces
+net.ipv4.ip_forward = 1                    # IPv4 forwarding (required for routers/NAT)
+net.ipv6.conf.all.forwarding = 1           # IPv6 forwarding
 
-# Memory settings
-vm.swappiness = 10                         # Swap preference (0-100)
-vm.dirty_ratio = 15                        # Dirty page threshold
-vm.overcommit_memory = 1                   # Memory overcommit
+# TCP Security and Performance
+net.ipv4.tcp_syncookies = 1                # SYN flood protection (prevents DoS)
+net.ipv4.tcp_max_syn_backlog = 2048        # SYN backlog queue size
+net.core.somaxconn = 1024                  # Max connection backlog (increase for busy servers)
+net.core.netdev_max_backlog = 5000         # Packet queue size before kernel processing
 
-# File system
-fs.file-max = 65536                        # Max open files
-fs.inotify.max_user_watches = 524288       # inotify watches
+# TCP Window Scaling - improves performance on high-latency networks
+net.ipv4.tcp_window_scaling = 1            # Enable window scaling
+net.ipv4.tcp_timestamps = 1                # TCP timestamps (needed for window scaling)
 
-# Kernel settings
-kernel.sysrq = 1                           # Enable SysRq key
-kernel.panic = 10                          # Reboot after panic (seconds)
+# Connection Tracking
+net.ipv4.tcp_fin_timeout = 30              # Time to wait for final FIN (reduce for faster cleanup)
+net.ipv4.tcp_keepalive_time = 300          # Time before sending keepalive probes (seconds)
+net.ipv4.tcp_keepalive_probes = 5          # Number of keepalive probes
+net.ipv4.tcp_keepalive_intvl = 15          # Interval between keepalive probes
+
+# Network Buffer Sizes
+net.core.rmem_default = 262144             # Default receive buffer size
+net.core.wmem_default = 262144             # Default send buffer size
+net.core.rmem_max = 16777216               # Maximum receive buffer size
+net.core.wmem_max = 16777216               # Maximum send buffer size
+</code></pre>
+<h3 id="memory-and-vm-settings"><a class="header" href="#memory-and-vm-settings">Memory and VM Settings</a></h3>
+<pre><code class="language-bash"># Swappiness - controls swap usage preference (0-100)
+vm.swappiness = 10                         # Low value: prefer RAM (good for databases)
+                                           # High value (60): balanced (default)
+                                           # Very high (100): aggressive swapping
+
+# Dirty Pages - controls when data is written to disk
+vm.dirty_ratio = 15                        # % of memory that can be dirty before sync writes
+vm.dirty_background_ratio = 5              # % of memory before background writes begin
+vm.dirty_expire_centisecs = 3000           # How old data must be to be written (1/100s)
+vm.dirty_writeback_centisecs = 500         # How often to wake up write daemon
+
+# Memory Overcommit - controls memory allocation behavior
+vm.overcommit_memory = 0                   # 0: heuristic (default)
+                                           # 1: always allow (can cause OOM)
+                                           # 2: never overcommit (strict)
+vm.overcommit_ratio = 50                   # % of RAM to allow when overcommit_memory=2
+
+# Memory Management
+vm.min_free_kbytes = 65536                 # Minimum free memory to maintain (KB)
+vm.vfs_cache_pressure = 100                # Tendency to reclaim inode/dentry cache (default 100)
+</code></pre>
+<h3 id="file-system-settings"><a class="header" href="#file-system-settings">File System Settings</a></h3>
+<pre><code class="language-bash"># File Descriptors
+fs.file-max = 65536                        # Max open files system-wide
+fs.nr_open = 1048576                       # Max files a process can open
+
+# Inotify - file system monitoring limits
+fs.inotify.max_user_watches = 524288       # Max watched files per user (increase for IDEs)
+fs.inotify.max_user_instances = 256        # Max inotify instances per user
+fs.inotify.max_queued_events = 16384       # Max queued events
+
+# AIO - asynchronous I/O
+fs.aio-max-nr = 1048576                    # Max concurrent async I/O operations
+</code></pre>
+<h3 id="kernel-settings"><a class="header" href="#kernel-settings">Kernel Settings</a></h3>
+<pre><code class="language-bash"># SysRq Key - emergency kernel commands (Alt+SysRq+command)
+kernel.sysrq = 1                           # 1: enable all, 0: disable
+                                           # For specific: 244 (common safe subset)
+
+# Panic Behavior
+kernel.panic = 10                          # Reboot after kernel panic (seconds)
+kernel.panic_on_oops = 1                   # Treat oops as panic (safer for production)
+
+# Process Limits
+kernel.pid_max = 65536                     # Maximum process ID value
+kernel.threads-max = 65536                 # Maximum number of threads
+
+# Shared Memory
+kernel.shmmax = 68719476736                # Max shared memory segment size (bytes)
+kernel.shmall = 4294967296                 # Total shared memory pages available
+</code></pre>
+<h2 id="security-hardening"><a class="header" href="#security-hardening">Security Hardening</a></h2>
+<pre><code class="language-bash"># Network Security - IP Spoofing Protection
+net.ipv4.conf.all.rp_filter = 1            # Enable source address verification
+net.ipv4.conf.default.rp_filter = 1        # Apply to new interfaces
+
+# ICMP Settings - Protection against ICMP attacks
+net.ipv4.icmp_echo_ignore_all = 0          # 0: respond to ping, 1: ignore ping
+net.ipv4.icmp_echo_ignore_broadcasts = 1   # Ignore broadcast pings (smurf attack)
+net.ipv4.icmp_ignore_bogus_error_responses = 1  # Ignore malformed ICMP errors
+
+# IP Redirect Protection - prevents MITM attacks
+net.ipv4.conf.all.accept_redirects = 0     # Don't accept ICMP redirects
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.secure_redirects = 0     # Don't accept secure redirects
+net.ipv4.conf.default.secure_redirects = 0
+net.ipv4.conf.all.send_redirects = 0       # Don't send redirects
+net.ipv4.conf.default.send_redirects = 0
+
+# IPv6 Security
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+net.ipv6.conf.all.accept_ra = 0            # Don't accept router advertisements
+net.ipv6.conf.default.accept_ra = 0
+
+# Source Routing - disable to prevent packet injection
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+
+# Log Suspicious Packets
+net.ipv4.conf.all.log_martians = 1         # Log packets with impossible addresses
+net.ipv4.conf.default.log_martians = 1
+
+# Kernel Security - ASLR and Core Dumps
+kernel.randomize_va_space = 2              # Full ASLR (address space layout randomization)
+                                           # 0: disabled, 1: partial, 2: full
+kernel.core_uses_pid = 1                   # Append PID to core dump filename
+kernel.core_pattern = |/bin/false          # Disable core dumps for security
+# Or specify location: /var/crash/core-%e-%p-%t
+
+# Restrict dmesg Access - hide kernel logs from non-root
+kernel.dmesg_restrict = 1                  # 1: only CAP_SYSLOG can read
+
+# Restrict kernel pointers - prevent information leaks
+kernel.kptr_restrict = 2                   # 0: visible, 1: root only, 2: always hidden
+
+# Restrict perf events - prevent performance monitoring exploits
+kernel.perf_event_paranoid = 3             # 3: restricted to root, 2: normal users limited
+
+# Yama Security Module - ptrace restrictions
+kernel.yama.ptrace_scope = 1               # 0: disabled, 1: restricted, 2: admin only, 3: disabled
 </code></pre>
 <h2 id="persistent-configuration"><a class="header" href="#persistent-configuration">Persistent Configuration</a></h2>
-<pre><code class="language-bash"># /etc/sysctl.conf or /etc/sysctl.d/99-custom.conf
+<p>Sysctl changes made with <code>sysctl -w</code> are temporary and lost after reboot. For persistent configuration:</p>
+<pre><code class="language-bash"># System-wide configuration
+# /etc/sysctl.conf (legacy)
 net.ipv4.ip_forward = 1
 vm.swappiness = 10
 fs.file-max = 100000
 
+# Modular configuration (preferred)
+# /etc/sysctl.d/99-custom.conf
+# Files are processed in lexical order, higher numbers = higher priority
+net.ipv4.ip_forward = 1
+vm.swappiness = 10
+
 # Apply configuration
-sudo sysctl -p
+sudo sysctl -p                             # Load /etc/sysctl.conf
+sudo sysctl -p /etc/sysctl.d/99-custom.conf  # Load specific file
+sudo sysctl --system                       # Load all config files
+</code></pre>
+<h3 id="configuration-file-locations-loaded-in-order"><a class="header" href="#configuration-file-locations-loaded-in-order">Configuration File Locations (loaded in order)</a></h3>
+<pre><code>/etc/sysctl.d/*.conf
+/run/sysctl.d/*.conf
+/usr/local/lib/sysctl.d/*.conf
+/usr/lib/sysctl.d/*.conf
+/lib/sysctl.d/*.conf
+/etc/sysctl.conf
 </code></pre>
 <h2 id="performance-tuning"><a class="header" href="#performance-tuning">Performance Tuning</a></h2>
-<pre><code class="language-bash"># High-performance networking
-net.core.rmem_max = 134217728
-net.core.wmem_max = 134217728
-net.ipv4.tcp_rmem = 4096 87380 67108864
-net.ipv4.tcp_wmem = 4096 65536 67108864
-net.ipv4.tcp_congestion_control = bbr
+<h3 id="high-performance-networking"><a class="header" href="#high-performance-networking">High-Performance Networking</a></h3>
+<pre><code class="language-bash"># For servers handling many connections (web servers, load balancers)
+net.core.rmem_max = 134217728              # 128 MB max receive buffer
+net.core.wmem_max = 134217728              # 128 MB max send buffer
+net.ipv4.tcp_rmem = 4096 87380 67108864    # Min, default, max read buffer
+net.ipv4.tcp_wmem = 4096 65536 67108864    # Min, default, max write buffer
+net.ipv4.tcp_congestion_control = bbr      # BBR congestion control (better than cubic)
+net.core.somaxconn = 4096                  # Increase connection queue
+net.core.netdev_max_backlog = 10000        # Increase packet processing queue
+net.ipv4.tcp_max_syn_backlog = 8192        # Increase SYN backlog
 
-# Database server optimization
-vm.swappiness = 1
-vm.dirty_background_ratio = 5
-vm.dirty_ratio = 10
+# Fast connection recycling
+net.ipv4.tcp_tw_reuse = 1                  # Reuse TIME-WAIT sockets
+net.ipv4.tcp_fin_timeout = 15              # Reduce FIN-WAIT-2 timeout
 </code></pre>
-<p>sysctl provides runtime kernel tuning for optimizing system performance and behavior.</p>
+<h3 id="database-server-optimization"><a class="header" href="#database-server-optimization">Database Server Optimization</a></h3>
+<pre><code class="language-bash"># Minimize swapping (crucial for database performance)
+vm.swappiness = 1                          # Almost never swap (keep data in RAM)
+
+# Optimize dirty page handling for consistent performance
+vm.dirty_background_ratio = 5              # Start background writes early
+vm.dirty_ratio = 10                        # Force sync writes sooner
+vm.dirty_expire_centisecs = 500            # Write data older than 5s
+vm.dirty_writeback_centisecs = 100         # Check every 1s for dirty pages
+
+# Increase shared memory (for PostgreSQL, Oracle, etc.)
+kernel.shmmax = 68719476736                # 64 GB max shared memory segment
+kernel.shmall = 4294967296                 # Total pages (64 GB with 4KB pages)
+
+# File descriptors
+fs.file-max = 2097152                      # Increase for many connections
+</code></pre>
+<h3 id="container-hosts-dockerkubernetes"><a class="header" href="#container-hosts-dockerkubernetes">Container Hosts (Docker/Kubernetes)</a></h3>
+<pre><code class="language-bash"># Networking for container environments
+net.bridge.bridge-nf-call-iptables = 1     # Enable iptables for bridged traffic
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward = 1                    # Required for container networking
+
+# Inotify limits (many containers = many file watches)
+fs.inotify.max_user_watches = 1048576      # Increase for container monitoring
+fs.inotify.max_user_instances = 512
+
+# Increase connection tracking
+net.netfilter.nf_conntrack_max = 1000000   # More tracked connections
+net.netfilter.nf_conntrack_buckets = 250000
+
+# File descriptors
+fs.file-max = 2097152                      # Many containers need many files
+</code></pre>
+<h3 id="high-file-io-systems"><a class="header" href="#high-file-io-systems">High File I/O Systems</a></h3>
+<pre><code class="language-bash"># For systems with heavy disk I/O (file servers, build systems)
+vm.dirty_ratio = 10                        # Lower to avoid I/O stalls
+vm.dirty_background_ratio = 5              # Start writing sooner
+vm.vfs_cache_pressure = 50                 # Keep directory/inode cache longer
+
+# AIO for databases and applications using async I/O
+fs.aio-max-nr = 1048576                    # Increase async I/O capacity
+
+# File descriptors
+fs.file-max = 2097152                      # Increase for many open files
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="verify-current-settings"><a class="header" href="#verify-current-settings">Verify Current Settings</a></h3>
+<pre><code class="language-bash"># Check current runtime value
+sysctl net.ipv4.ip_forward
+
+# Check if setting is in config files
+grep -r "net.ipv4.ip_forward" /etc/sysctl.conf /etc/sysctl.d/
+
+# Compare current vs. default
+sysctl -a | grep tcp_syncookies
+
+# View all network settings
+sysctl -a | grep ^net
+
+# View all settings (warning: very long output)
+sysctl -a
+</code></pre>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<p><strong>Changes don’t persist after reboot:</strong></p>
+<ul>
+<li>Ensure settings are in <code>/etc/sysctl.conf</code> or <code>/etc/sysctl.d/*.conf</code></li>
+<li>Run <code>sudo sysctl --system</code> to test loading all configs</li>
+<li>Check file syntax (no spaces around <code>=</code> is recommended)</li>
+</ul>
+<p><strong>“Cannot stat /proc/sys/…” error:</strong></p>
+<ul>
+<li>Kernel module not loaded (e.g., <code>modprobe br_netfilter</code> for bridge settings)</li>
+<li>Parameter doesn’t exist in your kernel version</li>
+<li>Check with <code>ls /proc/sys/...</code> to verify path</li>
+</ul>
+<p><strong>“Permission denied” when setting parameter:</strong></p>
+<ul>
+<li>Must use <code>sudo</code> or run as root</li>
+<li>Some parameters cannot be changed (read-only)</li>
+<li>Check if parameter is namespaced (container-specific)</li>
+</ul>
+<p><strong>Settings conflict or get overridden:</strong></p>
+<ul>
+<li>Files in <code>/etc/sysctl.d/</code> are loaded in lexical order</li>
+<li>Higher numbered files (e.g., <code>99-*.conf</code>) override lower ones</li>
+<li><code>/etc/sysctl.conf</code> is loaded last and can override everything</li>
+<li>Check with <code>sysctl --system</code> to see load order</li>
+</ul>
+<h3 id="debugging-techniques"><a class="header" href="#debugging-techniques">Debugging Techniques</a></h3>
+<pre><code class="language-bash"># Test before making persistent
+sudo sysctl -w net.ipv4.ip_forward=1       # Test immediately
+# If it works, add to config file
+
+# Validate configuration file syntax
+sudo sysctl -p /etc/sysctl.d/99-custom.conf --dry-run
+
+# Monitor kernel messages for errors
+sudo dmesg | tail -20
+
+# Check which file set a parameter
+grep -r "parameter_name" /etc/sysctl.conf /etc/sysctl.d/
+
+# Reset parameter to default (reboot or check kernel docs for default)
+# Example: most net.ipv4.ip_forward defaults to 0
+sudo sysctl -w net.ipv4.ip_forward=0
+
+# See all networking parameters and current values
+sudo sysctl -a --pattern 'net.*'
+</code></pre>
+<h3 id="testing-changes"><a class="header" href="#testing-changes">Testing Changes</a></h3>
+<pre><code class="language-bash"># Before changing network settings
+ping 8.8.8.8                               # Test connectivity
+
+# After enabling IP forwarding
+cat /proc/sys/net/ipv4/ip_forward          # Should show 1
+# Test actual routing functionality
+
+# After memory changes
+free -h                                     # Check memory usage
+cat /proc/meminfo                          # Detailed memory info
+
+# Monitor impact of changes
+vmstat 1                                    # System stats every second
+sar -n DEV 1                               # Network stats (if sysstat installed)
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Test before making persistent:</strong> Always test with <code>sysctl -w</code> first</li>
+<li><strong>Document changes:</strong> Add comments in config files explaining why you changed values</li>
+<li><strong>Use sysctl.d:</strong> Create separate files in <code>/etc/sysctl.d/</code> for different purposes (e.g., <code>10-security.conf</code>, <code>90-performance.conf</code>)</li>
+<li><strong>Monitor impact:</strong> Watch system performance after changes to ensure improvements</li>
+<li><strong>Know your workload:</strong> Database servers, web servers, and desktop systems need different tuning</li>
+<li><strong>Start conservative:</strong> Make incremental changes and measure results</li>
+<li><strong>Keep backups:</strong> Save original values before making changes</li>
+</ol>
+<p>sysctl provides powerful runtime kernel tuning for optimizing system performance, hardening security, and troubleshooting issues without requiring system reboots.</p>
 
                     </main>
 

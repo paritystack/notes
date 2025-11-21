@@ -1,0 +1,1196 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Union Find - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-a5d335fc.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-cda83475.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="union-find-disjoint-set-union"><a class="header" href="#union-find-disjoint-set-union">Union-Find (Disjoint Set Union)</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#eli10-explanation">ELI10 Explanation</a></li>
+<li><a href="#core-concepts">Core Concepts</a>
+<ul>
+<li><a href="#when-to-use-union-find">When to Use Union-Find</a></li>
+<li><a href="#key-operations">Key Operations</a></li>
+</ul>
+</li>
+<li><a href="#basic-implementation">Basic Implementation</a></li>
+<li><a href="#optimization-1-union-by-rank">Optimization 1: Union by Rank</a></li>
+<li><a href="#optimization-2-path-compression">Optimization 2: Path Compression</a></li>
+<li><a href="#optimized-union-find">Optimized Union-Find</a></li>
+<li><a href="#common-patterns">Common Patterns</a></li>
+<li><a href="#interview-problems">Interview Problems</a></li>
+<li><a href="#advanced-applications">Advanced Applications</a></li>
+<li><a href="#complexity-analysis">Complexity Analysis</a></li>
+<li><a href="#when-to-use">When to Use</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#practice-problems">Practice Problems</a></li>
+<li><a href="#additional-resources">Additional Resources</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p><strong>Union-Find</strong> (also called <strong>Disjoint Set Union</strong> or <strong>DSU</strong>) is a data structure that efficiently tracks and merges disjoint sets. It’s particularly powerful for:</p>
+<ul>
+<li>Detecting cycles in undirected graphs</li>
+<li>Finding connected components</li>
+<li>Kruskal’s Minimum Spanning Tree algorithm</li>
+<li>Dynamic connectivity problems</li>
+</ul>
+<p><strong>Key characteristics:</strong></p>
+<ul>
+<li>Tracks partitioning of elements into disjoint sets</li>
+<li>Two main operations: <strong>Union</strong> (merge sets) and <strong>Find</strong> (find set representative)</li>
+<li>With optimizations: nearly O(1) amortized time per operation</li>
+<li>Simple to implement but very powerful</li>
+</ul>
+<h2 id="eli10-explanation"><a class="header" href="#eli10-explanation">ELI10 Explanation</a></h2>
+<p>Imagine you have a classroom with students, and you want to organize them into friend groups.</p>
+<p><strong>Initial state:</strong> Everyone is in their own group (alone).</p>
+<p><strong>Union (make friends):</strong>
+When Alice and Bob become friends, we merge their groups. If Alice was already friends with Charlie, now Bob is also in the same group as Charlie!</p>
+<p><strong>Find (which group?):</strong>
+To check if two students are in the same friend group, we find the “leader” of each group. If they have the same leader, they’re friends!</p>
+<p><strong>The smart part:</strong>
+Instead of remembering everyone in each group, we just remember:</p>
+<ol>
+<li>Each person’s “parent” (who they point to)</li>
+<li>Eventually, everyone points to a “leader” who points to themselves</li>
+</ol>
+<p>It’s like a tree where the root is the group leader!</p>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="when-to-use-union-find"><a class="header" href="#when-to-use-union-find">When to Use Union-Find</a></h3>
+<p>Union-Find is perfect for:</p>
+<ol>
+<li><strong>Connected components</strong> in graphs</li>
+<li><strong>Cycle detection</strong> in undirected graphs</li>
+<li><strong>Dynamic connectivity</strong> - connections change over time</li>
+<li><strong>Grouping/clustering</strong> elements</li>
+<li><strong>Minimum spanning tree</strong> (Kruskal’s algorithm)</li>
+<li><strong>Grid connectivity</strong> problems</li>
+</ol>
+<p><strong>Keywords to look for:</strong></p>
+<ul>
+<li>“connected components”</li>
+<li>“group elements”</li>
+<li>“detect cycles”</li>
+<li>“dynamic connectivity”</li>
+<li>“friends of friends”</li>
+</ul>
+<h3 id="key-operations"><a class="header" href="#key-operations">Key Operations</a></h3>
+<pre><code class="language-python">"""
+1. FIND(x): Find the representative (root) of x's set
+   - Returns the "leader" of the set containing x
+   - Used to check if two elements are in same set
+
+2. UNION(x, y): Merge the sets containing x and y
+   - Combines two sets into one
+   - One root becomes child of the other
+
+3. CONNECTED(x, y): Check if x and y are in same set
+   - Simply: find(x) == find(y)
+"""
+</code></pre>
+<h2 id="basic-implementation"><a class="header" href="#basic-implementation">Basic Implementation</a></h2>
+<h3 id="naive-union-find"><a class="header" href="#naive-union-find">Naive Union-Find</a></h3>
+<pre><code class="language-python">class UnionFind:
+    """
+    Basic Union-Find without optimizations.
+
+    Time complexity:
+    - find(): O(n) worst case (chain)
+    - union(): O(n) worst case
+    """
+
+    def __init__(self, n: int):
+        """Initialize n disjoint sets."""
+        # parent[i] = parent of element i
+        # Initially, each element is its own parent (root)
+        self.parent = list(range(n))
+
+    def find(self, x: int) -&gt; int:
+        """
+        Find root of x's set.
+
+        Follow parent pointers until reaching root (parent[x] == x).
+        """
+        while self.parent[x] != x:
+            x = self.parent[x]
+        return x
+
+    def union(self, x: int, y: int) -&gt; None:
+        """Merge sets containing x and y."""
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x != root_y:
+            # Make root_y the parent of root_x
+            self.parent[root_x] = root_y
+
+    def connected(self, x: int, y: int) -&gt; bool:
+        """Check if x and y are in the same set."""
+        return self.find(x) == self.find(y)
+
+# Example usage
+uf = UnionFind(10)
+
+# Union some elements
+uf.union(1, 2)
+uf.union(2, 3)
+uf.union(4, 5)
+
+print(uf.connected(1, 3))  # True (1-2-3 connected)
+print(uf.connected(1, 4))  # False (different sets)
+print(uf.connected(4, 5))  # True (4-5 connected)
+
+uf.union(3, 5)
+print(uf.connected(1, 4))  # True (now all connected!)
+</code></pre>
+<h3 id="visualizing-operations"><a class="header" href="#visualizing-operations">Visualizing Operations</a></h3>
+<pre><code class="language-python">def visualize_union_find():
+    """Demonstrate Union-Find operations visually."""
+    uf = UnionFind(6)
+
+    print("Initial state: Each element is its own set")
+    print(f"Parent array: {uf.parent}")
+    print("Sets: {0} {1} {2} {3} {4} {5}\n")
+
+    print("Union(0, 1):")
+    uf.union(0, 1)
+    print(f"Parent array: {uf.parent}")
+    print("Sets: {0,1} {2} {3} {4} {5}\n")
+
+    print("Union(2, 3):")
+    uf.union(2, 3)
+    print(f"Parent array: {uf.parent}")
+    print("Sets: {0,1} {2,3} {4} {5}\n")
+
+    print("Union(0, 2):")
+    uf.union(0, 2)
+    print(f"Parent array: {uf.parent}")
+    print("Sets: {0,1,2,3} {4} {5}\n")
+
+    print(f"Connected(1, 3)? {uf.connected(1, 3)}")  # True
+    print(f"Connected(1, 5)? {uf.connected(1, 5)}")  # False
+
+visualize_union_find()
+</code></pre>
+<h2 id="optimization-1-union-by-rank"><a class="header" href="#optimization-1-union-by-rank">Optimization 1: Union by Rank</a></h2>
+<p><strong>Problem with naive union:</strong> Can create long chains (O(n) find time).</p>
+<p><strong>Solution:</strong> Always attach smaller tree under larger tree.</p>
+<pre><code class="language-python">class UnionFindByRank:
+    """
+    Union-Find with union by rank optimization.
+
+    Rank = approximate depth of tree.
+    Attach smaller rank tree under larger rank tree.
+
+    Time complexity:
+    - find(): O(log n)
+    - union(): O(log n)
+    """
+
+    def __init__(self, n: int):
+        self.parent = list(range(n))
+        self.rank = [0] * n  # Rank of each tree
+
+    def find(self, x: int) -&gt; int:
+        """Find root of x's set."""
+        while self.parent[x] != x:
+            x = self.parent[x]
+        return x
+
+    def union(self, x: int, y: int) -&gt; bool:
+        """
+        Merge sets containing x and y.
+        Returns True if sets were different (union happened).
+        """
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            return False  # Already in same set
+
+        # Union by rank: attach smaller rank tree under larger rank tree
+        if self.rank[root_x] &lt; self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] &gt; self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            # Same rank: choose one as parent, increment rank
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
+        return True
+
+    def connected(self, x: int, y: int) -&gt; bool:
+        return self.find(x) == self.find(y)
+
+# Example
+uf = UnionFindByRank(10)
+uf.union(1, 2)
+uf.union(3, 4)
+uf.union(1, 3)  # Merges {1,2} with {3,4}
+print(uf.connected(2, 4))  # True
+</code></pre>
+<h2 id="optimization-2-path-compression"><a class="header" href="#optimization-2-path-compression">Optimization 2: Path Compression</a></h2>
+<p><strong>Further optimization:</strong> During find(), make all nodes point directly to root.</p>
+<pre><code class="language-python">class UnionFindPathCompression:
+    """
+    Union-Find with path compression.
+
+    During find(), flatten the tree by making all nodes
+    point directly to the root.
+
+    Time complexity:
+    - find(): Amortized nearly O(1)
+    - union(): Amortized nearly O(1)
+    """
+
+    def __init__(self, n: int):
+        self.parent = list(range(n))
+
+    def find(self, x: int) -&gt; int:
+        """
+        Find root with path compression.
+
+        Recursively find root and compress path.
+        """
+        if self.parent[x] != x:
+            # Path compression: point x directly to root
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def find_iterative(self, x: int) -&gt; int:
+        """Iterative version with two passes."""
+        # First pass: find root
+        root = x
+        while self.parent[root] != root:
+            root = self.parent[root]
+
+        # Second pass: compress path
+        while x != root:
+            next_node = self.parent[x]
+            self.parent[x] = root
+            x = next_node
+
+        return root
+
+    def union(self, x: int, y: int) -&gt; bool:
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            return False
+
+        self.parent[root_x] = root_y
+        return True
+
+    def connected(self, x: int, y: int) -&gt; bool:
+        return self.find(x) == self.find(y)
+</code></pre>
+<h2 id="optimized-union-find"><a class="header" href="#optimized-union-find">Optimized Union-Find</a></h2>
+<p><strong>Best implementation:</strong> Combine both optimizations!</p>
+<pre><code class="language-python">class UnionFind:
+    """
+    Optimized Union-Find with both:
+    1. Union by rank (or size)
+    2. Path compression
+
+    Time complexity: O(α(n)) amortized per operation
+    where α(n) is inverse Ackermann function (&lt; 5 for practical n)
+
+    This is the standard implementation you should use!
+    """
+
+    def __init__(self, n: int):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+        self.count = n  # Number of disjoint sets
+
+    def find(self, x: int) -&gt; int:
+        """Find root with path compression."""
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x: int, y: int) -&gt; bool:
+        """
+        Union by rank with path compression.
+        Returns True if union happened, False if already connected.
+        """
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            return False  # Already connected
+
+        # Union by rank
+        if self.rank[root_x] &lt; self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] &gt; self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
+        self.count -= 1  # Decreased number of sets
+        return True
+
+    def connected(self, x: int, y: int) -&gt; bool:
+        """Check if x and y are in same set."""
+        return self.find(x) == self.find(y)
+
+    def get_count(self) -&gt; int:
+        """Return number of disjoint sets."""
+        return self.count
+
+# Example with detailed output
+def demonstrate_optimized_uf():
+    uf = UnionFind(8)
+
+    print(f"Initial sets: {uf.get_count()}")
+
+    operations = [
+        (0, 1), (1, 2), (3, 4), (5, 6), (6, 7), (2, 5)
+    ]
+
+    for x, y in operations:
+        if uf.union(x, y):
+            print(f"Union({x}, {y}) - Sets now: {uf.get_count()}")
+        else:
+            print(f"Union({x}, {y}) - Already connected!")
+
+    print(f"\nFinal sets: {uf.get_count()}")
+    print(f"Connected(0, 7)? {uf.connected(0, 7)}")  # True
+    print(f"Connected(0, 3)? {uf.connected(0, 3)}")  # True
+
+demonstrate_optimized_uf()
+</code></pre>
+<h3 id="union-by-size-alternative"><a class="header" href="#union-by-size-alternative">Union by Size (Alternative)</a></h3>
+<pre><code class="language-python">class UnionFindBySize:
+    """
+    Union by size instead of rank.
+    Often simpler and equally effective.
+    """
+
+    def __init__(self, n: int):
+        self.parent = list(range(n))
+        self.size = [1] * n  # Size of each set
+        self.count = n
+
+    def find(self, x: int) -&gt; int:
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x: int, y: int) -&gt; bool:
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            return False
+
+        # Union by size: attach smaller to larger
+        if self.size[root_x] &lt; self.size[root_y]:
+            self.parent[root_x] = root_y
+            self.size[root_y] += self.size[root_x]
+        else:
+            self.parent[root_y] = root_x
+            self.size[root_x] += self.size[root_y]
+
+        self.count -= 1
+        return True
+
+    def get_size(self, x: int) -&gt; int:
+        """Get size of set containing x."""
+        return self.size[self.find(x)]
+</code></pre>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="pattern-1-count-connected-components"><a class="header" href="#pattern-1-count-connected-components">Pattern 1: Count Connected Components</a></h3>
+<pre><code class="language-python">def count_components(n: int, edges: list[list[int]]) -&gt; int:
+    """
+    LeetCode 323: Count connected components in undirected graph.
+
+    Strategy: Use Union-Find to merge connected nodes.
+    Remaining count = number of components.
+
+    Time: O(E * α(n)), Space: O(n)
+    """
+    uf = UnionFind(n)
+
+    for u, v in edges:
+        uf.union(u, v)
+
+    return uf.get_count()
+
+# Example
+edges = [[0, 1], [1, 2], [3, 4]]
+print(count_components(5, edges))  # 2 components: {0,1,2} and {3,4}
+</code></pre>
+<h3 id="pattern-2-detect-cycle-in-undirected-graph"><a class="header" href="#pattern-2-detect-cycle-in-undirected-graph">Pattern 2: Detect Cycle in Undirected Graph</a></h3>
+<pre><code class="language-python">def has_cycle(n: int, edges: list[list[int]]) -&gt; bool:
+    """
+    Detect if undirected graph has a cycle.
+
+    Strategy: If union(u, v) returns False, u and v
+    were already connected → cycle exists!
+
+    Time: O(E * α(n)), Space: O(n)
+    """
+    uf = UnionFind(n)
+
+    for u, v in edges:
+        if not uf.union(u, v):
+            return True  # Already connected, cycle found!
+
+    return False
+
+# Example
+edges1 = [[0, 1], [1, 2], [2, 0]]  # Triangle - has cycle
+edges2 = [[0, 1], [1, 2]]           # Line - no cycle
+
+print(has_cycle(3, edges1))  # True
+print(has_cycle(3, edges2))  # False
+</code></pre>
+<h3 id="pattern-3-find-redundant-connection"><a class="header" href="#pattern-3-find-redundant-connection">Pattern 3: Find Redundant Connection</a></h3>
+<pre><code class="language-python">def find_redundant_connection(edges: list[list[int]]) -&gt; list[int]:
+    """
+    LeetCode 684: Find edge that creates cycle in tree.
+
+    Tree with n nodes has n-1 edges. One extra edge creates cycle.
+    Return the last edge that creates the cycle.
+
+    Time: O(n * α(n)), Space: O(n)
+    """
+    uf = UnionFind(len(edges) + 1)  # 1-indexed
+
+    for u, v in edges:
+        if not uf.union(u, v):
+            return [u, v]  # This edge creates cycle
+
+    return []
+
+# Example
+edges = [[1, 2], [1, 3], [2, 3]]
+print(find_redundant_connection(edges))  # [2, 3]
+</code></pre>
+<h3 id="pattern-4-number-of-provinces"><a class="header" href="#pattern-4-number-of-provinces">Pattern 4: Number of Provinces</a></h3>
+<pre><code class="language-python">def find_circle_num(is_connected: list[list[int]]) -&gt; int:
+    """
+    LeetCode 547: Find number of provinces (friend circles).
+
+    is_connected[i][j] = 1 if person i and j are friends.
+
+    Time: O(n² * α(n)), Space: O(n)
+    """
+    n = len(is_connected)
+    uf = UnionFind(n)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if is_connected[i][j] == 1:
+                uf.union(i, j)
+
+    return uf.get_count()
+
+# Example
+is_connected = [
+    [1, 1, 0],
+    [1, 1, 0],
+    [0, 0, 1]
+]
+print(find_circle_num(is_connected))  # 2 provinces
+</code></pre>
+<h2 id="interview-problems"><a class="header" href="#interview-problems">Interview Problems</a></h2>
+<h3 id="problem-1-accounts-merge"><a class="header" href="#problem-1-accounts-merge">Problem 1: Accounts Merge</a></h3>
+<pre><code class="language-python">def accounts_merge(accounts: list[list[str]]) -&gt; list[list[str]]:
+    """
+    LeetCode 721: Merge accounts with common emails.
+
+    Strategy:
+    1. Map each email to an ID
+    2. Union accounts with same emails
+    3. Group emails by root ID
+
+    Time: O(N * K * α(N)) where N = accounts, K = max emails
+    Space: O(N * K)
+    """
+    email_to_id = {}
+    email_to_name = {}
+    uf = UnionFind(len(accounts))
+
+    # Assign IDs and union accounts with same email
+    for i, account in enumerate(accounts):
+        name = account[0]
+        for email in account[1:]:
+            email_to_name[email] = name
+
+            if email in email_to_id:
+                uf.union(i, email_to_id[email])
+            else:
+                email_to_id[email] = i
+
+    # Group emails by root account
+    root_to_emails = {}
+    for email, account_id in email_to_id.items():
+        root = uf.find(account_id)
+        if root not in root_to_emails:
+            root_to_emails[root] = []
+        root_to_emails[root].append(email)
+
+    # Build result
+    result = []
+    for root, emails in root_to_emails.items():
+        name = email_to_name[emails[0]]
+        result.append([name] + sorted(emails))
+
+    return result
+
+# Example
+accounts = [
+    ["John", "john@mail.com", "john_newyork@mail.com"],
+    ["John", "john00@mail.com"],
+    ["Mary", "mary@mail.com"],
+    ["John", "john_newyork@mail.com", "john00@mail.com"]
+]
+print(accounts_merge(accounts))
+</code></pre>
+<h3 id="problem-2-number-of-islands-ii"><a class="header" href="#problem-2-number-of-islands-ii">Problem 2: Number of Islands II</a></h3>
+<pre><code class="language-python">def num_islands2(m: int, n: int, positions: list[list[int]]) -&gt; list[int]:
+    """
+    LeetCode 305: Number of islands after each addLand operation.
+
+    Strategy: Use Union-Find with 2D coordinates.
+
+    Time: O(k * α(mn)) where k = operations
+    Space: O(mn)
+    """
+    def get_id(x: int, y: int) -&gt; int:
+        """Convert 2D coordinate to 1D ID."""
+        return x * n + y
+
+    uf = UnionFind(m * n)
+    grid = [[0] * n for _ in range(m)]
+    result = []
+    count = 0
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+    for x, y in positions:
+        if grid[x][y] == 1:
+            result.append(count)
+            continue
+
+        grid[x][y] = 1
+        count += 1
+        current_id = get_id(x, y)
+
+        # Try to union with adjacent islands
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if 0 &lt;= nx &lt; m and 0 &lt;= ny &lt; n and grid[nx][ny] == 1:
+                neighbor_id = get_id(nx, ny)
+                if uf.union(current_id, neighbor_id):
+                    count -= 1  # Merged two islands
+
+        result.append(count)
+
+    return result
+
+# Example
+positions = [[0,0], [0,1], [1,2], [2,1]]
+print(num_islands2(3, 3, positions))  # [1, 1, 2, 3]
+</code></pre>
+<h3 id="problem-3-smallest-string-with-swaps"><a class="header" href="#problem-3-smallest-string-with-swaps">Problem 3: Smallest String With Swaps</a></h3>
+<pre><code class="language-python">def smallest_string_with_swaps(s: str, pairs: list[list[int]]) -&gt; str:
+    """
+    LeetCode 1202: Find lexicographically smallest string after swaps.
+
+    Strategy:
+    1. Union indices that can be swapped (transitively)
+    2. For each component, sort characters
+    3. Distribute sorted characters back
+
+    Time: O(n log n + E * α(n)), Space: O(n)
+    """
+    n = len(s)
+    uf = UnionFind(n)
+
+    # Union all swappable pairs
+    for i, j in pairs:
+        uf.union(i, j)
+
+    # Group indices by root
+    root_to_indices = {}
+    for i in range(n):
+        root = uf.find(i)
+        if root not in root_to_indices:
+            root_to_indices[root] = []
+        root_to_indices[root].append(i)
+
+    # Sort characters in each group
+    result = list(s)
+    for indices in root_to_indices.values():
+        # Get characters at these indices
+        chars = sorted([s[i] for i in indices])
+        # Put sorted chars back
+        for i, char in zip(sorted(indices), chars):
+            result[i] = char
+
+    return ''.join(result)
+
+# Example
+s = "dcab"
+pairs = [[0,3], [1,2]]
+print(smallest_string_with_swaps(s, pairs))  # "bacd"
+# Can swap: 0↔3, 1↔2
+# Groups: {0,3} and {1,2}
+# Sort: "dc" → "cd" and "ab" → "ab"
+# Result: "bacd"
+</code></pre>
+<h3 id="problem-4-satisfiability-of-equality-equations"><a class="header" href="#problem-4-satisfiability-of-equality-equations">Problem 4: Satisfiability of Equality Equations</a></h3>
+<pre><code class="language-python">def equations_possible(equations: list[str]) -&gt; bool:
+    """
+    LeetCode 990: Check if all equality equations can be satisfied.
+
+    equations[i] is "a==b" or "a!=b"
+
+    Strategy:
+    1. Process all "==" equations, union variables
+    2. Check all "!=" equations, return False if same set
+
+    Time: O(n * α(26)), Space: O(26) = O(1)
+    """
+    uf = UnionFind(26)  # 26 letters
+
+    # Process equality equations
+    for eq in equations:
+        if eq[1] == '=':
+            a = ord(eq[0]) - ord('a')
+            b = ord(eq[3]) - ord('a')
+            uf.union(a, b)
+
+    # Check inequality equations
+    for eq in equations:
+        if eq[1] == '!':
+            a = ord(eq[0]) - ord('a')
+            b = ord(eq[3]) - ord('a')
+            if uf.connected(a, b):
+                return False  # Contradiction!
+
+    return True
+
+# Examples
+print(equations_possible(["a==b", "b!=a"]))  # False (contradiction)
+print(equations_possible(["a==b", "b==c", "a!=c"]))  # False
+print(equations_possible(["a==b", "b!=c", "c==a"]))  # False
+print(equations_possible(["a!=b", "b!=c", "c!=a"]))  # True
+</code></pre>
+<h2 id="advanced-applications"><a class="header" href="#advanced-applications">Advanced Applications</a></h2>
+<h3 id="kruskals-minimum-spanning-tree"><a class="header" href="#kruskals-minimum-spanning-tree">Kruskal’s Minimum Spanning Tree</a></h3>
+<pre><code class="language-python">def kruskal_mst(n: int, edges: list[tuple[int, int, int]]) -&gt; list[tuple[int, int, int]]:
+    """
+    Kruskal's algorithm for Minimum Spanning Tree.
+
+    edges: list of (u, v, weight)
+
+    Strategy:
+    1. Sort edges by weight
+    2. Add edge if it doesn't create cycle (use Union-Find)
+    3. Stop when n-1 edges added
+
+    Time: O(E log E), Space: O(n)
+    """
+    uf = UnionFind(n)
+    edges.sort(key=lambda x: x[2])  # Sort by weight
+    mst = []
+
+    for u, v, weight in edges:
+        if uf.union(u, v):
+            mst.append((u, v, weight))
+            if len(mst) == n - 1:
+                break  # MST complete
+
+    return mst
+
+# Example
+edges = [
+    (0, 1, 10),
+    (0, 2, 6),
+    (0, 3, 5),
+    (1, 3, 15),
+    (2, 3, 4)
+]
+mst = kruskal_mst(4, edges)
+print(f"MST edges: {mst}")
+print(f"Total weight: {sum(w for _, _, w in mst)}")
+</code></pre>
+<h3 id="online-connectivity-queries"><a class="header" href="#online-connectivity-queries">Online Connectivity Queries</a></h3>
+<pre><code class="language-python">class DynamicConnectivity:
+    """
+    Handle dynamic connectivity with online queries.
+
+    Supports:
+    - Add edge
+    - Query if two nodes connected
+    """
+
+    def __init__(self, n: int):
+        self.uf = UnionFind(n)
+
+    def add_edge(self, u: int, v: int) -&gt; None:
+        """Add edge between u and v."""
+        self.uf.union(u, v)
+
+    def is_connected(self, u: int, v: int) -&gt; bool:
+        """Check if u and v are connected."""
+        return self.uf.connected(u, v)
+
+    def count_components(self) -&gt; int:
+        """Get current number of components."""
+        return self.uf.get_count()
+
+# Example
+dc = DynamicConnectivity(6)
+print(f"Components: {dc.count_components()}")  # 6
+
+dc.add_edge(0, 1)
+dc.add_edge(2, 3)
+print(f"Components: {dc.count_components()}")  # 4
+
+print(f"0-1 connected? {dc.is_connected(0, 1)}")  # True
+print(f"0-2 connected? {dc.is_connected(0, 2)}")  # False
+
+dc.add_edge(1, 2)
+print(f"0-3 connected? {dc.is_connected(0, 3)}")  # True
+</code></pre>
+<h2 id="complexity-analysis"><a class="header" href="#complexity-analysis">Complexity Analysis</a></h2>
+<h3 id="time-complexity"><a class="header" href="#time-complexity">Time Complexity</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Naive</th><th>With Rank</th><th>With Path Compression</th><th>Both Optimizations</th></tr>
+</thead>
+<tbody>
+<tr><td>Find</td><td>O(n)</td><td>O(log n)</td><td>Amortized O(log n)</td><td>Amortized O(α(n))*</td></tr>
+<tr><td>Union</td><td>O(n)</td><td>O(log n)</td><td>Amortized O(log n)</td><td>Amortized O(α(n))*</td></tr>
+<tr><td>Connected</td><td>O(n)</td><td>O(log n)</td><td>Amortized O(log n)</td><td>Amortized O(α(n))*</td></tr>
+</tbody>
+</table>
+</div>
+<p>*α(n) is the inverse Ackermann function, which grows extremely slowly:</p>
+<ul>
+<li>α(10^9) &lt; 5</li>
+<li>For all practical purposes, α(n) ≤ 4</li>
+<li>Can be considered nearly constant!</li>
+</ul>
+<h3 id="space-complexity"><a class="header" href="#space-complexity">Space Complexity</a></h3>
+<ul>
+<li><strong>O(n)</strong> for parent array</li>
+<li><strong>O(n)</strong> for rank/size array (if used)</li>
+<li>Total: <strong>O(n)</strong></li>
+</ul>
+<h2 id="when-to-use"><a class="header" href="#when-to-use">When to Use</a></h2>
+<p><strong>Use Union-Find when:</strong></p>
+<ol>
+<li>
+<p><strong>Connected components</strong> in undirected graph</p>
+<ul>
+<li>“How many groups?”</li>
+<li>“Are these elements connected?”</li>
+</ul>
+</li>
+<li>
+<p><strong>Cycle detection</strong> in undirected graph</p>
+<ul>
+<li>Simpler than DFS for this specific case</li>
+<li>Used in Kruskal’s MST</li>
+</ul>
+</li>
+<li>
+<p><strong>Dynamic connectivity</strong></p>
+<ul>
+<li>Connections added over time</li>
+<li>Need to query connectivity online</li>
+</ul>
+</li>
+<li>
+<p><strong>Grouping/clustering</strong> elements</p>
+<ul>
+<li>Social networks (friends of friends)</li>
+<li>Image segmentation</li>
+<li>Equivalence classes</li>
+</ul>
+</li>
+<li>
+<p><strong>Minimum Spanning Tree</strong> (Kruskal’s algorithm)</p>
+</li>
+</ol>
+<p><strong>Don’t use when:</strong></p>
+<ul>
+<li>Need to track actual paths (use BFS/DFS)</li>
+<li>Directed graphs (Union-Find is for undirected)</li>
+<li>Need to delete edges efficiently (harder with Union-Find)</li>
+<li>Need to iterate through elements in a set (not supported)</li>
+</ul>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<h3 id="1-forgetting-path-compression"><a class="header" href="#1-forgetting-path-compression">1. Forgetting Path Compression</a></h3>
+<pre><code class="language-python"># Inefficient:
+def find(self, x: int) -&gt; int:
+    while self.parent[x] != x:
+        x = self.parent[x]
+    return x
+
+# Optimized with path compression:
+def find(self, x: int) -&gt; int:
+    if self.parent[x] != x:
+        self.parent[x] = self.find(self.parent[x])
+    return self.parent[x]
+</code></pre>
+<h3 id="2-not-using-union-by-ranksize"><a class="header" href="#2-not-using-union-by-ranksize">2. Not Using Union by Rank/Size</a></h3>
+<pre><code class="language-python"># Bad: Can create long chains
+def union(self, x: int, y: int):
+    root_x = self.find(x)
+    root_y = self.find(y)
+    self.parent[root_x] = root_y  # Arbitrary choice
+
+# Good: Balance trees
+def union(self, x: int, y: int):
+    root_x = self.find(x)
+    root_y = self.find(y)
+
+    if self.rank[root_x] &lt; self.rank[root_y]:
+        self.parent[root_x] = root_y
+    elif self.rank[root_x] &gt; self.rank[root_y]:
+        self.parent[root_y] = root_x
+    else:
+        self.parent[root_y] = root_x
+        self.rank[root_x] += 1
+</code></pre>
+<h3 id="3-incorrect-initialization"><a class="header" href="#3-incorrect-initialization">3. Incorrect Initialization</a></h3>
+<pre><code class="language-python"># Wrong: All elements point to 0
+self.parent = [0] * n
+
+# Correct: Each element is its own parent
+self.parent = list(range(n))
+</code></pre>
+<h3 id="4-off-by-one-with-indexing"><a class="header" href="#4-off-by-one-with-indexing">4. Off-by-One with Indexing</a></h3>
+<pre><code class="language-python"># If nodes are 1-indexed (common in graph problems)
+uf = UnionFind(n + 1)  # Create n+1 elements
+
+# If nodes are 0-indexed
+uf = UnionFind(n)  # Create n elements
+</code></pre>
+<h3 id="5-not-checking-if-union-succeeded"><a class="header" href="#5-not-checking-if-union-succeeded">5. Not Checking if Union Succeeded</a></h3>
+<pre><code class="language-python"># Missing information:
+uf.union(u, v)
+
+# Better: track if union happened
+if uf.union(u, v):
+    # Successfully merged two different sets
+    count -= 1
+else:
+    # Already in same set (cycle detected!)
+    return True
+</code></pre>
+<h2 id="practice-problems"><a class="header" href="#practice-problems">Practice Problems</a></h2>
+<h3 id="easy"><a class="header" href="#easy">Easy</a></h3>
+<ol>
+<li><strong>Find if Path Exists in Graph</strong> (LeetCode 1971)</li>
+<li><strong>The Earliest Moment When Everyone Become Friends</strong> (LeetCode 1101)</li>
+</ol>
+<h3 id="medium"><a class="header" href="#medium">Medium</a></h3>
+<ol start="3">
+<li><strong>Number of Connected Components</strong> (LeetCode 323)</li>
+<li><strong>Graph Valid Tree</strong> (LeetCode 261)</li>
+<li><strong>Number of Provinces</strong> (LeetCode 547)</li>
+<li><strong>Redundant Connection</strong> (LeetCode 684)</li>
+<li><strong>Accounts Merge</strong> (LeetCode 721)</li>
+<li><strong>Most Stones Removed</strong> (LeetCode 947)</li>
+<li><strong>Satisfiability of Equality Equations</strong> (LeetCode 990)</li>
+<li><strong>Smallest String With Swaps</strong> (LeetCode 1202)</li>
+<li><strong>Minimize Malware Spread</strong> (LeetCode 924)</li>
+<li><strong>Regions Cut By Slashes</strong> (LeetCode 959)</li>
+<li><strong>Sentence Similarity II</strong> (LeetCode 737)</li>
+</ol>
+<h3 id="hard"><a class="header" href="#hard">Hard</a></h3>
+<ol start="14">
+<li><strong>Number of Islands II</strong> (LeetCode 305)</li>
+<li><strong>Redundant Connection II</strong> (LeetCode 685) - directed graph</li>
+<li><strong>Minimize Malware Spread II</strong> (LeetCode 928)</li>
+<li><strong>Bricks Falling When Hit</strong> (LeetCode 803)</li>
+</ol>
+<h3 id="classic-algorithms"><a class="header" href="#classic-algorithms">Classic Algorithms</a></h3>
+<ol start="18">
+<li><strong>Kruskal’s MST</strong> - implement using Union-Find</li>
+<li><strong>Image Segmentation</strong> - connected components</li>
+<li><strong>Social Network Analysis</strong> - friend circles</li>
+</ol>
+<h2 id="additional-resources"><a class="header" href="#additional-resources">Additional Resources</a></h2>
+<h3 id="visualizations"><a class="header" href="#visualizations">Visualizations</a></h3>
+<ul>
+<li><strong>VisuAlgo</strong>: Union-Find visualization</li>
+<li><strong>Algorithm Visualizer</strong>: DSU animations</li>
+</ul>
+<h3 id="tutorials"><a class="header" href="#tutorials">Tutorials</a></h3>
+<ul>
+<li><strong>Princeton Algorithms</strong>: Union-Find lecture (Sedgewick)</li>
+<li><strong>CP-Algorithms</strong>: Disjoint Set Union</li>
+<li><strong>GeeksforGeeks</strong>: Union-Find detailed guide</li>
+</ul>
+<h3 id="papers"><a class="header" href="#papers">Papers</a></h3>
+<ul>
+<li>Tarjan &amp; van Leeuwen: “Worst-case Analysis of Set Union Algorithms”</li>
+<li>Inverse Ackermann function analysis</li>
+</ul>
+<h3 id="videos"><a class="header" href="#videos">Videos</a></h3>
+<ul>
+<li><strong>MIT OCW</strong>: Union-Find lecture</li>
+<li><strong>Princeton Coursera</strong>: Algorithms Part I (Week 1)</li>
+</ul>
+<h3 id="practice-platforms"><a class="header" href="#practice-platforms">Practice Platforms</a></h3>
+<ul>
+<li>LeetCode Tag: Union-Find (40+ problems)</li>
+<li>Codeforces: DSU problems</li>
+<li>AtCoder: Union-Find practice</li>
+</ul>
+<hr>
+<p><strong>Key Takeaways:</strong></p>
+<ol>
+<li>Union-Find tracks disjoint sets with near-constant time operations</li>
+<li>Two key optimizations: path compression + union by rank</li>
+<li>Perfect for connectivity, grouping, and cycle detection</li>
+<li>Kruskal’s MST uses Union-Find</li>
+<li>Time complexity: O(α(n)) ≈ O(1) amortized with optimizations</li>
+<li>Simple to implement but extremely powerful</li>
+</ol>
+<p>Master Union-Find and you’ll efficiently solve graph connectivity problems that would be much harder with other approaches!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../algorithms/two_pointers.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../security/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../algorithms/two_pointers.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../security/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

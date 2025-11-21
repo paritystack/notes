@@ -1,7 +1,5 @@
 # Design Patterns
 
- // Start Generation Here
-
 ## Introduction to Design Patterns
 
 Design patterns are proven solutions to common problems encountered in software development. They provide a standardized approach to solving issues related to object creation, structure, and behavior, promoting code reusability, scalability, and maintainability. Understanding design patterns is essential for building robust and efficient software systems.

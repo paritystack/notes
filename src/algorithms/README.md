@@ -209,15 +209,48 @@ Function calls itself to solve problems.
 
 See: [Recursion](recursion.md)
 
+### 10. String Algorithms
+
+Pattern matching and string manipulation techniques.
+
+**Common String Algorithms:**
+- KMP Pattern Matching
+- Rabin-Karp Algorithm
+- Z Algorithm
+- Manacher's Algorithm
+- Trie Operations
+
+See: [String Algorithms](string_algorithms.md)
+
+### 11. Bit Manipulation
+
+Efficient operations using bitwise operators.
+
+**Common Techniques:**
+- XOR properties for finding unique elements
+- Counting set bits
+- Power of 2 checks
+- Bit masking for sets
+- Gray code generation
+
+See: [Bit Manipulation](bit_manipulation.md)
+
 ## Common Algorithm Patterns
 
 ### Two Pointers
+
+Use two pointers to traverse data structures efficiently. Reduces O(n²) to O(n) for many problems.
+
+**Common patterns:**
+- Opposite direction (two sum in sorted array)
+- Same direction fast/slow (remove duplicates, cycle detection)
+- Multiple arrays (merge sorted arrays)
 
 ```python
 # Find pair with given sum in sorted array
 def find_pair_with_sum(arr, target):
     left, right = 0, len(arr) - 1
-    
+
     while left < right:
         current_sum = arr[left] + arr[right]
         if current_sum == target:
@@ -226,40 +259,48 @@ def find_pair_with_sum(arr, target):
             left += 1
         else:
             right -= 1
-    
+
     return None
 
 # Remove duplicates from sorted array
 def remove_duplicates(arr):
     if not arr:
         return 0
-    
+
     write_index = 1
     for read_index in range(1, len(arr)):
         if arr[read_index] != arr[read_index - 1]:
             arr[write_index] = arr[read_index]
             write_index += 1
-    
+
     return write_index
 ```
 
+See: [Two Pointers](two_pointers.md) for comprehensive guide
+
 ### Sliding Window
+
+Maintain a window of elements that slides through array/string. Optimizes from O(n²) to O(n).
+
+**Types:**
+- Fixed-size window (max sum of k elements)
+- Variable-size window (longest substring with k distinct chars)
 
 ```python
 # Maximum sum subarray of size k
 def max_sum_subarray(arr, k):
     if len(arr) < k:
         return None
-    
+
     # Calculate sum of first window
     window_sum = sum(arr[:k])
     max_sum = window_sum
-    
+
     # Slide window
     for i in range(k, len(arr)):
         window_sum = window_sum - arr[i - k] + arr[i]
         max_sum = max(max_sum, window_sum)
-    
+
     return max_sum
 
 # Longest substring without repeating characters
@@ -267,16 +308,18 @@ def longest_unique_substring(s):
     char_index = {}
     max_length = 0
     start = 0
-    
+
     for end in range(len(s)):
         if s[end] in char_index and char_index[s[end]] >= start:
             start = char_index[s[end]] + 1
-        
+
         char_index[s[end]] = end
         max_length = max(max_length, end - start + 1)
-    
+
     return max_length
 ```
+
+See: [Sliding Window](sliding_window.md) for comprehensive guide
 
 ### Fast and Slow Pointers
 
@@ -333,17 +376,26 @@ def merge_intervals(intervals):
     return merged
 ```
 
-### Binary Search Pattern
+### Binary Search Patterns
+
+Efficient O(log n) search on sorted data or monotonic search spaces.
+
+**Common patterns:**
+- Find exact match in sorted array
+- Find first/last occurrence
+- Search in rotated sorted array
+- Binary search on answer (find minimum/maximum value)
+- Peak finding
 
 ```python
 # Find first occurrence
 def find_first(arr, target):
     left, right = 0, len(arr) - 1
     result = -1
-    
+
     while left <= right:
         mid = (left + right) // 2
-        
+
         if arr[mid] == target:
             result = mid
             right = mid - 1  # Continue searching left
@@ -351,23 +403,66 @@ def find_first(arr, target):
             left = mid + 1
         else:
             right = mid - 1
-    
+
     return result
 
 # Find peak element
 def find_peak(arr):
     left, right = 0, len(arr) - 1
-    
+
     while left < right:
         mid = (left + right) // 2
-        
+
         if arr[mid] > arr[mid + 1]:
             right = mid
         else:
             left = mid + 1
-    
+
     return left
 ```
+
+See: [Binary Search Patterns](binary_search_patterns.md) for comprehensive guide
+
+### Union-Find (Disjoint Set)
+
+Track and merge disjoint sets with near-constant time operations.
+
+**Use cases:**
+- Connected components in graphs
+- Cycle detection in undirected graphs
+- Kruskal's MST algorithm
+- Dynamic connectivity problems
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        root_x, root_y = self.find(x), self.find(y)
+
+        if root_x == root_y:
+            return False
+
+        # Union by rank
+        if self.rank[root_x] < self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] > self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
+        return True
+```
+
+See: [Union-Find](union_find.md) for comprehensive guide
 
 ## Problem-Solving Approach
 
@@ -486,19 +581,36 @@ def find_peak(arr):
 
 Explore detailed guides for specific algorithm types:
 
+### Fundamentals
 1. [Big O Notation](big_o.md) - Understanding algorithm complexity
-2. [Sorting Algorithms](sorting.md) - Comprehensive sorting guide
-3. [Searching Algorithms](searching.md) - Various search techniques
-4. [Graph Algorithms](../data_structures/graphs.md) - Graph traversal and algorithms
-5. [Tree Algorithms](../data_structures/trees.md) - Tree operations and traversals
+2. [Recursion](recursion.md) - Recursive problem solving
+
+### Sorting & Searching
+3. [Sorting Algorithms](sorting.md) - Comprehensive sorting guide
+4. [Searching Algorithms](searching.md) - Various search techniques
+5. [Binary Search Patterns](binary_search_patterns.md) - Advanced binary search techniques
+
+### Algorithm Paradigms
 6. [Dynamic Programming](dynamic_programming.md) - DP patterns and problems
 7. [Greedy Algorithms](greedy_algorithms.md) - Greedy approach and examples
-8. [Divide and Conquer](divide_and_conquer.md) - D&C strategy
+8. [Divide and Conquer](divide_and_conquer.md) - Divide and conquer strategy
 9. [Backtracking](backtracking.md) - Backtracking techniques
-10. [Recursion](recursion.md) - Recursive problem solving
-11. [Heaps](../data_structures/heaps.md) - Heap data structure and algorithms
-12. [Tries](../data_structures/tries.md) - Trie data structure and applications
-13. [Raft Consensus](raft.md) - Distributed consensus algorithm for replicated logs
+
+### Common Patterns & Techniques
+10. [Two Pointers](two_pointers.md) - Two pointer technique patterns
+11. [Sliding Window](sliding_window.md) - Sliding window optimization
+12. [Bit Manipulation](bit_manipulation.md) - Bitwise operations and tricks
+13. [Union-Find](union_find.md) - Disjoint set union data structure
+
+### Graph & Tree Algorithms
+14. [Graph Algorithms](graph_algorithms.md) - Graph traversal and algorithms
+15. [Tree Algorithms](../data_structures/trees.md) - Tree operations and traversals
+
+### String & Specialized
+16. [String Algorithms](string_algorithms.md) - Pattern matching and string manipulation
+17. [Heaps](../data_structures/heaps.md) - Heap data structure and algorithms
+18. [Tries](../data_structures/tries.md) - Trie data structure and applications
+19. [Raft Consensus](raft.md) - Distributed consensus algorithm
 
 ## Quick Reference
 

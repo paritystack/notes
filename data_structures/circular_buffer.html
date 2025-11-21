@@ -1,0 +1,1268 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Circular Buffer - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-93ad08a6.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-f9b1048b.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="circular-buffer-ring-buffer"><a class="header" href="#circular-buffer-ring-buffer">Circular Buffer (Ring Buffer)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A <strong>circular buffer</strong> (also known as a <strong>ring buffer</strong> or <strong>cyclic buffer</strong>) is a fixed-size buffer that uses a single, continuous block of memory and wraps around when it reaches the end. It operates as if the memory is connected end-to-end in a circular fashion, making it ideal for implementing fixed-size queues where old data is automatically overwritten by new data.</p>
+<p><strong>Key Characteristics:</strong></p>
+<ul>
+<li><strong>Fixed Size</strong>: Memory is allocated once and size doesn’t change</li>
+<li><strong>O(1) Operations</strong>: Enqueue and dequeue in constant time</li>
+<li><strong>Wrap-Around</strong>: When reaching the end, operations continue from the beginning</li>
+<li><strong>No Shifting</strong>: Elements stay in place, only head/tail pointers move</li>
+<li><strong>Cache-Friendly</strong>: Contiguous memory improves cache performance</li>
+<li><strong>Lock-Free</strong>: Can be implemented without locks for single producer/consumer</li>
+</ul>
+<p><strong>Visual Representation:</strong></p>
+<pre><code>Initial State (capacity = 5):
+[_, _, _, _, _]
+ ↑
+head/tail
+
+After enqueueing 3 elements (A, B, C):
+[A, B, C, _, _]
+ ↑     ↑
+head  tail
+
+After dequeueing 2 elements:
+[_, _, C, _, _]
+       ↑  ↑
+      head tail
+
+After enqueueing 4 more elements (D, E, F, G):
+[F, G, C, D, E]  ← Buffer wraps around!
+    ↑  ↑
+   tail head
+</code></pre>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<h3 id="basic-circular-buffer-python"><a class="header" href="#basic-circular-buffer-python">Basic Circular Buffer (Python)</a></h3>
+<pre><code class="language-python">class CircularBuffer:
+    """
+    A fixed-size circular buffer with automatic overwriting.
+    """
+    def __init__(self, capacity):
+        """
+        Initialize circular buffer with given capacity.
+        Time: O(n), Space: O(n)
+        """
+        self.capacity = capacity
+        self.buffer = [None] * capacity
+        self.head = 0  # Points to oldest element
+        self.tail = 0  # Points to next write position
+        self.size = 0  # Current number of elements
+        self.is_full = False
+
+    def enqueue(self, item):
+        """
+        Add item to buffer. Overwrites oldest if full.
+        Time: O(1), Space: O(1)
+        """
+        self.buffer[self.tail] = item
+
+        if self.is_full:
+            # Overwrite mode: move head forward too
+            self.head = (self.head + 1) % self.capacity
+
+        self.tail = (self.tail + 1) % self.capacity
+
+        if self.tail == self.head:
+            self.is_full = True
+
+        self.size = min(self.size + 1, self.capacity)
+
+    def dequeue(self):
+        """
+        Remove and return oldest item.
+        Time: O(1), Space: O(1)
+        """
+        if self.is_empty():
+            raise IndexError("Dequeue from empty buffer")
+
+        item = self.buffer[self.head]
+        self.buffer[self.head] = None  # Optional: clear reference
+        self.head = (self.head + 1) % self.capacity
+        self.is_full = False
+        self.size -= 1
+
+        return item
+
+    def peek(self):
+        """
+        Return oldest item without removing.
+        Time: O(1), Space: O(1)
+        """
+        if self.is_empty():
+            raise IndexError("Peek from empty buffer")
+        return self.buffer[self.head]
+
+    def is_empty(self):
+        """Check if buffer is empty. Time: O(1)"""
+        return self.size == 0
+
+    def is_full_buffer(self):
+        """Check if buffer is full. Time: O(1)"""
+        return self.is_full
+
+    def __len__(self):
+        """Return current size. Time: O(1)"""
+        return self.size
+
+    def __str__(self):
+        """String representation showing buffer state."""
+        if self.is_empty():
+            return "[]"
+
+        items = []
+        idx = self.head
+        for _ in range(self.size):
+            items.append(str(self.buffer[idx]))
+            idx = (idx + 1) % self.capacity
+
+        return f"[{', '.join(items)}]"
+
+
+# Example usage
+if __name__ == "__main__":
+    # Create buffer with capacity 3
+    cb = CircularBuffer(3)
+
+    # Enqueue elements
+    cb.enqueue('A')
+    cb.enqueue('B')
+    cb.enqueue('C')
+    print(f"After enqueuing A,B,C: {cb}")  # [A, B, C]
+
+    # Dequeue one element
+    print(f"Dequeued: {cb.dequeue()}")  # A
+    print(f"After dequeue: {cb}")  # [B, C]
+
+    # Enqueue more (wraps around)
+    cb.enqueue('D')
+    cb.enqueue('E')  # Overwrites B
+    print(f"After enqueuing D,E: {cb}")  # [C, D, E]
+</code></pre>
+<h3 id="non-overwriting-version-blocking"><a class="header" href="#non-overwriting-version-blocking">Non-Overwriting Version (Blocking)</a></h3>
+<pre><code class="language-python">class BlockingCircularBuffer:
+    """
+    Circular buffer that blocks/raises error when full instead of overwriting.
+    """
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.buffer = [None] * capacity
+        self.head = 0
+        self.tail = 0
+        self.size = 0
+
+    def enqueue(self, item):
+        """
+        Add item to buffer. Raises exception if full.
+        Time: O(1), Space: O(1)
+        """
+        if self.is_full():
+            raise OverflowError("Buffer is full")
+
+        self.buffer[self.tail] = item
+        self.tail = (self.tail + 1) % self.capacity
+        self.size += 1
+
+    def dequeue(self):
+        """
+        Remove and return oldest item.
+        Time: O(1), Space: O(1)
+        """
+        if self.is_empty():
+            raise IndexError("Buffer is empty")
+
+        item = self.buffer[self.head]
+        self.head = (self.head + 1) % self.capacity
+        self.size -= 1
+
+        return item
+
+    def is_empty(self):
+        return self.size == 0
+
+    def is_full(self):
+        return self.size == self.capacity
+</code></pre>
+<h3 id="thread-safe-circular-buffer-single-producersingle-consumer"><a class="header" href="#thread-safe-circular-buffer-single-producersingle-consumer">Thread-Safe Circular Buffer (Single Producer/Single Consumer)</a></h3>
+<pre><code class="language-python">import threading
+
+class ThreadSafeCircularBuffer:
+    """
+    Lock-free circular buffer for single producer and single consumer.
+    Uses atomic operations for thread safety without locks.
+    """
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.buffer = [None] * capacity
+        self.head = 0  # Only modified by consumer
+        self.tail = 0  # Only modified by producer
+
+    def try_enqueue(self, item):
+        """
+        Try to add item. Returns True if successful, False if full.
+        Time: O(1), Space: O(1)
+        Thread-safe for single producer.
+        """
+        next_tail = (self.tail + 1) % self.capacity
+
+        # Check if buffer is full
+        if next_tail == self.head:
+            return False
+
+        self.buffer[self.tail] = item
+        self.tail = next_tail  # Atomic write
+
+        return True
+
+    def try_dequeue(self):
+        """
+        Try to remove item. Returns (True, item) if successful,
+        (False, None) if empty.
+        Time: O(1), Space: O(1)
+        Thread-safe for single consumer.
+        """
+        # Check if buffer is empty
+        if self.head == self.tail:
+            return False, None
+
+        item = self.buffer[self.head]
+        self.head = (self.head + 1) % self.capacity  # Atomic write
+
+        return True, item
+
+    def size(self):
+        """
+        Approximate size (may not be exact in concurrent scenario).
+        Time: O(1)
+        """
+        head = self.head
+        tail = self.tail
+
+        if tail &gt;= head:
+            return tail - head
+        else:
+            return self.capacity - head + tail
+</code></pre>
+<h3 id="javascript-implementation"><a class="header" href="#javascript-implementation">JavaScript Implementation</a></h3>
+<pre><code class="language-javascript">class CircularBuffer {
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.buffer = new Array(capacity);
+        this.head = 0;
+        this.tail = 0;
+        this.size = 0;
+        this.isFull = false;
+    }
+
+    /**
+     * Add item to buffer. Overwrites oldest if full.
+     * Time: O(1), Space: O(1)
+     */
+    enqueue(item) {
+        this.buffer[this.tail] = item;
+
+        if (this.isFull) {
+            this.head = (this.head + 1) % this.capacity;
+        }
+
+        this.tail = (this.tail + 1) % this.capacity;
+
+        if (this.tail === this.head) {
+            this.isFull = true;
+        }
+
+        this.size = Math.min(this.size + 1, this.capacity);
+    }
+
+    /**
+     * Remove and return oldest item.
+     * Time: O(1), Space: O(1)
+     */
+    dequeue() {
+        if (this.isEmpty()) {
+            throw new Error("Dequeue from empty buffer");
+        }
+
+        const item = this.buffer[this.head];
+        this.buffer[this.head] = undefined;
+        this.head = (this.head + 1) % this.capacity;
+        this.isFull = false;
+        this.size--;
+
+        return item;
+    }
+
+    /**
+     * Return oldest item without removing.
+     * Time: O(1), Space: O(1)
+     */
+    peek() {
+        if (this.isEmpty()) {
+            throw new Error("Peek from empty buffer");
+        }
+        return this.buffer[this.head];
+    }
+
+    isEmpty() {
+        return this.size === 0;
+    }
+
+    isFullBuffer() {
+        return this.isFull;
+    }
+
+    length() {
+        return this.size;
+    }
+
+    toString() {
+        if (this.isEmpty()) return "[]";
+
+        const items = [];
+        let idx = this.head;
+        for (let i = 0; i &lt; this.size; i++) {
+            items.push(this.buffer[idx]);
+            idx = (idx + 1) % this.capacity;
+        }
+
+        return `[${items.join(', ')}]`;
+    }
+}
+
+// Example usage
+const cb = new CircularBuffer(3);
+cb.enqueue('A');
+cb.enqueue('B');
+cb.enqueue('C');
+console.log(cb.toString());  // [A, B, C]
+
+console.log(cb.dequeue());  // A
+console.log(cb.toString());  // [B, C]
+
+cb.enqueue('D');
+cb.enqueue('E');  // Overwrites B
+console.log(cb.toString());  // [C, D, E]
+</code></pre>
+<h2 id="advanced-patterns"><a class="header" href="#advanced-patterns">Advanced Patterns</a></h2>
+<h3 id="1-generic-circular-buffer-with-batch-operations"><a class="header" href="#1-generic-circular-buffer-with-batch-operations">1. Generic Circular Buffer with Batch Operations</a></h3>
+<pre><code class="language-python">from typing import TypeVar, Generic, List, Optional
+
+T = TypeVar('T')
+
+class GenericCircularBuffer(Generic[T]):
+    """
+    Generic circular buffer with batch operations.
+    """
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.buffer: List[Optional[T]] = [None] * capacity
+        self.head = 0
+        self.tail = 0
+        self.size = 0
+
+    def enqueue_batch(self, items: List[T]) -&gt; int:
+        """
+        Enqueue multiple items. Returns number of items actually added.
+        Time: O(k) where k = min(len(items), capacity)
+        """
+        count = 0
+        for item in items:
+            if self.size &gt;= self.capacity:
+                break
+            self.buffer[self.tail] = item
+            self.tail = (self.tail + 1) % self.capacity
+            self.size += 1
+            count += 1
+        return count
+
+    def dequeue_batch(self, n: int) -&gt; List[T]:
+        """
+        Dequeue up to n items.
+        Time: O(min(n, size))
+        """
+        result = []
+        for _ in range(min(n, self.size)):
+            item = self.buffer[self.head]
+            self.head = (self.head + 1) % self.capacity
+            self.size -= 1
+            result.append(item)
+        return result
+
+    def peek_batch(self, n: int) -&gt; List[T]:
+        """
+        Peek at up to n oldest items without removing.
+        Time: O(min(n, size))
+        """
+        result = []
+        idx = self.head
+        for _ in range(min(n, self.size)):
+            result.append(self.buffer[idx])
+            idx = (idx + 1) % self.capacity
+        return result
+</code></pre>
+<h3 id="2-resizable-circular-buffer"><a class="header" href="#2-resizable-circular-buffer">2. Resizable Circular Buffer</a></h3>
+<pre><code class="language-python">class ResizableCircularBuffer:
+    """
+    Circular buffer that can grow when needed.
+    """
+    def __init__(self, initial_capacity: int = 8):
+        self.buffer = [None] * initial_capacity
+        self.head = 0
+        self.tail = 0
+        self.size = 0
+
+    @property
+    def capacity(self):
+        return len(self.buffer)
+
+    def enqueue(self, item):
+        """
+        Add item, growing buffer if necessary.
+        Time: O(1) amortized (O(n) when resizing)
+        """
+        if self.size == self.capacity:
+            self._resize(self.capacity * 2)
+
+        self.buffer[self.tail] = item
+        self.tail = (self.tail + 1) % self.capacity
+        self.size += 1
+
+    def dequeue(self):
+        """
+        Remove oldest item, shrinking if necessary.
+        Time: O(1) amortized (O(n) when resizing)
+        """
+        if self.size == 0:
+            raise IndexError("Dequeue from empty buffer")
+
+        item = self.buffer[self.head]
+        self.head = (self.head + 1) % self.capacity
+        self.size -= 1
+
+        # Shrink if size is 1/4 of capacity
+        if self.size &gt; 0 and self.size == self.capacity // 4:
+            self._resize(self.capacity // 2)
+
+        return item
+
+    def _resize(self, new_capacity):
+        """
+        Resize buffer to new capacity.
+        Time: O(n), Space: O(n)
+        """
+        new_buffer = [None] * new_capacity
+
+        # Copy elements in order
+        for i in range(self.size):
+            new_buffer[i] = self.buffer[(self.head + i) % self.capacity]
+
+        self.buffer = new_buffer
+        self.head = 0
+        self.tail = self.size
+</code></pre>
+<h3 id="3-circular-buffer-with-statistics"><a class="header" href="#3-circular-buffer-with-statistics">3. Circular Buffer with Statistics</a></h3>
+<pre><code class="language-python">from collections import deque
+import statistics
+
+class StatisticalCircularBuffer:
+    """
+    Circular buffer that maintains running statistics.
+    """
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.buffer = CircularBuffer(capacity)
+        self.sum = 0
+        self.values = deque(maxlen=capacity)
+
+    def add(self, value: float):
+        """
+        Add value and update statistics.
+        Time: O(1)
+        """
+        # Remove old value if buffer is full
+        if len(self.values) == self.capacity:
+            old_value = self.values[0]
+            self.sum -= old_value
+
+        self.values.append(value)
+        self.sum += value
+        self.buffer.enqueue(value)
+
+    def mean(self) -&gt; float:
+        """Calculate mean. Time: O(1)"""
+        if not self.values:
+            return 0.0
+        return self.sum / len(self.values)
+
+    def median(self) -&gt; float:
+        """Calculate median. Time: O(n log n)"""
+        if not self.values:
+            return 0.0
+        return statistics.median(self.values)
+
+    def std_dev(self) -&gt; float:
+        """Calculate standard deviation. Time: O(n)"""
+        if len(self.values) &lt; 2:
+            return 0.0
+        return statistics.stdev(self.values)
+
+    def min(self) -&gt; float:
+        """Get minimum value. Time: O(n)"""
+        if not self.values:
+            raise ValueError("Buffer is empty")
+        return min(self.values)
+
+    def max(self) -&gt; float:
+        """Get maximum value. Time: O(n)"""
+        if not self.values:
+            raise ValueError("Buffer is empty")
+        return max(self.values)
+</code></pre>
+<h2 id="time--space-complexity"><a class="header" href="#time--space-complexity">Time &amp; Space Complexity</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Initialization</strong></td><td>O(n)</td><td>O(n)</td><td>Allocate buffer once</td></tr>
+<tr><td><strong>Enqueue</strong></td><td>O(1)</td><td>O(1)</td><td>Always constant time</td></tr>
+<tr><td><strong>Dequeue</strong></td><td>O(1)</td><td>O(1)</td><td>Always constant time</td></tr>
+<tr><td><strong>Peek</strong></td><td>O(1)</td><td>O(1)</td><td>Just read, no write</td></tr>
+<tr><td><strong>Is Empty/Full</strong></td><td>O(1)</td><td>O(1)</td><td>Check size/pointers</td></tr>
+<tr><td><strong>Batch Operations</strong></td><td>O(k)</td><td>O(1)</td><td>k = number of items</td></tr>
+<tr><td><strong>Resize (if resizable)</strong></td><td>O(n)</td><td>O(n)</td><td>Amortized O(1)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Memory Characteristics:</strong></p>
+<ul>
+<li><strong>Fixed Size</strong>: No dynamic allocation after initialization</li>
+<li><strong>No Fragmentation</strong>: Contiguous memory block</li>
+<li><strong>Cache-Friendly</strong>: Sequential access pattern within buffer</li>
+<li><strong>Space Overhead</strong>: Just 2-3 integers (head, tail, size)</li>
+</ul>
+<h2 id="real-world-applications"><a class="header" href="#real-world-applications">Real-World Applications</a></h2>
+<h3 id="1-audiovideo-streaming"><a class="header" href="#1-audiovideo-streaming">1. <strong>Audio/Video Streaming</strong></a></h3>
+<pre><code class="language-python">class AudioBuffer:
+    """
+    Circular buffer for audio streaming with jitter handling.
+    """
+    def __init__(self, sample_rate: int, duration_ms: int):
+        samples = (sample_rate * duration_ms) // 1000
+        self.buffer = CircularBuffer(samples)
+        self.underrun_count = 0
+        self.overrun_count = 0
+
+    def write_samples(self, samples):
+        """Producer writes audio samples."""
+        for sample in samples:
+            if self.buffer.is_full_buffer():
+                self.overrun_count += 1
+            self.buffer.enqueue(sample)
+
+    def read_samples(self, count):
+        """Consumer reads samples for playback."""
+        samples = []
+        for _ in range(count):
+            if self.buffer.is_empty():
+                self.underrun_count += 1
+                samples.append(0)  # Silence
+            else:
+                samples.append(self.buffer.dequeue())
+        return samples
+</code></pre>
+<h3 id="2-producer-consumer-pattern"><a class="header" href="#2-producer-consumer-pattern">2. <strong>Producer-Consumer Pattern</strong></a></h3>
+<pre><code class="language-python">import time
+from threading import Thread
+
+def producer(buffer, items):
+    """Producer thread adds items to buffer."""
+    for item in items:
+        while not buffer.try_enqueue(item):
+            time.sleep(0.001)  # Wait if buffer full
+        print(f"Produced: {item}")
+        time.sleep(0.1)
+
+def consumer(buffer, count):
+    """Consumer thread removes items from buffer."""
+    consumed = 0
+    while consumed &lt; count:
+        success, item = buffer.try_dequeue()
+        if success:
+            print(f"Consumed: {item}")
+            consumed += 1
+        else:
+            time.sleep(0.001)  # Wait if buffer empty
+
+# Example usage
+buffer = ThreadSafeCircularBuffer(5)
+items = list(range(10))
+
+prod_thread = Thread(target=producer, args=(buffer, items))
+cons_thread = Thread(target=consumer, args=(buffer, len(items)))
+
+prod_thread.start()
+cons_thread.start()
+prod_thread.join()
+cons_thread.join()
+</code></pre>
+<h3 id="3-network-packet-buffer"><a class="header" href="#3-network-packet-buffer">3. <strong>Network Packet Buffer</strong></a></h3>
+<pre><code class="language-python">class PacketBuffer:
+    """
+    Circular buffer for network packet processing.
+    """
+    def __init__(self, capacity: int):
+        self.buffer = BlockingCircularBuffer(capacity)
+        self.dropped_packets = 0
+        self.total_packets = 0
+
+    def receive_packet(self, packet):
+        """Receive incoming packet."""
+        self.total_packets += 1
+        try:
+            self.buffer.enqueue(packet)
+        except OverflowError:
+            self.dropped_packets += 1
+            print(f"Packet dropped! Drop rate: "
+                  f"{self.dropped_packets/self.total_packets:.2%}")
+
+    def process_packets(self, max_count: int):
+        """Process up to max_count packets."""
+        processed = 0
+        while processed &lt; max_count and not self.buffer.is_empty():
+            packet = self.buffer.dequeue()
+            self._process_packet(packet)
+            processed += 1
+        return processed
+
+    def _process_packet(self, packet):
+        """Process single packet (implementation specific)."""
+        pass
+</code></pre>
+<h3 id="4-embedded-systems-sensor-data"><a class="header" href="#4-embedded-systems-sensor-data">4. <strong>Embedded Systems: Sensor Data</strong></a></h3>
+<pre><code class="language-python">class SensorDataBuffer:
+    """
+    Memory-efficient circular buffer for embedded sensor data.
+    """
+    def __init__(self, capacity: int):
+        self.buffer = CircularBuffer(capacity)
+        self.sample_count = 0
+
+    def add_reading(self, value: float):
+        """Add sensor reading."""
+        self.buffer.enqueue((self.sample_count, value))
+        self.sample_count += 1
+
+    def get_recent_readings(self, n: int):
+        """Get n most recent readings."""
+        readings = []
+        temp_buffer = []
+
+        # Extract readings
+        count = min(n, len(self.buffer))
+        for _ in range(count):
+            reading = self.buffer.dequeue()
+            readings.append(reading)
+            temp_buffer.append(reading)
+
+        # Restore buffer
+        for reading in temp_buffer:
+            self.buffer.enqueue(reading)
+
+        return readings
+
+    def calculate_moving_average(self, window: int) -&gt; float:
+        """Calculate moving average over window."""
+        readings = self.get_recent_readings(window)
+        if not readings:
+            return 0.0
+        return sum(r[1] for r in readings) / len(readings)
+</code></pre>
+<h3 id="5-log-buffer-with-rotation"><a class="header" href="#5-log-buffer-with-rotation">5. <strong>Log Buffer with Rotation</strong></a></h3>
+<pre><code class="language-python">import datetime
+
+class RotatingLogBuffer:
+    """
+    Circular buffer for log messages with automatic rotation.
+    """
+    def __init__(self, capacity: int):
+        self.buffer = CircularBuffer(capacity)
+
+    def log(self, level: str, message: str):
+        """Add log entry with timestamp."""
+        timestamp = datetime.datetime.now()
+        entry = {
+            'timestamp': timestamp,
+            'level': level,
+            'message': message
+        }
+        self.buffer.enqueue(entry)
+
+    def get_logs(self, level: str = None):
+        """Get all logs, optionally filtered by level."""
+        logs = []
+        temp = []
+
+        while not self.buffer.is_empty():
+            entry = self.buffer.dequeue()
+            temp.append(entry)
+            if level is None or entry['level'] == level:
+                logs.append(entry)
+
+        # Restore buffer
+        for entry in temp:
+            self.buffer.enqueue(entry)
+
+        return logs
+
+    def info(self, message: str):
+        self.log('INFO', message)
+
+    def warning(self, message: str):
+        self.log('WARNING', message)
+
+    def error(self, message: str):
+        self.log('ERROR', message)
+</code></pre>
+<h2 id="leetcode-problems"><a class="header" href="#leetcode-problems">LeetCode Problems</a></h2>
+<h3 id="direct-applications"><a class="header" href="#direct-applications">Direct Applications</a></h3>
+<ol>
+<li>
+<p><strong><a href="https://leetcode.com/problems/design-circular-queue/">622. Design Circular Queue</a></strong> - Medium</p>
+<ul>
+<li><strong>Pattern</strong>: Basic circular buffer implementation</li>
+<li><strong>Key</strong>: Track head, tail, and size with modulo arithmetic</li>
+</ul>
+</li>
+<li>
+<p><strong><a href="https://leetcode.com/problems/design-circular-deque/">641. Design Circular Deque</a></strong> - Medium</p>
+<ul>
+<li><strong>Pattern</strong>: Bidirectional circular buffer</li>
+<li><strong>Key</strong>: Support insertions/deletions at both ends</li>
+</ul>
+</li>
+<li>
+<p><strong><a href="https://leetcode.com/problems/moving-average-from-data-stream/">346. Moving Average from Data Stream</a></strong> - Easy</p>
+<ul>
+<li><strong>Pattern</strong>: Fixed-size window statistics</li>
+<li><strong>Key</strong>: Use circular buffer to maintain window</li>
+</ul>
+</li>
+</ol>
+<h3 id="related-problems"><a class="header" href="#related-problems">Related Problems</a></h3>
+<ol start="4">
+<li>
+<p><strong><a href="https://leetcode.com/problems/number-of-recent-calls/">933. Number of Recent Calls</a></strong> - Easy</p>
+<ul>
+<li><strong>Pattern</strong>: Time-based windowing</li>
+<li><strong>Key</strong>: Remove old entries, count recent ones</li>
+</ul>
+</li>
+<li>
+<p><strong><a href="https://leetcode.com/problems/longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit/">1438. Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit</a></strong> - Medium</p>
+<ul>
+<li><strong>Pattern</strong>: Sliding window with min/max tracking</li>
+<li><strong>Key</strong>: Circular buffer-like deque operations</li>
+</ul>
+</li>
+<li>
+<p><strong><a href="https://leetcode.com/problems/sliding-window-maximum/">239. Sliding Window Maximum</a></strong> - Hard</p>
+<ul>
+<li><strong>Pattern</strong>: Fixed-size window queries</li>
+<li><strong>Key</strong>: Efficient removal of oldest elements</li>
+</ul>
+</li>
+</ol>
+<h2 id="interview-patterns--tips"><a class="header" href="#interview-patterns--tips">Interview Patterns &amp; Tips</a></h2>
+<h3 id="common-interview-questions"><a class="header" href="#common-interview-questions">Common Interview Questions</a></h3>
+<ol>
+<li>
+<p><strong>“Implement a circular buffer with fixed capacity”</strong></p>
+<ul>
+<li>Focus on modulo arithmetic for wrap-around</li>
+<li>Discuss overflow strategies (overwrite vs. block)</li>
+<li>Mention thread-safety considerations</li>
+</ul>
+</li>
+<li>
+<p><strong>“Design a rate limiter using a circular buffer”</strong></p>
+<ul>
+<li>Use buffer to track recent requests</li>
+<li>Remove expired timestamps</li>
+<li>Count valid entries in window</li>
+</ul>
+</li>
+<li>
+<p><strong>“How would you implement a lock-free queue?”</strong></p>
+<ul>
+<li>Single producer/single consumer circular buffer</li>
+<li>Atomic operations on head/tail</li>
+<li>Memory barriers for visibility</li>
+</ul>
+</li>
+</ol>
+<h3 id="key-concepts-to-explain"><a class="header" href="#key-concepts-to-explain">Key Concepts to Explain</a></h3>
+<p><strong>1. Wrap-Around Logic:</strong></p>
+<pre><code class="language-python"># Always use modulo for circular indexing
+next_index = (current_index + 1) % capacity
+
+# Alternative: conditional
+next_index = current_index + 1
+if next_index &gt;= capacity:
+    next_index = 0
+</code></pre>
+<p><strong>2. Full vs. Empty Detection:</strong></p>
+<pre><code class="language-python"># Method 1: Track size separately
+is_empty = (size == 0)
+is_full = (size == capacity)
+
+# Method 2: Use flag
+is_full = (tail == head) and flag
+is_empty = (tail == head) and not flag
+
+# Method 3: Waste one slot
+is_full = ((tail + 1) % capacity == head)
+is_empty = (tail == head)
+</code></pre>
+<p><strong>3. Overwrite vs. Block Behavior:</strong></p>
+<ul>
+<li><strong>Overwrite</strong>: Move head forward when full (data loss acceptable)</li>
+<li><strong>Block</strong>: Raise exception or return false (data preservation required)</li>
+<li><strong>Choice depends on use case</strong>: Logs can overwrite, queues should block</li>
+</ul>
+<h3 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h3>
+<ol>
+<li><strong>Off-by-One Errors</strong>: Carefully handle wrap-around at capacity boundary</li>
+<li><strong>Full/Empty Confusion</strong>: When head == tail, buffer could be full or empty</li>
+<li><strong>Integer Overflow</strong>: In long-running systems, counters may overflow</li>
+<li><strong>Thread Safety</strong>: Without proper synchronization, concurrent access breaks buffer</li>
+<li><strong>Memory Leaks</strong>: Clear references when dequeuing (especially in garbage-collected languages)</li>
+</ol>
+<h3 id="performance-considerations"><a class="header" href="#performance-considerations">Performance Considerations</a></h3>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>O(1) enqueue/dequeue operations</li>
+<li>No dynamic memory allocation</li>
+<li>Cache-friendly due to contiguous memory</li>
+<li>Predictable performance (no garbage collection pauses)</li>
+</ul>
+<p><strong>When to Use:</strong></p>
+<ul>
+<li>Fixed maximum size is acceptable</li>
+<li>Predictable memory usage required</li>
+<li>High-performance producer-consumer scenarios</li>
+<li>Embedded systems with limited memory</li>
+<li>Real-time systems requiring deterministic behavior</li>
+</ul>
+<p><strong>When Not to Use:</strong></p>
+<ul>
+<li>Need unbounded growth</li>
+<li>Random access to all elements required</li>
+<li>Priority-based processing needed</li>
+<li>Complex reordering operations</li>
+</ul>
+<h2 id="comparison-with-alternatives"><a class="header" href="#comparison-with-alternatives">Comparison with Alternatives</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Circular Buffer</th><th>Dynamic Queue</th><th>Linked List</th><th>Array Deque</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Enqueue Time</strong></td><td>O(1)</td><td>O(1) amortized</td><td>O(1)</td><td>O(1) amortized</td></tr>
+<tr><td><strong>Dequeue Time</strong></td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(1)</td></tr>
+<tr><td><strong>Memory</strong></td><td>Fixed O(n)</td><td>Variable O(n)</td><td>O(n) + pointers</td><td>Variable O(n)</td></tr>
+<tr><td><strong>Cache Efficiency</strong></td><td>Excellent</td><td>Good</td><td>Poor</td><td>Good</td></tr>
+<tr><td><strong>Resizable</strong></td><td>No*</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+<tr><td><strong>Memory Overhead</strong></td><td>Minimal</td><td>Moderate</td><td>High</td><td>Moderate</td></tr>
+<tr><td><strong>Predictability</strong></td><td>Perfect</td><td>Good</td><td>Poor</td><td>Good</td></tr>
+<tr><td><strong>Thread-Safe</strong></td><td>Can be lock-free</td><td>Needs locks</td><td>Needs locks</td><td>Needs locks</td></tr>
+</tbody>
+</table>
+</div>
+<p>*Unless implemented as resizable variant</p>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="1-lock-free-multi-producer-multi-consumer"><a class="header" href="#1-lock-free-multi-producer-multi-consumer">1. Lock-Free Multi-Producer Multi-Consumer</a></h3>
+<p>For multiple producers/consumers, use atomic compare-and-swap (CAS):</p>
+<pre><code class="language-python">import threading
+
+class MPMCCircularBuffer:
+    """
+    Lock-free circular buffer for multiple producers/consumers.
+    Note: This is a simplified version. Production code needs memory barriers.
+    """
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.buffer = [None] * capacity
+        self.enqueue_pos = 0
+        self.dequeue_pos = 0
+        self.lock = threading.Lock()  # Simplified version uses lock
+
+    def try_enqueue(self, item):
+        """Thread-safe enqueue using lock."""
+        with self.lock:
+            next_pos = (self.enqueue_pos + 1) % self.capacity
+            if next_pos == self.dequeue_pos:
+                return False  # Full
+
+            self.buffer[self.enqueue_pos] = item
+            self.enqueue_pos = next_pos
+            return True
+
+    def try_dequeue(self):
+        """Thread-safe dequeue using lock."""
+        with self.lock:
+            if self.enqueue_pos == self.dequeue_pos:
+                return False, None  # Empty
+
+            item = self.buffer[self.dequeue_pos]
+            self.dequeue_pos = (self.dequeue_pos + 1) % self.capacity
+            return True, item
+</code></pre>
+<h3 id="2-memory-mapped-circular-buffer"><a class="header" href="#2-memory-mapped-circular-buffer">2. Memory-Mapped Circular Buffer</a></h3>
+<p>For IPC (inter-process communication):</p>
+<pre><code class="language-python">import mmap
+import struct
+
+class MemoryMappedCircularBuffer:
+    """
+    Circular buffer using memory-mapped file for IPC.
+    """
+    def __init__(self, filename: str, capacity: int):
+        self.capacity = capacity
+        self.item_size = 8  # 8 bytes per item (long long)
+
+        # Header: head (8 bytes) + tail (8 bytes)
+        header_size = 16
+        total_size = header_size + (capacity * self.item_size)
+
+        # Create memory-mapped file
+        with open(filename, 'wb') as f:
+            f.write(b'\x00' * total_size)
+
+        self.file = open(filename, 'r+b')
+        self.mmap = mmap.mmap(self.file.fileno(), total_size)
+
+    def enqueue(self, value: int):
+        """Write integer to shared buffer."""
+        head = struct.unpack('Q', self.mmap[0:8])[0]
+        tail = struct.unpack('Q', self.mmap[8:16])[0]
+
+        next_tail = (tail + 1) % self.capacity
+        if next_tail == head:
+            raise OverflowError("Buffer full")
+
+        offset = 16 + (tail * self.item_size)
+        self.mmap[offset:offset+8] = struct.pack('Q', value)
+        self.mmap[8:16] = struct.pack('Q', next_tail)
+
+    def dequeue(self) -&gt; int:
+        """Read integer from shared buffer."""
+        head = struct.unpack('Q', self.mmap[0:8])[0]
+        tail = struct.unpack('Q', self.mmap[8:16])[0]
+
+        if head == tail:
+            raise IndexError("Buffer empty")
+
+        offset = 16 + (head * self.item_size)
+        value = struct.unpack('Q', self.mmap[offset:offset+8])[0]
+
+        next_head = (head + 1) % self.capacity
+        self.mmap[0:8] = struct.pack('Q', next_head)
+
+        return value
+
+    def close(self):
+        """Close memory-mapped file."""
+        self.mmap.close()
+        self.file.close()
+</code></pre>
+<h3 id="3-power-of-two-capacity-optimization"><a class="header" href="#3-power-of-two-capacity-optimization">3. Power-of-Two Capacity Optimization</a></h3>
+<p>Using power-of-two capacity allows bitwise AND instead of modulo:</p>
+<pre><code class="language-python">class OptimizedCircularBuffer:
+    """
+    Circular buffer optimized with power-of-2 capacity.
+    """
+    def __init__(self, capacity_bits: int):
+        """
+        Initialize with capacity = 2^capacity_bits.
+        Example: capacity_bits=10 gives capacity=1024
+        """
+        self.capacity = 1 &lt;&lt; capacity_bits  # 2^capacity_bits
+        self.mask = self.capacity - 1  # For bitwise AND
+        self.buffer = [None] * self.capacity
+        self.head = 0
+        self.tail = 0
+
+    def enqueue(self, item):
+        """Enqueue using bitwise AND instead of modulo."""
+        next_tail = (self.tail + 1) &amp; self.mask  # Same as % capacity
+        if next_tail == self.head:
+            raise OverflowError("Buffer full")
+
+        self.buffer[self.tail] = item
+        self.tail = next_tail
+
+    def dequeue(self):
+        """Dequeue using bitwise AND."""
+        if self.head == self.tail:
+            raise IndexError("Buffer empty")
+
+        item = self.buffer[self.head]
+        self.head = (self.head + 1) &amp; self.mask
+        return item
+</code></pre>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p><strong>Circular Buffer is ideal when:</strong></p>
+<ul>
+<li>Fixed maximum size is acceptable</li>
+<li>Need O(1) enqueue/dequeue operations</li>
+<li>Predictable memory usage is critical</li>
+<li>Building producer-consumer systems</li>
+<li>Working in embedded/real-time environments</li>
+<li>Old data can be overwritten (in overwrite mode)</li>
+<li>High cache efficiency is important</li>
+</ul>
+<p><strong>Avoid Circular Buffer when:</strong></p>
+<ul>
+<li>Need dynamic, unbounded growth</li>
+<li>Require random access to all elements</li>
+<li>Need complex reordering or priority queues</li>
+<li>Can’t tolerate data loss (and buffer size is uncertain)</li>
+</ul>
+<p><strong>Key Takeaway</strong>: Circular buffers are the go-to choice for fixed-size FIFO queues where performance and memory predictability matter. They shine in streaming applications, embedded systems, and high-performance producer-consumer scenarios.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../data_structures/union_find.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../data_structures/fenwick_tree.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../data_structures/union_find.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../data_structures/fenwick_tree.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

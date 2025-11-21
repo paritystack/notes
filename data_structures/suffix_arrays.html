@@ -1,0 +1,1298 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Suffix Arrays - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-93ad08a6.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-f9b1048b.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="suffix-arrays-and-suffix-trees"><a class="header" href="#suffix-arrays-and-suffix-trees">Suffix Arrays and Suffix Trees</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#suffix-arrays">Suffix Arrays</a>
+<ul>
+<li><a href="#what-is-a-suffix-array">What is a Suffix Array</a></li>
+<li><a href="#construction-algorithms">Construction Algorithms</a></li>
+<li><a href="#lcp-array">LCP Array</a></li>
+<li><a href="#suffix-array-applications">Applications</a></li>
+</ul>
+</li>
+<li><a href="#suffix-trees">Suffix Trees</a>
+<ul>
+<li><a href="#what-is-a-suffix-tree">What is a Suffix Tree</a></li>
+<li><a href="#construction-ukkonens-algorithm">Construction (Ukkonen’s Algorithm)</a></li>
+<li><a href="#suffix-tree-applications">Applications</a></li>
+</ul>
+</li>
+<li><a href="#implementation">Implementation</a></li>
+<li><a href="#comparison">Comparison</a></li>
+<li><a href="#common-problems">Common Problems</a></li>
+<li><a href="#advanced-topics">Advanced Topics</a></li>
+</ul>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p><strong>Suffix arrays</strong> and <strong>suffix trees</strong> are powerful data structures for string processing. They enable efficient solutions to problems like pattern matching, longest repeated substring, and string compression.</p>
+<h3 id="key-characteristics"><a class="header" href="#key-characteristics">Key Characteristics</a></h3>
+<p><strong>Suffix Array:</strong></p>
+<ul>
+<li>Array of integers representing sorted suffixes</li>
+<li>Space: O(n) integers</li>
+<li>Construction: O(n log n) or O(n)</li>
+<li>Queries: O(m log n) for pattern matching</li>
+</ul>
+<p><strong>Suffix Tree:</strong></p>
+<ul>
+<li>Tree structure storing all suffixes</li>
+<li>Space: O(n) nodes</li>
+<li>Construction: O(n) with Ukkonen’s algorithm</li>
+<li>Queries: O(m) for pattern matching</li>
+<li>More versatile but more complex</li>
+</ul>
+<h3 id="why-these-structures"><a class="header" href="#why-these-structures">Why These Structures?</a></h3>
+<p><strong>Problems they solve efficiently:</strong></p>
+<ul>
+<li>Pattern matching in O(m + log n) or O(m)</li>
+<li>Find longest repeated substring</li>
+<li>Find longest common substring of two strings</li>
+<li>Count distinct substrings</li>
+<li>String compression (LZ77, Burrows-Wheeler Transform)</li>
+<li>Bioinformatics (DNA sequence analysis)</li>
+</ul>
+<h2 id="suffix-arrays"><a class="header" href="#suffix-arrays">Suffix Arrays</a></h2>
+<h3 id="what-is-a-suffix-array"><a class="header" href="#what-is-a-suffix-array">What is a Suffix Array</a></h3>
+<p>A <strong>suffix array</strong> for string S is an array of integers representing the starting positions of all suffixes of S, sorted in lexicographical order.</p>
+<p><strong>Example:</strong></p>
+<pre><code>String: "banana"
+Index:   012345
+
+Suffixes:
+i  Suffix      Sorted
+0  banana      5  a
+1  anana       3  ana
+2  nana        1  anana
+3  ana         0  banana
+4  na          4  na
+5  a           2  nana
+
+Suffix Array: [5, 3, 1, 0, 4, 2]
+</code></pre>
+<p><strong>Definition:</strong></p>
+<pre><code>For string S[0..n-1]:
+SA[i] = starting index of the i-th smallest suffix
+</code></pre>
+<p><strong>Key Property</strong>: Binary search on suffix array enables fast pattern matching!</p>
+<h3 id="visual-representation"><a class="header" href="#visual-representation">Visual Representation</a></h3>
+<pre><code>String S = "banana$" ($ = sentinel, lexicographically smallest)
+
+Suffixes in sorted order:
+SA[0] = 6  →  $
+SA[1] = 5  →  a$
+SA[2] = 3  →  ana$
+SA[3] = 1  →  anana$
+SA[4] = 0  →  banana$
+SA[5] = 4  →  na$
+SA[6] = 2  →  nana$
+</code></pre>
+<h3 id="construction-algorithms"><a class="header" href="#construction-algorithms">Construction Algorithms</a></h3>
+<h4 id="naive-construction---on²-log-n"><a class="header" href="#naive-construction---on²-log-n">Naive Construction - O(n² log n)</a></h4>
+<p><strong>Algorithm:</strong></p>
+<ol>
+<li>Generate all suffixes</li>
+<li>Sort them lexicographically</li>
+<li>Store starting positions</li>
+</ol>
+<pre><code class="language-python">def build_suffix_array_naive(s):
+    """
+    Naive O(n² log n) construction.
+
+    Args:
+        s (str): Input string
+
+    Returns:
+        list: Suffix array
+
+    Time: O(n² log n) - O(n log n) sorts, O(n) comparisons each
+    """
+    n = len(s)
+    suffixes = [(s[i:], i) for i in range(n)]
+    suffixes.sort()  # O(n² log n) due to string comparisons
+    return [suffix[1] for suffix in suffixes]
+
+# Example
+s = "banana"
+sa = build_suffix_array_naive(s)
+print(sa)  # [5, 3, 1, 0, 4, 2]
+</code></pre>
+<p><strong>Problem</strong>: O(n) string comparisons are expensive!</p>
+<h4 id="prefix-doubling---on-log²-n"><a class="header" href="#prefix-doubling---on-log²-n">Prefix Doubling - O(n log² n)</a></h4>
+<p><strong>Idea</strong>: Build suffix array by doubling sorted prefix length each iteration.</p>
+<p><strong>Algorithm:</strong></p>
+<ol>
+<li>Sort by first character: O(n log n)</li>
+<li>Sort by first 2 characters using first-char ranks: O(n log n)</li>
+<li>Sort by first 4 characters using 2-char ranks: O(n log n)</li>
+<li>Continue: log n iterations</li>
+</ol>
+<pre><code class="language-python">def build_suffix_array_doubling(s):
+    """
+    Prefix doubling O(n log² n) construction.
+
+    Key idea:
+    - Rank suffixes by first k characters
+    - Use ranks to sort by first 2k characters
+    - Double k each iteration until k ≥ n
+
+    Time: O(n log² n)
+    """
+    n = len(s)
+    s = s + '$'  # Add sentinel
+    n += 1
+
+    # Initial ranking by first character
+    rank = [ord(c) for c in s]
+    sa = list(range(n))
+    k = 1
+
+    while k &lt; n:
+        # Sort by (rank[i], rank[i+k]) pairs
+        sa.sort(key=lambda i: (rank[i], rank[i + k] if i + k &lt; n else -1))
+
+        # Compute new ranks
+        new_rank = [0] * n
+        new_rank[sa[0]] = 0
+
+        for i in range(1, n):
+            prev = sa[i - 1]
+            curr = sa[i]
+
+            prev_pair = (rank[prev], rank[prev + k] if prev + k &lt; n else -1)
+            curr_pair = (rank[curr], rank[curr + k] if curr + k &lt; n else -1)
+
+            if prev_pair == curr_pair:
+                new_rank[curr] = new_rank[prev]
+            else:
+                new_rank[curr] = new_rank[prev] + 1
+
+        rank = new_rank
+        k *= 2
+
+    return sa[1:]  # Remove sentinel position
+
+
+# Example
+s = "banana"
+sa = build_suffix_array_doubling(s)
+print(sa)  # [5, 3, 1, 0, 4, 2]
+</code></pre>
+<p><strong>How it works:</strong></p>
+<pre><code>String: "banana"
+
+Iteration 1 (k=1): Sort by first 1 character
+Ranks: [b:1, a:0, n:2, a:0, n:2, a:0]
+SA after sorting: [5, 3, 1, 0, 4, 2] (positions of 'a', then 'b', then 'n')
+
+Iteration 2 (k=2): Sort by first 2 characters
+Use ranks: position i sorted by (rank[i], rank[i+1])
+...
+
+Iteration 3 (k=4): Sort by first 4 characters
+...
+
+After log(n) iterations: Full suffix array built!
+</code></pre>
+<h4 id="dc3--skew-algorithm---on"><a class="header" href="#dc3--skew-algorithm---on">DC3 / Skew Algorithm - O(n)</a></h4>
+<p><strong>Best algorithm for suffix array construction in O(n) time.</strong></p>
+<p><strong>Key ideas:</strong></p>
+<ol>
+<li>Recursively sort 2/3 of suffixes</li>
+<li>Use sorted 2/3 to sort remaining 1/3</li>
+<li>Merge sorted portions</li>
+</ol>
+<p><strong>Not commonly implemented in interviews</strong> due to complexity.</p>
+<h3 id="lcp-array"><a class="header" href="#lcp-array">LCP Array</a></h3>
+<p><strong>LCP (Longest Common Prefix) Array</strong>: Stores length of longest common prefix between consecutive suffixes in sorted order.</p>
+<p><strong>Definition:</strong></p>
+<pre><code>LCP[i] = length of longest common prefix of SA[i-1] and SA[i]
+LCP[0] = 0 (by convention)
+</code></pre>
+<p><strong>Example:</strong></p>
+<pre><code>String: "banana"
+
+SA:  [5, 3, 1, 0, 4, 2]
+     Suffixes:
+     a          (SA[0] = 5)
+     ana        (SA[1] = 3)
+     anana      (SA[2] = 1)
+     banana     (SA[3] = 0)
+     na         (SA[4] = 4)
+     nana       (SA[5] = 2)
+
+LCP: [0, 1, 3, 0, 0, 2]
+     ^  ^  ^  ^  ^  ^
+     |  |  |  |  |  └─ "na" vs "nana": LCP = 2
+     |  |  |  |  └──── "banana" vs "na": LCP = 0
+     |  |  |  └─────── "anana" vs "banana": LCP = 0
+     |  |  └────────── "ana" vs "anana": LCP = 3
+     |  └───────────── "a" vs "ana": LCP = 1
+     └──────────────── convention
+</code></pre>
+<h4 id="kasais-algorithm---on"><a class="header" href="#kasais-algorithm---on">Kasai’s Algorithm - O(n)</a></h4>
+<p><strong>Efficient construction of LCP array from suffix array.</strong></p>
+<p><strong>Key insight</strong>: If LCP of suffixes starting at positions i and j is k, then LCP of suffixes starting at i+1 and j+1 is at least k-1.</p>
+<pre><code class="language-python">def build_lcp_array(s, sa):
+    """
+    Build LCP array using Kasai's algorithm.
+
+    Args:
+        s (str): Input string
+        sa (list): Suffix array
+
+    Returns:
+        list: LCP array
+
+    Time: O(n)
+    """
+    n = len(s)
+    rank = [0] * n
+    lcp = [0] * n
+
+    # Compute rank array (inverse of suffix array)
+    for i in range(n):
+        rank[sa[i]] = i
+
+    k = 0  # Length of current LCP
+    for i in range(n):
+        if rank[i] == n - 1:
+            k = 0
+            continue
+
+        # Compare suffix starting at i with next suffix in sorted order
+        j = sa[rank[i] + 1]
+
+        # Extend LCP
+        while i + k &lt; n and j + k &lt; n and s[i + k] == s[j + k]:
+            k += 1
+
+        lcp[rank[i]] = k
+
+        # Key insight: LCP can decrease by at most 1
+        if k &gt; 0:
+            k -= 1
+
+    return lcp
+
+
+# Example
+s = "banana"
+sa = [5, 3, 1, 0, 4, 2]
+lcp = build_lcp_array(s, sa)
+print(lcp)  # [0, 1, 3, 0, 0, 2]
+</code></pre>
+<p><strong>Why O(n)?</strong></p>
+<ul>
+<li>k can increase at most n times total (bounded by string length)</li>
+<li>k can decrease at most n times total</li>
+<li>Each character compared at most twice</li>
+<li>Total: O(n)</li>
+</ul>
+<h3 id="suffix-array-applications"><a class="header" href="#suffix-array-applications">Suffix Array Applications</a></h3>
+<h4 id="1-pattern-matching"><a class="header" href="#1-pattern-matching">1. Pattern Matching</a></h4>
+<p><strong>Problem</strong>: Find all occurrences of pattern P in text T</p>
+<p><strong>Solution</strong>: Binary search on suffix array</p>
+<pre><code class="language-python">def pattern_matching(text, pattern, sa):
+    """
+    Find all occurrences of pattern in text using suffix array.
+
+    Args:
+        text (str): Text to search in
+        pattern (str): Pattern to find
+        sa (list): Suffix array of text
+
+    Returns:
+        list: Starting positions of pattern occurrences
+
+    Time: O(m log n) where m = len(pattern), n = len(text)
+    """
+    def compare_with_pattern(suffix_start):
+        """Compare suffix with pattern"""
+        for i in range(len(pattern)):
+            if suffix_start + i &gt;= len(text):
+                return -1  # Pattern longer than suffix
+            if text[suffix_start + i] &lt; pattern[i]:
+                return -1
+            if text[suffix_start + i] &gt; pattern[i]:
+                return 1
+        return 0
+
+    # Binary search for leftmost occurrence
+    left, right = 0, len(sa)
+    while left &lt; right:
+        mid = (left + right) // 2
+        if compare_with_pattern(sa[mid]) &lt; 0:
+            left = mid + 1
+        else:
+            right = mid
+
+    start = left
+
+    # Binary search for rightmost occurrence
+    left, right = 0, len(sa)
+    while left &lt; right:
+        mid = (left + right) // 2
+        if compare_with_pattern(sa[mid]) &lt;= 0:
+            left = mid + 1
+        else:
+            right = mid
+
+    end = right
+
+    # Extract all occurrences
+    return [sa[i] for i in range(start, end)]
+
+
+# Example
+text = "banana"
+pattern = "ana"
+sa = [5, 3, 1, 0, 4, 2]
+positions = pattern_matching(text, pattern, sa)
+print(f"Pattern '{pattern}' found at positions: {positions}")  # [1, 3]
+</code></pre>
+<h4 id="2-longest-repeated-substring"><a class="header" href="#2-longest-repeated-substring">2. Longest Repeated Substring</a></h4>
+<p><strong>Problem</strong>: Find longest substring that appears at least twice in string</p>
+<p><strong>Solution</strong>: Maximum value in LCP array</p>
+<pre><code class="language-python">def longest_repeated_substring(s):
+    """
+    Find longest repeated substring.
+
+    Args:
+        s (str): Input string
+
+    Returns:
+        str: Longest repeated substring
+
+    Time: O(n log n) for SA construction + O(n) for LCP
+    """
+    sa = build_suffix_array_doubling(s)
+    lcp = build_lcp_array(s, sa)
+
+    # Find maximum LCP value
+    max_lcp = max(lcp)
+    max_idx = lcp.index(max_lcp)
+
+    # Extract substring
+    start = sa[max_idx]
+    return s[start:start + max_lcp]
+
+
+# Example
+s = "banana"
+result = longest_repeated_substring(s)
+print(f"Longest repeated substring: '{result}'")  # "ana"
+</code></pre>
+<p><strong>Why it works:</strong></p>
+<ul>
+<li>Repeated substring appears as prefix of multiple suffixes</li>
+<li>These suffixes are adjacent in sorted suffix array</li>
+<li>LCP of adjacent suffixes = length of common prefix = repeated substring</li>
+</ul>
+<h4 id="3-count-distinct-substrings"><a class="header" href="#3-count-distinct-substrings">3. Count Distinct Substrings</a></h4>
+<p><strong>Problem</strong>: Count number of distinct substrings</p>
+<p><strong>Solution</strong>: Use formula involving LCP array</p>
+<pre><code class="language-python">def count_distinct_substrings(s):
+    """
+    Count number of distinct substrings.
+
+    Formula: Total substrings - Duplicate substrings
+           = n*(n+1)/2 - sum(LCP)
+
+    Args:
+        s (str): Input string
+
+    Returns:
+        int: Number of distinct substrings
+
+    Time: O(n log n)
+    """
+    n = len(s)
+    sa = build_suffix_array_doubling(s)
+    lcp = build_lcp_array(s, sa)
+
+    # Total possible substrings
+    total = n * (n + 1) // 2
+
+    # Subtract duplicates (sum of LCP values)
+    duplicates = sum(lcp)
+
+    return total - duplicates
+
+
+# Example
+s = "banana"
+count = count_distinct_substrings(s)
+print(f"Distinct substrings: {count}")  # 15
+</code></pre>
+<p><strong>Explanation:</strong></p>
+<ul>
+<li>Each suffix contributes len(suffix) substrings</li>
+<li>But substrings matching LCP with previous suffix are duplicates</li>
+<li>Formula accounts for all unique substrings</li>
+</ul>
+<h4 id="4-longest-common-substring-of-two-strings"><a class="header" href="#4-longest-common-substring-of-two-strings">4. Longest Common Substring of Two Strings</a></h4>
+<p><strong>Problem</strong>: Find longest substring common to both strings</p>
+<p><strong>Solution</strong>: Build suffix array of concatenated string</p>
+<pre><code class="language-python">def longest_common_substring(s1, s2):
+    """
+    Find longest common substring of two strings.
+
+    Args:
+        s1, s2 (str): Input strings
+
+    Returns:
+        str: Longest common substring
+
+    Time: O((n+m) log(n+m))
+    """
+    # Concatenate with separator
+    separator = '#'  # Character not in either string
+    combined = s1 + separator + s2
+    n1, n2 = len(s1), len(s2)
+
+    # Build suffix array and LCP
+    sa = build_suffix_array_doubling(combined)
+    lcp = build_lcp_array(combined, sa)
+
+    # Find max LCP where suffixes come from different strings
+    max_lcp = 0
+    max_idx = 0
+
+    for i in range(1, len(lcp)):
+        # Check if adjacent suffixes from different strings
+        suffix1_from_s1 = sa[i - 1] &lt; n1
+        suffix2_from_s1 = sa[i] &lt; n1
+
+        if suffix1_from_s1 != suffix2_from_s1:  # Different strings
+            if lcp[i] &gt; max_lcp:
+                max_lcp = lcp[i]
+                max_idx = i
+
+    # Extract substring
+    start = sa[max_idx] if sa[max_idx] &lt; n1 else sa[max_idx] - n1 - 1
+    original_string = s1 if sa[max_idx] &lt; n1 else s2
+    return original_string[start:start + max_lcp]
+
+
+# Example
+s1 = "banana"
+s2 = "ananas"
+result = longest_common_substring(s1, s2)
+print(f"Longest common substring: '{result}'")  # "anana"
+</code></pre>
+<h2 id="suffix-trees"><a class="header" href="#suffix-trees">Suffix Trees</a></h2>
+<h3 id="what-is-a-suffix-tree"><a class="header" href="#what-is-a-suffix-tree">What is a Suffix Tree</a></h3>
+<p>A <strong>suffix tree</strong> for string S is a compressed trie (prefix tree) of all suffixes of S.</p>
+<p><strong>Properties:</strong></p>
+<ul>
+<li>Each edge labeled with substring of S</li>
+<li>Each path from root represents a suffix</li>
+<li>Leaves correspond to suffixes</li>
+<li>Internal nodes have at least 2 children</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>String: "banana$"
+
+Suffix Tree:
+                    root
+            /       |      \
+           $        a       banana$
+                 /     \
+               na$      $
+               /
+              na$
+
+More detailed:
+                        root
+                    /    |    \
+                   $     a     banana$
+                        / \
+                   na$-3  $-5
+                      /
+                na$-1,4
+</code></pre>
+<h3 id="space-optimization-edge-compression"><a class="header" href="#space-optimization-edge-compression">Space Optimization: Edge Compression</a></h3>
+<p><strong>Key idea</strong>: Store edge labels as (start, end) indices into original string instead of actual substrings.</p>
+<pre><code class="language-python">class SuffixTreeNode:
+    def __init__(self):
+        self.children = {}  # char -&gt; child node
+        self.start = -1     # Edge label start index
+        self.end = None     # Edge label end index (pointer for leaves)
+        self.suffix_link = None  # For Ukkonen's algorithm
+        self.suffix_index = -1   # Leaf: suffix starting position
+</code></pre>
+<p><strong>Space</strong>: O(n) nodes, O(n) total edge label storage</p>
+<h3 id="construction-ukkonens-algorithm"><a class="header" href="#construction-ukkonens-algorithm">Construction (Ukkonen’s Algorithm)</a></h3>
+<p><strong>Ukkonen’s algorithm</strong> builds suffix tree in O(n) time using online construction.</p>
+<p><strong>Key ideas:</strong></p>
+<ol>
+<li><strong>Build incrementally</strong>: Add one character at a time</li>
+<li><strong>Implicit representation</strong>: Lazy evaluation of leaves</li>
+<li><strong>Suffix links</strong>: Fast navigation between related suffixes</li>
+<li><strong>Active point</strong>: Track construction state</li>
+</ol>
+<p><strong>Algorithm outline:</strong></p>
+<pre><code>For each character c in string:
+    1. Extend all existing leaves (implicit via end pointer)
+    2. Add new leaves for suffixes ending at c
+    3. Use suffix links to efficiently navigate
+    4. Update active point
+</code></pre>
+<p><strong>Implementation</strong> (simplified):</p>
+<pre><code class="language-python">class SuffixTree:
+    """
+    Suffix tree using Ukkonen's algorithm.
+    Simplified implementation for understanding.
+    """
+
+    class Node:
+        def __init__(self, start, end):
+            self.start = start
+            self.end = end
+            self.children = {}
+            self.suffix_link = None
+            self.suffix_index = -1
+
+    def __init__(self, text):
+        self.text = text + '$'  # Add terminator
+        self.root = self.Node(-1, -1)
+        self.root.suffix_link = self.root
+        self._build()
+
+    def _build(self):
+        """
+        Build suffix tree using Ukkonen's algorithm.
+        Simplified version - full implementation is complex.
+        """
+        # Active point tracks where to insert next
+        active_node = self.root
+        active_edge = -1
+        active_length = 0
+
+        # Remaining suffix count
+        remaining = 0
+
+        # Build tree character by character
+        for i, char in enumerate(self.text):
+            remaining += 1
+
+            # ... complex logic for:
+            # - Extending existing suffixes
+            # - Adding new suffixes
+            # - Following suffix links
+            # - Rule 1: Leaf extension (implicit)
+            # - Rule 2: New branch creation
+            # - Rule 3: Suffix already exists
+
+            # Simplified: Just show structure
+            pass
+
+    def search(self, pattern):
+        """Search for pattern in suffix tree. Time: O(m)"""
+        node = self.root
+        i = 0
+
+        while i &lt; len(pattern):
+            char = pattern[i]
+            if char not in node.children:
+                return False
+
+            child = node.children[char]
+            edge_length = child.end - child.start + 1
+
+            # Match along edge
+            for j in range(edge_length):
+                if i &gt;= len(pattern):
+                    return True
+                if pattern[i] != self.text[child.start + j]:
+                    return False
+                i += 1
+
+            node = child
+
+        return True
+</code></pre>
+<p><strong>Full Ukkonen’s algorithm is complex</strong> - typically 200+ lines. For interviews, understanding the concept is usually sufficient.</p>
+<h3 id="suffix-tree-applications"><a class="header" href="#suffix-tree-applications">Suffix Tree Applications</a></h3>
+<h4 id="1-fast-pattern-matching"><a class="header" href="#1-fast-pattern-matching">1. Fast Pattern Matching</a></h4>
+<p><strong>Time</strong>: O(m) where m = pattern length</p>
+<pre><code class="language-python">def pattern_match_suffix_tree(suffix_tree, pattern):
+    """
+    Search pattern in O(m) time.
+    Much faster than suffix array's O(m log n).
+    """
+    return suffix_tree.search(pattern)
+</code></pre>
+<h4 id="2-longest-repeated-substring-1"><a class="header" href="#2-longest-repeated-substring-1">2. Longest Repeated Substring</a></h4>
+<p><strong>Solution</strong>: Find deepest internal node</p>
+<pre><code class="language-python">def longest_repeated_substring_tree(suffix_tree):
+    """
+    Find longest repeated substring using suffix tree.
+    = Deepest internal node
+    """
+    def dfs(node, depth):
+        if not node.children:  # Leaf
+            return "", 0
+
+        max_substring = ""
+        max_depth = depth
+
+        for child in node.children.values():
+            edge_len = child.end - child.start + 1
+            substr, d = dfs(child, depth + edge_len)
+
+            if d &gt; max_depth:
+                max_depth = d
+                max_substring = suffix_tree.text[child.start:child.end+1] + substr
+
+        return max_substring, max_depth
+
+    result, _ = dfs(suffix_tree.root, 0)
+    return result
+</code></pre>
+<h4 id="3-all-occurrences-in-om--occ"><a class="header" href="#3-all-occurrences-in-om--occ">3. All Occurrences in O(m + occ)</a></h4>
+<p><strong>occ</strong> = number of occurrences</p>
+<pre><code class="language-python">def find_all_occurrences(suffix_tree, pattern):
+    """
+    Find all occurrences of pattern.
+    Time: O(m + occ)
+    """
+    # Step 1: Find pattern node (O(m))
+    node = suffix_tree.traverse(pattern)
+
+    if not node:
+        return []
+
+    # Step 2: Collect all leaf nodes under this node (O(occ))
+    def collect_leaves(node):
+        if node.suffix_index != -1:  # Leaf
+            return [node.suffix_index]
+
+        indices = []
+        for child in node.children.values():
+            indices.extend(collect_leaves(child))
+        return indices
+
+    return collect_leaves(node)
+</code></pre>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<h3 id="complete-suffix-array-implementation"><a class="header" href="#complete-suffix-array-implementation">Complete Suffix Array Implementation</a></h3>
+<pre><code class="language-python">def build_suffix_array(s):
+    """
+    Build suffix array using prefix doubling.
+    Time: O(n log² n)
+    Space: O(n)
+    """
+    n = len(s)
+    s = s + chr(0)  # Add smallest character
+    n += 1
+
+    rank = [ord(c) for c in s]
+    sa = list(range(n))
+    k = 1
+
+    while k &lt; n:
+        # Sort by (rank[i], rank[i+k])
+        sa.sort(key=lambda i: (rank[i], rank[i+k] if i+k &lt; n else -1))
+
+        # Update ranks
+        new_rank = [0] * n
+        for i in range(1, n):
+            prev_pair = (rank[sa[i-1]], rank[sa[i-1]+k] if sa[i-1]+k &lt; n else -1)
+            curr_pair = (rank[sa[i]], rank[sa[i]+k] if sa[i]+k &lt; n else -1)
+            new_rank[sa[i]] = new_rank[sa[i-1]] + (prev_pair != curr_pair)
+
+        rank = new_rank
+        k *= 2
+
+    return sa[1:]  # Remove sentinel
+
+
+def build_lcp(s, sa):
+    """Build LCP array using Kasai's algorithm"""
+    n = len(s)
+    rank = [0] * n
+    lcp = [0] * n
+
+    for i in range(n):
+        rank[sa[i]] = i
+
+    k = 0
+    for i in range(n):
+        if rank[i] == n - 1:
+            k = 0
+            continue
+
+        j = sa[rank[i] + 1]
+        while i+k &lt; n and j+k &lt; n and s[i+k] == s[j+k]:
+            k += 1
+
+        lcp[rank[i]] = k
+        if k &gt; 0:
+            k -= 1
+
+    return lcp
+
+
+# Complete example usage
+class SuffixArrayDS:
+    """Complete suffix array data structure"""
+
+    def __init__(self, text):
+        self.text = text
+        self.sa = build_suffix_array(text)
+        self.lcp = build_lcp(text, self.sa)
+
+    def search(self, pattern):
+        """Find all occurrences of pattern"""
+        def compare(idx):
+            for i in range(len(pattern)):
+                if idx + i &gt;= len(self.text):
+                    return -1
+                if self.text[idx + i] &lt; pattern[i]:
+                    return -1
+                if self.text[idx + i] &gt; pattern[i]:
+                    return 1
+            return 0
+
+        # Binary search for range
+        left = 0
+        right = len(self.sa)
+
+        while left &lt; right:
+            mid = (left + right) // 2
+            if compare(self.sa[mid]) &lt; 0:
+                left = mid + 1
+            else:
+                right = mid
+
+        start = left
+
+        left = 0
+        right = len(self.sa)
+        while left &lt; right:
+            mid = (left + right) // 2
+            if compare(self.sa[mid]) &lt;= 0:
+                left = mid + 1
+            else:
+                right = mid
+
+        end = right
+
+        return [self.sa[i] for i in range(start, end)]
+
+    def longest_repeated_substring(self):
+        """Find longest repeated substring"""
+        if not self.lcp:
+            return ""
+
+        max_lcp = max(self.lcp)
+        idx = self.lcp.index(max_lcp)
+        start = self.sa[idx]
+        return self.text[start:start + max_lcp]
+
+    def count_distinct_substrings(self):
+        """Count distinct substrings"""
+        n = len(self.text)
+        total = n * (n + 1) // 2
+        return total - sum(self.lcp)
+
+
+# Usage
+text = "banana"
+sa_ds = SuffixArrayDS(text)
+
+print("Suffix Array:", sa_ds.sa)
+print("LCP Array:", sa_ds.lcp)
+print("Search 'ana':", sa_ds.search("ana"))
+print("Longest repeated:", sa_ds.longest_repeated_substring())
+print("Distinct substrings:", sa_ds.count_distinct_substrings())
+</code></pre>
+<h3 id="javascript-implementation"><a class="header" href="#javascript-implementation">JavaScript Implementation</a></h3>
+<pre><code class="language-javascript">function buildSuffixArray(s) {
+    const n = s.length;
+    s = s + String.fromCharCode(0);
+    let rank = Array.from(s, c =&gt; c.charCodeAt(0));
+    let sa = Array.from({length: n + 1}, (_, i) =&gt; i);
+    let k = 1;
+
+    while (k &lt; n + 1) {
+        sa.sort((a, b) =&gt; {
+            const rankA = [rank[a], a + k &lt; n + 1 ? rank[a + k] : -1];
+            const rankB = [rank[b], b + k &lt; n + 1 ? rank[b + k] : -1];
+            return rankA[0] - rankB[0] || rankA[1] - rankB[1];
+        });
+
+        const newRank = new Array(n + 1);
+        newRank[sa[0]] = 0;
+
+        for (let i = 1; i &lt; n + 1; i++) {
+            const prev = sa[i - 1], curr = sa[i];
+            const prevPair = [rank[prev], prev + k &lt; n + 1 ? rank[prev + k] : -1];
+            const currPair = [rank[curr], curr + k &lt; n + 1 ? rank[curr + k] : -1];
+
+            newRank[curr] = newRank[prev] +
+                (prevPair[0] !== currPair[0] || prevPair[1] !== currPair[1] ? 1 : 0);
+        }
+
+        rank = newRank;
+        k *= 2;
+    }
+
+    return sa.slice(1);
+}
+
+function buildLCP(s, sa) {
+    const n = s.length;
+    const rank = new Array(n);
+    const lcp = new Array(n);
+
+    for (let i = 0; i &lt; n; i++) {
+        rank[sa[i]] = i;
+    }
+
+    let k = 0;
+    for (let i = 0; i &lt; n; i++) {
+        if (rank[i] === n - 1) {
+            k = 0;
+            continue;
+        }
+
+        const j = sa[rank[i] + 1];
+        while (i + k &lt; n &amp;&amp; j + k &lt; n &amp;&amp; s[i + k] === s[j + k]) {
+            k++;
+        }
+
+        lcp[rank[i]] = k;
+        if (k &gt; 0) k--;
+    }
+
+    return lcp;
+}
+
+// Usage
+const text = "banana";
+const sa = buildSuffixArray(text);
+const lcp = buildLCP(text, sa);
+console.log("Suffix Array:", sa);
+console.log("LCP Array:", lcp);
+</code></pre>
+<h2 id="comparison"><a class="header" href="#comparison">Comparison</a></h2>
+<h3 id="suffix-array-vs-suffix-tree"><a class="header" href="#suffix-array-vs-suffix-tree">Suffix Array vs Suffix Tree</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Suffix Array</th><th>Suffix Tree</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Space</strong></td><td>O(n) integers (~4n bytes)</td><td>O(n) nodes (~20n bytes)</td></tr>
+<tr><td><strong>Construction</strong></td><td>O(n log n) simple, O(n) complex</td><td>O(n) Ukkonen</td></tr>
+<tr><td><strong>Pattern match</strong></td><td>O(m log n)</td><td>O(m)</td></tr>
+<tr><td><strong>Implementation</strong></td><td>Simpler</td><td>Complex</td></tr>
+<tr><td><strong>Memory access</strong></td><td>Better cache locality</td><td>More pointer chasing</td></tr>
+<tr><td><strong>Queries</strong></td><td>Less versatile</td><td>More versatile</td></tr>
+<tr><td><strong>Practical use</strong></td><td>Preferred in most cases</td><td>When O(m) query needed</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>When to use Suffix Array:</strong></p>
+<ul>
+<li>Space is limited</li>
+<li>O(m log n) pattern matching acceptable</li>
+<li>Simpler implementation preferred</li>
+<li>Better cache performance desired</li>
+</ul>
+<p><strong>When to use Suffix Tree:</strong></p>
+<ul>
+<li>Need O(m) pattern matching</li>
+<li>Require complex string queries</li>
+<li>Space is not a concern</li>
+<li>Need rich structure (LCA, etc.)</li>
+</ul>
+<h3 id="both-vs-alternatives"><a class="header" href="#both-vs-alternatives">Both vs Alternatives</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem</th><th>Suffix Array/Tree</th><th>Alternative</th></tr>
+</thead>
+<tbody>
+<tr><td>Pattern matching</td><td>O(m log n) / O(m)</td><td>KMP: O(n + m)</td></tr>
+<tr><td>Repeated substring</td><td>O(n log n)</td><td>DP: O(n²)</td></tr>
+<tr><td>Distinct substrings</td><td>O(n log n)</td><td>Trie: O(n²) space</td></tr>
+<tr><td>LCS of 2 strings</td><td>O(n log n)</td><td>DP: O(n²)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Advantage</strong>: Suffix structures solve multiple problems efficiently once built.</p>
+<h2 id="common-problems"><a class="header" href="#common-problems">Common Problems</a></h2>
+<h3 id="leetcode-problems"><a class="header" href="#leetcode-problems">LeetCode Problems</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem</th><th>Difficulty</th><th>Technique</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string/">28. Find the Index of the First Occurrence in a String</a></td><td>Easy</td><td>Pattern matching</td></tr>
+<tr><td><a href="https://leetcode.com/problems/longest-duplicate-substring/">1044. Longest Duplicate Substring</a></td><td>Hard</td><td>Suffix array + LCP</td></tr>
+<tr><td><a href="https://leetcode.com/problems/number-of-distinct-substrings-in-a-string/">1698. Number of Distinct Substrings in a String</a></td><td>Hard</td><td>Suffix array formula</td></tr>
+<tr><td><a href="https://leetcode.com/problems/longest-common-subpath/">1923. Longest Common Subpath</a></td><td>Hard</td><td>Suffix array + binary search</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="competitive-programming"><a class="header" href="#competitive-programming">Competitive Programming</a></h3>
+<p>Common patterns:</p>
+<ol>
+<li><strong>Longest repeated substring with at least k occurrences</strong></li>
+<li><strong>Number of substrings matching pattern</strong></li>
+<li><strong>Lexicographically kth substring</strong></li>
+<li><strong>Burrows-Wheeler Transform</strong> (compression)</li>
+</ol>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="generalized-suffix-arraytree"><a class="header" href="#generalized-suffix-arraytree">Generalized Suffix Array/Tree</a></h3>
+<p><strong>Problem</strong>: Build suffix structure for multiple strings</p>
+<p><strong>Solution</strong>: Concatenate strings with unique separators</p>
+<pre><code>String 1: "banana"
+String 2: "ananas"
+Combined: "banana#ananas$"
+
+Build suffix array/tree on combined string
+Query which string each suffix comes from
+</code></pre>
+<p><strong>Applications:</strong></p>
+<ul>
+<li>Multiple pattern matching</li>
+<li>Longest common substring of k strings</li>
+<li>Document searching</li>
+</ul>
+<h3 id="compressed-suffix-arrays"><a class="header" href="#compressed-suffix-arrays">Compressed Suffix Arrays</a></h3>
+<p><strong>Space optimization</strong> techniques:</p>
+<ol>
+<li><strong>ψ-function</strong>: Compress SA to O(n log log n) bits</li>
+<li><strong>Wavelet trees</strong>: Compressed pattern matching</li>
+<li><strong>FM-index</strong>: Used in Burrows-Wheeler Transform</li>
+</ol>
+<p><strong>Trade-off</strong>: Less space, slightly slower queries</p>
+<h3 id="applications-in-bioinformatics"><a class="header" href="#applications-in-bioinformatics">Applications in Bioinformatics</a></h3>
+<p><strong>DNA sequence analysis:</strong></p>
+<ul>
+<li>Find repeated sequences</li>
+<li>Identify mutations</li>
+<li>Sequence alignment</li>
+<li>Genome assembly</li>
+</ul>
+<p><strong>Example</strong>: Find all tandem repeats (repeated adjacent patterns)</p>
+<h3 id="burrows-wheeler-transform-bwt"><a class="header" href="#burrows-wheeler-transform-bwt">Burrows-Wheeler Transform (BWT)</a></h3>
+<p><strong>Uses suffix array</strong> for compression:</p>
+<pre><code class="language-python">def burrows_wheeler_transform(s):
+    """
+    Apply BWT using suffix array.
+    Used in bzip2 compression.
+    """
+    s = s + '$'
+    sa = build_suffix_array(s)
+
+    # BWT is last column of sorted rotation matrix
+    bwt = ''.join(s[(sa[i] - 1) % len(s)] for i in range(len(sa)))
+    return bwt
+</code></pre>
+<h3 id="suffix-array-vs-hashing"><a class="header" href="#suffix-array-vs-hashing">Suffix Array vs Hashing</a></h3>
+<p><strong>Comparison with rolling hash methods:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Method</th><th>Pattern Match</th><th>Space</th><th>Collisions</th></tr>
+</thead>
+<tbody>
+<tr><td>Suffix Array</td><td>O(m log n)</td><td>O(n)</td><td>No</td></tr>
+<tr><td>Rolling Hash</td><td>O(n + m)</td><td>O(1)</td><td>Possible</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Use suffix array</strong> when:</p>
+<ul>
+<li>Need multiple queries on same text</li>
+<li>Want guaranteed correctness</li>
+<li>Building once, querying many times</li>
+</ul>
+<h2 id="key-takeaways"><a class="header" href="#key-takeaways">Key Takeaways</a></h2>
+<ol>
+<li><strong>Suffix arrays</strong> = sorted array of suffix starting positions</li>
+<li><strong>Suffix trees</strong> = compressed trie of all suffixes</li>
+<li><strong>LCP array</strong> = longest common prefixes, enables many algorithms</li>
+<li><strong>Construction</strong>: O(n log² n) easy, O(n) possible</li>
+<li><strong>Pattern matching</strong>: O(m log n) with SA, O(m) with ST</li>
+<li><strong>Applications</strong>: String matching, bioinformatics, compression</li>
+<li><strong>Practical</strong>: Suffix array preferred (space, simplicity)</li>
+<li><strong>LCP formula</strong>: Distinct substrings = n(n+1)/2 - Σ LCP</li>
+</ol>
+<h2 id="when-to-use"><a class="header" href="#when-to-use">When to Use</a></h2>
+<p>✅ <strong>Use Suffix Array when:</strong></p>
+<ul>
+<li>Multiple pattern matching queries</li>
+<li>Finding longest repeated/common substrings</li>
+<li>Counting distinct substrings</li>
+<li>Space efficiency matters</li>
+<li>Simpler implementation preferred</li>
+</ul>
+<p>✅ <strong>Use Suffix Tree when:</strong></p>
+<ul>
+<li>Need O(m) pattern matching</li>
+<li>Complex tree queries (LCA, etc.)</li>
+<li>Rich structure needed</li>
+<li>Space is not critical</li>
+</ul>
+<p>❌ <strong>Don’t use when:</strong></p>
+<ul>
+<li>Single pattern match (use KMP/Boyer-Moore)</li>
+<li>Text changes frequently (rebuild expensive)</li>
+<li>Very short strings (overhead not worth it)</li>
+</ul>
+<hr>
+<p><strong>Time to Implement</strong>:</p>
+<ul>
+<li>Suffix Array: 30-45 minutes (with LCP)</li>
+<li>Suffix Tree: 2-3 hours (Ukkonen’s)</li>
+</ul>
+<p><strong>Most Common Interview Uses</strong>:</p>
+<ul>
+<li>Longest repeated substring</li>
+<li>Pattern matching in text</li>
+<li>Distinct substring counting</li>
+<li>Longest common substring</li>
+</ul>
+<p><strong>Pro Tip</strong>: For interviews, master suffix array construction and LCP array. Suffix trees are often too complex to implement fully but good to understand conceptually. Focus on applications and problem patterns!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../data_structures/spatial_structures.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../algorithms/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../data_structures/spatial_structures.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../algorithms/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

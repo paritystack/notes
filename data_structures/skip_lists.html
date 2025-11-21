@@ -1,0 +1,1401 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Skip Lists - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-93ad08a6.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-f9b1048b.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="skip-lists"><a class="header" href="#skip-lists">Skip Lists</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#the-problem-it-solves">The Problem It Solves</a></li>
+<li><a href="#how-it-works">How It Works</a></li>
+<li><a href="#key-concepts">Key Concepts</a></li>
+<li><a href="#structure-and-properties">Structure and Properties</a></li>
+<li><a href="#core-operations">Core Operations</a>
+<ul>
+<li><a href="#search-operation">Search</a></li>
+<li><a href="#insert-operation">Insert</a></li>
+<li><a href="#delete-operation">Delete</a></li>
+</ul>
+</li>
+<li><a href="#time-and-space-complexity">Time and Space Complexity</a></li>
+<li><a href="#implementation">Implementation</a>
+<ul>
+<li><a href="#python-implementation">Python Implementation</a></li>
+<li><a href="#javascript-implementation">JavaScript Implementation</a></li>
+</ul>
+</li>
+<li><a href="#variations">Variations</a></li>
+<li><a href="#applications">Applications</a></li>
+<li><a href="#comparison-with-other-structures">Comparison with Other Structures</a></li>
+<li><a href="#interview-patterns">Interview Patterns</a></li>
+<li><a href="#advanced-topics">Advanced Topics</a></li>
+</ul>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A <strong>Skip List</strong> is a probabilistic data structure that allows O(log n) search, insertion, and deletion operations on an ordered sequence of elements. Invented by William Pugh in 1990, it provides an elegant alternative to balanced binary search trees using randomization instead of complex balancing rules.</p>
+<h3 id="key-characteristics"><a class="header" href="#key-characteristics">Key Characteristics</a></h3>
+<ul>
+<li><strong>Probabilistic</strong>: Uses random coin flips instead of deterministic balancing</li>
+<li><strong>Simple</strong>: Much easier to implement than AVL or Red-Black trees</li>
+<li><strong>Efficient</strong>: O(log n) expected time for search, insert, delete</li>
+<li><strong>Space efficient</strong>: O(n) expected space (with small constants)</li>
+<li><strong>Concurrent-friendly</strong>: Easier to make lock-free than balanced trees</li>
+<li><strong>Ordered</strong>: Maintains sorted order of elements</li>
+</ul>
+<h3 id="why-skip-lists"><a class="header" href="#why-skip-lists">Why Skip Lists?</a></h3>
+<p><strong>Advantages over Balanced BSTs:</strong></p>
+<ul>
+<li>Simpler implementation (no rotations or color management)</li>
+<li>Easier to understand and reason about</li>
+<li>Better for concurrent access (lock-free implementations)</li>
+<li>Predictable performance in practice</li>
+<li>Natural support for range queries</li>
+</ul>
+<p><strong>Real-world usage:</strong></p>
+<ul>
+<li>Redis Sorted Sets</li>
+<li>LevelDB (replaced by LSM trees but inspired design)</li>
+<li>Apache Lucene (MemoryIndex)</li>
+<li>Concurrent data structures</li>
+</ul>
+<h2 id="the-problem-it-solves"><a class="header" href="#the-problem-it-solves">The Problem It Solves</a></h2>
+<h3 id="the-search-problem-in-sorted-lists"><a class="header" href="#the-search-problem-in-sorted-lists">The Search Problem in Sorted Lists</a></h3>
+<p><strong>Given:</strong> A sorted linked list with n elements</p>
+<p><strong>Need:</strong> Fast search, insert, delete operations</p>
+<p><strong>Approaches:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Structure</th><th>Search</th><th>Insert</th><th>Delete</th><th>Complexity</th></tr>
+</thead>
+<tbody>
+<tr><td>Sorted Array</td><td>O(log n)</td><td>O(n)</td><td>O(n)</td><td>Binary search but expensive updates</td></tr>
+<tr><td>Linked List</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>Sequential scan</td></tr>
+<tr><td>BST (balanced)</td><td>O(log n)</td><td>O(log n)</td><td>O(log n)</td><td>Complex rotations</td></tr>
+<tr><td><strong>Skip List</strong></td><td><strong>O(log n)</strong></td><td><strong>O(log n)</strong></td><td><strong>O(log n)</strong></td><td><strong>Simple + Fast</strong></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="the-brilliant-insight"><a class="header" href="#the-brilliant-insight">The Brilliant Insight</a></h3>
+<p><strong>Question:</strong> How can we speed up search in a sorted linked list?</p>
+<p><strong>Answer:</strong> Add “express lanes” at multiple levels!</p>
+<pre><code>Level 3: 1 -----------------&gt; 25
+Level 2: 1 --------&gt; 13 ----&gt; 25 --------&gt; 45
+Level 1: 1 -&gt; 7 ---&gt; 13 ----&gt; 25 -&gt; 33 --&gt; 45 -&gt; 56
+Level 0: 1 -&gt; 7 -&gt; 9 -&gt; 13 -&gt; 17 -&gt; 25 -&gt; 33 -&gt; 40 -&gt; 45 -&gt; 56
+</code></pre>
+<p>Search for 33:</p>
+<ul>
+<li>Start at top level (Level 3): 1 → 25 (too small) → next level</li>
+<li>Level 2: 25 → 45 (too big) → next level</li>
+<li>Level 1: 25 → 33 (found!)</li>
+</ul>
+<p>Only 3 jumps instead of 7!</p>
+<h2 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h2>
+<h3 id="layered-linked-lists"><a class="header" href="#layered-linked-lists">Layered Linked Lists</a></h3>
+<p>A skip list consists of multiple levels of linked lists:</p>
+<ul>
+<li><strong>Level 0</strong>: Contains all elements (base list)</li>
+<li><strong>Level 1+</strong>: Progressively sparser “express lanes”</li>
+<li><strong>Higher levels</strong>: Skip more elements for faster traversal</li>
+</ul>
+<h3 id="randomized-heights"><a class="header" href="#randomized-heights">Randomized Heights</a></h3>
+<p><strong>Key question:</strong> Which elements should appear in higher levels?</p>
+<p><strong>Answer:</strong> Use a coin flip!</p>
+<p>When inserting element x:</p>
+<ol>
+<li>Insert at level 0 (always)</li>
+<li>Flip coin: if heads, insert at level 1</li>
+<li>Flip coin: if heads, insert at level 2</li>
+<li>Continue until tails (or max level reached)</li>
+</ol>
+<p><strong>Probability</strong>: Element appears at level k with probability 1/2^k</p>
+<pre><code>Level 3: ~12.5% of elements
+Level 2: ~25% of elements
+Level 1: ~50% of elements
+Level 0: 100% of elements
+</code></pre>
+<h3 id="search-path"><a class="header" href="#search-path">Search Path</a></h3>
+<p>To search for value x:</p>
+<ol>
+<li>Start at top-left (highest level, head node)</li>
+<li>Move right while next.value &lt; x</li>
+<li>Move down one level</li>
+<li>Repeat until found or reach bottom</li>
+</ol>
+<pre><code>Search for 40:
+
+Level 2: HEAD -&gt; 13 -&gt; 25 -&gt; 45 (25 &lt; 40 &lt; 45, go down)
+                      ↓
+Level 1:             25 -&gt; 33 -&gt; 45 (33 &lt; 40 &lt; 45, go down)
+                           ↓
+Level 0:                  33 -&gt; 40 (found!)
+</code></pre>
+<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="1-node-structure"><a class="header" href="#1-node-structure">1. Node Structure</a></h3>
+<p>Each node contains:</p>
+<ul>
+<li><strong>Key/value</strong>: The data stored</li>
+<li><strong>Forward pointers</strong>: Array of next pointers at each level</li>
+<li><strong>Level</strong>: Height of the node (random)</li>
+</ul>
+<pre><code>Node at level 3:
+┌─────┐
+│  25 │
+├─────┤
+│ [0] │ → next at level 0
+│ [1] │ → next at level 1
+│ [2] │ → next at level 2
+│ [3] │ → next at level 3
+└─────┘
+</code></pre>
+<h3 id="2-level-distribution"><a class="header" href="#2-level-distribution">2. Level Distribution</a></h3>
+<p>With probability p = 0.5:</p>
+<ul>
+<li>50% of nodes have height 1 (level 0 only)</li>
+<li>25% of nodes have height 2 (levels 0-1)</li>
+<li>12.5% of nodes have height 3 (levels 0-2)</li>
+<li>…</li>
+</ul>
+<p><strong>Expected max height</strong>: O(log n)</p>
+<h3 id="3-express-lane-analogy"><a class="header" href="#3-express-lane-analogy">3. Express Lane Analogy</a></h3>
+<p>Think of skip list as highway system:</p>
+<ul>
+<li>Level 0: Local roads (all intersections)</li>
+<li>Level 1: Highway (half the exits)</li>
+<li>Level 2: Interstate (quarter of the exits)</li>
+<li>Level 3: Major interstate (few exits)</li>
+</ul>
+<p>To reach destination:</p>
+<ol>
+<li>Start on highest highway available</li>
+<li>Take highway until past destination</li>
+<li>Drop to lower level</li>
+<li>Repeat</li>
+</ol>
+<h3 id="4-probabilistic-balancing"><a class="header" href="#4-probabilistic-balancing">4. Probabilistic Balancing</a></h3>
+<p>Unlike AVL/Red-Black trees:</p>
+<ul>
+<li><strong>No rotations needed</strong></li>
+<li><strong>No deterministic balance</strong> constraints</li>
+<li><strong>Balance via randomization</strong></li>
+</ul>
+<p><strong>With high probability</strong> (1 - 1/n^c):</p>
+<ul>
+<li>Height is O(log n)</li>
+<li>Operations are O(log n)</li>
+</ul>
+<h3 id="5-invariants"><a class="header" href="#5-invariants">5. Invariants</a></h3>
+<ol>
+<li><strong>Sorted order</strong>: All levels maintain sorted order</li>
+<li><strong>Subset property</strong>: Level k+1 ⊆ Level k</li>
+<li><strong>Reachability</strong>: All nodes reachable from head</li>
+</ol>
+<h2 id="structure-and-properties"><a class="header" href="#structure-and-properties">Structure and Properties</a></h2>
+<h3 id="mathematical-properties"><a class="header" href="#mathematical-properties">Mathematical Properties</a></h3>
+<p><strong>For skip list with n elements and probability p = 0.5:</strong></p>
+<ol>
+<li>
+<p><strong>Expected number of levels</strong>:</p>
+<pre><code>L = log₂(n)
+</code></pre>
+</li>
+<li>
+<p><strong>Expected number of pointers</strong>:</p>
+<pre><code>Total pointers = n * (1 + p + p² + ...) = n * 1/(1-p) = 2n
+</code></pre>
+</li>
+<li>
+<p><strong>Expected search time</strong>:</p>
+<pre><code>T(n) = O(log n)
+</code></pre>
+</li>
+<li>
+<p><strong>Space</strong>:</p>
+<pre><code>S(n) = O(n)  (expected)
+</code></pre>
+</li>
+</ol>
+<h3 id="probability-analysis"><a class="header" href="#probability-analysis">Probability Analysis</a></h3>
+<p><strong>Theorem</strong>: With probability ≥ 1 - 1/n, search time is O(log n)</p>
+<p><strong>Proof sketch:</strong></p>
+<ul>
+<li>Probability a node reaches level k: p^k = (1/2)^k</li>
+<li>Expected number of nodes at level k: n/2^k</li>
+<li>Height exceeds c·log n with probability ≤ 1/n^c</li>
+<li>Search path length bounded by height</li>
+</ul>
+<h3 id="space-overhead"><a class="header" href="#space-overhead">Space Overhead</a></h3>
+<p><strong>Expected space per node</strong>:</p>
+<pre><code>E[pointers per node] = 1 + p + p² + p³ + ...
+                     = 1/(1-p)
+                     = 2  (when p = 0.5)
+</code></pre>
+<p>So on average, each node has 2 forward pointers.</p>
+<p><strong>Total space</strong>: O(n) expected, O(n log n) with high probability</p>
+<h2 id="core-operations"><a class="header" href="#core-operations">Core Operations</a></h2>
+<h3 id="search-operation"><a class="header" href="#search-operation">Search Operation</a></h3>
+<p><strong>Goal</strong>: Find if element x exists in skip list</p>
+<p><strong>Algorithm:</strong></p>
+<pre><code>1. current = head
+2. For level from max_level down to 0:
+     While current.forward[level].key &lt; x:
+         current = current.forward[level]
+3. current = current.forward[0]
+4. Return current.key == x
+</code></pre>
+<p><strong>Visualization:</strong></p>
+<pre><code>Search for 25:
+
+Level 2: H ---&gt; 13 ---&gt; 25*
+              ↓
+Level 1: H -&gt; 7 -&gt; 13 -&gt; 25*
+                        ↓
+Level 0: H -&gt; 7 -&gt; 9 -&gt; 13 -&gt; 17 -&gt; 25* (found!)
+
+Path: H₂ → 13₂ → 25₂ → 25₁ → 25₀
+</code></pre>
+<p><strong>Time Complexity</strong>: O(log n) expected</p>
+<ul>
+<li>Each level: O(1/p) expected steps right</li>
+<li>Number of levels: O(log n) expected</li>
+<li>Total: O(log n)</li>
+</ul>
+<h3 id="insert-operation"><a class="header" href="#insert-operation">Insert Operation</a></h3>
+<p><strong>Goal</strong>: Insert new element x</p>
+<p><strong>Algorithm:</strong></p>
+<pre><code>1. Find insert position (like search)
+   - Keep track of update[] array (last node before insert at each level)
+2. Generate random level for new node
+3. Create new node with random level
+4. Update forward pointers at each level
+</code></pre>
+<p><strong>Detailed Steps:</strong></p>
+<pre><code class="language-python">def insert(x):
+    # Step 1: Find insert position
+    update = [None] * MAX_LEVEL
+    current = head
+
+    for i in range(level, -1, -1):
+        while current.forward[i] and current.forward[i].key &lt; x:
+            current = current.forward[i]
+        update[i] = current  # Last node before insert position
+
+    # Step 2: Generate random level
+    new_level = random_level()
+
+    # Step 3: Create new node
+    new_node = Node(x, new_level)
+
+    # Step 4: Update pointers
+    for i in range(new_level):
+        new_node.forward[i] = update[i].forward[i]
+        update[i].forward[i] = new_node
+</code></pre>
+<p><strong>Visualization:</strong></p>
+<pre><code>Insert 23 (randomly assigned level 2):
+
+Before:
+Level 2: H ---&gt; 13 ---&gt; 25
+Level 1: H -&gt; 7 -&gt; 13 -&gt; 25
+Level 0: H -&gt; 7 -&gt; 9 -&gt; 13 -&gt; 17 -&gt; 25
+
+After:
+Level 2: H ---&gt; 13 ---&gt; 23 ---&gt; 25
+Level 1: H -&gt; 7 -&gt; 13 -&gt; 23 -&gt; 25
+Level 0: H -&gt; 7 -&gt; 9 -&gt; 13 -&gt; 17 -&gt; 23 -&gt; 25
+
+Update array points to last nodes before 23:
+update[2] = 13
+update[1] = 13
+update[0] = 17
+</code></pre>
+<p><strong>Time Complexity</strong>: O(log n) expected</p>
+<h3 id="delete-operation"><a class="header" href="#delete-operation">Delete Operation</a></h3>
+<p><strong>Goal</strong>: Remove element x from skip list</p>
+<p><strong>Algorithm:</strong></p>
+<pre><code>1. Find node to delete (like search)
+   - Keep track of update[] array
+2. If node exists:
+     For each level:
+         Update forward pointers to bypass deleted node
+     Free node memory
+</code></pre>
+<p><strong>Detailed Steps:</strong></p>
+<pre><code class="language-python">def delete(x):
+    # Step 1: Find node
+    update = [None] * MAX_LEVEL
+    current = head
+
+    for i in range(level, -1, -1):
+        while current.forward[i] and current.forward[i].key &lt; x:
+            current = current.forward[i]
+        update[i] = current
+
+    current = current.forward[0]
+
+    # Step 2: Delete if found
+    if current and current.key == x:
+        for i in range(level + 1):
+            if update[i].forward[i] != current:
+                break
+            update[i].forward[i] = current.forward[i]
+
+        # Decrease level if top levels empty
+        while level &gt; 0 and head.forward[level] is None:
+            level -= 1
+</code></pre>
+<p><strong>Visualization:</strong></p>
+<pre><code>Delete 13:
+
+Before:
+Level 2: H ---&gt; 13 ---&gt; 25
+Level 1: H -&gt; 7 -&gt; 13 -&gt; 25
+Level 0: H -&gt; 7 -&gt; 9 -&gt; 13 -&gt; 17 -&gt; 25
+
+After:
+Level 2: H ---------------&gt; 25
+Level 1: H -&gt; 7 ----------&gt; 25
+Level 0: H -&gt; 7 -&gt; 9 -----&gt; 17 -&gt; 25
+</code></pre>
+<p><strong>Time Complexity</strong>: O(log n) expected</p>
+<h3 id="random-level-generation"><a class="header" href="#random-level-generation">Random Level Generation</a></h3>
+<p><strong>Core of skip list’s probabilistic nature:</strong></p>
+<pre><code class="language-python">def random_level(p=0.5, max_level=16):
+    """
+    Generate random level for new node.
+    With probability p, increase level by 1.
+    """
+    level = 0
+    while random.random() &lt; p and level &lt; max_level - 1:
+        level += 1
+    return level
+</code></pre>
+<p><strong>Distribution:</strong></p>
+<ul>
+<li>Level 0: 50% probability</li>
+<li>Level 1: 25% probability</li>
+<li>Level 2: 12.5% probability</li>
+<li>Level k: (1/2)^(k+1) probability</li>
+</ul>
+<h2 id="time-and-space-complexity"><a class="header" href="#time-and-space-complexity">Time and Space Complexity</a></h2>
+<h3 id="time-complexity"><a class="header" href="#time-complexity">Time Complexity</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Average</th><th>Worst Case</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>Search</td><td>O(log n)</td><td>O(n)</td><td>Worst case if very unlucky with random levels</td></tr>
+<tr><td>Insert</td><td>O(log n)</td><td>O(n)</td><td>Includes search time</td></tr>
+<tr><td>Delete</td><td>O(log n)</td><td>O(n)</td><td>Includes search time</td></tr>
+<tr><td>Range query</td><td>O(log n + k)</td><td>O(n)</td><td>k = number of elements in range</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Probabilistic guarantee</strong>: With probability ≥ 1 - 1/n:</p>
+<ul>
+<li>All operations are O(log n)</li>
+<li>Height is O(log n)</li>
+</ul>
+<h3 id="space-complexity"><a class="header" href="#space-complexity">Space Complexity</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Metric</th><th>Expected</th><th>Worst Case</th></tr>
+</thead>
+<tbody>
+<tr><td>Total space</td><td>O(n)</td><td>O(n log n)</td></tr>
+<tr><td>Pointers per node</td><td>2 (p=0.5)</td><td>O(log n)</td></tr>
+<tr><td>Maximum level</td><td>O(log n)</td><td>O(log n)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Practical</strong>: With p = 0.5, space overhead is ~2x compared to simple linked list</p>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<h3 id="python-implementation"><a class="header" href="#python-implementation">Python Implementation</a></h3>
+<p><strong>Complete Skip List Implementation:</strong></p>
+<pre><code class="language-python">import random
+
+class Node:
+    """Node in skip list with multiple forward pointers"""
+
+    def __init__(self, key, value, level):
+        self.key = key
+        self.value = value
+        self.forward = [None] * (level + 1)  # Forward pointers at each level
+
+
+class SkipList:
+    """
+    Skip List implementation with O(log n) expected time operations.
+
+    Features:
+    - Search: O(log n) expected
+    - Insert: O(log n) expected
+    - Delete: O(log n) expected
+    - Ordered traversal: O(n)
+    """
+
+    def __init__(self, max_level=16, p=0.5):
+        """
+        Initialize skip list.
+
+        Args:
+            max_level (int): Maximum number of levels
+            p (float): Probability for level increase (typically 0.5 or 0.25)
+        """
+        self.max_level = max_level
+        self.p = p
+        self.level = 0  # Current maximum level in use
+        self.header = Node(None, None, max_level)  # Sentinel head node
+
+    def random_level(self):
+        """
+        Generate random level for new node.
+
+        Returns:
+            int: Random level between 0 and max_level-1
+
+        Time: O(log n) expected
+        """
+        level = 0
+        while random.random() &lt; self.p and level &lt; self.max_level - 1:
+            level += 1
+        return level
+
+    def search(self, key):
+        """
+        Search for key in skip list.
+
+        Args:
+            key: Key to search for
+
+        Returns:
+            Value if found, None otherwise
+
+        Time: O(log n) expected
+        """
+        current = self.header
+
+        # Start from highest level and move down
+        for i in range(self.level, -1, -1):
+            while current.forward[i] and current.forward[i].key &lt; key:
+                current = current.forward[i]
+
+        # Move to level 0
+        current = current.forward[0]
+
+        # Check if we found the key
+        if current and current.key == key:
+            return current.value
+        return None
+
+    def insert(self, key, value):
+        """
+        Insert key-value pair into skip list.
+
+        Args:
+            key: Key to insert
+            value: Value to insert
+
+        Time: O(log n) expected
+        """
+        # Array to store rightmost node at each level before insert position
+        update = [None] * self.max_level
+        current = self.header
+
+        # Find insert position
+        for i in range(self.level, -1, -1):
+            while current.forward[i] and current.forward[i].key &lt; key:
+                current = current.forward[i]
+            update[i] = current
+
+        # Move to level 0
+        current = current.forward[0]
+
+        # If key exists, update value
+        if current and current.key == key:
+            current.value = value
+            return
+
+        # Generate random level for new node
+        new_level = self.random_level()
+
+        # If new level is higher than current level, update header pointers
+        if new_level &gt; self.level:
+            for i in range(self.level + 1, new_level + 1):
+                update[i] = self.header
+            self.level = new_level
+
+        # Create new node
+        new_node = Node(key, value, new_level)
+
+        # Update forward pointers
+        for i in range(new_level + 1):
+            new_node.forward[i] = update[i].forward[i]
+            update[i].forward[i] = new_node
+
+    def delete(self, key):
+        """
+        Delete key from skip list.
+
+        Args:
+            key: Key to delete
+
+        Returns:
+            bool: True if deleted, False if not found
+
+        Time: O(log n) expected
+        """
+        update = [None] * self.max_level
+        current = self.header
+
+        # Find node to delete
+        for i in range(self.level, -1, -1):
+            while current.forward[i] and current.forward[i].key &lt; key:
+                current = current.forward[i]
+            update[i] = current
+
+        current = current.forward[0]
+
+        # If found, delete it
+        if current and current.key == key:
+            # Update forward pointers
+            for i in range(self.level + 1):
+                if update[i].forward[i] != current:
+                    break
+                update[i].forward[i] = current.forward[i]
+
+            # Decrease level if top levels are empty
+            while self.level &gt; 0 and self.header.forward[self.level] is None:
+                self.level -= 1
+
+            return True
+
+        return False
+
+    def display(self):
+        """Display skip list structure (for debugging)"""
+        print("\nSkip List Structure:")
+        for i in range(self.level, -1, -1):
+            print(f"Level {i}: ", end="")
+            node = self.header.forward[i]
+            while node:
+                print(f"{node.key} ", end="")
+                node = node.forward[i]
+            print()
+
+    def range_query(self, start_key, end_key):
+        """
+        Get all key-value pairs in range [start_key, end_key].
+
+        Args:
+            start_key: Start of range (inclusive)
+            end_key: End of range (inclusive)
+
+        Returns:
+            list: List of (key, value) tuples in range
+
+        Time: O(log n + k) where k is number of results
+        """
+        result = []
+        current = self.header
+
+        # Find starting position
+        for i in range(self.level, -1, -1):
+            while current.forward[i] and current.forward[i].key &lt; start_key:
+                current = current.forward[i]
+
+        # Move to level 0 and collect results
+        current = current.forward[0]
+        while current and current.key &lt;= end_key:
+            result.append((current.key, current.value))
+            current = current.forward[0]
+
+        return result
+
+    def __iter__(self):
+        """Iterator for in-order traversal"""
+        current = self.header.forward[0]
+        while current:
+            yield (current.key, current.value)
+            current = current.forward[0]
+
+    def __len__(self):
+        """Count number of elements. Time: O(n)"""
+        count = 0
+        current = self.header.forward[0]
+        while current:
+            count += 1
+            current = current.forward[0]
+        return count
+
+
+# Example usage
+if __name__ == "__main__":
+    sl = SkipList()
+
+    # Insert elements
+    elements = [3, 6, 7, 9, 12, 17, 19, 21, 25, 26]
+    for elem in elements:
+        sl.insert(elem, f"value_{elem}")
+
+    print("After insertions:")
+    sl.display()
+
+    # Search
+    print(f"\nSearch for 19: {sl.search(19)}")
+    print(f"Search for 20: {sl.search(20)}")
+
+    # Range query
+    print(f"\nRange [9, 21]: {sl.range_query(9, 21)}")
+
+    # Delete
+    print("\nDeleting 12...")
+    sl.delete(12)
+    sl.display()
+
+    # Iteration
+    print("\nAll elements:")
+    for key, value in sl:
+        print(f"{key}: {value}")
+</code></pre>
+<p><strong>Simplified Version:</strong></p>
+<pre><code class="language-python">class SimpleSkipList:
+    """Minimal skip list implementation"""
+
+    class Node:
+        def __init__(self, key, level):
+            self.key = key
+            self.forward = [None] * (level + 1)
+
+    def __init__(self):
+        self.max_level = 16
+        self.p = 0.5
+        self.level = 0
+        self.head = self.Node(None, self.max_level)
+
+    def random_level(self):
+        level = 0
+        while random.random() &lt; self.p and level &lt; self.max_level - 1:
+            level += 1
+        return level
+
+    def search(self, key):
+        curr = self.head
+        for i in range(self.level, -1, -1):
+            while curr.forward[i] and curr.forward[i].key &lt; key:
+                curr = curr.forward[i]
+        curr = curr.forward[0]
+        return curr and curr.key == key
+
+    def insert(self, key):
+        update = [self.head] * self.max_level
+        curr = self.head
+
+        for i in range(self.level, -1, -1):
+            while curr.forward[i] and curr.forward[i].key &lt; key:
+                curr = curr.forward[i]
+            update[i] = curr
+
+        level = self.random_level()
+        if level &gt; self.level:
+            self.level = level
+
+        node = self.Node(key, level)
+        for i in range(level + 1):
+            node.forward[i] = update[i].forward[i]
+            update[i].forward[i] = node
+</code></pre>
+<h3 id="javascript-implementation"><a class="header" href="#javascript-implementation">JavaScript Implementation</a></h3>
+<pre><code class="language-javascript">class Node {
+    constructor(key, value, level) {
+        this.key = key;
+        this.value = value;
+        this.forward = new Array(level + 1).fill(null);
+    }
+}
+
+class SkipList {
+    constructor(maxLevel = 16, p = 0.5) {
+        this.maxLevel = maxLevel;
+        this.p = p;
+        this.level = 0;
+        this.header = new Node(null, null, maxLevel);
+    }
+
+    randomLevel() {
+        let level = 0;
+        while (Math.random() &lt; this.p &amp;&amp; level &lt; this.maxLevel - 1) {
+            level++;
+        }
+        return level;
+    }
+
+    search(key) {
+        let current = this.header;
+
+        for (let i = this.level; i &gt;= 0; i--) {
+            while (current.forward[i] &amp;&amp; current.forward[i].key &lt; key) {
+                current = current.forward[i];
+            }
+        }
+
+        current = current.forward[0];
+        return current &amp;&amp; current.key === key ? current.value : null;
+    }
+
+    insert(key, value) {
+        const update = new Array(this.maxLevel);
+        let current = this.header;
+
+        for (let i = this.level; i &gt;= 0; i--) {
+            while (current.forward[i] &amp;&amp; current.forward[i].key &lt; key) {
+                current = current.forward[i];
+            }
+            update[i] = current;
+        }
+
+        current = current.forward[0];
+
+        if (current &amp;&amp; current.key === key) {
+            current.value = value;
+            return;
+        }
+
+        const newLevel = this.randomLevel();
+
+        if (newLevel &gt; this.level) {
+            for (let i = this.level + 1; i &lt;= newLevel; i++) {
+                update[i] = this.header;
+            }
+            this.level = newLevel;
+        }
+
+        const newNode = new Node(key, value, newLevel);
+
+        for (let i = 0; i &lt;= newLevel; i++) {
+            newNode.forward[i] = update[i].forward[i];
+            update[i].forward[i] = newNode;
+        }
+    }
+
+    delete(key) {
+        const update = new Array(this.maxLevel);
+        let current = this.header;
+
+        for (let i = this.level; i &gt;= 0; i--) {
+            while (current.forward[i] &amp;&amp; current.forward[i].key &lt; key) {
+                current = current.forward[i];
+            }
+            update[i] = current;
+        }
+
+        current = current.forward[0];
+
+        if (current &amp;&amp; current.key === key) {
+            for (let i = 0; i &lt;= this.level; i++) {
+                if (update[i].forward[i] !== current) break;
+                update[i].forward[i] = current.forward[i];
+            }
+
+            while (this.level &gt; 0 &amp;&amp; this.header.forward[this.level] === null) {
+                this.level--;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    *[Symbol.iterator]() {
+        let current = this.header.forward[0];
+        while (current) {
+            yield [current.key, current.value];
+            current = current.forward[0];
+        }
+    }
+}
+
+// Example usage
+const sl = new SkipList();
+sl.insert(3, 'three');
+sl.insert(6, 'six');
+sl.insert(9, 'nine');
+
+console.log(sl.search(6));  // 'six'
+console.log(sl.search(5));  // null
+
+for (const [key, value] of sl) {
+    console.log(`${key}: ${value}`);
+}
+</code></pre>
+<h2 id="variations"><a class="header" href="#variations">Variations</a></h2>
+<h3 id="1-deterministic-skip-list"><a class="header" href="#1-deterministic-skip-list">1. Deterministic Skip List</a></h3>
+<p>Instead of random levels, use deterministic pattern (e.g., 1-2-4 pattern).</p>
+<p><strong>Advantage</strong>: Guaranteed O(log n) worst case
+<strong>Disadvantage</strong>: More complex, loses simplicity benefit</p>
+<h3 id="2-indexable-skip-list"><a class="header" href="#2-indexable-skip-list">2. Indexable Skip List</a></h3>
+<p>Add size information at each node to support kth element queries.</p>
+<pre><code class="language-python">class IndexableNode:
+    def __init__(self, key, level):
+        self.key = key
+        self.forward = [None] * (level + 1)
+        self.width = [1] * (level + 1)  # Distance to next node
+
+    def find_kth(self, k):
+        """Find kth element in O(log n)"""
+        current = self.head
+        pos = 0
+
+        for i in range(self.level, -1, -1):
+            while current.forward[i] and pos + current.width[i] &lt;= k:
+                pos += current.width[i]
+                current = current.forward[i]
+
+        return current.key
+</code></pre>
+<h3 id="3-concurrent-skip-list"><a class="header" href="#3-concurrent-skip-list">3. Concurrent Skip List</a></h3>
+<p>Lock-free skip list for concurrent access.</p>
+<p><strong>Key idea</strong>: Use atomic compare-and-swap (CAS) operations</p>
+<p><strong>Advantage</strong>: High concurrency, no global locks</p>
+<p><strong>Used in</strong>: Java’s <code>ConcurrentSkipListMap</code>, <code>ConcurrentSkipListSet</code></p>
+<h3 id="4-skip-list-with-finger-search"><a class="header" href="#4-skip-list-with-finger-search">4. Skip List with Finger Search</a></h3>
+<p>Maintain “fingers” pointing to recently accessed nodes.</p>
+<p><strong>Advantage</strong>: O(log k) search when searching near previous position
+<strong>Use case</strong>: Temporal locality in access patterns</p>
+<h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
+<h3 id="1-redis-sorted-sets"><a class="header" href="#1-redis-sorted-sets">1. Redis Sorted Sets</a></h3>
+<p>Redis uses skip lists for sorted sets (ZADD, ZRANGE commands).</p>
+<p><strong>Why skip lists over balanced trees:</strong></p>
+<ul>
+<li>Simpler implementation</li>
+<li>Better for range queries (just walk forward pointers)</li>
+<li>Memory efficient</li>
+<li>Good cache locality</li>
+</ul>
+<pre><code class="language-python"># Redis-style sorted set operations
+class RedisSortedSet:
+    def __init__(self):
+        self.skip_list = SkipList()
+        self.dict = {}  # member -&gt; score mapping
+
+    def zadd(self, member, score):
+        """Add member with score"""
+        if member in self.dict:
+            self.skip_list.delete((self.dict[member], member))
+        self.skip_list.insert((score, member), member)
+        self.dict[member] = score
+
+    def zrange(self, start, stop):
+        """Get members in score range"""
+        result = []
+        for (score, member), _ in self.skip_list:
+            if score &gt;= start and score &lt;= stop:
+                result.append(member)
+        return result
+</code></pre>
+<h3 id="2-in-memory-databases"><a class="header" href="#2-in-memory-databases">2. In-Memory Databases</a></h3>
+<p>LevelDB’s MemTable uses skip lists.</p>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Fast ordered insertion</li>
+<li>Efficient range scans</li>
+<li>Good for LSM-tree first level</li>
+</ul>
+<h3 id="3-priority-queues"><a class="header" href="#3-priority-queues">3. Priority Queues</a></h3>
+<p>Skip lists can implement priority queues with O(log n) operations.</p>
+<pre><code class="language-python">class SkipListPriorityQueue:
+    def __init__(self):
+        self.sl = SkipList()
+
+    def insert(self, priority, item):
+        self.sl.insert(priority, item)
+
+    def extract_min(self):
+        """Get and remove minimum element"""
+        min_node = self.sl.header.forward[0]
+        if min_node:
+            self.sl.delete(min_node.key)
+            return min_node.value
+        return None
+
+    def peek_min(self):
+        """Get minimum without removing"""
+        min_node = self.sl.header.forward[0]
+        return min_node.value if min_node else None
+</code></pre>
+<h3 id="4-range-query-systems"><a class="header" href="#4-range-query-systems">4. Range Query Systems</a></h3>
+<p>Efficiently answer range queries on ordered data.</p>
+<pre><code class="language-python">def range_aggregation(skip_list, start, end, aggregate_fn):
+    """
+    Aggregate values in range using custom function.
+    Examples: sum, max, count, etc.
+    """
+    result = aggregate_fn.identity()
+    current = skip_list.header
+
+    # Find start
+    for i in range(skip_list.level, -1, -1):
+        while current.forward[i] and current.forward[i].key &lt; start:
+            current = current.forward[i]
+
+    # Aggregate range
+    current = current.forward[0]
+    while current and current.key &lt;= end:
+        result = aggregate_fn.combine(result, current.value)
+        current = current.forward[0]
+
+    return result
+</code></pre>
+<h3 id="5-computational-geometry"><a class="header" href="#5-computational-geometry">5. Computational Geometry</a></h3>
+<p>Skip lists for interval trees and segment storage.</p>
+<p><strong>Use case</strong>: Store intervals and query overlaps</p>
+<h2 id="comparison-with-other-structures"><a class="header" href="#comparison-with-other-structures">Comparison with Other Structures</a></h2>
+<h3 id="skip-list-vs-balanced-bst"><a class="header" href="#skip-list-vs-balanced-bst">Skip List vs Balanced BST</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Skip List</th><th>Balanced BST (AVL/RB)</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Implementation</strong></td><td>Simple</td><td>Complex (rotations)</td></tr>
+<tr><td><strong>Search</strong></td><td>O(log n) expected</td><td>O(log n) worst case</td></tr>
+<tr><td><strong>Insert</strong></td><td>O(log n) expected</td><td>O(log n) worst case</td></tr>
+<tr><td><strong>Delete</strong></td><td>O(log n) expected</td><td>O(log n) worst case</td></tr>
+<tr><td><strong>Space</strong></td><td>O(n) expected</td><td>O(n) worst case</td></tr>
+<tr><td><strong>Balancing</strong></td><td>Probabilistic</td><td>Deterministic</td></tr>
+<tr><td><strong>Code lines</strong></td><td>~100-150</td><td>~300-500</td></tr>
+<tr><td><strong>Concurrency</strong></td><td>Easier (lock-free possible)</td><td>Harder</td></tr>
+<tr><td><strong>Range queries</strong></td><td>Natural</td><td>Need in-order traversal</td></tr>
+<tr><td><strong>Cache locality</strong></td><td>Better (sequential)</td><td>Worse (pointer chasing)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>When to use Skip List:</strong></p>
+<ul>
+<li>Want simpler implementation</li>
+<li>Need concurrent access</li>
+<li>Frequent range queries</li>
+<li>Probabilistic guarantees acceptable</li>
+</ul>
+<p><strong>When to use BST:</strong></p>
+<ul>
+<li>Need guaranteed O(log n) worst case</li>
+<li>Memory is extremely tight</li>
+<li>Want deterministic behavior</li>
+</ul>
+<h3 id="skip-list-vs-hash-table"><a class="header" href="#skip-list-vs-hash-table">Skip List vs Hash Table</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Skip List</th><th>Hash Table</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Ordered</strong></td><td>Yes</td><td>No</td></tr>
+<tr><td><strong>Search</strong></td><td>O(log n)</td><td>O(1) average</td></tr>
+<tr><td><strong>Range query</strong></td><td>O(log n + k)</td><td>O(n)</td></tr>
+<tr><td><strong>Space</strong></td><td>O(n)</td><td>O(n)</td></tr>
+<tr><td><strong>Dynamic resizing</strong></td><td>Not needed</td><td>Needed (expensive)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Use Skip List when:</strong> Need ordering, range queries, no resizing
+<strong>Use Hash Table when:</strong> Only need point queries, no ordering required</p>
+<h3 id="skip-list-vs-b-tree"><a class="header" href="#skip-list-vs-b-tree">Skip List vs B-Tree</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Skip List</th><th>B-Tree</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Disk-friendly</strong></td><td>No</td><td>Yes</td></tr>
+<tr><td><strong>Node size</strong></td><td>Small</td><td>Large (cache line)</td></tr>
+<tr><td><strong>Fanout</strong></td><td>2 (binary)</td><td>High (configurable)</td></tr>
+<tr><td><strong>Use case</strong></td><td>In-memory</td><td>Disk-based databases</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="interview-patterns"><a class="header" href="#interview-patterns">Interview Patterns</a></h2>
+<h3 id="pattern-1-basic-operations"><a class="header" href="#pattern-1-basic-operations">Pattern 1: Basic Operations</a></h3>
+<pre><code class="language-python">def solve_with_skip_list(operations):
+    """
+    Implement data structure supporting:
+    - insert(x)
+    - search(x)
+    - delete(x)
+    All in O(log n)
+    """
+    sl = SkipList()
+
+    for op, value in operations:
+        if op == 'insert':
+            sl.insert(value, value)
+        elif op == 'search':
+            print(sl.search(value))
+        else:  # delete
+            sl.delete(value)
+</code></pre>
+<h3 id="pattern-2-range-queries"><a class="header" href="#pattern-2-range-queries">Pattern 2: Range Queries</a></h3>
+<pre><code class="language-python">def range_sum_query(nums, queries):
+    """
+    Process range sum queries efficiently.
+    Build skip list, use for range aggregation.
+    """
+    sl = SkipList()
+
+    # Build skip list with prefix sums
+    prefix = 0
+    for i, num in enumerate(nums):
+        prefix += num
+        sl.insert(i, prefix)
+
+    results = []
+    for l, r in queries:
+        right_sum = sl.search(r)
+        left_sum = sl.search(l - 1) if l &gt; 0 else 0
+        results.append(right_sum - left_sum)
+
+    return results
+</code></pre>
+<h3 id="pattern-3-design-problems"><a class="header" href="#pattern-3-design-problems">Pattern 3: Design Problems</a></h3>
+<p><strong>LeetCode 1396: Design Underground System</strong></p>
+<p>Skip lists can efficiently handle timestamp-based queries.</p>
+<h3 id="pattern-4-kth-element"><a class="header" href="#pattern-4-kth-element">Pattern 4: Kth Element</a></h3>
+<p>With indexable skip list:</p>
+<pre><code class="language-python">def find_kth_smallest(stream, k):
+    """
+    Maintain kth smallest in stream.
+    Use indexable skip list for O(log n) kth queries.
+    """
+    sl = IndexableSkipList()
+
+    for value in stream:
+        sl.insert(value, value)
+        if len(sl) &gt;= k:
+            print(f"Kth smallest: {sl.kth_element(k)}")
+</code></pre>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="probabilistic-analysis"><a class="header" href="#probabilistic-analysis">Probabilistic Analysis</a></h3>
+<p><strong>Theorem (Pugh 1990)</strong>: In a skip list with n elements and p = 1/2:</p>
+<ol>
+<li>
+<p><strong>Expected number of levels</strong>:</p>
+<pre><code>E[L(n)] = log₂(n) + O(1)
+</code></pre>
+</li>
+<li>
+<p><strong>Search path length</strong>:</p>
+<pre><code>E[C(n)] = 2 log₂(n)  (expected comparisons)
+</code></pre>
+</li>
+<li>
+<p><strong>Space</strong>:</p>
+<pre><code>E[S(n)] = 2n  (expected number of pointers)
+</code></pre>
+</li>
+</ol>
+<p><strong>Proof sketch</strong> uses geometric distribution and linearity of expectation.</p>
+<h3 id="optimal-p-value"><a class="header" href="#optimal-p-value">Optimal p Value</a></h3>
+<p><strong>Question</strong>: What’s the best probability p?</p>
+<p><strong>Answer</strong>: Depends on priorities:</p>
+<ul>
+<li><strong>p = 1/2</strong>: Good balance (most common choice)</li>
+<li><strong>p = 1/4</strong>: Less space (1.33n pointers), slower search</li>
+<li><strong>p = 1/e</strong>: Optimal for minimizing search time (theoretical)</li>
+</ul>
+<p><strong>Trade-off</strong>:</p>
+<pre><code>Lower p → Less space, more levels, slower search
+Higher p → More space, fewer levels, faster search
+</code></pre>
+<h3 id="lock-free-implementation"><a class="header" href="#lock-free-implementation">Lock-Free Implementation</a></h3>
+<p>Key challenges for concurrent skip list:</p>
+<ol>
+<li><strong>Insertion</strong>: Mark forward pointers atomically</li>
+<li><strong>Deletion</strong>: Logical delete then physical removal</li>
+<li><strong>Memory reclamation</strong>: Use hazard pointers or epoch-based</li>
+</ol>
+<p><strong>Pseudo-code pattern:</strong></p>
+<pre><code>insert_concurrent(key):
+    while True:
+        find insert position
+        attempt CAS to link new node
+        if CAS succeeds:
+            break
+        else:
+            retry with updated position
+</code></pre>
+<h3 id="finger-search-optimization"><a class="header" href="#finger-search-optimization">Finger Search Optimization</a></h3>
+<p><strong>Idea</strong>: Start search from recently accessed position instead of head.</p>
+<p><strong>Benefit</strong>: O(log k) time when target is distance k from finger</p>
+<p><strong>Implementation</strong>: Maintain finger pointer, update on each access</p>
+<h2 id="key-takeaways"><a class="header" href="#key-takeaways">Key Takeaways</a></h2>
+<ol>
+<li><strong>Skip lists = Probabilistic balanced trees</strong> using randomization</li>
+<li><strong>Simple implementation</strong> compared to AVL/Red-Black trees</li>
+<li><strong>O(log n) expected time</strong> for search/insert/delete</li>
+<li><strong>O(n) expected space</strong> with low constants</li>
+<li><strong>Excellent for concurrent</strong> access (lock-free possible)</li>
+<li><strong>Natural range query</strong> support via forward pointers</li>
+<li><strong>Used in production</strong> (Redis, LevelDB)</li>
+<li><strong>Random level = coin flips</strong> until tails</li>
+</ol>
+<h2 id="when-to-use-skip-lists"><a class="header" href="#when-to-use-skip-lists">When to Use Skip Lists</a></h2>
+<p>✅ <strong>Use when:</strong></p>
+<ul>
+<li>Want simple balanced structure</li>
+<li>Need ordered data with O(log n) operations</li>
+<li>Require range queries</li>
+<li>Building concurrent data structure</li>
+<li>Prefer probabilistic over deterministic</li>
+</ul>
+<p>❌ <strong>Don’t use when:</strong></p>
+<ul>
+<li>Need guaranteed worst-case O(log n)</li>
+<li>Memory is extremely constrained</li>
+<li>Only need point queries (use hash table)</li>
+<li>Implementing for disk-based system (use B-tree)</li>
+</ul>
+<hr>
+<p><strong>Time to Implement</strong>: 30-40 minutes (basic), 60+ minutes (with all features)</p>
+<p><strong>Space Complexity</strong>: O(n) expected</p>
+<p><strong>Most Common Interview Uses</strong>:</p>
+<ul>
+<li>Design ordered data structure</li>
+<li>Range query problems</li>
+<li>Alternative to BST in system design</li>
+</ul>
+<p><strong>Pro Tip</strong>: Skip lists shine in their simplicity. When asked to implement a balanced tree, consider suggesting a skip list as an alternative - it’s much easier to code correctly in an interview setting!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../data_structures/persistent_structures.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../data_structures/sparse_table.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../data_structures/persistent_structures.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../data_structures/sparse_table.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

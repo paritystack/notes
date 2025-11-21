@@ -77,6 +77,13 @@
     - [Lru Cache](data_structures/lru_cache.md)
     - [Segment Trees](data_structures/segment_trees.md)
     - [Union Find](data_structures/union_find.md)
+    - [Circular Buffer](data_structures/circular_buffer.md)
+    - [Fenwick Tree](data_structures/fenwick_tree.md)
+    - [Persistent Structures](data_structures/persistent_structures.md)
+    - [Skip Lists](data_structures/skip_lists.md)
+    - [Sparse Table](data_structures/sparse_table.md)
+    - [Spatial Structures](data_structures/spatial_structures.md)
+    - [Suffix Arrays](data_structures/suffix_arrays.md)
 
 * [Algorithms](algorithms/README.md)
     - [Big O](algorithms/big_o.md)

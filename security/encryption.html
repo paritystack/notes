@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-78b9311f.js";
+            window.path_to_searchindex_js = "../searchindex-93581825.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -188,8 +188,11 @@ Ciphertext + Key  [Decrypt] &gt; Plaintext
 <p><strong>Algorithms</strong>:</p>
 <ul>
 <li><strong>AES</strong> (Advanced Encryption Standard): Industry standard, 128/192/256-bit keys</li>
-<li><strong>ChaCha20</strong>: Modern, fast, secure</li>
+<li><strong>ChaCha20-Poly1305</strong>: Modern, fast, authenticated encryption (AEAD)</li>
+<li><strong>Blowfish</strong>: 64-bit blocks, 32-448 bit keys (legacy, use AES instead)</li>
+<li><strong>Twofish</strong>: AES finalist, 128-bit blocks, up to 256-bit keys</li>
 <li><strong>DES</strong>: Obsolete, 56-bit key (too short)</li>
+<li><strong>3DES</strong>: Triple DES, more secure but slow (being phased out)</li>
 </ul>
 <p><strong>When to use</strong>: Database encryption, file encryption, internal communication</p>
 <h3 id="asymmetric-encryption"><a class="header" href="#asymmetric-encryption">Asymmetric Encryption</a></h3>
@@ -201,9 +204,28 @@ Ciphertext + Private Key  [Decrypt] &gt; Plaintext
 <ul>
 <li><strong>RSA</strong>: Based on factoring difficulty, 2048/4096-bit keys</li>
 <li><strong>ECC</strong> (Elliptic Curve): Shorter keys, same security as RSA</li>
+<li><strong>EdDSA/Ed25519</strong>: Modern elliptic curve for signatures, very fast</li>
+<li><strong>ECDSA</strong>: Elliptic Curve Digital Signature Algorithm</li>
 <li><strong>Diffie-Hellman</strong>: Key exchange, not encryption</li>
 </ul>
 <p><strong>When to use</strong>: HTTPS, email encryption, digital signatures</p>
+<h3 id="post-quantum-cryptography"><a class="header" href="#post-quantum-cryptography">Post-Quantum Cryptography</a></h3>
+<p>Algorithms resistant to quantum computer attacks:</p>
+<pre><code>Quantum computers threaten:
+ RSA, ECC, Diffie-Hellman (based on factoring/discrete log)
+
+Post-quantum alternatives:
+ Lattice-based, hash-based, code-based
+</code></pre>
+<p><strong>NIST Standardized Algorithms</strong> (2024):</p>
+<ul>
+<li><strong>CRYSTALS-Kyber</strong>: Key encapsulation mechanism (KEM)</li>
+<li><strong>CRYSTALS-Dilithium</strong>: Digital signatures</li>
+<li><strong>SPHINCS+</strong>: Hash-based signatures (stateless)</li>
+<li><strong>FALCON</strong>: Fast lattice-based signatures</li>
+</ul>
+<p><strong>Status</strong>: Transitioning to production (TLS 1.3, Signal Protocol adding support)</p>
+<p><strong>When to use</strong>: Long-term secure data, forward-looking systems</p>
 <h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
 <h3 id="key-size"><a class="header" href="#key-size">Key Size</a></h3>
 <pre><code>More bits = More security but slower
@@ -287,6 +309,208 @@ const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
 let plaintext = decipher.update(ciphertext, 'hex', 'utf8');
 plaintext += decipher.final('utf8');
 </code></pre>
+<h3 id="go---aes-gcm-authenticated-encryption"><a class="header" href="#go---aes-gcm-authenticated-encryption">Go - AES-GCM Authenticated Encryption</a></h3>
+<pre><code class="language-go">package main
+
+import (
+    "crypto/aes"
+    "crypto/cipher"
+    "crypto/rand"
+    "io"
+)
+
+func encrypt(plaintext []byte, key []byte) ([]byte, error) {
+    // Create cipher block
+    block, err := aes.NewCipher(key) // key: 16, 24, or 32 bytes
+    if err != nil {
+        return nil, err
+    }
+
+    // Create GCM mode
+    gcm, err := cipher.NewGCM(block)
+    if err != nil {
+        return nil, err
+    }
+
+    // Generate nonce
+    nonce := make([]byte, gcm.NonceSize())
+    if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+        return nil, err
+    }
+
+    // Encrypt (nonce is prepended to ciphertext)
+    ciphertext := gcm.Seal(nonce, nonce, plaintext, nil)
+    return ciphertext, nil
+}
+
+func decrypt(ciphertext []byte, key []byte) ([]byte, error) {
+    block, err := aes.NewCipher(key)
+    if err != nil {
+        return nil, err
+    }
+
+    gcm, err := cipher.NewGCM(block)
+    if err != nil {
+        return nil, err
+    }
+
+    // Extract nonce and decrypt
+    nonceSize := gcm.NonceSize()
+    nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+
+    plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+    return plaintext, err
+}
+</code></pre>
+<h3 id="rust---chacha20-poly1305"><a class="header" href="#rust---chacha20-poly1305">Rust - ChaCha20-Poly1305</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use chacha20poly1305::{
+    aead::{Aead, KeyInit, OsRng},
+    ChaCha20Poly1305, Nonce
+};
+
+fn encrypt_message(plaintext: &amp;[u8], key: &amp;[u8; 32]) -&gt; Result&lt;Vec&lt;u8&gt;, Box&lt;dyn Error&gt;&gt; {
+    let cipher = ChaCha20Poly1305::new(key.into());
+
+    // Generate random nonce (96 bits for ChaCha20Poly1305)
+    let nonce = ChaCha20Poly1305::generate_nonce(&amp;mut OsRng);
+
+    // Encrypt
+    let ciphertext = cipher.encrypt(&amp;nonce, plaintext)
+        .map_err(|e| format!("Encryption failed: {}", e))?;
+
+    // Prepend nonce to ciphertext
+    let mut result = nonce.to_vec();
+    result.extend_from_slice(&amp;ciphertext);
+
+    Ok(result)
+}
+
+fn decrypt_message(data: &amp;[u8], key: &amp;[u8; 32]) -&gt; Result&lt;Vec&lt;u8&gt;, Box&lt;dyn Error&gt;&gt; {
+    let cipher = ChaCha20Poly1305::new(key.into());
+
+    // Extract nonce and ciphertext
+    let (nonce_bytes, ciphertext) = data.split_at(12);
+    let nonce = Nonce::from_slice(nonce_bytes);
+
+    // Decrypt
+    let plaintext = cipher.decrypt(nonce, ciphertext)
+        .map_err(|e| format!("Decryption failed: {}", e))?;
+
+    Ok(plaintext)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="java---aes-encryption"><a class="header" href="#java---aes-encryption">Java - AES Encryption</a></h3>
+<pre><code class="language-java">import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
+
+public class AESEncryption {
+    private static final int GCM_TAG_LENGTH = 128;
+    private static final int GCM_IV_LENGTH = 12;
+
+    public static byte[] encrypt(byte[] plaintext, SecretKey key) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+        // Generate random IV
+        byte[] iv = new byte[GCM_IV_LENGTH];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(iv);
+
+        GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, key, parameterSpec);
+
+        byte[] ciphertext = cipher.doFinal(plaintext);
+
+        // Prepend IV to ciphertext
+        byte[] encrypted = new byte[iv.length + ciphertext.length];
+        System.arraycopy(iv, 0, encrypted, 0, iv.length);
+        System.arraycopy(ciphertext, 0, encrypted, iv.length, ciphertext.length);
+
+        return encrypted;
+    }
+
+    public static byte[] decrypt(byte[] encrypted, SecretKey key) throws Exception {
+        // Extract IV and ciphertext
+        byte[] iv = new byte[GCM_IV_LENGTH];
+        System.arraycopy(encrypted, 0, iv, 0, iv.length);
+
+        byte[] ciphertext = new byte[encrypted.length - GCM_IV_LENGTH];
+        System.arraycopy(encrypted, GCM_IV_LENGTH, ciphertext, 0, ciphertext.length);
+
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+        cipher.init(Cipher.DECRYPT_MODE, key, parameterSpec);
+
+        return cipher.doFinal(ciphertext);
+    }
+
+    // Generate AES key
+    public static SecretKey generateKey() throws Exception {
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(256); // 256-bit key
+        return keyGen.generateKey();
+    }
+}
+</code></pre>
+<h3 id="hybrid-encryption-pattern"><a class="header" href="#hybrid-encryption-pattern">Hybrid Encryption Pattern</a></h3>
+<p>Combining asymmetric and symmetric for performance:</p>
+<pre><code class="language-python">from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import os
+
+def hybrid_encrypt(plaintext: bytes, recipient_public_key):
+    # Generate random symmetric key
+    symmetric_key = os.urandom(32)  # AES-256 key
+    iv = os.urandom(16)
+
+    # Encrypt data with symmetric key (fast)
+    cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+
+    # Encrypt symmetric key with public key (small data)
+    encrypted_key = recipient_public_key.encrypt(
+        symmetric_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    # Return: encrypted_key + iv + ciphertext
+    return encrypted_key + iv + ciphertext
+
+def hybrid_decrypt(encrypted_data: bytes, private_key):
+    # Extract components
+    key_size = private_key.key_size // 8
+    encrypted_key = encrypted_data[:key_size]
+    iv = encrypted_data[key_size:key_size+16]
+    ciphertext = encrypted_data[key_size+16:]
+
+    # Decrypt symmetric key
+    symmetric_key = private_key.decrypt(
+        encrypted_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    # Decrypt data
+    cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
+    decryptor = cipher.decryptor()
+    plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+
+    return plaintext
+</code></pre>
 <h2 id="common-algorithms-comparison"><a class="header" href="#common-algorithms-comparison">Common Algorithms Comparison</a></h2>
 <div class="table-wrapper">
 <table>
@@ -295,9 +519,12 @@ plaintext += decipher.final('utf8');
 </thead>
 <tbody>
 <tr><td><strong>AES</strong></td><td>Symmetric</td><td>Fast</td><td>Very good</td><td>General encryption</td></tr>
-<tr><td><strong>ChaCha20</strong></td><td>Symmetric</td><td>Very fast</td><td>Very good</td><td>Mobile/streaming</td></tr>
+<tr><td><strong>ChaCha20-Poly1305</strong></td><td>Symmetric</td><td>Very fast</td><td>Excellent</td><td>Mobile/streaming/AEAD</td></tr>
+<tr><td><strong>Twofish</strong></td><td>Symmetric</td><td>Fast</td><td>Very good</td><td>Alternative to AES</td></tr>
 <tr><td><strong>RSA</strong></td><td>Asymmetric</td><td>Slow</td><td>Good</td><td>Key exchange, signatures</td></tr>
 <tr><td><strong>ECC</strong></td><td>Asymmetric</td><td>Medium</td><td>Excellent</td><td>HTTPS, signatures</td></tr>
+<tr><td><strong>Ed25519</strong></td><td>Asymmetric</td><td>Fast</td><td>Excellent</td><td>Digital signatures</td></tr>
+<tr><td><strong>CRYSTALS-Kyber</strong></td><td>Post-quantum</td><td>Medium</td><td>Quantum-resistant</td><td>Future-proof KEM</td></tr>
 <tr><td><strong>DES</strong></td><td>Symmetric</td><td>Fast</td><td>L Broken</td><td>Legacy only</td></tr>
 </tbody>
 </table>
@@ -344,6 +571,230 @@ key = os.environ.get('ENCRYPTION_KEY')
 <pre><code class="language-python"># Generate new IV for each encryption
 iv = os.urandom(16)  # Different each time
 </code></pre>
+<h2 id="advanced-concepts"><a class="header" href="#advanced-concepts">Advanced Concepts</a></h2>
+<h3 id="key-derivation-functions-kdf"><a class="header" href="#key-derivation-functions-kdf">Key Derivation Functions (KDF)</a></h3>
+<p>Transforms weak key material into strong cryptographic keys:</p>
+<pre><code>Purpose: Password → Strong encryption key
+        Low-entropy → High-entropy
+</code></pre>
+<p><strong>Common KDFs</strong>:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Algorithm</th><th>Params</th><th>Best For</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>PBKDF2</strong></td><td>Iterations</td><td>General</td><td>Widely supported</td></tr>
+<tr><td><strong>Argon2</strong></td><td>Memory, time, parallelism</td><td>Password hashing</td><td>Winner of PHC (2015)</td></tr>
+<tr><td><strong>scrypt</strong></td><td>Memory, CPU</td><td>Key derivation</td><td>Memory-hard</td></tr>
+<tr><td><strong>HKDF</strong></td><td>None</td><td>Key expansion</td><td>Fast, not for passwords</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Python Example (PBKDF2)</strong>:</p>
+<pre><code class="language-python">from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+import os
+
+def derive_key(password: bytes, salt: bytes = None):
+    if salt is None:
+        salt = os.urandom(16)  # Generate random salt
+
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,  # 256-bit key
+        salt=salt,
+        iterations=600_000,  # OWASP 2023 recommendation
+    )
+
+    key = kdf.derive(password)
+    return key, salt
+</code></pre>
+<p><strong>Why KDFs?</strong>:</p>
+<pre><code>Direct hash:  SHA256("password") = always same output (vulnerable)
+With KDF:     PBKDF2("password", salt, 600k iter) = unique, slow to brute force
+</code></pre>
+<h3 id="password-hashing"><a class="header" href="#password-hashing">Password Hashing</a></h3>
+<p><strong>Never encrypt passwords - hash them!</strong></p>
+<pre><code>Encryption: Reversible (you can decrypt)
+Hashing:    One-way (cannot reverse)
+</code></pre>
+<p><strong>Modern Password Hashing</strong> (use these):</p>
+<pre><code class="language-python">import bcrypt
+import argon2
+
+# bcrypt (good)
+password = b"user_password"
+hashed = bcrypt.hashpw(password, bcrypt.gensalt(rounds=12))
+# Verify
+if bcrypt.checkpw(password, hashed):
+    print("Valid password")
+
+# Argon2 (better - memory-hard)
+from argon2 import PasswordHasher
+ph = PasswordHasher()
+hash = ph.hash("user_password")
+# Verify
+try:
+    ph.verify(hash, "user_password")
+    print("Valid password")
+except argon2.exceptions.VerifyMismatchError:
+    print("Invalid password")
+</code></pre>
+<p><strong>Salt vs Pepper</strong>:</p>
+<pre><code>Salt: Random per-password, stored with hash
+      Prevents rainbow table attacks
+      Example: $argon2id$v=19$m=65536...[salt][hash]
+
+Pepper: Secret key, same for all passwords, stored separately
+        Additional defense if database is compromised
+        Example: HMAC(hash, pepper_key)
+</code></pre>
+<p><strong>Bad Practices</strong>:</p>
+<pre><code class="language-python"># L Never do this
+password_hash = hashlib.md5(password).hexdigest()  # Fast, no salt, broken
+password_hash = hashlib.sha256(password).hexdigest()  # Fast, no salt
+
+#  Do this
+password_hash = argon2.hash(password)  # Slow, salted, memory-hard
+</code></pre>
+<h3 id="perfect-forward-secrecy-pfs"><a class="header" href="#perfect-forward-secrecy-pfs">Perfect Forward Secrecy (PFS)</a></h3>
+<p>Ensures past communications remain secure even if long-term keys are compromised:</p>
+<pre><code>Without PFS:
+  Server private key compromised → All past traffic decrypted
+
+With PFS:
+  Server private key compromised → Past sessions still secure
+  (Each session uses ephemeral keys that are destroyed)
+</code></pre>
+<p><strong>How it works</strong>:</p>
+<pre><code>1. Each session generates temporary (ephemeral) key pair
+2. Ephemeral keys used for that session only
+3. Keys destroyed after session ends
+4. Even if server key stolen later, old sessions safe
+</code></pre>
+<p><strong>TLS 1.3 with PFS</strong>:</p>
+<pre><code>Client                                Server
+  |                                     |
+  | ClientHello (supported groups)      |
+  |------------------------------------&gt;|
+  |                                     |
+  |     ServerHello (ephemeral key)     |
+  |&lt;------------------------------------|
+  |                                     |
+Both derive session key from ephemeral Diffie-Hellman exchange
+Ephemeral keys discarded after handshake
+</code></pre>
+<p><strong>Cipher suites with PFS</strong>:</p>
+<ul>
+<li><code>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</code> (ECDHE = ephemeral)</li>
+<li><code>TLS_DHE_RSA_WITH_AES_256_GCM_SHA384</code></li>
+</ul>
+<p><strong>Without PFS</strong>:</p>
+<ul>
+<li><code>TLS_RSA_WITH_AES_128_CBC_SHA</code> (static RSA key)</li>
+</ul>
+<h3 id="homomorphic-encryption"><a class="header" href="#homomorphic-encryption">Homomorphic Encryption</a></h3>
+<p>Allows computation on encrypted data without decrypting:</p>
+<pre><code>Normal:
+  Decrypt → Compute → Encrypt
+
+Homomorphic:
+  Compute directly on ciphertext
+</code></pre>
+<p><strong>Example</strong>:</p>
+<pre><code>E(a) + E(b) = E(a + b)
+E(a) × E(b) = E(a × b)
+
+Cloud server can add encrypted numbers without seeing values!
+</code></pre>
+<p><strong>Types</strong>:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Type</th><th>Operations</th><th>Use Case</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Partial</strong></td><td>Addition OR multiplication</td><td>Limited computation</td></tr>
+<tr><td><strong>Somewhat</strong></td><td>Limited additions + multiplications</td><td>Simple functions</td></tr>
+<tr><td><strong>Fully</strong></td><td>Unlimited operations</td><td>Any computation (slow)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Use Cases</strong>:</p>
+<ul>
+<li>Private cloud computing</li>
+<li>Encrypted database queries</li>
+<li>Secure voting systems</li>
+<li>Medical data analysis (privacy-preserving)</li>
+</ul>
+<p><strong>Python Example</strong> (using tenseal for partial HE):</p>
+<pre><code class="language-python">import tenseal as ts
+
+# Setup context
+context = ts.context(ts.SCHEME_TYPE.CKKS, poly_modulus_degree=8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
+context.global_scale = 2**40
+context.generate_galois_keys()
+
+# Encrypt
+v1 = ts.ckks_vector(context, [1.5, 2.5, 3.5])
+v2 = ts.ckks_vector(context, [4.0, 5.0, 6.0])
+
+# Compute on encrypted data
+result = v1 + v2  # Still encrypted!
+
+# Decrypt
+print(result.decrypt())  # [5.5, 7.5, 9.5]
+</code></pre>
+<p><strong>Limitations</strong>: Very slow (1000-1000000x slower than plaintext computation)</p>
+<h3 id="zero-knowledge-proofs-zkp"><a class="header" href="#zero-knowledge-proofs-zkp">Zero-Knowledge Proofs (ZKP)</a></h3>
+<p>Prove you know something without revealing what it is:</p>
+<pre><code>Prover: "I know the password"
+Verifier: "Prove it without telling me the password"
+Prover: [sends proof]
+Verifier: "Verified!"
+</code></pre>
+<p><strong>Properties</strong>:</p>
+<ol>
+<li><strong>Completeness</strong>: If true, honest verifier will be convinced</li>
+<li><strong>Soundness</strong>: If false, cannot fool verifier</li>
+<li><strong>Zero-knowledge</strong>: Verifier learns nothing except validity</li>
+</ol>
+<p><strong>Simple Example - Cave Analogy</strong>:</p>
+<pre><code>     A ←─── Entrance
+     │
+     ├─────┐
+     │     │
+     B     C ← Secret door needs password
+
+1. Prover enters cave, goes to B or C (verifier can't see)
+2. Verifier asks prover to come out from random side (B or C)
+3. If prover knows password, can always comply
+4. Repeat many times → probability of cheating becomes negligible
+5. Verifier convinced prover knows password, but didn't see it
+</code></pre>
+<p><strong>Real-World Uses</strong>:</p>
+<ul>
+<li><strong>Cryptocurrencies</strong>: Zcash (prove transaction validity without revealing amount)</li>
+<li><strong>Authentication</strong>: Prove identity without revealing password</li>
+<li><strong>Private voting</strong>: Prove vote is valid without revealing choice</li>
+</ul>
+<p><strong>zk-SNARKs</strong> (Zero-Knowledge Succinct Non-Interactive ARgument of Knowledge):</p>
+<pre><code class="language-python"># Conceptual example (real implementation is complex)
+# Prove you know x such that hash(x) = y, without revealing x
+
+statement = "I know preimage of this hash"
+proof = generate_proof(secret_x, public_hash_y)
+
+# Verifier checks proof
+is_valid = verify_proof(proof, public_hash_y)  # True, but doesn't learn x
+</code></pre>
+<p><strong>Modern ZKP Systems</strong>:</p>
+<ul>
+<li><strong>zk-SNARKs</strong>: Tiny proofs, fast verification (used in Zcash)</li>
+<li><strong>zk-STARKs</strong>: Larger proofs, no trusted setup needed</li>
+<li><strong>Bulletproofs</strong>: Short proofs, no trusted setup</li>
+</ul>
 <h2 id="key-exchange"><a class="header" href="#key-exchange">Key Exchange</a></h2>
 <h3 id="diffie-hellman"><a class="header" href="#diffie-hellman">Diffie-Hellman</a></h3>
 <p>Agree on shared secret over insecure channel:</p>
@@ -360,6 +811,391 @@ Bob:   (g^a)^b mod p = g^ab mod p
 3. Client generates pre-master secret, encrypts with public key
 4. Both derive session key from pre-master secret
 5. Encrypted communication begins
+</code></pre>
+<h2 id="practical-use-cases"><a class="header" href="#practical-use-cases">Practical Use Cases</a></h2>
+<h3 id="1-password-storage--authentication"><a class="header" href="#1-password-storage--authentication">1. Password Storage &amp; Authentication</a></h3>
+<p><strong>L NEVER store passwords in plaintext or encrypted form!</strong></p>
+<pre><code class="language-python"># Backend password storage
+from argon2 import PasswordHasher
+
+class UserAuth:
+    def __init__(self):
+        self.ph = PasswordHasher()
+
+    def register(self, username, password):
+        # Hash password with Argon2
+        password_hash = self.ph.hash(password)
+
+        # Store in database
+        save_to_db(username, password_hash)
+
+    def login(self, username, password):
+        # Retrieve hash from database
+        stored_hash = get_from_db(username)
+
+        try:
+            # Verify password
+            self.ph.verify(stored_hash, password)
+
+            # Check if rehashing needed (params changed)
+            if self.ph.check_needs_rehash(stored_hash):
+                new_hash = self.ph.hash(password)
+                update_db(username, new_hash)
+
+            return True
+        except:
+            return False
+</code></pre>
+<p><strong>Database schema</strong>:</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,  -- e.g., $argon2id$v=19$m=65536...
+    created_at TIMESTAMP DEFAULT NOW()
+);
+</code></pre>
+<h3 id="2-end-to-end-encryption-e2ee"><a class="header" href="#2-end-to-end-encryption-e2ee">2. End-to-End Encryption (E2EE)</a></h3>
+<p>Messaging app pattern where only sender and receiver can read messages:</p>
+<pre><code class="language-python"># Signal Protocol simplified concept
+from cryptography.hazmat.primitives.asymmetric import x25519
+from cryptography.hazmat.primitives import serialization
+import os
+
+class E2EEMessaging:
+    def __init__(self):
+        # Each user has identity key pair
+        self.private_key = x25519.X25519PrivateKey.generate()
+        self.public_key = self.private_key.public_key()
+
+    def send_message(self, recipient_public_key, message):
+        # 1. Perform key exchange
+        shared_secret = self.private_key.exchange(recipient_public_key)
+
+        # 2. Derive encryption key from shared secret
+        key, salt = derive_key(shared_secret)
+
+        # 3. Encrypt message with AES-GCM
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        aesgcm = AESGCM(key)
+        nonce = os.urandom(12)
+        ciphertext = aesgcm.encrypt(nonce, message.encode(), None)
+
+        # 4. Send: nonce + ciphertext (server never sees plaintext)
+        return nonce + ciphertext
+
+    def receive_message(self, sender_public_key, encrypted_data):
+        # 1. Perform same key exchange
+        shared_secret = self.private_key.exchange(sender_public_key)
+
+        # 2. Derive same encryption key
+        key, _ = derive_key(shared_secret)
+
+        # 3. Decrypt
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        aesgcm = AESGCM(key)
+        nonce = encrypted_data[:12]
+        ciphertext = encrypted_data[12:]
+
+        plaintext = aesgcm.decrypt(nonce, ciphertext, None)
+        return plaintext.decode()
+</code></pre>
+<p><strong>Key properties</strong>:</p>
+<ul>
+<li>Server cannot read messages (no decryption key)</li>
+<li>Each conversation has unique keys</li>
+<li>Forward secrecy with ephemeral keys</li>
+</ul>
+<h3 id="3-database-field-encryption"><a class="header" href="#3-database-field-encryption">3. Database Field Encryption</a></h3>
+<p>Encrypt sensitive fields while keeping database functional:</p>
+<pre><code class="language-python">from cryptography.fernet import Fernet
+import os
+
+class EncryptedDatabase:
+    def __init__(self):
+        # Load encryption key from secure storage (KMS, env var, etc.)
+        self.key = os.environ.get('DB_ENCRYPTION_KEY').encode()
+        self.cipher = Fernet(self.key)
+
+    def store_user(self, name, email, ssn, credit_card):
+        # Encrypt sensitive fields
+        encrypted_ssn = self.cipher.encrypt(ssn.encode())
+        encrypted_cc = self.cipher.encrypt(credit_card.encode())
+
+        # Store in database
+        sql = """
+            INSERT INTO users (name, email, ssn_encrypted, cc_encrypted)
+            VALUES (%s, %s, %s, %s)
+        """
+        execute(sql, (name, email, encrypted_ssn, encrypted_cc))
+
+    def get_user_sensitive_data(self, user_id):
+        # Retrieve encrypted data
+        result = query("SELECT ssn_encrypted, cc_encrypted FROM users WHERE id = %s", user_id)
+
+        # Decrypt
+        ssn = self.cipher.decrypt(result['ssn_encrypted']).decode()
+        cc = self.cipher.decrypt(result['cc_encrypted']).decode()
+
+        return {'ssn': ssn, 'credit_card': cc}
+</code></pre>
+<p><strong>When to use</strong>:</p>
+<ul>
+<li>Encrypt: SSN, credit cards, medical records, personal addresses</li>
+<li>Don’t encrypt: Usernames, email (need to search), timestamps</li>
+</ul>
+<p><strong>Limitations</strong>:</p>
+<ul>
+<li>Cannot search on encrypted fields directly</li>
+<li>Cannot use database indexes on encrypted data</li>
+<li>Consider: Deterministic encryption for searchable fields (less secure)</li>
+</ul>
+<h3 id="4-file-encryption-at-rest"><a class="header" href="#4-file-encryption-at-rest">4. File Encryption at Rest</a></h3>
+<p><strong>Full Disk Encryption</strong> vs <strong>File-Level Encryption</strong>:</p>
+<pre><code>Full Disk (LUKS, BitLocker, FileVault):
+  + Encrypts everything automatically
+  + No application changes needed
+  - Decrypted when system is running
+  - All-or-nothing protection
+
+File-Level:
+  + Selective encryption
+  + Files stay encrypted in memory
+  - Must implement in application
+</code></pre>
+<p><strong>File encryption example</strong>:</p>
+<pre><code class="language-python">from cryptography.fernet import Fernet
+import os
+
+def encrypt_file(input_path, output_path, key=None):
+    if key is None:
+        key = Fernet.generate_key()
+        # Save key securely!
+        with open('file.key', 'wb') as f:
+            f.write(key)
+
+    cipher = Fernet(key)
+
+    # Read file
+    with open(input_path, 'rb') as f:
+        data = f.read()
+
+    # Encrypt and write
+    encrypted = cipher.encrypt(data)
+    with open(output_path, 'wb') as f:
+        f.write(encrypted)
+
+    return key
+
+def decrypt_file(input_path, output_path, key):
+    cipher = Fernet(key)
+
+    with open(input_path, 'rb') as f:
+        encrypted = f.read()
+
+    decrypted = cipher.decrypt(encrypted)
+
+    with open(output_path, 'wb') as f:
+        f.write(decrypted)
+
+# Usage
+key = encrypt_file('secret.pdf', 'secret.pdf.encrypted')
+decrypt_file('secret.pdf.encrypted', 'secret_decrypted.pdf', key)
+</code></pre>
+<p><strong>Large file encryption</strong> (streaming):</p>
+<pre><code class="language-python">from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import os
+
+def encrypt_large_file(input_path, output_path, key):
+    iv = os.urandom(16)
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
+    encryptor = cipher.encryptor()
+
+    with open(input_path, 'rb') as infile, open(output_path, 'wb') as outfile:
+        # Write IV first
+        outfile.write(iv)
+
+        # Encrypt in chunks
+        while True:
+            chunk = infile.read(64 * 1024)  # 64KB chunks
+            if not chunk:
+                break
+            # Pad last chunk if needed
+            if len(chunk) % 16 != 0:
+                chunk += b'\0' * (16 - len(chunk) % 16)
+
+            encrypted_chunk = encryptor.update(chunk)
+            outfile.write(encrypted_chunk)
+
+        outfile.write(encryptor.finalize())
+</code></pre>
+<h3 id="5-secure-api-communication"><a class="header" href="#5-secure-api-communication">5. Secure API Communication</a></h3>
+<p><strong>API Key Encryption</strong>:</p>
+<pre><code class="language-python">import hmac
+import hashlib
+import time
+
+class APIAuth:
+    def __init__(self, api_key, api_secret):
+        self.api_key = api_key
+        self.api_secret = api_secret
+
+    def create_signature(self, method, endpoint, params):
+        # Timestamp prevents replay attacks
+        timestamp = str(int(time.time()))
+
+        # Create message to sign
+        message = f"{method}{endpoint}{timestamp}{params}"
+
+        # HMAC signature
+        signature = hmac.new(
+            self.api_secret.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        return {
+            'X-API-Key': self.api_key,
+            'X-Timestamp': timestamp,
+            'X-Signature': signature
+        }
+
+    def verify_signature(self, received_sig, method, endpoint, params, timestamp):
+        # Prevent replay attacks (5 min window)
+        if abs(int(time.time()) - int(timestamp)) &gt; 300:
+            return False
+
+        # Recreate signature
+        message = f"{method}{endpoint}{timestamp}{params}"
+        expected_sig = hmac.new(
+            self.api_secret.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        # Constant-time comparison
+        return hmac.compare_digest(expected_sig, received_sig)
+
+# Usage
+auth = APIAuth('key_abc123', 'secret_xyz789')
+headers = auth.create_signature('POST', '/api/users', '{"name":"Alice"}')
+</code></pre>
+<p><strong>JWT (JSON Web Tokens)</strong>:</p>
+<pre><code class="language-python">import jwt
+from datetime import datetime, timedelta
+
+SECRET_KEY = "your-secret-key"  # Store securely!
+
+def create_token(user_id, role):
+    payload = {
+        'user_id': user_id,
+        'role': role,
+        'exp': datetime.utcnow() + timedelta(hours=24),  # Expires in 24h
+        'iat': datetime.utcnow()  # Issued at
+    }
+
+    token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+    return token
+
+def verify_token(token):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None  # Token expired
+    except jwt.InvalidTokenError:
+        return None  # Invalid token
+</code></pre>
+<h3 id="6-backup-encryption"><a class="header" href="#6-backup-encryption">6. Backup Encryption</a></h3>
+<p>Encrypt backups with key management strategy:</p>
+<pre><code class="language-python">import tarfile
+import os
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+
+def create_encrypted_backup(source_dir, backup_path, password):
+    # 1. Create tar archive
+    tar_path = backup_path + '.tar'
+    with tarfile.open(tar_path, 'w') as tar:
+        tar.add(source_dir, arcname='.')
+
+    # 2. Derive key from password
+    salt = os.urandom(16)
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=600_000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+    cipher = Fernet(key)
+
+    # 3. Encrypt tar file
+    with open(tar_path, 'rb') as f:
+        data = f.read()
+
+    encrypted = cipher.encrypt(data)
+
+    # 4. Write salt + encrypted data
+    with open(backup_path + '.encrypted', 'wb') as f:
+        f.write(salt)
+        f.write(encrypted)
+
+    # 5. Clean up tar file
+    os.remove(tar_path)
+
+    print(f"Backup created: {backup_path}.encrypted")
+    print("IMPORTANT: Store your password securely!")
+
+def restore_encrypted_backup(backup_path, restore_dir, password):
+    with open(backup_path, 'rb') as f:
+        salt = f.read(16)
+        encrypted = f.read()
+
+    # Derive key
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=600_000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+    cipher = Fernet(key)
+
+    # Decrypt
+    data = cipher.decrypt(encrypted)
+
+    # Extract tar
+    tar_path = 'temp_restore.tar'
+    with open(tar_path, 'wb') as f:
+        f.write(data)
+
+    with tarfile.open(tar_path, 'r') as tar:
+        tar.extractall(restore_dir)
+
+    os.remove(tar_path)
+</code></pre>
+<p><strong>Key Management Strategies</strong>:</p>
+<pre><code>1. Password-based:
+    User password → KDF → Encryption key
+    Pros: Simple, no key storage
+    Cons: Forget password = lose data
+
+2. Key splitting:
+    Key split into parts, stored separately
+    Example: Part A in code, Part B in env var, Part C in vault
+    Pros: Multiple points of failure needed
+    Cons: Complex
+
+3. Cloud KMS (AWS KMS, Google Cloud KMS):
+    Master key in cloud HSM
+    Pros: Managed, audited, rotatable
+    Cons: Dependency on cloud provider
+
+4. Hardware Security Module (HSM):
+    Keys stored in tamper-proof hardware
+    Pros: Highest security
+    Cons: Expensive
 </code></pre>
 <h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
 <p>Think of encryption as a locked box:</p>

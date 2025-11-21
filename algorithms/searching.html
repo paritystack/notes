@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-78b9311f.js";
+            window.path_to_searchindex_js = "../searchindex-93581825.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -187,14 +187,16 @@
             return i
     return -1
 </code></pre>
-<p><strong>When to use</strong>: Small arrays, unsorted data</p>
+<p><strong>When to use</strong>: Small arrays, unsorted data, or when you need to find all occurrences</p>
+<p><strong>Pros</strong>: Simple, works on unsorted data, stable
+<strong>Cons</strong>: Slow for large datasets</p>
 <h2 id="binary-search"><a class="header" href="#binary-search">Binary Search</a></h2>
-<p><strong>Time</strong>: $O(\log n)$ | <strong>Space</strong>: $O(1)$ | <strong>Requires</strong>: Sorted array</p>
+<p><strong>Time</strong>: $O(\log n)$ | <strong>Space</strong>: $O(1)$ iterative, $O(\log n)$ recursive | <strong>Requires</strong>: Sorted array</p>
 <pre><code class="language-python">def binary_search(arr, target):
     left, right = 0, len(arr) - 1
 
     while left &lt;= right:
-        mid = left + (right - left) // 2
+        mid = left + (right - left) // 2  # Avoid overflow
         if arr[mid] == target:
             return mid
         elif arr[mid] &lt; target:
@@ -203,6 +205,23 @@
             right = mid - 1
 
     return -1  # Not found
+</code></pre>
+<h3 id="recursive-implementation"><a class="header" href="#recursive-implementation">Recursive Implementation</a></h3>
+<pre><code class="language-python">def binary_search_recursive(arr, target, left=0, right=None):
+    if right is None:
+        right = len(arr) - 1
+
+    if left &gt; right:
+        return -1
+
+    mid = left + (right - left) // 2
+
+    if arr[mid] == target:
+        return mid
+    elif arr[mid] &lt; target:
+        return binary_search_recursive(arr, target, mid + 1, right)
+    else:
+        return binary_search_recursive(arr, target, left, mid - 1)
 </code></pre>
 <h3 id="variations"><a class="header" href="#variations">Variations</a></h3>
 <pre><code class="language-python"># Find first occurrence
@@ -238,11 +257,40 @@ def find_last(arr, target):
             right = mid - 1
 
     return result
+
+# Find insertion position (lower bound)
+def lower_bound(arr, target):
+    """Find first position where target can be inserted"""
+    left, right = 0, len(arr)
+
+    while left &lt; right:
+        mid = left + (right - left) // 2
+        if arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid
+
+    return left
+
+# Find upper bound
+def upper_bound(arr, target):
+    """Find last position where target can be inserted"""
+    left, right = 0, len(arr)
+
+    while left &lt; right:
+        mid = left + (right - left) // 2
+        if arr[mid] &lt;= target:
+            left = mid + 1
+        else:
+            right = mid
+
+    return left
 </code></pre>
+<p><strong>When to use</strong>: Large sorted datasets, need $O(\log n)$ performance</p>
 <h2 id="two-pointer-technique"><a class="header" href="#two-pointer-technique">Two Pointer Technique</a></h2>
 <p><strong>Time</strong>: $O(n)$ | <strong>Space</strong>: $O(1)$</p>
 <pre><code class="language-python">def two_sum(arr, target):
-    """Find two numbers that sum to target"""
+    """Find two numbers that sum to target in sorted array"""
     left, right = 0, len(arr) - 1
 
     while left &lt; right:
@@ -255,9 +303,36 @@ def find_last(arr, target):
             right -= 1
 
     return []
+
+# Three sum
+def three_sum_closest(arr, target):
+    """Find three numbers whose sum is closest to target"""
+    arr.sort()
+    closest = float('inf')
+    result = 0
+
+    for i in range(len(arr) - 2):
+        left, right = i + 1, len(arr) - 1
+
+        while left &lt; right:
+            current_sum = arr[i] + arr[left] + arr[right]
+
+            if abs(target - current_sum) &lt; closest:
+                closest = abs(target - current_sum)
+                result = current_sum
+
+            if current_sum &lt; target:
+                left += 1
+            elif current_sum &gt; target:
+                right -= 1
+            else:
+                return current_sum
+
+    return result
 </code></pre>
+<p><strong>When to use</strong>: Sorted arrays, finding pairs/triplets with specific properties</p>
 <h2 id="jump-search"><a class="header" href="#jump-search">Jump Search</a></h2>
-<p><strong>Time</strong>: O(n) | <strong>Space</strong>: $O(1)$ | <strong>Requires</strong>: Sorted array</p>
+<p><strong>Time</strong>: $O(\sqrt{n})$ | <strong>Space</strong>: $O(1)$ | <strong>Requires</strong>: Sorted array</p>
 <pre><code class="language-python">import math
 
 def jump_search(arr, target):
@@ -284,6 +359,9 @@ def jump_search(arr, target):
 
     return -1
 </code></pre>
+<p><strong>When to use</strong>: Large sorted arrays where binary search overhead is a concern, systems with costly comparisons</p>
+<p><strong>Pros</strong>: Better than linear, simpler than binary, good for jumping through data
+<strong>Cons</strong>: Slower than binary search</p>
 <h2 id="interpolation-search"><a class="header" href="#interpolation-search">Interpolation Search</a></h2>
 <p><strong>Time</strong>: $O(\log \log n)$ average, $O(n)$ worst | <strong>Requires</strong>: Sorted uniformly distributed data</p>
 <pre><code class="language-python">def interpolation_search(arr, target):
@@ -293,7 +371,13 @@ def jump_search(arr, target):
            target &gt;= arr[left] and
            target &lt;= arr[right]):
 
-        # Estimate position
+        # Avoid division by zero
+        if arr[left] == arr[right]:
+            if arr[left] == target:
+                return left
+            return -1
+
+        # Estimate position using interpolation formula
         pos = left + int((right - left) / (arr[right] - arr[left]) *
                         (target - arr[left]))
 
@@ -306,17 +390,24 @@ def jump_search(arr, target):
 
     return -1
 </code></pre>
+<p><strong>When to use</strong>: Uniformly distributed sorted data (e.g., dictionary, phone book)</p>
+<p><strong>Pros</strong>: Faster than binary for uniform data
+<strong>Cons</strong>: Worst case $O(n)$, doesn’t work well with non-uniform distribution</p>
 <h2 id="exponential-search"><a class="header" href="#exponential-search">Exponential Search</a></h2>
 <p><strong>Time</strong>: $O(\log n)$ | <strong>Space</strong>: $O(1)$ | <strong>Requires</strong>: Sorted array</p>
 <pre><code class="language-python">def exponential_search(arr, target):
     n = len(arr)
 
-    # Find range
+    # If target at first position
+    if arr[0] == target:
+        return 0
+
+    # Find range for binary search
     i = 1
-    while i &lt; n and arr[i] &lt; target:
+    while i &lt; n and arr[i] &lt;= target:
         i *= 2
 
-    # Binary search in range
+    # Binary search in range [i//2, min(i, n-1)]
     left = i // 2
     right = min(i, n - 1)
 
@@ -331,7 +422,141 @@ def jump_search(arr, target):
 
     return -1
 </code></pre>
+<p><strong>When to use</strong>: Unbounded/infinite arrays, when target is likely near the beginning</p>
+<p><strong>Pros</strong>: Better than binary for unbounded searches
+<strong>Cons</strong>: Slightly more complex than binary search</p>
+<h2 id="fibonacci-search"><a class="header" href="#fibonacci-search">Fibonacci Search</a></h2>
+<p><strong>Time</strong>: $O(\log n)$ | <strong>Space</strong>: $O(1)$ | <strong>Requires</strong>: Sorted array</p>
+<pre><code class="language-python">def fibonacci_search(arr, target):
+    n = len(arr)
+
+    # Generate Fibonacci numbers
+    fib2 = 0  # (m-2)'th Fibonacci
+    fib1 = 1  # (m-1)'th Fibonacci
+    fib = fib2 + fib1  # m'th Fibonacci
+
+    # Find smallest Fibonacci &gt;= n
+    while fib &lt; n:
+        fib2 = fib1
+        fib1 = fib
+        fib = fib2 + fib1
+
+    offset = -1
+
+    while fib &gt; 1:
+        # Check if fib2 is valid location
+        i = min(offset + fib2, n - 1)
+
+        if arr[i] &lt; target:
+            fib = fib1
+            fib1 = fib2
+            fib2 = fib - fib1
+            offset = i
+        elif arr[i] &gt; target:
+            fib = fib2
+            fib1 = fib1 - fib2
+            fib2 = fib - fib1
+        else:
+            return i
+
+    # Check last element
+    if fib1 and offset + 1 &lt; n and arr[offset + 1] == target:
+        return offset + 1
+
+    return -1
+</code></pre>
+<p><strong>When to use</strong>: Memory-constrained systems, data on sequential access devices</p>
+<p><strong>Pros</strong>: Divides using addition instead of division, good for tape/disk
+<strong>Cons</strong>: More complex to implement</p>
+<h2 id="ternary-search"><a class="header" href="#ternary-search">Ternary Search</a></h2>
+<p><strong>Time</strong>: $O(\log_3 n)$ | <strong>Space</strong>: $O(1)$ | <strong>Requires</strong>: Sorted array or unimodal function</p>
+<pre><code class="language-python">def ternary_search(arr, target):
+    left, right = 0, len(arr) - 1
+
+    while left &lt;= right:
+        # Divide into three parts
+        mid1 = left + (right - left) // 3
+        mid2 = right - (right - left) // 3
+
+        if arr[mid1] == target:
+            return mid1
+        if arr[mid2] == target:
+            return mid2
+
+        if target &lt; arr[mid1]:
+            right = mid1 - 1
+        elif target &gt; arr[mid2]:
+            left = mid2 + 1
+        else:
+            left = mid1 + 1
+            right = mid2 - 1
+
+    return -1
+
+# Finding maximum in unimodal function
+def ternary_search_max(f, left, right, epsilon=1e-9):
+    """Find maximum of unimodal function f"""
+    while right - left &gt; epsilon:
+        mid1 = left + (right - left) / 3
+        mid2 = right - (right - left) / 3
+
+        if f(mid1) &lt; f(mid2):
+            left = mid1
+        else:
+            right = mid2
+
+    return (left + right) / 2
+</code></pre>
+<p><strong>When to use</strong>: Finding extrema in unimodal functions, optimization problems</p>
+<p><strong>Pros</strong>: Can find max/min of functions
+<strong>Cons</strong>: More comparisons than binary search for standard searching</p>
+<h2 id="hash-table-search"><a class="header" href="#hash-table-search">Hash Table Search</a></h2>
+<p><strong>Time</strong>: $O(1)$ average, $O(n)$ worst | <strong>Space</strong>: $O(n)$</p>
+<pre><code class="language-python">def hash_table_search():
+    """Using Python's built-in dictionary"""
+    # Build hash table
+    hash_table = {}
+    arr = [4, 2, 7, 1, 9, 3]
+
+    for i, val in enumerate(arr):
+        hash_table[val] = i
+
+    # Search in O(1)
+    target = 7
+    if target in hash_table:
+        return hash_table[target]
+    return -1
+
+# Custom hash table with collision handling
+class HashTable:
+    def __init__(self, size=100):
+        self.size = size
+        self.table = [[] for _ in range(size)]
+
+    def hash_function(self, key):
+        return hash(key) % self.size
+
+    def insert(self, key, value):
+        hash_index = self.hash_function(key)
+        # Linear probing for collisions
+        for item in self.table[hash_index]:
+            if item[0] == key:
+                item[1] = value
+                return
+        self.table[hash_index].append([key, value])
+
+    def search(self, key):
+        hash_index = self.hash_function(key)
+        for item in self.table[hash_index]:
+            if item[0] == key:
+                return item[1]
+        return None
+</code></pre>
+<p><strong>When to use</strong>: Need $O(1)$ lookups, have extra memory, data doesn’t need to be sorted</p>
+<p><strong>Pros</strong>: Fastest average case
+<strong>Cons</strong>: Extra space, no ordering, worst case $O(n)$</p>
 <h2 id="sentinel-search"><a class="header" href="#sentinel-search">Sentinel Search</a></h2>
+<p><strong>Time</strong>: $O(n)$ | <strong>Space</strong>: $O(1)$ | <strong>Works on</strong>: Unsorted arrays</p>
 <p>Optimize linear search by eliminating boundary check:</p>
 <pre><code class="language-python">def sentinel_search(arr, target):
     n = len(arr)
@@ -348,40 +573,145 @@ def jump_search(arr, target):
         return i
     return -1
 </code></pre>
+<p><strong>When to use</strong>: Optimization of linear search when boundary checks are expensive</p>
 <h2 id="comparison"><a class="header" href="#comparison">Comparison</a></h2>
 <div class="table-wrapper">
 <table>
 <thead>
-<tr><th>Algorithm</th><th>Time (Avg)</th><th>Time (Worst)</th><th>Space</th><th>Requires Sorted</th></tr>
+<tr><th>Algorithm</th><th>Time (Avg)</th><th>Time (Worst)</th><th>Space</th><th>Requires Sorted</th><th>Best For</th></tr>
 </thead>
 <tbody>
-<tr><td>Linear</td><td>$O(n)$</td><td>$O(n)$</td><td>$O(1)$</td><td>No</td></tr>
-<tr><td>Binary</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(1)$</td><td>Yes</td></tr>
-<tr><td>Jump</td><td>O(n)</td><td>O(n)</td><td>$O(1)$</td><td>Yes</td></tr>
-<tr><td>Interpolation</td><td>$O(\log \log n)$</td><td>$O(n)$</td><td>$O(1)$</td><td>Yes</td></tr>
-<tr><td>Exponential</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(1)$</td><td>Yes</td></tr>
+<tr><td>Linear</td><td>$O(n)$</td><td>$O(n)$</td><td>$O(1)$</td><td>No</td><td>Small/unsorted data</td></tr>
+<tr><td>Binary</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(1)$</td><td>Yes</td><td>Large sorted data</td></tr>
+<tr><td>Jump</td><td>$O(\sqrt{n})$</td><td>$O(\sqrt{n})$</td><td>$O(1)$</td><td>Yes</td><td>Large arrays, costly comparisons</td></tr>
+<tr><td>Interpolation</td><td>$O(\log \log n)$</td><td>$O(n)$</td><td>$O(1)$</td><td>Yes (uniform)</td><td>Uniform distribution</td></tr>
+<tr><td>Exponential</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(1)$</td><td>Yes</td><td>Unbounded arrays</td></tr>
+<tr><td>Fibonacci</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(1)$</td><td>Yes</td><td>Sequential access media</td></tr>
+<tr><td>Ternary</td><td>$O(\log_3 n)$</td><td>$O(\log_3 n)$</td><td>$O(1)$</td><td>Yes</td><td>Finding extrema</td></tr>
+<tr><td>Hash Table</td><td>$O(1)$</td><td>$O(n)$</td><td>$O(n)$</td><td>No</td><td>Fast lookups with space</td></tr>
 </tbody>
 </table>
 </div>
+<h2 id="decision-tree"><a class="header" href="#decision-tree">Decision Tree</a></h2>
+<pre><code>Do you need O(1) lookup and have extra space?
+├─ Yes → Hash Table
+└─ No → Is data sorted?
+    ├─ No → Linear Search (or sort first)
+    └─ Yes → What's the data distribution?
+        ├─ Uniform → Interpolation Search
+        ├─ Unknown → Binary Search
+        ├─ Near beginning → Exponential Search
+        └─ Sequential access → Fibonacci Search
+</code></pre>
+<h2 id="common-patterns-and-edge-cases"><a class="header" href="#common-patterns-and-edge-cases">Common Patterns and Edge Cases</a></h2>
+<h3 id="pattern-search-space-reduction"><a class="header" href="#pattern-search-space-reduction">Pattern: Search Space Reduction</a></h3>
+<pre><code class="language-python"># Find peak element
+def find_peak(arr):
+    left, right = 0, len(arr) - 1
+
+    while left &lt; right:
+        mid = left + (right - left) // 2
+        if arr[mid] &lt; arr[mid + 1]:
+            left = mid + 1
+        else:
+            right = mid
+
+    return left
+
+# Search in rotated sorted array
+def search_rotated(arr, target):
+    left, right = 0, len(arr) - 1
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2
+
+        if arr[mid] == target:
+            return mid
+
+        # Left half is sorted
+        if arr[left] &lt;= arr[mid]:
+            if arr[left] &lt;= target &lt; arr[mid]:
+                right = mid - 1
+            else:
+                left = mid + 1
+        # Right half is sorted
+        else:
+            if arr[mid] &lt; target &lt;= arr[right]:
+                left = mid + 1
+            else:
+                right = mid - 1
+
+    return -1
+</code></pre>
+<h3 id="edge-cases-to-handle"><a class="header" href="#edge-cases-to-handle">Edge Cases to Handle</a></h3>
+<pre><code class="language-python">def robust_binary_search(arr, target):
+    # Handle empty array
+    if not arr:
+        return -1
+
+    # Handle single element
+    if len(arr) == 1:
+        return 0 if arr[0] == target else -1
+
+    # Handle target out of bounds
+    if target &lt; arr[0] or target &gt; arr[-1]:
+        return -1
+
+    # Standard binary search
+    left, right = 0, len(arr) - 1
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1
+</code></pre>
 <h2 id="key-takeaways"><a class="header" href="#key-takeaways">Key Takeaways</a></h2>
 <ol>
-<li><strong>Unsorted data?</strong> Use Linear Search or Hash Table</li>
-<li><strong>Sorted data?</strong> Use Binary Search for $O(\log n)$</li>
-<li><strong>Uniformly distributed?</strong> Try Interpolation Search</li>
-<li><strong>Need flexibility?</strong> Build a Hash Table for $O(1)$ lookup</li>
+<li><strong>Unsorted data?</strong> Use Linear Search ($O(n)$) or Hash Table ($O(1)$ average)</li>
+<li><strong>Sorted data?</strong> Use Binary Search for $O(\log n)$ - it’s the default choice</li>
+<li><strong>Uniformly distributed?</strong> Try Interpolation Search for $O(\log \log n)$</li>
+<li><strong>Need fastest lookup?</strong> Build a Hash Table for $O(1)$ average lookup</li>
+<li><strong>Unbounded data?</strong> Use Exponential Search</li>
+<li><strong>Finding extrema?</strong> Use Ternary Search on unimodal functions</li>
+<li><strong>Space constrained?</strong> Stick with in-place algorithms like Binary or Jump Search</li>
+</ol>
+<h2 id="performance-tips"><a class="header" href="#performance-tips">Performance Tips</a></h2>
+<ol>
+<li><strong>Use <code>mid = left + (right - left) // 2</code></strong> to avoid integer overflow</li>
+<li><strong>Check bounds</strong> before accessing array elements</li>
+<li><strong>For multiple queries</strong>, preprocess data (sort or build hash table)</li>
+<li><strong>Binary search variants</strong> are powerful - master lower_bound and upper_bound</li>
+<li><strong>Consider data characteristics</strong> - uniform distribution favors interpolation search</li>
 </ol>
 <h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
 <p>Imagine finding a word in a dictionary:</p>
 <ul>
 <li><strong>Linear Search</strong>: Check every word from start (slow!)</li>
 <li><strong>Binary Search</strong>: Open middle, go left or right, repeat (fast!)</li>
-<li><strong>Interpolation</strong>: Estimate where word should be based on first letter</li>
+<li><strong>Interpolation Search</strong>: Estimate where word should be based on first letter (smarter!)</li>
+<li><strong>Hash Table</strong>: Like an index that tells you exactly which page (fastest!)</li>
 </ul>
-<p>Binary search is fastest for sorted data!</p>
+<p>Binary search is like playing “guess the number” - each guess eliminates half the possibilities!</p>
+<h2 id="leetcode-problems"><a class="header" href="#leetcode-problems">LeetCode Problems</a></h2>
+<ul>
+<li><a href="https://leetcode.com/problems/binary-search/">704. Binary Search</a> - Basic</li>
+<li><a href="https://leetcode.com/problems/search-insert-position/">35. Search Insert Position</a> - Lower bound</li>
+<li><a href="https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/">34. Find First and Last Position</a> - Binary search variations</li>
+<li><a href="https://leetcode.com/problems/search-in-rotated-sorted-array/">33. Search in Rotated Sorted Array</a> - Modified binary search</li>
+<li><a href="https://leetcode.com/problems/find-peak-element/">162. Find Peak Element</a> - Search space reduction</li>
+<li><a href="https://leetcode.com/problems/search-a-2d-matrix/">74. Search a 2D Matrix</a> - 2D binary search</li>
+</ul>
 <h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
 <ul>
 <li><a href="https://leetcode.com/tag/binary-search/">LeetCode Binary Search</a></li>
 <li><a href="https://visualgo.net/en/search">Searching Algorithms Visualization</a></li>
+<li><a href="https://leetcode.com/explore/learn/card/binary-search/">Binary Search Tutorial</a></li>
 </ul>
 
                     </main>

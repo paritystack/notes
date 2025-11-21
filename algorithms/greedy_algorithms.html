@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-78b9311f.js";
+            window.path_to_searchindex_js = "../searchindex-93581825.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a4fa5267.js"></script>
@@ -179,51 +179,132 @@
                         <h1 id="greedy-algorithms"><a class="header" href="#greedy-algorithms">Greedy Algorithms</a></h1>
 <p>Greedy algorithms are a class of algorithms that make locally optimal choices at each stage with the hope of finding a global optimum. They are often used for optimization problems where a solution can be built incrementally.</p>
 <h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="greedy-choice-property"><a class="header" href="#greedy-choice-property">Greedy Choice Property</a></h3>
+<p>A problem exhibits the <strong>greedy choice property</strong> if we can make locally optimal choices at each step and still arrive at a globally optimal solution. This means:</p>
 <ul>
-<li>
-<p><strong>Greedy Choice Property</strong>: A global optimum can be reached by selecting a local optimum. This property is essential for the effectiveness of greedy algorithms.</p>
-</li>
-<li>
-<p><strong>Optimal Substructure</strong>: A problem exhibits optimal substructure if an optimal solution to the problem contains optimal solutions to its subproblems.</p>
-</li>
+<li>At each step, we make the choice that seems best at the moment</li>
+<li>We never reconsider or backtrack from previous choices</li>
+<li>The sequence of greedy choices leads to an optimal solution</li>
 </ul>
+<p><strong>Proving Greedy Choice Property</strong>: To prove a greedy algorithm is correct, we typically use one of these techniques:</p>
+<ol>
+<li><strong>Exchange Argument</strong>: Show that any optimal solution can be transformed into the greedy solution without making it worse</li>
+<li><strong>Greedy Stays Ahead</strong>: Prove that the greedy solution is always at least as good as any other solution at every step</li>
+<li><strong>Structural Induction</strong>: Show that if the greedy choice is optimal for smaller subproblems, it remains optimal when extended</li>
+</ol>
+<h3 id="optimal-substructure"><a class="header" href="#optimal-substructure">Optimal Substructure</a></h3>
+<p>A problem has <strong>optimal substructure</strong> if an optimal solution to the problem contains optimal solutions to its subproblems. This property is shared with dynamic programming, but the key difference is:</p>
+<ul>
+<li><strong>Greedy</strong>: Make an irrevocable choice, then solve the remaining subproblem</li>
+<li><strong>Dynamic Programming</strong>: Examine all choices, solve all resulting subproblems, then choose the best</li>
+</ul>
+<h3 id="greedy-vs-dynamic-programming"><a class="header" href="#greedy-vs-dynamic-programming">Greedy vs. Dynamic Programming</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>Greedy</th><th>Dynamic Programming</th></tr>
+</thead>
+<tbody>
+<tr><td>Decision</td><td>Makes one choice at each step</td><td>Considers all choices at each step</td></tr>
+<tr><td>Backtracking</td><td>Never backtracks</td><td>May reconsider previous choices</td></tr>
+<tr><td>Efficiency</td><td>Usually O(n log n) or O(n)</td><td>Often O(n²) or worse</td></tr>
+<tr><td>Correctness</td><td>Doesn’t always work</td><td>Always finds optimal if applicable</td></tr>
+<tr><td>Use when</td><td>Greedy choice property holds</td><td>Overlapping subproblems exist</td></tr>
+</tbody>
+</table>
+</div>
 <h2 id="activity-selection-problem"><a class="header" href="#activity-selection-problem">Activity Selection Problem</a></h2>
-<p>Select the maximum number of activities that don’t overlap in time.</p>
+<p><strong>Problem</strong>: Select the maximum number of activities that don’t overlap in time.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Always pick the activity that finishes earliest among remaining activities</li>
+<li>Why? Activities that finish early leave more room for subsequent activities</li>
+<li>Sorting by finish time ensures we can process activities in the optimal order</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: If we sort by finish time, selecting the first activity is always part of some optimal solution.</p>
 <pre><code class="language-python">def activity_selection(activities):
-    # Sort by finish time
+    """
+    Select maximum number of non-overlapping activities.
+
+    Args:
+        activities: List of tuples (start_time, end_time)
+
+    Returns:
+        List of selected activities that don't overlap
+
+    Time: O(n log n) - dominated by sorting
+    Space: O(n) - for storing selected activities
+    """
+    if not activities:
+        return []
+
+    # Sort by finish time - greedy choice: pick earliest finisher
     activities.sort(key=lambda x: x[1])
-    
+
+    # Always select first activity (earliest to finish)
     selected = [activities[0]]
     last_finish = activities[0][1]
-    
+
+    # For remaining activities, select if compatible with last selected
     for start, finish in activities[1:]:
-        if start &gt;= last_finish:
+        if start &gt;= last_finish:  # No overlap
             selected.append((start, finish))
             last_finish = finish
-    
+
     return selected
 
 # Example usage
-activities = [(1, 4), (3, 5), (0, 6), (5, 7), (3, 9), (5, 9), (6, 10), (8, 11), (8, 12), (2, 14), (12, 16)]
+activities = [(1, 4), (3, 5), (0, 6), (5, 7), (3, 9), (5, 9),
+              (6, 10), (8, 11), (8, 12), (2, 14), (12, 16)]
 result = activity_selection(activities)
 print(f"Selected {len(result)} activities:")
 for activity in result:
     print(f"  Start: {activity[0]}, Finish: {activity[1]}")
 </code></pre>
-<p><strong>Time Complexity</strong>: $O(n \log n)$ for sorting
-<strong>Space Complexity</strong>: $O(n)$</p>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n \log n)$ - dominated by sorting; iteration is $O(n)$</li>
+<li><strong>Space</strong>: $O(n)$ - for storing selected activities list</li>
+</ul>
 <h2 id="fractional-knapsack"><a class="header" href="#fractional-knapsack">Fractional Knapsack</a></h2>
-<p>Maximize value in knapsack by taking fractions of items.</p>
+<p><strong>Problem</strong>: Maximize value in knapsack by taking fractions of items (items are divisible).</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Always take items with the highest value-to-weight ratio first</li>
+<li>Unlike 0/1 knapsack, we can take fractions, so greedy works perfectly</li>
+<li>Sort by value/weight ratio and greedily fill the knapsack</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: Taking the item with the highest value-per-unit-weight first is always optimal.</p>
 <pre><code class="language-python">def fractional_knapsack(items, capacity):
-    # Calculate value per weight and sort by it
+    """
+    Maximize value in knapsack by taking fractions of items.
+
+    Args:
+        items: List of tuples (value, weight)
+        capacity: Maximum weight capacity of knapsack
+
+    Returns:
+        Tuple of (max_value, items_taken)
+        items_taken is list of (value, weight, fraction_taken)
+
+    Time: O(n log n) - dominated by sorting
+    Space: O(n) - for items_with_ratio and taken lists
+    """
+    if not items or capacity &lt;= 0:
+        return 0, []
+
+    # Calculate value per weight and sort by it (descending)
     items_with_ratio = [(value, weight, value/weight) for value, weight in items]
     items_with_ratio.sort(key=lambda x: x[2], reverse=True)
-    
+
     total_value = 0
     remaining_capacity = capacity
     taken = []
-    
+
     for value, weight, ratio in items_with_ratio:
+        if remaining_capacity &lt;= 0:
+            break
+
         if remaining_capacity &gt;= weight:
             # Take full item
             total_value += value
@@ -234,8 +315,8 @@ for activity in result:
             fraction = remaining_capacity / weight
             total_value += value * fraction
             taken.append((value, weight, fraction))
-            break
-    
+            remaining_capacity = 0  # Knapsack is full
+
     return total_value, taken
 
 # Example usage
@@ -247,89 +328,166 @@ print("Items taken:")
 for value, weight, fraction in taken:
     print(f"  Value={value}, Weight={weight}, Fraction={fraction:.2f}")
 </code></pre>
-<p><strong>Time Complexity</strong>: $O(n \log n)$</p>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n \log n)$ - sorting dominates; iteration is $O(n)$</li>
+<li><strong>Space</strong>: $O(n)$ - for storing items with ratios and taken items</li>
+</ul>
 <h2 id="coin-change-greedy---doesnt-always-work"><a class="header" href="#coin-change-greedy---doesnt-always-work">Coin Change (Greedy - doesn’t always work!)</a></h2>
-<p>Make change using minimum number of coins (works for standard coin systems).</p>
+<p><strong>Problem</strong>: Make change using minimum number of coins.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Always use the largest coin possible</li>
+<li>Works for <strong>canonical</strong> coin systems (like US: 1, 5, 10, 25)</li>
+<li>Does NOT work for arbitrary coin systems!</li>
+</ul>
+<p><strong>When Greedy Fails</strong>: For coins [1, 3, 4] and amount 6:</p>
+<ul>
+<li>Greedy: 4 + 1 + 1 = 3 coins</li>
+<li>Optimal: 3 + 3 = 2 coins</li>
+</ul>
 <pre><code class="language-python">def coin_change_greedy(coins, amount):
-    coins.sort(reverse=True)
+    """
+    Make change using minimum coins (greedy approach).
+    WARNING: Only works for canonical coin systems!
+
+    Args:
+        coins: List of coin denominations
+        amount: Target amount to make change for
+
+    Returns:
+        Tuple of (coin_count, coins_used)
+        Returns (-1, []) if exact change impossible
+
+    Time: O(n log n + amount/min_coin) - sorting + greedy selection
+    Space: O(n) - for result list in worst case
+    """
+    coins.sort(reverse=True)  # Largest first
     count = 0
     result = []
-    
+
     for coin in coins:
-        while amount &gt;= coin:
-            amount -= coin
-            count += 1
-            result.append(coin)
-    
+        # Use as many of this coin as possible
+        num_coins = amount // coin
+        if num_coins &gt; 0:
+            count += num_coins
+            result.extend([coin] * num_coins)
+            amount -= coin * num_coins
+
     if amount &gt; 0:
         return -1, []  # Cannot make exact change
-    
+
     return count, result
 
-# Example usage (US coins)
+# Example 1: US coins (greedy works!)
 coins = [25, 10, 5, 1]
 amount = 63
 count, result = coin_change_greedy(coins, amount)
-print(f"Minimum coins: {count}")
+print(f"Amount {amount}: {count} coins")
 print(f"Coins used: {result}")  # [25, 25, 10, 1, 1, 1]
+
+# Example 2: Non-canonical system (greedy fails!)
+coins = [1, 3, 4]
+amount = 6
+count, result = coin_change_greedy(coins, amount)
+print(f"\nAmount {amount}: {count} coins (greedy)")
+print(f"Coins: {result}")  # [4, 1, 1] - 3 coins
+print("Optimal would be [3, 3] - 2 coins!")
 </code></pre>
-<p><strong>Note</strong>: Greedy doesn’t always give optimal solution for arbitrary coin systems.
-For example, with coins [1, 3, 4] and amount 6, greedy gives [4, 1, 1] (3 coins)
-but optimal is [3, 3] (2 coins).</p>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n \log n + \frac{\text{amount}}{\text{min_coin}})$ - sorting + greedy selection</li>
+<li><strong>Space</strong>: $O(n)$ - for result list (worst case with many small coins)</li>
+</ul>
+<p><strong>Note</strong>: For arbitrary coin systems, use dynamic programming instead!</p>
 <h2 id="huffman-coding"><a class="header" href="#huffman-coding">Huffman Coding</a></h2>
-<p>Optimal prefix-free encoding for data compression.</p>
+<p><strong>Problem</strong>: Generate optimal prefix-free binary encoding for data compression.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Build tree by repeatedly merging two lowest-frequency nodes</li>
+<li>More frequent characters get shorter codes, less frequent get longer codes</li>
+<li>Result is a prefix-free code (no code is prefix of another)</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: Merging the two lowest-frequency nodes first is always optimal.</p>
 <pre><code class="language-python">import heapq
 from collections import defaultdict
 
 class HuffmanNode:
+    """Node in Huffman tree."""
     def __init__(self, char, freq):
-        self.char = char
-        self.freq = freq
-        self.left = None
-        self.right = None
-    
+        self.char = char    # Character (None for internal nodes)
+        self.freq = freq    # Frequency of character(s)
+        self.left = None    # Left child
+        self.right = None   # Right child
+
     def __lt__(self, other):
+        """Compare nodes by frequency for heap ordering."""
         return self.freq &lt; other.freq
 
 def huffman_encoding(text):
-    # Count frequency
+    """
+    Generate Huffman encoding for given text.
+
+    Args:
+        text: String to encode
+
+    Returns:
+        Tuple of (encoded_string, character_codes, huffman_tree_root)
+
+    Time: O(n + k log k) where n=text length, k=unique characters
+    Space: O(k) for tree and codes
+    """
+    if not text:
+        return "", {}, None
+
+    # Count frequency of each character - O(n)
     freq = defaultdict(int)
     for char in text:
         freq[char] += 1
-    
-    # Create priority queue
+
+    # Special case: single unique character
+    if len(freq) == 1:
+        char = list(freq.keys())[0]
+        codes = {char: '0'}
+        encoded = '0' * len(text)
+        return encoded, codes, HuffmanNode(char, freq[char])
+
+    # Create priority queue with leaf nodes - O(k)
     heap = [HuffmanNode(char, f) for char, f in freq.items()]
-    heapq.heapify(heap)
-    
-    # Build Huffman tree
+    heapq.heapify(heap)  # O(k)
+
+    # Build Huffman tree - O(k log k)
     while len(heap) &gt; 1:
-        left = heapq.heappop(heap)
-        right = heapq.heappop(heap)
-        
+        # Extract two nodes with minimum frequency
+        left = heapq.heappop(heap)   # O(log k)
+        right = heapq.heappop(heap)  # O(log k)
+
+        # Create internal node with combined frequency
         merged = HuffmanNode(None, left.freq + right.freq)
         merged.left = left
         merged.right = right
-        
-        heapq.heappush(heap, merged)
-    
-    # Generate codes
+
+        heapq.heappush(heap, merged)  # O(log k)
+
+    # Generate codes by traversing tree - O(k)
     root = heap[0]
     codes = {}
-    
+
     def generate_codes(node, code):
-        if node.char is not None:
-            codes[node.char] = code
+        """DFS to generate binary codes."""
+        if node.char is not None:  # Leaf node
+            codes[node.char] = code if code else '0'
             return
         if node.left:
             generate_codes(node.left, code + '0')
         if node.right:
             generate_codes(node.right, code + '1')
-    
+
     generate_codes(root, '')
-    
-    # Encode text
+
+    # Encode text using generated codes - O(n)
     encoded = ''.join(codes[char] for char in text)
-    
+
     return encoded, codes, root
 
 # Example usage
@@ -342,31 +500,65 @@ print(f"\nOriginal size: {len(text) * 8} bits")
 print(f"Encoded size: {len(encoded)} bits")
 print(f"Compression ratio: {len(encoded) / (len(text) * 8):.2%}")
 </code></pre>
-<p><strong>Time Complexity</strong>: $O(n \log n)$</p>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n + k \log k)$ where $n$ = text length, $k$ = unique characters
+<ul>
+<li>Frequency counting: $O(n)$</li>
+<li>Building heap: $O(k)$</li>
+<li>Tree construction: $O(k \log k)$</li>
+<li>Encoding: $O(n)$</li>
+</ul>
+</li>
+<li><strong>Space</strong>: $O(k)$ - for tree nodes and code dictionary</li>
+</ul>
 <h2 id="job-sequencing"><a class="header" href="#job-sequencing">Job Sequencing</a></h2>
-<p>Maximize profit by scheduling jobs with deadlines.</p>
+<p><strong>Problem</strong>: Schedule jobs with deadlines to maximize profit (each job takes 1 unit time).</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Sort jobs by profit (highest first), schedule each in latest possible slot</li>
+<li>Scheduling in latest slot leaves more options for other jobs</li>
+<li>Only profitable if we can schedule before deadline</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: Considering jobs in decreasing order of profit and scheduling in latest available slot is optimal.</p>
 <pre><code class="language-python">def job_sequencing(jobs):
-    # Sort by profit (descending)
+    """
+    Schedule jobs to maximize profit.
+
+    Args:
+        jobs: List of tuples (job_id, deadline, profit)
+              Each job takes 1 unit time
+
+    Returns:
+        Tuple of (total_profit, scheduled_jobs)
+
+    Time: O(n^2) - for each job, search for free slot
+    Space: O(max_deadline) - for slots array
+    """
+    if not jobs:
+        return 0, []
+
+    # Sort by profit (descending) - greedy choice
     jobs.sort(key=lambda x: x[2], reverse=True)
-    
-    # Find maximum deadline
+
+    # Find maximum deadline to determine slot array size
     max_deadline = max(job[1] for job in jobs)
-    
-    # Create slot array
+
+    # Create slot array to track which job is scheduled when
     slots = [-1] * max_deadline
     total_profit = 0
     scheduled_jobs = []
-    
-    # For each job, try to schedule it
+
+    # For each job (in profit order), try to schedule it
     for job_id, deadline, profit in jobs:
-        # Find a free slot before deadline
+        # Find latest available slot before deadline
         for slot in range(min(max_deadline, deadline) - 1, -1, -1):
-            if slots[slot] == -1:
+            if slots[slot] == -1:  # Slot is free
                 slots[slot] = job_id
                 total_profit += profit
                 scheduled_jobs.append((job_id, profit))
-                break
-    
+                break  # Job scheduled, move to next
+
     return total_profit, scheduled_jobs
 
 # Example usage
@@ -384,42 +576,75 @@ print("Scheduled jobs:")
 for job_id, profit in scheduled:
     print(f"  Job {job_id}: ${profit}")
 </code></pre>
-<p><strong>Time Complexity</strong>: $O(n^2)$</p>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n^2)$ - sorting is $O(n \log n)$, but slot search is $O(n \times \text{max_deadline})$ which can be $O(n^2)$</li>
+<li><strong>Space</strong>: $O(d)$ where $d$ = max deadline - for slots array</li>
+</ul>
+<p><strong>Optimization</strong>: Can be improved to $O(n \log n)$ using Disjoint Set Union (Union-Find)</p>
 <h2 id="minimum-spanning-tree---prims-algorithm"><a class="header" href="#minimum-spanning-tree---prims-algorithm">Minimum Spanning Tree - Prim’s Algorithm</a></h2>
-<p>Find minimum spanning tree of a weighted graph.</p>
+<p><strong>Problem</strong>: Find minimum spanning tree (MST) of a weighted connected graph.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Start from any vertex, repeatedly add the minimum-weight edge that connects a new vertex</li>
+<li>Grows the MST one vertex at a time by always choosing the cheapest connection</li>
+<li>Uses priority queue to efficiently find minimum edge</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: The minimum-weight edge connecting MST to a non-MST vertex is always in some MST.</p>
 <pre><code class="language-python">import heapq
 
 def prim_mst(graph, start=0):
+    """
+    Find minimum spanning tree using Prim's algorithm.
+
+    Args:
+        graph: Adjacency list where graph[u] = [(v, weight), ...]
+        start: Starting vertex (default 0)
+
+    Returns:
+        Tuple of (mst_edges, total_cost)
+        mst_edges is list of (from, to, weight)
+
+    Time: O(E log V) with binary heap
+    Space: O(V + E) for visited set and priority queue
+    """
     n = len(graph)
     visited = set([start])
+    # Priority queue: (cost, from_vertex, to_vertex)
     edges = [(cost, start, to) for to, cost in graph[start]]
     heapq.heapify(edges)
-    
+
     mst = []
     total_cost = 0
-    
+
+    # Continue until all vertices visited or no more edges
     while edges and len(visited) &lt; n:
         cost, frm, to = heapq.heappop(edges)
-        
-        if to not in visited:
-            visited.add(to)
-            mst.append((frm, to, cost))
-            total_cost += cost
-            
-            for next_to, next_cost in graph[to]:
-                if next_to not in visited:
-                    heapq.heappush(edges, (next_cost, to, next_to))
-    
+
+        # Skip if vertex already in MST
+        if to in visited:
+            continue
+
+        # Add vertex to MST
+        visited.add(to)
+        mst.append((frm, to, cost))
+        total_cost += cost
+
+        # Add all edges from newly added vertex
+        for next_to, next_cost in graph[to]:
+            if next_to not in visited:
+                heapq.heappush(edges, (next_cost, to, next_to))
+
     return mst, total_cost
 
 # Example usage
 # Graph as adjacency list: graph[node] = [(neighbor, weight), ...]
 graph = [
-    [(1, 2), (3, 6)],           # Node 0
-    [(0, 2), (2, 3), (3, 8), (4, 5)],  # Node 1
-    [(1, 3), (4, 7)],           # Node 2
-    [(0, 6), (1, 8)],           # Node 3
-    [(1, 5), (2, 7)]            # Node 4
+    [(1, 2), (3, 6)],                      # Node 0
+    [(0, 2), (2, 3), (3, 8), (4, 5)],      # Node 1
+    [(1, 3), (4, 7)],                      # Node 2
+    [(0, 6), (1, 8)],                      # Node 3
+    [(1, 5), (2, 7)]                       # Node 4
 ]
 mst, cost = prim_mst(graph)
 print(f"Minimum spanning tree cost: {cost}")
@@ -427,45 +652,88 @@ print("Edges in MST:")
 for frm, to, weight in mst:
     print(f"  {frm} -- {to} (weight: {weight})")
 </code></pre>
-<p><strong>Time Complexity</strong>: $O(E \log V)$ with binary heap</p>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(E \log V)$ with binary heap
+<ul>
+<li>Each edge processed at most once: $O(E)$</li>
+<li>Each heap operation: $O(\log V)$</li>
+</ul>
+</li>
+<li><strong>Space</strong>: $O(V + E)$ - visited set $O(V)$ + priority queue $O(E)$</li>
+</ul>
 <h2 id="minimum-spanning-tree---kruskals-algorithm"><a class="header" href="#minimum-spanning-tree---kruskals-algorithm">Minimum Spanning Tree - Kruskal’s Algorithm</a></h2>
-<p>Another MST algorithm using Union-Find.</p>
+<p><strong>Problem</strong>: Find MST by considering edges in order of increasing weight.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Sort all edges by weight, add edges if they don’t create a cycle</li>
+<li>Uses Union-Find (Disjoint Set Union) to efficiently detect cycles</li>
+<li>Considers edges globally (unlike Prim’s which grows from a single vertex)</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: Adding the minimum-weight edge that doesn’t create a cycle is always safe.</p>
 <pre><code class="language-python">class UnionFind:
+    """
+    Disjoint Set Union (DSU) with path compression and union by rank.
+    """
     def __init__(self, n):
-        self.parent = list(range(n))
-        self.rank = [0] * n
-    
+        self.parent = list(range(n))  # Each node is its own parent initially
+        self.rank = [0] * n           # Rank for union by rank optimization
+
     def find(self, x):
+        """Find root with path compression."""
         if self.parent[x] != x:
-            self.parent[x] = self.find(self.parent[x])
+            self.parent[x] = self.find(self.parent[x])  # Path compression
         return self.parent[x]
-    
+
     def union(self, x, y):
+        """
+        Union two sets by rank.
+        Returns True if sets were different (no cycle), False otherwise.
+        """
         px, py = self.find(x), self.find(y)
         if px == py:
-            return False
+            return False  # Already in same set (would create cycle)
+
+        # Union by rank: attach smaller tree under larger tree
         if self.rank[px] &lt; self.rank[py]:
             px, py = py, px
         self.parent[py] = px
         if self.rank[px] == self.rank[py]:
             self.rank[px] += 1
+
         return True
 
 def kruskal_mst(n, edges):
-    # Sort edges by weight
+    """
+    Find minimum spanning tree using Kruskal's algorithm.
+
+    Args:
+        n: Number of vertices
+        edges: List of tuples (u, v, weight)
+
+    Returns:
+        Tuple of (mst_edges, total_cost)
+
+    Time: O(E log E) for sorting edges
+    Space: O(V) for Union-Find structure
+    """
+    # Sort edges by weight - greedy choice
     edges.sort(key=lambda x: x[2])
-    
+
     uf = UnionFind(n)
     mst = []
     total_cost = 0
-    
+
+    # Process edges in sorted order
     for u, v, weight in edges:
+        # Add edge if it doesn't create a cycle
         if uf.union(u, v):
             mst.append((u, v, weight))
             total_cost += weight
+            # MST has exactly n-1 edges
             if len(mst) == n - 1:
                 break
-    
+
     return mst, total_cost
 
 # Example usage
@@ -480,30 +748,63 @@ print("Edges in MST:")
 for u, v, weight in mst:
     print(f"  {u} -- {v} (weight: {weight})")
 </code></pre>
-<p><strong>Time Complexity</strong>: $O(E \log E)$ or $O(E \log V)$</p>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(E \log E)$ or equivalently $O(E \log V)$ since $E \leq V^2$
+<ul>
+<li>Sorting edges: $O(E \log E)$</li>
+<li>Union-Find operations: $O(E \cdot \alpha(V))$ where $\alpha$ is inverse Ackermann (nearly constant)</li>
+</ul>
+</li>
+<li><strong>Space</strong>: $O(V)$ - for Union-Find parent and rank arrays</li>
+</ul>
 <h2 id="dijkstras-shortest-path"><a class="header" href="#dijkstras-shortest-path">Dijkstra’s Shortest Path</a></h2>
-<p>Find shortest path from source to all other vertices.</p>
+<p><strong>Problem</strong>: Find shortest paths from a source vertex to all other vertices (non-negative weights).</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Always explore the nearest unvisited vertex first</li>
+<li>Once we visit a vertex, we’ve found the shortest path to it</li>
+<li>Uses priority queue to efficiently get nearest vertex</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: The nearest unvisited vertex has its final shortest distance determined.</p>
+<p><strong>Note</strong>: Does NOT work with negative edge weights (use Bellman-Ford instead).</p>
 <pre><code class="language-python">import heapq
 
 def dijkstra(graph, start):
+    """
+    Find shortest paths from start to all vertices using Dijkstra's algorithm.
+
+    Args:
+        graph: Adjacency list where graph[u] = [(v, weight), ...]
+        start: Source vertex
+
+    Returns:
+        List of shortest distances from start to each vertex
+
+    Time: O((V + E) log V) with binary heap
+    Space: O(V) for distance array and visited set
+    """
     n = len(graph)
     dist = [float('inf')] * n
     dist[start] = 0
+    # Priority queue: (distance, vertex)
     pq = [(0, start)]
     visited = set()
-    
+
     while pq:
         d, u = heapq.heappop(pq)
-        
+
+        # Skip if already processed (may have duplicate entries)
         if u in visited:
             continue
         visited.add(u)
-        
+
+        # Relax all edges from u
         for v, weight in graph[u]:
             if dist[u] + weight &lt; dist[v]:
                 dist[v] = dist[u] + weight
                 heapq.heappush(pq, (dist[v], v))
-    
+
     return dist
 
 # Example usage
@@ -517,40 +818,471 @@ graph = [
 distances = dijkstra(graph, 0)
 print("Shortest distances from node 0:")
 for i, d in enumerate(distances):
-    print(f"  To node {i}: {d}")
+    if d == float('inf'):
+        print(f"  To node {i}: unreachable")
+    else:
+        print(f"  To node {i}: {d}")
 </code></pre>
-<p><strong>Time Complexity</strong>: $O((V + E) \log V)$ with binary heap</p>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O((V + E) \log V)$ with binary heap
+<ul>
+<li>Each vertex added to queue once: $O(V \log V)$</li>
+<li>Each edge relaxed once: $O(E \log V)$</li>
+</ul>
+</li>
+<li><strong>Space</strong>: $O(V)$ - for distance array, visited set, and priority queue</li>
+</ul>
+<p><strong>Optimization</strong>: Can achieve $O(V \log V + E)$ with Fibonacci heap</p>
 <h2 id="gas-station-problem"><a class="header" href="#gas-station-problem">Gas Station Problem</a></h2>
-<p>Find starting station to complete circular route.</p>
+<p><strong>Problem</strong>: Find starting gas station to complete a circular route, or determine if impossible.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>If total gas &lt; total cost, impossible to complete circuit</li>
+<li>If possible, there exists exactly one valid starting station</li>
+<li>Greedy strategy: If we can’t reach station <code>i+1</code> from start, then no station between start and <code>i</code> can work either (so try from <code>i+1</code>)</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: If sum(gas) ≥ sum(cost), the first station where we can’t continue must be after the optimal start.</p>
 <pre><code class="language-python">def can_complete_circuit(gas, cost):
+    """
+    Find starting gas station to complete circular route.
+
+    Args:
+        gas: List of gas available at each station
+        cost: List of gas needed to reach next station
+
+    Returns:
+        Starting station index, or -1 if impossible
+
+    Time: O(n) - single pass
+    Space: O(1) - only using constant extra space
+    """
     n = len(gas)
     total_gas = sum(gas)
     total_cost = sum(cost)
-    
-    # If total gas &lt; total cost, impossible
+
+    # If total gas &lt; total cost, impossible to complete circuit
     if total_gas &lt; total_cost:
         return -1
-    
+
+    # If we can complete circuit, find the starting point
     start = 0
     tank = 0
-    
+
     for i in range(n):
         tank += gas[i] - cost[i]
+
+        # If tank goes negative, we can't reach next station
         if tank &lt; 0:
-            # Can't reach next station from current start
+            # Key insight: none of the stations from start to i can work
+            # So try starting from i+1
             start = i + 1
             tank = 0
-    
+
+    # If total_gas &gt;= total_cost, 'start' is guaranteed to work
     return start
 
 # Example usage
 gas = [1, 2, 3, 4, 5]
 cost = [3, 4, 5, 1, 2]
 start = can_complete_circuit(gas, cost)
-print(f"Start at station: {start}")  # Output: 3
+if start != -1:
+    print(f"Start at station: {start}")  # Output: 3
+else:
+    print("No solution possible")
 </code></pre>
-<p><strong>Time Complexity</strong>: $O(n)$</p>
-<h2 id="greedy-vs-dynamic-programming"><a class="header" href="#greedy-vs-dynamic-programming">Greedy vs Dynamic Programming</a></h2>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n)$ - single pass through all stations</li>
+<li><strong>Space</strong>: $O(1)$ - only constant extra space</li>
+</ul>
+<p><strong>Why This Works</strong>: If we can’t reach station <code>j</code> starting from station <code>i</code>, then we also can’t reach <code>j</code> starting from any station between <code>i</code> and <code>j-1</code>. This is because we would have less gas starting from a middle station than starting from <code>i</code>.</p>
+<h2 id="jump-game-i"><a class="header" href="#jump-game-i">Jump Game I</a></h2>
+<p><strong>Problem</strong>: Determine if you can reach the last index, where each element represents maximum jump length.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Track the farthest position we can reach</li>
+<li>If at any point our current position exceeds the farthest reachable, return false</li>
+<li>No need to try all possible jumps - just track maximum reach</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: We only need to know if the last index is reachable, not the actual path.</p>
+<pre><code class="language-python">def can_jump(nums):
+    """
+    Determine if we can reach the last index.
+
+    Args:
+        nums: List where nums[i] is max jump length from position i
+
+    Returns:
+        True if last index is reachable, False otherwise
+
+    Time: O(n) - single pass
+    Space: O(1) - constant space
+    """
+    if not nums:
+        return False
+
+    max_reach = 0  # Farthest index we can reach
+
+    for i in range(len(nums)):
+        # If current position is beyond our reach, we're stuck
+        if i &gt; max_reach:
+            return False
+
+        # Update farthest position we can reach from here
+        max_reach = max(max_reach, i + nums[i])
+
+        # Early exit if we can already reach the end
+        if max_reach &gt;= len(nums) - 1:
+            return True
+
+    return True
+
+# Example usage
+nums1 = [2, 3, 1, 1, 4]
+print(f"Can reach end of {nums1}: {can_jump(nums1)}")  # True
+
+nums2 = [3, 2, 1, 0, 4]
+print(f"Can reach end of {nums2}: {can_jump(nums2)}")  # False
+</code></pre>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n)$ - single pass through array</li>
+<li><strong>Space</strong>: $O(1)$ - only tracking max_reach</li>
+</ul>
+<h2 id="jump-game-ii"><a class="header" href="#jump-game-ii">Jump Game II</a></h2>
+<p><strong>Problem</strong>: Find minimum number of jumps to reach the last index (guaranteed reachable).</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Make jumps as late as possible to maximize options</li>
+<li>Track the farthest position reachable with current number of jumps</li>
+<li>When we reach the end of current jump range, increment jump count</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: Always jumping to the position that maximizes our next range is optimal.</p>
+<pre><code class="language-python">def jump(nums):
+    """
+    Find minimum number of jumps to reach last index.
+
+    Args:
+        nums: List where nums[i] is max jump length from position i
+
+    Returns:
+        Minimum number of jumps needed
+
+    Time: O(n) - single pass
+    Space: O(1) - constant space
+    """
+    if len(nums) &lt;= 1:
+        return 0
+
+    jumps = 0
+    current_end = 0      # End of range for current jump
+    farthest = 0         # Farthest position reachable
+
+    # Don't need to check last index (we start there)
+    for i in range(len(nums) - 1):
+        # Update farthest position we can reach
+        farthest = max(farthest, i + nums[i])
+
+        # If we've reached the end of current jump range
+        if i == current_end:
+            jumps += 1
+            current_end = farthest  # Start new jump range
+
+            # Early exit if we can reach the end
+            if current_end &gt;= len(nums) - 1:
+                break
+
+    return jumps
+
+# Example usage
+nums = [2, 3, 1, 1, 4]
+print(f"Minimum jumps for {nums}: {jump(nums)}")  # 2
+# Explanation: Jump 1 step from index 0 to 1, then 3 steps to last index
+
+nums2 = [2, 3, 0, 1, 4]
+print(f"Minimum jumps for {nums2}: {jump(nums2)}")  # 2
+</code></pre>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n)$ - single pass through array</li>
+<li><strong>Space</strong>: $O(1)$ - only tracking a few variables</li>
+</ul>
+<h2 id="meeting-rooms-ii"><a class="header" href="#meeting-rooms-ii">Meeting Rooms II</a></h2>
+<p><strong>Problem</strong>: Find minimum number of conference rooms needed to hold all meetings.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Track how many meetings are active at any time</li>
+<li>Sort start times and end times separately</li>
+<li>When a meeting starts, check if a room is free (if a meeting has ended)</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: The minimum rooms needed equals the maximum number of overlapping meetings at any point.</p>
+<pre><code class="language-python">def min_meeting_rooms(intervals):
+    """
+    Find minimum number of conference rooms needed.
+
+    Args:
+        intervals: List of tuples (start_time, end_time)
+
+    Returns:
+        Minimum number of rooms needed
+
+    Time: O(n log n) - sorting start and end times
+    Space: O(n) - for start and end time arrays
+    """
+    if not intervals:
+        return 0
+
+    # Separate start and end times
+    start_times = sorted([interval[0] for interval in intervals])
+    end_times = sorted([interval[1] for interval in intervals])
+
+    rooms_needed = 0
+    rooms_available = 0
+    start_ptr = 0
+    end_ptr = 0
+
+    # Process all events
+    while start_ptr &lt; len(intervals):
+        # If a meeting starts before earliest ending meeting
+        if start_times[start_ptr] &lt; end_times[end_ptr]:
+            # Need a new room
+            rooms_needed += 1
+            start_ptr += 1
+        else:
+            # A room becomes available
+            rooms_available += 1
+            end_ptr += 1
+
+    return rooms_needed - rooms_available
+
+# Alternative implementation using heap
+import heapq
+
+def min_meeting_rooms_heap(intervals):
+    """
+    Find minimum conference rooms using min heap.
+
+    Time: O(n log n) - sorting + heap operations
+    Space: O(n) - heap size
+    """
+    if not intervals:
+        return 0
+
+    # Sort by start time
+    intervals.sort(key=lambda x: x[0])
+
+    # Min heap to track end times of ongoing meetings
+    heap = []
+
+    for start, end in intervals:
+        # If earliest ending meeting has ended, remove it
+        if heap and heap[0] &lt;= start:
+            heapq.heappop(heap)
+
+        # Add current meeting's end time
+        heapq.heappush(heap, end)
+
+    # Heap size = number of rooms needed
+    return len(heap)
+
+# Example usage
+meetings = [(0, 30), (5, 10), (15, 20)]
+print(f"Meetings: {meetings}")
+print(f"Rooms needed: {min_meeting_rooms(meetings)}")  # 2
+print(f"Rooms needed (heap): {min_meeting_rooms_heap(meetings)}")  # 2
+
+meetings2 = [(7, 10), (2, 4)]
+print(f"\nMeetings: {meetings2}")
+print(f"Rooms needed: {min_meeting_rooms_heap(meetings2)}")  # 1
+</code></pre>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n \log n)$ - sorting dominates</li>
+<li><strong>Space</strong>: $O(n)$ - for sorted arrays or heap</li>
+</ul>
+<h2 id="minimum-arrows-to-burst-balloons"><a class="header" href="#minimum-arrows-to-burst-balloons">Minimum Arrows to Burst Balloons</a></h2>
+<p><strong>Problem</strong>: Find minimum arrows needed to burst all balloons (given as intervals).</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Similar to Activity Selection but we want minimum resources to cover all intervals</li>
+<li>Greedy strategy: Sort by end position, shoot arrow at end of each balloon</li>
+<li>One arrow can burst all balloons that overlap at that position</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: Shooting at the earliest end position covers maximum balloons.</p>
+<pre><code class="language-python">def find_min_arrows(points):
+    """
+    Find minimum arrows to burst all balloons.
+
+    Args:
+        points: List of [start, end] representing balloon diameters
+
+    Returns:
+        Minimum number of arrows needed
+
+    Time: O(n log n) - sorting
+    Space: O(1) - constant extra space
+    """
+    if not points:
+        return 0
+
+    # Sort by end position - greedy choice
+    points.sort(key=lambda x: x[1])
+
+    arrows = 1
+    current_arrow_pos = points[0][1]  # Shoot at end of first balloon
+
+    for start, end in points[1:]:
+        # If current balloon starts after our arrow position
+        if start &gt; current_arrow_pos:
+            # Need a new arrow
+            arrows += 1
+            current_arrow_pos = end  # Shoot at end of this balloon
+
+    return arrows
+
+# Example usage
+balloons = [[10, 16], [2, 8], [1, 6], [7, 12]]
+print(f"Balloons: {balloons}")
+print(f"Minimum arrows: {find_min_arrows(balloons)}")  # 2
+# Shoot at position 6 (bursts [2,8] and [1,6])
+# Shoot at position 12 (bursts [10,16] and [7,12])
+
+balloons2 = [[1, 2], [3, 4], [5, 6], [7, 8]]
+print(f"\nBalloons: {balloons2}")
+print(f"Minimum arrows: {find_min_arrows(balloons2)}")  # 4
+</code></pre>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n \log n)$ - sorting dominates</li>
+<li><strong>Space</strong>: $O(1)$ - only tracking arrows count and position</li>
+</ul>
+<h2 id="task-scheduler"><a class="header" href="#task-scheduler">Task Scheduler</a></h2>
+<p><strong>Problem</strong>: Schedule tasks with cooldown period <code>n</code> between same tasks. Find minimum time units needed.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Schedule most frequent tasks first to minimize idle time</li>
+<li>Create “frames” of size <code>n+1</code> where each task appears at most once per frame</li>
+<li>Fill frames with most frequent tasks first, then less frequent ones</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: Scheduling most frequent tasks first and spacing them optimally minimizes total time.</p>
+<pre><code class="language-python">from collections import Counter
+
+def least_interval(tasks, n):
+    """
+    Find minimum time units needed to complete all tasks.
+
+    Args:
+        tasks: List of task names (e.g., ['A', 'A', 'B', 'B', 'C'])
+        n: Cooldown period - must wait n intervals between same tasks
+
+    Returns:
+        Minimum number of time units needed
+
+    Time: O(k log k) where k = number of unique tasks (max 26)
+          In practice O(n) since k is bounded
+    Space: O(k) for frequency counter
+    """
+    if n == 0:
+        return len(tasks)
+
+    # Count frequency of each task
+    freq = Counter(tasks)
+    max_freq = max(freq.values())
+
+    # Count how many tasks have the maximum frequency
+    max_freq_count = sum(1 for f in freq.values() if f == max_freq)
+
+    # Calculate minimum time needed
+    # Formula: (max_freq - 1) * (n + 1) + max_freq_count
+    # Explanation:
+    # - We create (max_freq - 1) complete frames of size (n + 1)
+    # - Plus one final slot for each max-frequency task
+    min_time = (max_freq - 1) * (n + 1) + max_freq_count
+
+    # Answer is max of calculated time or total tasks
+    # (if cooldown allows, we can execute continuously)
+    return max(min_time, len(tasks))
+
+# Example usage
+tasks1 = ['A', 'A', 'A', 'B', 'B', 'B']
+n1 = 2
+print(f"Tasks: {tasks1}, n={n1}")
+print(f"Minimum time: {least_interval(tasks1, n1)}")  # 8
+# Explanation: A -&gt; B -&gt; idle -&gt; A -&gt; B -&gt; idle -&gt; A -&gt; B
+
+tasks2 = ['A', 'A', 'A', 'B', 'B', 'B']
+n2 = 0
+print(f"\nTasks: {tasks2}, n={n2}")
+print(f"Minimum time: {least_interval(tasks2, n2)}")  # 6
+
+tasks3 = ['A', 'A', 'A', 'A', 'A', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
+n3 = 2
+print(f"\nTasks: {tasks3}, n={n3}")
+print(f"Minimum time: {least_interval(tasks3, n3)}")  # 16
+</code></pre>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n)$ where $n$ is number of tasks (counter operations + constant work for 26 letters max)</li>
+<li><strong>Space</strong>: $O(1)$ - at most 26 different tasks (can be considered constant)</li>
+</ul>
+<h2 id="partition-labels"><a class="header" href="#partition-labels">Partition Labels</a></h2>
+<p><strong>Problem</strong>: Partition a string into as many parts as possible such that each letter appears in at most one part.</p>
+<p><strong>Intuition</strong>:</p>
+<ul>
+<li>Greedy strategy: Track the last occurrence of each character</li>
+<li>Extend current partition until we’ve included all characters’ last occurrences</li>
+<li>Start new partition when current partition is complete</li>
+</ul>
+<p><strong>Greedy Choice Property</strong>: Making a partition as soon as all characters are complete is optimal.</p>
+<pre><code class="language-python">def partition_labels(s):
+    """
+    Partition string into maximum parts where each char appears in one part.
+
+    Args:
+        s: Input string
+
+    Returns:
+        List of partition lengths
+
+    Time: O(n) - two passes through string
+    Space: O(1) - at most 26 characters (constant space)
+    """
+    # Record last occurrence of each character
+    last_occurrence = {char: i for i, char in enumerate(s)}
+
+    partitions = []
+    start = 0
+    end = 0
+
+    for i, char in enumerate(s):
+        # Extend partition to include this character's last occurrence
+        end = max(end, last_occurrence[char])
+
+        # If we've reached the end of current partition
+        if i == end:
+            partitions.append(end - start + 1)
+            start = i + 1  # Start new partition
+
+    return partitions
+
+# Example usage
+s1 = "ababcbacadefegdehijhklij"
+print(f"String: {s1}")
+print(f"Partitions: {partition_labels(s1)}")  # [9, 7, 8]
+# Explanation: "ababcbaca", "defegde", "hijhklij"
+
+s2 = "eccbbbbdec"
+print(f"\nString: {s2}")
+print(f"Partitions: {partition_labels(s2)}")  # [10]
+# Explanation: entire string is one partition
+</code></pre>
+<p><strong>Complexity Analysis</strong>:</p>
+<ul>
+<li><strong>Time</strong>: $O(n)$ - one pass to find last occurrences, one pass to partition</li>
+<li><strong>Space</strong>: $O(1)$ - at most 26 characters in dictionary (constant)</li>
+</ul>
+<h2 id="greedy-vs-dynamic-programming-1"><a class="header" href="#greedy-vs-dynamic-programming-1">Greedy vs Dynamic Programming</a></h2>
 <p>Some problems can be solved by both approaches:</p>
 <pre><code class="language-python"># Greedy (doesn't always work)
 def coin_change_greedy(coins, amount):
@@ -571,12 +1303,46 @@ def coin_change_dp(coins, amount):
     return dp[amount] if dp[amount] != float('inf') else -1
 </code></pre>
 <h2 id="when-to-use-greedy"><a class="header" href="#when-to-use-greedy">When to Use Greedy</a></h2>
-<p>Use greedy when:</p>
+<h3 id="problems-where-greedy-works"><a class="header" href="#problems-where-greedy-works">Problems Where Greedy Works</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem Type</th><th>Key Characteristic</th><th>Example</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Interval Scheduling</strong></td><td>Maximize non-overlapping intervals</td><td>Activity Selection, Meeting Rooms</td></tr>
+<tr><td><strong>Shortest Path</strong></td><td>Non-negative weights</td><td>Dijkstra’s Algorithm</td></tr>
+<tr><td><strong>Spanning Trees</strong></td><td>Minimum weight connections</td><td>Prim’s, Kruskal’s</td></tr>
+<tr><td><strong>Huffman Coding</strong></td><td>Optimal prefix-free codes</td><td>Data Compression</td></tr>
+<tr><td><strong>Fractional Problems</strong></td><td>Can take fractions</td><td>Fractional Knapsack</td></tr>
+<tr><td><strong>Array Problems</strong></td><td>Maximize/minimize with greedy choice</td><td>Jump Game, Gas Station</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="problems-where-greedy-fails"><a class="header" href="#problems-where-greedy-fails">Problems Where Greedy Fails</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem Type</th><th>Why Greedy Fails</th><th>Correct Approach</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>0/1 Knapsack</strong></td><td>Can’t take fractions; greedy by ratio fails</td><td>Dynamic Programming</td></tr>
+<tr><td><strong>Coin Change (arbitrary)</strong></td><td>Greedy doesn’t consider all combinations</td><td>Dynamic Programming</td></tr>
+<tr><td><strong>Longest Path</strong></td><td>Negative weights or need max path</td><td>Dynamic Programming</td></tr>
+<tr><td><strong>Subset Sum</strong></td><td>Need exact sum, not greedy accumulation</td><td>Dynamic Programming</td></tr>
+<tr><td><strong>Edit Distance</strong></td><td>Many overlapping subproblems</td><td>Dynamic Programming</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="checklist-should-i-use-greedy"><a class="header" href="#checklist-should-i-use-greedy">Checklist: Should I Use Greedy?</a></h3>
 <ol>
-<li>Problem has greedy choice property</li>
-<li>Problem has optimal substructure</li>
-<li>Local optimum leads to global optimum</li>
+<li><strong>Greedy Choice Property</strong>: Can I make a locally optimal choice?</li>
+<li><strong>Optimal Substructure</strong>: Does optimal solution contain optimal subsolutions?</li>
+<li><strong>No Backtracking Needed</strong>: Once I make a choice, do I never reconsider it?</li>
+<li><strong>Proof</strong>: Can I prove greedy works via exchange argument or greedy-stays-ahead?</li>
 </ol>
+<p>If YES to all → Try Greedy
+If NO → Consider DP, Backtracking, or other approaches</p>
 <h2 id="common-greedy-patterns"><a class="header" href="#common-greedy-patterns">Common Greedy Patterns</a></h2>
 <ol>
 <li><strong>Sorting first</strong>: Many greedy algorithms start by sorting</li>
@@ -585,16 +1351,82 @@ def coin_change_dp(coins, amount):
 <li><strong>Graph traversal</strong>: MST, shortest path</li>
 </ol>
 <h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
-<p>Greedy algorithms are widely used in various applications, including:</p>
+<h3 id="real-world-applications-of-greedy-algorithms"><a class="header" href="#real-world-applications-of-greedy-algorithms">Real-World Applications of Greedy Algorithms</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Domain</th><th>Application</th><th>Algorithm Used</th><th>Impact</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Networking</strong></td><td>Internet routing (OSPF, RIP)</td><td>Dijkstra’s Shortest Path</td><td>Fast packet routing</td></tr>
+<tr><td><strong>Data Compression</strong></td><td>ZIP, JPEG, MP3</td><td>Huffman Coding</td><td>File size reduction</td></tr>
+<tr><td><strong>Operating Systems</strong></td><td>Process scheduling</td><td>Greedy scheduling</td><td>CPU utilization</td></tr>
+<tr><td><strong>Cloud Computing</strong></td><td>Resource allocation</td><td>Greedy bin packing</td><td>Cost optimization</td></tr>
+<tr><td><strong>Transportation</strong></td><td>GPS navigation</td><td>Dijkstra’s/A*</td><td>Route planning</td></tr>
+<tr><td><strong>Telecommunications</strong></td><td>Network design</td><td>MST (Prim’s/Kruskal’s)</td><td>Minimize cable cost</td></tr>
+<tr><td><strong>Finance</strong></td><td>Portfolio optimization</td><td>Greedy selection</td><td>Maximize returns</td></tr>
+<tr><td><strong>Manufacturing</strong></td><td>Job scheduling on machines</td><td>Greedy job sequencing</td><td>Minimize completion time</td></tr>
+<tr><td><strong>Game Development</strong></td><td>AI pathfinding</td><td>Greedy best-first search</td><td>Real-time decisions</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="specific-examples"><a class="header" href="#specific-examples">Specific Examples</a></h3>
+<ol>
+<li>
+<p><strong>Dijkstra’s in GPS Systems</strong></p>
 <ul>
-<li><strong>Network Routing</strong>: Finding the shortest path in a network (Dijkstra’s algorithm)</li>
-<li><strong>Resource Allocation</strong>: Distributing resources in a way that maximizes efficiency</li>
-<li><strong>Job Scheduling</strong>: Scheduling jobs on machines to minimize completion time</li>
-<li><strong>Data Compression</strong>: Huffman coding for optimal compression</li>
-<li><strong>Minimum Spanning Trees</strong>: Network design problems</li>
+<li>Google Maps, Waze use variants of Dijkstra’s algorithm</li>
+<li>Finds shortest routes between locations</li>
+<li>Modified for real-time traffic data</li>
 </ul>
+</li>
+<li>
+<p><strong>Huffman Coding in Compression</strong></p>
+<ul>
+<li>Used in ZIP, GZIP, JPEG, MP3</li>
+<li>Assigns shorter codes to frequent characters</li>
+<li>Achieves optimal prefix-free compression</li>
+</ul>
+</li>
+<li>
+<p><strong>Greedy Scheduling in Operating Systems</strong></p>
+<ul>
+<li>CPU scheduling algorithms (Shortest Job First)</li>
+<li>Memory management (Best Fit, First Fit)</li>
+<li>Disk scheduling (SCAN, C-SCAN)</li>
+</ul>
+</li>
+<li>
+<p><strong>MST in Network Design</strong></p>
+<ul>
+<li>Telecommunications network layout</li>
+<li>Electrical grid design</li>
+<li>Minimizes total cable/wire length</li>
+</ul>
+</li>
+<li>
+<p><strong>Activity Selection in Resource Management</strong></p>
+<ul>
+<li>Conference room scheduling</li>
+<li>Meeting room allocation</li>
+<li>Classroom assignment</li>
+</ul>
+</li>
+</ol>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Greedy algorithms provide a straightforward and efficient approach to solving optimization problems. While they do not always yield the optimal solution, they are often easier to implement and can be very effective for certain types of problems.</p>
+<p>Greedy algorithms provide an elegant and efficient approach to solving optimization problems. Their key advantages are:</p>
+<ul>
+<li><strong>Simplicity</strong>: Easy to understand and implement</li>
+<li><strong>Efficiency</strong>: Often $O(n \log n)$ or better</li>
+<li><strong>Practicality</strong>: Work well for many real-world problems</li>
+</ul>
+<p>However, remember that greedy algorithms don’t always guarantee optimal solutions. Always verify the greedy choice property and optimal substructure before applying greedy approach. When greedy fails, consider:</p>
+<ul>
+<li><strong>Dynamic Programming</strong>: For overlapping subproblems</li>
+<li><strong>Backtracking</strong>: When you need to explore all possibilities</li>
+<li><strong>Branch and Bound</strong>: For optimization with constraints</li>
+</ul>
+<p><strong>Key Takeaway</strong>: Greedy algorithms are powerful when applicable, but require careful analysis to ensure correctness.</p>
 
                     </main>
 

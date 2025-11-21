@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-aabda7aa.js";
+            window.path_to_searchindex_js = "../searchindex-030848ba.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-8fce9580.js"></script>
+        <script src="../toc-c5c10ac8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,28 +177,758 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="power-management"><a class="header" href="#power-management">Power Management</a></h1>
-<p>Power management refers to the process of managing the power consumption of a device or system to optimize energy efficiency and prolong battery life. It is crucial in various applications, especially in portable devices like smartphones, laptops, and IoT devices.</p>
+<p>Power management refers to the process of managing the power consumption of a device or system to optimize energy efficiency and prolong battery life. It is crucial in various applications, especially in portable devices like smartphones, laptops, and IoT devices. Modern power management involves a sophisticated combination of hardware mechanisms, software policies, and system-level optimizations that work together to minimize energy consumption while maintaining performance requirements.</p>
 <h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="sleep-modes"><a class="header" href="#sleep-modes">Sleep Modes</a></h3>
+<p>Sleep modes are low-power states that processors and peripherals can enter when idle. These modes trade off power savings against wake-up latency and state retention.</p>
+<h4 id="processor-specific-sleep-states"><a class="header" href="#processor-specific-sleep-states">Processor-Specific Sleep States</a></h4>
+<p><strong>ARM Cortex-M Sleep Modes:</strong></p>
 <ul>
+<li><strong>Sleep Mode</strong>: CPU clock stopped, peripherals continue running. Wake on any interrupt.</li>
+<li><strong>Deep Sleep</strong>: CPU and most peripherals stopped, only wake-up peripherals active. Requires reconfiguration on wake.</li>
+<li><strong>Standby/Shutdown</strong>: Minimal power consumption, only RTC and wake pins active. Full system reset on wake.</li>
+</ul>
+<pre><code class="language-c">// ARM Cortex-M sleep mode entry
+void enter_sleep_mode(void) {
+    __WFI();  // Wait For Interrupt - enters sleep mode
+}
+
+void enter_deep_sleep(void) {
+    SCB-&gt;SCR |= SCB_SCR_SLEEPDEEP_Msk;  // Set SLEEPDEEP bit
+    __WFI();  // Enter deep sleep
+}
+</code></pre>
+<p><strong>ARM Cortex-A (Linux) C-States:</strong></p>
+<ul>
+<li><strong>C0</strong>: Active/running state</li>
+<li><strong>C1</strong>: Halt/WFI - lowest latency (~1-10μs), CPU execution stopped</li>
+<li><strong>C2</strong>: Stop clock - medium latency (~50-100μs), CPU and cache clocks gated</li>
+<li><strong>C3</strong>: Sleep - higher latency (~200-500μs), cache flushed, voltage may be reduced</li>
+</ul>
+<p><strong>x86 Processor C-States:</strong></p>
+<ul>
+<li><strong>C0</strong>: Active</li>
+<li><strong>C1</strong>: Auto HALT - ~1μs wake latency</li>
+<li><strong>C3</strong>: Deep Sleep - ~100μs wake latency, L1/L2 cache flushed</li>
+<li><strong>C6</strong>: Deep Power Down - ~200μs latency, core voltage reduced</li>
+<li><strong>C7/C8</strong>: Deeper states with progressively lower power and higher latency</li>
+</ul>
+<pre><code class="language-c">// Linux kernel - entering idle state
+void cpu_idle(void) {
+    while (!need_resched()) {
+        if (cpuidle_idle_call())
+            pm_idle();  // Architecture-specific idle function
+    }
+}
+</code></pre>
+<h4 id="wake-up-latency-vs-power-savings"><a class="header" href="#wake-up-latency-vs-power-savings">Wake-up Latency vs. Power Savings</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Sleep Mode</th><th>Power Savings</th><th>Wake Latency</th><th>State Retention</th></tr>
+</thead>
+<tbody>
+<tr><td>C1/WFI</td><td>10-20%</td><td>1-10 μs</td><td>Full</td></tr>
+<tr><td>C2/C3</td><td>50-70%</td><td>50-500 μs</td><td>Partial</td></tr>
+<tr><td>Deep Sleep</td><td>90-95%</td><td>1-10 ms</td><td>Minimal</td></tr>
+<tr><td>Shutdown</td><td>99%+</td><td>100+ ms</td><td>None</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="dynamic-voltage-and-frequency-scaling-dvfs"><a class="header" href="#dynamic-voltage-and-frequency-scaling-dvfs">Dynamic Voltage and Frequency Scaling (DVFS)</a></h3>
+<p>DVFS adjusts processor voltage and frequency dynamically based on workload, exploiting the relationship: <strong>Power ∝ V² × f</strong></p>
+<h4 id="voltage-frequency-relationship"><a class="header" href="#voltage-frequency-relationship">Voltage-Frequency Relationship</a></h4>
+<p>Processors have defined operating points (OPPs) that pair voltage levels with maximum safe frequencies:</p>
+<pre><code>Frequency (MHz)  Voltage (V)  Power (mW)
+1500            1.20         1800
+1200            1.10         1210
+800             1.00         640
+400             0.90         324
+</code></pre>
+<p>Reducing frequency from 1500 MHz to 800 MHz saves ~64% power.</p>
+<h4 id="dvfs-governors"><a class="header" href="#dvfs-governors">DVFS Governors</a></h4>
+<p><strong>Performance Governor</strong>: Always runs at maximum frequency</p>
+<pre><code class="language-bash">echo performance &gt; /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+</code></pre>
+<p><strong>Powersave Governor</strong>: Always runs at minimum frequency</p>
+<p><strong>Ondemand Governor</strong>: Rapidly scales to maximum frequency on load, gradually decreases when idle</p>
+<ul>
+<li>Fast response to workload increases</li>
+<li>Check interval typically 10-100ms</li>
+<li>Threshold-based scaling</li>
+</ul>
+<p><strong>Conservative Governor</strong>: Gradual frequency changes</p>
+<ul>
+<li>Slower ramp-up than ondemand</li>
+<li>Better for steady workloads</li>
+</ul>
+<p><strong>Schedutil Governor</strong>: Uses scheduler utilization data</p>
+<ul>
+<li>Integrated with task scheduler</li>
+<li>More responsive to transient loads</li>
+</ul>
+<h4 id="implementation-example"><a class="header" href="#implementation-example">Implementation Example</a></h4>
+<pre><code class="language-c">// Setting CPU frequency on Linux
+#include &lt;cpufreq.h&gt;
+
+int set_cpu_frequency(unsigned int cpu, unsigned long target_freq) {
+    unsigned long min, max;
+    cpufreq_get_hardware_limits(cpu, &amp;min, &amp;max);
+
+    if (target_freq &lt; min || target_freq &gt; max)
+        return -EINVAL;
+
+    return cpufreq_set_frequency(cpu, target_freq);
+}
+</code></pre>
+<p>Device Tree DVFS configuration:</p>
+<pre><code class="language-dts">cpu0_opp_table: opp-table {
+    compatible = "operating-points-v2";
+
+    opp-400000000 {
+        opp-hz = /bits/ 64 &lt;400000000&gt;;
+        opp-microvolt = &lt;900000&gt;;
+        clock-latency-ns = &lt;300000&gt;;
+    };
+    opp-800000000 {
+        opp-hz = /bits/ 64 &lt;800000000&gt;;
+        opp-microvolt = &lt;1000000&gt;;
+        clock-latency-ns = &lt;300000&gt;;
+    };
+    opp-1200000000 {
+        opp-hz = /bits/ 64 &lt;1200000000&gt;;
+        opp-microvolt = &lt;1100000&gt;;
+        clock-latency-ns = &lt;300000&gt;;
+    };
+};
+</code></pre>
+<h3 id="power-gating"><a class="header" href="#power-gating">Power Gating</a></h3>
+<p>Power gating completely shuts off power to unused circuit blocks, eliminating both static and dynamic power consumption.</p>
+<h4 id="technical-implementation"><a class="header" href="#technical-implementation">Technical Implementation</a></h4>
+<p><strong>Key Components:</strong></p>
+<ul>
+<li><strong>Isolation Cells</strong>: Prevent floating signals from powered-down blocks from affecting active circuits</li>
+<li><strong>Retention Registers</strong>: Special flip-flops that maintain state during power-down (with backup power)</li>
+<li><strong>Power Switches</strong>: Large transistors (typically PMOS) that control power domains</li>
+<li><strong>Power State Machine</strong>: Controls sequencing of isolation, power switch control, and retention</li>
+</ul>
+<h4 id="power-domain-control"><a class="header" href="#power-domain-control">Power Domain Control</a></h4>
+<pre><code class="language-c">// Power domain control example (vendor-specific)
+struct power_domain {
+    void __iomem *pmu_base;
+    u32 domain_id;
+};
+
+int power_domain_on(struct power_domain *pd) {
+    // 1. Turn on retention
+    writel(RETENTION_ON, pd-&gt;pmu_base + RETENTION_CTRL);
+
+    // 2. Enable power switch
+    writel(POWER_ON, pd-&gt;pmu_base + POWER_CTRL);
+    udelay(10);  // Wait for power stabilization
+
+    // 3. Disable isolation
+    writel(ISOLATION_OFF, pd-&gt;pmu_base + ISO_CTRL);
+
+    // 4. Restore clocks
+    writel(CLOCK_ON, pd-&gt;pmu_base + CLOCK_CTRL);
+
+    return 0;
+}
+
+int power_domain_off(struct power_domain *pd) {
+    // Reverse sequence
+    writel(CLOCK_OFF, pd-&gt;pmu_base + CLOCK_CTRL);
+    writel(ISOLATION_ON, pd-&gt;pmu_base + ISO_CTRL);
+    writel(POWER_OFF, pd-&gt;pmu_base + POWER_CTRL);
+
+    return 0;
+}
+</code></pre>
+<h4 id="power-domain-design-considerations"><a class="header" href="#power-domain-design-considerations">Power Domain Design Considerations</a></h4>
+<ul>
+<li><strong>Granularity</strong>: Fine-grained domains offer more savings but increase complexity</li>
+<li><strong>Isolation overhead</strong>: Isolation cells add area and delay</li>
+<li><strong>Power-up sequencing</strong>: Incorrect ordering can cause latch-up or data corruption</li>
+<li><strong>Retention power</strong>: Retention registers still consume power</li>
+</ul>
+<h3 id="clock-gating"><a class="header" href="#clock-gating">Clock Gating</a></h3>
+<p>Clock gating disables clock signals to idle circuit blocks, eliminating dynamic power from clock tree switching.</p>
+<h4 id="types-of-clock-gating"><a class="header" href="#types-of-clock-gating">Types of Clock Gating</a></h4>
+<p><strong>Coarse-Grained</strong>: Module-level gating</p>
+<pre><code class="language-c">// Peripheral clock control
+#define RCC_APB1ENR (*(volatile uint32_t*)0x40023840)
+
+void uart_clock_enable(void) {
+    RCC_APB1ENR |= (1 &lt;&lt; 17);  // Enable USART2 clock
+}
+
+void uart_clock_disable(void) {
+    RCC_APB1ENR &amp;= ~(1 &lt;&lt; 17);  // Disable USART2 clock
+}
+</code></pre>
+<p><strong>Fine-Grained</strong>: Register-level gating</p>
+<ul>
+<li>Automatically inserted by synthesis tools</li>
+<li>Uses enable signal to gate clock to registers</li>
+<li>Typical power savings: 20-40% of dynamic power</li>
+</ul>
+<pre><code class="language-verilog">// Hardware clock gating cell
+module clock_gate (
+    input clk,
+    input enable,
+    output gated_clk
+);
+    reg enable_latch;
+
+    always @(clk or enable)
+        if (!clk)
+            enable_latch &lt;= enable;
+
+    assign gated_clk = clk &amp; enable_latch;
+endmodule
+</code></pre>
+<h4 id="linux-runtime-pm-framework"><a class="header" href="#linux-runtime-pm-framework">Linux Runtime PM Framework</a></h4>
+<pre><code class="language-c">#include &lt;linux/pm_runtime.h&gt;
+
+// Enable runtime PM for a device
+static int my_driver_probe(struct platform_device *pdev) {
+    pm_runtime_enable(&amp;pdev-&gt;dev);
+    pm_runtime_get_sync(&amp;pdev-&gt;dev);  // Increment usage count, power on
+
+    // Initialize device...
+
+    pm_runtime_put(&amp;pdev-&gt;dev);  // Decrement usage count, may power down
+    return 0;
+}
+
+// Runtime suspend callback
+static int my_driver_runtime_suspend(struct device *dev) {
+    struct my_device *mydev = dev_get_drvdata(dev);
+
+    // Disable clocks
+    clk_disable_unprepare(mydev-&gt;clk);
+
+    return 0;
+}
+
+// Runtime resume callback
+static int my_driver_runtime_resume(struct device *dev) {
+    struct my_device *mydev = dev_get_drvdata(dev);
+
+    // Enable clocks
+    return clk_prepare_enable(mydev-&gt;clk);
+}
+</code></pre>
+<h2 id="power-measurement-and-profiling"><a class="header" href="#power-measurement-and-profiling">Power Measurement and Profiling</a></h2>
+<h3 id="measurement-techniques"><a class="header" href="#measurement-techniques">Measurement Techniques</a></h3>
+<h4 id="hardware-measurement-methods"><a class="header" href="#hardware-measurement-methods">Hardware Measurement Methods</a></h4>
+<p><strong>Shunt Resistor Method:</strong></p>
+<ul>
+<li>Insert low-value resistor (0.01-0.1Ω) in power path</li>
+<li>Measure voltage drop across resistor: I = V/R</li>
+<li>High accuracy but requires hardware modification</li>
+</ul>
+<p><strong>Current Probe:</strong></p>
+<ul>
+<li>Clamp-on or inline current probes</li>
+<li>Non-invasive for clamp-on type</li>
+<li>Bandwidth considerations for dynamic measurements</li>
+</ul>
+<p><strong>Power Monitoring ICs:</strong></p>
+<ul>
+<li>Dedicated ICs like INA219, INA3221, PAC1934</li>
+<li>Integrated shunt resistor and ADC</li>
+<li>I2C/SPI interface for software monitoring</li>
+</ul>
+<pre><code class="language-c">// INA219 power monitor example
+#include "ina219.h"
+
+float measure_system_power(void) {
+    float voltage = ina219_read_bus_voltage();  // V
+    float current = ina219_read_current();      // mA
+    return voltage * current / 1000.0;          // mW
+}
+</code></pre>
+<h4 id="software-profiling-tools"><a class="header" href="#software-profiling-tools">Software Profiling Tools</a></h4>
+<p><strong>Linux PowerTOP:</strong></p>
+<pre><code class="language-bash">sudo powertop --html=power_report.html
+</code></pre>
+<ul>
+<li>Identifies power-hungry processes and devices</li>
+<li>Provides tuning suggestions</li>
+<li>Estimates power consumption by component</li>
+</ul>
+<p><strong>perf power events:</strong></p>
+<pre><code class="language-bash">perf stat -e power/energy-cores/,power/energy-pkg/ ./my_app
+</code></pre>
+<p><strong>ARM Streamline:</strong></p>
+<ul>
+<li>CPU frequency and voltage tracking</li>
+<li>Per-core power estimation</li>
+<li>GPU and memory power profiling</li>
+</ul>
+<p><strong>Vendor-Specific Tools:</strong></p>
+<ul>
+<li>Intel VTune (x86 energy analysis)</li>
+<li>NVIDIA Nsight (GPU power profiling)</li>
+<li>Qualcomm Trepn (mobile power profiling)</li>
+</ul>
+<h3 id="power-budgeting"><a class="header" href="#power-budgeting">Power Budgeting</a></h3>
+<p>Power budget allocation for a typical embedded system:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Component</th><th>Active (mW)</th><th>Idle (mW)</th><th>Sleep (μW)</th></tr>
+</thead>
+<tbody>
+<tr><td>CPU Core</td><td>300-1000</td><td>50-100</td><td>10-50</td></tr>
+<tr><td>RAM</td><td>50-200</td><td>20-50</td><td>5-10</td></tr>
+<tr><td>Flash</td><td>20-50</td><td>1-5</td><td>0.1-1</td></tr>
+<tr><td>Wireless</td><td>100-300</td><td>10-20</td><td>1-5</td></tr>
+<tr><td>Sensors</td><td>10-50</td><td>1-5</td><td>0.1-1</td></tr>
+<tr><td>Display</td><td>200-800</td><td>0</td><td>0</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>680-2400</strong></td><td><strong>82-180</strong></td><td><strong>16-67</strong></td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="thermal-management"><a class="header" href="#thermal-management">Thermal Management</a></h2>
+<p>Thermal management is intrinsically linked to power management: <strong>Power = Heat</strong></p>
+<h3 id="thermal-throttling"><a class="header" href="#thermal-throttling">Thermal Throttling</a></h3>
+<p>When junction temperature (Tj) exceeds threshold, reduce performance to lower power:</p>
+<pre><code class="language-c">// Thermal throttling implementation
+#define TEMP_THRESHOLD_HIGH  85.0  // °C
+#define TEMP_THRESHOLD_LOW   75.0  // °C
+
+void thermal_monitor_task(void) {
+    float temp = read_junction_temperature();
+
+    if (temp &gt; TEMP_THRESHOLD_HIGH) {
+        // Reduce to 50% frequency
+        set_cpu_frequency(get_max_frequency() / 2);
+        throttled = true;
+    }
+    else if (throttled &amp;&amp; temp &lt; TEMP_THRESHOLD_LOW) {
+        // Restore full frequency
+        set_cpu_frequency(get_max_frequency());
+        throttled = false;
+    }
+}
+</code></pre>
+<h3 id="thermal-design-power-tdp"><a class="header" href="#thermal-design-power-tdp">Thermal Design Power (TDP)</a></h3>
+<p>TDP represents the maximum sustained power dissipation under realistic workloads:</p>
+<ul>
+<li>Used for cooling system design</li>
+<li>Typically lower than absolute maximum power</li>
+<li>Example: Intel i7 TDP = 65W, max turbo = 90W+</li>
+</ul>
+<h3 id="cooling-strategies"><a class="header" href="#cooling-strategies">Cooling Strategies</a></h3>
+<p><strong>Passive Cooling:</strong></p>
+<ul>
+<li>Heat sinks with thermal interface material (TIM)</li>
+<li>Thermal spreading planes in PCB</li>
+<li>Natural convection</li>
+</ul>
+<p><strong>Active Cooling:</strong></p>
+<ul>
+<li>Fans with PWM speed control</li>
+<li>Liquid cooling for high-power systems</li>
+<li>Thermoelectric coolers (Peltier devices)</li>
+</ul>
+<h2 id="battery-management"><a class="header" href="#battery-management">Battery Management</a></h2>
+<h3 id="battery-chemistry-characteristics"><a class="header" href="#battery-chemistry-characteristics">Battery Chemistry Characteristics</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Chemistry</th><th>Voltage</th><th>Energy Density</th><th>Cycle Life</th><th>Self-Discharge</th></tr>
+</thead>
+<tbody>
+<tr><td>Li-Ion</td><td>3.7V</td><td>150-200 Wh/kg</td><td>500-1000</td><td>~5% /month</td></tr>
+<tr><td>Li-Po</td><td>3.7V</td><td>180-250 Wh/kg</td><td>300-500</td><td>~5% /month</td></tr>
+<tr><td>LiFePO4</td><td>3.2V</td><td>90-120 Wh/kg</td><td>2000-5000</td><td>~3% /month</td></tr>
+<tr><td>NiMH</td><td>1.2V</td><td>60-100 Wh/kg</td><td>500-1000</td><td>~30% /month</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="battery-management-systems-bms"><a class="header" href="#battery-management-systems-bms">Battery Management Systems (BMS)</a></h3>
+<p><strong>Key Functions:</strong></p>
+<ul>
+<li><strong>Voltage monitoring</strong>: Per-cell voltage measurement</li>
+<li><strong>Current monitoring</strong>: Charge/discharge current tracking</li>
+<li><strong>State of Charge (SOC)</strong>: Remaining capacity estimation</li>
+<li><strong>State of Health (SOH)</strong>: Battery degradation tracking</li>
+<li><strong>Cell balancing</strong>: Equalize voltages across series cells</li>
+<li><strong>Protection</strong>: Overvoltage, undervoltage, overcurrent, overtemperature</li>
+</ul>
+<h4 id="fuel-gauging"><a class="header" href="#fuel-gauging">Fuel Gauging</a></h4>
+<p><strong>Coulomb Counting:</strong></p>
+<pre><code class="language-c">// Simple coulomb counter
+float battery_capacity_mah = 2500.0;
+float current_charge_mah = 2500.0;
+
+void update_battery_charge(float current_ma, float time_s) {
+    // Integrate current over time
+    current_charge_mah -= (current_ma * time_s / 3600.0);
+
+    // Estimate SOC
+    float soc = (current_charge_mah / battery_capacity_mah) * 100.0;
+}
+</code></pre>
+<p><strong>Voltage-based Estimation:</strong></p>
+<ul>
+<li>Uses discharge curve lookup table</li>
+<li>Less accurate, affected by load and temperature</li>
+<li>Simple, no current measurement needed</li>
+</ul>
+<p><strong>Impedance Tracking:</strong></p>
+<ul>
+<li>Measures internal resistance changes</li>
+<li>Better SOC accuracy under varying loads</li>
+<li>Used in advanced fuel gauge ICs (e.g., Texas Instruments bq series)</li>
+</ul>
+<h3 id="charging-algorithms"><a class="header" href="#charging-algorithms">Charging Algorithms</a></h3>
+<p><strong>Constant Current / Constant Voltage (CC/CV):</strong></p>
+<ol>
+<li><strong>CC Phase</strong>: Charge at constant current (typically 0.5-1C) until voltage reaches 4.2V</li>
+<li><strong>CV Phase</strong>: Hold voltage at 4.2V, current decreases exponentially</li>
+<li><strong>Termination</strong>: Stop when current drops below 0.05-0.1C</li>
+</ol>
+<pre><code class="language-c">// CC/CV charging state machine
+typedef enum {
+    CHARGE_IDLE,
+    CHARGE_CC,
+    CHARGE_CV,
+    CHARGE_COMPLETE
+} charge_state_t;
+
+charge_state_t charging_update(void) {
+    float voltage = read_battery_voltage();
+    float current = read_charge_current();
+
+    switch (charge_state) {
+        case CHARGE_CC:
+            set_charge_current(CHARGE_CURRENT_MAX);
+            if (voltage &gt;= CHARGE_VOLTAGE_MAX)
+                charge_state = CHARGE_CV;
+            break;
+
+        case CHARGE_CV:
+            set_charge_voltage(CHARGE_VOLTAGE_MAX);
+            if (current &lt; CHARGE_CURRENT_TERMINATION)
+                charge_state = CHARGE_COMPLETE;
+            break;
+    }
+
+    return charge_state;
+}
+</code></pre>
+<h2 id="best-practices-and-design-patterns"><a class="header" href="#best-practices-and-design-patterns">Best Practices and Design Patterns</a></h2>
+<h3 id="power-aware-software-architecture"><a class="header" href="#power-aware-software-architecture">Power-Aware Software Architecture</a></h3>
+<p><strong>Event-Driven vs. Polling:</strong></p>
+<pre><code class="language-c">// Bad: Polling wastes power
+while (1) {
+    if (button_pressed()) {
+        handle_button();
+    }
+    // CPU stays active checking button
+}
+
+// Good: Event-driven
+void button_irq_handler(void) {
+    handle_button();
+}
+
+while (1) {
+    enter_sleep_mode();  // Sleep until interrupt
+}
+</code></pre>
+<p><strong>Batching Operations:</strong></p>
+<pre><code class="language-c">// Bad: Frequent wake-ups
+void periodic_sensor_read(void) {
+    wake_sensor();
+    value = read_sensor();
+    sleep_sensor();
+    // Process immediately
+}
+
+// Good: Batch processing
+void batched_sensor_read(void) {
+    wake_sensor();
+    for (int i = 0; i &lt; BATCH_SIZE; i++) {
+        buffer[i] = read_sensor();
+        delay_ms(10);
+    }
+    sleep_sensor();
+    // Process batch
+}
+</code></pre>
+<h3 id="peripheral-power-management-strategy"><a class="header" href="#peripheral-power-management-strategy">Peripheral Power Management Strategy</a></h3>
+<p><strong>Systematic Shutdown:</strong></p>
+<ol>
+<li>Identify all peripherals and their power modes</li>
+<li>Create power state matrix</li>
+<li>Implement coordinated shutdown sequence</li>
+</ol>
+<pre><code class="language-c">typedef struct {
+    bool uart_needed;
+    bool spi_needed;
+    bool i2c_needed;
+    bool adc_needed;
+} system_requirements_t;
+
+void configure_power_state(system_requirements_t *req) {
+    if (!req-&gt;uart_needed) {
+        uart_clock_disable();
+    }
+    if (!req-&gt;spi_needed) {
+        spi_clock_disable();
+    }
+    // etc...
+}
+</code></pre>
+<h3 id="dma-for-power-efficiency"><a class="header" href="#dma-for-power-efficiency">DMA for Power Efficiency</a></h3>
+<p>DMA transfers allow CPU to sleep during data movement:</p>
+<pre><code class="language-c">// Without DMA: CPU stays active
+void copy_data_polling(uint8_t *src, uint8_t *dst, size_t len) {
+    for (size_t i = 0; i &lt; len; i++) {
+        dst[i] = src[i];  // CPU active entire time
+    }
+}
+
+// With DMA: CPU can sleep
+void copy_data_dma(uint8_t *src, uint8_t *dst, size_t len) {
+    dma_configure(src, dst, len);
+    dma_start();
+    enter_sleep_mode();  // CPU sleeps, DMA works
+    // Wake on DMA completion interrupt
+}
+</code></pre>
+<h2 id="common-pitfalls-and-debugging"><a class="header" href="#common-pitfalls-and-debugging">Common Pitfalls and Debugging</a></h2>
+<h3 id="race-conditions-in-power-state-transitions"><a class="header" href="#race-conditions-in-power-state-transitions">Race Conditions in Power State Transitions</a></h3>
+<p><strong>Problem</strong>: Peripheral access during power-down</p>
+<pre><code class="language-c">// Dangerous: UART might be powered down
+void send_data(char *data) {
+    uart_transmit(data);  // What if UART clock is disabled?
+}
+</code></pre>
+<p><strong>Solution</strong>: Reference counting or state checks</p>
+<pre><code class="language-c">struct peripheral_context {
+    atomic_t ref_count;
+    bool powered;
+};
+
+int uart_acquire(struct peripheral_context *ctx) {
+    if (atomic_inc_return(&amp;ctx-&gt;ref_count) == 1) {
+        uart_power_on();
+        ctx-&gt;powered = true;
+    }
+    return 0;
+}
+
+void uart_release(struct peripheral_context *ctx) {
+    if (atomic_dec_return(&amp;ctx-&gt;ref_count) == 0) {
+        uart_power_off();
+        ctx-&gt;powered = false;
+    }
+}
+</code></pre>
+<h3 id="wake-up-latency-violations"><a class="header" href="#wake-up-latency-violations">Wake-up Latency Violations</a></h3>
+<p>Real-time tasks must account for wake-up latency:</p>
+<pre><code class="language-c">void time_critical_task(void) {
+    // Allow time for wake-up
+    uint32_t wakeup_latency_us = get_current_sleep_latency();
+    uint32_t deadline_us = get_task_deadline();
+
+    if (wakeup_latency_us &gt; deadline_us) {
+        // Constrain sleep mode
+        set_max_sleep_state(SHALLOW_SLEEP);
+    }
+}
+</code></pre>
+<h3 id="debugging-power-issues"><a class="header" href="#debugging-power-issues">Debugging Power Issues</a></h3>
+<p><strong>Common Tools and Techniques:</strong></p>
+<ol>
 <li>
-<p><strong>Sleep Modes</strong>: Many devices have different sleep modes that reduce power consumption when the device is not in active use. These modes can range from low-power states to complete shutdowns.</p>
+<p><strong>Current measurement with timestamps:</strong></p>
+<ul>
+<li>Correlate current spikes with system events</li>
+<li>Use oscilloscope with current probe</li>
+</ul>
 </li>
 <li>
-<p><strong>Dynamic Voltage and Frequency Scaling (DVFS)</strong>: This technique adjusts the voltage and frequency of a processor based on the workload, allowing for reduced power consumption during low-demand periods.</p>
+<p><strong>GPIO toggling for profiling:</strong></p>
 </li>
-<li>
-<p><strong>Power Gating</strong>: This method involves shutting off power to certain components of a device when they are not in use, further conserving energy.</p>
-</li>
+</ol>
+<pre><code class="language-c">void enter_sleep(void) {
+    GPIO_SET_LOW(DEBUG_PIN);  // Visible on logic analyzer
+    __WFI();
+    GPIO_SET_HIGH(DEBUG_PIN);
+}
+</code></pre>
+<ol start="3">
+<li><strong>Power state logging:</strong></li>
+</ol>
+<pre><code class="language-c">void log_power_event(const char *event, uint32_t timestamp) {
+    // Circular buffer for power state transitions
+    power_log[log_idx].timestamp = timestamp;
+    strncpy(power_log[log_idx].event, event, 32);
+    log_idx = (log_idx + 1) % LOG_SIZE;
+}
+</code></pre>
+<h3 id="unexpected-power-consumption-sources"><a class="header" href="#unexpected-power-consumption-sources">Unexpected Power Consumption Sources</a></h3>
+<ul>
+<li><strong>Pull-up/pull-down resistors on floating pins</strong>: Can cause current drain</li>
+<li><strong>Analog peripherals</strong>: ADC/DAC can consume significant static power</li>
+<li><strong>Oscillators</strong>: External crystals may not stop in some sleep modes</li>
+<li><strong>LEDs</strong>: Often forgotten, can consume 5-20mA each</li>
+<li><strong>Voltage regulators</strong>: Quiescent current varies widely (1μA to 1mA)</li>
+</ul>
+<h2 id="performance-vs-power-trade-offs"><a class="header" href="#performance-vs-power-trade-offs">Performance vs. Power Trade-offs</a></h2>
+<h3 id="quantitative-analysis"><a class="header" href="#quantitative-analysis">Quantitative Analysis</a></h3>
+<p><strong>Race-to-Sleep Strategy:</strong>
+Run at maximum frequency to complete task quickly, then enter deep sleep.</p>
+<p><strong>Example Calculation:</strong>
+Task requires 1M CPU cycles</p>
+<p><strong>Option 1</strong>: 100 MHz, 100mW active, 1mW sleep</p>
+<ul>
+<li>Time: 10ms active, 90ms sleep</li>
+<li>Energy: (100mW × 10ms) + (1mW × 90ms) = 1.09 mJ</li>
+</ul>
+<p><strong>Option 2</strong>: 50 MHz, 60mW active, 1mW sleep</p>
+<ul>
+<li>Time: 20ms active, 80ms sleep</li>
+<li>Energy: (60mW × 20ms) + (1mW × 80ms) = 1.28 mJ</li>
+</ul>
+<p>Race-to-sleep wins by 15% energy savings!</p>
+<h3 id="real-time-constraints"><a class="header" href="#real-time-constraints">Real-Time Constraints</a></h3>
+<p><strong>Latency-Sensitive Applications:</strong></p>
+<ul>
+<li>Audio processing: Cannot tolerate &gt;10ms interruptions</li>
+<li>Motor control: Requires &lt;1ms response times</li>
+<li>Communication protocols: Strict timing requirements</li>
+</ul>
+<p><strong>Strategy</strong>: Use QoS (Quality of Service) requirements</p>
+<pre><code class="language-c">struct pm_qos_request {
+    int latency_us;
+    int throughput_kbps;
+};
+
+void set_latency_requirement(int max_latency_us) {
+    // Constrain sleep states based on wake latency
+    if (max_latency_us &lt; 100)
+        disable_deep_sleep();
+    else
+        enable_deep_sleep();
+}
+</code></pre>
+<h3 id="energy-proportional-computing"><a class="header" href="#energy-proportional-computing">Energy Proportional Computing</a></h3>
+<p>Ideal system: Energy consumption proportional to utilization</p>
+<ul>
+<li>Real systems: Fixed overhead power</li>
+<li>Challenge: Minimize idle power while maintaining responsiveness</li>
 </ul>
 <h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
-<p>Power management techniques are widely used in:</p>
+<h3 id="mobile-devices"><a class="header" href="#mobile-devices">Mobile Devices</a></h3>
+<p>Modern smartphones employ aggressive power management:</p>
 <ul>
-<li><strong>Mobile Devices</strong>: Extending battery life through efficient power usage.</li>
-<li><strong>Data Centers</strong>: Reducing energy costs and improving cooling efficiency.</li>
-<li><strong>Embedded Systems</strong>: Ensuring long operational life in battery-powered applications.</li>
+<li><strong>Display</strong>: Largest power consumer (200-800mW), adaptive brightness, OLED pixel-level control</li>
+<li><strong>Cellular modem</strong>: Discontinuous reception (DRX), power class adaptation</li>
+<li><strong>Application processor</strong>: big.LITTLE architecture (high-performance + efficient cores)</li>
+<li><strong>GPU</strong>: Per-block power gating, DVFS</li>
+<li><strong>Sensors</strong>: Always-on low-power sensor hub, batched sensor data</li>
+</ul>
+<p><strong>Typical power profile:</strong></p>
+<ul>
+<li>Screen on, active use: 2-4W</li>
+<li>Screen off, background: 50-200mW</li>
+<li>Airplane mode, sleep: 5-20mW</li>
+<li>Powered off (RTC only): &lt;1mW</li>
+</ul>
+<h3 id="data-centers"><a class="header" href="#data-centers">Data Centers</a></h3>
+<p>Power and cooling represent 30-50% of operational costs:</p>
+<ul>
+<li><strong>Server-level</strong>: CPU power capping, DVFS, core parking</li>
+<li><strong>Rack-level</strong>: Dynamic power allocation across servers</li>
+<li><strong>Facility-level</strong>: Free cooling, hot/cold aisle containment, renewable energy integration</li>
+</ul>
+<p><strong>Power Usage Effectiveness (PUE):</strong>
+PUE = Total Facility Power / IT Equipment Power</p>
+<ul>
+<li>Typical PUE: 1.5-2.0</li>
+<li>Efficient designs: 1.1-1.3</li>
+<li>Ideal (theoretical): 1.0</li>
+</ul>
+<h3 id="embedded-systems"><a class="header" href="#embedded-systems">Embedded Systems</a></h3>
+<p>Battery-powered embedded systems prioritize ultra-low power:</p>
+<p><strong>Energy Harvesting Applications:</strong></p>
+<ul>
+<li>Solar: 10-100 μW/cm² indoors, 10-100 mW/cm² outdoors</li>
+<li>Thermoelectric: 10-100 μW/cm²</li>
+<li>Vibration: 1-100 μW/cm³</li>
+<li>RF harvesting: 0.1-10 μW/cm²</li>
+</ul>
+<p><strong>Power budgets must match harvesting rates:</strong></p>
+<pre><code class="language-c">// Energy-neutral operation
+float harvested_power_uw = 50.0;
+float active_power_uw = 5000.0;
+float sleep_power_uw = 5.0;
+float duty_cycle = (harvested_power_uw - sleep_power_uw) /
+                   (active_power_uw - sleep_power_uw);
+// duty_cycle ≈ 0.9% (9ms active per second)
+</code></pre>
+<h2 id="references-and-standards"><a class="header" href="#references-and-standards">References and Standards</a></h2>
+<h3 id="industry-standards"><a class="header" href="#industry-standards">Industry Standards</a></h3>
+<p><strong>ACPI (Advanced Configuration and Power Interface):</strong></p>
+<ul>
+<li>Defines sleep states (S0-S5), performance states (P-states), processor states (C-states)</li>
+<li>Standard for x86 systems</li>
+<li>Specification: https://uefi.org/specifications</li>
+</ul>
+<p><strong>ARM Power State Coordination Interface (PSCI):</strong></p>
+<ul>
+<li>Standard power management interface for ARM systems</li>
+<li>Defines CPU_SUSPEND, CPU_OFF, SYSTEM_OFF operations</li>
+</ul>
+<p><strong>IEEE 1801 (UPF - Unified Power Format):</strong></p>
+<ul>
+<li>Standard for specifying power intent in chip design</li>
+<li>Defines power domains, isolation, retention strategies</li>
+</ul>
+<p><strong>Energy Star:</strong></p>
+<ul>
+<li>EPA program for energy efficiency</li>
+<li>Defines maximum idle power consumption for computers and servers</li>
+</ul>
+<h3 id="key-specifications"><a class="header" href="#key-specifications">Key Specifications</a></h3>
+<ul>
+<li><strong>USB Power Delivery (USB-PD)</strong>: Up to 240W power delivery specification</li>
+<li><strong>Qi Wireless Charging</strong>: Inductive power transfer standard</li>
+<li><strong>Bluetooth Low Energy (BLE)</strong>: Low-power wireless protocol (~10-20mA active, &lt;1μA sleep)</li>
+<li><strong>LoRaWAN</strong>: Long-range, low-power wide-area network protocol</li>
+</ul>
+<h3 id="recommended-resources"><a class="header" href="#recommended-resources">Recommended Resources</a></h3>
+<p><strong>Books:</strong></p>
+<ul>
+<li>“Low-Power CMOS Design” by Anantha Chandrakasan</li>
+<li>“Power Management Integrated Circuits” by Maloberti and Davies</li>
+</ul>
+<p><strong>Online Resources:</strong></p>
+<ul>
+<li>Linux kernel power management documentation: https://www.kernel.org/doc/html/latest/power/</li>
+<li>ARM power management documentation</li>
+<li>Intel Software Developer Manuals (Volume 3B: System Programming)</li>
 </ul>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Effective power management is essential for enhancing the performance and longevity of electronic devices. By implementing various techniques, developers can create more energy-efficient systems that meet the demands of modern applications.</p>
+<p>Effective power management is a multi-faceted challenge requiring careful coordination between hardware design, firmware implementation, and software policies. Modern systems employ a hierarchy of power management techniques—from transistor-level clock gating to system-level thermal management—to achieve optimal energy efficiency.</p>
+<p>Key takeaways:</p>
+<ul>
+<li><strong>No single solution</strong>: Combine multiple techniques (DVFS, sleep modes, power gating, clock gating)</li>
+<li><strong>Measure, don’t guess</strong>: Use profiling tools to identify actual power consumers</li>
+<li><strong>Consider the whole system</strong>: CPU power is often dominated by peripherals and I/O</li>
+<li><strong>Trade-offs are inevitable</strong>: Balance power, performance, latency, and cost</li>
+<li><strong>Software matters</strong>: Poor software design can negate hardware power savings</li>
+</ul>
+<p>As devices become more complex and energy constraints tighten, power management will continue to be a critical differentiator in system design. The principles outlined in this document provide a foundation for developing energy-efficient embedded systems that meet the demanding requirements of modern applications while maximizing battery life and minimizing operational costs.</p>
 
                     </main>
 

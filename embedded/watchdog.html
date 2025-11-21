@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-aabda7aa.js";
+            window.path_to_searchindex_js = "../searchindex-030848ba.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-8fce9580.js"></script>
+        <script src="../toc-c5c10ac8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -184,13 +184,432 @@
 <li><strong>Reset Mechanism</strong>: The action taken when the watchdog timer times out. This is typically a system reset, but it can also include other actions like logging an error or entering a safe state.</li>
 <li><strong>Feeding the Watchdog</strong>: The process of regularly resetting the watchdog timer to prevent it from timing out. This is also known as “kicking” or “patting” the watchdog.</li>
 </ul>
+<h2 id="hardware-implementation"><a class="header" href="#hardware-implementation">Hardware Implementation</a></h2>
+<h3 id="architecture"><a class="header" href="#architecture">Architecture</a></h3>
+<p>A typical hardware watchdog timer consists of:</p>
+<ol>
+<li><strong>Counter/Timer</strong>: A down-counter that decrements at a fixed rate</li>
+<li><strong>Prescaler</strong>: Divides the system clock to create longer timeout periods</li>
+<li><strong>Control Registers</strong>: Configure timeout period, enable/disable, and operating modes</li>
+<li><strong>Reset Circuit</strong>: Generates reset signal when counter reaches zero</li>
+</ol>
+<h3 id="common-hardware-configurations"><a class="header" href="#common-hardware-configurations">Common Hardware Configurations</a></h3>
+<p><strong>STM32 Independent Watchdog (IWDG)</strong></p>
+<ul>
+<li>Free-running down-counter clocked by independent LSI oscillator</li>
+<li>Prescaler range: 4 to 256</li>
+<li>12-bit reload register (timeout from ~100μs to ~32s)</li>
+<li>Once started, cannot be stopped except by reset</li>
+<li>Key register: IWDG_KR (0xCCCC to start, 0xAAAA to reload)</li>
+</ul>
+<p><strong>AVR Watchdog Timer</strong></p>
+<ul>
+<li>Built-in oscillator running at approximately 128 kHz</li>
+<li>Timeout periods: 15ms to 8s (configurable via WDTCSR register)</li>
+<li>Supports both interrupt and reset modes</li>
+<li>Can be disabled by fuse bits (WDTON fuse)</li>
+</ul>
+<p><strong>ESP32 Watchdog</strong></p>
+<ul>
+<li>Two-level watchdog: Task WDT and Interrupt WDT</li>
+<li>Task WDT monitors FreeRTOS tasks</li>
+<li>Interrupt WDT monitors ISRs and critical sections</li>
+<li>Configurable through esp_task_wdt_* APIs</li>
+</ul>
+<h3 id="register-operations"><a class="header" href="#register-operations">Register Operations</a></h3>
+<p>Typical register operations include:</p>
+<ol>
+<li><strong>Enable/Start</strong>: Write specific key value to start counter</li>
+<li><strong>Reload/Feed</strong>: Write reload value to reset counter to maximum</li>
+<li><strong>Configure Timeout</strong>: Set prescaler and reload values</li>
+<li><strong>Status Check</strong>: Read flags to determine if reset was WDT-triggered</li>
+</ol>
+<h2 id="software-implementation-examples"><a class="header" href="#software-implementation-examples">Software Implementation Examples</a></h2>
+<h3 id="bare-metal-microcontroller-stm32"><a class="header" href="#bare-metal-microcontroller-stm32">Bare-Metal Microcontroller (STM32)</a></h3>
+<pre><code class="language-c">#include "stm32f4xx.h"
+
+void IWDG_Init(uint32_t timeout_ms) {
+    // Enable write access to IWDG_PR and IWDG_RLR registers
+    IWDG-&gt;KR = 0x5555;
+
+    // Set prescaler to 32 (LSI/32)
+    IWDG-&gt;PR = IWDG_PR_PR_2;
+
+    // Set reload value (timeout_ms * 32000 / 32 / 1000)
+    IWDG-&gt;RLR = (timeout_ms * 1000) / 1000;
+
+    // Reload counter
+    IWDG-&gt;KR = 0xAAAA;
+
+    // Enable IWDG
+    IWDG-&gt;KR = 0xCCCC;
+}
+
+void IWDG_Feed(void) {
+    IWDG-&gt;KR = 0xAAAA;  // Reload watchdog counter
+}
+
+int main(void) {
+    IWDG_Init(1000);  // 1 second timeout
+
+    while(1) {
+        // Perform application tasks
+        do_work();
+
+        // Feed watchdog periodically
+        IWDG_Feed();
+
+        HAL_Delay(500);  // Delay less than timeout
+    }
+}
+</code></pre>
+<h3 id="esp32-with-freertos"><a class="header" href="#esp32-with-freertos">ESP32 with FreeRTOS</a></h3>
+<pre><code class="language-c">#include "esp_task_wdt.h"
+
+#define WDT_TIMEOUT_S 5
+
+void critical_task(void *pvParameters) {
+    // Subscribe this task to the watchdog
+    esp_task_wdt_add(NULL);
+
+    while(1) {
+        // Perform critical operations
+        process_data();
+        read_sensors();
+
+        // Reset watchdog for this task
+        esp_task_wdt_reset();
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+void app_main(void) {
+    // Initialize Task Watchdog Timer
+    esp_task_wdt_init(WDT_TIMEOUT_S, true);
+
+    xTaskCreate(critical_task, "critical", 2048, NULL, 5, NULL);
+}
+</code></pre>
+<h3 id="linux-userspace"><a class="header" href="#linux-userspace">Linux Userspace</a></h3>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;linux/watchdog.h&gt;
+
+int main(void) {
+    int fd;
+    int timeout = 10;  // seconds
+
+    // Open watchdog device
+    fd = open("/dev/watchdog", O_WRONLY);
+    if (fd &lt; 0) {
+        perror("Failed to open watchdog");
+        exit(1);
+    }
+
+    // Set timeout
+    ioctl(fd, WDIOC_SETTIMEOUT, &amp;timeout);
+
+    while(1) {
+        // Perform application tasks
+        do_application_work();
+
+        // Feed the watchdog
+        ioctl(fd, WDIOC_KEEPALIVE, 0);
+
+        sleep(5);  // Sleep less than timeout
+    }
+
+    // Close watchdog (triggers reset on some systems)
+    close(fd);
+
+    return 0;
+}
+</code></pre>
+<h3 id="freertos-task-monitor"><a class="header" href="#freertos-task-monitor">FreeRTOS Task Monitor</a></h3>
+<pre><code class="language-c">#include "FreeRTOS.h"
+#include "task.h"
+
+TaskHandle_t xTask1Handle = NULL;
+TaskHandle_t xTask2Handle = NULL;
+
+void vTask1(void *pvParameters) {
+    while(1) {
+        // Task 1 work
+        perform_task1();
+
+        // Notify watchdog task that we're alive
+        xTaskNotifyGive(xWatchdogTaskHandle);
+
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+}
+
+void vWatchdogTask(void *pvParameters) {
+    uint32_t ulNotificationValue;
+    const TickType_t xMaxExpectedBlockTime = pdMS_TO_TICKS(500);
+
+    while(1) {
+        // Wait for notifications from monitored tasks
+        ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxExpectedBlockTime);
+
+        if(ulNotificationValue &gt; 0) {
+            // Tasks are running, feed hardware watchdog
+            HAL_IWDG_Refresh(&amp;hiwdg);
+        } else {
+            // Timeout - tasks are stuck, allow WDT reset
+            // Do not feed the watchdog
+        }
+    }
+}
+</code></pre>
+<h2 id="advanced-concepts"><a class="header" href="#advanced-concepts">Advanced Concepts</a></h2>
+<h3 id="window-watchdog-timer"><a class="header" href="#window-watchdog-timer">Window Watchdog Timer</a></h3>
+<p>A window watchdog enforces both minimum and maximum refresh intervals, preventing both hung systems and runaway code that refreshes too quickly.</p>
+<p><strong>Characteristics:</strong></p>
+<ul>
+<li>Has both upper and lower time bounds</li>
+<li>Generates reset if refreshed too early or too late</li>
+<li>Useful for detecting timing violations in periodic tasks</li>
+</ul>
+<p><strong>STM32 WWDG Example:</strong></p>
+<pre><code class="language-c">void WWDG_Init(void) {
+    __HAL_RCC_WWDG_CLK_ENABLE();
+
+    hwwdg.Instance = WWDG;
+    hwwdg.Init.Prescaler = WWDG_PRESCALER_8;
+    hwwdg.Init.Window = 127;    // Upper bound
+    hwwdg.Init.Counter = 127;   // Start value
+    hwwdg.Init.EWIMode = WWDG_EWI_DISABLE;
+
+    HAL_WWDG_Init(&amp;hwwdg);
+}
+
+void WWDG_Refresh(void) {
+    // Refresh only when counter falls below window
+    HAL_WWDG_Refresh(&amp;hwwdg);
+}
+</code></pre>
+<h3 id="cascaded-watchdog-systems"><a class="header" href="#cascaded-watchdog-systems">Cascaded Watchdog Systems</a></h3>
+<p>Multiple watchdog layers provide defense in depth:</p>
+<ol>
+<li><strong>Hardware WDT</strong>: Final safety net, cannot be disabled by software</li>
+<li><strong>Software WDT</strong>: Monitors task health, can trigger controlled recovery</li>
+<li><strong>Application Monitor</strong>: Checks data validity and logical correctness</li>
+</ol>
+<pre><code>Application Tasks → Software Monitor → Hardware WDT → Reset
+                         ↓
+                   Graceful Recovery
+</code></pre>
+<h3 id="interrupt-driven-watchdog"><a class="header" href="#interrupt-driven-watchdog">Interrupt-Driven Watchdog</a></h3>
+<p>Some watchdogs can generate interrupts before reset, allowing cleanup:</p>
+<pre><code class="language-c">void WWDG_IRQHandler(void) {
+    if(__HAL_WWDG_GET_FLAG(&amp;hwwdg, WWDG_FLAG_EWIF)) {
+        // Early warning interrupt
+        // Last chance to save critical data
+        save_critical_state();
+        log_error("Watchdog about to reset");
+
+        __HAL_WWDG_CLEAR_FLAG(&amp;hwwdg, WWDG_FLAG_EWIF);
+
+        // System will reset shortly if not refreshed
+    }
+}
+</code></pre>
+<h3 id="watchdog-in-low-power-modes"><a class="header" href="#watchdog-in-low-power-modes">Watchdog in Low-Power Modes</a></h3>
+<p>Watchdog behavior during sleep/standby modes:</p>
+<ul>
+<li><strong>Independent WDT (STM32 IWDG)</strong>: Continues running in all power modes</li>
+<li><strong>Window WDT (STM32 WWDG)</strong>: Stops in Stop/Standby modes</li>
+<li><strong>ESP32</strong>: Task WDT can be suspended during light sleep</li>
+</ul>
+<p><strong>Considerations:</strong></p>
+<ul>
+<li>Choose appropriate watchdog type for power profile</li>
+<li>Account for sleep duration in timeout calculations</li>
+<li>May need to disable/reconfigure WDT before entering deep sleep</li>
+</ul>
+<h2 id="troubleshooting--best-practices"><a class="header" href="#troubleshooting--best-practices">Troubleshooting &amp; Best Practices</a></h2>
+<h3 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h3>
+<ol>
+<li>
+<p><strong>Timeout Too Short</strong></p>
+<ul>
+<li>Symptom: System resets during legitimate long operations</li>
+<li>Solution: Profile worst-case execution time, add margin</li>
+</ul>
+</li>
+<li>
+<p><strong>Timeout Too Long</strong></p>
+<ul>
+<li>Symptom: System hangs go undetected too long</li>
+<li>Solution: Break long operations into chunks with WDT refreshes</li>
+</ul>
+</li>
+<li>
+<p><strong>Feeding Too Frequently</strong></p>
+<ul>
+<li>Symptom: Stuck in tight loop but still feeding watchdog</li>
+<li>Solution: Use window watchdog or structured feeding points</li>
+</ul>
+</li>
+<li>
+<p><strong>Feeding in Interrupt</strong></p>
+<ul>
+<li>Symptom: Interrupt runs, main code hung, but WDT still fed</li>
+<li>Solution: Feed only from main application flow, not ISRs</li>
+</ul>
+</li>
+<li>
+<p><strong>Forgetting Clock Source</strong></p>
+<ul>
+<li>Symptom: Timeout period incorrect or unstable</li>
+<li>Solution: Account for RC oscillator accuracy (±10-40%)</li>
+</ul>
+</li>
+</ol>
+<h3 id="debugging-strategies"><a class="header" href="#debugging-strategies">Debugging Strategies</a></h3>
+<p><strong>Detect Watchdog Resets:</strong></p>
+<pre><code class="language-c">void check_reset_source(void) {
+    if(__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST)) {
+        // System was reset by Independent Watchdog
+        log_error("WDT Reset detected");
+        __HAL_RCC_CLEAR_RESET_FLAGS();
+    }
+}
+</code></pre>
+<p><strong>Add Instrumentation:</strong></p>
+<pre><code class="language-c">volatile uint32_t wdt_feed_counter = 0;
+uint32_t last_feed_timestamp = 0;
+
+void IWDG_Feed_Debug(void) {
+    wdt_feed_counter++;
+    last_feed_timestamp = HAL_GetTick();
+    IWDG_Feed();
+}
+</code></pre>
+<p><strong>Simulate Failures:</strong></p>
+<pre><code class="language-c">#ifdef DEBUG_WDT
+void test_watchdog_reset(void) {
+    // Deliberately stop feeding to test WDT
+    while(1) {
+        // Wait for reset
+    }
+}
+#endif
+</code></pre>
+<h3 id="design-patterns"><a class="header" href="#design-patterns">Design Patterns</a></h3>
+<p><strong>Centralized Feeding:</strong></p>
+<pre><code class="language-c">void system_health_monitor(void) {
+    if(check_all_tasks_healthy()) {
+        IWDG_Feed();
+    }
+    // If unhealthy, don't feed - allow reset
+}
+</code></pre>
+<p><strong>Distributed Feeding with Health Tokens:</strong></p>
+<pre><code class="language-c">typedef struct {
+    bool task1_alive;
+    bool task2_alive;
+    bool task3_alive;
+} health_status_t;
+
+health_status_t system_health = {0};
+
+void watchdog_manager_task(void) {
+    while(1) {
+        if(system_health.task1_alive &amp;&amp;
+           system_health.task2_alive &amp;&amp;
+           system_health.task3_alive) {
+            IWDG_Feed();
+        }
+
+        // Reset health flags
+        system_health.task1_alive = false;
+        system_health.task2_alive = false;
+        system_health.task3_alive = false;
+
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+}
+</code></pre>
+<p><strong>Graceful Degradation:</strong></p>
+<pre><code class="language-c">typedef enum {
+    MODE_NORMAL,
+    MODE_SAFE,
+    MODE_EMERGENCY
+} system_mode_t;
+
+system_mode_t current_mode = MODE_NORMAL;
+
+void main_loop(void) {
+    switch(current_mode) {
+        case MODE_NORMAL:
+            execute_all_features();
+            break;
+        case MODE_SAFE:
+            execute_critical_features_only();
+            break;
+        case MODE_EMERGENCY:
+            minimal_operation();
+            break;
+    }
+
+    if(system_healthy()) {
+        IWDG_Feed();
+    }
+}
+</code></pre>
+<h3 id="testing-strategies"><a class="header" href="#testing-strategies">Testing Strategies</a></h3>
+<ol>
+<li>
+<p><strong>Unit Test Timeout Calculations</strong></p>
+<ul>
+<li>Verify timeout math accounts for clock accuracy</li>
+<li>Test prescaler and reload value calculations</li>
+</ul>
+</li>
+<li>
+<p><strong>Integration Test Reset Recovery</strong></p>
+<ul>
+<li>Deliberately trigger WDT reset</li>
+<li>Verify system recovers to known safe state</li>
+</ul>
+</li>
+<li>
+<p><strong>Stress Test Under Load</strong></p>
+<ul>
+<li>Run worst-case scenarios</li>
+<li>Measure maximum time between feeds</li>
+</ul>
+</li>
+<li>
+<p><strong>Power Cycle Testing</strong></p>
+<ul>
+<li>Verify WDT behavior across power transitions</li>
+<li>Test brownout conditions</li>
+</ul>
+</li>
+<li>
+<p><strong>Long-Term Reliability Testing</strong></p>
+<ul>
+<li>Run for extended periods (days/weeks)</li>
+<li>Monitor for unexpected resets</li>
+</ul>
+</li>
+</ol>
 <h2 id="example-usage"><a class="header" href="#example-usage">Example Usage</a></h2>
 <ol>
 <li><strong>Embedded Systems</strong>: Watchdog timers are commonly used in embedded systems to ensure that the system can recover from unexpected failures. For example, if a microcontroller stops responding, the watchdog timer can reset it to restore normal operation.</li>
 <li><strong>Safety-Critical Applications</strong>: In applications where safety is paramount, such as automotive or medical devices, watchdog timers help ensure that the system can recover from faults and continue to operate safely.</li>
+<li><strong>Industrial Control Systems</strong>: PLCs and SCADA systems use watchdogs to maintain continuous operation and automatically recover from transient faults.</li>
+<li><strong>IoT Devices</strong>: Remote devices use watchdogs to recover from network issues or software hangs without manual intervention.</li>
 </ol>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Watchdog timers are essential components in many systems, providing a mechanism to detect and recover from malfunctions. Understanding how to configure and use watchdog timers is crucial for developing reliable and resilient systems.</p>
+<p>Watchdog timers are essential components in many systems, providing a mechanism to detect and recover from malfunctions. Proper implementation requires understanding hardware architecture, choosing appropriate timeout periods, implementing robust feeding strategies, and thorough testing. A well-designed watchdog system provides reliable fault detection while avoiding false resets, balancing safety with system stability. Whether implementing a simple independent watchdog or a sophisticated multi-level monitoring system, the key is to match the watchdog strategy to the specific reliability requirements and failure modes of your application.</p>
 
                     </main>
 

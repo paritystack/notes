@@ -12,6 +12,37 @@ Raft ensures that a cluster of servers agrees on a sequence of values, even in t
 - Safety
 - Membership changes
 
+## Quick Reference
+
+### State Variables
+
+**Persistent state (must survive crashes):**
+- `currentTerm`: Latest term server has seen (initialized to 0)
+- `votedFor`: CandidateId that received vote in current term (null if none)
+- `log[]`: Log entries; each entry contains command and term when entry was received by leader
+
+**Volatile state (all servers):**
+- `commitIndex`: Index of highest log entry known to be committed (initialized to 0)
+- `lastApplied`: Index of highest log entry applied to state machine (initialized to 0)
+
+**Volatile state (leaders only, reinitialized after election):**
+- `nextIndex[]`: For each server, index of next log entry to send (initialized to leader's last log index + 1)
+- `matchIndex[]`: For each server, index of highest log entry known to be replicated (initialized to 0)
+
+### Key Parameters
+
+- **Election timeout**: 150-300ms (randomized)
+- **Heartbeat interval**: < 150ms (typically 50ms)
+- **RPC timeout**: Varies by implementation (typically 100-500ms)
+- **Minimum election timeout**: Should be >> network round-trip time
+
+### Core Guarantees
+
+- **At most one leader per term**
+- **Leader never deletes/overwrites log entries**
+- **If two logs contain entry with same index and term, all preceding entries are identical**
+- **Committed entries are durable and will eventually be executed by all state machines**
+
 ## Server States
 
 ```
@@ -28,6 +59,44 @@ Raft ensures that a cluster of servers agrees on a sequence of values, even in t
                  discovers server with       └────────┘
                  higher term
 ```
+
+### Timing and Network Assumptions
+
+Raft's correctness depends on safety properties that hold regardless of timing, but **liveness** (making progress) requires specific timing constraints:
+
+**Key timing requirement:**
+```
+broadcastTime ≪ electionTimeout ≪ MTBF
+```
+
+Where:
+- **broadcastTime**: Average time for server to send RPCs to every server and receive responses (0.5ms to 20ms)
+- **electionTimeout**: Time before follower becomes candidate (typically 150-300ms)
+- **MTBF**: Mean Time Between Failures for single server (typically months or years)
+
+**Why these relationships matter:**
+
+1. **broadcastTime ≪ electionTimeout**
+   - Leader must send heartbeats reliably before followers timeout
+   - Prevents unnecessary elections during normal operation
+   - Typical: broadcastTime = 10ms, electionTimeout = 200ms (20x margin)
+
+2. **electionTimeout ≪ MTBF**
+   - Cluster remains available even when leader crashes
+   - Brief unavailability during election acceptable
+   - System makes progress most of the time
+
+**Network assumptions:**
+- Messages can be lost, reordered, or duplicated
+- Messages are not corrupted (or corruption is detected via checksums)
+- Network partitions can occur (split brain scenarios)
+- Eventually, messages will be delivered (asynchronous model)
+
+**Handling network partitions:**
+- Minority partition cannot commit entries (lacks majority)
+- Majority partition continues operating normally
+- When partition heals, minority rejoins and updates its log
+- Old leader in minority steps down when it discovers higher term
 
 ## Leader Election
 
@@ -129,6 +198,61 @@ The **Log Matching Property** ensures:
 4. Leader decrements `nextIndex` for that follower and retries
 5. Eventually finds point where logs match, then follower's log matches leader's from that point forward
 
+### Log State Examples
+
+**Example 1: Normal replication (all followers in sync)**
+```
+Leader (S1):  [1,x] [1,y] [2,z] [3,a] [3,b]  (term 3)
+Follower (S2):[1,x] [1,y] [2,z] [3,a] [3,b]  commitIndex=3
+Follower (S3):[1,x] [1,y] [2,z] [3,a]        commitIndex=3
+              ─────────────────committed─────
+```
+- Entry [3,b] is replicated to S1 and S2 (majority)
+- Once S3 acknowledges, [3,b] can be committed
+
+**Example 2: Follower lagging behind leader**
+```
+Leader (S1):  [1,x] [1,y] [2,z] [3,a] [3,b] [3,c]  (term 3)
+Follower (S2):[1,x] [1,y] [2,z]
+              ─────────────committed──────
+
+Leader sends: AppendEntries(prevLogIndex=3, prevLogTerm=2, entries=[[3,a],[3,b],[3,c]])
+S2 has entry at index 3 with term 2 → accepts and appends [3,a], [3,b], [3,c]
+```
+
+**Example 3: Conflicting entries (follower has extra uncommitted entries)**
+```
+Leader (S1):  [1,x] [1,y] [3,z] [3,a]  (term 3, was follower in term 2)
+Follower (S2):[1,x] [1,y] [2,z] [2,a] [2,b]  (was following old leader in term 2)
+              ─────────────committed─────
+
+Leader sends: AppendEntries(prevLogIndex=2, prevLogTerm=1, entries=[[3,z],[3,a]])
+S2 receives [3,z] at index 3, but has [2,z] → conflict!
+S2 deletes [2,z], [2,a], [2,b] and appends [3,z], [3,a]
+
+Result:
+Follower (S2):[1,x] [1,y] [3,z] [3,a]  ✓ now matches leader
+```
+
+**Example 4: Follower missing entries in middle of log**
+```
+Leader (S1):  [1,x] [1,y] [1,z] [2,a] [2,b] [3,c]  (term 3)
+Follower (S2):[1,x] [1,y]
+              ─────────────committed──────
+
+Leader sends: AppendEntries(prevLogIndex=6, prevLogTerm=3, entries=[])  # heartbeat
+S2 doesn't have entry at index 6 → rejects
+
+Leader decrements nextIndex[S2] = 5
+Leader sends: AppendEntries(prevLogIndex=5, prevLogTerm=2, entries=[[3,c]])
+S2 doesn't have entry at index 5 → rejects
+
+(continues decrementing until...)
+
+Leader sends: AppendEntries(prevLogIndex=2, prevLogTerm=1, entries=[[1,z],[2,a],[2,b],[3,c]])
+S2 has entry at index 2 with term 1 → accepts and appends all entries
+```
+
 ### Conflict Resolution
 
 When follower's log conflicts with leader's:
@@ -148,12 +272,48 @@ An entry is **committed** when:
 1. Leader has stored it on majority of servers
 2. At least one entry from current term is also stored on majority (prevents committing entries from previous terms directly)
 
+**Why rule #2 matters: The commitment restriction**
+
+Raft never commits log entries from previous terms by counting replicas. Only entries from the leader's current term can be committed by counting replicas. Once an entry from the current term is committed, all prior entries are committed indirectly (due to Log Matching Property).
+
+**Example scenario showing why this is necessary:**
+
+```
+Time  S1 (Leader)  S2          S3          S4          S5
+────────────────────────────────────────────────────────────
+t0    [1,x] [2,y]  [1,x] [2,y]  [1,x]       -           -
+      Leader T2
+
+t1    [1,x] [2,y]  [1,x] [2,y]  [1,x] [2,y] -           -
+      Crashed!
+
+t2    [1,x] [2,y]  [1,x] [2,y]  [1,x] [2,y] [1,x]       [1,x]
+                                 Leader T3
+
+t3    [1,x] [2,y]  [1,x] [2,y]  [1,x] [2,y] [1,x] [3,z] [1,x] [3,z]
+                                 [3,z]
+
+Without the restriction: S3 could commit [2,y] in term 3 because it's on majority (S1,S2,S3)
+But if S3 crashes and S5 becomes leader in term 4, [2,y] would be overwritten!
+
+With restriction: S3 must commit [3,z] first, which commits [2,y] indirectly
+If S3 crashes before committing [3,z], S5 can become leader and [2,y] is safely lost
+```
+
 **Commitment process:**
 1. Leader tracks highest committed entry in `commitIndex`
 2. Once entry committed, leader applies it to state machine
 3. Leader includes `commitIndex` in AppendEntries RPCs
 4. Followers apply committed entries to their state machines
 5. Entries are applied in log order to ensure state machine consistency
+
+**Formal commitment rule:**
+```
+commitIndex = max index N where:
+  - N ≤ leader's last log index
+  - matchIndex[i] ≥ N for majority of i
+  - log[N].term == currentTerm
+```
 
 ## Safety Rules
 
@@ -222,6 +382,133 @@ Throughout normal operation, Raft maintains:
 - **Committed entries are durable**: Once committed, entry present in majority; will survive into future leaders
 - **Applied entries are consistent**: All servers apply same entries at each index
 - **Terms increase monotonically**: Servers never decrease currentTerm
+
+### Formal Safety Proof Sketch
+
+**Theorem: State Machine Safety holds**
+
+Proof by contradiction:
+1. Assume State Machine Safety is violated
+2. Then some server applies entry at index i, another applies different entry at same index i
+3. Let T be smallest term where this occurs
+4. Both entries must have been committed (servers only apply committed entries)
+5. By Leader Completeness, if entry committed in term ≤ T, it appears in leader's log for term T
+6. By Election Safety, only one leader in term T
+7. By Leader Append-Only, leader has single log
+8. By Log Matching, if two entries have same index and term, they're identical
+9. Therefore, both servers must have applied same entry at index i
+10. Contradiction! State Machine Safety cannot be violated.
+
+**Key lemma: Leader Completeness**
+
+If entry is committed in term T, then present in leader's log for all terms > T.
+
+Proof intuition:
+- Entry committed → replicated to majority in term T
+- Candidate needs majority to win election in term T+1
+- These majorities must overlap (pigeonhole principle)
+- Voting restriction ensures candidate's log has all committed entries from servers that vote for it
+- By induction, committed entries flow forward through all future leaders
+
+## Performance Optimizations
+
+While Raft prioritizes understandability, several optimizations improve performance in production systems:
+
+### 1. Batching and Pipelining
+
+**Batching:**
+- Accumulate multiple client requests before creating log entries
+- Send multiple log entries in single AppendEntries RPC
+- Reduces RPC overhead and improves throughput
+- Trade-off: Slight increase in latency vs. much higher throughput
+
+**Pipelining:**
+- Don't wait for AppendEntries response before sending next batch
+- Leader maintains window of in-flight AppendEntries RPCs
+- Significantly improves throughput on high-latency networks
+- Must track responses to update nextIndex/matchIndex correctly
+
+### 2. Fast Log Backtracking
+
+**Problem:** When follower's log diverges significantly, decrementing nextIndex one entry at a time is slow.
+
+**Optimization:** Include additional info in AppendEntries rejection:
+- `conflictTerm`: Term of conflicting entry (or -1 if log too short)
+- `conflictIndex`: First index with conflictTerm
+
+**Leader's response strategy:**
+1. If follower's log too short: set nextIndex = conflictIndex
+2. If follower has conflicting term:
+   - If leader has entries from conflictTerm: set nextIndex to leader's last entry for that term
+   - Otherwise: set nextIndex = conflictIndex
+
+**Result:** Often repairs log in single round-trip instead of many.
+
+**Example:**
+```
+Leader (T5):  [1,a] [1,b] [1,c] [4,d] [4,e] [5,f]
+Follower:     [1,a] [1,b] [2,c] [2,d] [2,e] [3,f] [3,g]
+
+Old approach: 6 round-trips (decrement from index 7→6→5→4→3→2)
+
+Fast backtracking:
+- Follower rejects, returns conflictTerm=3, conflictIndex=6
+- Leader has no entries from term 3, sets nextIndex=6
+- Next rejection: conflictTerm=2, conflictIndex=3
+- Leader has no entries from term 2, sets nextIndex=3
+- Next AppendEntries succeeds: 2 round-trips total ✓
+```
+
+### 3. Lease-Based Reads (Linearizable Reads)
+
+**Problem:** Reading from leader requires heartbeat to all servers to ensure leadership (read might be stale if leader was partitioned).
+
+**Optimization - Leader Leases:**
+- Leader maintains lease while receiving heartbeat responses from majority
+- Lease duration < election timeout
+- While lease valid, leader can serve reads locally without contacting followers
+- Reduces read latency significantly (no network round-trip)
+
+**Implementation considerations:**
+- Requires synchronized clocks (or conservative lease durations)
+- Must account for clock drift
+- Leader cannot serve reads immediately after election (must commit entry from current term first)
+
+**Alternative - Read Index:**
+- Leader records commitIndex when read request arrives
+- Sends heartbeat to majority to confirm leadership
+- Once confirmed and state machine has applied up to readIndex, serve read
+- Doesn't require synchronized clocks
+- One round-trip instead of full Raft replication
+
+### 4. Asynchronous Log Application
+
+**Optimization:** Decouple log replication from state machine application:
+- Leader commits entries as soon as replicated to majority
+- Apply entries to state machine asynchronously in background
+- Return result to client once applied
+- Improves throughput by parallelizing replication and application
+
+### 5. Snapshot Compaction
+
+**Problem:** Log grows unbounded, consuming memory and slowing catch-up for new/recovering servers.
+
+**Solution:** Periodically compact log by taking state machine snapshot:
+- Snapshot includes: last included index, last included term, state machine state
+- Discard all log entries up to last included index
+- When follower too far behind, send snapshot instead of log entries
+
+**Trade-offs:**
+- Reduces memory usage and speeds up catch-up
+- Snapshot creation can be expensive (copy-on-write helps)
+- Must not block normal operations during snapshot
+
+### 6. Parallel Log Replication
+
+**Optimization:** Send AppendEntries to all followers in parallel
+- Don't wait for responses sequentially
+- Track responses and update commitIndex when majority responds
+- Standard approach in production implementations
 
 ## Cluster Membership Changes
 
@@ -342,34 +629,493 @@ While in C-old,new state:
   - Specifically: if received AppendEntries within minimum election timeout
   - Prevents disruption from removed servers
 
-## Example (Python-like pseudocode)
+## Common Pitfalls and Debugging
+
+### 1. Not Persisting State Correctly
+
+**Pitfall:** Failing to persist `currentTerm`, `votedFor`, or `log[]` before responding to RPCs.
+
+**Consequence:**
+- Server could vote for multiple candidates in same term after crash
+- Could lose committed entries after crash
+- Violates safety properties
+
+**Solution:** Always flush to disk before sending RPC responses:
+```python
+def handle_request_vote(term, candidate_id):
+    if term > self.current_term:
+        self.current_term = term
+        self.voted_for = None
+        self.persist()  # Must persist before continuing!
+
+    if self.voted_for is None and candidate_log_is_up_to_date():
+        self.voted_for = candidate_id
+        self.persist()  # Must persist before responding!
+        return True
+```
+
+### 2. Committing Entries from Previous Terms Directly
+
+**Pitfall:** Trying to commit old entries by counting replicas, ignoring the current-term requirement.
+
+**Consequence:** Can lead to committed entries being overwritten (violates State Machine Safety).
+
+**Solution:** Always check `log[N].term == currentTerm` before committing. See "Commitment Rules" section for detailed example.
+
+### 3. Applying Entries Out of Order
+
+**Pitfall:** Applying log entries to state machine in wrong order or multiple times.
+
+**Consequence:** State machines diverge across servers.
+
+**Solution:**
+- Track `lastApplied` index
+- Apply entries sequentially: `for i in (lastApplied+1)..commitIndex`
+- Make state machine operations idempotent where possible
+- Never apply entries beyond commitIndex
+
+### 4. Incorrect Election Timeout Handling
+
+**Pitfall:** Not resetting election timeout when receiving valid AppendEntries from current leader.
+
+**Consequence:** Unnecessary elections, reduced availability, term inflation.
+
+**Solution:**
+```python
+def handle_append_entries(term, leader_id, ...):
+    if term >= self.current_term:
+        self.reset_election_timeout()  # Reset timer!
+        self.current_term = term
+        self.state = "follower"
+```
+
+### 5. Split Vote Loops
+
+**Pitfall:** Multiple servers timing out simultaneously, causing perpetual split votes.
+
+**Consequence:** Cluster unavailable until randomization breaks symmetry.
+
+**Solution:**
+- Use **randomized** election timeouts (e.g., 150-300ms)
+- Randomize timeout for each election attempt
+- Ensure randomization range is significant (not just ±1ms)
+
+### 6. Ignoring Terms in RPC Responses
+
+**Pitfall:** Leader receives RPC response with higher term but doesn't step down.
+
+**Consequence:** Multiple leaders in different terms, split brain.
+
+**Solution:** Always check response terms:
+```python
+response = send_append_entries(server, ...)
+if response.term > self.current_term:
+    self.current_term = response.term
+    self.state = "follower"
+    self.voted_for = None
+    self.persist()
+    return  # Stop being leader!
+```
+
+### 7. Not Handling RPC Duplicates/Reordering
+
+**Pitfall:** Assuming RPCs arrive in order and exactly once.
+
+**Consequence:** Log inconsistencies, incorrect state transitions.
+
+**Solution:**
+- Use term numbers to detect stale RPCs
+- Reject requests with `term < currentTerm`
+- Make RPC handlers idempotent where possible
+- Include unique identifiers in client requests
+
+### 8. Incorrect Log Matching Check
+
+**Pitfall:** Only checking `prevLogTerm` without checking if entry exists at `prevLogIndex`.
+
+**Consequence:** Accepting entries when follower's log is too short, causing inconsistencies.
+
+**Solution:**
+```python
+def append_entries(prev_log_index, prev_log_term, entries):
+    # Check 1: Log must be long enough
+    if len(self.log) <= prev_log_index:
+        return False
+
+    # Check 2: Terms must match
+    if self.log[prev_log_index].term != prev_log_term:
+        return False
+
+    # Both checks pass → accept entries
+```
+
+### Debugging Tips
+
+**Check these invariants during testing:**
+- `commitIndex ≤ lastApplied ≤ len(log)` at all times
+- At most one server thinks it's leader in a given term
+- All servers' `currentTerm` values are non-decreasing
+- If entry is committed, it appears in all future leaders' logs
+
+**Common debugging techniques:**
+- Log all RPC requests/responses with timestamps and terms
+- Verify persistent state is actually persisted (check after simulated crashes)
+- Add assertions for safety invariants
+- Use property-based testing (e.g., Jepsen, TLA+)
+- Simulate network partitions, crashes, message delays/losses
+
+## Implementation Considerations
+
+### Persistence Layer
+
+**Critical operations requiring persistence:**
+1. Before responding to RequestVote
+2. Before responding to AppendEntries
+3. Before starting new election (increment term)
+
+**Implementation options:**
+- **Synchronous writes**: Call `fsync()` before responding (safest, slower)
+- **Write-ahead log**: Batch multiple operations, fsync periodically (faster, more complex)
+- **Battery-backed RAM**: Non-volatile memory for state (fastest, expensive)
+
+**Trade-offs:**
+- More frequent fsync → better safety, worse performance
+- Batched fsync → better performance, slight safety risk during batching window
+
+### Threading Model
+
+**Common approaches:**
+
+1. **Single-threaded with event loop:**
+   - Simplest, no concurrency bugs
+   - All operations serialized
+   - Good for small clusters or low load
+
+2. **Thread per RPC:**
+   - Better throughput for large clusters
+   - Requires locks around shared state
+   - More complex, potential for deadlocks
+
+3. **Actor model:**
+   - Each server is an actor
+   - Message passing between actors
+   - Good balance of performance and correctness
+
+**Shared state requiring protection:**
+- currentTerm, votedFor, log[]
+- commitIndex, lastApplied
+- nextIndex[], matchIndex[]
+
+### State Machine Interface
+
+**Design considerations:**
+
+```python
+class StateMachine:
+    def apply(self, command) -> result:
+        """Apply command to state machine. Must be deterministic!"""
+        pass
+
+    def snapshot(self) -> bytes:
+        """Create snapshot of current state."""
+        pass
+
+    def restore(self, snapshot: bytes):
+        """Restore state from snapshot."""
+        pass
+```
+
+**Requirements:**
+- Operations must be deterministic (same input → same output)
+- Must support snapshotting for log compaction
+- Should be idempotent if possible (helps with at-least-once semantics)
+
+### Client Interaction
+
+**Linearizable semantics:**
+- Client sends command to leader
+- Leader waits for commitment and application
+- Returns result to client
+- If leader crashes, client retries with new leader
+
+**Handling retries:**
+- Client includes unique request ID
+- Leader tracks recently processed requests
+- If duplicate detected, return cached result (don't reapply)
+
+### Testing Strategies
+
+**Unit tests:**
+- Test each RPC handler in isolation
+- Verify state transitions (follower → candidate → leader)
+- Test persistence and recovery
+
+**Integration tests:**
+- Multi-server clusters (3, 5, 7 servers)
+- Inject failures: crashes, network partitions, message loss
+- Verify safety properties maintained
+
+**Property-based testing:**
+- Use tools like Jepsen, Maelstrom, or custom frameworks
+- Generate random failure scenarios
+- Check invariants: no data loss, linearizability, etc.
+
+**Formal verification:**
+- TLA+ specification of Raft protocol
+- Model checking to verify safety properties
+- Helps catch subtle edge cases
+
+## Example Implementation (Python-like pseudocode)
 
 ```python
 class RaftNode:
-    def __init__(self):
-        self.state = "follower"
+    def __init__(self, node_id, peers):
+        # Persistent state (must be saved to disk before responding to RPCs)
         self.current_term = 0
         self.voted_for = None
-        self.log = []
-        self.commit_index = 0
+        self.log = []  # List of (term, command) tuples
 
-    def request_vote(self, term, candidate_id):
+        # Volatile state on all servers
+        self.commit_index = 0
+        self.last_applied = 0
+
+        # Volatile state on leaders (reinitialized after election)
+        self.next_index = {}   # For each server, index of next log entry to send
+        self.match_index = {}  # For each server, index of highest log entry known to be replicated
+
+        # Server metadata
+        self.node_id = node_id
+        self.peers = peers
+        self.state = "follower"  # "follower", "candidate", or "leader"
+        self.leader_id = None
+        self.election_timeout = random_timeout(150, 300)
+
+    def persist(self):
+        """Write current_term, voted_for, and log to stable storage."""
+        # In real implementation: fsync() to disk
+        pass
+
+    # === RPC Handlers ===
+
+    def handle_request_vote(self, term, candidate_id, last_log_index, last_log_term):
+        """RequestVote RPC handler."""
+        # 1. Update term if needed
         if term > self.current_term:
             self.current_term = term
             self.voted_for = None
-
-        if self.voted_for is None:
-            self.voted_for = candidate_id
-            return True
-        return False
-
-    def append_entries(self, term, leader_id, entries):
-        if term >= self.current_term:
             self.state = "follower"
+            self.persist()
+
+        # 2. Reject if term is old
+        if term < self.current_term:
+            return {"term": self.current_term, "vote_granted": False}
+
+        # 3. Check if already voted for someone else
+        if self.voted_for is not None and self.voted_for != candidate_id:
+            return {"term": self.current_term, "vote_granted": False}
+
+        # 4. Check if candidate's log is at least as up-to-date
+        my_last_log_index = len(self.log) - 1
+        my_last_log_term = self.log[-1][0] if self.log else 0
+
+        log_is_up_to_date = (
+            last_log_term > my_last_log_term or
+            (last_log_term == my_last_log_term and last_log_index >= my_last_log_index)
+        )
+
+        if log_is_up_to_date:
+            self.voted_for = candidate_id
+            self.persist()
+            self.reset_election_timeout()
+            return {"term": self.current_term, "vote_granted": True}
+
+        return {"term": self.current_term, "vote_granted": False}
+
+    def handle_append_entries(self, term, leader_id, prev_log_index, prev_log_term,
+                             entries, leader_commit):
+        """AppendEntries RPC handler (also serves as heartbeat)."""
+        # 1. Update term if needed
+        if term > self.current_term:
             self.current_term = term
-            self.log.extend(entries)
-            return True
-        return False
+            self.voted_for = None
+            self.persist()
+
+        # 2. Reject if term is old
+        if term < self.current_term:
+            return {"term": self.current_term, "success": False}
+
+        # 3. Valid leader for this term
+        self.state = "follower"
+        self.leader_id = leader_id
+        self.reset_election_timeout()
+
+        # 4. Consistency check: log must contain entry at prev_log_index with prev_log_term
+        if prev_log_index >= 0:
+            if prev_log_index >= len(self.log):
+                # Log too short
+                return {"term": self.current_term, "success": False}
+            if self.log[prev_log_index][0] != prev_log_term:
+                # Term mismatch
+                return {"term": self.current_term, "success": False}
+
+        # 5. Delete conflicting entries and append new ones
+        log_index = prev_log_index + 1
+        for i, entry in enumerate(entries):
+            if log_index + i < len(self.log):
+                if self.log[log_index + i][0] != entry[0]:
+                    # Conflict: delete this entry and all that follow
+                    self.log = self.log[:log_index + i]
+                    self.log.append(entry)
+            else:
+                # Append new entry
+                self.log.append(entry)
+
+        self.persist()
+
+        # 6. Update commit index
+        if leader_commit > self.commit_index:
+            self.commit_index = min(leader_commit, len(self.log) - 1)
+            self.apply_committed_entries()
+
+        return {"term": self.current_term, "success": True}
+
+    # === Leader Election ===
+
+    def start_election(self):
+        """Transition to candidate and start election."""
+        self.state = "candidate"
+        self.current_term += 1
+        self.voted_for = self.node_id
+        self.persist()
+
+        votes_received = 1  # Vote for self
+        last_log_index = len(self.log) - 1
+        last_log_term = self.log[-1][0] if self.log else 0
+
+        # Request votes from all peers
+        for peer in self.peers:
+            response = peer.request_vote(
+                self.current_term, self.node_id, last_log_index, last_log_term
+            )
+
+            if response["term"] > self.current_term:
+                # Discovered higher term, become follower
+                self.current_term = response["term"]
+                self.state = "follower"
+                self.voted_for = None
+                self.persist()
+                return
+
+            if response["vote_granted"]:
+                votes_received += 1
+
+        # Check if won election (majority)
+        if votes_received > len(self.peers) // 2:
+            self.become_leader()
+
+    def become_leader(self):
+        """Transition to leader state."""
+        self.state = "leader"
+        self.leader_id = self.node_id
+
+        # Initialize leader-specific state
+        for peer in self.peers:
+            self.next_index[peer] = len(self.log)
+            self.match_index[peer] = -1
+
+        # Send initial heartbeat
+        self.send_heartbeat()
+
+    def send_heartbeat(self):
+        """Send AppendEntries (heartbeat) to all followers."""
+        for peer in self.peers:
+            self.replicate_to_follower(peer)
+
+    # === Log Replication ===
+
+    def replicate_to_follower(self, peer):
+        """Send AppendEntries RPC to specific follower."""
+        next_idx = self.next_index[peer]
+        prev_log_index = next_idx - 1
+        prev_log_term = self.log[prev_log_index][0] if prev_log_index >= 0 else 0
+
+        entries = self.log[next_idx:]  # Entries to send
+
+        response = peer.append_entries(
+            self.current_term, self.node_id, prev_log_index,
+            prev_log_term, entries, self.commit_index
+        )
+
+        if response["term"] > self.current_term:
+            # Discovered higher term, step down
+            self.current_term = response["term"]
+            self.state = "follower"
+            self.voted_for = None
+            self.persist()
+            return
+
+        if response["success"]:
+            # Update next_index and match_index
+            self.next_index[peer] = next_idx + len(entries)
+            self.match_index[peer] = self.next_index[peer] - 1
+            self.update_commit_index()
+        else:
+            # Decrement next_index and retry
+            self.next_index[peer] = max(0, self.next_index[peer] - 1)
+
+    def update_commit_index(self):
+        """Update commit index based on majority replication."""
+        # Find highest N where majority of match_index[i] >= N
+        # and log[N].term == current_term
+        for n in range(len(self.log) - 1, self.commit_index, -1):
+            if self.log[n][0] == self.current_term:
+                replicated_count = sum(
+                    1 for peer in self.peers if self.match_index.get(peer, -1) >= n
+                )
+                if replicated_count + 1 > len(self.peers) // 2:  # +1 for leader itself
+                    self.commit_index = n
+                    self.apply_committed_entries()
+                    break
+
+    # === State Machine ===
+
+    def apply_committed_entries(self):
+        """Apply committed entries to state machine."""
+        while self.last_applied < self.commit_index:
+            self.last_applied += 1
+            entry = self.log[self.last_applied]
+            self.apply_to_state_machine(entry[1])  # entry[1] is the command
+
+    def apply_to_state_machine(self, command):
+        """Apply a single command to the state machine."""
+        # In real implementation: execute the command
+        pass
+
+    # === Utilities ===
+
+    def reset_election_timeout(self):
+        """Reset election timeout with randomization."""
+        self.election_timeout = random_timeout(150, 300)
+
+def random_timeout(min_ms, max_ms):
+    """Generate random timeout between min_ms and max_ms."""
+    import random
+    return random.uniform(min_ms, max_ms) / 1000.0
 ```
 
-Raft provides understandable consensus for building reliable distributed systems like etcd, Consul, and CockroachDB.
+## Real-World Implementations
+
+Raft is used in production by many distributed systems:
+
+- **etcd**: Kubernetes' distributed key-value store
+- **Consul**: Service mesh and service discovery (HashiCorp)
+- **CockroachDB**: Distributed SQL database
+- **TiKV**: Distributed transactional key-value database
+- **LogCabin**: Replicated state machine for datacenter coordination
+
+## Further Reading
+
+- **Original paper**: "In Search of an Understandable Consensus Algorithm" by Diego Ongaro and John Ousterhout
+- **Interactive visualization**: https://raft.github.io/
+- **TLA+ specification**: Formal specification for verification
+- **Raft PhD dissertation**: Extended version with more details and proofs

@@ -84,6 +84,9 @@
     - [Sparse Table](data_structures/sparse_table.md)
     - [Spatial Structures](data_structures/spatial_structures.md)
     - [Suffix Arrays](data_structures/suffix_arrays.md)
+    - [Advanced Trees](data_structures/advanced_trees.md)
+    - [Complexity Guide](data_structures/complexity_guide.md)
+    - [Implementation Patterns](data_structures/implementation_patterns.md)
 
 * [Algorithms](algorithms/README.md)
     - [Big O](algorithms/big_o.md)

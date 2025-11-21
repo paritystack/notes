@@ -1,0 +1,1335 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Segment Trees - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-5e706ac8.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-82510463.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="segment-trees"><a class="header" href="#segment-trees">Segment Trees</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#key-concepts">Key Concepts</a></li>
+<li><a href="#structure-and-properties">Structure and Properties</a></li>
+<li><a href="#core-operations">Core Operations</a>
+<ul>
+<li><a href="#build-operation">Build</a></li>
+<li><a href="#query-operation">Query</a></li>
+<li><a href="#update-operation">Update</a></li>
+</ul>
+</li>
+<li><a href="#lazy-propagation">Lazy Propagation</a></li>
+<li><a href="#time-and-space-complexity">Time and Space Complexity</a></li>
+<li><a href="#implementation">Implementation</a>
+<ul>
+<li><a href="#python-implementation">Python Implementation</a></li>
+<li><a href="#javascript-implementation">JavaScript Implementation</a></li>
+</ul>
+</li>
+<li><a href="#variations">Variations</a></li>
+<li><a href="#applications">Applications</a></li>
+<li><a href="#common-problems">Common Problems</a></li>
+<li><a href="#comparison-with-other-structures">Comparison with Other Structures</a></li>
+<li><a href="#interview-patterns">Interview Patterns</a></li>
+<li><a href="#advanced-topics">Advanced Topics</a></li>
+</ul>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>A <strong>Segment Tree</strong> is a tree data structure used for storing information about array intervals (segments). It allows efficient querying and updating of array ranges.</p>
+<h3 id="why-segment-trees"><a class="header" href="#why-segment-trees">Why Segment Trees?</a></h3>
+<p>Segment trees excel at problems requiring:</p>
+<ul>
+<li><strong>Range queries</strong> - Find min/max/sum over array range [L, R]</li>
+<li><strong>Range updates</strong> - Update all elements in range [L, R]</li>
+<li><strong>Dynamic data</strong> - Array elements change frequently</li>
+<li><strong>Multiple queries</strong> - Many queries on the same array</li>
+</ul>
+<h3 id="the-range-query-problem"><a class="header" href="#the-range-query-problem">The Range Query Problem</a></h3>
+<p><strong>Problem</strong>: Given array <code>arr[]</code> and many queries:</p>
+<ul>
+<li>Find sum/min/max of elements from index L to R</li>
+<li>Update element at index i</li>
+</ul>
+<p><strong>Naive approach</strong>:</p>
+<ul>
+<li>Query: O(n) - iterate through range</li>
+<li>Update: O(1) - change single element</li>
+</ul>
+<p><strong>With segment tree</strong>:</p>
+<ul>
+<li>Query: O(log n)</li>
+<li>Update: O(log n)</li>
+<li>Build: O(n)</li>
+</ul>
+<h3 id="real-world-applications"><a class="header" href="#real-world-applications">Real-World Applications</a></h3>
+<ol>
+<li><strong>Database Systems</strong>: Range aggregation queries</li>
+<li><strong>Graphics/Gaming</strong>: Collision detection, ray tracing</li>
+<li><strong>Financial Systems</strong>: Time-series analysis, stock price ranges</li>
+<li><strong>GIS Systems</strong>: Spatial range queries</li>
+<li><strong>Network Monitoring</strong>: Traffic analysis over time windows</li>
+</ol>
+<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="segments-and-intervals"><a class="header" href="#segments-and-intervals">Segments and Intervals</a></h3>
+<p>A segment tree divides an array into segments (intervals):</p>
+<pre><code>Array: [1, 3, 5, 7, 9, 11]
+Indices: 0  1  2  3  4  5
+
+Segments:
+[0,5] - entire array
+[0,2], [3,5] - two halves
+[0,1], [2,2], [3,4], [5,5] - smaller segments
+[0,0], [1,1], [2,2], [3,3], [4,4], [5,5] - individual elements
+</code></pre>
+<h3 id="tree-structure"><a class="header" href="#tree-structure">Tree Structure</a></h3>
+<p>Each node represents a segment and stores aggregate information:</p>
+<pre><code>                    [0-5]: sum=36
+                    /            \
+           [0-2]: sum=9        [3-5]: sum=27
+           /        \          /          \
+    [0-1]: sum=4  [2]: 5  [3-4]: sum=16  [5]: 11
+    /      \                /       \
+[0]: 1   [1]: 3        [3]: 7    [4]: 9
+</code></pre>
+<h3 id="node-representation"><a class="header" href="#node-representation">Node Representation</a></h3>
+<ul>
+<li><strong>Leaf nodes</strong>: Individual array elements</li>
+<li><strong>Internal nodes</strong>: Aggregate of children (sum, min, max, etc.)</li>
+<li><strong>Root</strong>: Aggregate of entire array</li>
+</ul>
+<h3 id="binary-tree-property"><a class="header" href="#binary-tree-property">Binary Tree Property</a></h3>
+<ul>
+<li>Left child represents left half of segment</li>
+<li>Right child represents right half of segment</li>
+<li>Height = O(log n)</li>
+</ul>
+<h2 id="structure-and-properties"><a class="header" href="#structure-and-properties">Structure and Properties</a></h2>
+<h3 id="array-representation"><a class="header" href="#array-representation">Array Representation</a></h3>
+<p>Segment trees are typically stored in an array (like heaps):</p>
+<pre><code class="language-python">tree = [0] * (4 * n)  # Array to store segment tree
+
+# Node indexing (1-based):
+# Node i:
+#   Left child: 2*i
+#   Right child: 2*i + 1
+#   Parent: i//2
+</code></pre>
+<h3 id="size-of-segment-tree"><a class="header" href="#size-of-segment-tree">Size of Segment Tree</a></h3>
+<p>For array of size n:</p>
+<ul>
+<li>If n is power of 2: tree size = 2n - 1</li>
+<li>General case: tree size ≤ 4n (to handle all cases safely)</li>
+</ul>
+<p><strong>Why 4n?</strong></p>
+<ul>
+<li>Height h = ⌈log₂ n⌉</li>
+<li>Maximum nodes = 2^(h+1) - 1</li>
+<li>For safety, allocate 4n</li>
+</ul>
+<h3 id="tree-height"><a class="header" href="#tree-height">Tree Height</a></h3>
+<ul>
+<li>Height = ⌈log₂ n⌉</li>
+<li>Example: array of 8 elements → height = 3</li>
+</ul>
+<h2 id="core-operations"><a class="header" href="#core-operations">Core Operations</a></h2>
+<h3 id="build-operation"><a class="header" href="#build-operation">Build Operation</a></h3>
+<p><strong>Purpose</strong>: Construct segment tree from array</p>
+<p><strong>Recursive approach</strong>:</p>
+<ol>
+<li>Base case: If segment has one element, store it</li>
+<li>Recursive case:
+<ul>
+<li>Build left child for left half</li>
+<li>Build right child for right half</li>
+<li>Current node = aggregate of children</li>
+</ul>
+</li>
+</ol>
+<p><strong>Visual Example</strong>:</p>
+<pre><code>Array: [1, 3, 5, 7]
+
+Build process (sum tree):
+1. Build [0-3]
+   - Build [0-1]: Build [0-0]=1, [1-1]=3 → sum=4
+   - Build [2-3]: Build [2-2]=5, [3-3]=7 → sum=12
+   - [0-3] = 4 + 12 = 16
+</code></pre>
+<p><strong>Time Complexity</strong>: O(n)</p>
+<ul>
+<li>Visit each array element once</li>
+<li>Each element appears in log n nodes</li>
+</ul>
+<h3 id="query-operation"><a class="header" href="#query-operation">Query Operation</a></h3>
+<p><strong>Purpose</strong>: Find aggregate (sum/min/max) over range [L, R]</p>
+<p><strong>Three cases for segment [node_L, node_R]</strong>:</p>
+<ol>
+<li>
+<p><strong>Complete overlap</strong>: [L, R] completely covers [node_L, node_R]</p>
+<ul>
+<li>Return node value</li>
+</ul>
+</li>
+<li>
+<p><strong>No overlap</strong>: [L, R] doesn’t intersect [node_L, node_R]</p>
+<ul>
+<li>Return identity (0 for sum, ∞ for min, -∞ for max)</li>
+</ul>
+</li>
+<li>
+<p><strong>Partial overlap</strong>: [L, R] partially overlaps [node_L, node_R]</p>
+<ul>
+<li>Query both children, combine results</li>
+</ul>
+</li>
+</ol>
+<p><strong>Visual Example</strong>:</p>
+<pre><code>Query sum [1, 3]:
+
+                    [0-3]: 16
+                    /        \
+           [0-1]: 4          [2-3]: 12
+           /    \            /      \
+       [0]: 1  [1]: 3    [2]: 5   [3]: 7
+
+Query [1,3]:
+- [0-3]: Partial overlap → go deeper
+- [0-1]: Partial overlap → go deeper
+  - [0]: No overlap → skip
+  - [1]: Complete overlap → return 3
+- [2-3]: Complete overlap → return 12
+Result: 3 + 12 = 15
+</code></pre>
+<p><strong>Time Complexity</strong>: O(log n)</p>
+<ul>
+<li>Visit at most 4 nodes per level</li>
+<li>Tree height = log n</li>
+</ul>
+<h3 id="update-operation"><a class="header" href="#update-operation">Update Operation</a></h3>
+<p><strong>Purpose</strong>: Change value at index i and update affected segments</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Find leaf node for index i</li>
+<li>Update leaf with new value</li>
+<li>Propagate changes up to root</li>
+</ol>
+<p><strong>Visual Example</strong>:</p>
+<pre><code>Update index 1: 3 → 10
+
+Before:                      After:
+        [0-3]: 16                    [0-3]: 23
+        /        \                   /        \
+   [0-1]: 4    [2-3]: 12       [0-1]: 11   [2-3]: 12
+   /    \       /      \        /     \      /      \
+[0]: 1 [1]: 3 [2]: 5 [3]: 7  [0]: 1 [1]: 10 [2]: 5 [3]: 7
+
+Changed nodes: [1], [0-1], [0-3]
+</code></pre>
+<p><strong>Time Complexity</strong>: O(log n)</p>
+<ul>
+<li>Update log n nodes (path from leaf to root)</li>
+</ul>
+<h2 id="lazy-propagation"><a class="header" href="#lazy-propagation">Lazy Propagation</a></h2>
+<h3 id="the-problem"><a class="header" href="#the-problem">The Problem</a></h3>
+<p><strong>Range update</strong> with standard approach:</p>
+<ul>
+<li>Update all elements in [L, R]</li>
+<li>Time: O(n log n) - update each element individually</li>
+</ul>
+<p>This is inefficient for frequent range updates!</p>
+<h3 id="the-solution-lazy-propagation"><a class="header" href="#the-solution-lazy-propagation">The Solution: Lazy Propagation</a></h3>
+<p><strong>Idea</strong>: Postpone updates to children until necessary</p>
+<p><strong>Lazy array</strong>: Stores pending updates for each node</p>
+<pre><code class="language-python">lazy = [0] * (4 * n)  # Lazy propagation array
+
+# lazy[i] != 0 means:
+# "Node i and its subtree need to be updated by lazy[i]"
+</code></pre>
+<h3 id="how-lazy-propagation-works"><a class="header" href="#how-lazy-propagation-works">How Lazy Propagation Works</a></h3>
+<ol>
+<li>
+<p><strong>Range update [L, R]</strong>:</p>
+<ul>
+<li>Mark nodes with lazy values</li>
+<li>Don’t update children yet</li>
+</ul>
+</li>
+<li>
+<p><strong>Query</strong>:</p>
+<ul>
+<li>Before querying node, apply pending lazy updates</li>
+<li>Push lazy values to children</li>
+</ul>
+</li>
+<li>
+<p><strong>Update children only when needed</strong>:</p>
+<ul>
+<li>Reduces redundant work</li>
+<li>O(log n) for range update!</li>
+</ul>
+</li>
+</ol>
+<p><strong>Visual Example</strong>:</p>
+<pre><code>Range update: Add 10 to [1, 3]
+
+Before:
+        [0-3]: 16
+        /        \
+   [0-1]: 4    [2-3]: 12
+
+After (with lazy):
+        [0-3]: 16, lazy=0
+        /              \
+   [0-1]: 4          [2-3]: 12
+   lazy=10           lazy=10
+
+When querying [1, 1]:
+- Visit [0-1], see lazy=10
+- Apply: [0-1] = 4 + 10*2 = 24
+- Push to children: [0].lazy=10, [1].lazy=10
+- Clear [0-1].lazy = 0
+</code></pre>
+<h3 id="time-complexity-with-lazy-propagation"><a class="header" href="#time-complexity-with-lazy-propagation">Time Complexity with Lazy Propagation</a></h3>
+<ul>
+<li><strong>Range update</strong>: O(log n) - instead of O(n log n)</li>
+<li><strong>Range query</strong>: O(log n) - same as before</li>
+<li><strong>Point update</strong>: O(log n) - same as before</li>
+</ul>
+<h2 id="time-and-space-complexity"><a class="header" href="#time-and-space-complexity">Time and Space Complexity</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Time Complexity</th><th>Explanation</th></tr>
+</thead>
+<tbody>
+<tr><td>Build</td><td>O(n)</td><td>Process each element once</td></tr>
+<tr><td>Point query</td><td>O(log n)</td><td>Traverse from root to leaf</td></tr>
+<tr><td>Range query</td><td>O(log n)</td><td>Visit O(log n) nodes</td></tr>
+<tr><td>Point update</td><td>O(log n)</td><td>Update path from leaf to root</td></tr>
+<tr><td>Range update (naive)</td><td>O(n log n)</td><td>Update each element</td></tr>
+<tr><td>Range update (lazy)</td><td>O(log n)</td><td>Mark nodes lazily</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Space Complexity</strong>: O(n)</p>
+<ul>
+<li>Segment tree array: O(4n) = O(n)</li>
+<li>Lazy array (if used): O(4n) = O(n)</li>
+<li>Total: O(n)</li>
+</ul>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<h3 id="python-implementation"><a class="header" href="#python-implementation">Python Implementation</a></h3>
+<p><strong>Basic Segment Tree (Sum)</strong>:</p>
+<pre><code class="language-python">class SegmentTree:
+    """
+    Segment tree for range sum queries and point updates.
+
+    Supports:
+    - Range sum query: sum of elements in [L, R]
+    - Point update: update single element at index i
+    """
+
+    def __init__(self, arr):
+        """
+        Initialize segment tree from array.
+
+        Args:
+            arr: Input array
+
+        Time Complexity: O(n)
+        """
+        self.n = len(arr)
+        self.arr = arr[:]
+        self.tree = [0] * (4 * self.n)
+        self._build(0, 0, self.n - 1)
+
+    def _build(self, node, start, end):
+        """
+        Build segment tree recursively.
+
+        Args:
+            node: Current node index in tree
+            start: Start index of segment
+            end: End index of segment
+        """
+        if start == end:
+            # Leaf node
+            self.tree[node] = self.arr[start]
+            return
+
+        mid = (start + end) // 2
+        left_child = 2 * node + 1
+        right_child = 2 * node + 2
+
+        # Build left and right subtrees
+        self._build(left_child, start, mid)
+        self._build(right_child, mid + 1, end)
+
+        # Internal node = sum of children
+        self.tree[node] = self.tree[left_child] + self.tree[right_child]
+
+    def query(self, L, R):
+        """
+        Query sum of elements in range [L, R].
+
+        Args:
+            L: Left boundary (inclusive)
+            R: Right boundary (inclusive)
+
+        Returns:
+            Sum of elements in [L, R]
+
+        Time Complexity: O(log n)
+        """
+        return self._query(0, 0, self.n - 1, L, R)
+
+    def _query(self, node, start, end, L, R):
+        """
+        Recursive range query helper.
+
+        Args:
+            node: Current node index
+            start, end: Current segment [start, end]
+            L, R: Query range [L, R]
+
+        Returns:
+            Sum of overlapping portion
+        """
+        # No overlap
+        if R &lt; start or L &gt; end:
+            return 0
+
+        # Complete overlap
+        if L &lt;= start and end &lt;= R:
+            return self.tree[node]
+
+        # Partial overlap
+        mid = (start + end) // 2
+        left_child = 2 * node + 1
+        right_child = 2 * node + 2
+
+        left_sum = self._query(left_child, start, mid, L, R)
+        right_sum = self._query(right_child, mid + 1, end, L, R)
+
+        return left_sum + right_sum
+
+    def update(self, index, value):
+        """
+        Update element at index to new value.
+
+        Args:
+            index: Index to update
+            value: New value
+
+        Time Complexity: O(log n)
+        """
+        self.arr[index] = value
+        self._update(0, 0, self.n - 1, index, value)
+
+    def _update(self, node, start, end, index, value):
+        """
+        Recursive update helper.
+
+        Args:
+            node: Current node index
+            start, end: Current segment [start, end]
+            index: Index to update
+            value: New value
+        """
+        if start == end:
+            # Leaf node
+            self.tree[node] = value
+            return
+
+        mid = (start + end) // 2
+        left_child = 2 * node + 1
+        right_child = 2 * node + 2
+
+        if index &lt;= mid:
+            self._update(left_child, start, mid, index, value)
+        else:
+            self._update(right_child, mid + 1, end, index, value)
+
+        # Update current node
+        self.tree[node] = self.tree[left_child] + self.tree[right_child]
+
+
+# Example usage
+arr = [1, 3, 5, 7, 9, 11]
+seg_tree = SegmentTree(arr)
+
+print(seg_tree.query(1, 3))  # Sum of arr[1:4] = 3+5+7 = 15
+seg_tree.update(1, 10)       # arr[1] = 10
+print(seg_tree.query(1, 3))  # Sum = 10+5+7 = 22
+</code></pre>
+<p><strong>Segment Tree with Lazy Propagation</strong>:</p>
+<pre><code class="language-python">class LazySegmentTree:
+    """
+    Segment tree with lazy propagation for efficient range updates.
+
+    Supports:
+    - Range sum query: sum of elements in [L, R]
+    - Range update: add value to all elements in [L, R]
+    """
+
+    def __init__(self, arr):
+        self.n = len(arr)
+        self.arr = arr[:]
+        self.tree = [0] * (4 * self.n)
+        self.lazy = [0] * (4 * self.n)  # Lazy propagation array
+        self._build(0, 0, self.n - 1)
+
+    def _build(self, node, start, end):
+        if start == end:
+            self.tree[node] = self.arr[start]
+            return
+
+        mid = (start + end) // 2
+        left_child = 2 * node + 1
+        right_child = 2 * node + 2
+
+        self._build(left_child, start, mid)
+        self._build(right_child, mid + 1, end)
+        self.tree[node] = self.tree[left_child] + self.tree[right_child]
+
+    def _push_lazy(self, node, start, end):
+        """
+        Push pending lazy updates to children.
+
+        Args:
+            node: Current node
+            start, end: Current segment
+        """
+        if self.lazy[node] == 0:
+            return  # No pending update
+
+        # Apply pending update to current node
+        self.tree[node] += (end - start + 1) * self.lazy[node]
+
+        # Push to children if not leaf
+        if start != end:
+            left_child = 2 * node + 1
+            right_child = 2 * node + 2
+            self.lazy[left_child] += self.lazy[node]
+            self.lazy[right_child] += self.lazy[node]
+
+        # Clear lazy value
+        self.lazy[node] = 0
+
+    def range_update(self, L, R, value):
+        """
+        Add value to all elements in range [L, R].
+
+        Args:
+            L: Left boundary
+            R: Right boundary
+            value: Value to add
+
+        Time Complexity: O(log n)
+        """
+        self._range_update(0, 0, self.n - 1, L, R, value)
+
+    def _range_update(self, node, start, end, L, R, value):
+        # Apply pending updates first
+        self._push_lazy(node, start, end)
+
+        # No overlap
+        if R &lt; start or L &gt; end:
+            return
+
+        # Complete overlap
+        if L &lt;= start and end &lt;= R:
+            self.lazy[node] += value
+            self._push_lazy(node, start, end)
+            return
+
+        # Partial overlap - recurse on children
+        mid = (start + end) // 2
+        left_child = 2 * node + 1
+        right_child = 2 * node + 2
+
+        self._range_update(left_child, start, mid, L, R, value)
+        self._range_update(right_child, mid + 1, end, L, R, value)
+
+        # Update current node after children updated
+        self._push_lazy(left_child, start, mid)
+        self._push_lazy(right_child, mid + 1, end)
+        self.tree[node] = self.tree[left_child] + self.tree[right_child]
+
+    def query(self, L, R):
+        """
+        Query sum of elements in range [L, R].
+
+        Time Complexity: O(log n)
+        """
+        return self._query(0, 0, self.n - 1, L, R)
+
+    def _query(self, node, start, end, L, R):
+        # Apply pending updates
+        self._push_lazy(node, start, end)
+
+        # No overlap
+        if R &lt; start or L &gt; end:
+            return 0
+
+        # Complete overlap
+        if L &lt;= start and end &lt;= R:
+            return self.tree[node]
+
+        # Partial overlap
+        mid = (start + end) // 2
+        left_child = 2 * node + 1
+        right_child = 2 * node + 2
+
+        left_sum = self._query(left_child, start, mid, L, R)
+        right_sum = self._query(right_child, mid + 1, end, L, R)
+
+        return left_sum + right_sum
+
+
+# Example usage
+arr = [1, 3, 5, 7, 9, 11]
+seg_tree = LazySegmentTree(arr)
+
+print(seg_tree.query(1, 3))        # Sum = 15
+seg_tree.range_update(1, 3, 10)    # Add 10 to arr[1], arr[2], arr[3]
+print(seg_tree.query(1, 3))        # Sum = 15 + 30 = 45
+</code></pre>
+<p><strong>Segment Tree for Minimum Queries</strong>:</p>
+<pre><code class="language-python">class MinSegmentTree:
+    """Segment tree for range minimum queries"""
+
+    def __init__(self, arr):
+        self.n = len(arr)
+        self.arr = arr[:]
+        self.tree = [float('inf')] * (4 * self.n)
+        self._build(0, 0, self.n - 1)
+
+    def _build(self, node, start, end):
+        if start == end:
+            self.tree[node] = self.arr[start]
+            return
+
+        mid = (start + end) // 2
+        left = 2 * node + 1
+        right = 2 * node + 2
+
+        self._build(left, start, mid)
+        self._build(right, mid + 1, end)
+        self.tree[node] = min(self.tree[left], self.tree[right])
+
+    def query(self, L, R):
+        """Find minimum in range [L, R]"""
+        return self._query(0, 0, self.n - 1, L, R)
+
+    def _query(self, node, start, end, L, R):
+        if R &lt; start or L &gt; end:
+            return float('inf')
+
+        if L &lt;= start and end &lt;= R:
+            return self.tree[node]
+
+        mid = (start + end) // 2
+        left = 2 * node + 1
+        right = 2 * node + 2
+
+        left_min = self._query(left, start, mid, L, R)
+        right_min = self._query(right, mid + 1, end, L, R)
+
+        return min(left_min, right_min)
+
+    def update(self, index, value):
+        """Update element at index"""
+        self.arr[index] = value
+        self._update(0, 0, self.n - 1, index, value)
+
+    def _update(self, node, start, end, index, value):
+        if start == end:
+            self.tree[node] = value
+            return
+
+        mid = (start + end) // 2
+        left = 2 * node + 1
+        right = 2 * node + 2
+
+        if index &lt;= mid:
+            self._update(left, start, mid, index, value)
+        else:
+            self._update(right, mid + 1, end, index, value)
+
+        self.tree[node] = min(self.tree[left], self.tree[right])
+</code></pre>
+<h3 id="javascript-implementation"><a class="header" href="#javascript-implementation">JavaScript Implementation</a></h3>
+<p><strong>Basic Segment Tree</strong>:</p>
+<pre><code class="language-javascript">class SegmentTree {
+    /**
+     * Initialize segment tree for range sum queries
+     * @param {number[]} arr - Input array
+     */
+    constructor(arr) {
+        this.n = arr.length;
+        this.arr = [...arr];
+        this.tree = new Array(4 * this.n).fill(0);
+        this._build(0, 0, this.n - 1);
+    }
+
+    _build(node, start, end) {
+        if (start === end) {
+            this.tree[node] = this.arr[start];
+            return;
+        }
+
+        const mid = Math.floor((start + end) / 2);
+        const leftChild = 2 * node + 1;
+        const rightChild = 2 * node + 2;
+
+        this._build(leftChild, start, mid);
+        this._build(rightChild, mid + 1, end);
+        this.tree[node] = this.tree[leftChild] + this.tree[rightChild];
+    }
+
+    /**
+     * Query sum of range [L, R]
+     * @param {number} L - Left boundary
+     * @param {number} R - Right boundary
+     * @returns {number} Sum of elements
+     */
+    query(L, R) {
+        return this._query(0, 0, this.n - 1, L, R);
+    }
+
+    _query(node, start, end, L, R) {
+        // No overlap
+        if (R &lt; start || L &gt; end) {
+            return 0;
+        }
+
+        // Complete overlap
+        if (L &lt;= start &amp;&amp; end &lt;= R) {
+            return this.tree[node];
+        }
+
+        // Partial overlap
+        const mid = Math.floor((start + end) / 2);
+        const leftChild = 2 * node + 1;
+        const rightChild = 2 * node + 2;
+
+        const leftSum = this._query(leftChild, start, mid, L, R);
+        const rightSum = this._query(rightChild, mid + 1, end, L, R);
+
+        return leftSum + rightSum;
+    }
+
+    /**
+     * Update element at index to new value
+     * @param {number} index - Index to update
+     * @param {number} value - New value
+     */
+    update(index, value) {
+        this.arr[index] = value;
+        this._update(0, 0, this.n - 1, index, value);
+    }
+
+    _update(node, start, end, index, value) {
+        if (start === end) {
+            this.tree[node] = value;
+            return;
+        }
+
+        const mid = Math.floor((start + end) / 2);
+        const leftChild = 2 * node + 1;
+        const rightChild = 2 * node + 2;
+
+        if (index &lt;= mid) {
+            this._update(leftChild, start, mid, index, value);
+        } else {
+            this._update(rightChild, mid + 1, end, index, value);
+        }
+
+        this.tree[node] = this.tree[leftChild] + this.tree[rightChild];
+    }
+}
+
+// Example usage
+const arr = [1, 3, 5, 7, 9, 11];
+const segTree = new SegmentTree(arr);
+
+console.log(segTree.query(1, 3));  // 15
+segTree.update(1, 10);
+console.log(segTree.query(1, 3));  // 22
+</code></pre>
+<h2 id="variations"><a class="header" href="#variations">Variations</a></h2>
+<h3 id="1-maximumminimum-segment-tree"><a class="header" href="#1-maximumminimum-segment-tree">1. Maximum/Minimum Segment Tree</a></h3>
+<p>Change aggregate function from sum to min/max:</p>
+<pre><code class="language-python"># In build and update:
+self.tree[node] = max(self.tree[left_child], self.tree[right_child])
+
+# In query (no overlap case):
+return float('-inf')  # For max
+return float('inf')   # For min
+</code></pre>
+<h3 id="2-gcd-segment-tree"><a class="header" href="#2-gcd-segment-tree">2. GCD Segment Tree</a></h3>
+<p>Store GCD of range:</p>
+<pre><code class="language-python">import math
+
+def _build(self, node, start, end):
+    if start == end:
+        self.tree[node] = self.arr[start]
+        return
+
+    # ... build children ...
+
+    self.tree[node] = math.gcd(self.tree[left], self.tree[right])
+</code></pre>
+<h3 id="3-count-segment-tree"><a class="header" href="#3-count-segment-tree">3. Count Segment Tree</a></h3>
+<p>Count elements satisfying property:</p>
+<pre><code class="language-python">def _query(self, node, start, end, L, R, threshold):
+    """Count elements &gt; threshold in [L, R]"""
+    # Store counts in segment tree
+    # Useful for range frequency queries
+</code></pre>
+<h3 id="4-2d-segment-tree"><a class="header" href="#4-2d-segment-tree">4. 2D Segment Tree</a></h3>
+<p>For 2D range queries (rectangle sums):</p>
+<pre><code class="language-python">class SegmentTree2D:
+    """Segment tree for 2D range queries"""
+
+    def __init__(self, matrix):
+        self.n = len(matrix)
+        self.m = len(matrix[0])
+        # Build tree of trees
+        # Each node contains a 1D segment tree
+</code></pre>
+<h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
+<h3 id="1-range-sum-queries"><a class="header" href="#1-range-sum-queries">1. Range Sum Queries</a></h3>
+<p><strong>Problem</strong>: Given array, answer many range sum queries</p>
+<pre><code class="language-python">arr = [1, 3, 5, 7, 9, 11]
+seg_tree = SegmentTree(arr)
+
+# Multiple queries
+print(seg_tree.query(0, 2))  # sum(arr[0:3])
+print(seg_tree.query(3, 5))  # sum(arr[3:6])
+print(seg_tree.query(1, 4))  # sum(arr[1:5])
+</code></pre>
+<h3 id="2-range-minimummaximum-query-rmq"><a class="header" href="#2-range-minimummaximum-query-rmq">2. Range Minimum/Maximum Query (RMQ)</a></h3>
+<p><strong>Problem</strong>: Find minimum in any range [L, R]</p>
+<pre><code class="language-python">min_tree = MinSegmentTree([3, 2, 4, 5, 1, 1, 5, 3])
+
+print(min_tree.query(0, 4))  # min of [3,2,4,5,1] = 1
+print(min_tree.query(3, 7))  # min of [5,1,1,5,3] = 1
+</code></pre>
+<p><strong>Application</strong>: Stock prices, sensor readings, temperature data</p>
+<h3 id="3-counting-inversions-with-updates"><a class="header" href="#3-counting-inversions-with-updates">3. Counting Inversions with Updates</a></h3>
+<p><strong>Problem</strong>: Count pairs (i, j) where i &lt; j but arr[i] &gt; arr[j], with updates</p>
+<pre><code class="language-python">def count_inversions_with_updates(arr, queries):
+    """
+    Count inversions dynamically as array changes.
+    Uses coordinate compression + segment tree.
+    """
+    # Compress coordinates
+    # Build segment tree
+    # Process updates and queries
+</code></pre>
+<h3 id="4-range-gcd"><a class="header" href="#4-range-gcd">4. Range GCD</a></h3>
+<p><strong>Problem</strong>: Find GCD of all elements in range [L, R]</p>
+<pre><code class="language-python">class GCDSegmentTree:
+    def query(self, L, R):
+        """Find GCD of arr[L:R+1]"""
+        return self._query(0, 0, self.n - 1, L, R)
+
+# Application: Number theory problems, competitive programming
+</code></pre>
+<h3 id="5-lazy-propagation-range-assignment"><a class="header" href="#5-lazy-propagation-range-assignment">5. Lazy Propagation: Range Assignment</a></h3>
+<p><strong>Problem</strong>: Set all elements in [L, R] to value v</p>
+<pre><code class="language-python">class AssignmentSegmentTree:
+    """Range assignment with lazy propagation"""
+
+    def range_assign(self, L, R, value):
+        """Set arr[L:R+1] = value"""
+        # Use lazy array to mark assignment
+        # Apply only when needed
+</code></pre>
+<h2 id="common-problems"><a class="header" href="#common-problems">Common Problems</a></h2>
+<h3 id="leetcode-problems"><a class="header" href="#leetcode-problems">LeetCode Problems</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem</th><th>Difficulty</th><th>Key Concept</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="https://leetcode.com/problems/range-sum-query-mutable/">307. Range Sum Query - Mutable</a></td><td>Medium</td><td>Basic segment tree</td></tr>
+<tr><td><a href="https://leetcode.com/problems/count-of-smaller-numbers-after-self/">315. Count of Smaller Numbers After Self</a></td><td>Hard</td><td>Segment tree + sorting</td></tr>
+<tr><td><a href="https://leetcode.com/problems/count-of-range-sum/">327. Count of Range Sum</a></td><td>Hard</td><td>Segment tree + prefix sum</td></tr>
+<tr><td><a href="https://leetcode.com/problems/queue-reconstruction-by-height/">406. Queue Reconstruction by Height</a></td><td>Medium</td><td>Segment tree for kth element</td></tr>
+<tr><td><a href="https://leetcode.com/problems/reverse-pairs/">493. Reverse Pairs</a></td><td>Hard</td><td>Merge sort or segment tree</td></tr>
+<tr><td><a href="https://leetcode.com/problems/falling-squares/">699. Falling Squares</a></td><td>Hard</td><td>Coordinate compression + segment tree</td></tr>
+<tr><td><a href="https://leetcode.com/problems/range-module/">715. Range Module</a></td><td>Hard</td><td>Segment tree with lazy propagation</td></tr>
+<tr><td><a href="https://leetcode.com/problems/my-calendar-iii/">732. My Calendar III</a></td><td>Hard</td><td>Sweep line or segment tree</td></tr>
+<tr><td><a href="https://leetcode.com/problems/rectangle-area-ii/">850. Rectangle Area II</a></td><td>Hard</td><td>Coordinate compression + segment tree</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="codeforcescompetitive-programming"><a class="header" href="#codeforcescompetitive-programming">Codeforces/Competitive Programming</a></h3>
+<ul>
+<li><strong>Range Update Range Query (RURQ)</strong>: Lazy propagation essential</li>
+<li><strong>Dynamic RMQ</strong>: Find min/max with frequent updates</li>
+<li><strong>Persistent Segment Trees</strong>: Time-travel queries</li>
+<li><strong>2D Range Queries</strong>: Matrix sum/min/max queries</li>
+</ul>
+<h2 id="comparison-with-other-structures"><a class="header" href="#comparison-with-other-structures">Comparison with Other Structures</a></h2>
+<h3 id="segment-tree-vs-fenwick-tree-bit"><a class="header" href="#segment-tree-vs-fenwick-tree-bit">Segment Tree vs Fenwick Tree (BIT)</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Segment Tree</th><th>Fenwick Tree</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Implementation</strong></td><td>More complex</td><td>Simpler</td></tr>
+<tr><td><strong>Space</strong></td><td>4n</td><td>n+1</td></tr>
+<tr><td><strong>Range query</strong></td><td>O(log n)</td><td>O(log n)</td></tr>
+<tr><td><strong>Point update</strong></td><td>O(log n)</td><td>O(log n)</td></tr>
+<tr><td><strong>Range update</strong></td><td>O(log n) with lazy</td><td>Not directly supported</td></tr>
+<tr><td><strong>Flexibility</strong></td><td>Any associative operation</td><td>Only invertible operations</td></tr>
+<tr><td><strong>Use case</strong></td><td>Min/max/GCD/custom</td><td>Sum/XOR (invertible ops)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>When to use Segment Tree</strong>:</p>
+<ul>
+<li>Need range updates (with lazy propagation)</li>
+<li>Operation is not invertible (min, max, GCD)</li>
+<li>Need custom/complex aggregation</li>
+</ul>
+<p><strong>When to use Fenwick Tree</strong>:</p>
+<ul>
+<li>Only need range sum or XOR</li>
+<li>Want simpler implementation</li>
+<li>Space is concern (though 4n vs n is usually not critical)</li>
+</ul>
+<h3 id="segment-tree-vs-prefix-sum"><a class="header" href="#segment-tree-vs-prefix-sum">Segment Tree vs Prefix Sum</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Segment Tree</th><th>Prefix Sum</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Build</strong></td><td>O(n)</td><td>O(n)</td></tr>
+<tr><td><strong>Query</strong></td><td>O(log n)</td><td>O(1)</td></tr>
+<tr><td><strong>Update</strong></td><td>O(log n)</td><td>O(n)</td></tr>
+<tr><td><strong>Use when</strong></td><td>Frequent updates</td><td>Static array or rare updates</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="segment-tree-vs-sparse-table"><a class="header" href="#segment-tree-vs-sparse-table">Segment Tree vs Sparse Table</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Segment Tree</th><th>Sparse Table</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Build</strong></td><td>O(n)</td><td>O(n log n)</td></tr>
+<tr><td><strong>Query</strong></td><td>O(log n)</td><td>O(1)</td></tr>
+<tr><td><strong>Update</strong></td><td>O(log n)</td><td>O(n log n) rebuild</td></tr>
+<tr><td><strong>Space</strong></td><td>O(n)</td><td>O(n log n)</td></tr>
+<tr><td><strong>Use when</strong></td><td>Need updates</td><td>Static RMQ, no updates</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="interview-patterns"><a class="header" href="#interview-patterns">Interview Patterns</a></h2>
+<h3 id="pattern-1-basic-range-query"><a class="header" href="#pattern-1-basic-range-query">Pattern 1: Basic Range Query</a></h3>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python">class Solution:
+    def rangeQuery(self, arr, queries):
+        seg_tree = SegmentTree(arr)
+        results = []
+        for L, R in queries:
+            results.append(seg_tree.query(L, R))
+        return results
+</code></pre>
+<p><strong>When to use</strong>: Multiple queries on static or infrequently changing array</p>
+<h3 id="pattern-2-range-update-point-query"><a class="header" href="#pattern-2-range-update-point-query">Pattern 2: Range Update Point Query</a></h3>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python"># Use difference array + segment tree
+# Or lazy segment tree
+def range_update(L, R, value):
+    seg_tree.range_update(L, R, value)
+
+def point_query(index):
+    return seg_tree.query(index, index)
+</code></pre>
+<p><strong>When to use</strong>: Many range updates, query individual elements</p>
+<h3 id="pattern-3-coordinate-compression"><a class="header" href="#pattern-3-coordinate-compression">Pattern 3: Coordinate Compression</a></h3>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python">def solve_with_compression(arr):
+    # Compress large range to small range
+    sorted_unique = sorted(set(arr))
+    compress = {v: i for i, v in enumerate(sorted_unique)}
+
+    compressed_arr = [compress[x] for x in arr]
+    seg_tree = SegmentTree(compressed_arr)
+    # ... use compressed indices
+</code></pre>
+<p><strong>When to use</strong>: Values span large range but few unique values</p>
+<h3 id="pattern-4-dynamic-rmq"><a class="header" href="#pattern-4-dynamic-rmq">Pattern 4: Dynamic RMQ</a></h3>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python">min_tree = MinSegmentTree(arr)
+
+for query in queries:
+    if query[0] == 'update':
+        min_tree.update(query[1], query[2])
+    else:  # query
+        print(min_tree.query(query[1], query[2]))
+</code></pre>
+<p><strong>When to use</strong>: Range min/max with updates</p>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="persistent-segment-tree"><a class="header" href="#persistent-segment-tree">Persistent Segment Tree</a></h3>
+<p><strong>Idea</strong>: Keep all previous versions of tree</p>
+<pre><code class="language-python">class PersistentSegmentTree:
+    """
+    Allows querying any previous version of the tree.
+    Useful for time-travel queries.
+
+    Each update creates new nodes only on update path (O(log n) space per version).
+    Old nodes remain accessible.
+    """
+
+    class Node:
+        def __init__(self, val=0, left=None, right=None):
+            self.val = val
+            self.left = left
+            self.right = right
+
+    def update(self, root, start, end, index, value):
+        """
+        Create new version with update at index.
+        Returns new root (old root unchanged).
+        """
+        if start == end:
+            return self.Node(value)
+
+        mid = (start + end) // 2
+        new_node = self.Node()
+
+        if index &lt;= mid:
+            new_node.left = self.update(root.left, start, mid, index, value)
+            new_node.right = root.right  # Reuse old right subtree
+        else:
+            new_node.left = root.left  # Reuse old left subtree
+            new_node.right = self.update(root.right, mid + 1, end, index, value)
+
+        new_node.val = new_node.left.val + new_node.right.val
+        return new_node
+</code></pre>
+<p><strong>Applications</strong>:</p>
+<ul>
+<li>Version control systems</li>
+<li>Time-travel queries</li>
+<li>Kth smallest in range</li>
+</ul>
+<h3 id="dynamic-segment-tree"><a class="header" href="#dynamic-segment-tree">Dynamic Segment Tree</a></h3>
+<p><strong>Idea</strong>: Create nodes only when needed (sparse segment tree)</p>
+<pre><code class="language-python">class DynamicSegmentTree:
+    """
+    For very large ranges (e.g., 10^9) but few active elements.
+    Create nodes on-demand instead of pre-allocating.
+    """
+
+    class Node:
+        def __init__(self):
+            self.val = 0
+            self.left = None
+            self.right = None
+
+    def __init__(self, L, R):
+        self.root = self.Node()
+        self.L = L  # Minimum index
+        self.R = R  # Maximum index
+</code></pre>
+<p><strong>Use case</strong>: When coordinate range is huge (10^9) but only few updates</p>
+<h3 id="merge-sort-tree"><a class="header" href="#merge-sort-tree">Merge Sort Tree</a></h3>
+<p><strong>Idea</strong>: Each node stores sorted list of its range</p>
+<pre><code class="language-python">class MergeSortTree:
+    """
+    Each node stores sorted array of elements in its range.
+    Allows counting elements in range [L, R] less than k.
+    """
+
+    def _build(self, node, start, end):
+        if start == end:
+            self.tree[node] = [self.arr[start]]
+            return
+
+        # Build children
+        # ...
+
+        # Merge sorted arrays from children
+        self.tree[node] = sorted(
+            self.tree[left_child] + self.tree[right_child]
+        )
+
+    def count_less_than(self, L, R, k):
+        """Count elements in [L, R] less than k"""
+        # Use binary search in each node's sorted array
+</code></pre>
+<h2 id="key-takeaways"><a class="header" href="#key-takeaways">Key Takeaways</a></h2>
+<ol>
+<li><strong>Use segment trees for range queries</strong> with updates on dynamic arrays</li>
+<li><strong>Lazy propagation</strong> is essential for efficient range updates</li>
+<li><strong>Space is O(4n)</strong> for safety (or 2n for perfect binary tree)</li>
+<li><strong>All operations O(log n)</strong> after O(n) build</li>
+<li><strong>Flexible aggregation</strong> - works for any associative operation (sum, min, max, GCD, etc.)</li>
+<li><strong>0-indexed or 1-indexed</strong> - be consistent throughout implementation</li>
+<li><strong>Iterative vs recursive</strong> - recursive is more intuitive, iterative can be faster</li>
+<li><strong>Node indexing</strong>: left child = 2<em>i, right child = 2</em>i+1 (1-indexed) or 2<em>i+1, 2</em>i+2 (0-indexed)</li>
+</ol>
+<h2 id="when-to-use-segment-trees"><a class="header" href="#when-to-use-segment-trees">When to Use Segment Trees</a></h2>
+<p>✅ <strong>Use when</strong>:</p>
+<ul>
+<li>Need range queries (sum/min/max/GCD) on dynamic array</li>
+<li>Array elements change frequently (updates)</li>
+<li>Need range updates (with lazy propagation)</li>
+<li>Operation is associative but not invertible</li>
+</ul>
+<p>❌ <strong>Don’t use when</strong>:</p>
+<ul>
+<li>Array is static → use prefix sum or sparse table</li>
+<li>Only need point queries → use array</li>
+<li>Only need range sum with updates → Fenwick tree is simpler</li>
+<li>Need fast kth element → consider other structures (order statistics tree)</li>
+</ul>
+<hr>
+<p><strong>Time to Implement</strong>: 20-30 minutes (basic), 40+ minutes (with lazy propagation)</p>
+<p><strong>Space Complexity</strong>: O(n)</p>
+<p><strong>Most Common Interview Uses</strong>:</p>
+<ul>
+<li>Range sum/min/max with updates</li>
+<li>Count of elements satisfying property in range</li>
+<li>Dynamic RMQ problems</li>
+</ul>
+<p><strong>Pro Tip</strong>: Master the recursive implementation first, understand the three cases (complete/no/partial overlap), then learn lazy propagation for range updates.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../data_structures/lru_cache.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../data_structures/union_find.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../data_structures/lru_cache.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../data_structures/union_find.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

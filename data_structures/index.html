@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-a5d335fc.js";
+            window.path_to_searchindex_js = "../searchindex-5e706ac8.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-cda83475.js"></script>
+        <script src="../toc-82510463.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -695,7 +695,103 @@ class GraphMatrix:
 <li>Cyclic/Acyclic</li>
 <li>Connected/Disconnected</li>
 </ul>
-<p>See: <a href="../algorithms/graphs.html">Graph algorithms</a></p>
+<p>See: <a href="graphs.html">Graphs</a> | <a href="../algorithms/graphs.html">Graph algorithms</a></p>
+<h3 id="8-specialized-structures"><a class="header" href="#8-specialized-structures">8. Specialized Structures</a></h3>
+<h4 id="union-find-disjoint-set-union"><a class="header" href="#union-find-disjoint-set-union">Union-Find (Disjoint Set Union)</a></h4>
+<p>Data structure for efficiently tracking and merging disjoint sets.</p>
+<pre><code class="language-python">class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        """Find root with path compression - O(α(n))"""
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        """Merge sets - O(α(n))"""
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            return False
+
+        if self.rank[root_x] &lt; self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] &gt; self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
+        return True
+</code></pre>
+<p><strong>Applications:</strong></p>
+<ul>
+<li>Kruskal’s MST algorithm</li>
+<li>Connected components</li>
+<li>Cycle detection</li>
+<li>Network connectivity</li>
+</ul>
+<p>See: <a href="union_find.html">Union-Find</a></p>
+<h4 id="lru-cache"><a class="header" href="#lru-cache">LRU Cache</a></h4>
+<p>Hybrid data structure combining hash table and doubly linked list for O(1) cache operations.</p>
+<pre><code class="language-python">from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.cache = OrderedDict()
+        self.capacity = capacity
+
+    def get(self, key):
+        """Get value and mark as recently used - O(1)"""
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key, value):
+        """Insert/update and evict LRU if needed - O(1)"""
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) &gt; self.capacity:
+            self.cache.popitem(last=False)
+</code></pre>
+<p><strong>Applications:</strong></p>
+<ul>
+<li>Browser caching</li>
+<li>Database query cache</li>
+<li>CDN systems</li>
+<li>Memory management</li>
+</ul>
+<p>See: <a href="lru_cache.html">LRU Cache</a></p>
+<h4 id="segment-trees"><a class="header" href="#segment-trees">Segment Trees</a></h4>
+<p>Tree structure for efficient range queries and updates on arrays.</p>
+<pre><code class="language-python">class SegmentTree:
+    def __init__(self, arr):
+        self.n = len(arr)
+        self.tree = [0] * (4 * self.n)
+        self._build(arr, 0, 0, self.n - 1)
+
+    def query(self, L, R):
+        """Range query - O(log n)"""
+        return self._query(0, 0, self.n - 1, L, R)
+
+    def update(self, index, value):
+        """Point update - O(log n)"""
+        self._update(0, 0, self.n - 1, index, value)
+</code></pre>
+<p><strong>Use cases:</strong></p>
+<ul>
+<li>Range sum/min/max queries</li>
+<li>Range updates with lazy propagation</li>
+<li>Interval problems</li>
+<li>Competitive programming</li>
+</ul>
+<p>See: <a href="segment_trees.html">Segment Trees</a></p>
 <h2 id="choosing-the-right-data-structure"><a class="header" href="#choosing-the-right-data-structure">Choosing the Right Data Structure</a></h2>
 <h3 id="array-vs-linked-list"><a class="header" href="#array-vs-linked-list">Array vs Linked List</a></h3>
 <p><strong>Use Array when:</strong></p>
@@ -913,7 +1009,15 @@ def hash_search(hash_table, key):
 <ul>
 <li>Two sum</li>
 <li>Group anagrams</li>
-<li>LRU cache</li>
+<li>Frequency counting</li>
+</ul>
+</li>
+<li>
+<p><strong>Advanced Structures</strong></p>
+<ul>
+<li>Union-Find (connected components, MST)</li>
+<li>LRU Cache (design problem)</li>
+<li>Segment Trees (range queries)</li>
 </ul>
 </li>
 </ol>
@@ -928,16 +1032,29 @@ def hash_search(hash_table, key):
 </ul>
 <h2 id="available-resources"><a class="header" href="#available-resources">Available Resources</a></h2>
 <p>Explore detailed guides for specific data structures:</p>
+<h3 id="fundamental-structures"><a class="header" href="#fundamental-structures">Fundamental Structures</a></h3>
 <ol>
 <li><a href="arrays.html">Arrays</a> - Array operations and techniques</li>
 <li><a href="linked_lists.html">Linked Lists</a> - Singly, doubly, circular lists</li>
 <li><a href="stacks.html">Stacks</a> - Stack implementation and applications</li>
 <li><a href="queues.html">Queues</a> - Queue types and use cases</li>
 <li><a href="hash_tables.html">Hash Tables</a> - Hashing and collision resolution</li>
+</ol>
+<h3 id="tree-structures"><a class="header" href="#tree-structures">Tree Structures</a></h3>
+<ol start="6">
 <li><a href="trees.html">Trees</a> - Binary trees, BST, AVL, traversals</li>
-<li><a href="graphs.html">Graphs</a> - Graph representations, traversal, algorithms</li>
 <li><a href="heaps.html">Heaps</a> - Min heaps, max heaps, priority queues</li>
 <li><a href="tries.html">Tries</a> - Prefix trees, autocomplete, string matching</li>
+<li><a href="segment_trees.html">Segment Trees</a> - Range queries and updates with lazy propagation</li>
+</ol>
+<h3 id="graph-and-set-structures"><a class="header" href="#graph-and-set-structures">Graph and Set Structures</a></h3>
+<ol start="10">
+<li><a href="graphs.html">Graphs</a> - Graph representations, traversal, algorithms</li>
+<li><a href="union_find.html">Union-Find</a> - Disjoint set union for connectivity and grouping</li>
+</ol>
+<h3 id="specialized-structures"><a class="header" href="#specialized-structures">Specialized Structures</a></h3>
+<ol start="12">
+<li><a href="lru_cache.html">LRU Cache</a> - Least Recently Used cache with O(1) operations</li>
 <li><a href="bloom_filter.html">Bloom Filter</a> - Space-efficient probabilistic set membership testing</li>
 </ol>
 <p>Related algorithm topics:</p>

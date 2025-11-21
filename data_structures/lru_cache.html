@@ -1,0 +1,1261 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Lru Cache - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-5e706ac8.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-82510463.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="lru-cache-least-recently-used-cache"><a class="header" href="#lru-cache-least-recently-used-cache">LRU Cache (Least Recently Used Cache)</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#key-concepts">Key Concepts</a></li>
+<li><a href="#design-principles">Design Principles</a></li>
+<li><a href="#data-structure-design">Data Structure Design</a></li>
+<li><a href="#operations">Operations</a>
+<ul>
+<li><a href="#get-operation">Get</a></li>
+<li><a href="#put-operation">Put</a></li>
+</ul>
+</li>
+<li><a href="#time-and-space-complexity">Time and Space Complexity</a></li>
+<li><a href="#implementation">Implementation</a>
+<ul>
+<li><a href="#python-implementation">Python Implementation</a></li>
+<li><a href="#javascript-implementation">JavaScript Implementation</a></li>
+</ul>
+</li>
+<li><a href="#variations">Variations</a>
+<ul>
+<li><a href="#lfu-cache">LFU Cache</a></li>
+<li><a href="#ttl-cache">TTL Cache</a></li>
+<li><a href="#lru-k">LRU-K</a></li>
+</ul>
+</li>
+<li><a href="#real-world-applications">Real-World Applications</a></li>
+<li><a href="#common-problems">Common Problems</a></li>
+<li><a href="#interview-patterns">Interview Patterns</a></li>
+<li><a href="#advanced-topics">Advanced Topics</a></li>
+</ul>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>An <strong>LRU (Least Recently Used) Cache</strong> is a data structure that stores a limited number of items and automatically evicts the least recently used item when the cache reaches capacity. It’s one of the most common cache eviction policies.</p>
+<h3 id="why-lru-cache"><a class="header" href="#why-lru-cache">Why LRU Cache?</a></h3>
+<p>LRU caches are essential for:</p>
+<ul>
+<li><strong>Memory management</strong> - Limited memory requires eviction strategies</li>
+<li><strong>Performance optimization</strong> - Fast access to frequently used data</li>
+<li><strong>Resource management</strong> - CPU caches, web browsers, databases</li>
+<li><strong>System design</strong> - Distributed caching (Redis, Memcached)</li>
+</ul>
+<h3 id="real-world-applications"><a class="header" href="#real-world-applications">Real-World Applications</a></h3>
+<ol>
+<li><strong>Operating Systems</strong>: Page replacement in virtual memory</li>
+<li><strong>Web Browsers</strong>: Browser cache management</li>
+<li><strong>Databases</strong>: Query result caching (MySQL, PostgreSQL)</li>
+<li><strong>CDNs</strong>: Content delivery and caching</li>
+<li><strong>APIs</strong>: Rate limiting and response caching</li>
+<li><strong>Applications</strong>: Recently viewed items, autocomplete suggestions</li>
+</ol>
+<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="least-recently-used-lru-policy"><a class="header" href="#least-recently-used-lru-policy">Least Recently Used (LRU) Policy</a></h3>
+<p><strong>Rule</strong>: When cache is full, remove the item that was accessed longest ago</p>
+<pre><code>Cache capacity: 3
+
+Access pattern: 1, 2, 3, 1, 4
+                        ↑
+                   Cache full, need to evict
+
+Cache state:
+[3, 2, 1] → Access 1 → [1, 3, 2]
+[1, 3, 2] → Access 4 → [4, 1, 3] (evict 2, least recently used)
+</code></pre>
+<h3 id="access-updates-recency"><a class="header" href="#access-updates-recency">Access Updates Recency</a></h3>
+<p>Both <strong>get</strong> and <strong>put</strong> operations update an item’s position:</p>
+<pre><code>Initial: [3, 2, 1]
+Get(2):  [2, 3, 1]  ← 2 moved to front (most recent)
+Put(4):  [4, 2, 3]  ← 1 evicted, 4 added at front
+</code></pre>
+<h3 id="cache-hit-vs-miss"><a class="header" href="#cache-hit-vs-miss">Cache Hit vs Miss</a></h3>
+<ul>
+<li><strong>Cache Hit</strong>: Key exists in cache, return value (fast)</li>
+<li><strong>Cache Miss</strong>: Key not in cache, fetch from source (slow)</li>
+</ul>
+<pre><code class="language-python">value = cache.get(key)
+if value is not None:
+    # Cache HIT - O(1)
+    return value
+else:
+    # Cache MISS - fetch from database/API
+    value = fetch_from_source(key)
+    cache.put(key, value)
+    return value
+</code></pre>
+<h2 id="design-principles"><a class="header" href="#design-principles">Design Principles</a></h2>
+<h3 id="requirements"><a class="header" href="#requirements">Requirements</a></h3>
+<ol>
+<li><strong>O(1) get operation</strong>: Fast lookup by key</li>
+<li><strong>O(1) put operation</strong>: Fast insertion and eviction</li>
+<li><strong>O(1) eviction</strong>: Quickly identify and remove LRU item</li>
+<li><strong>Fixed capacity</strong>: Maintain size limit</li>
+<li><strong>Recency tracking</strong>: Track access order efficiently</li>
+</ol>
+<h3 id="why-hash-table--doubly-linked-list"><a class="header" href="#why-hash-table--doubly-linked-list">Why Hash Table + Doubly Linked List?</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Requirement</th><th>Data Structure</th><th>Reason</th></tr>
+</thead>
+<tbody>
+<tr><td>O(1) lookup</td><td><strong>Hash Table</strong></td><td>Direct access by key</td></tr>
+<tr><td>O(1) insertion/deletion</td><td><strong>Doubly Linked List</strong></td><td>Can remove from middle efficiently</td></tr>
+<tr><td>Track access order</td><td><strong>Doubly Linked List</strong></td><td>Maintain order from MRU to LRU</td></tr>
+<tr><td>Move to front</td><td><strong>Doubly Linked List</strong></td><td>Easy reordering with prev/next pointers</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="architecture-diagram"><a class="header" href="#architecture-diagram">Architecture Diagram</a></h3>
+<pre><code>Hash Table (for O(1) lookup)
+┌─────────┬──────────┐
+│  Key    │  Node*   │  ← Points to node in linked list
+├─────────┼──────────┤
+│  "a"    │  ●───────┼──┐
+│  "b"    │  ●───────┼─┐│
+│  "c"    │  ●───────┼┐││
+└─────────┴──────────┘│││
+                      │││
+Doubly Linked List (for maintaining order)
+                      │││
+    head ←──────────────┘││
+    ↓                  ││
+┌────────┐  ┌────────┐ ↓│ ┌────────┐
+│ key: c │←→│ key: b │←→│→│ key: a │  ← tail (LRU)
+│ val: 3 │  │ val: 2 │   │ val: 1 │
+└────────┘  └────────┘   └────────┘
+    ↑
+Most Recently Used (MRU)
+</code></pre>
+<h2 id="data-structure-design"><a class="header" href="#data-structure-design">Data Structure Design</a></h2>
+<h3 id="node-structure"><a class="header" href="#node-structure">Node Structure</a></h3>
+<pre><code class="language-python">class Node:
+    def __init__(self, key=0, value=0):
+        self.key = key      # Store key for eviction
+        self.value = value
+        self.prev = None    # Previous node (more recent)
+        self.next = None    # Next node (less recent)
+</code></pre>
+<h3 id="why-store-key-in-node"><a class="header" href="#why-store-key-in-node">Why Store Key in Node?</a></h3>
+<p>When evicting, we need to delete from hash table too:</p>
+<pre><code class="language-python"># Remove LRU node
+lru_node = self.tail.prev
+self.remove_node(lru_node)
+del self.cache[lru_node.key]  # ← Need key to delete from hash table
+</code></pre>
+<h3 id="sentinel-nodes-dummy-headtail"><a class="header" href="#sentinel-nodes-dummy-headtail">Sentinel Nodes (Dummy Head/Tail)</a></h3>
+<p>Using dummy head/tail nodes simplifies edge cases:</p>
+<pre><code class="language-python"># Without sentinels - need to check if head/tail is None
+if self.head is None:
+    self.head = node
+else:
+    # Handle insertion...
+
+# With sentinels - no null checks needed!
+self.head.next = node
+node.prev = self.head
+</code></pre>
+<h2 id="operations"><a class="header" href="#operations">Operations</a></h2>
+<h3 id="get-operation"><a class="header" href="#get-operation">Get Operation</a></h3>
+<p><strong>Goal</strong>: Return value for key, mark as most recently used</p>
+<p><strong>Steps</strong>:</p>
+<ol>
+<li>Check if key exists in hash table</li>
+<li>If not found, return -1 (or None)</li>
+<li>If found, move node to head (most recent)</li>
+<li>Return value</li>
+</ol>
+<p><strong>Visual Example</strong>:</p>
+<pre><code>Before get("b"):
+head → [c] ←→ [b] ←→ [a] ← tail
+        MRU          LRU
+
+After get("b"):
+head → [b] ←→ [c] ←→ [a] ← tail
+        MRU          LRU
+</code></pre>
+<p><strong>Time Complexity</strong>: O(1)</p>
+<h3 id="put-operation"><a class="header" href="#put-operation">Put Operation</a></h3>
+<p><strong>Goal</strong>: Insert/update key-value pair, evict LRU if needed</p>
+<p><strong>Steps</strong>:</p>
+<ol>
+<li>If key exists:
+<ul>
+<li>Update value</li>
+<li>Move to head (most recent)</li>
+</ul>
+</li>
+<li>If key doesn’t exist:
+<ul>
+<li>Check if cache is full</li>
+<li>If full, remove LRU node (tail.prev) and delete from hash table</li>
+<li>Create new node</li>
+<li>Add to head</li>
+<li>Add to hash table</li>
+</ul>
+</li>
+</ol>
+<p><strong>Visual Example</strong>:</p>
+<pre><code>Cache capacity: 3
+
+Before put(4, "d") - Cache is full:
+head → [3:"c"] ←→ [2:"b"] ←→ [1:"a"] ← tail
+        MRU                    LRU
+
+After put(4, "d") - Evicted key=1:
+head → [4:"d"] ←→ [3:"c"] ←→ [2:"b"] ← tail
+        MRU                    LRU
+</code></pre>
+<p><strong>Time Complexity</strong>: O(1)</p>
+<h2 id="time-and-space-complexity"><a class="header" href="#time-and-space-complexity">Time and Space Complexity</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Time Complexity</th><th>Explanation</th></tr>
+</thead>
+<tbody>
+<tr><td>get(key)</td><td>O(1)</td><td>Hash table lookup + move to head</td></tr>
+<tr><td>put(key, value)</td><td>O(1)</td><td>Hash table insert + add to head + possible eviction</td></tr>
+<tr><td>evict()</td><td>O(1)</td><td>Remove from tail + delete from hash table</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Space Complexity</strong>: O(capacity)</p>
+<ul>
+<li>Hash table: O(capacity)</li>
+<li>Doubly linked list: O(capacity)</li>
+<li>Total: O(capacity)</li>
+</ul>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<h3 id="python-implementation"><a class="header" href="#python-implementation">Python Implementation</a></h3>
+<p><strong>Complete Implementation with Sentinel Nodes</strong>:</p>
+<pre><code class="language-python">class Node:
+    """Doubly linked list node"""
+    def __init__(self, key=0, value=0):
+        self.key = key
+        self.value = value
+        self.prev = None
+        self.next = None
+
+
+class LRUCache:
+    """
+    LRU Cache implementation using hash table + doubly linked list.
+
+    Maintains O(1) time complexity for both get and put operations.
+    """
+
+    def __init__(self, capacity: int):
+        """
+        Initialize LRU cache with given capacity.
+
+        Args:
+            capacity: Maximum number of items in cache
+        """
+        self.capacity = capacity
+        self.cache = {}  # key -&gt; Node
+
+        # Sentinel nodes to simplify edge cases
+        self.head = Node()  # Dummy head (most recent)
+        self.tail = Node()  # Dummy tail (least recent)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def _remove_node(self, node: Node) -&gt; None:
+        """
+        Remove node from its current position in linked list.
+
+        Args:
+            node: Node to remove
+
+        Time Complexity: O(1)
+        """
+        prev_node = node.prev
+        next_node = node.next
+        prev_node.next = next_node
+        next_node.prev = prev_node
+
+    def _add_to_head(self, node: Node) -&gt; None:
+        """
+        Add node right after head (most recent position).
+
+        Args:
+            node: Node to add
+
+        Time Complexity: O(1)
+        """
+        node.prev = self.head
+        node.next = self.head.next
+
+        self.head.next.prev = node
+        self.head.next = node
+
+    def _move_to_head(self, node: Node) -&gt; None:
+        """
+        Move node to head (mark as most recently used).
+
+        Args:
+            node: Node to move
+
+        Time Complexity: O(1)
+        """
+        self._remove_node(node)
+        self._add_to_head(node)
+
+    def _remove_tail(self) -&gt; Node:
+        """
+        Remove and return LRU node (node before tail).
+
+        Returns:
+            The removed node
+
+        Time Complexity: O(1)
+        """
+        lru_node = self.tail.prev
+        self._remove_node(lru_node)
+        return lru_node
+
+    def get(self, key: int) -&gt; int:
+        """
+        Get value for key, mark as recently used.
+
+        Args:
+            key: Key to look up
+
+        Returns:
+            Value if found, -1 otherwise
+
+        Time Complexity: O(1)
+        """
+        if key not in self.cache:
+            return -1
+
+        node = self.cache[key]
+        self._move_to_head(node)  # Mark as recently used
+        return node.value
+
+    def put(self, key: int, value: int) -&gt; None:
+        """
+        Insert or update key-value pair.
+        Evicts LRU item if cache is full.
+
+        Args:
+            key: Key to insert/update
+            value: Value to store
+
+        Time Complexity: O(1)
+        """
+        if key in self.cache:
+            # Update existing key
+            node = self.cache[key]
+            node.value = value
+            self._move_to_head(node)
+        else:
+            # Insert new key
+            new_node = Node(key, value)
+
+            self.cache[key] = new_node
+            self._add_to_head(new_node)
+
+            if len(self.cache) &gt; self.capacity:
+                # Remove LRU item
+                lru_node = self._remove_tail()
+                del self.cache[lru_node.key]
+
+
+# Example usage
+cache = LRUCache(2)  # Capacity = 2
+
+cache.put(1, 1)       # Cache: {1=1}
+cache.put(2, 2)       # Cache: {1=1, 2=2}
+print(cache.get(1))   # Returns 1, Cache: {2=2, 1=1}
+cache.put(3, 3)       # Evicts key 2, Cache: {1=1, 3=3}
+print(cache.get(2))   # Returns -1 (not found)
+cache.put(4, 4)       # Evicts key 1, Cache: {3=3, 4=4}
+print(cache.get(1))   # Returns -1 (not found)
+print(cache.get(3))   # Returns 3
+print(cache.get(4))   # Returns 4
+</code></pre>
+<p><strong>Using Python’s OrderedDict</strong>:</p>
+<pre><code class="language-python">from collections import OrderedDict
+
+class LRUCache:
+    """
+    LRU Cache using OrderedDict (simpler but same complexity).
+
+    OrderedDict maintains insertion order and supports move_to_end().
+    """
+
+    def __init__(self, capacity: int):
+        self.cache = OrderedDict()
+        self.capacity = capacity
+
+    def get(self, key: int) -&gt; int:
+        if key not in self.cache:
+            return -1
+
+        # Move to end (most recent)
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -&gt; None:
+        if key in self.cache:
+            # Update and move to end
+            self.cache.move_to_end(key)
+
+        self.cache[key] = value
+
+        if len(self.cache) &gt; self.capacity:
+            # Remove first item (least recent)
+            self.cache.popitem(last=False)
+
+
+# Example usage
+cache = LRUCache(2)
+cache.put(1, 1)
+cache.put(2, 2)
+print(cache.get(1))  # 1
+cache.put(3, 3)      # Evicts key 2
+print(cache.get(2))  # -1
+</code></pre>
+<h3 id="javascript-implementation"><a class="header" href="#javascript-implementation">JavaScript Implementation</a></h3>
+<p><strong>Complete Implementation</strong>:</p>
+<pre><code class="language-javascript">class Node {
+    constructor(key = 0, value = 0) {
+        this.key = key;
+        this.value = value;
+        this.prev = null;
+        this.next = null;
+    }
+}
+
+class LRUCache {
+    /**
+     * Initialize LRU cache with given capacity
+     * @param {number} capacity - Maximum cache size
+     */
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.cache = new Map(); // key -&gt; Node
+
+        // Sentinel nodes
+        this.head = new Node();
+        this.tail = new Node();
+        this.head.next = this.tail;
+        this.tail.prev = this.head;
+    }
+
+    /**
+     * Remove node from linked list
+     * @param {Node} node - Node to remove
+     */
+    _removeNode(node) {
+        const prevNode = node.prev;
+        const nextNode = node.next;
+        prevNode.next = nextNode;
+        nextNode.prev = prevNode;
+    }
+
+    /**
+     * Add node right after head
+     * @param {Node} node - Node to add
+     */
+    _addToHead(node) {
+        node.prev = this.head;
+        node.next = this.head.next;
+        this.head.next.prev = node;
+        this.head.next = node;
+    }
+
+    /**
+     * Move node to head (mark as most recently used)
+     * @param {Node} node - Node to move
+     */
+    _moveToHead(node) {
+        this._removeNode(node);
+        this._addToHead(node);
+    }
+
+    /**
+     * Remove and return LRU node
+     * @returns {Node} The removed node
+     */
+    _removeTail() {
+        const lruNode = this.tail.prev;
+        this._removeNode(lruNode);
+        return lruNode;
+    }
+
+    /**
+     * Get value for key
+     * @param {number} key
+     * @returns {number} Value if found, -1 otherwise
+     */
+    get(key) {
+        if (!this.cache.has(key)) {
+            return -1;
+        }
+
+        const node = this.cache.get(key);
+        this._moveToHead(node);
+        return node.value;
+    }
+
+    /**
+     * Insert or update key-value pair
+     * @param {number} key
+     * @param {number} value
+     */
+    put(key, value) {
+        if (this.cache.has(key)) {
+            // Update existing
+            const node = this.cache.get(key);
+            node.value = value;
+            this._moveToHead(node);
+        } else {
+            // Insert new
+            const newNode = new Node(key, value);
+            this.cache.set(key, newNode);
+            this._addToHead(newNode);
+
+            if (this.cache.size &gt; this.capacity) {
+                // Evict LRU
+                const lruNode = this._removeTail();
+                this.cache.delete(lruNode.key);
+            }
+        }
+    }
+}
+
+// Example usage
+const cache = new LRUCache(2);
+cache.put(1, 1);
+cache.put(2, 2);
+console.log(cache.get(1));  // 1
+cache.put(3, 3);             // Evicts key 2
+console.log(cache.get(2));  // -1
+</code></pre>
+<p><strong>Using JavaScript Map (Simpler)</strong>:</p>
+<pre><code class="language-javascript">class LRUCache {
+    /**
+     * LRU Cache using Map (maintains insertion order in ES6+)
+     */
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.cache = new Map();
+    }
+
+    get(key) {
+        if (!this.cache.has(key)) {
+            return -1;
+        }
+
+        // Move to end (most recent)
+        const value = this.cache.get(key);
+        this.cache.delete(key);
+        this.cache.set(key, value);
+        return value;
+    }
+
+    put(key, value) {
+        if (this.cache.has(key)) {
+            // Delete to re-insert (moves to end)
+            this.cache.delete(key);
+        }
+
+        this.cache.set(key, value);
+
+        if (this.cache.size &gt; this.capacity) {
+            // Remove first item (LRU)
+            const firstKey = this.cache.keys().next().value;
+            this.cache.delete(firstKey);
+        }
+    }
+}
+</code></pre>
+<p><strong>TypeScript Version with Generic Types</strong>:</p>
+<pre><code class="language-typescript">class LRUCache&lt;K, V&gt; {
+    private capacity: number;
+    private cache: Map&lt;K, V&gt;;
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.cache = new Map();
+    }
+
+    get(key: K): V | undefined {
+        if (!this.cache.has(key)) {
+            return undefined;
+        }
+
+        const value = this.cache.get(key)!;
+        this.cache.delete(key);
+        this.cache.set(key, value);
+        return value;
+    }
+
+    put(key: K, value: V): void {
+        if (this.cache.has(key)) {
+            this.cache.delete(key);
+        }
+
+        this.cache.set(key, value);
+
+        if (this.cache.size &gt; this.capacity) {
+            const firstKey = this.cache.keys().next().value;
+            this.cache.delete(firstKey);
+        }
+    }
+
+    has(key: K): boolean {
+        return this.cache.has(key);
+    }
+
+    size(): number {
+        return this.cache.size;
+    }
+}
+
+// Usage with type safety
+const cache = new LRUCache&lt;string, number&gt;(100);
+cache.put("user:123", 42);
+const value = cache.get("user:123"); // Type: number | undefined
+</code></pre>
+<h2 id="variations"><a class="header" href="#variations">Variations</a></h2>
+<h3 id="lfu-cache-least-frequently-used"><a class="header" href="#lfu-cache-least-frequently-used">LFU Cache (Least Frequently Used)</a></h3>
+<p>Evicts item with lowest access frequency instead of least recent:</p>
+<pre><code class="language-python">class LFUCache:
+    """
+    LFU Cache - evicts least frequently used item.
+    Breaks ties using LRU among items with same frequency.
+    """
+
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = {}  # key -&gt; (value, freq)
+        self.freq_map = {}  # freq -&gt; OrderedDict of keys
+        self.min_freq = 0
+
+    def get(self, key: int) -&gt; int:
+        if key not in self.cache:
+            return -1
+
+        value, freq = self.cache[key]
+
+        # Remove from current frequency list
+        del self.freq_map[freq][key]
+        if not self.freq_map[freq] and freq == self.min_freq:
+            self.min_freq += 1
+
+        # Add to next frequency list
+        new_freq = freq + 1
+        if new_freq not in self.freq_map:
+            self.freq_map[new_freq] = OrderedDict()
+        self.freq_map[new_freq][key] = None
+
+        self.cache[key] = (value, new_freq)
+        return value
+
+    def put(self, key: int, value: int) -&gt; None:
+        if self.capacity &lt;= 0:
+            return
+
+        if key in self.cache:
+            _, freq = self.cache[key]
+            self.cache[key] = (value, freq)
+            self.get(key)  # Update frequency
+            return
+
+        if len(self.cache) &gt;= self.capacity:
+            # Evict LFU (and LRU among LFU)
+            evict_key, _ = self.freq_map[self.min_freq].popitem(last=False)
+            del self.cache[evict_key]
+
+        # Add new key with frequency 1
+        self.cache[key] = (value, 1)
+        self.min_freq = 1
+        if 1 not in self.freq_map:
+            self.freq_map[1] = OrderedDict()
+        self.freq_map[1][key] = None
+</code></pre>
+<h3 id="ttl-cache-time-to-live"><a class="header" href="#ttl-cache-time-to-live">TTL Cache (Time-To-Live)</a></h3>
+<p>Items expire after a certain time:</p>
+<pre><code class="language-python">import time
+
+class TTLCache:
+    """
+    Cache with time-to-live (TTL) for entries.
+    Entries expire after ttl seconds.
+    """
+
+    def __init__(self, capacity: int, ttl: float):
+        self.capacity = capacity
+        self.ttl = ttl
+        self.cache = {}  # key -&gt; (value, expiry_time)
+        self.access_order = OrderedDict()  # key -&gt; None (for LRU)
+
+    def _is_expired(self, key: int) -&gt; bool:
+        """Check if entry has expired"""
+        if key not in self.cache:
+            return True
+        _, expiry = self.cache[key]
+        return time.time() &gt; expiry
+
+    def get(self, key: int) -&gt; int:
+        if self._is_expired(key):
+            if key in self.cache:
+                del self.cache[key]
+                del self.access_order[key]
+            return -1
+
+        value, expiry = self.cache[key]
+        self.access_order.move_to_end(key)
+        return value
+
+    def put(self, key: int, value: int) -&gt; None:
+        expiry_time = time.time() + self.ttl
+
+        if key in self.cache:
+            self.cache[key] = (value, expiry_time)
+            self.access_order.move_to_end(key)
+        else:
+            if len(self.cache) &gt;= self.capacity:
+                # Evict LRU
+                lru_key, _ = self.access_order.popitem(last=False)
+                del self.cache[lru_key]
+
+            self.cache[key] = (value, expiry_time)
+            self.access_order[key] = None
+</code></pre>
+<h3 id="lru-k"><a class="header" href="#lru-k">LRU-K</a></h3>
+<p>Considers K most recent accesses instead of just the last one:</p>
+<pre><code class="language-python">class LRU2Cache:
+    """
+    LRU-2: Evicts item with oldest second-to-last access.
+    More resistant to one-time access patterns.
+    """
+
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = {}
+        self.history = {}  # key -&gt; list of access times
+
+    def get(self, key: int) -&gt; int:
+        if key not in self.cache:
+            return -1
+
+        # Record access time
+        if key not in self.history:
+            self.history[key] = []
+        self.history[key].append(time.time())
+
+        # Keep only last 2 accesses
+        if len(self.history[key]) &gt; 2:
+            self.history[key].pop(0)
+
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -&gt; None:
+        if key in self.cache:
+            self.cache[key] = value
+            self.get(key)  # Update access time
+            return
+
+        if len(self.cache) &gt;= self.capacity:
+            # Find key with oldest second-to-last access
+            evict_key = min(
+                self.history.keys(),
+                key=lambda k: self.history[k][-2] if len(self.history[k]) &gt; 1 else float('inf')
+            )
+            del self.cache[evict_key]
+            del self.history[evict_key]
+
+        self.cache[key] = value
+        self.history[key] = [time.time()]
+</code></pre>
+<h2 id="real-world-applications-1"><a class="header" href="#real-world-applications-1">Real-World Applications</a></h2>
+<h3 id="1-database-query-cache"><a class="header" href="#1-database-query-cache">1. Database Query Cache</a></h3>
+<pre><code class="language-python">class DatabaseCache:
+    """Cache database query results"""
+
+    def __init__(self, capacity: int = 1000):
+        self.cache = LRUCache(capacity)
+        self.stats = {'hits': 0, 'misses': 0}
+
+    def query(self, sql: str):
+        # Try cache first
+        result = self.cache.get(sql)
+
+        if result != -1:
+            self.stats['hits'] += 1
+            return result
+
+        # Cache miss - execute query
+        self.stats['misses'] += 1
+        result = self._execute_query(sql)
+        self.cache.put(sql, result)
+        return result
+
+    def _execute_query(self, sql: str):
+        # Execute actual database query
+        pass
+</code></pre>
+<h3 id="2-web-api-response-cache"><a class="header" href="#2-web-api-response-cache">2. Web API Response Cache</a></h3>
+<pre><code class="language-javascript">class APICache {
+    constructor(capacity = 100, ttl = 300) { // 5 min TTL
+        this.cache = new LRUCache(capacity);
+        this.ttl = ttl * 1000; // Convert to ms
+        this.timestamps = new Map();
+    }
+
+    async fetch(url) {
+        const cached = this.cache.get(url);
+        const timestamp = this.timestamps.get(url);
+
+        // Check if cached and not expired
+        if (cached &amp;&amp; Date.now() - timestamp &lt; this.ttl) {
+            console.log('Cache HIT:', url);
+            return cached;
+        }
+
+        // Cache miss or expired
+        console.log('Cache MISS:', url);
+        const response = await fetch(url);
+        const data = await response.json();
+
+        this.cache.put(url, data);
+        this.timestamps.set(url, Date.now());
+
+        return data;
+    }
+}
+</code></pre>
+<h3 id="3-in-memory-session-store"><a class="header" href="#3-in-memory-session-store">3. In-Memory Session Store</a></h3>
+<pre><code class="language-python">class SessionStore:
+    """Store user sessions with LRU eviction"""
+
+    def __init__(self, max_sessions: int = 10000):
+        self.sessions = LRUCache(max_sessions)
+
+    def create_session(self, session_id: str, user_data: dict):
+        self.sessions.put(session_id, user_data)
+
+    def get_session(self, session_id: str):
+        return self.sessions.get(session_id)
+
+    def update_session(self, session_id: str, user_data: dict):
+        self.sessions.put(session_id, user_data)
+
+    def delete_session(self, session_id: str):
+        # Implementation depends on cache structure
+        pass
+</code></pre>
+<h2 id="common-problems"><a class="header" href="#common-problems">Common Problems</a></h2>
+<h3 id="leetcode-problems"><a class="header" href="#leetcode-problems">LeetCode Problems</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem</th><th>Difficulty</th><th>Key Concept</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="https://leetcode.com/problems/lru-cache/">146. LRU Cache</a></td><td>Medium</td><td>Standard LRU implementation</td></tr>
+<tr><td><a href="https://leetcode.com/problems/lfu-cache/">460. LFU Cache</a></td><td>Hard</td><td>Frequency-based eviction</td></tr>
+<tr><td><a href="https://leetcode.com/problems/design-most-recently-used-queue/">1756. Design Most Recently Used Queue</a></td><td>Medium</td><td>Modified LRU</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="related-interview-problems"><a class="header" href="#related-interview-problems">Related Interview Problems</a></h3>
+<ol>
+<li><strong>Design browser history</strong> - LRU for back/forward navigation</li>
+<li><strong>Implement autocomplete</strong> - LRU for recent searches</li>
+<li><strong>Design file system cache</strong> - LRU for file contents</li>
+<li><strong>Rate limiter</strong> - Token bucket with LRU</li>
+</ol>
+<h2 id="interview-patterns"><a class="header" href="#interview-patterns">Interview Patterns</a></h2>
+<h3 id="pattern-1-basic-lru-cache"><a class="header" href="#pattern-1-basic-lru-cache">Pattern 1: Basic LRU Cache</a></h3>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python">class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) &gt; self.capacity:
+            self.cache.popitem(last=False)
+</code></pre>
+<p><strong>When to use</strong>: Standard LRU cache problem</p>
+<h3 id="pattern-2-lru-with-expiration"><a class="header" href="#pattern-2-lru-with-expiration">Pattern 2: LRU with Expiration</a></h3>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python">def get(self, key):
+    if key in self.cache:
+        value, expiry = self.cache[key]
+        if time.time() &lt; expiry:
+            self._move_to_head(key)
+            return value
+        else:
+            del self.cache[key]  # Expired
+    return -1
+</code></pre>
+<p><strong>When to use</strong>: Caching with TTL requirements</p>
+<h3 id="pattern-3-multi-level-cache"><a class="header" href="#pattern-3-multi-level-cache">Pattern 3: Multi-level Cache</a></h3>
+<p><strong>Template</strong>:</p>
+<pre><code class="language-python">class MultiLevelCache:
+    def __init__(self, l1_size, l2_size):
+        self.l1 = LRUCache(l1_size)  # Fast, small
+        self.l2 = LRUCache(l2_size)  # Slower, larger
+
+    def get(self, key):
+        # Check L1 first
+        value = self.l1.get(key)
+        if value != -1:
+            return value
+
+        # Check L2
+        value = self.l2.get(key)
+        if value != -1:
+            self.l1.put(key, value)  # Promote to L1
+            return value
+
+        return -1
+</code></pre>
+<p><strong>When to use</strong>: Hierarchical caching systems</p>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="thread-safe-lru-cache"><a class="header" href="#thread-safe-lru-cache">Thread-Safe LRU Cache</a></h3>
+<pre><code class="language-python">import threading
+
+class ThreadSafeLRUCache:
+    """Thread-safe LRU cache using locks"""
+
+    def __init__(self, capacity: int):
+        self.cache = LRUCache(capacity)
+        self.lock = threading.RLock()
+
+    def get(self, key: int) -&gt; int:
+        with self.lock:
+            return self.cache.get(key)
+
+    def put(self, key: int, value: int) -&gt; None:
+        with self.lock:
+            self.cache.put(key, value)
+</code></pre>
+<h3 id="distributed-lru-cache"><a class="header" href="#distributed-lru-cache">Distributed LRU Cache</a></h3>
+<pre><code class="language-python">class DistributedLRUCache:
+    """
+    Distributed cache using consistent hashing.
+    Each node maintains its own LRU cache.
+    """
+
+    def __init__(self, nodes: list, capacity_per_node: int):
+        self.nodes = nodes
+        self.caches = {node: LRUCache(capacity_per_node) for node in nodes}
+
+    def _get_node(self, key: int) -&gt; str:
+        """Consistent hashing to determine node"""
+        return self.nodes[hash(key) % len(self.nodes)]
+
+    def get(self, key: int) -&gt; int:
+        node = self._get_node(key)
+        return self.caches[node].get(key)
+
+    def put(self, key: int, value: int) -&gt; None:
+        node = self._get_node(key)
+        self.caches[node].put(key, value)
+</code></pre>
+<h3 id="write-through-vs-write-back-cache"><a class="header" href="#write-through-vs-write-back-cache">Write-Through vs Write-Back Cache</a></h3>
+<pre><code class="language-python">class WriteThroughCache:
+    """
+    Write-through: Write to cache AND database immediately.
+    Guarantees consistency but slower writes.
+    """
+
+    def put(self, key, value):
+        self.cache.put(key, value)
+        self.database.write(key, value)  # Synchronous
+
+
+class WriteBackCache:
+    """
+    Write-back: Write to cache first, database later (async).
+    Faster writes but risk of data loss.
+    """
+
+    def put(self, key, value):
+        self.cache.put(key, value)
+        self.dirty_keys.add(key)
+        # Async flush to database later
+</code></pre>
+<h2 id="key-takeaways"><a class="header" href="#key-takeaways">Key Takeaways</a></h2>
+<ol>
+<li><strong>Hybrid data structure</strong>: Hash table for O(1) lookup + doubly linked list for O(1) reordering</li>
+<li><strong>Sentinel nodes</strong>: Simplify edge cases (no null checks)</li>
+<li><strong>Store key in node</strong>: Needed for eviction (to delete from hash table)</li>
+<li><strong>Both get and put update recency</strong>: Any access marks item as recently used</li>
+<li><strong>OrderedDict shortcut</strong>: Python’s OrderedDict can simplify implementation</li>
+<li><strong>Map ordering</strong>: JavaScript Map maintains insertion order (ES6+)</li>
+<li><strong>Trade-offs</strong>: LRU is simple and effective but not optimal for all access patterns</li>
+</ol>
+<h2 id="when-to-use-lru-cache"><a class="header" href="#when-to-use-lru-cache">When to Use LRU Cache</a></h2>
+<p>✅ <strong>Use when</strong>:</p>
+<ul>
+<li>Limited memory and need automatic eviction</li>
+<li>Recent items likely to be accessed again (temporal locality)</li>
+<li>Want simple, predictable eviction policy</li>
+<li>Need O(1) get and put operations</li>
+</ul>
+<p>❌ <strong>Don’t use when</strong>:</p>
+<ul>
+<li>Access frequency matters more than recency (use LFU)</li>
+<li>Need persistent storage (use database)</li>
+<li>Working set larger than cache (high miss rate)</li>
+<li>Need complex eviction logic (custom policy)</li>
+</ul>
+<hr>
+<p><strong>Time to Implement</strong>: 15-20 minutes (with doubly linked list)</p>
+<p><strong>Space Complexity</strong>: O(capacity)</p>
+<p><strong>Most Common Interview Question</strong>: <a href="https://leetcode.com/problems/lru-cache/">LeetCode 146. LRU Cache</a></p>
+<p><strong>Pro Tip</strong>: Master the doubly linked list + hash table approach, but know OrderedDict/Map shortcuts for quick implementation.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../data_structures/bloom_filter.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../data_structures/segment_trees.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../data_structures/bloom_filter.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../data_structures/segment_trees.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

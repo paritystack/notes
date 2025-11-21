@@ -129,6 +129,7 @@
     - [Cuda](machine_learning/cuda.md)
     - [Metrics](machine_learning/metrics.md)
     - [Thinking](machine_learning/thinking.md)
+    - [Moe](machine_learning/moe.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)

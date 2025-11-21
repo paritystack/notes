@@ -127,6 +127,8 @@
     - [Interesting Papers](machine_learning/interesting_papers.md)
     - [Lora](machine_learning/lora.md)
     - [Cuda](machine_learning/cuda.md)
+    - [Metrics](machine_learning/metrics.md)
+    - [Thinking](machine_learning/thinking.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)

@@ -545,7 +545,116 @@ class GraphMatrix:
 - Cyclic/Acyclic
 - Connected/Disconnected
 
-See: [Graph algorithms](../algorithms/graphs.md)
+See: [Graphs](graphs.md) | [Graph algorithms](../algorithms/graphs.md)
+
+### 8. Specialized Structures
+
+#### Union-Find (Disjoint Set Union)
+
+Data structure for efficiently tracking and merging disjoint sets.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        """Find root with path compression - O(α(n))"""
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        """Merge sets - O(α(n))"""
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            return False
+
+        if self.rank[root_x] < self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] > self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
+        return True
+```
+
+**Applications:**
+- Kruskal's MST algorithm
+- Connected components
+- Cycle detection
+- Network connectivity
+
+See: [Union-Find](union_find.md)
+
+#### LRU Cache
+
+Hybrid data structure combining hash table and doubly linked list for O(1) cache operations.
+
+```python
+from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.cache = OrderedDict()
+        self.capacity = capacity
+
+    def get(self, key):
+        """Get value and mark as recently used - O(1)"""
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key, value):
+        """Insert/update and evict LRU if needed - O(1)"""
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)
+```
+
+**Applications:**
+- Browser caching
+- Database query cache
+- CDN systems
+- Memory management
+
+See: [LRU Cache](lru_cache.md)
+
+#### Segment Trees
+
+Tree structure for efficient range queries and updates on arrays.
+
+```python
+class SegmentTree:
+    def __init__(self, arr):
+        self.n = len(arr)
+        self.tree = [0] * (4 * self.n)
+        self._build(arr, 0, 0, self.n - 1)
+
+    def query(self, L, R):
+        """Range query - O(log n)"""
+        return self._query(0, 0, self.n - 1, L, R)
+
+    def update(self, index, value):
+        """Point update - O(log n)"""
+        self._update(0, 0, self.n - 1, index, value)
+```
+
+**Use cases:**
+- Range sum/min/max queries
+- Range updates with lazy propagation
+- Interval problems
+- Competitive programming
+
+See: [Segment Trees](segment_trees.md)
 
 ## Choosing the Right Data Structure
 
@@ -743,7 +852,12 @@ def hash_search(hash_table, key):
 6. **Hash Tables**
    - Two sum
    - Group anagrams
-   - LRU cache
+   - Frequency counting
+
+7. **Advanced Structures**
+   - Union-Find (connected components, MST)
+   - LRU Cache (design problem)
+   - Segment Trees (range queries)
 
 ### Common Patterns
 
@@ -758,16 +872,26 @@ def hash_search(hash_table, key):
 
 Explore detailed guides for specific data structures:
 
+### Fundamental Structures
 1. [Arrays](arrays.md) - Array operations and techniques
 2. [Linked Lists](linked_lists.md) - Singly, doubly, circular lists
 3. [Stacks](stacks.md) - Stack implementation and applications
 4. [Queues](queues.md) - Queue types and use cases
 5. [Hash Tables](hash_tables.md) - Hashing and collision resolution
+
+### Tree Structures
 6. [Trees](trees.md) - Binary trees, BST, AVL, traversals
-7. [Graphs](graphs.md) - Graph representations, traversal, algorithms
-8. [Heaps](heaps.md) - Min heaps, max heaps, priority queues
-9. [Tries](tries.md) - Prefix trees, autocomplete, string matching
-10. [Bloom Filter](bloom_filter.md) - Space-efficient probabilistic set membership testing
+7. [Heaps](heaps.md) - Min heaps, max heaps, priority queues
+8. [Tries](tries.md) - Prefix trees, autocomplete, string matching
+9. [Segment Trees](segment_trees.md) - Range queries and updates with lazy propagation
+
+### Graph and Set Structures
+10. [Graphs](graphs.md) - Graph representations, traversal, algorithms
+11. [Union-Find](union_find.md) - Disjoint set union for connectivity and grouping
+
+### Specialized Structures
+12. [LRU Cache](lru_cache.md) - Least Recently Used cache with O(1) operations
+13. [Bloom Filter](bloom_filter.md) - Space-efficient probabilistic set membership testing
 
 Related algorithm topics:
 - [Sorting Algorithms](../algorithms/sorting.md)

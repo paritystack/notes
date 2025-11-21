@@ -74,6 +74,9 @@
     - [Heaps](data_structures/heaps.md)
     - [Tries](data_structures/tries.md)
     - [Bloom Filter](data_structures/bloom_filter.md)
+    - [Lru Cache](data_structures/lru_cache.md)
+    - [Segment Trees](data_structures/segment_trees.md)
+    - [Union Find](data_structures/union_find.md)
 
 * [Algorithms](algorithms/README.md)
     - [Big O](algorithms/big_o.md)

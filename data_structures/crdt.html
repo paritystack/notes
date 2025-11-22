@@ -1,0 +1,1443 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Crdt - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-c422b50d.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-bd4efd9a.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="conflict-free-replicated-data-types-crdts"><a class="header" href="#conflict-free-replicated-data-types-crdts">Conflict-Free Replicated Data Types (CRDTs)</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p><strong>Conflict-Free Replicated Data Types (CRDTs)</strong> are data structures designed for distributed systems that guarantee <strong>strong eventual consistency</strong> without requiring coordination or consensus protocols. CRDTs enable replicas to be updated independently and concurrently, while ensuring that all replicas converge to the same state when they have received the same set of updates.</p>
+<p>CRDTs are the foundation for many modern distributed systems including collaborative editors (Google Docs, Figma), distributed databases (Riak, Redis), and synchronization systems (TomTom GPS, Apple Notes).</p>
+<h3 id="why-crdts"><a class="header" href="#why-crdts">Why CRDTs?</a></h3>
+<p>In distributed systems, achieving consistency traditionally requires:</p>
+<ul>
+<li><strong>Locks/Coordination</strong>: Expensive and reduces availability</li>
+<li><strong>Consensus Protocols</strong> (Paxos, Raft): Complex and have latency overhead</li>
+<li><strong>Conflict Resolution</strong>: Manual or application-specific logic</li>
+</ul>
+<p>CRDTs eliminate these requirements by ensuring that <strong>all concurrent operations commute</strong>, meaning they can be applied in any order and still produce the same result.</p>
+<h3 id="core-principles"><a class="header" href="#core-principles">Core Principles</a></h3>
+<ol>
+<li><strong>Strong Eventual Consistency</strong>: If all replicas receive the same updates, they converge to the same state</li>
+<li><strong>No Coordination</strong>: Replicas can update independently without waiting for others</li>
+<li><strong>Automatic Conflict Resolution</strong>: Built into the data structure semantics</li>
+<li><strong>Mathematically Provable</strong>: Based on semilattice theory and order theory</li>
+</ol>
+<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<h3 id="state-based-crdts-cvrdt"><a class="header" href="#state-based-crdts-cvrdt">State-based CRDTs (CvRDT)</a></h3>
+<p><strong>Convergent Replicated Data Types</strong> merge entire states using a join operation.</p>
+<p><strong>Requirements:</strong></p>
+<ul>
+<li>States form a <strong>semilattice</strong> (join-semilattice)</li>
+<li>Merge operation is <strong>commutative</strong>, <strong>associative</strong>, and <strong>idempotent</strong></li>
+<li>Updates increase state monotonically</li>
+</ul>
+<p><strong>Characteristics:</strong></p>
+<ul>
+<li>Send entire state (or delta-state) during synchronization</li>
+<li>Simple to implement</li>
+<li>Higher bandwidth requirements</li>
+<li>Resilient to message loss and reordering</li>
+</ul>
+<p><strong>Example</strong>: Two replicas of a counter merge by taking the maximum value.</p>
+<pre><code>Replica A: {value: 5}
+Replica B: {value: 3}
+Merged:    {value: max(5, 3) = 5}
+</code></pre>
+<h3 id="operation-based-crdts-cmrdt"><a class="header" href="#operation-based-crdts-cmrdt">Operation-based CRDTs (CmRDT)</a></h3>
+<p><strong>Commutative Replicated Data Types</strong> transmit operations that commute.</p>
+<p><strong>Requirements:</strong></p>
+<ul>
+<li>Operations are <strong>commutative</strong> when concurrent</li>
+<li>Delivery guarantees: <strong>exactly-once</strong>, <strong>causal order</strong> delivery</li>
+<li>Operations can be applied immediately</li>
+</ul>
+<p><strong>Characteristics:</strong></p>
+<ul>
+<li>Send operations (smaller messages)</li>
+<li>Lower bandwidth</li>
+<li>Requires reliable causal broadcast</li>
+<li>More complex delivery infrastructure</li>
+</ul>
+<p><strong>Example</strong>: Two concurrent increment operations commute regardless of order.</p>
+<pre><code>State: 0
+Op1: increment(+3)
+Op2: increment(+2)
+Result: 5 (regardless of order)
+</code></pre>
+<h3 id="semilattice-structure"><a class="header" href="#semilattice-structure">Semilattice Structure</a></h3>
+<p>A <strong>join-semilattice</strong> is a partially ordered set with a least upper bound (LUB) for any two elements.</p>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><strong>Commutativity</strong>: <code>a ⊔ b = b ⊔ a</code></li>
+<li><strong>Associativity</strong>: <code>(a ⊔ b) ⊔ c = a ⊔ (b ⊔ c)</code></li>
+<li><strong>Idempotence</strong>: <code>a ⊔ a = a</code></li>
+</ul>
+<p>Where <code>⊔</code> represents the join operation (merge).</p>
+<h3 id="causality-and-vector-clocks"><a class="header" href="#causality-and-vector-clocks">Causality and Vector Clocks</a></h3>
+<p>Many CRDTs use <strong>vector clocks</strong> or <strong>version vectors</strong> to track causality between operations:</p>
+<pre><code>VectorClock = {replica_id → counter}
+</code></pre>
+<p><strong>Happens-before relation</strong>: Event <code>a</code> happened before <code>b</code> if <code>VC(a) &lt; VC(b)</code>
+<strong>Concurrent events</strong>: <code>a</code> and <code>b</code> are concurrent if neither <code>VC(a) &lt; VC(b)</code> nor <code>VC(b) &lt; VC(a)</code></p>
+<h2 id="crdt-types"><a class="header" href="#crdt-types">CRDT Types</a></h2>
+<h3 id="1-g-counter-grow-only-counter"><a class="header" href="#1-g-counter-grow-only-counter">1. G-Counter (Grow-only Counter)</a></h3>
+<p>A counter that only increments. Each replica maintains its own counter, and the global value is the sum of all replica counters.</p>
+<p><strong>State</strong>: <code>{replica_id → count}</code></p>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>increment(replica_id)</code>: Increase replica’s counter</li>
+<li><code>value()</code>: Sum all counters</li>
+<li><code>merge(other)</code>: Take pairwise maximum</li>
+</ul>
+<p><strong>Properties:</strong></p>
+<ul>
+<li>Monotonically increasing</li>
+<li>Eventually consistent</li>
+<li>Simple and efficient</li>
+</ul>
+<h3 id="2-pn-counter-positive-negative-counter"><a class="header" href="#2-pn-counter-positive-negative-counter">2. PN-Counter (Positive-Negative Counter)</a></h3>
+<p>A counter supporting both increments and decrements using two G-Counters.</p>
+<p><strong>State</strong>: <code>{P: G-Counter, N: G-Counter}</code></p>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>increment(replica_id)</code>: Increment P counter</li>
+<li><code>decrement(replica_id)</code>: Increment N counter</li>
+<li><code>value()</code>: P.value() - N.value()</li>
+<li><code>merge(other)</code>: Merge both P and N</li>
+</ul>
+<h3 id="3-g-set-grow-only-set"><a class="header" href="#3-g-set-grow-only-set">3. G-Set (Grow-only Set)</a></h3>
+<p>A set that only supports additions (no removals).</p>
+<p><strong>State</strong>: <code>Set of elements</code></p>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>add(element)</code>: Add element to set</li>
+<li><code>contains(element)</code>: Check membership</li>
+<li><code>merge(other)</code>: Set union</li>
+</ul>
+<p><strong>Merge</strong>: <code>S1 ⊔ S2 = S1 ∪ S2</code></p>
+<h3 id="4-2p-set-two-phase-set"><a class="header" href="#4-2p-set-two-phase-set">4. 2P-Set (Two-Phase Set)</a></h3>
+<p>A set supporting both additions and removals, but elements can only be added once and removed once.</p>
+<p><strong>State</strong>: <code>{A: G-Set (added), R: G-Set (removed)}</code></p>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>add(element)</code>: Add to A set</li>
+<li><code>remove(element)</code>: Add to R set (if in A)</li>
+<li><code>contains(element)</code>: <code>element ∈ A ∧ element ∉ R</code></li>
+<li><code>merge(other)</code>: Merge both A and R</li>
+</ul>
+<p><strong>Limitation</strong>: Cannot re-add removed elements (tombstone problem).</p>
+<h3 id="5-lww-element-set-last-write-wins-element-set"><a class="header" href="#5-lww-element-set-last-write-wins-element-set">5. LWW-Element-Set (Last-Write-Wins Element Set)</a></h3>
+<p>A set where each element is tagged with a timestamp, and the most recent operation wins.</p>
+<p><strong>State</strong>: <code>{A: {element → timestamp}, R: {element → timestamp}}</code></p>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>add(element, timestamp)</code>: Add element with timestamp</li>
+<li><code>remove(element, timestamp)</code>: Mark removed with timestamp</li>
+<li><code>contains(element)</code>: Element in A with timestamp &gt; R timestamp (or not in R)</li>
+<li><code>merge(other)</code>: Keep element with maximum timestamp for each element</li>
+</ul>
+<p><strong>Bias</strong>: Configurable (add-bias or remove-bias) for concurrent operations with same timestamp.</p>
+<h3 id="6-or-set-observed-remove-set"><a class="header" href="#6-or-set-observed-remove-set">6. OR-Set (Observed-Remove Set)</a></h3>
+<p>A set where removes only affect elements that have been observed (adds always win over concurrent removes).</p>
+<p><strong>State</strong>: <code>{element → Set of unique_tags}</code></p>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>add(element)</code>: Add element with new unique tag</li>
+<li><code>remove(element)</code>: Remove all currently observed tags for element</li>
+<li><code>contains(element)</code>: Element has at least one tag</li>
+<li><code>merge(other)</code>: Union of all tags for each element</li>
+</ul>
+<p><strong>Semantics</strong>: Add-wins (concurrent add beats remove).</p>
+<h3 id="7-lww-register-last-write-wins-register"><a class="header" href="#7-lww-register-last-write-wins-register">7. LWW-Register (Last-Write-Wins Register)</a></h3>
+<p>A register (single value holder) where the value with the latest timestamp wins.</p>
+<p><strong>State</strong>: <code>{value, timestamp}</code></p>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>set(value, timestamp)</code>: Update if timestamp is greater</li>
+<li><code>get()</code>: Return current value</li>
+<li><code>merge(other)</code>: Keep value with maximum timestamp</li>
+</ul>
+<h3 id="8-mv-register-multi-value-register"><a class="header" href="#8-mv-register-multi-value-register">8. MV-Register (Multi-Value Register)</a></h3>
+<p>A register that preserves all concurrent values (supports multiple simultaneous values).</p>
+<p><strong>State</strong>: <code>{value → vector_clock}</code></p>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>set(value, vector_clock)</code>: Add value with its vector clock</li>
+<li><code>get()</code>: Return all concurrent values</li>
+<li><code>merge(other)</code>: Keep values that are concurrent or maximal</li>
+</ul>
+<h2 id="time-and-space-complexity"><a class="header" href="#time-and-space-complexity">Time and Space Complexity</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>CRDT Type</th><th>Add/Update</th><th>Remove</th><th>Query</th><th>Merge</th><th>Space</th></tr>
+</thead>
+<tbody>
+<tr><td>G-Counter</td><td>$O(1)$</td><td>N/A</td><td>$O(n)$</td><td>$O(n)$</td><td>$O(n)$ replicas</td></tr>
+<tr><td>PN-Counter</td><td>$O(1)$</td><td>$O(1)$</td><td>$O(n)$</td><td>$O(n)$</td><td>$O(n)$ replicas</td></tr>
+<tr><td>G-Set</td><td>$O(1)$</td><td>N/A</td><td>$O(1)$</td><td>$O(m)$</td><td>$O(m)$ elements</td></tr>
+<tr><td>2P-Set</td><td>$O(1)$</td><td>$O(1)$</td><td>$O(1)$</td><td>$O(m)$</td><td>$O(m)$ (with tombstones)</td></tr>
+<tr><td>LWW-Element-Set</td><td>$O(1)$</td><td>$O(1)$</td><td>$O(1)$</td><td>$O(m)$</td><td>$O(m)$ elements</td></tr>
+<tr><td>OR-Set</td><td>$O(1)$</td><td>$O(k)$</td><td>$O(1)$</td><td>$O(m \cdot k)$</td><td>$O(m \cdot k)$ tags</td></tr>
+<tr><td>LWW-Register</td><td>$O(1)$</td><td>N/A</td><td>$O(1)$</td><td>$O(1)$</td><td>$O(1)$</td></tr>
+<tr><td>MV-Register</td><td>$O(1)$</td><td>N/A</td><td>$O(k)$</td><td>$O(k)$</td><td>$O(k)$ concurrent values</td></tr>
+</tbody>
+</table>
+</div>
+<p>Where:</p>
+<ul>
+<li><code>n</code> = number of replicas</li>
+<li><code>m</code> = number of elements</li>
+<li><code>k</code> = number of unique tags/concurrent values per element</li>
+</ul>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<h3 id="g-counter-state-based"><a class="header" href="#g-counter-state-based">G-Counter (State-based)</a></h3>
+<pre><code class="language-python">class GCounter:
+    """
+    Grow-only Counter (State-based CRDT)
+    Supports increment and merge operations
+    """
+    def __init__(self, replica_id):
+        self.replica_id = replica_id
+        self.counters = {}  # {replica_id: count}
+
+    def increment(self, amount=1):
+        """Increment this replica's counter - $O(1)$"""
+        if self.replica_id not in self.counters:
+            self.counters[self.replica_id] = 0
+        self.counters[self.replica_id] += amount
+
+    def value(self):
+        """Get total count across all replicas - $O(n)$"""
+        return sum(self.counters.values())
+
+    def merge(self, other):
+        """Merge with another GCounter - $O(n)$"""
+        result = GCounter(self.replica_id)
+        all_replicas = set(self.counters.keys()) | set(other.counters.keys())
+
+        for replica in all_replicas:
+            # Take maximum for each replica (semilattice join)
+            result.counters[replica] = max(
+                self.counters.get(replica, 0),
+                other.counters.get(replica, 0)
+            )
+        return result
+
+    def __repr__(self):
+        return f"GCounter(replica={self.replica_id}, counters={self.counters}, value={self.value()})"
+
+
+# Usage Example
+replica_a = GCounter("A")
+replica_b = GCounter("B")
+
+replica_a.increment(5)
+replica_b.increment(3)
+
+# Merge replicas
+merged = replica_a.merge(replica_b)
+print(merged.value())  # Output: 8
+</code></pre>
+<h3 id="pn-counter-state-based"><a class="header" href="#pn-counter-state-based">PN-Counter (State-based)</a></h3>
+<pre><code class="language-python">class PNCounter:
+    """
+    Positive-Negative Counter (State-based CRDT)
+    Supports increment, decrement, and merge
+    """
+    def __init__(self, replica_id):
+        self.replica_id = replica_id
+        self.positive = GCounter(replica_id)  # Increments
+        self.negative = GCounter(replica_id)  # Decrements
+
+    def increment(self, amount=1):
+        """Increment counter - $O(1)$"""
+        self.positive.increment(amount)
+
+    def decrement(self, amount=1):
+        """Decrement counter - $O(1)$"""
+        self.negative.increment(amount)
+
+    def value(self):
+        """Get net count - $O(n)$"""
+        return self.positive.value() - self.negative.value()
+
+    def merge(self, other):
+        """Merge with another PNCounter - $O(n)$"""
+        result = PNCounter(self.replica_id)
+        result.positive = self.positive.merge(other.positive)
+        result.negative = self.negative.merge(other.negative)
+        return result
+
+    def __repr__(self):
+        return f"PNCounter(value={self.value()}, +{self.positive.value()}, -{self.negative.value()})"
+
+
+# Usage Example
+counter_a = PNCounter("A")
+counter_b = PNCounter("B")
+
+counter_a.increment(10)
+counter_a.decrement(3)
+
+counter_b.increment(5)
+counter_b.decrement(2)
+
+merged = counter_a.merge(counter_b)
+print(merged.value())  # Output: (10 + 5) - (3 + 2) = 10
+</code></pre>
+<h3 id="or-set-observed-remove-set"><a class="header" href="#or-set-observed-remove-set">OR-Set (Observed-Remove Set)</a></h3>
+<pre><code class="language-python">import uuid
+
+class ORSet:
+    """
+    Observed-Remove Set (State-based CRDT)
+    Add-wins semantics: concurrent adds beat removes
+    """
+    def __init__(self):
+        self.elements = {}  # {element: {unique_tag, ...}}
+
+    def add(self, element):
+        """Add element with unique tag - $O(1)$"""
+        if element not in self.elements:
+            self.elements[element] = set()
+        # Generate unique tag for this add operation
+        unique_tag = str(uuid.uuid4())
+        self.elements[element].add(unique_tag)
+        return unique_tag
+
+    def remove(self, element):
+        """Remove element by removing all observed tags - $O(k)$"""
+        if element in self.elements:
+            # Remove all currently observed tags
+            self.elements[element].clear()
+
+    def contains(self, element):
+        """Check if element exists - $O(1)$"""
+        return element in self.elements and len(self.elements[element]) &gt; 0
+
+    def merge(self, other):
+        """Merge with another ORSet - $O(m \cdot k)$"""
+        result = ORSet()
+        all_elements = set(self.elements.keys()) | set(other.elements.keys())
+
+        for element in all_elements:
+            # Union of all tags for each element
+            tags = self.elements.get(element, set()) | other.elements.get(element, set())
+            if tags:
+                result.elements[element] = tags
+
+        return result
+
+    def get_elements(self):
+        """Get all elements in set - $O(m)$"""
+        return {elem for elem, tags in self.elements.items() if tags}
+
+    def __repr__(self):
+        return f"ORSet({self.get_elements()})"
+
+
+# Usage Example
+set_a = ORSet()
+set_b = ORSet()
+
+# Concurrent operations
+set_a.add("apple")
+set_a.add("banana")
+
+set_b.add("apple")  # Concurrent add
+set_b.remove("banana")  # Remove without observing the add
+
+# Merge
+merged = set_a.merge(set_b)
+print(merged.get_elements())  # {'apple', 'banana'} - add wins!
+</code></pre>
+<h3 id="lww-register-last-write-wins-register"><a class="header" href="#lww-register-last-write-wins-register">LWW-Register (Last-Write-Wins Register)</a></h3>
+<pre><code class="language-python">import time
+
+class LWWRegister:
+    """
+    Last-Write-Wins Register (State-based CRDT)
+    The value with the highest timestamp wins
+    """
+    def __init__(self, replica_id):
+        self.replica_id = replica_id
+        self.value = None
+        self.timestamp = 0
+
+    def set(self, value, timestamp=None):
+        """Set value with timestamp - $O(1)$"""
+        if timestamp is None:
+            timestamp = time.time()
+
+        # Only update if new timestamp is greater
+        if timestamp &gt; self.timestamp:
+            self.value = value
+            self.timestamp = timestamp
+
+    def get(self):
+        """Get current value - $O(1)$"""
+        return self.value
+
+    def merge(self, other):
+        """Merge with another register - $O(1)$"""
+        result = LWWRegister(self.replica_id)
+
+        # Keep value with maximum timestamp
+        if self.timestamp &gt; other.timestamp:
+            result.value = self.value
+            result.timestamp = self.timestamp
+        elif other.timestamp &gt; self.timestamp:
+            result.value = other.value
+            result.timestamp = other.timestamp
+        else:
+            # Tie-break: use replica_id or bias (here: keep self)
+            result.value = self.value
+            result.timestamp = self.timestamp
+
+        return result
+
+    def __repr__(self):
+        return f"LWWRegister(value={self.value}, ts={self.timestamp})"
+
+
+# Usage Example
+reg_a = LWWRegister("A")
+reg_b = LWWRegister("B")
+
+reg_a.set("first", timestamp=100)
+reg_b.set("second", timestamp=200)
+
+merged = reg_a.merge(reg_b)
+print(merged.get())  # Output: "second" (higher timestamp)
+</code></pre>
+<h3 id="javascript-implementation-g-counter"><a class="header" href="#javascript-implementation-g-counter">JavaScript Implementation: G-Counter</a></h3>
+<pre><code class="language-javascript">class GCounter {
+  /**
+   * Grow-only Counter (State-based CRDT)
+   * @param {string} replicaId - Unique identifier for this replica
+   */
+  constructor(replicaId) {
+    this.replicaId = replicaId;
+    this.counters = new Map(); // replica_id → count
+  }
+
+  /**
+   * Increment this replica's counter - O(1)
+   * @param {number} amount - Amount to increment
+   */
+  increment(amount = 1) {
+    const current = this.counters.get(this.replicaId) || 0;
+    this.counters.set(this.replicaId, current + amount);
+  }
+
+  /**
+   * Get total count across all replicas - O(n)
+   * @returns {number} Sum of all counters
+   */
+  value() {
+    let sum = 0;
+    for (const count of this.counters.values()) {
+      sum += count;
+    }
+    return sum;
+  }
+
+  /**
+   * Merge with another GCounter - O(n)
+   * @param {GCounter} other - Another GCounter to merge with
+   * @returns {GCounter} Merged result
+   */
+  merge(other) {
+    const result = new GCounter(this.replicaId);
+
+    // Get all replica IDs from both counters
+    const allReplicas = new Set([
+      ...this.counters.keys(),
+      ...other.counters.keys()
+    ]);
+
+    // Take maximum for each replica
+    for (const replica of allReplicas) {
+      const thisCount = this.counters.get(replica) || 0;
+      const otherCount = other.counters.get(replica) || 0;
+      result.counters.set(replica, Math.max(thisCount, otherCount));
+    }
+
+    return result;
+  }
+
+  toString() {
+    return `GCounter(replica=${this.replicaId}, value=${this.value()})`;
+  }
+}
+
+// Usage Example
+const replicaA = new GCounter('A');
+const replicaB = new GCounter('B');
+
+replicaA.increment(5);
+replicaB.increment(3);
+
+const merged = replicaA.merge(replicaB);
+console.log(merged.value()); // Output: 8
+</code></pre>
+<h3 id="crdt-text-editing-simplified"><a class="header" href="#crdt-text-editing-simplified">CRDT Text Editing (Simplified)</a></h3>
+<pre><code class="language-python">class CharWithMetadata:
+    """Character with position and causality information"""
+    def __init__(self, char, position, replica_id, counter):
+        self.char = char
+        self.position = position  # Fractional index between neighbors
+        self.replica_id = replica_id
+        self.counter = counter  # Lamport timestamp
+        self.deleted = False
+
+    def __lt__(self, other):
+        """Compare by position for ordering"""
+        return self.position &lt; other.position
+
+
+class CRDTText:
+    """
+    Simplified CRDT for collaborative text editing
+    Uses fractional indexing for position
+    """
+    def __init__(self, replica_id):
+        self.replica_id = replica_id
+        self.chars = []  # List of CharWithMetadata
+        self.counter = 0
+
+    def insert(self, char, index):
+        """Insert character at index - $O(\log n + n)$"""
+        self.counter += 1
+
+        # Calculate position between neighbors
+        if index == 0:
+            pos = 0.0 if not self.chars else self.chars[0].position - 1.0
+        elif index &gt;= len(self.chars):
+            pos = self.chars[-1].position + 1.0 if self.chars else 0.0
+        else:
+            # Position between index-1 and index
+            prev_pos = self.chars[index - 1].position if index &gt; 0 else 0.0
+            next_pos = self.chars[index].position
+            pos = (prev_pos + next_pos) / 2.0
+
+        char_meta = CharWithMetadata(char, pos, self.replica_id, self.counter)
+        self.chars.append(char_meta)
+        self.chars.sort()  # Maintain order by position
+
+    def delete(self, index):
+        """Delete character at index (tombstone) - $O(1)$"""
+        visible_chars = [c for c in self.chars if not c.deleted]
+        if 0 &lt;= index &lt; len(visible_chars):
+            visible_chars[index].deleted = True
+
+    def merge(self, other):
+        """Merge with another CRDT text - $O(m + n)$"""
+        result = CRDTText(self.replica_id)
+        result.counter = max(self.counter, other.counter)
+
+        # Merge character lists
+        merged_chars = {}
+        for char in self.chars + other.chars:
+            key = (char.position, char.replica_id, char.counter)
+            if key not in merged_chars:
+                merged_chars[key] = char
+            else:
+                # Keep the one marked as deleted if either is deleted
+                if char.deleted or merged_chars[key].deleted:
+                    merged_chars[key].deleted = True
+
+        result.chars = sorted(merged_chars.values())
+        return result
+
+    def to_string(self):
+        """Get visible text - $O(n)$"""
+        return ''.join(c.char for c in self.chars if not c.deleted)
+
+    def __repr__(self):
+        return f"CRDTText('{self.to_string()}')"
+
+
+# Usage Example: Collaborative editing
+doc_a = CRDTText("Alice")
+doc_b = CRDTText("Bob")
+
+# Alice types "Hello"
+for i, char in enumerate("Hello"):
+    doc_a.insert(char, i)
+
+# Bob concurrently types "World"
+for i, char in enumerate("World"):
+    doc_b.insert(char, i)
+
+# Merge documents
+merged = doc_a.merge(doc_b)
+print(merged.to_string())  # Both "Hello" and "World" characters preserved
+</code></pre>
+<h2 id="common-algorithms-and-patterns"><a class="header" href="#common-algorithms-and-patterns">Common Algorithms and Patterns</a></h2>
+<h3 id="delta-state-crdts"><a class="header" href="#delta-state-crdts">Delta-State CRDTs</a></h3>
+<p>To reduce bandwidth, send only the <strong>delta</strong> (changes since last sync) instead of full state.</p>
+<pre><code class="language-python">class DeltaGCounter(GCounter):
+    """G-Counter with delta-state optimization"""
+
+    def __init__(self, replica_id):
+        super().__init__(replica_id)
+        self.delta = {}  # Track changes since last sync
+
+    def increment(self, amount=1):
+        """Increment and record delta - $O(1)$"""
+        super().increment(amount)
+        if self.replica_id not in self.delta:
+            self.delta[self.replica_id] = 0
+        self.delta[self.replica_id] += amount
+
+    def get_delta(self):
+        """Get changes since last sync - $O(k)$ where k = changed replicas"""
+        delta_counter = GCounter(self.replica_id)
+        delta_counter.counters = self.delta.copy()
+        self.delta.clear()  # Reset delta
+        return delta_counter
+
+    def merge_delta(self, delta):
+        """Merge delta state - $O(k)$"""
+        return self.merge(delta)
+</code></pre>
+<h3 id="garbage-collection-for-tombstones"><a class="header" href="#garbage-collection-for-tombstones">Garbage Collection for Tombstones</a></h3>
+<p>CRDTs with remove operations (2P-Set, OR-Set) accumulate tombstones. Garbage collection removes obsolete metadata.</p>
+<pre><code class="language-python">class ORSetWithGC(ORSet):
+    """OR-Set with garbage collection support"""
+
+    def garbage_collect(self, cutoff_timestamp):
+        """
+        Remove tombstones older than cutoff - $O(m)$
+        Requires causal stability: all replicas have seen operations before cutoff
+        """
+        for element in list(self.elements.keys()):
+            if not self.elements[element]:  # Empty tag set
+                del self.elements[element]
+</code></pre>
+<h3 id="vector-clock-implementation"><a class="header" href="#vector-clock-implementation">Vector Clock Implementation</a></h3>
+<pre><code class="language-python">class VectorClock:
+    """Vector clock for tracking causality"""
+
+    def __init__(self, replica_id):
+        self.replica_id = replica_id
+        self.clock = {}  # {replica_id: counter}
+
+    def increment(self):
+        """Increment local counter - $O(1)$"""
+        if self.replica_id not in self.clock:
+            self.clock[self.replica_id] = 0
+        self.clock[self.replica_id] += 1
+
+    def update(self, other):
+        """Update clock with received clock - $O(n)$"""
+        for replica, count in other.clock.items():
+            self.clock[replica] = max(self.clock.get(replica, 0), count)
+        self.increment()
+
+    def happens_before(self, other):
+        """Check if this clock happens before other - $O(n)$"""
+        # self &lt; other iff: self[i] &lt;= other[i] for all i, and exists j: self[j] &lt; other[j]
+        all_replicas = set(self.clock.keys()) | set(other.clock.keys())
+
+        less_than_or_equal = True
+        strictly_less = False
+
+        for replica in all_replicas:
+            self_count = self.clock.get(replica, 0)
+            other_count = other.clock.get(replica, 0)
+
+            if self_count &gt; other_count:
+                less_than_or_equal = False
+                break
+            if self_count &lt; other_count:
+                strictly_less = True
+
+        return less_than_or_equal and strictly_less
+
+    def concurrent(self, other):
+        """Check if clocks are concurrent - $O(n)$"""
+        return not self.happens_before(other) and not other.happens_before(self)
+</code></pre>
+<h3 id="causal-broadcast-for-op-based-crdts"><a class="header" href="#causal-broadcast-for-op-based-crdts">Causal Broadcast for Op-based CRDTs</a></h3>
+<pre><code class="language-python">from collections import deque
+
+class CausalBroadcast:
+    """
+    Ensures causal delivery order for operation-based CRDTs
+    Uses vector clocks
+    """
+    def __init__(self, replica_id, num_replicas):
+        self.replica_id = replica_id
+        self.vector_clock = VectorClock(replica_id)
+        self.buffer = deque()  # Operations waiting for causal dependencies
+
+    def send_operation(self, operation):
+        """Send operation with vector clock - $O(1)$"""
+        self.vector_clock.increment()
+        return {
+            'op': operation,
+            'timestamp': self.vector_clock.clock.copy(),
+            'sender': self.replica_id
+        }
+
+    def receive_operation(self, message):
+        """
+        Receive and buffer operation until causally ready - $O(n)$
+        Returns operations ready to apply
+        """
+        self.buffer.append(message)
+        ready_ops = []
+
+        # Try to deliver buffered operations in causal order
+        i = 0
+        while i &lt; len(self.buffer):
+            msg = self.buffer[i]
+            sender = msg['sender']
+            timestamp = msg['timestamp']
+
+            # Check if causally ready
+            can_deliver = True
+            for replica, count in timestamp.items():
+                local_count = self.vector_clock.clock.get(replica, 0)
+
+                if replica == sender:
+                    # Must be exactly next operation from sender
+                    if count != local_count + 1:
+                        can_deliver = False
+                        break
+                else:
+                    # Must have seen all prior operations from other replicas
+                    if count &gt; local_count:
+                        can_deliver = False
+                        break
+
+            if can_deliver:
+                # Deliver operation
+                self.vector_clock.update(VectorClock(sender))
+                self.vector_clock.clock[sender] = timestamp[sender]
+                ready_ops.append(msg['op'])
+                self.buffer.remove(msg)
+            else:
+                i += 1
+
+        return ready_ops
+</code></pre>
+<h2 id="practical-applications"><a class="header" href="#practical-applications">Practical Applications</a></h2>
+<h3 id="1-collaborative-text-editing"><a class="header" href="#1-collaborative-text-editing">1. Collaborative Text Editing</a></h3>
+<p><strong>Systems</strong>: Google Docs, Figma, Atom Teletype, Apple Notes</p>
+<p><strong>CRDT Used</strong>:</p>
+<ul>
+<li><strong>WOOT</strong> (Without Operational Transformation)</li>
+<li><strong>RGA</strong> (Replicated Growable Array)</li>
+<li><strong>Logoot</strong>: Fractional indexing with unique identifiers</li>
+<li><strong>Yjs</strong>: High-performance CRDT framework</li>
+</ul>
+<p><strong>Example</strong>: Two users editing the same document concurrently:</p>
+<pre><code>User A types: "Hello"
+User B types: "World" at the same position
+Result after merge: "HelloWorld" or "WorldHello" (deterministic based on position/timestamp)
+</code></pre>
+<h3 id="2-distributed-databases"><a class="header" href="#2-distributed-databases">2. Distributed Databases</a></h3>
+<p><strong>Systems</strong>:</p>
+<ul>
+<li><strong>Riak</strong>: Uses CRDTs for counters, sets, maps, and registers</li>
+<li><strong>Redis Enterprise</strong>: CRDT-based active-active geo-distribution</li>
+<li><strong>AntidoteDB</strong>: Highly available transactional database with CRDTs</li>
+</ul>
+<p><strong>Use Case</strong>: Shopping cart that works offline</p>
+<pre><code class="language-python"># Shopping cart as OR-Set CRDT
+cart = ORSet()
+
+# User adds items while offline
+cart.add("laptop")
+cart.add("mouse")
+
+# Later removes item
+cart.remove("mouse")
+
+# Syncs with server - changes merge automatically
+</code></pre>
+<h3 id="3-distributed-caching"><a class="header" href="#3-distributed-caching">3. Distributed Caching</a></h3>
+<p><strong>Pattern</strong>: Multi-master cache with LWW-Register or MV-Register</p>
+<pre><code class="language-python"># Cache value across data centers
+cache_us = LWWRegister("US")
+cache_eu = LWWRegister("EU")
+
+# Update in US
+cache_us.set("user_123_profile", {"name": "Alice", "age": 30}, timestamp=1000)
+
+# Concurrent update in EU
+cache_eu.set("user_123_profile", {"name": "Alice", "age": 31}, timestamp=1001)
+
+# Merge - EU value wins (higher timestamp)
+merged = cache_us.merge(cache_eu)
+</code></pre>
+<h3 id="4-real-time-analytics"><a class="header" href="#4-real-time-analytics">4. Real-time Analytics</a></h3>
+<p><strong>Pattern</strong>: PN-Counter for metrics aggregation</p>
+<pre><code class="language-python"># Page view counter across edge servers
+views_edge1 = PNCounter("edge1")
+views_edge2 = PNCounter("edge2")
+
+# Count views independently
+views_edge1.increment(1523)
+views_edge2.increment(2841)
+
+# Aggregate globally
+total_views = views_edge1.merge(views_edge2)
+print(f"Total views: {total_views.value()}")  # 4364
+</code></pre>
+<h3 id="5-offline-first-mobile-apps"><a class="header" href="#5-offline-first-mobile-apps">5. Offline-First Mobile Apps</a></h3>
+<p><strong>Pattern</strong>: Local-first software with CRDTs</p>
+<p><strong>Example</strong>: Todo list app</p>
+<pre><code class="language-python">class TodoList:
+    """Todo list using OR-Set CRDT"""
+    def __init__(self, replica_id):
+        self.replica_id = replica_id
+        self.items = ORSet()  # Todo items
+        self.completed = ORSet()  # Completed items
+
+    def add_todo(self, item):
+        self.items.add(item)
+
+    def complete_todo(self, item):
+        if self.items.contains(item):
+            self.completed.add(item)
+
+    def remove_todo(self, item):
+        self.items.remove(item)
+        self.completed.remove(item)
+
+    def sync(self, other_list):
+        """Sync with another device"""
+        self.items = self.items.merge(other_list.items)
+        self.completed = self.completed.merge(other_list.completed)
+</code></pre>
+<h3 id="6-configuration-management"><a class="header" href="#6-configuration-management">6. Configuration Management</a></h3>
+<p><strong>Pattern</strong>: Multi-value register for feature flags</p>
+<pre><code class="language-python">class FeatureFlags:
+    """Feature flags using MV-Register"""
+    def __init__(self):
+        self.flags = {}  # {flag_name: MV-Register}
+
+    def set_flag(self, name, enabled, replica_id):
+        if name not in self.flags:
+            self.flags[name] = MVRegister()
+        self.flags[name].set(enabled, VectorClock(replica_id))
+
+    def is_enabled(self, name):
+        """Return True if any replica has it enabled"""
+        if name not in self.flags:
+            return False
+        values = self.flags[name].get()
+        return any(values)  # Optimistic: enable if any says yes
+</code></pre>
+<h2 id="trade-offs-and-best-practices"><a class="header" href="#trade-offs-and-best-practices">Trade-offs and Best Practices</a></h2>
+<h3 id="when-to-use-crdts"><a class="header" href="#when-to-use-crdts">When to Use CRDTs</a></h3>
+<p>✅ <strong>Good Use Cases:</strong></p>
+<ul>
+<li>High availability required (offline-first, geo-distributed)</li>
+<li>Concurrent updates are common</li>
+<li>Low-latency local operations needed</li>
+<li>Network partitions expected</li>
+<li>Eventual consistency is acceptable</li>
+</ul>
+<p>❌ <strong>Not Ideal When:</strong></p>
+<ul>
+<li>Strong consistency required (banking transactions)</li>
+<li>Total ordering of operations critical</li>
+<li>Storage constraints are severe (CRDTs can have metadata overhead)</li>
+<li>Complex invariants must be maintained (e.g., uniqueness constraints)</li>
+</ul>
+<h3 id="performance-considerations"><a class="header" href="#performance-considerations">Performance Considerations</a></h3>
+<ol>
+<li>
+<p><strong>Metadata Overhead</strong></p>
+<ul>
+<li>OR-Set: Each element carries unique tags</li>
+<li>Vector Clocks: Grows with number of replicas</li>
+<li><strong>Solution</strong>: Use delta-state CRDTs, garbage collection</li>
+</ul>
+</li>
+<li>
+<p><strong>Merge Complexity</strong></p>
+<ul>
+<li>Full-state merge can be expensive for large CRDTs</li>
+<li><strong>Solution</strong>: Delta-state synchronization, incremental merge</li>
+</ul>
+</li>
+<li>
+<p><strong>Tombstone Accumulation</strong></p>
+<ul>
+<li>Removed elements leave tombstones</li>
+<li><strong>Solution</strong>: Periodic garbage collection with causal stability</li>
+</ul>
+</li>
+<li>
+<p><strong>Memory Usage</strong></p>
+<ul>
+<li>CRDTs retain metadata for conflict resolution</li>
+<li><strong>Solution</strong>: Use compact representations, prune old data</li>
+</ul>
+</li>
+</ol>
+<h3 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h3>
+<h4 id="1-choose-the-right-crdt"><a class="header" href="#1-choose-the-right-crdt">1. Choose the Right CRDT</a></h4>
+<pre><code>Need counter? → G-Counter (increment only) or PN-Counter (inc/dec)
+Need set with add/remove? → OR-Set (add-wins) or LWW-Set (timestamp-based)
+Need single value? → LWW-Register or MV-Register
+Need ordered collection? → RGA or Logoot (specialized text CRDTs)
+</code></pre>
+<h4 id="2-handle-semantic-conflicts"><a class="header" href="#2-handle-semantic-conflicts">2. Handle Semantic Conflicts</a></h4>
+<p>CRDTs prevent <em>technical</em> conflicts but not <em>semantic</em> ones:</p>
+<pre><code class="language-python"># Bad: Balance can go negative
+account = PNCounter("account_123")
+account.increment(100)  # Deposit $100
+account.decrement(150)  # Withdraw $150 (allowed but semantically wrong!)
+
+# Good: Add application-level validation
+class BankAccount:
+    def __init__(self, account_id):
+        self.balance = PNCounter(account_id)
+        self.pending_withdrawals = ORSet()
+
+    def withdraw(self, amount):
+        if self.balance.value() &gt;= amount:
+            self.balance.decrement(amount)
+            return True
+        else:
+            # Queue for later or reject
+            return False
+</code></pre>
+<h4 id="3-implement-garbage-collection"><a class="header" href="#3-implement-garbage-collection">3. Implement Garbage Collection</a></h4>
+<pre><code class="language-python">class ManagedORSet(ORSet):
+    """OR-Set with automatic GC"""
+    def __init__(self, max_tombstones=10000):
+        super().__init__()
+        self.max_tombstones = max_tombstones
+        self.tombstone_count = 0
+
+    def remove(self, element):
+        super().remove(element)
+        self.tombstone_count += 1
+
+        if self.tombstone_count &gt; self.max_tombstones:
+            self._gc()
+
+    def _gc(self):
+        # Remove elements with no tags
+        self.elements = {k: v for k, v in self.elements.items() if v}
+        self.tombstone_count = 0
+</code></pre>
+<h4 id="4-use-delta-state-for-efficiency"><a class="header" href="#4-use-delta-state-for-efficiency">4. Use Delta-State for Efficiency</a></h4>
+<pre><code class="language-python"># Bad: Send full state every sync (expensive for large CRDTs)
+def sync_full_state(crdt):
+    full_state = crdt.to_dict()  # Potentially huge
+    send_to_replicas(full_state)
+
+# Good: Send only changes
+def sync_delta_state(delta_crdt):
+    delta = delta_crdt.get_delta()  # Only recent changes
+    send_to_replicas(delta)
+</code></pre>
+<h4 id="5-timestamp-hygiene"><a class="header" href="#5-timestamp-hygiene">5. Timestamp Hygiene</a></h4>
+<pre><code class="language-python"># Bad: System clocks can drift or go backwards
+timestamp = time.time()
+
+# Good: Use logical clocks or hybrid logical clocks
+class HybridLogicalClock:
+    """Combines physical and logical time"""
+    def __init__(self):
+        self.wall_clock = 0
+        self.logical = 0
+
+    def tick(self):
+        new_wall = time.time_ns()
+        if new_wall &gt; self.wall_clock:
+            self.wall_clock = new_wall
+            self.logical = 0
+        else:
+            self.logical += 1
+        return (self.wall_clock, self.logical)
+</code></pre>
+<h4 id="6-testing-for-convergence"><a class="header" href="#6-testing-for-convergence">6. Testing for Convergence</a></h4>
+<pre><code class="language-python">def test_convergence():
+    """Test that replicas converge after concurrent operations"""
+    replica_a = ORSet()
+    replica_b = ORSet()
+    replica_c = ORSet()
+
+    # Concurrent operations
+    replica_a.add("x")
+    replica_b.add("y")
+    replica_c.add("z")
+    replica_a.remove("y")
+
+    # Merge in different orders
+    result1 = replica_a.merge(replica_b).merge(replica_c)
+    result2 = replica_c.merge(replica_a).merge(replica_b)
+    result3 = replica_b.merge(replica_c).merge(replica_a)
+
+    # All should converge to same state
+    assert result1.get_elements() == result2.get_elements() == result3.get_elements()
+</code></pre>
+<h3 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h3>
+<p>❌ <strong>Don’t rely on operation order</strong></p>
+<pre><code class="language-python"># Bad: Assuming operations apply in sent order
+crdt.add("a")
+crdt.add("b")
+# Don't assume "a" appears before "b" on other replicas
+</code></pre>
+<p>✅ <strong>Use CRDTs designed for ordering</strong></p>
+<pre><code class="language-python"># Good: Use RGA or other sequence CRDTs for ordered data
+sequence = RGA()
+sequence.insert("a", position=0)
+sequence.insert("b", position=1)
+</code></pre>
+<p>❌ <strong>Don’t use LWW for critical data</strong></p>
+<pre><code class="language-python"># Bad: LWW can lose concurrent updates
+register.set("Alice's edit", timestamp=100)
+register.set("Bob's edit", timestamp=100)  # One edit lost!
+</code></pre>
+<p>✅ <strong>Use MV-Register or application-level merge</strong></p>
+<pre><code class="language-python"># Good: Preserve concurrent values
+mv_register = MVRegister()
+mv_register.set("Alice's edit", vc_alice)
+mv_register.set("Bob's edit", vc_bob)
+all_values = mv_register.get()  # Both preserved, app decides how to merge
+</code></pre>
+<h2 id="advanced-topics"><a class="header" href="#advanced-topics">Advanced Topics</a></h2>
+<h3 id="combining-crdts"><a class="header" href="#combining-crdts">Combining CRDTs</a></h3>
+<p>CRDTs can be composed to create more complex data structures:</p>
+<pre><code class="language-python">class CRDTMap:
+    """Map CRDT: keys → CRDT values"""
+    def __init__(self):
+        self.keys = ORSet()  # Keys as OR-Set
+        self.values = {}  # {key: CRDT_value}
+
+    def set(self, key, value_crdt):
+        """Set key to a CRDT value"""
+        self.keys.add(key)
+        if key not in self.values:
+            self.values[key] = value_crdt
+        else:
+            self.values[key] = self.values[key].merge(value_crdt)
+
+    def remove(self, key):
+        """Remove key"""
+        self.keys.remove(key)
+
+    def merge(self, other):
+        """Merge maps"""
+        result = CRDTMap()
+        result.keys = self.keys.merge(other.keys)
+
+        all_keys = result.keys.get_elements()
+        for key in all_keys:
+            if key in self.values and key in other.values:
+                result.values[key] = self.values[key].merge(other.values[key])
+            elif key in self.values:
+                result.values[key] = self.values[key]
+            else:
+                result.values[key] = other.values[key]
+
+        return result
+</code></pre>
+<h3 id="pure-operation-based-crdt-example"><a class="header" href="#pure-operation-based-crdt-example">Pure Operation-based CRDT Example</a></h3>
+<pre><code class="language-python">class OpBasedGCounter:
+    """
+    Operation-based G-Counter
+    Requires reliable causal broadcast
+    """
+    def __init__(self, replica_id, broadcast_fn):
+        self.replica_id = replica_id
+        self.broadcast = broadcast_fn
+        self.count = 0
+
+    def increment(self, amount=1):
+        """Broadcast increment operation - $O(1)$"""
+        operation = {'type': 'increment', 'amount': amount, 'replica': self.replica_id}
+        self.broadcast(operation)
+        self.apply_increment(amount)
+
+    def apply_increment(self, amount):
+        """Apply increment operation - $O(1)$"""
+        self.count += amount
+
+    def value(self):
+        """Get current value - $O(1)$"""
+        return self.count
+</code></pre>
+<h3 id="strong-eventual-consistency-proof-intuition"><a class="header" href="#strong-eventual-consistency-proof-intuition">Strong Eventual Consistency Proof (Intuition)</a></h3>
+<p>For a state-based CRDT to guarantee <strong>Strong Eventual Consistency (SEC)</strong>:</p>
+<ol>
+<li><strong>Eventual Delivery</strong>: All updates are eventually delivered to all replicas</li>
+<li><strong>Convergence</strong>: Replicas that have received the same updates have equivalent state</li>
+</ol>
+<p><strong>Proof sketch</strong>:</p>
+<ul>
+<li>State space forms a join-semilattice with merge operation <code>⊔</code></li>
+<li>Updates move state monotonically upward: <code>s ⊑ s'</code> after update</li>
+<li>Merge is commutative, associative, idempotent</li>
+<li>For any set of updates <code>U</code>, all permutations of merging reach the same state (LUB)</li>
+</ul>
+<h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
+<p>Imagine you and your friend both have a <strong>shared notebook</strong> where you write down your favorite movies. But there’s a twist: you each have your own copy of the notebook, and sometimes you can’t see what the other person wrote right away (like when you’re not connected to the internet).</p>
+<h3 id="the-problem"><a class="header" href="#the-problem">The Problem</a></h3>
+<p>If you both write “Toy Story” at the same time in your separate notebooks, how do you make sure both notebooks end up with the same list when you finally compare them? What if one of you deletes a movie while the other adds it?</p>
+<h3 id="the-crdt-solution"><a class="header" href="#the-crdt-solution">The CRDT Solution</a></h3>
+<p><strong>CRDTs are like magic rules</strong> for your notebooks that guarantee you’ll <strong>always end up with the same list</strong>, no matter what order you compare your changes!</p>
+<h4 id="example-1-the-counter"><a class="header" href="#example-1-the-counter">Example 1: The Counter</a></h4>
+<p>Imagine counting how many times you’ve watched your favorite movie:</p>
+<ul>
+<li>You’re at home: click, click, click (3 times)</li>
+<li>Your friend at school: click, click (2 times)</li>
+<li>When you meet up, you add your counts: 3 + 2 = <strong>5 times total</strong></li>
+</ul>
+<p>This works because adding numbers doesn’t care about order: 3+2 = 2+3!</p>
+<h4 id="example-2-the-set"><a class="header" href="#example-2-the-set">Example 2: The Set</a></h4>
+<p>You both write movie names:</p>
+<ul>
+<li>You write: “Frozen”, “Moana”</li>
+<li>Friend writes: “Frozen”, “Encanto”</li>
+<li>When you merge: you keep all unique movies: <strong>“Frozen”, “Moana”, “Encanto”</strong></li>
+</ul>
+<p>Even if you both wrote “Frozen”, it only appears once (no duplicates).</p>
+<h4 id="example-3-the-timestamp-trick"><a class="header" href="#example-3-the-timestamp-trick">Example 3: The Timestamp Trick</a></h4>
+<p>What if you both change the same thing?</p>
+<ul>
+<li>You write: “Best movie: Frozen” at 3:00 PM</li>
+<li>Friend writes: “Best movie: Moana” at 3:15 PM</li>
+<li>Rule: <strong>The most recent one wins</strong> → “Best movie: Moana”</li>
+</ul>
+<h3 id="why-this-is-cool"><a class="header" href="#why-this-is-cool">Why This is Cool</a></h3>
+<ol>
+<li><strong>You can work offline</strong>: Write in your notebook anytime, sync later</li>
+<li><strong>No arguments</strong>: The rules automatically decide what to keep</li>
+<li><strong>Nothing gets lost</strong>: If you both add different things, both are kept</li>
+<li><strong>Always the same result</strong>: Doesn’t matter who syncs first</li>
+</ol>
+<h3 id="real-world-magic"><a class="header" href="#real-world-magic">Real-World Magic</a></h3>
+<ul>
+<li><strong>Google Docs</strong>: You and your classmate edit the same document at the same time</li>
+<li><strong>Multiplayer games</strong>: Everyone sees the same game state eventually</li>
+<li><strong>Your phone’s contacts</strong>: Changes sync across your phone, tablet, and computer</li>
+</ul>
+<p>CRDTs are the secret sauce that makes all these work without everyone having to wait for each other! 🎉</p>
+<h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
+<h3 id="academic-papers"><a class="header" href="#academic-papers">Academic Papers</a></h3>
+<ol>
+<li>
+<p><strong>Shapiro et al. (2011)</strong> - “A comprehensive study of Convergent and Commutative Replicated Data Types”</p>
+<ul>
+<li>Original CRDT paper defining state-based and operation-based CRDTs</li>
+</ul>
+</li>
+<li>
+<p><strong>Shapiro et al. (2011)</strong> - “Conflict-free Replicated Data Types” (Technical Report)</p>
+<ul>
+<li>Formal specifications and proofs for major CRDT types</li>
+</ul>
+</li>
+<li>
+<p><strong>Almeida et al. (2018)</strong> - “Delta State Replicated Data Types”</p>
+<ul>
+<li>Optimization for reducing synchronization bandwidth</li>
+</ul>
+</li>
+<li>
+<p><strong>Roh et al. (2011)</strong> - “Replicated abstract data types: Building blocks for collaborative applications”</p>
+<ul>
+<li>RGA (Replicated Growable Array) for sequences</li>
+</ul>
+</li>
+<li>
+<p><strong>Kleppmann &amp; Beresford (2017)</strong> - “A Conflict-Free Replicated JSON Datatype”</p>
+<ul>
+<li>JSON CRDTs for structured data</li>
+</ul>
+</li>
+</ol>
+<h3 id="libraries-and-frameworks"><a class="header" href="#libraries-and-frameworks">Libraries and Frameworks</a></h3>
+<p><strong>JavaScript/TypeScript:</strong></p>
+<ul>
+<li><a href="https://github.com/yjs/yjs">Yjs</a> - High-performance CRDT framework</li>
+<li><a href="https://github.com/automerge/automerge">Automerge</a> - JSON-like CRDT</li>
+<li><a href="https://github.com/share/sharedb">ShareDB</a> - Real-time database with CRDTs</li>
+</ul>
+<p><strong>Python:</strong></p>
+<ul>
+<li><a href="https://github.com/jupyter-server/pycrdt">pycrdt</a> - Python bindings for Yjs</li>
+<li><a href="https://github.com/coast-team/concordant">concordant</a> - CRDT library</li>
+</ul>
+<p><strong>Rust:</strong></p>
+<ul>
+<li><a href="https://github.com/automerge/automerge-rs">automerge-rs</a> - Rust implementation of Automerge</li>
+<li><a href="https://github.com/y-crdt/y-crdt">yrs</a> - Rust port of Yjs</li>
+</ul>
+<p><strong>Go:</strong></p>
+<ul>
+<li><a href="https://github.com/neurodyne/go-crdt">go-crdt</a> - CRDT implementations in Go</li>
+</ul>
+<h3 id="databases-with-crdt-support"><a class="header" href="#databases-with-crdt-support">Databases with CRDT Support</a></h3>
+<ul>
+<li><strong>Riak</strong> - Distributed database with built-in CRDTs</li>
+<li><strong>Redis Enterprise</strong> - Active-active geo-distribution with CRDTs</li>
+<li><strong>AntidoteDB</strong> - Transactional database with CRDT support</li>
+<li><strong>OrbitDB</strong> - Peer-to-peer database using CRDTs</li>
+<li><strong>Datomic</strong> - Immutable database with CRDT-like properties</li>
+</ul>
+<h3 id="articles-and-tutorials"><a class="header" href="#articles-and-tutorials">Articles and Tutorials</a></h3>
+<ul>
+<li><a href="https://crdt.tech/">CRDT.tech</a> - Community hub for CRDT resources</li>
+<li><a href="https://www.inkandswitch.com/local-first/">Local-First Software</a> - Ink &amp; Switch research on CRDTs</li>
+<li><a href="https://dataintensive.net/">Designing Data-Intensive Applications (Kleppmann)</a> - Chapter on replication and CRDTs</li>
+</ul>
+<h3 id="related-topics"><a class="header" href="#related-topics">Related Topics</a></h3>
+<ul>
+<li><a href="./vector_clocks.html">Vector Clocks</a> - Causality tracking</li>
+<li><a href="../systems/distributed_systems.html">Distributed Systems</a> - Context for CRDT usage</li>
+<li><a href="./hash_tables.html">Hash Tables</a> - Often used in CRDT implementations</li>
+<li><a href="./trees.html">Merkle Trees</a> - Efficient state synchronization</li>
+</ul>
+<h3 id="video-resources"><a class="header" href="#video-resources">Video Resources</a></h3>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=B5NULPSiOGw">CRDTs and the Quest for Distributed Consistency</a> - Martin Kleppmann</li>
+<li><a href="https://www.youtube.com/watch?v=yCcWpzY8dIA">Conflict Resolution for Eventual Consistency</a> - Marc Shapiro</li>
+</ul>
+<hr>
+<p><strong>Last Updated</strong>: 2025-01-22
+<strong>Related</strong>: <a href="../systems/distributed_systems.html">Distributed Systems</a>, <a href="../algorithms/consensus.html">Consensus Algorithms</a>, <a href="./vector_clocks.html">Vector Clocks</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../data_structures/implementation_patterns.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../algorithms/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../data_structures/implementation_patterns.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../algorithms/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

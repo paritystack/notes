@@ -90,6 +90,7 @@
     - [Advanced Trees](data_structures/advanced_trees.md)
     - [Complexity Guide](data_structures/complexity_guide.md)
     - [Implementation Patterns](data_structures/implementation_patterns.md)
+    - [Crdt](data_structures/crdt.md)
 
 * [Algorithms](algorithms/README.md)
     - [Big O](algorithms/big_o.md)

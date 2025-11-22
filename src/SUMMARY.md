@@ -55,6 +55,9 @@
     - [Udev](linux/udev.md)
     - [Process](linux/process.md)
     - [Wireguard](linux/wireguard.md)
+    - [Openwrt](linux/openwrt.md)
+    - [Yocto](linux/yocto.md)
+    - [Quic](networking/quic.md)
 
 - [Android](android/README.md)
     - [Android Internals](android/internals.md)
@@ -111,6 +114,7 @@
     - [Sliding Window](algorithms/sliding_window.md)
     - [Two Pointers](algorithms/two_pointers.md)
     - [Union Find](algorithms/union_find.md)
+    - [Heuristic Search](algorithms/heuristic_search.md)
 
 - [Security](security/README.md)
     - [Hashing](security/hashing.md)
@@ -154,6 +158,7 @@
     - [Metrics](machine_learning/metrics.md)
     - [Thinking](machine_learning/thinking.md)
     - [Moe](machine_learning/moe.md)
+    - [Jax](machine_learning/jax.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)
@@ -205,6 +210,7 @@
     - [Ninja](tools/ninja.md)
     - [Ripgrep](tools/ripgrep.md)
     - [Tcpdump](tools/tcpdump.md)
+    - [Uv](tools/uv.md)
 
 - [Embedded](embedded/README.md)
     - [AVR](embedded/avr.md)

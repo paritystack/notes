@@ -116,6 +116,16 @@ Find specific elements in data structures.
 
 See: [Searching Algorithms](searching.md)
 
+**Heuristic Search Algorithms:**
+- Beam Search - Memory-efficient search for large state spaces
+- A* Search - Optimal pathfinding with heuristics
+- Greedy Best-First Search - Fast approximate solutions
+- IDA* - Memory-efficient optimal search
+- Hill Climbing - Local optimization
+- Simulated Annealing - Global optimization with randomization
+
+See: [Heuristic Search Algorithms](heuristic_search.md)
+
 ### 3. Graph Algorithms
 
 Solve problems related to graph structures.
@@ -588,29 +598,30 @@ Explore detailed guides for specific algorithm types:
 ### Sorting & Searching
 3. [Sorting Algorithms](sorting.md) - Comprehensive sorting guide
 4. [Searching Algorithms](searching.md) - Various search techniques
-5. [Binary Search Patterns](binary_search_patterns.md) - Advanced binary search techniques
+5. [Heuristic Search Algorithms](heuristic_search.md) - AI search: Beam Search, A*, IDA*, Hill Climbing
+6. [Binary Search Patterns](binary_search_patterns.md) - Advanced binary search techniques
 
 ### Algorithm Paradigms
-6. [Dynamic Programming](dynamic_programming.md) - DP patterns and problems
-7. [Greedy Algorithms](greedy_algorithms.md) - Greedy approach and examples
-8. [Divide and Conquer](divide_and_conquer.md) - Divide and conquer strategy
-9. [Backtracking](backtracking.md) - Backtracking techniques
+7. [Dynamic Programming](dynamic_programming.md) - DP patterns and problems
+8. [Greedy Algorithms](greedy_algorithms.md) - Greedy approach and examples
+9. [Divide and Conquer](divide_and_conquer.md) - Divide and conquer strategy
+10. [Backtracking](backtracking.md) - Backtracking techniques
 
 ### Common Patterns & Techniques
-10. [Two Pointers](two_pointers.md) - Two pointer technique patterns
-11. [Sliding Window](sliding_window.md) - Sliding window optimization
-12. [Bit Manipulation](bit_manipulation.md) - Bitwise operations and tricks
-13. [Union-Find](union_find.md) - Disjoint set union data structure
+11. [Two Pointers](two_pointers.md) - Two pointer technique patterns
+12. [Sliding Window](sliding_window.md) - Sliding window optimization
+13. [Bit Manipulation](bit_manipulation.md) - Bitwise operations and tricks
+14. [Union-Find](union_find.md) - Disjoint set union data structure
 
 ### Graph & Tree Algorithms
-14. [Graph Algorithms](graph_algorithms.md) - Graph traversal and algorithms
-15. [Tree Algorithms](../data_structures/trees.md) - Tree operations and traversals
+15. [Graph Algorithms](graph_algorithms.md) - Graph traversal and algorithms
+16. [Tree Algorithms](../data_structures/trees.md) - Tree operations and traversals
 
 ### String & Specialized
-16. [String Algorithms](string_algorithms.md) - Pattern matching and string manipulation
-17. [Heaps](../data_structures/heaps.md) - Heap data structure and algorithms
-18. [Tries](../data_structures/tries.md) - Trie data structure and applications
-19. [Raft Consensus](raft.md) - Distributed consensus algorithm
+17. [String Algorithms](string_algorithms.md) - Pattern matching and string manipulation
+18. [Heaps](../data_structures/heaps.md) - Heap data structure and algorithms
+19. [Tries](../data_structures/tries.md) - Trie data structure and applications
+20. [Raft Consensus](raft.md) - Distributed consensus algorithm
 
 ## Quick Reference
 

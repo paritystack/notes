@@ -617,13 +617,30 @@ class Order:
 
 Explore detailed guides for specific topics:
 
+### Core Investment Topics
 1. [General Finance](general.md) - Fundamental concepts and principles
 2. [Stocks](stocks.md) - Equity investing and analysis
-3. [Options](options.md) - Options trading strategies
-4. [Futures](futures.md) - Futures contracts and trading
+3. [Bonds](bonds.md) - Fixed income securities and bond markets
+4. [ETFs](etfs.md) - Exchange-traded funds and passive investing
 5. [Cryptocurrency](crypto.md) - Digital assets and blockchain
-6. [Fundamental Analysis](fundamental_analysis.md) - Company valuation
-7. [Technical Analysis](technical_analysis.md) - Chart patterns and indicators
+
+### Derivatives and Advanced Trading
+6. [Options](options.md) - Options trading strategies
+7. [Futures](futures.md) - Futures contracts and trading
+8. [Derivatives](derivatives.md) - Swaps, forwards, and exotic derivatives
+9. [Forex](forex.md) - Foreign exchange trading
+10. [Commodities](commodities.md) - Commodity markets and trading
+
+### Analysis and Strategy
+11. [Fundamental Analysis](fundamental_analysis.md) - Company valuation and financial statements
+12. [Technical Analysis](technical_analysis.md) - Chart patterns and indicators
+13. [Valuation](valuation.md) - DCF, multiples, and valuation methods
+14. [Algorithmic Trading](algorithmic_trading.md) - Automated trading systems
+
+### Portfolio and Risk Management
+15. [Portfolio Management](portfolio_management.md) - Asset allocation and optimization
+16. [Risk Management](risk_management.md) - Risk measurement and hedging
+17. [Financial Planning](financial_planning.md) - Personal finance and retirement
 
 ## Important Disclaimers
 

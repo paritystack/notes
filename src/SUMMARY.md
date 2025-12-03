@@ -359,9 +359,12 @@
     - [Core Dump Analysis](debugging/core_dump.md)
     - [Linux Kernel Debugging](debugging/linux_kernel.md)
 
+- [Maths](maths/README.md)
+    - [Statistics](maths/statistics.md)
+    - [Calculus](maths/calculus.md)
+    - [Linear Algebra](maths/linear_algebra.md)
+
 - [Miscellaneous](misc/README.md)
-    - [Mathematics](misc/math.md)
-    - [Statistics](misc/statistics.md)
     - [Matplotlib](misc/matplotlib.md)
     - [Pandas](misc/pandas.md)
     - [Blockchain](misc/blockchain.md)

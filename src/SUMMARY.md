@@ -23,6 +23,7 @@
     - [Go](programming/go.md)
     - [Lua](programming/lua.md)
     - [Rust](programming/rust.md)
+    - [Zig](programming/zig.md)
     - [SQL](programming/sql.md)
     - [Interview Questions](programming/interview_questions.md)
     - [Design Patterns](programming/design_patterns.md)

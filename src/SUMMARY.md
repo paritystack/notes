@@ -200,6 +200,7 @@
     - [Vllm](ai/vllm.md)
     - [Software Dev Prompts](ai/software_dev_prompts.md)
     - [Agent Frameworks](ai/agent_frameworks.md)
+    - [Agentic Context Engineering (ACE)](ai/ace.md)
     - [Tool Use](ai/tool_use.md)
 
 - [Cloud](cloud/README.md)

@@ -52,6 +52,7 @@
     - [sysfs](linux/sysfs.md)
     - [Filesystems](linux/filesystems.md)
     - [Namespace](linux/namespace.md)
+    - [Virtualization](linux/virtualization.md)
     - [Selinux](linux/selinux.md)
     - [Udev](linux/udev.md)
     - [Process](linux/process.md)
@@ -77,6 +78,7 @@
     - [Heaps](data_structures/heaps.md)
     - [Tries](data_structures/tries.md)
     - [Bloom Filter](data_structures/bloom_filter.md)
+    - [Probabilistic Structures](data_structures/probabilistic.md)
     - [Lru Cache](data_structures/lru_cache.md)
     - [Segment Trees](data_structures/segment_trees.md)
     - [Union Find](data_structures/union_find.md)
@@ -150,6 +152,7 @@
     - [OAuth 2.0](security/oauth2.md)
     - [JWT](security/jwt.md)
     - [Auth](security/auth.md)
+    - [OWASP Top 10](security/owasp_top_10.md)
 
 - [Wifi](wifi/README.md)
     - [Wifi Basics](wifi/basics.md)
@@ -165,6 +168,7 @@
     - [Deep Learning](machine_learning/deep_learning.md)
     - [Neural Networks](machine_learning/neural_networks.md)
     - [Supervised Learning](machine_learning/supervised_learning.md)
+    - [Gradient Boosting](machine_learning/gradient_boosting.md)
     - [Unsupervised Learning](machine_learning/unsupervised_learning.md)
     - [Reinforcement Learning](machine_learning/reinforcement_learning.md)
     - [Deep Reinforcement Learning](machine_learning/deep_reinforcement_learning.md)
@@ -187,6 +191,8 @@
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)
+    - [Retrieval Augmented Generation (RAG)](ai/rag.md)
+    - [Vector Databases](ai/vector_databases.md)
     - [LLMs](ai/llms.md)
     - [Prompt Engineering](ai/prompt_engineering.md)
     - [LLAMA](ai/llama.md)
@@ -260,6 +266,7 @@
     - [Timers](embedded/timers.md)
     - [Watchdog](embedded/watchdog.md)
     - [Power Management](embedded/power_management.md)
+    - [OTA Updates](embedded/ota_updates.md)
     - [Debugging](embedded/debugging.md)
 
 - [Finance](finance/README.md)
@@ -311,6 +318,7 @@
     - [gRPC](web_development/grpc.md)
     - [Css](web_development/css.md)
     - [Api Design](web_development/api_design.md)
+    - [Accessibility (A11y)](web_development/accessibility.md)
     - [Frontend Performance](web_development/frontend_performance.md)
 
 - [DevOps](devops/README.md)
@@ -323,6 +331,7 @@
     - [Monitoring](devops/monitoring.md)
     - [Terraform](devops/terraform.md)
     - [Observability](devops/observability.md)
+    - [Site Reliability Engineering (SRE)](devops/sre.md)
 
 - [System Design](system_design/README.md)
     - [Scalability](system_design/scalability.md)
@@ -335,6 +344,7 @@
     - [Message Queues](system_design/message_queues.md)
     - [Distributed Systems](system_design/distributed_systems.md)
     - [Load Balancing](system_design/load_balancing.md)
+    - [Rate Limiting](system_design/rate_limiting.md)
 
 - [Mobile Development](mobile_development/README.md)
     - [React Native](mobile_development/react_native.md)

@@ -84,6 +84,11 @@ AVR  |  │          │    │      │  │     │  │    │
 
 ## Core Concepts
 
+### Hardware Architecture
+
+*   **[Instruction Set Architecture (ISA)](isa.md):** The interface between hardware and software (e.g., ARM, RISC-V, x86).
+*   **[Processor Design](processor_design.md):** How the ISA is implemented (e.g., pipelining, cache hierarchy, branch prediction).
+
 ### Memory Architecture
 
 #### Flash Memory (Program Storage)

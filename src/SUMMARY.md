@@ -251,6 +251,8 @@
     - [Uv](tools/uv.md)
 
 - [Embedded](embedded/README.md)
+    - [ISA](embedded/isa.md)
+    - [Processor Design](embedded/processor_design.md)
     - [AVR](embedded/avr.md)
     - [STM32](embedded/stm32.md)
     - [ESP32](embedded/esp32.md)

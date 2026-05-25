@@ -87,6 +87,30 @@ Model adaptation and customization:
 - Training configuration and optimization
 - Evaluation and deployment
 
+### 10. [Skills](./skills.md)
+Claude / Agent Skills — packaged, model-invocable capabilities:
+- SKILL.md structure and YAML frontmatter
+- Progressive disclosure and context efficiency
+- Invocation flow (automatic vs. explicit `/skill-name`)
+- Authoring, distribution, and plugin namespacing
+- Skills vs. tools vs. subagents
+
+### 11. [Claude Code CLI](./cli.md)
+Best practices for developing with Anthropic's Claude Code:
+- Plan mode, subagents, and parallel tool use
+- CLAUDE.md, slash commands, and skills
+- Permissions, hooks, and settings.json
+- MCP servers and IDE integrations
+- Context management and multi-model workflows (Opus/Sonnet/Haiku)
+
+### 12. [Model Context Protocol (MCP)](./mcp.md)
+The open standard for connecting AI assistants to external systems:
+- Client/server architecture and JSON-RPC transports (stdio, HTTP)
+- Core primitives: tools, resources, prompts
+- Sampling, roots, notifications, and OAuth 2.1
+- Building servers in Python and TypeScript
+- Ecosystem (GitHub, Postgres, Slack, Playwright, ...) and security model
+
 ## Key AI Concepts
 
 ### Large Language Models (LLMs)

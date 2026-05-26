@@ -623,6 +623,15 @@ Explore detailed guides for specific algorithm types:
 19. [Tries](../data_structures/tries.md) - Trie data structure and applications
 20. [Raft Consensus](raft.md) - Distributed consensus algorithm
 
+### Advanced Data Structures & Techniques
+21. [Segment Tree](segment_tree.md) - Range queries and updates with lazy propagation
+22. [Fenwick Tree (BIT)](fenwick_tree.md) - Compact prefix-sum tree with point/range updates
+23. [Sparse Table](sparse_table.md) - O(1) static range queries for idempotent operations
+24. [Lowest Common Ancestor (LCA)](lca.md) - Binary lifting, Euler tour, and Tarjan's offline LCA
+25. [Strongly Connected Components](strongly_connected_components.md) - Tarjan, Kosaraju, articulation points, bridges, 2-SAT
+26. [Heavy-Light Decomposition](heavy_light_decomposition.md) - Path queries on trees in O(log² n)
+27. [Mo's Algorithm](mo_algorithm.md) - Offline range queries via sqrt decomposition
+
 ## Quick Reference
 
 ### Most Important Algorithms to Know

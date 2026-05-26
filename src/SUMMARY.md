@@ -213,6 +213,11 @@
     - [Agent Frameworks](ai/agent_frameworks.md)
     - [Agentic Context Engineering (ACE)](ai/ace.md)
     - [Tool Use](ai/tool_use.md)
+    - [Ace](ai/ace.md)
+    - [Cli](ai/cli.md)
+    - [Mcp](ai/mcp.md)
+    - [Rag](ai/rag.md)
+    - [Skills](ai/skills.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)
@@ -331,6 +336,7 @@
     - [Web Security Mechanisms](web_development/web_security.md)
     - [Accessibility (A11y)](web_development/accessibility.md)
     - [Frontend Performance](web_development/frontend_performance.md)
+    - [Accessibility](web_development/accessibility.md)
 
 - [DevOps](devops/README.md)
     - [Docker](devops/docker.md)
@@ -344,6 +350,7 @@
     - [Observability](devops/observability.md)
     - [Chaos Engineering](devops/chaos_engineering.md)
     - [Site Reliability Engineering (SRE)](devops/sre.md)
+    - [Sre](devops/sre.md)
 
 - [System Design](system_design/README.md)
     - [Scalability](system_design/scalability.md)

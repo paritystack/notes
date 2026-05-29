@@ -642,6 +642,23 @@ Explore detailed guides for specific topics:
 16. [Risk Management](risk_management.md) - Risk measurement and hedging
 17. [Financial Planning](financial_planning.md) - Personal finance and retirement
 
+### Macro and Cycles
+18. [Macroeconomics](macroeconomics.md) - GDP, inflation, employment, regimes
+19. [Interest Rates](interest_rates.md) - Yield curve, Fed, duration, real vs nominal
+20. [Market Cycles](market_cycles.md) - Bull/bear, sector rotation, regime detection
+
+### Strategy Playbooks
+21. [Pairs Trading & Mean Reversion](pairs_mean_reversion.md) - Cointegration, stat arb, z-score
+22. [Momentum & Trend Following](momentum_trend.md) - Cross-sectional, time-series, CTA
+23. [Event-Driven Trading](event_driven.md) - Earnings, M&A arb, spin-offs, FDA
+24. [Volatility Trading](volatility_trading.md) - VIX, IV crush, variance premium
+
+### Tax and New Asset Classes
+25. [Tax Strategies](tax_strategies.md) - TLH, wash sales, asset location, withdrawals
+26. [REITs](reits.md) - Equity vs mortgage, FFO/AFFO, sectors, rate sensitivity
+27. [Private Markets](private_markets.md) - PE, VC, GP/LP structure, J-curve
+28. [Credit Markets](credit_markets.md) - IG vs HY, spreads, CDS, MBS/ABS/CLOs
+
 ## Important Disclaimers
 
 1. **Not Financial Advice**: This is educational content only

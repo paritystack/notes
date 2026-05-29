@@ -14,6 +14,7 @@ Database systems and data engineering concepts for storing, querying, and managi
 - **[PostgreSQL](postgres.md)** - Advanced PostgreSQL features, JSON support, performance tuning
 - **[SQLite](sqlite.md)** - Lightweight embedded database for applications
 - **[DuckDB](duckdb.md)** - Analytical database for data analysis and OLAP queries
+- **[ClickHouse](clickhouse.md)** - Column-oriented OLAP database for real-time analytics at scale
 
 ### NoSQL Databases
 

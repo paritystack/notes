@@ -3287,6 +3287,8 @@ print(f"Similarity: {similarity:.1f}%")
 
 Inverted index with pattern matching.
 
+> **See also:** for a deep-dive on the inverted index data structure itself — term dictionaries (FST), posting list compression (VarByte/PFOR-Delta), skip pointers, BM25 top-K with BlockMaxWAND, and segment-based update strategies — see [`data_structures/inverted_index.md`](../data_structures/inverted_index.md).
+
 ```python
 class SimpleSearchEngine:
     """

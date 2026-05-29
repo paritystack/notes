@@ -893,6 +893,12 @@ Explore detailed guides for specific data structures:
 12. [LRU Cache](lru_cache.md) - Least Recently Used cache with O(1) operations
 13. [Bloom Filter](bloom_filter.md) - Space-efficient probabilistic set membership testing
 
+### AI/ML & Search Structures
+14. [HNSW](hnsw.md) - Hierarchical Navigable Small World graphs for approximate nearest neighbor search
+15. [Inverted Index](inverted_index.md) - Term dictionary, posting lists, compression, and top-K retrieval for keyword search
+16. [Product Quantization](product_quantization.md) - Vector compression and IVF-based ANN at billion-scale
+17. [MinHash & LSH](minhash_lsh.md) - Jaccard similarity estimation and sub-linear similar-set retrieval
+
 Related algorithm topics:
 - [Sorting Algorithms](../algorithms/sorting.md)
 - [Searching Algorithms](../algorithms/searching.md)

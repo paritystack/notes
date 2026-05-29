@@ -21,6 +21,38 @@ The practical 4-layer model used in modern networks:
 - Internet Layer
 - Network Access Layer
 
+## Layer 2 / Layer 3 Fundamentals
+
+### [ARP (Address Resolution Protocol)](arp.md)
+- IP-to-MAC mapping on local networks
+- Request/reply exchange and cache lifecycle
+- Gratuitous ARP, proxy ARP, ARP probes
+- ARP spoofing attacks and Dynamic ARP Inspection
+- NDP comparison for IPv6
+
+### [Ethernet & VLAN](ethernet_vlan.md)
+- Ethernet frame format and MAC addresses
+- Switch MAC learning and forwarding
+- 802.1Q VLAN tagging, access vs trunk ports
+- Native VLAN and VLAN hopping
+- Spanning Tree Protocol (STP, RSTP)
+- Link aggregation (LACP), PoE, jumbo frames
+
+### [DHCP (Dynamic Host Configuration Protocol)](dhcp.md)
+- DORA exchange (Discover/Offer/Request/Ack)
+- Lease lifecycle and renewal (T1/T2)
+- DHCP options and PXE boot
+- DHCP relay agents and Option 82
+- DHCPv6 and SLAAC interaction
+- Rogue DHCP, DHCP snooping, starvation attacks
+
+### [MTU, PMTUD & Fragmentation](mtu_pmtud.md)
+- MTU on Ethernet, tunnels, and jumbo frames
+- IPv4 fragmentation vs IPv6 (source-only)
+- Path MTU Discovery and ICMP black holes
+- MSS clamping for VPNs and tunnels
+- Container / overlay network MTU pitfalls
+
 ## Core Protocols
 
 ### [IPv4 (Internet Protocol version 4)](ipv4.md)
@@ -60,6 +92,39 @@ The practical 4-layer model used in modern networks:
 - Headers and caching
 - Authentication and CORS
 - REST API design
+
+## Application Protocols
+
+### [SSH (Secure Shell)](ssh.md)
+- KEX, host keys, user authentication
+- Public key auth and SSH agent
+- Port forwarding (local, remote, dynamic SOCKS)
+- ProxyJump, multiplexing, certificates
+- sshd hardening
+
+### [HTTP/2](http2.md)
+- Binary framing and stream multiplexing
+- HPACK header compression
+- Flow control and prioritization
+- ALPN negotiation, h2 vs h2c
+- Server push (deprecated) and Early Hints
+- vs HTTP/1.1 and HTTP/3 (see [QUIC](quic.md))
+
+### [gRPC](grpc.md)
+- Protobuf schemas and code generation
+- Four call types (unary, server-streaming, client-streaming, bidirectional)
+- Status codes, deadlines, metadata
+- Interceptors and middleware
+- mTLS and per-call auth
+- Reflection, grpcurl, gRPC-Web
+
+### [IoT Protocols (MQTT + CoAP)](iot_protocols.md)
+- MQTT pub/sub, QoS levels, retained messages
+- Last Will and Testament, keep-alive
+- MQTT 5 features (shared subs, properties)
+- CoAP REST-like over UDP
+- Confirmable messages, Observe, block-wise transfer
+- DTLS, CoAP-HTTP proxying
 
 ## Name Resolution
 
@@ -140,6 +205,39 @@ The practical 4-layer model used in modern networks:
 - Media codecs and quality adaptation
 - Security with mandatory encryption
 - Simulcast and bandwidth management
+
+## VPN & Overlay Networks
+
+### [WireGuard](wireguard.md)
+- Noise protocol handshake, cryptokey routing
+- Static keypairs and AllowedIPs
+- PersistentKeepalive for NAT traversal
+- Roaming across networks
+- Tailscale / Headscale / Netbird control planes
+- Comparison to OpenVPN/IPsec
+
+### [IPsec](ipsec.md)
+- ESP vs AH, transport vs tunnel mode
+- IKEv2 negotiation and Security Associations
+- NAT-T (UDP 4500 encapsulation)
+- strongSwan / Libreswan configuration
+- Linux XFRM framework
+- Site-to-site and road-warrior patterns
+
+### [Container Networking](container_networking.md)
+- Linux network namespaces, veth pairs, bridges
+- Docker bridge mode and port publishing
+- Kubernetes pod networking model
+- CNI plugins (Flannel, Calico, Cilium)
+- kube-proxy modes (iptables, IPVS, eBPF)
+- NetworkPolicy and service routing
+
+### [Overlay Networks (VXLAN, GRE, Geneve)](overlay_networks.md)
+- L2-in-L3 encapsulation primitives
+- VXLAN with multicast / EVPN / unicast control planes
+- GRE for simple point-to-point tunnels
+- Geneve TLV extensibility (modern replacement)
+- MTU and encryption considerations
 
 ## Network Discovery
 

@@ -7,11 +7,12 @@
 4. [eBPF Maps](#ebpf-maps)
 5. [Development Tools](#development-tools)
 6. [Writing eBPF Programs](#writing-ebpf-programs)
-7. [Common Use Cases](#common-use-cases)
-8. [Examples](#examples)
-9. [Security and Safety](#security-and-safety)
-10. [Debugging](#debugging)
-11. [Resources](#resources)
+7. [Modern eBPF Features](#modern-ebpf-features)
+8. [Common Use Cases](#common-use-cases)
+9. [Examples](#examples)
+10. [Security and Safety](#security-and-safety)
+11. [Debugging](#debugging)
+12. [Resources](#resources)
 
 ---
 
@@ -135,6 +136,17 @@ int xdp_prog(struct xdp_md *ctx) {
 }
 ```
 
+**XDP Modes**:
+- **Native (driver) XDP**: runs in the driver's RX path, fastest (requires driver support)
+- **Generic XDP** (`xdpgeneric`): runs after `skb` allocation, works on any NIC, slower
+- **Offloaded XDP**: program runs on the SmartNIC itself (e.g. Netronome)
+
+**Redirection maps & zero-copy**:
+- `BPF_MAP_TYPE_DEVMAP` / `DEVMAP_HASH`: redirect to another interface for `XDP_REDIRECT`
+- `BPF_MAP_TYPE_CPUMAP`: redirect packets to a remote CPU for load distribution
+- `BPF_MAP_TYPE_XSKMAP`: redirect into an **AF_XDP (XSK)** socket for zero-copy
+  userspace packet processing (DPDK-style fast path without leaving the kernel's NIC ring)
+
 ### TC (Traffic Control)
 
 Attaches to network queueing discipline (ingress/egress).
@@ -221,6 +233,53 @@ int BPF_PROG(file_open, struct file *file) {
     return 0; // Allow
 }
 ```
+
+### Fentry/Fexit (BPF Trampolines)
+
+BTF-based tracing of kernel functions via BPF trampolines (kernel 5.5+). The modern,
+lower-overhead replacement for kprobes/kretprobes on BTF-enabled kernels: arguments and
+return values are directly typed instead of decoded from `pt_regs`.
+
+```c
+// Entry: typed access to function arguments
+SEC("fentry/tcp_connect")
+int BPF_PROG(tcp_connect_entry, struct sock *sk) {
+    return 0;
+}
+
+// Exit: typed args plus the return value
+SEC("fexit/tcp_connect")
+int BPF_PROG(tcp_connect_exit, struct sock *sk, int ret) {
+    return 0;
+}
+```
+
+### Struct_ops
+
+Programs that implement a kernel-defined struct of callbacks (kernel 5.6+). The BPF program
+*becomes* an implementation the kernel calls into.
+
+**Use Cases**: pluggable TCP congestion control algorithms, HID-BPF, and `sched_ext`.
+
+```c
+SEC("struct_ops/cong_avoid")
+void BPF_PROG(my_cong_avoid, struct sock *sk, __u32 ack, __u32 acked) {
+    // Custom congestion-control logic
+}
+
+SEC(".struct_ops")
+struct tcp_congestion_ops my_ca = {
+    .cong_avoid = (void *)my_cong_avoid,
+    .name       = "bpf_mycc",
+};
+```
+
+### sched_ext (SCX)
+
+Extensible scheduler class (kernel 6.12+) built on `struct_ops`, allowing CPU schedulers to
+be implemented entirely in BPF and loaded/swapped at runtime — with a safety watchdog that
+falls back to the default scheduler if the BPF scheduler misbehaves. Used for rapid
+scheduler experimentation (e.g. the `scx_*` schedulers like `scx_rusty`, `scx_lavd`).
 
 ### Other Program Types
 
@@ -340,6 +399,43 @@ struct {
 bpf_tail_call(ctx, &prog_array, index);
 ```
 
+#### BPF_MAP_TYPE_BLOOM_FILTER
+Probabilistic set-membership filter (kernel 5.16+). No keys — only values are pushed; lookups
+report "possibly present" or "definitely absent". Useful for cheaply skipping expensive work.
+
+```c
+struct {
+    __uint(type, BPF_MAP_TYPE_BLOOM_FILTER);
+    __uint(max_entries, 10000);
+    __type(value, u32);
+    __uint(map_extra, 5); // number of hash functions
+} seen SEC(".maps");
+
+bpf_map_push_elem(&seen, &val, BPF_ANY);
+if (bpf_map_peek_elem(&seen, &val) == 0) { /* possibly seen */ }
+```
+
+#### Local Storage Maps
+Storage attached to the lifetime of a kernel object, automatically freed when the object dies.
+Heavily used in modern tracers/security tools to associate state without manual cleanup.
+
+- `BPF_MAP_TYPE_TASK_STORAGE`: per-task (process/thread) storage
+- `BPF_MAP_TYPE_SK_STORAGE`: per-socket storage
+- `BPF_MAP_TYPE_INODE_STORAGE`: per-inode storage
+- `BPF_MAP_TYPE_CGRP_STORAGE`: per-cgroup storage (kernel 6.2+)
+
+```c
+struct {
+    __uint(type, BPF_MAP_TYPE_TASK_STORAGE);
+    __uint(map_flags, BPF_F_NO_PREALLOC);
+    __type(key, int);
+    __type(value, u64);
+} task_state SEC(".maps");
+
+u64 *st = bpf_task_storage_get(&task_state, task, NULL,
+                               BPF_LOCAL_STORAGE_GET_F_CREATE);
+```
+
 ### Map Operations
 
 ```c
@@ -382,6 +478,11 @@ int hello(void *ctx) {
 b = BPF(text=prog)
 b.attach_kprobe(event="sys_clone", fn_name="hello")
 ```
+
+> **Note**: The BCC project has largely shifted its tools to **libbpf-tools** (CO-RE,
+> compiled ahead of time with no runtime LLVM/kernel-headers dependency). Prefer the
+> `libbpf-tools/` versions for production; the Python BCC interface remains useful for
+> prototyping.
 
 ### libbpf
 
@@ -445,12 +546,36 @@ link, err := link.AttachXDP(link.XDPOptions{
 defer link.Close()
 ```
 
+### eBPF for Rust
+
+Two main approaches:
+
+- **Aya**: a pure-Rust framework where both the kernel-side BPF program *and* the user-space
+  loader are written in Rust, with **no libbpf and no LLVM/bpf-linker runtime dependency** on
+  the target. CO-RE and BTF supported. Good fit for distributing self-contained binaries.
+- **libbpf-rs**: idiomatic Rust bindings over libbpf; BPF code is still written in C and
+  compiled with Clang, with a `libbpf-cargo` build step generating skeletons.
+
+```rust
+// Aya user-space loader (excerpt)
+use aya::{Ebpf, programs::Xdp};
+
+let mut bpf = Ebpf::load_file("prog.o")?;
+let prog: &mut Xdp = bpf.program_mut("xdp_prog").unwrap().try_into()?;
+prog.load()?;
+prog.attach("eth0", aya::programs::XdpFlags::default())?;
+```
+
 ### Other Tools
 
 - **Cilium**: Container networking with eBPF
+- **Hubble**: Network observability for Cilium (flows, service map)
+- **Tetragon**: eBPF runtime security observability & enforcement (Cilium)
 - **Katran**: Layer 4 load balancer (Facebook)
 - **Falco**: Runtime security monitoring
-- **Pixie**: Observability platform
+- **Tracee**: Runtime security & forensics (Aqua Security)
+- **Pixie**: Observability platform (auto-instrumentation)
+- **Parca**: Continuous (always-on) profiling using eBPF
 - **bpftrace**: High-level tracing language
 
 ---
@@ -533,6 +658,11 @@ int trace_connect(struct pt_regs *ctx) {
 ```bash
 bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 ```
+
+**Running CO-RE on kernels without BTF**: kernels older than 5.2, or those built without
+`CONFIG_DEBUG_INFO_BTF`, lack `/sys/kernel/btf/vmlinux`. **BTFHub** provides pre-generated
+BTF for thousands of distro kernels; libbpf can load an external BTF blob (and tools can ship
+a `min_core_btf`-trimmed BTF to keep binaries small) so a single CO-RE binary runs everywhere.
 
 ### User-Space Loader (libbpf)
 
@@ -854,6 +984,124 @@ char LICENSE[] SEC("license") = "GPL";
 
 ---
 
+## Modern eBPF Features
+
+Capabilities that have matured since the early "maps + helpers" model, enabling far richer
+programs (timers, dynamic memory, in-kernel data structures, safe unprivileged delegation).
+
+### kfuncs (BPF Kernel Functions)
+
+Type-safe kernel functions exported for direct calling from BPF programs. Unlike the fixed,
+UAPI-stable helper list, kfuncs are declared per-program with `__ksym` and can evolve with the
+kernel. They are the modern mechanism behind dynptrs, BPF data structures, and much more.
+
+```c
+// Declare the kfunc the kernel exports
+extern struct task_struct *bpf_task_acquire(struct task_struct *p) __ksym;
+extern void bpf_task_release(struct task_struct *p) __ksym;
+```
+
+### BPF Timers (5.15+)
+
+Run a callback after a delay, fully inside the kernel, from a timer stored in a map value.
+
+```c
+struct elem { struct bpf_timer t; };
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 1);
+    __type(key, int);
+    __type(value, struct elem);
+} timers SEC(".maps");
+
+static int cb(void *map, int *key, struct elem *e) { return 0; }
+
+// init -> set callback -> start (nanoseconds)
+bpf_timer_init(&e->t, &timers, CLOCK_MONOTONIC);
+bpf_timer_set_callback(&e->t, cb);
+bpf_timer_start(&e->t, 1000000000ULL, 0);
+```
+
+### bpf_loop Helper (5.17+)
+
+Verifier-friendly bounded iteration with far higher limits than `#pragma unroll`, and without
+exploding instruction count. The callback runs up to `nr_loops` times.
+
+```c
+static long body(u32 i, void *ctx) {
+    // returns 0 to continue, 1 to break early
+    return 0;
+}
+bpf_loop(1000000, body, &my_ctx, 0);
+```
+
+### Dynptrs (5.19+)
+
+Dynamically-sized, bounds-checked pointers that let the verifier track buffer length at
+runtime — safer and more flexible than fixed-size `bpf_probe_read` patterns.
+
+```c
+struct bpf_dynptr ptr;
+bpf_ringbuf_reserve_dynptr(&events, len, 0, &ptr);
+void *p = bpf_dynptr_data(&ptr, 0, len);  // verifier knows the bounds
+bpf_ringbuf_submit_dynptr(&ptr, 0);
+```
+
+### BPF Iterators (5.8+)
+
+Walk kernel state (tasks, sockets, map entries…) and emit it to user space via a seq_file,
+read like a file from a pinned iterator. Great for snapshotting state without polling.
+
+```c
+SEC("iter/task")
+int dump_tasks(struct bpf_iter__task *ctx) {
+    struct task_struct *task = ctx->task;
+    if (!task) return 0;
+    BPF_SEQ_PRINTF(ctx->meta->seq, "%d %s\n", task->pid, task->comm);
+    return 0;
+}
+```
+
+### Sleepable Programs (5.10+)
+
+Programs that may sleep/fault, allowing helpers that take page faults (e.g. user-memory reads
+in uprobes, certain LSM hooks). Marked with `BPF_F_SLEEPABLE` and the `.s` section suffix.
+
+```c
+SEC("lsm.s/bprm_check_security")   // ".s" = sleepable
+int BPF_PROG(check, struct linux_binprm *bprm) {
+    return 0;
+}
+```
+
+### In-Kernel Data Structures (6.x)
+
+`kptr`s and allocated objects (`bpf_obj_new` / `bpf_obj_drop`) let programs build dynamic
+structures the verifier tracks for ownership and safety — backed by **linked lists** and
+**rbtrees** via kfuncs.
+
+```c
+struct node { struct bpf_list_node n; int val; };
+// bpf_obj_new(typeof(*p)) allocates; pushed under a bpf_spin_lock
+bpf_list_push_back(&my_list, &p->n);
+bpf_rbtree_add(&my_tree, &p->rb, less_cb);
+```
+
+### BPF Arena (6.9+)
+
+A sparse, demand-paged memory region shared between a BPF program and user space, addressable
+by normal pointers from both sides. Enables building large dynamic data structures (hash
+tables, allocators) in BPF without the constraints of fixed map entries.
+
+### BPF Token (6.9+)
+
+A delegation mechanism that lets an unprivileged or containerized workload perform specific
+BPF operations (load programs, create maps) without holding full `CAP_BPF`/`CAP_SYS_ADMIN`.
+A privileged manager mints a token (from a bpffs mount with delegation options) and hands the
+fd to the workload — see [Security and Safety](#security-and-safety) for the capability model.
+
+---
+
 ## Security and Safety
 
 ### Verifier Guarantees
@@ -917,6 +1165,11 @@ Loading eBPF programs requires:
 # Grant specific capabilities
 setcap cap_bpf,cap_perfmon,cap_net_admin+eip ./my_program
 ```
+
+**BPF tokens** (kernel 6.9+) provide a finer-grained alternative to handing out `CAP_BPF`:
+a privileged process configures delegation on a `bpffs` mount and passes a token fd to an
+otherwise-unprivileged workload, scoping exactly which BPF commands, map types, and program
+types it may use (see [Modern eBPF Features](#modern-ebpf-features)).
 
 ### Unprivileged eBPF
 
@@ -1099,9 +1352,14 @@ perf report
 - **libbpf**: https://github.com/libbpf/libbpf
 - **bpftool**: https://github.com/libbpf/bpftool
 - **Cilium**: https://github.com/cilium/cilium
+- **Tetragon**: https://github.com/cilium/tetragon
 - **Katran**: https://github.com/facebookincubator/katran
 - **Falco**: https://github.com/falcosecurity/falco
+- **Tracee**: https://github.com/aquasecurity/tracee
 - **bpftrace**: https://github.com/iovisor/bpftrace
+- **Aya (Rust)**: https://github.com/aya-rs/aya — docs: https://aya-rs.dev/
+- **libbpf-rs**: https://github.com/libbpf/libbpf-rs
+- **sched_ext schedulers**: https://github.com/sched-ext/scx
 
 ### Example Collections
 
@@ -1189,16 +1447,26 @@ cat /sys/kernel/debug/tracing/trace_pipe
 
 - **3.18** (2014): Initial eBPF support
 - **4.1** (2015): BPF maps, tail calls
-- **4.4** (2016): XDP support
-- **4.8** (2016): Direct packet access
+- **4.7** (2016): Direct packet access
+- **4.8** (2016): XDP support
 - **4.18** (2018): BTF (BPF Type Format)
-- **5.2** (2019): Bounded loops support
+- **5.3** (2019): Bounded loops support
+- **5.5** (2020): fentry/fexit, BPF trampolines
 - **5.7** (2020): LSM BPF programs
-- **5.8** (2020): Ring buffer, `CAP_BPF`
-- **5.13** (2021): Kernel module function calls
+- **5.8** (2020): Ring buffer, `CAP_BPF`, BPF iterators
+- **5.10** (2020): Sleepable BPF programs
+- **5.13** (2021): Kernel module function calls (kfuncs)
+- **5.15** (2021): BPF timers
+- **5.16** (2022): Bloom filter map
+- **5.17** (2022): `bpf_loop` helper
+- **5.19** (2022): Dynptrs, BPF kfuncs maturing
 - **6.0** (2022): Sleepable programs enhancements
+- **6.4** (2023): BPF allocated objects, linked lists
+- **6.6** (2023): BPF exceptions, cpumask kfuncs
+- **6.9** (2024): BPF arena, BPF token
+- **6.12** (2024): sched_ext (SCX) extensible scheduler
 
 ---
 
-**Last Updated**: 2024
-**Kernel Version Coverage**: Linux 3.18 - 6.x
+**Last Updated**: 2026-05
+**Kernel Version Coverage**: Linux 3.18 - 6.13

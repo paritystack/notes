@@ -36,6 +36,8 @@ The definition of "similarity" depends on the math used to compare vectors.
 
 To search fast, we trade accuracy for speed (Approximate Nearest Neighbor).
 
+> **See also:** for deep-dive treatments of the data structures themselves (algorithms, complexity, implementation, tuning), see [`data_structures/hnsw.md`](../data_structures/hnsw.md) and [`data_structures/product_quantization.md`](../data_structures/product_quantization.md).
+
 ### 3.1. HNSW (Hierarchical Navigable Small World)
 The industry standard.
 *   **Structure:** A multi-layered graph. Top layers have few "long-range" links (like highways). Bottom layers have dense "short-range" links (local roads).

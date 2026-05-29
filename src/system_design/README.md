@@ -2,16 +2,52 @@
 
 Designing large-scale distributed systems for performance, scalability, and reliability.
 
-## Topics Covered
+## Foundations
 
 - **[Scalability](scalability.md)**: Horizontal vs vertical scaling, load balancing strategies
 - **[Caching](caching.md)**: Cache strategies, invalidation, distributed caching
+- **[Load Balancing](load_balancing.md)**: Algorithms, OSI layers, health checks
+- **[Consistent Hashing](consistent_hashing.md)**: Even partitioning with minimal remapping
+- **[Rate Limiting](rate_limiting.md)**: Throttling algorithms (token bucket, leaky bucket)
 - **[RPC](rpc.md)**: Remote Procedure Call frameworks and patterns
-- **[Microservices](microservices.md)**: Microservices architecture patterns, service decomposition, communication patterns
+
+## Distributed Systems
+
+- **[Distributed Systems](distributed_systems.md)**: CAP, consistency models, replication, partitioning
+- **[Distributed Consensus](distributed_consensus.md)**: Paxos, Raft, consistency models
 - **[Databases](databases.md)**: SQL vs NoSQL, sharding, replication
 - **[Message Queues](message_queues.md)**: Asynchronous processing, event-driven architecture
-- **[Distributed Consensus](distributed_consensus.md)**: Consistency models, CAP theorem
-- **[Design Patterns](design_patterns.md)**: Common solutions for distributed systems
+
+## Architecture
+
+- **[Microservices](microservices.md)**: Service decomposition, communication, deployment
+- **[Design Patterns](design_patterns.md)**: API gateway, BFF, circuit breaker, saga, CQRS, event sourcing
+
+## Concept Primers
+
+Focused interview-style references for topics that show up in nearly every design.
+
+- **[CDN](cdn.md)**: Edge caching, origin shield, invalidation, edge compute
+- **[Observability](observability.md)**: Logs/metrics/traces, OpenTelemetry, RED/USE, SLO alerting
+- **[WebSockets & Realtime](websockets_realtime.md)**: WS/SSE/long-poll, scaling stateful connections
+- **[Idempotency](idempotency.md)**: Idempotency keys, dedup, exactly-once illusions
+- **[ID Generation](id_generation.md)**: Snowflake, UUIDv7, ULID, KSUID
+
+## Interview Toolkit
+
+- **[Interview Framework](interview_framework.md)**: The 7-phase playbook (clarify → estimate → API → data → HLD → deep dive → wrap)
+- **[Estimation Cheatsheet](estimation_cheatsheet.md)**: Latency numbers, QPS/storage math, sizing templates
+
+## Case Studies
+
+Canonical design problems. Each follows the same template: Requirements → Estimation → API → Data model → HLD → Deep dives → Bottlenecks → Tradeoffs → Follow-ups.
+
+- **[URL Shortener](design_url_shortener.md)** (TinyURL/Bitly): ID gen, KV store, read-heavy cache
+- **[News Feed](design_news_feed.md)** (Twitter/Facebook): Fan-out, celebrity problem
+- **[Chat System](design_chat_system.md)** (WhatsApp/Slack): WS, ordering, group fan-out
+- **[Ride Sharing](design_ride_sharing.md)** (Uber/Lyft): Geospatial, matching, surge
+- **[Video Streaming](design_video_streaming.md)** (YouTube/Netflix): CDN, ABR, transcoding
+- **[Typeahead](design_typeahead.md)** (Google Suggest): Trie at scale, top-K, freshness
 
 ## Key Concepts
 
@@ -28,14 +64,18 @@ Designing large-scale distributed systems for performance, scalability, and reli
 3. **Performance**: Fast responses
 4. **Maintainability**: Easy to update
 
-## Steps to Design System
+## How to Approach a Design
 
-1. Understand requirements and constraints
-2. High-level architecture
-3. Detailed design of components
-4. Identify bottlenecks
-5. Trade-offs and optimization
+See `interview_framework.md` for the full playbook. In short:
+
+1. Clarify requirements & scope (functional + non-functional)
+2. Capacity estimation (QPS, storage, bandwidth)
+3. API design
+4. Data model
+5. High-level architecture
+6. Deep dives on hard parts
+7. Bottlenecks & tradeoffs
 
 ## Navigation
 
-Learn principles for designing systems at scale.
+Foundations and primers first, then case studies. The case studies cross-link back to primers for depth.

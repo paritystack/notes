@@ -6,7 +6,8 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 
 1. [Essential Commands](./commands.md) - Command reference and examples
 2. [Kernel Architecture](./kernel.md) - Linux kernel internals and development
-3. [Kernel Development Patterns](./kernel_patterns.md) - Common patterns and best practices for kernel development
+3. [Memory Management](./memory_management.md) - Virtual memory, paging, allocators, reclaim, and OOM
+4. [Kernel Development Patterns](./kernel_patterns.md) - Common patterns and best practices for kernel development
 4. [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless subsystem frameworks for WiFi drivers
 5. [Driver Development](./driver_development.md) - Linux driver model and device driver development
 6. [Device Tree](./device_tree.md) - Hardware description using Device Tree
@@ -21,6 +22,7 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 15. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
 16. [Netlink](./netlink.md) - Kernel-userspace communication interface
 17. [eBPF](./ebpf.md) - Extended Berkeley Packet Filter for kernel programmability
+18. [Control Groups (cgroups)](./cgroups.md) - Resource limiting, accounting, and isolation for process groups
 
 ## Overview
 
@@ -39,9 +41,11 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 
 ### For Developers
 - [Kernel Architecture](./kernel.md) - Understand Linux internals
+- [Memory Management](./memory_management.md) - Virtual memory, paging, allocators, and reclaim
 - [Kernel Development Patterns](./kernel_patterns.md) - Coding patterns and best practices
 - [Driver Development](./driver_development.md) - Linux driver model and device drivers
 - [Device Tree](./device_tree.md) - Hardware description and parsing
+- [Control Groups (cgroups)](./cgroups.md) - Resource control for containers and services
 - [Cross Compilation](./cross_compilation.md) - Building for embedded systems
 - [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless driver development
 - [Essential Commands](./commands.md) - Development and debugging tools

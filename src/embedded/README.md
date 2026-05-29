@@ -244,11 +244,44 @@ Speed (Mbps)
 - **[Timers](timers.md)**: Hardware timers for precise timing
 - **[Interrupts](interrupts.md)**: Event-driven programming
 - **[Watchdog](watchdog.md)**: System reliability and reset
+- **[Clock Systems](clock_systems.md)**: Crystals, PLL, clock tree, MCO
 
 ### Specialized Interfaces
 - **[RTC](rtc.md)**: Real-Time Clock for timekeeping
 - **[SDIO](sdio.md)**: SD card interface
 - **[Ethernet](ethernet.md)**: Network connectivity
+- **[DMA](dma.md)**: Direct memory access for peripheral streaming
+
+## Firmware Infrastructure
+
+- **[Bootloaders](bootloaders.md)**: Boot flow, vector relocation, A/B updates, MCUboot
+- **[OTA Updates](ota_updates.md)**: Field firmware updates
+- **[Linker Scripts](linker_scripts.md)**: Memory layout and section placement
+- **[CMSIS](cmsis.md)**: ARM's standard core API, HAL vs LL vs bare-metal
+- **[Build Systems](build_systems.md)**: Make, CMake, PlatformIO, west, ESP-IDF
+- **[Flash Filesystems](flash_filesystems.md)**: LittleFS, SPIFFS, FatFs, NVS
+
+## Wireless
+
+- **[BLE](ble.md)**: GAP, GATT, advertising, pairing, MCU BLE stacks
+- **[LoRa & LoRaWAN](lora.md)**: Sub-GHz long-range, chirp spread spectrum, OTAA/ABP
+
+## Hardware Fundamentals
+
+- **[Signal Integrity](signal_integrity.md)**: Decoupling, ground planes, reflections, level shifting
+
+## Security
+
+- **[Secure Boot](secure_boot.md)**: Chain of trust, signed images, RDP, anti-rollback
+- **[TrustZone-M](trustzone_m.md)**: Armv8-M hardware isolation, SAU, NSC, PSA, TF-M
+
+## Debugging
+
+- **[Debugging](debugging.md)**: General techniques
+- **[JTAG & SWD](jtag_swd.md)**: Wire-level debug protocols, CoreSight, probes
+- **[HardFault Debugging](hardfault_debugging.md)**: CFSR/HFSR decoding, fault handlers, crash dumps
+- **[RTT & Semihosting](rtt_semihosting.md)**: Printf alternatives via debug probe
+- **[GDB for Embedded](gdb_embedded.md)**: Workflows, scripting, probe integration
 
 ## Getting Started
 

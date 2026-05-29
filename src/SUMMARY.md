@@ -204,7 +204,6 @@
     - [Generative Models](machine_learning/generative_models.md)
     - [Deep Generative Models](machine_learning/deep_generative_models.md)
     - [Transfer Learning](machine_learning/transfer_learning.md)
-    - [Transformers Architecture](ai/transformers_architecture.md)
     - [Transformers](machine_learning/transformers.md)
     - [Hugging Face](machine_learning/hugging_face.md)
     - [PyTorch](machine_learning/pytorch.md)

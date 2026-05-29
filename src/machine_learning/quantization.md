@@ -764,6 +764,86 @@ NF4_LEVELS = [
 ]
 ```
 
+## GGUF Quantization and Naming (Q4_K_M, etc.)
+
+When you download community models from sites like Hugging Face, you'll often see files named like `llama-3-8b-instruct.Q4_K_M.gguf`. This naming comes from **llama.cpp** and its **GGUF** file format (the successor to the older GGML format), which is the de facto standard for running LLMs on CPUs, Apple Silicon, and consumer GPUs.
+
+The schemes here are different from GPTQ/AWQ/NF4 above: they are weight-only quantization formats designed for fast CPU/GPU inference inside llama.cpp, not Hugging Face `transformers`.
+
+### Decoding the Name
+
+A name like `Q4_K_M` breaks into three parts:
+
+| Segment | Meaning |
+|---------|---------|
+| `Q4` | The precision budget — roughly **4 bits per weight**. `Q` = quantized. |
+| `K` | The **K-quant method** (super-block scaling). It is *not* a version number. |
+| `M` | A **size tier**: `S` < `M` < `L`. Controls how many tensors are bumped to higher precision. |
+
+So `Q4_K_M` = "4-bit K-quant, medium tier."
+
+> **Important nuance:** "4 bits per weight" is nominal, not actual. The *effective* bits-per-weight is higher because quantization metadata (per-block scales and mins) is stored alongside the weights. Q4_K is roughly **4.5 bpw** in practice, which is why a 7B model in Q4_K_M lands near ~4.1 GB rather than the naive 7B × 4 bits = 3.5 GB.
+
+### Legacy Quants (the "type 0/1" formats)
+
+The original llama.cpp quants used a single flat scale per block of 32 weights:
+
+| Name | Bits | Scheme | Notes |
+|------|------|--------|-------|
+| `Q4_0` | 4 | Symmetric (scale only) | Oldest, fastest, lowest quality |
+| `Q4_1` | 4 | Asymmetric (scale + min) | Slightly better than Q4_0 |
+| `Q5_0` | 5 | Symmetric | Better quality, larger |
+| `Q5_1` | 5 | Asymmetric | |
+| `Q8_0` | 8 | Symmetric | Near-lossless, often used as a baseline |
+
+These are largely superseded by K-quants for 2–6 bit ranges, but `Q8_0` is still common when you want minimal quality loss.
+
+### K-Quants (the `_K` family)
+
+K-quants ("K" for the super-block scheme) improved quality at the same bit budget by using **two levels of scaling**:
+
+1. Weights are grouped into **super-blocks of 256**, each split into **8 sub-blocks of 32**.
+2. Each sub-block gets its own quantized scale (and min, for asymmetric variants), stored compactly (e.g. 6-bit).
+3. A single higher-precision (FP16) **super-block scale** multiplies all the sub-block scales.
+
+This hierarchical scaling adapts to local weight variation far better than one flat scale per block, so K-quants give noticeably lower perplexity than legacy quants at the same nominal bit width.
+
+K-quants exist at multiple bit budgets: `Q2_K`, `Q3_K`, `Q4_K`, `Q5_K`, `Q6_K`. (`Q8_0` has no K variant — at 8 bits the extra machinery isn't worth it.)
+
+### Size Tiers: S, M, L
+
+The `_S` / `_M` / `_L` suffix is a **mixed-precision** knob. Within a single file, llama.cpp keeps some tensors at higher precision than the base type because they matter more for quality — typically the attention `wv` (value) and the feed-forward `w2` (down-projection) tensors, plus embeddings/output.
+
+- `_S` (small): everything at the base type (e.g. all Q4_K). Smallest, lowest quality.
+- `_M` (medium): a subset of important tensors bumped up (e.g. some tensors in Q6_K while the rest stay Q4_K). The usual recommended default.
+- `_L` (large): even more tensors bumped to higher precision. Largest, best quality of the three.
+
+So `Q4_K_M` and `Q5_K_M` aren't *uniformly* 4- or 5-bit — they're mostly that, with the sensitive tensors carried at 6 bits.
+
+### I-Quants (the `IQ` family)
+
+Newer `IQ` types (e.g. `IQ2_XXS`, `IQ3_XS`, `IQ4_NL`) use **importance-matrix (imatrix)** calibration plus codebook/lookup-based quantization to squeeze quality out of very low bit budgets (2–4 bits). They generally beat K-quants on quality-per-byte at the low end, at the cost of:
+
+- Slower inference on some hardware (more compute per weight).
+- Requiring an imatrix (calibration data) to build well.
+
+`NL` = "non-linear" (non-uniform levels, similar in spirit to NF4); `XXS`/`XS`/`S` are size tiers as before.
+
+### Common Types and When to Use Them
+
+Approximate bits-per-weight and the usual guidance:
+
+| Type | ~bpw | Quality | Typical use |
+|------|------|---------|-------------|
+| `Q2_K` / `IQ2_*` | 2.5–3 | Low | Only when severely memory-limited |
+| `Q3_K_M` / `IQ3_*` | ~3.5 | Fair | Squeezing a bigger model onto small VRAM |
+| `Q4_K_M` | ~4.5 | Good | **Recommended default** — best size/quality balance |
+| `Q5_K_M` | ~5.5 | Better | When you have a bit more memory to spare |
+| `Q6_K` | ~6.5 | Near-FP16 | High quality, diminishing returns vs Q5 |
+| `Q8_0` | ~8.5 | ~Lossless | Baseline / quality reference |
+
+**Rule of thumb:** start with `Q4_K_M`. Drop to `Q3_K_M`/`IQ3` only if it doesn't fit; move up to `Q5_K_M`/`Q6_K` if you have headroom and want more quality. A larger model at a lower quant (e.g. 13B `Q4_K_M`) usually beats a smaller model at a higher quant (7B `Q6_K`) for the same memory budget.
+
 ## Quantization for Different Architectures
 
 ### Convolutional Neural Networks (CNNs)

@@ -238,7 +238,6 @@
     - [Agent Frameworks](ai/agent_frameworks.md)
     - [Agentic Context Engineering (ACE)](ai/ace.md)
     - [Tool Use](ai/tool_use.md)
-    - [Ace](ai/ace.md)
     - [Cli](ai/cli.md)
     - [Mcp](ai/mcp.md)
     - [Rag](ai/rag.md)

@@ -240,7 +240,6 @@
     - [Tool Use](ai/tool_use.md)
     - [Cli](ai/cli.md)
     - [Mcp](ai/mcp.md)
-    - [Rag](ai/rag.md)
     - [Skills](ai/skills.md)
 
 - [Cloud](cloud/README.md)
@@ -387,7 +386,6 @@
     - [Web Security Mechanisms](web_development/web_security.md)
     - [Accessibility (A11y)](web_development/accessibility.md)
     - [Frontend Performance](web_development/frontend_performance.md)
-    - [Accessibility](web_development/accessibility.md)
 
 - [DevOps](devops/README.md)
     - [Docker](devops/docker.md)

@@ -15,8 +15,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-aafba5d1.js";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f4c5bb4e.js"></script>
+        <script src="../toc-62d4d51c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -182,13 +182,123 @@
 <p>DuckDB is optimized for analytical queries with columnar storage, vectorized execution, and minimal dependencies.</p>
 <p><strong>Key Features:</strong></p>
 <ul>
-<li>In-process, embedded database</li>
-<li>Columnar storage for analytics</li>
-<li>ACID compliant</li>
-<li>Vectorized query execution</li>
-<li>No external dependencies</li>
-<li>SQL compatible</li>
-<li>Direct querying of CSV, Parquet, JSON</li>
+<li>In-process, embedded database (no server, links into your process)</li>
+<li>Columnar storage with per-column compression (FSST, dictionary, RLE, ALP)</li>
+<li>ACID compliant with MVCC snapshot isolation</li>
+<li>Vectorized query execution on chunks of 2048 values</li>
+<li>Morsel-driven parallelism across all CPU cores</li>
+<li>No external dependencies — a single library</li>
+<li>Standard SQL plus a rich “friendly SQL” dialect</li>
+<li>Direct querying of CSV, Parquet, JSON, Arrow without import</li>
+<li>Larger-than-memory execution via automatic spilling</li>
+<li>Extensions for httpfs/S3, Iceberg, Delta, spatial, full-text, vector search</li>
+</ul>
+<p><strong>When to reach for it:</strong></p>
+<ul>
+<li>Local analytics on files (Parquet, CSV) that are too big for Pandas/Polars but don’t justify a cluster</li>
+<li>Embedded analytics inside an application (similar role to SQLite, OLAP role instead of OLTP)</li>
+<li>Notebook / ad-hoc data exploration with SQL</li>
+<li>ETL pipelines that need a fast SQL engine without infrastructure</li>
+<li>Lakehouse-style reads against Iceberg/Delta tables on object storage</li>
+</ul>
+<h2 id="architecture"><a class="header" href="#architecture">Architecture</a></h2>
+<pre><code>┌────────────────────────────────────────────────────────────────┐
+│                       DuckDB (in-process)                      │
+│                                                                │
+│  SQL ─► Parser ─► Binder ─► Optimizer ─► Physical Plan         │
+│                                              │                 │
+│                                              ▼                 │
+│                              ┌───────────────────────────┐     │
+│                              │  Vectorized Executor      │     │
+│                              │  (DataChunk = 2048 rows)  │     │
+│                              │  Morsel-driven scheduler  │     │
+│                              └───────────┬───────────────┘     │
+│                                          │                     │
+│              ┌───────────────────────────┼─────────────────┐   │
+│              ▼                           ▼                 ▼   │
+│       ┌────────────┐             ┌─────────────┐    ┌────────┐ │
+│       │  Buffer    │             │  External   │    │ Catalog│ │
+│       │  Manager   │             │  Readers    │    │ + WAL  │ │
+│       │ (block I/O)│             │ (httpfs,    │    │        │ │
+│       └─────┬──────┘             │  parquet,   │    └────────┘ │
+│             │                    │  csv, json) │                │
+│             ▼                    └─────────────┘                │
+│   ┌────────────────────┐                                        │
+│   │ Single-file *.duckdb│                                       │
+│   │ (block-based,       │                                       │
+│   │  columnar storage)  │                                       │
+│   └────────────────────┘                                        │
+└────────────────────────────────────────────────────────────────┘
+</code></pre>
+<ul>
+<li><strong>Single-file storage</strong>: a database is one <code>.duckdb</code> file plus a small <code>.wal</code>. Copy, move, or attach over the network like a SQLite file.</li>
+<li><strong>Block-based columnar layout</strong>: rows are grouped into row groups (~120K rows); each column is stored separately with its own compression scheme.</li>
+<li><strong>Vectorized execution</strong>: operators process <code>DataChunk</code>s of up to 2048 values, keeping data in CPU cache and letting the compiler emit SIMD.</li>
+<li><strong>Morsel-driven parallelism</strong>: scans are split into morsels (~100K rows) and stolen across threads — no manual partition keys needed.</li>
+<li><strong>External readers</strong>: <code>read_parquet</code>, <code>read_csv</code>, <code>read_json</code>, <code>httpfs</code>, <code>iceberg_scan</code>, <code>delta_scan</code> plug into the same vectorized pipeline as native tables.</li>
+</ul>
+<h2 id="storage-format"><a class="header" href="#storage-format">Storage Format</a></h2>
+<ul>
+<li><strong>File layout</strong>: header block → catalog → row-group metadata → column data blocks → free list. Block size is 256 KB by default.</li>
+<li><strong>Row groups</strong>: ~122,880 rows (60 × 2048) by default. Each holds per-column compressed data plus min/max zone maps and null bitmaps.</li>
+<li><strong>Per-column compression</strong> is chosen per row group based on data shape:
+<ul>
+<li><code>Constant</code> for single-value columns</li>
+<li><code>RLE</code> for runs (e.g. sorted timestamps)</li>
+<li><code>Dictionary</code> for low-cardinality strings</li>
+<li><code>FSST</code> (Fast Static Symbol Table) for compressible strings</li>
+<li><code>Bit-packing</code> and <code>FOR</code> (frame-of-reference) for tight integers</li>
+<li><code>ALP</code> / <code>Chimp</code> / <code>Patas</code> for floating-point columns</li>
+</ul>
+</li>
+<li><strong>Zone maps</strong>: every row group stores min/max per column → predicate filters skip entire row groups before touching data.</li>
+<li><strong>Checkpoint vs WAL</strong>: writes go to the WAL first, then a checkpoint rewrites the affected blocks. <code>PRAGMA force_checkpoint;</code> flushes manually.</li>
+<li><strong>Compatibility</strong>: storage version is stable across minor releases since v0.10. <code>pragma storage_info('table_name')</code> exposes per-block layout.</li>
+</ul>
+<h2 id="vectorized-execution"><a class="header" href="#vectorized-execution">Vectorized Execution</a></h2>
+<ul>
+<li><strong>DataChunk</strong> is the unit of data flow — a column-major mini-batch of up to 2048 values per column, kept hot in L1/L2 cache.</li>
+<li><strong>Push-based pipeline</strong>: operators in a query plan hand chunks to the next operator without materializing intermediate rows.</li>
+<li><strong>Vector types</strong>: <code>FLAT</code>, <code>CONSTANT</code>, <code>DICTIONARY</code>, <code>SEQUENCE</code> — operators short-circuit on <code>CONSTANT</code>/<code>SEQUENCE</code> instead of expanding to FLAT.</li>
+<li><strong>Hash aggregates and joins</strong> use vectorized probes; hash tables are partitioned across threads.</li>
+<li><strong>SIMD</strong>: tight inner loops (integer comparisons, arithmetic, decompression) auto-vectorize. Use <code>pragma enable_progress_bar</code> to watch long queries.</li>
+</ul>
+<h2 id="mvcc--transactions"><a class="header" href="#mvcc--transactions">MVCC &amp; Transactions</a></h2>
+<ul>
+<li><strong>Snapshot isolation</strong>: each transaction sees a stable snapshot; readers never block writers.</li>
+<li><strong>Single-writer</strong>: only one writer at a time <em>per database file</em>. Multiple processes can attach the same file in read-only mode.</li>
+<li><strong>Optimistic concurrency control</strong>: write/write conflicts raise <code>TransactionContext Error: ... Conflict on tuple</code> at commit time.</li>
+<li><strong>No row-level locks</strong> — different from Postgres; you cannot <code>SELECT ... FOR UPDATE</code>.</li>
+<li><strong>Implicit transactions</strong>: every statement runs in its own transaction unless wrapped in <code>BEGIN ... COMMIT</code>.</li>
+<li><strong>WAL durability</strong>: <code>pragma wal_autocheckpoint = '...'</code> controls checkpoint cadence; <code>pragma disable_checkpoint_on_shutdown</code> for tests.</li>
+</ul>
+<pre><code class="language-sql">-- Inspect the current transaction state
+SELECT * FROM duckdb_settings() WHERE name LIKE '%transaction%';
+
+-- Force-flush WAL into the main file
+PRAGMA force_checkpoint;
+</code></pre>
+<h2 id="larger-than-memory-execution"><a class="header" href="#larger-than-memory-execution">Larger-than-Memory Execution</a></h2>
+<p>DuckDB streams and spills automatically when working sets exceed <code>memory_limit</code>.</p>
+<ul>
+<li><strong>Out-of-core operators</strong>: hash join, hash aggregate, ORDER BY, window functions all spill to <code>temp_directory</code>.</li>
+<li><strong>Spill files</strong> are compressed; you’ll see them as <code>duckdb_temp_*</code> under the configured temp dir.</li>
+<li><strong>Tune</strong>: set <code>memory_limit</code> to ~75% of RAM and <code>temp_directory</code> to a fast local disk (NVMe).</li>
+<li><strong>Avoid OOMs from string blow-up</strong>: very wide <code>VARCHAR</code> columns expand in hash tables; cast to <code>BLOB</code> or <code>UUID</code> when applicable.</li>
+</ul>
+<pre><code class="language-sql">SET memory_limit = '8GB';
+SET temp_directory = '/var/tmp/duckdb';
+SET max_temp_directory_size = '200GB';
+
+-- See current spill usage
+SELECT * FROM duckdb_temporary_files();
+</code></pre>
+<h2 id="parallelism"><a class="header" href="#parallelism">Parallelism</a></h2>
+<ul>
+<li><code>SET threads TO N</code> controls the worker pool; default = physical cores.</li>
+<li>Morsel-driven scheduling means parallelism is automatic for scans, joins, aggregates, and CSV/Parquet ingest.</li>
+<li>Parallelism <em>hurts</em> on very small queries (overhead dominates) — set <code>threads = 1</code> in tight benchmarks.</li>
+<li><code>EXPLAIN ANALYZE</code> reports per-operator timing including idle thread time.</li>
 </ul>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <pre><code class="language-bash"># Ubuntu/Debian
@@ -375,6 +485,121 @@ SELECT
     score,
     PERCENT_RANK() OVER (ORDER BY score) AS percentile
 FROM scores;
+</code></pre>
+<h2 id="friendly-sql"><a class="header" href="#friendly-sql">Friendly SQL</a></h2>
+<p>DuckDB ships a set of SQL dialect extensions that cut boilerplate. None of these exist in standard SQL but they are widely used in DuckDB code.</p>
+<h3 id="star-expressions"><a class="header" href="#star-expressions">Star expressions</a></h3>
+<pre><code class="language-sql">-- Exclude columns from a star
+SELECT * EXCLUDE (password_hash, internal_id) FROM users;
+
+-- Replace columns in-place (rename/transform without listing all columns)
+SELECT * REPLACE (LOWER(email) AS email, created_at::DATE AS created_at)
+FROM users;
+
+-- Rename columns in the projection
+SELECT * RENAME (username AS handle, created_at AS signup_date)
+FROM users;
+
+-- Combine: exclude + replace
+SELECT * EXCLUDE (password_hash) REPLACE (LOWER(email) AS email)
+FROM users;
+
+-- COLUMNS() picks columns dynamically
+SELECT COLUMNS(c -&gt; c LIKE 'metric_%') FROM measurements;
+SELECT COLUMNS('^sales_\d{4}$') FROM revenue;  -- regex
+SELECT MIN(COLUMNS(* EXCLUDE id)) FROM measurements;  -- apply MIN to each column
+</code></pre>
+<h3 id="group-by-all--order-by-all"><a class="header" href="#group-by-all--order-by-all">GROUP BY ALL / ORDER BY ALL</a></h3>
+<pre><code class="language-sql">-- Group by every non-aggregated SELECT expression automatically
+SELECT region, product, SUM(amount) AS total
+FROM sales
+GROUP BY ALL;  -- equivalent to GROUP BY region, product
+
+-- Order by every SELECT expression
+SELECT region, product, SUM(amount) FROM sales GROUP BY ALL ORDER BY ALL;
+</code></pre>
+<h3 id="qualify"><a class="header" href="#qualify">QUALIFY</a></h3>
+<p>Filters the output of window functions without wrapping in a subquery.</p>
+<pre><code class="language-sql">-- Top 3 orders per customer
+SELECT customer_id, order_id, amount,
+       ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC) AS rn
+FROM orders
+QUALIFY rn &lt;= 3;
+
+-- Without QUALIFY, this would need a CTE or subquery
+</code></pre>
+<h3 id="from-first-syntax"><a class="header" href="#from-first-syntax">FROM-first syntax</a></h3>
+<pre><code class="language-sql">-- Lets you start typing the table name first (good for autocomplete)
+FROM users SELECT username, email WHERE active;
+FROM users;  -- shorthand for SELECT * FROM users
+</code></pre>
+<h3 id="chained-comparisons-and-string-slicing"><a class="header" href="#chained-comparisons-and-string-slicing">Chained comparisons and string slicing</a></h3>
+<pre><code class="language-sql">SELECT * FROM measurements WHERE 0 &lt; value &lt; 100;
+SELECT 'hello world'[1:5];     -- 'hello' (1-indexed, inclusive)
+SELECT 'hello world'[-5:];     -- 'world'
+SELECT [1, 2, 3, 4, 5][2:4];   -- [2, 3, 4]
+</code></pre>
+<h3 id="list-comprehensions-and-lambdas"><a class="header" href="#list-comprehensions-and-lambdas">List comprehensions and lambdas</a></h3>
+<pre><code class="language-sql">-- List comprehension
+SELECT [x * 2 FOR x IN [1, 2, 3, 4, 5] IF x &gt; 2];  -- [6, 8, 10]
+
+-- Lambdas with higher-order list functions
+SELECT list_transform([1, 2, 3, 4], x -&gt; x * x);   -- [1, 4, 9, 16]
+SELECT list_filter([1, 2, 3, 4], x -&gt; x % 2 = 0);  -- [2, 4]
+SELECT list_reduce([1, 2, 3, 4], (acc, x) -&gt; acc + x);  -- 10
+
+-- Combined with COLUMNS
+SELECT list_transform([col_a, col_b, col_c], x -&gt; x * 100) FROM data;
+</code></pre>
+<h3 id="union-by-name"><a class="header" href="#union-by-name">UNION BY NAME</a></h3>
+<pre><code class="language-sql">-- Standard UNION matches by column position. UNION BY NAME aligns by name
+-- and fills missing columns with NULL.
+SELECT 1 AS a, 2 AS b
+UNION BY NAME
+SELECT 3 AS b, 4 AS c;
+-- Result: (a=1, b=2, c=NULL), (a=NULL, b=3, c=4)
+</code></pre>
+<h3 id="sampling"><a class="header" href="#sampling">Sampling</a></h3>
+<pre><code class="language-sql">-- Reservoir sample (exact N rows)
+SELECT * FROM huge_table USING SAMPLE 1000;
+
+-- Bernoulli sample (each row independently with probability)
+SELECT * FROM huge_table USING SAMPLE 5 PERCENT;
+
+-- System sample (block-level, much faster, less uniform)
+SELECT * FROM huge_table USING SAMPLE 5 PERCENT (system, 42);  -- seed=42
+
+-- Sample inside a subquery
+SELECT AVG(price) FROM (FROM products USING SAMPLE 10000);
+</code></pre>
+<h3 id="positional-and-lateral-joins"><a class="header" href="#positional-and-lateral-joins">Positional and LATERAL joins</a></h3>
+<pre><code class="language-sql">-- POSITIONAL JOIN matches rows by row order (zip-like)
+SELECT * FROM ts POSITIONAL JOIN values;
+
+-- LATERAL lets the right side reference the left side row-by-row
+SELECT u.id, top_orders.*
+FROM users u,
+     LATERAL (
+         SELECT * FROM orders o
+         WHERE o.user_id = u.id
+         ORDER BY o.amount DESC
+         LIMIT 3
+     ) top_orders;
+</code></pre>
+<h3 id="trailing-commas-multi-line-strings-and-friendly-errors"><a class="header" href="#trailing-commas-multi-line-strings-and-friendly-errors">Trailing commas, multi-line strings, and friendly errors</a></h3>
+<pre><code class="language-sql">SELECT
+    id,
+    name,
+    email,        -- trailing comma allowed
+FROM users
+GROUP BY
+    id,
+    name,
+;                  -- trailing comma allowed
+</code></pre>
+<h3 id="is-distinct-from-and-null-safe-equality"><a class="header" href="#is-distinct-from-and-null-safe-equality">IS DISTINCT FROM and NULL-safe equality</a></h3>
+<pre><code class="language-sql">SELECT * FROM users WHERE last_login IS DISTINCT FROM previous_login;
+-- True even when one side is NULL — unlike `=`
 </code></pre>
 <h2 id="aggregations"><a class="header" href="#aggregations">Aggregations</a></h2>
 <pre><code class="language-sql">-- Basic aggregations
@@ -628,23 +853,242 @@ SELECT * FROM active_users;
 -- Drop view
 DROP VIEW active_users;
 </code></pre>
+<h2 id="macros-sql-udfs"><a class="header" href="#macros-sql-udfs">Macros (SQL UDFs)</a></h2>
+<p>Macros are inlined SQL functions — no per-row interpreter overhead.</p>
+<pre><code class="language-sql">-- Scalar macro
+CREATE MACRO add_one(x) AS x + 1;
+SELECT add_one(41);  -- 42
+
+-- Multi-argument with defaults
+CREATE MACRO bucket(value, width := 10) AS (value // width) * width;
+SELECT bucket(57);             -- 50
+SELECT bucket(57, width := 5); -- 55
+
+-- Table macro (returns a relation)
+CREATE MACRO recent_orders(days) AS TABLE
+    SELECT * FROM orders
+    WHERE created_at &gt; CURRENT_DATE - INTERVAL (days) DAY;
+
+SELECT * FROM recent_orders(7);
+
+-- Inspect macros
+SELECT * FROM duckdb_functions() WHERE function_type = 'macro';
+</code></pre>
+<h2 id="python-udfs"><a class="header" href="#python-udfs">Python UDFs</a></h2>
+<p>Python functions registered with type hints are callable from SQL.</p>
+<pre><code class="language-python">import duckdb
+from duckdb.typing import VARCHAR, INTEGER
+
+con = duckdb.connect()
+
+# Scalar UDF
+def cap(s: str) -&gt; str:
+    return s.upper()
+
+con.create_function('cap', cap, [VARCHAR], VARCHAR)
+con.sql("SELECT cap('hello')").show()  # HELLO
+
+# Vectorized UDF (PyArrow) — orders of magnitude faster for batch work
+import pyarrow as pa
+def add_one_arrow(arr: pa.Array) -&gt; pa.Array:
+    import pyarrow.compute as pc
+    return pc.add(arr, 1)
+
+con.create_function('add_one', add_one_arrow,
+                    [INTEGER], INTEGER, type='arrow')
+con.sql("SELECT add_one(range) FROM range(5)").show()
+</code></pre>
+<h2 id="prepared-statements"><a class="header" href="#prepared-statements">Prepared Statements</a></h2>
+<pre><code class="language-sql">PREPARE top_n_orders(INTEGER) AS
+    SELECT * FROM orders ORDER BY amount DESC LIMIT $1;
+
+EXECUTE top_n_orders(10);
+
+DEALLOCATE top_n_orders;
+</code></pre>
+<pre><code class="language-python"># Positional placeholders
+con.execute("SELECT * FROM users WHERE id = ?", [42])
+
+# Named placeholders
+con.execute("SELECT * FROM users WHERE id = $id AND active = $a",
+            {'id': 42, 'a': True})
+
+# Bulk insert with executemany
+con.executemany("INSERT INTO users(id, email) VALUES (?, ?)",
+                [(1, 'a@x'), (2, 'b@x'), (3, 'c@x')])
+</code></pre>
+<h2 id="recursive-ctes"><a class="header" href="#recursive-ctes">Recursive CTEs</a></h2>
+<pre><code class="language-sql">-- Graph traversal: find all descendants of node 1
+WITH RECURSIVE descendants(id, parent_id, depth) AS (
+    SELECT id, parent_id, 0 FROM nodes WHERE id = 1
+    UNION ALL
+    SELECT n.id, n.parent_id, d.depth + 1
+    FROM nodes n
+    JOIN descendants d ON n.parent_id = d.id
+)
+SELECT * FROM descendants ORDER BY depth, id;
+
+-- Fibonacci
+WITH RECURSIVE fib(i, a, b) AS (
+    SELECT 1, 0, 1
+    UNION ALL
+    SELECT i + 1, b, a + b FROM fib WHERE i &lt; 20
+)
+SELECT i, a FROM fib;
+</code></pre>
+<h2 id="advanced-window-functions"><a class="header" href="#advanced-window-functions">Advanced Window Functions</a></h2>
+<pre><code class="language-sql">-- Range frame in time units
+SELECT
+    sensor_id, ts, value,
+    AVG(value) OVER (
+        PARTITION BY sensor_id
+        ORDER BY ts
+        RANGE BETWEEN INTERVAL '5' MINUTE PRECEDING AND CURRENT ROW
+    ) AS avg_5m
+FROM readings;
+
+-- EXCLUDE clauses (CURRENT ROW, GROUP, TIES, NO OTHERS)
+SELECT id, score,
+       SUM(score) OVER (ORDER BY id
+                        ROWS BETWEEN 5 PRECEDING AND 5 FOLLOWING
+                        EXCLUDE CURRENT ROW) AS context_sum
+FROM scores;
+
+-- Named window definitions
+SELECT
+    region,
+    ts,
+    SUM(revenue) OVER w7  AS rev_7d,
+    SUM(revenue) OVER w30 AS rev_30d
+FROM daily_revenue
+WINDOW
+    w7  AS (PARTITION BY region ORDER BY ts ROWS 6 PRECEDING),
+    w30 AS (PARTITION BY region ORDER BY ts ROWS 29 PRECEDING);
+</code></pre>
+<h2 id="approximate-aggregates"><a class="header" href="#approximate-aggregates">Approximate Aggregates</a></h2>
+<p>For huge datasets where exact answers are too expensive.</p>
+<pre><code class="language-sql">-- HyperLogLog cardinality estimate
+SELECT approx_count_distinct(user_id) FROM events;
+
+-- T-Digest quantiles
+SELECT
+    approx_quantile(latency_ms, 0.50) AS p50,
+    approx_quantile(latency_ms, 0.99) AS p99,
+    approx_quantile(latency_ms, [0.5, 0.9, 0.99]) AS quantiles
+FROM requests;
+
+-- Reservoir sample of values (exact, bounded memory)
+SELECT reservoir_quantile(value, 0.95, 8192) FROM measurements;
+
+-- Top-K most common values (space-saving)
+SELECT approx_top_k(country, 10) FROM users;
+</code></pre>
+<h2 id="sequences"><a class="header" href="#sequences">Sequences</a></h2>
+<pre><code class="language-sql">CREATE SEQUENCE order_id_seq START 1000 INCREMENT 1;
+
+CREATE TABLE orders (
+    id INTEGER DEFAULT nextval('order_id_seq'),
+    user_id INTEGER,
+    amount DECIMAL
+);
+
+INSERT INTO orders (user_id, amount) VALUES (1, 99.99);
+SELECT currval('order_id_seq');  -- 1000
+
+-- Reset
+ALTER SEQUENCE order_id_seq RESTART WITH 5000;
+DROP SEQUENCE order_id_seq;
+</code></pre>
 <h2 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h2>
-<pre><code class="language-sql">-- Analyze query plan
+<h3 id="plans-and-profiling"><a class="header" href="#plans-and-profiling">Plans and profiling</a></h3>
+<pre><code class="language-sql">-- Logical plan, physical plan, both
 EXPLAIN SELECT * FROM users WHERE username = 'john';
+EXPLAIN (FORMAT TEXT) SELECT ...;
+EXPLAIN (FORMAT JSON) SELECT ...;
+
+-- Run + measure
 EXPLAIN ANALYZE SELECT * FROM users JOIN orders ON users.id = orders.user_id;
 
--- Vacuum and analyze
-VACUUM;
-ANALYZE users;
+-- Detailed JSON profile to a file
+SET enable_profiling = 'json';
+SET profiling_output = '/tmp/profile.json';
+SET profiling_mode = 'detailed';
 
--- Parallel query execution (automatic)
+-- Reset profiling
+SET enable_profiling = '';
+
+-- Progress bar for long queries
+SET enable_progress_bar = true;
+
+-- Threading and memory
 SET threads TO 4;
-
--- Memory limit
 SET memory_limit = '4GB';
-
--- Temp directory
 SET temp_directory = '/path/to/temp';
+</code></pre>
+<h3 id="parquet-writes"><a class="header" href="#parquet-writes">Parquet writes</a></h3>
+<pre><code class="language-sql">-- Single file
+COPY events TO 'events.parquet' (FORMAT PARQUET, COMPRESSION ZSTD);
+
+-- Tune row group size to your read pattern (larger = better scan throughput,
+-- smaller = better filter pushdown selectivity)
+COPY events TO 'events.parquet'
+(FORMAT PARQUET, ROW_GROUP_SIZE 100000, COMPRESSION ZSTD);
+
+-- Hive-partitioned write (per-partition directories with key=value names)
+COPY events TO 'events/'
+(FORMAT PARQUET, PARTITION_BY (year, month), OVERWRITE_OR_IGNORE);
+
+-- File-per-thread for parallel ingest downstream
+COPY (FROM events) TO 'shards/' (FORMAT PARQUET, PER_THREAD_OUTPUT true);
+</code></pre>
+<h3 id="parquet-reads-and-pushdown"><a class="header" href="#parquet-reads-and-pushdown">Parquet reads and pushdown</a></h3>
+<pre><code class="language-sql">-- Filter pushdown: predicate pushes into the Parquet reader,
+-- skipping row groups via min/max statistics.
+SELECT * FROM 's3://lake/events/*.parquet'
+WHERE event_date BETWEEN '2025-05-01' AND '2025-05-31';
+
+-- Projection pushdown: only requested columns are decoded.
+SELECT user_id, amount FROM 's3://lake/orders/*.parquet';
+
+-- Hive partition pruning: directory keys turn into predicates.
+SELECT * FROM read_parquet('s3://lake/events/*/*/*.parquet',
+                            hive_partitioning = true)
+WHERE year = 2025 AND month = 5;
+
+-- What pushes down? Equality, ranges, IN-lists, AND/OR — yes.
+-- Function calls on the column (LOWER(col) = 'x') usually don't.
+-- Cast the literal, not the column.
+</code></pre>
+<h3 id="indexes"><a class="header" href="#indexes">Indexes</a></h3>
+<p>DuckDB rarely needs explicit indexes — zone maps + columnar layout + vectorized scans cover most analytical workloads. Add ART indexes only for selective point lookups in a primary/foreign key column.</p>
+<pre><code class="language-sql">-- ART (adaptive radix tree) index
+CREATE INDEX idx_orders_user ON orders(user_id);
+
+-- Auto-created for PRIMARY KEY and UNIQUE constraints
+
+-- Inspect
+SELECT * FROM duckdb_indexes();
+</code></pre>
+<h3 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common pitfalls</a></h3>
+<ul>
+<li><strong>Row-at-a-time inserts</strong> kill throughput. Batch with <code>INSERT INTO ... SELECT FROM read_parquet(...)</code> or <code>executemany</code>.</li>
+<li><strong>CSV inference on huge files</strong> is slow — pass explicit <code>types=</code> to <code>read_csv</code>.</li>
+<li><strong>Cross joins from missing predicates</strong> — DuckDB will happily do <code>N×M</code>. Watch the cardinality column in <code>EXPLAIN</code>.</li>
+<li><strong>String columns in joins</strong> — cast to integer keys when possible; dictionary-encoded VARCHARs are fast but still wider than <code>INTEGER</code>.</li>
+<li><strong>Updating large tables</strong>: prefer <code>CREATE TABLE new AS SELECT ...; DROP old; ALTER new RENAME</code> for full rewrites.</li>
+<li><strong><code>SELECT *</code> over remote Parquet</strong>: pay for every column. List the ones you need.</li>
+</ul>
+<h3 id="benchmarking-checklist"><a class="header" href="#benchmarking-checklist">Benchmarking checklist</a></h3>
+<ul>
+<li>Run on a <code>:memory:</code> database for pure compute; on a file DB for full pipeline.</li>
+<li><code>PRAGMA disable_object_cache;</code> between runs to compare cold-cache performance.</li>
+<li>Use <code>EXPLAIN ANALYZE</code> (not wallclock) for per-operator times.</li>
+<li>Pin threads (<code>SET threads TO 1</code>) when comparing algorithmic changes.</li>
+<li>Use <code>time_bucket</code> + <code>tpch(SF)</code> / <code>tpcds(SF)</code> extensions for reproducible workloads.</li>
+</ul>
+<pre><code class="language-sql">INSTALL tpch; LOAD tpch;
+CALL dbgen(sf = 1);
+PRAGMA tpch(7);
 </code></pre>
 <h2 id="settings-and-configuration"><a class="header" href="#settings-and-configuration">Settings and Configuration</a></h2>
 <pre><code class="language-sql">-- Show settings
@@ -679,6 +1123,244 @@ SELECT * FROM pg_db.users;
 -- Detach
 DETACH sqlite_db;
 </code></pre>
+<h2 id="extensions"><a class="header" href="#extensions">Extensions</a></h2>
+<p>DuckDB ships a minimal core; capabilities like S3 reads, Iceberg, full-text search, and vector search are loaded on demand.</p>
+<h3 id="managing-extensions"><a class="header" href="#managing-extensions">Managing extensions</a></h3>
+<pre><code class="language-sql">-- List available extensions and their state
+SELECT extension_name, installed, loaded, description
+FROM duckdb_extensions();
+
+-- Install + load (the common pair)
+INSTALL httpfs;
+LOAD httpfs;
+
+-- Force a specific repo (community extensions live in 'community')
+INSTALL h3 FROM community;
+LOAD h3;
+
+-- Pin to a specific version
+INSTALL httpfs VERSION 'v1.1.3';
+
+-- Autoload trusted extensions on first reference
+SET autoinstall_known_extensions = true;
+SET autoload_known_extensions = true;
+
+-- Where extensions live
+SELECT current_setting('extension_directory');
+</code></pre>
+<h3 id="httpfs-and-s3"><a class="header" href="#httpfs-and-s3">httpfs and S3</a></h3>
+<p><code>httpfs</code> reads <code>http(s)://</code>, <code>s3://</code>, <code>gcs://</code>, <code>r2://</code>, <code>azure://</code>, and <code>hf://</code> URLs as if they were local files.</p>
+<pre><code class="language-sql">INSTALL httpfs; LOAD httpfs;
+
+-- One-off public file
+SELECT COUNT(*) FROM 'https://example.com/data.parquet';
+
+-- S3 credentials via SECRET (preferred over environment vars)
+CREATE SECRET aws_prod (
+    TYPE S3,
+    KEY_ID 'AKIA...',
+    SECRET 'wJal...',
+    REGION 'us-east-1'
+);
+
+-- Or use the AWS provider chain (env, profile, instance role)
+CREATE SECRET aws_chain (
+    TYPE S3,
+    PROVIDER credential_chain,
+    CHAIN 'config;sts;env;sso',
+    REGION 'us-east-1'
+);
+
+-- Read from S3
+SELECT * FROM 's3://my-bucket/events/2025/*/*.parquet'
+WHERE event_type = 'purchase'
+LIMIT 100;
+
+-- Globs with Hive-style partition discovery
+SELECT *
+FROM read_parquet('s3://my-bucket/events/year=*/month=*/*.parquet',
+                  hive_partitioning = true);
+
+-- Write back to S3
+COPY (SELECT * FROM purchases WHERE year = 2025)
+TO 's3://my-bucket/exports/purchases_2025/'
+(FORMAT PARQUET, PARTITION_BY (month), OVERWRITE_OR_IGNORE);
+
+-- Hugging Face datasets (hf:// is built on httpfs)
+SELECT * FROM 'hf://datasets/squad/squad/plain_text/train-*.parquet' LIMIT 5;
+</code></pre>
+<h3 id="iceberg"><a class="header" href="#iceberg">Iceberg</a></h3>
+<pre><code class="language-sql">INSTALL iceberg; LOAD iceberg;
+
+-- Scan an Iceberg table by path
+SELECT * FROM iceberg_scan('s3://lake/warehouse/db/orders');
+
+-- Read a specific snapshot
+SELECT * FROM iceberg_scan(
+    's3://lake/warehouse/db/orders',
+    snapshot_id = 1234567890
+);
+
+-- Inspect metadata
+SELECT * FROM iceberg_snapshots('s3://lake/warehouse/db/orders');
+SELECT * FROM iceberg_metadata('s3://lake/warehouse/db/orders');
+
+-- Attach a REST catalog (Polaris, Nessie, etc.)
+ATTACH 'warehouse' AS lake (
+    TYPE ICEBERG,
+    ENDPOINT 'https://catalog.example.com',
+    TOKEN 'abc...'
+);
+SELECT * FROM lake.db.orders;
+</code></pre>
+<h3 id="delta-lake"><a class="header" href="#delta-lake">Delta Lake</a></h3>
+<pre><code class="language-sql">INSTALL delta; LOAD delta;
+
+SELECT * FROM delta_scan('s3://lake/delta/events');
+
+-- Time travel
+SELECT * FROM delta_scan('s3://lake/delta/events', version = 42);
+</code></pre>
+<h3 id="json"><a class="header" href="#json">JSON</a></h3>
+<pre><code class="language-sql">-- The json extension is built in. Reads detect format automatically.
+SELECT * FROM read_json_auto('logs.json');
+SELECT * FROM read_json('logs.jsonl', format = 'newline_delimited');
+
+-- JSON path operators
+SELECT
+    j-&gt;'user'-&gt;&gt;'name'      AS user_name,    -- -&gt;&gt; returns VARCHAR
+    j-&gt;'tags'-&gt;0            AS first_tag,    -- -&gt; returns JSON
+    json_extract(j, '$.user.email') AS email,
+    json_extract_string(j, '$.user.email') AS email_str
+FROM events;
+
+-- Materialize JSON into typed STRUCT
+SELECT json_transform(
+    '{"id": 1, "ts": "2025-05-28T10:00:00"}',
+    '{"id": "INTEGER", "ts": "TIMESTAMP"}'
+);
+
+-- Aggregate to JSON
+SELECT json_group_array(json_object('id', id, 'name', name))
+FROM users;
+</code></pre>
+<h3 id="spatial"><a class="header" href="#spatial">Spatial</a></h3>
+<pre><code class="language-sql">INSTALL spatial; LOAD spatial;
+
+-- Create geometries
+SELECT ST_Point(longitude, latitude) AS pt FROM cities;
+
+-- Distance (in CRS units; use ST_Distance_Sphere for meters on WGS84)
+SELECT a.name, b.name, ST_Distance(a.pt, b.pt) AS dist
+FROM cities a, cities b
+WHERE a.name = 'Berlin' AND b.name &lt;&gt; a.name
+ORDER BY dist
+LIMIT 5;
+
+-- Read GeoParquet / Shapefile / GeoJSON / GDAL formats
+SELECT * FROM ST_Read('countries.shp');
+SELECT * FROM ST_Read('admin.geojson');
+
+-- Spatial joins
+SELECT c.name, COUNT(*) AS station_count
+FROM cities c, stations s
+WHERE ST_Within(s.geom, c.boundary)
+GROUP BY c.name;
+</code></pre>
+<h3 id="full-text-search"><a class="header" href="#full-text-search">Full-text search</a></h3>
+<pre><code class="language-sql">INSTALL fts; LOAD fts;
+
+-- Build an index over text columns
+PRAGMA create_fts_index(
+    'documents',     -- table
+    'id',            -- key column
+    'title', 'body', -- text columns
+    stemmer = 'porter',
+    stopwords = 'english',
+    ignore = '(\\.|[^a-z])+'
+);
+
+-- BM25 score
+SELECT id, title, fts_main_documents.match_bm25(id, 'machine learning') AS score
+FROM documents
+WHERE score IS NOT NULL
+ORDER BY score DESC
+LIMIT 10;
+
+-- Drop the index
+PRAGMA drop_fts_index('documents');
+</code></pre>
+<h3 id="vector-similarity-search-vss"><a class="header" href="#vector-similarity-search-vss">Vector similarity search (vss)</a></h3>
+<p>For embeddings / ANN search; pairs well with [[hnsw]] and [[product_quantization]] notes.</p>
+<pre><code class="language-sql">INSTALL vss; LOAD vss;
+
+-- Fixed-length float array column
+CREATE TABLE docs (
+    id INTEGER,
+    title VARCHAR,
+    embedding FLOAT[384]
+);
+
+INSERT INTO docs VALUES (1, 'duckdb', [0.1, 0.2, /* ... */]::FLOAT[384]);
+
+-- Distance functions
+SELECT id,
+       array_distance(embedding, $1::FLOAT[384])      AS l2,
+       array_cosine_distance(embedding, $1::FLOAT[384]) AS cos,
+       array_inner_product(embedding, $1::FLOAT[384])  AS dot
+FROM docs
+ORDER BY cos
+LIMIT 10;
+
+-- HNSW index for fast top-k (only when persisted DB; experimental flag)
+SET hnsw_enable_experimental_persistence = true;
+CREATE INDEX docs_hnsw ON docs USING HNSW (embedding)
+WITH (metric = 'cosine', M = 16, ef_construction = 200);
+
+-- Query uses the index transparently
+SELECT id, array_cosine_distance(embedding, $1::FLOAT[384]) AS d
+FROM docs ORDER BY d LIMIT 10;
+</code></pre>
+<h3 id="postgres--mysql--sqlite-scanners"><a class="header" href="#postgres--mysql--sqlite-scanners">Postgres / MySQL / SQLite scanners</a></h3>
+<pre><code class="language-sql">INSTALL postgres; LOAD postgres;
+INSTALL mysql;    LOAD mysql;
+-- sqlite is bundled
+
+-- Attach a live Postgres instance and query directly
+CREATE SECRET pg_dev (
+    TYPE POSTGRES,
+    HOST 'localhost', PORT 5432, DATABASE 'app',
+    USER 'analyst', PASSWORD 's3cret'
+);
+ATTACH '' AS pg (TYPE POSTGRES, SECRET pg_dev);
+
+-- Cross-engine join: DuckDB-local Parquet ⋈ Postgres rows
+SELECT u.id, u.email, p.total_spent
+FROM pg.users u
+JOIN read_parquet('s3://lake/spend/*.parquet') p
+  ON u.id = p.user_id;
+
+-- Write back to Postgres
+COPY (SELECT * FROM local_results)
+TO pg.public.results (USE_TMP_FILE false);
+</code></pre>
+<h3 id="other-useful-extensions"><a class="header" href="#other-useful-extensions">Other useful extensions</a></h3>
+<pre><code class="language-sql">INSTALL excel;  LOAD excel;
+SELECT * FROM read_xlsx('quarterly.xlsx', sheet = 'Q2');
+
+INSTALL avro; LOAD avro;
+SELECT * FROM read_avro('events.avro');
+
+INSTALL icu; LOAD icu;
+-- Adds proper unicode collation and timezone support
+SELECT '2025-05-28 10:00 America/New_York'::TIMESTAMPTZ;
+
+-- Community extensions worth knowing
+INSTALL h3 FROM community;          -- Uber H3 hex grid
+INSTALL prql FROM community;        -- PRQL → SQL
+INSTALL ulid FROM community;        -- ULID generation
+INSTALL substrait FROM community;   -- Substrait plan I/O
+</code></pre>
 <h2 id="python-integration"><a class="header" href="#python-integration">Python Integration</a></h2>
 <pre><code class="language-python">import duckdb
 import pandas as pd
@@ -709,6 +1391,140 @@ result = rel.filter('age &gt; 30').project('username, email').df()
 
 # Close
 con.close()
+</code></pre>
+<h2 id="arrow-integration"><a class="header" href="#arrow-integration">Arrow Integration</a></h2>
+<p>DuckDB and Apache Arrow share an in-memory format; data moves between them zero-copy.</p>
+<pre><code class="language-python">import duckdb
+import pyarrow as pa
+import pyarrow.parquet as pq
+
+con = duckdb.connect()
+
+# Arrow → DuckDB (registered as a virtual table, no copy)
+table = pq.read_table('events.parquet')
+con.register('events_arrow', table)
+con.sql("SELECT user_id, SUM(amount) FROM events_arrow GROUP BY user_id").show()
+
+# DuckDB → Arrow (zero-copy)
+arrow_table = con.sql("SELECT * FROM events").arrow()
+
+# RecordBatchReader for streaming
+reader = con.sql("FROM huge_table").fetch_record_batch(rows_per_batch=10_000)
+for batch in reader:
+    process(batch)
+
+# Arrow Database Connectivity (ADBC) — DBAPI 2.0 over Arrow
+import adbc_driver_duckdb.dbapi as adbc
+conn = adbc.connect('mydb.duckdb')
+cur = conn.cursor()
+cur.execute("SELECT * FROM events LIMIT 100")
+arrow_table = cur.fetch_arrow_table()
+</code></pre>
+<h2 id="polars-integration"><a class="header" href="#polars-integration">Polars Integration</a></h2>
+<pre><code class="language-python">import duckdb
+import polars as pl
+
+# Query a Polars DataFrame directly
+df = pl.read_parquet('events.parquet')
+result = duckdb.sql("SELECT user_id, SUM(amount) FROM df GROUP BY 1").pl()
+
+# Lazy frames work too (DuckDB collects on execute)
+lf = pl.scan_parquet('events.parquet').filter(pl.col('amount') &gt; 0)
+duckdb.sql("FROM lf SELECT * USING SAMPLE 1000").pl()
+
+# Round-trip
+duckdb.sql("FROM read_parquet('events.parquet')").pl()
+</code></pre>
+<h2 id="dbt-duckdb"><a class="header" href="#dbt-duckdb">dbt-duckdb</a></h2>
+<pre><code class="language-yaml"># profiles.yml
+analytics:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: dev.duckdb
+      threads: 8
+      extensions:
+        - httpfs
+        - iceberg
+      settings:
+        memory_limit: '8GB'
+      external_root: 's3://lake/analytics'
+</code></pre>
+<pre><code class="language-sql">-- models/orders_daily.sql
+{{ config(materialized='external', format='parquet',
+          partition_by=['order_date']) }}
+
+SELECT
+    order_date,
+    SUM(amount) AS revenue,
+    COUNT(*)    AS orders
+FROM {{ source('raw', 'orders') }}
+GROUP BY order_date
+</code></pre>
+<p>When to reach for <code>dbt-duckdb</code>: local development of a warehouse model graph, CI tests against canned fixtures, lakehouse-on-Parquet without a warehouse.</p>
+<h2 id="motherduck"><a class="header" href="#motherduck">MotherDuck</a></h2>
+<p>MotherDuck is a hosted DuckDB; it executes parts of a query in the cloud and others locally, transparently.</p>
+<pre><code class="language-sql">-- Attach a cloud DB by URL (DUCKDB_TOKEN env var holds the auth token)
+ATTACH 'md:' AS cloud;
+ATTACH 'md:my_database' AS prod;
+
+-- Hybrid query: local CSV ⋈ cloud table
+SELECT u.id, u.name, SUM(l.amount)
+FROM cloud.users u
+JOIN 'local_events.csv' l ON l.user_id = u.id
+GROUP BY u.id, u.name;
+
+-- Share read-only access
+GRANT SELECT ON cloud.users TO 'colleague@example.com';
+</code></pre>
+<h2 id="language-clients"><a class="header" href="#language-clients">Language Clients</a></h2>
+<pre><code class="language-javascript">// Node.js — @duckdb/node-api (Neo client)
+import { DuckDBInstance } from '@duckdb/node-api';
+const instance = await DuckDBInstance.create('mydb.duckdb');
+const conn = await instance.connect();
+const reader = await conn.runAndReadAll('SELECT 42 AS answer');
+console.log(reader.getRows());
+</code></pre>
+<pre><code class="language-r"># R
+library(duckdb)
+con &lt;- dbConnect(duckdb(), 'mydb.duckdb')
+dbGetQuery(con, "SELECT COUNT(*) FROM users")
+dbDisconnect(con, shutdown = TRUE)
+</code></pre>
+<pre><code class="language-java">// Java — JDBC
+Class.forName("org.duckdb.DuckDBDriver");
+try (Connection conn = DriverManager.getConnection("jdbc:duckdb:mydb.duckdb");
+     Statement stmt = conn.createStatement();
+     ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users")) {
+    while (rs.next()) System.out.println(rs.getLong(1));
+}
+</code></pre>
+<pre><code class="language-go">// Go — marcboeker/go-duckdb
+import (
+    "database/sql"
+    _ "github.com/marcboeker/go-duckdb"
+)
+db, _ := sql.Open("duckdb", "mydb.duckdb")
+defer db.Close()
+var n int
+db.QueryRow("SELECT COUNT(*) FROM users").Scan(&amp;n)
+</code></pre>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Rust — duckdb crate
+use duckdb::{Connection, params};
+let conn = Connection::open("mydb.duckdb")?;
+let mut stmt = conn.prepare("SELECT COUNT(*) FROM users")?;
+let n: i64 = stmt.query_row([], |r| r.get(0))?;
+<span class="boring">}</span></code></pre>
+<h2 id="http-server"><a class="header" href="#http-server">HTTP Server</a></h2>
+<pre><code class="language-sql">-- Community extension: serves SQL over HTTP for tooling integration
+INSTALL httpserver FROM community; LOAD httpserver;
+SELECT httpserve_start('0.0.0.0', 9999, 'optional_basic_auth');
+
+-- Test
+-- curl -G 'http://localhost:9999/' --data-urlencode 'q=SELECT 42'
 </code></pre>
 <h2 id="cli-commands"><a class="header" href="#cli-commands">CLI Commands</a></h2>
 <pre><code class="language-bash"># Meta-commands
@@ -764,6 +1580,91 @@ SELECT * FROM 'data.parquet' WHERE column &gt; 100;
 -- 10. Use appropriate compression
 COPY data TO 'compressed.parquet' (FORMAT PARQUET, COMPRESSION ZSTD);
 </code></pre>
+<h2 id="duckdb-vs-sqlite"><a class="header" href="#duckdb-vs-sqlite">DuckDB vs SQLite</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>DuckDB</th><th>SQLite</th></tr>
+</thead>
+<tbody>
+<tr><td>Workload</td><td>OLAP (analytics)</td><td>OLTP (transactions)</td></tr>
+<tr><td>Storage</td><td>Columnar, compressed</td><td>Row-based pages</td></tr>
+<tr><td>Execution</td><td>Vectorized, multi-threaded</td><td>Tuple-at-a-time, single-thread per query</td></tr>
+<tr><td>Concurrency</td><td>Snapshot isolation, single writer</td><td>Multi-reader, single writer (file-locked)</td></tr>
+<tr><td>Typical query</td><td>Scan/aggregate 100M+ rows</td><td>Lookup by primary key, small joins</td></tr>
+<tr><td>File format</td><td><code>.duckdb</code>, columnar</td><td><code>.sqlite</code>, row-paged</td></tr>
+<tr><td>Best for</td><td>Notebooks, ETL, embedded analytics</td><td>Apps with concurrent small reads/writes</td></tr>
+</tbody>
+</table>
+</div>
+<p>Both are embedded, ACID, single-file. The right answer is usually “use both” — SQLite for app state, DuckDB for analysis.</p>
+<h2 id="duckdb-vs-clickhouse"><a class="header" href="#duckdb-vs-clickhouse">DuckDB vs ClickHouse</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>DuckDB</th><th>ClickHouse</th></tr>
+</thead>
+<tbody>
+<tr><td>Deployment</td><td>Embedded library</td><td>Distributed server</td></tr>
+<tr><td>Scale</td><td>Single node (TB-ish)</td><td>Cluster (PB-scale)</td></tr>
+<tr><td>Ingest model</td><td>Batch (<code>COPY</code>, <code>INSERT FROM</code>)</td><td>Streaming (Kafka, real-time inserts)</td></tr>
+<tr><td>Replication</td><td>No (single-file)</td><td>Built-in (replicas, shards)</td></tr>
+<tr><td>Operations</td><td>None</td><td>ZooKeeper/Keeper + monitoring</td></tr>
+<tr><td>SQL dialect</td><td>Postgres-flavored</td><td>Custom (close to SQL)</td></tr>
+<tr><td>Best for</td><td>Ad-hoc analysis, lakehouse reads, ETL</td><td>Logs, metrics, ad-tech at huge scale</td></tr>
+</tbody>
+</table>
+</div>
+<p>Use DuckDB when there’s no cluster to run; use ClickHouse when ingest rate or dataset size requires one.</p>
+<h2 id="duckdb-vs-polars"><a class="header" href="#duckdb-vs-polars">DuckDB vs Polars</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>DuckDB</th><th>Polars</th></tr>
+</thead>
+<tbody>
+<tr><td>API</td><td>SQL</td><td>DataFrame (Python/Rust)</td></tr>
+<tr><td>Execution</td><td>Vectorized, push-based, parallel</td><td>Vectorized (Arrow2), parallel, lazy</td></tr>
+<tr><td>Persistence</td><td>Native DB file + Parquet</td><td>Reads/writes files only</td></tr>
+<tr><td>Joins</td><td>Hash, merge, asof, lateral, positional</td><td>Hash, merge, asof, cross</td></tr>
+<tr><td>Larger-than-memory</td><td>Yes (spilling)</td><td>Streaming engine (partial)</td></tr>
+<tr><td>Catalog</td><td>Yes (tables, views, attached DBs)</td><td>No</td></tr>
+<tr><td>Best for</td><td>SQL users, multi-table workloads, persistence</td><td>Imperative pipelines, tight Python loops</td></tr>
+</tbody>
+</table>
+</div>
+<p>They interoperate zero-copy via Arrow — pick the API that fits the task, not the engine.</p>
+<h2 id="duckdb-vs-pandas"><a class="header" href="#duckdb-vs-pandas">DuckDB vs Pandas</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>DuckDB</th><th>Pandas</th></tr>
+</thead>
+<tbody>
+<tr><td>Memory model</td><td>Columnar, compressed, out-of-core</td><td>In-memory NumPy arrays</td></tr>
+<tr><td>Parallelism</td><td>All cores by default</td><td>Single-threaded (without ext libs)</td></tr>
+<tr><td>SQL</td><td>First-class</td><td>None natively</td></tr>
+<tr><td>Joins on large data</td><td>Spills to disk</td><td>OOMs</td></tr>
+<tr><td>Type system</td><td>SQL types, including STRUCT/LIST</td><td>NumPy dtypes (object-y for strings)</td></tr>
+<tr><td>API ergonomics</td><td>SQL strings</td><td>Pythonic chaining</td></tr>
+</tbody>
+</table>
+</div>
+<p>Common pattern: keep Pandas for last-mile work, push joins/aggregations down to DuckDB.</p>
+<pre><code class="language-python"># DuckDB query reading a Pandas DataFrame directly
+import duckdb, pandas as pd
+df = pd.read_csv('big.csv')
+result = duckdb.sql("FROM df SELECT region, SUM(amount) GROUP BY region").df()
+</code></pre>
+<h2 id="decision-cheatsheet"><a class="header" href="#decision-cheatsheet">Decision Cheatsheet</a></h2>
+<ul>
+<li><strong>Need a SQL engine inside an app, embedded, no server?</strong> → DuckDB (or SQLite for OLTP).</li>
+<li><strong>Querying Parquet/CSV files locally?</strong> → DuckDB, faster than reading into Pandas.</li>
+<li><strong>Building a warehouse on object storage?</strong> → DuckDB + dbt-duckdb or MotherDuck.</li>
+<li><strong>Hundreds of concurrent writers?</strong> → not DuckDB. Use Postgres/ClickHouse.</li>
+<li><strong>Stream ingest of millions of events/sec?</strong> → not DuckDB. Use ClickHouse/Kafka.</li>
+<li><strong>Notebook exploration, mixed Python and SQL?</strong> → DuckDB Python API.</li>
+</ul>
 <h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
 <div class="table-wrapper">
 <table>
@@ -771,20 +1672,41 @@ COPY data TO 'compressed.parquet' (FORMAT PARQUET, COMPRESSION ZSTD);
 <tr><th>Command</th><th>Description</th></tr>
 </thead>
 <tbody>
-<tr><td><code>read_csv_auto('file.csv')</code></td><td>Read CSV file</td></tr>
-<tr><td><code>read_parquet('file.parquet')</code></td><td>Read Parquet file</td></tr>
-<tr><td><code>COPY table TO 'file.csv'</code></td><td>Export to CSV</td></tr>
-<tr><td><code>EXPLAIN ANALYZE</code></td><td>Show query plan</td></tr>
-<tr><td><code>SET threads TO 8</code></td><td>Set thread count</td></tr>
-<tr><td><code>DESCRIBE table</code></td><td>Show table schema</td></tr>
-<tr><td><code>.tables</code></td><td>List tables</td></tr>
-<tr><td><code>.mode csv</code></td><td>Set output format</td></tr>
-<tr><td><code>VACUUM</code></td><td>Optimize database</td></tr>
-<tr><td><code>ANALYZE</code></td><td>Update statistics</td></tr>
+<tr><td><code>read_csv_auto('file.csv')</code></td><td>Read CSV file (infer types)</td></tr>
+<tr><td><code>read_parquet('s3://b/**/*.parquet')</code></td><td>Read Parquet (glob, remote OK)</td></tr>
+<tr><td><code>read_json_auto('events.jsonl')</code></td><td>Read JSON / JSONL</td></tr>
+<tr><td><code>iceberg_scan('s3://lake/db/t')</code></td><td>Read Iceberg table</td></tr>
+<tr><td><code>delta_scan('s3://lake/delta/t')</code></td><td>Read Delta table</td></tr>
+<tr><td><code>COPY tbl TO 'file.parquet' (FORMAT PARQUET)</code></td><td>Export to Parquet</td></tr>
+<tr><td><code>COPY tbl TO 'dir/' (PARTITION_BY (y, m))</code></td><td>Hive-partitioned write</td></tr>
+<tr><td><code>INSTALL ext; LOAD ext</code></td><td>Install + load extension</td></tr>
+<tr><td><code>CREATE SECRET s (TYPE S3, ...)</code></td><td>Store credentials</td></tr>
+<tr><td><code>ATTACH 'md:'</code></td><td>Attach MotherDuck</td></tr>
+<tr><td><code>ATTACH 'pg.dbname=...' (TYPE POSTGRES)</code></td><td>Attach Postgres</td></tr>
+<tr><td><code>SELECT * EXCLUDE (col)</code></td><td>Star with exclusions</td></tr>
+<tr><td><code>SELECT * REPLACE (expr AS col)</code></td><td>Star with replacements</td></tr>
+<tr><td><code>GROUP BY ALL</code></td><td>Group by every non-agg select</td></tr>
+<tr><td><code>QUALIFY rn = 1</code></td><td>Filter on window output</td></tr>
+<tr><td><code>USING SAMPLE 1000</code></td><td>Reservoir sample</td></tr>
+<tr><td><code>UNION BY NAME</code></td><td>Column-name-aligned union</td></tr>
+<tr><td><code>EXPLAIN ANALYZE</code></td><td>Plan + per-op timing</td></tr>
+<tr><td><code>PRAGMA enable_profiling = 'json'</code></td><td>Detailed JSON profile</td></tr>
+<tr><td><code>PRAGMA show_index('tbl')</code></td><td>Inspect indexes</td></tr>
+<tr><td><code>SET threads TO 8</code></td><td>Thread count</td></tr>
+<tr><td><code>SET memory_limit = '8GB'</code></td><td>RAM budget</td></tr>
+<tr><td><code>SET temp_directory = '/var/tmp'</code></td><td>Spill location</td></tr>
+<tr><td><code>array_cosine_distance(v, q)</code></td><td>Vector similarity</td></tr>
+<tr><td><code>approx_count_distinct(c)</code></td><td>HLL cardinality</td></tr>
+<tr><td><code>time_bucket(INTERVAL '1 hour', ts)</code></td><td>Time bucketing</td></tr>
+<tr><td><code>DESCRIBE tbl</code> / <code>.schema tbl</code></td><td>Show schema</td></tr>
+<tr><td><code>.tables</code> / <code>SHOW TABLES</code></td><td>List tables</td></tr>
+<tr><td><code>.mode csv</code></td><td>CLI output format</td></tr>
+<tr><td><code>VACUUM</code> / <code>ANALYZE</code></td><td>Optimize / refresh stats</td></tr>
+<tr><td><code>PRAGMA force_checkpoint</code></td><td>Flush WAL to file</td></tr>
 </tbody>
 </table>
 </div>
-<p>DuckDB excels at analytical queries on local data files, making it perfect for data analysis, ETL pipelines, and embedded analytics applications.</p>
+<p>DuckDB excels at analytical queries on local data files, making it perfect for data analysis, ETL pipelines, embedded analytics, and lakehouse-style reads against Iceberg/Delta on object storage.</p>
 
                     </main>
 
@@ -794,7 +1716,7 @@ COPY data TO 'compressed.parquet' (FORMAT PARQUET, COMPRESSION ZSTD);
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../databases/nosql.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../databases/clickhouse.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -808,7 +1730,7 @@ COPY data TO 'compressed.parquet' (FORMAT PARQUET, COMPRESSION ZSTD);
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../databases/nosql.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../databases/clickhouse.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
@@ -830,11 +1752,11 @@ COPY data TO 'compressed.parquet' (FORMAT PARQUET, COMPRESSION ZSTD);
 
         <script src="../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

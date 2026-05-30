@@ -1,0 +1,837 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Fenwick Tree - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-62d4d51c.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="fenwick-tree-binary-indexed-tree"><a class="header" href="#fenwick-tree-binary-indexed-tree">Fenwick Tree (Binary Indexed Tree)</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#eli10-explanation">ELI10 Explanation</a></li>
+<li><a href="#core-concepts">Core Concepts</a>
+<ul>
+<li><a href="#when-to-use-a-fenwick-tree">When to Use a Fenwick Tree</a></li>
+<li><a href="#the-lowest-set-bit-trick">The Lowest-Set-Bit Trick</a></li>
+<li><a href="#why-it-works">Why It Works</a></li>
+</ul>
+</li>
+<li><a href="#basic-fenwick-tree">Basic Fenwick Tree</a>
+<ul>
+<li><a href="#point-update--prefix-sum">Point Update + Prefix Sum</a></li>
+<li><a href="#range-sum-query">Range Sum Query</a></li>
+<li><a href="#construction-in-on">Construction in O(n)</a></li>
+</ul>
+</li>
+<li><a href="#range-update--point-query">Range Update + Point Query</a></li>
+<li><a href="#range-update--range-query-two-bit-trick">Range Update + Range Query (Two-BIT Trick)</a></li>
+<li><a href="#fenwick-tree-on-other-operations">Fenwick Tree on Other Operations</a>
+<ul>
+<li><a href="#prefix-xor">Prefix XOR</a></li>
+<li><a href="#prefix-max-with-restrictions">Prefix Max with Restrictions</a></li>
+<li><a href="#multiplicative-prefix">Multiplicative Prefix</a></li>
+</ul>
+</li>
+<li><a href="#2d-fenwick-tree">2D Fenwick Tree</a>
+<ul>
+<li><a href="#2d-point-update--rectangle-sum">2D Point Update + Rectangle Sum</a></li>
+<li><a href="#2d-range-update--point-query">2D Range Update + Point Query</a></li>
+</ul>
+</li>
+<li><a href="#finding-the-kth-smallest-in-olog-n">Finding the kth Smallest in O(log n)</a></li>
+<li><a href="#counting-inversions">Counting Inversions</a></li>
+<li><a href="#offline-coordinate-compression-pattern">Offline Coordinate Compression Pattern</a></li>
+<li><a href="#bit-vs-segment-tree">BIT vs. Segment Tree</a></li>
+<li><a href="#common-patterns">Common Patterns</a></li>
+<li><a href="#interview--contest-problems">Interview &amp; Contest Problems</a></li>
+<li><a href="#complexity-analysis">Complexity Analysis</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#practice-problems">Practice Problems</a></li>
+<li><a href="#additional-resources">Additional Resources</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>A <strong>Fenwick tree</strong> (also called a <strong>Binary Indexed Tree</strong> or <strong>BIT</strong>) is a compact data structure that supports two operations in <strong>O(log n)</strong> time:</p>
+<ol>
+<li><strong>Point update</strong>: add a value to a single index.</li>
+<li><strong>Prefix aggregate</strong>: compute the sum (or XOR, or any other group operation) of a prefix.</li>
+</ol>
+<p>From those two primitives you get <strong>range sum queries</strong> via the standard subtraction trick: <code>sum(l..r) = prefix(r) - prefix(l-1)</code>.</p>
+<p>It is the workhorse of competitive programming for any problem that smells like “running total + updates”:</p>
+<ul>
+<li>Number of elements ≤ X seen so far (compressed BIT).</li>
+<li>Inversion counting in O(n log n).</li>
+<li>2D rectangle sums on a static grid with point updates.</li>
+<li>Sliding-window order statistics via Fenwick + binary lift.</li>
+</ul>
+<p>Related notes:</p>
+<ul>
+<li>[[segment_tree]] — more general (any associative op, range updates with lazy), but ~2× larger constant factor.</li>
+<li>[[sparse_table]] — for static idempotent queries, no updates.</li>
+<li>[[mo_algorithm]] — for offline range queries where the aggregate isn’t easily decomposable.</li>
+</ul>
+<h2 id="eli10-explanation"><a class="header" href="#eli10-explanation">ELI10 Explanation</a></h2>
+<p>Imagine you keep a daily diary of “how many cookies I ate today” and frequently ask “how many cookies total from day 1 through day d?”</p>
+<p>If you store one number per day and add them up on every query, that’s slow. If you store the running total instead, queries are O(1), but a correction (“oops, I forgot 3 cookies on day 5”) forces you to update <strong>every</strong> running total from day 5 onward.</p>
+<p>The Fenwick tree gives you the best of both worlds. It stores a clever set of <strong>partial sums</strong> — not one per day and not one giant running total, but <code>log n</code> carefully-chosen overlapping sums. The size of each partial sum is determined by the binary representation of the day number.</p>
+<p>When you query “total through day d”, you walk down the binary expansion of d, adding ~log d partial sums. When you update day i, you walk up through ~log n partial sums that contain day i. Both walks use the same trick: <strong>strip the lowest set bit</strong> of the index at each step.</p>
+<p>The result: every update and every prefix query touches only <code>log n</code> cells.</p>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="when-to-use-a-fenwick-tree"><a class="header" href="#when-to-use-a-fenwick-tree">When to Use a Fenwick Tree</a></h3>
+<p>Reach for a Fenwick tree when <strong>all</strong> of these hold:</p>
+<ol>
+<li>You need <strong>prefix-style aggregates</strong> with <strong>point updates</strong> (or one of the canonical extensions).</li>
+<li>The aggregate is a <strong>group operation</strong>: associative, with an identity, <strong>and an inverse</strong>. Sum, XOR, and “multiplication in a field” qualify. Min, max, and GCD do <strong>not</strong> (no inverse).</li>
+<li>The query domain is a single dimension (or two, for 2D BIT) of size known up front.</li>
+</ol>
+<p>If the aggregate has no inverse, fall back to [[segment_tree]] or — if the array is static — [[sparse_table]].</p>
+<h3 id="the-lowest-set-bit-trick"><a class="header" href="#the-lowest-set-bit-trick">The Lowest-Set-Bit Trick</a></h3>
+<p>The Fenwick tree’s magic identifier is <code>i &amp; -i</code>, the <strong>lowest set bit</strong> of <code>i</code>.</p>
+<p>In two’s complement, <code>-i</code> flips every bit of <code>i</code> and adds 1, so <code>i &amp; -i</code> isolates just the lowest 1-bit. Examples:</p>
+<pre><code> i = 12 = 0b1100   →  i &amp; -i = 0b0100 = 4
+ i =  6 = 0b0110   →  i &amp; -i = 0b0010 = 2
+ i =  7 = 0b0111   →  i &amp; -i = 0b0001 = 1
+ i = 16 = 0b10000  →  i &amp; -i = 0b10000 = 16
+</code></pre>
+<p>The Fenwick tree is <strong>1-indexed</strong>. Cell <code>tree[i]</code> stores the sum of <code>a[i - lowbit(i) + 1 .. i]</code>. So cell 12 stores the sum of indices 9..12; cell 8 stores 1..8; cell 6 stores 5..6; cell 7 stores just index 7.</p>
+<p>To compute <code>prefix(i)</code>, you start at <code>i</code>, take <code>tree[i]</code>, then jump to <code>i -= lowbit(i)</code> and repeat until <code>i == 0</code>.</p>
+<p>To <strong>update</strong> index <code>i</code> by <code>+v</code>, you start at <code>i</code>, add <code>v</code> to <code>tree[i]</code>, then jump to <code>i += lowbit(i)</code> until <code>i &gt; n</code>.</p>
+<h3 id="why-it-works"><a class="header" href="#why-it-works">Why It Works</a></h3>
+<p>Any positive integer <code>i</code> has a unique binary expansion. The set of partial sums <code>[i - lowbit(i) + 1, i]</code> for all i forms a <strong>proper covering</strong> such that any prefix <code>[1..k]</code> decomposes into a disjoint union of at most <code>popcount(k) ≤ log₂ k + 1</code> such intervals. That gives you the O(log n) prefix query.</p>
+<p>Similarly, the cells that include index <code>i</code> are exactly those at positions <code>i, i + lowbit(i), (i + lowbit(i)) + lowbit(i + lowbit(i)), ...</code> — also O(log n) of them. That gives you the O(log n) update.</p>
+<h2 id="basic-fenwick-tree"><a class="header" href="#basic-fenwick-tree">Basic Fenwick Tree</a></h2>
+<h3 id="point-update--prefix-sum"><a class="header" href="#point-update--prefix-sum">Point Update + Prefix Sum</a></h3>
+<pre><code class="language-python">class Fenwick:
+    """
+    Classic 1-indexed Fenwick tree supporting:
+      update(i, v):  add v to a[i]
+      prefix(i):     sum of a[1..i]
+      query(l, r):   sum of a[l..r] inclusive
+    Construct over an array of length n (1-indexed internally).
+    """
+
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (n + 1)
+
+    def update(self, i, delta):
+        """Add `delta` to a[i]. i is 1-indexed."""
+        while i &lt;= self.n:
+            self.tree[i] += delta
+            i += i &amp; -i
+
+    def prefix(self, i):
+        """Return sum of a[1..i]."""
+        s = 0
+        while i &gt; 0:
+            s += self.tree[i]
+            i -= i &amp; -i
+        return s
+
+    def query(self, l, r):
+        """Inclusive range sum a[l..r], 1-indexed."""
+        if r &lt; l:
+            return 0
+        return self.prefix(r) - self.prefix(l - 1)
+
+
+# Example
+bit = Fenwick(8)
+for i, v in enumerate([3, 2, -1, 6, 5, 4, -3, 3], start=1):
+    bit.update(i, v)
+print(bit.prefix(5))     # 3 + 2 + -1 + 6 + 5 = 15
+print(bit.query(3, 6))   # -1 + 6 + 5 + 4 = 14
+bit.update(4, -1)        # a[4]: 6 → 5
+print(bit.query(3, 6))   # -1 + 5 + 5 + 4 = 13
+</code></pre>
+<p>If you prefer <strong>0-indexed</strong> access at the API surface, just shift in the wrapper:</p>
+<pre><code class="language-python">class Fenwick0:
+    def __init__(self, n):
+        self._f = Fenwick(n)
+
+    def update(self, i, delta):  self._f.update(i + 1, delta)
+    def prefix(self, i):         return self._f.prefix(i + 1)  # sum a[0..i]
+    def query(self, l, r):       return self._f.query(l + 1, r + 1)
+</code></pre>
+<h3 id="range-sum-query"><a class="header" href="#range-sum-query">Range Sum Query</a></h3>
+<p>Falls out for free from <code>prefix(r) - prefix(l - 1)</code> as above. The subtraction trick requires that the underlying operation has an inverse (sum, XOR, addition mod p, etc.).</p>
+<h3 id="construction-in-on"><a class="header" href="#construction-in-on">Construction in O(n)</a></h3>
+<p>The naive way to construct a Fenwick over a starting array is <code>n</code> calls to <code>update(...)</code>, costing O(n log n). There’s a slicker O(n) method that uses the parent relation <code>parent(i) = i + lowbit(i)</code>:</p>
+<pre><code class="language-python">def build_fenwick(arr):
+    """
+    Build a Fenwick over arr (0-indexed) in O(n).
+    Returns a Fenwick instance.
+    """
+    n = len(arr)
+    f = Fenwick(n)
+    # copy initial values into tree[1..n]
+    for i in range(n):
+        f.tree[i + 1] = arr[i]
+    # propagate each cell to its parent in one sweep
+    for i in range(1, n + 1):
+        parent = i + (i &amp; -i)
+        if parent &lt;= n:
+            f.tree[parent] += f.tree[i]
+    return f
+</code></pre>
+<p>This is rarely a bottleneck, but it’s nice to know — it also explains the structural relationship “every cell flows up to its parent.”</p>
+<h2 id="range-update--point-query"><a class="header" href="#range-update--point-query">Range Update + Point Query</a></h2>
+<p>If you only need <strong>range updates</strong> and <strong>point queries</strong>, you can use a single Fenwick tree as a <strong>difference array</strong> in disguise.</p>
+<p>Let <code>d[i] = a[i] - a[i-1]</code>. Then:</p>
+<ul>
+<li>A range add of <code>+v</code> on <code>[l, r]</code> becomes two point updates on <code>d</code>: <code>d[l] += v</code>, <code>d[r + 1] -= v</code>.</li>
+<li>The value at position <code>i</code> is <code>a[i] = d[1] + d[2] + ... + d[i] = prefix_d(i)</code>.</li>
+</ul>
+<pre><code class="language-python">class FenwickRangeAddPoint:
+    """
+    Range-add + point-query using BIT on a difference array.
+    All indices 1-based.
+    """
+
+    def __init__(self, n):
+        self.bit = Fenwick(n)
+        self.n = n
+
+    def range_add(self, l, r, v):
+        self.bit.update(l, v)
+        if r + 1 &lt;= self.n:
+            self.bit.update(r + 1, -v)
+
+    def point_get(self, i):
+        return self.bit.prefix(i)
+
+
+# Example
+f = FenwickRangeAddPoint(6)
+f.range_add(2, 4, 3)     # a = [0, 3, 3, 3, 0, 0]
+f.range_add(3, 6, 1)     # a = [0, 3, 4, 4, 1, 1]
+print(f.point_get(2))    # 3
+print(f.point_get(4))    # 4
+print(f.point_get(5))    # 1
+</code></pre>
+<h2 id="range-update--range-query-two-bit-trick"><a class="header" href="#range-update--range-query-two-bit-trick">Range Update + Range Query (Two-BIT Trick)</a></h2>
+<p>The most powerful pure-BIT pattern: <strong>range add + range sum</strong> in O(log n) per op using <strong>two</strong> Fenwick trees.</p>
+<p>Let <code>d[i] = a[i] - a[i-1]</code> so <code>a[i] = Σ d[j] for j ≤ i</code>. Then for an inclusive prefix sum:</p>
+<pre><code>prefix_a(p) = Σ_{i=1..p} a[i]
+            = Σ_{i=1..p} Σ_{j=1..i} d[j]
+            = Σ_{j=1..p} d[j] * (p - j + 1)
+            = (p + 1) * Σ_{j=1..p} d[j]  -  Σ_{j=1..p} j * d[j]
+</code></pre>
+<p>So we maintain two BITs:</p>
+<ul>
+<li><code>B1[i]</code> over <code>d[i]</code>.</li>
+<li><code>B2[i]</code> over <code>i * d[i]</code>.</li>
+</ul>
+<p>A range add <code>+v</code> on <code>[l, r]</code> updates <strong>both</strong> BITs at two positions each: at <code>l</code> we add <code>+v</code> to <code>B1</code> and <code>+v * l</code> (with the right sign) to <code>B2</code>; at <code>r+1</code> we subtract. The exact updates are:</p>
+<pre><code>B1: +v at l,         -v at r+1
+B2: +v*(l-1) at l,   -v*r at r+1
+</code></pre>
+<p>And <code>prefix(p) = (p) * B1.prefix(p) - B2.prefix(p)</code>.</p>
+<pre><code class="language-python">class FenwickRangeAddRangeSum:
+    """
+    Range-add + range-sum BIT.
+    Two underlying Fenwick trees encode prefix sums of a[1..p].
+    All indices 1-based.
+    """
+
+    def __init__(self, n):
+        self.n = n
+        self.B1 = Fenwick(n)
+        self.B2 = Fenwick(n)
+
+    def _internal_update(self, i, v):
+        self.B1.update(i, v)
+        self.B2.update(i, v * (i - 1))
+
+    def range_add(self, l, r, v):
+        self._internal_update(l, v)
+        self._internal_update(r + 1, -v)
+
+    def _prefix(self, p):
+        return p * self.B1.prefix(p) - self.B2.prefix(p)
+
+    def range_sum(self, l, r):
+        return self._prefix(r) - self._prefix(l - 1)
+
+
+# Example
+f = FenwickRangeAddRangeSum(6)
+f.range_add(2, 4, 3)         # a = [0, 3, 3, 3, 0, 0]
+print(f.range_sum(1, 6))     # 0+3+3+3+0+0 = 9
+f.range_add(3, 6, 1)         # a = [0, 3, 4, 4, 1, 1]
+print(f.range_sum(1, 6))     # 13
+print(f.range_sum(3, 5))     # 4 + 4 + 1 = 9
+</code></pre>
+<p>A range-add + range-sum BIT is <strong>shorter and faster</strong> than the equivalent lazy segment tree and is one of the highest-leverage data structures to memorize for contests.</p>
+<h2 id="fenwick-tree-on-other-operations"><a class="header" href="#fenwick-tree-on-other-operations">Fenwick Tree on Other Operations</a></h2>
+<h3 id="prefix-xor"><a class="header" href="#prefix-xor">Prefix XOR</a></h3>
+<p>XOR is its own inverse, so the same Fenwick template works:</p>
+<pre><code class="language-python">class FenwickXor:
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (n + 1)
+
+    def update(self, i, v):
+        while i &lt;= self.n:
+            self.tree[i] ^= v
+            i += i &amp; -i
+
+    def prefix_xor(self, i):
+        x = 0
+        while i &gt; 0:
+            x ^= self.tree[i]
+            i -= i &amp; -i
+        return x
+
+    def range_xor(self, l, r):
+        return self.prefix_xor(r) ^ self.prefix_xor(l - 1)
+</code></pre>
+<h3 id="prefix-max-with-restrictions"><a class="header" href="#prefix-max-with-restrictions">Prefix Max with Restrictions</a></h3>
+<p>A standard Fenwick <strong>cannot</strong> answer arbitrary range max — max has no inverse. But it <strong>can</strong> answer <strong>prefix max</strong>: “what is the max of a[1..i]?” with point updates that <strong>only increase</strong>.</p>
+<pre><code class="language-python">class FenwickPrefixMax:
+    """
+    Prefix max queries with point updates that only increase the value.
+    Cannot do range max in general; cannot decrease values.
+    """
+
+    def __init__(self, n):
+        self.n = n
+        self.tree = [-(1 &lt;&lt; 60)] * (n + 1)
+
+    def update(self, i, v):
+        while i &lt;= self.n:
+            if v &gt; self.tree[i]:
+                self.tree[i] = v
+            i += i &amp; -i
+
+    def prefix_max(self, i):
+        m = -(1 &lt;&lt; 60)
+        while i &gt; 0:
+            if self.tree[i] &gt; m:
+                m = self.tree[i]
+            i -= i &amp; -i
+        return m
+</code></pre>
+<p>This shows up in the standard O(n log n) <strong>Longest Increasing Subsequence</strong> with coordinate compression.</p>
+<h3 id="multiplicative-prefix"><a class="header" href="#multiplicative-prefix">Multiplicative Prefix</a></h3>
+<p>For prefix <strong>products</strong> modulo a prime, multiplication is invertible (modular inverse), so a Fenwick works. Skip this if any value can be 0 — division by zero kills the trick. For arbitrary moduli or non-invertible values, use [[segment_tree]].</p>
+<h2 id="2d-fenwick-tree"><a class="header" href="#2d-fenwick-tree">2D Fenwick Tree</a></h2>
+<h3 id="2d-point-update--rectangle-sum"><a class="header" href="#2d-point-update--rectangle-sum">2D Point Update + Rectangle Sum</a></h3>
+<pre><code class="language-python">class Fenwick2D:
+    """
+    2D BIT: point update + rectangle prefix sum.
+    All indices 1-based; tree dimensions are (rows+1) x (cols+1).
+    """
+
+    def __init__(self, rows, cols):
+        self.r = rows
+        self.c = cols
+        self.tree = [[0] * (cols + 1) for _ in range(rows + 1)]
+
+    def update(self, x, y, delta):
+        i = x
+        while i &lt;= self.r:
+            j = y
+            while j &lt;= self.c:
+                self.tree[i][j] += delta
+                j += j &amp; -j
+            i += i &amp; -i
+
+    def prefix(self, x, y):
+        """Sum over rectangle (1, 1) to (x, y)."""
+        s = 0
+        i = x
+        while i &gt; 0:
+            j = y
+            while j &gt; 0:
+                s += self.tree[i][j]
+                j -= j &amp; -j
+            i -= i &amp; -i
+        return s
+
+    def rect_sum(self, x1, y1, x2, y2):
+        """Sum over inclusive rectangle (x1, y1) to (x2, y2)."""
+        return (
+            self.prefix(x2, y2)
+            - self.prefix(x1 - 1, y2)
+            - self.prefix(x2, y1 - 1)
+            + self.prefix(x1 - 1, y1 - 1)
+        )
+
+
+# Example
+g = Fenwick2D(4, 5)
+g.update(2, 3, 7)
+g.update(3, 4, 2)
+print(g.rect_sum(1, 1, 4, 5))  # 9
+print(g.rect_sum(3, 3, 4, 5))  # 2
+</code></pre>
+<h3 id="2d-range-update--point-query"><a class="header" href="#2d-range-update--point-query">2D Range Update + Point Query</a></h3>
+<p>The 2D analogue of the difference-array trick: a range add over rectangle <code>(x1, y1, x2, y2)</code> becomes four point updates on a 2D BIT, and a point query is a rectangle prefix sum.</p>
+<pre><code class="language-python">class Fenwick2DRangeAddPoint:
+    def __init__(self, rows, cols):
+        self.bit = Fenwick2D(rows, cols)
+
+    def range_add(self, x1, y1, x2, y2, v):
+        self.bit.update(x1, y1, v)
+        self.bit.update(x2 + 1, y1, -v)
+        self.bit.update(x1, y2 + 1, -v)
+        self.bit.update(x2 + 1, y2 + 1, v)
+
+    def point_get(self, x, y):
+        return self.bit.prefix(x, y)
+</code></pre>
+<p>For 2D <strong>range update + range query</strong> you can extend the two-BIT trick to <strong>four</strong> BITs — implementation is fiddly but follows the same algebra.</p>
+<h2 id="finding-the-kth-smallest-in-olog-n"><a class="header" href="#finding-the-kth-smallest-in-olog-n">Finding the kth Smallest in O(log n)</a></h2>
+<p>If a Fenwick tree maintains the frequency of compressed values 1..n, you can binary-lift down the tree to find the kth-smallest in O(log n) — twice as fast as <code>O(log² n)</code> with binary search over <code>prefix()</code>.</p>
+<pre><code class="language-python">def kth(bit, k):
+    """
+    Given a Fenwick over a frequency array of size n,
+    return the smallest index i such that prefix(i) &gt;= k. O(log n).
+    """
+    pos = 0
+    LOG = bit.n.bit_length()
+    pw = 1 &lt;&lt; LOG
+    while pw &gt; 0:
+        nxt = pos + pw
+        if nxt &lt;= bit.n and bit.tree[nxt] &lt; k:
+            pos = nxt
+            k -= bit.tree[nxt]
+        pw &gt;&gt;= 1
+    return pos + 1
+</code></pre>
+<p>Quick proof of correctness: at each step the “is <code>tree[nxt] &lt; k</code>?” check decides whether the kth element lies in the implicit half-tree rooted at <code>nxt</code>. If it doesn’t (i.e., enough mass is in <code>[pos+1, nxt]</code>), we descend; otherwise we skip past and decrement <code>k</code>.</p>
+<p>This pattern is the heart of “Order Statistics Tree” implementations in C++ and gives you <code>select(k)</code> in <code>O(log n)</code> without storing duplicates explicitly.</p>
+<h2 id="counting-inversions"><a class="header" href="#counting-inversions">Counting Inversions</a></h2>
+<p>The canonical Fenwick application. An <strong>inversion</strong> is a pair <code>(i, j)</code> with <code>i &lt; j</code> and <code>a[i] &gt; a[j]</code>. Counting inversions in O(n log n):</p>
+<pre><code class="language-python">def count_inversions(a):
+    """
+    Count inversions in `a` using a Fenwick over compressed ranks.
+    Inversions = pairs (i, j) with i &lt; j and a[i] &gt; a[j].
+    """
+    sorted_unique = sorted(set(a))
+    rank = {v: i + 1 for i, v in enumerate(sorted_unique)}  # 1-indexed ranks
+    m = len(sorted_unique)
+    bit = Fenwick(m)
+    inv = 0
+    for x in reversed(a):
+        r = rank[x]
+        # how many elements seen so far (to the right) are strictly smaller than x?
+        inv += bit.prefix(r - 1)
+        bit.update(r, 1)
+    return inv
+
+
+print(count_inversions([2, 4, 1, 3, 5]))  # 3 (pairs: (2,1), (4,1), (4,3))
+</code></pre>
+<p>The same <code>reverse + BIT</code> pattern counts “for each i, how many j &gt; i with a[j] &lt; a[i]” — useful in many sub-problems (e.g., LeetCode 315).</p>
+<h2 id="offline-coordinate-compression-pattern"><a class="header" href="#offline-coordinate-compression-pattern">Offline Coordinate Compression Pattern</a></h2>
+<p>When values are huge (up to 10^9) but only <code>n</code> distinct ones appear, you don’t want a Fenwick of size 10^9. The pattern:</p>
+<pre><code class="language-python">def offline_with_compression(events):
+    """
+    events: list of (op, *args) where op references a value.
+    All values are first mapped to ranks 1..k for some k &lt;= n.
+    """
+    values = sorted({v for op, *args in events for v in args if isinstance(v, int)})
+    rank = {v: i + 1 for i, v in enumerate(values)}
+    bit = Fenwick(len(values))
+    out = []
+    for op, *args in events:
+        if op == 'add':
+            (v,) = args
+            bit.update(rank[v], 1)
+        elif op == 'count_leq':
+            (v,) = args
+            out.append(bit.prefix(rank[v]))
+    return out
+</code></pre>
+<p>You can also compress on the fly using <code>bisect</code>:</p>
+<pre><code class="language-python">import bisect
+
+values = sorted({...})
+def rk(x):
+    return bisect.bisect_right(values, x)  # 1-indexed rank of largest value &lt;= x
+</code></pre>
+<p>This is the bread-and-butter setup for inversion variants, “count of smaller elements after self,” sweep-line algorithms, and segment intersection problems.</p>
+<h2 id="bit-vs-segment-tree"><a class="header" href="#bit-vs-segment-tree">BIT vs. Segment Tree</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>Fenwick</th><th>Segment tree</th></tr>
+</thead>
+<tbody>
+<tr><td>Memory</td><td><code>n + 1</code> cells</td><td><code>4n</code> (recursive) or <code>2n</code> (iterative)</td></tr>
+<tr><td>Constant factor</td><td>Very small (one cache-friendly array, no recursion)</td><td>2–5× larger</td></tr>
+<tr><td>Code length</td><td>~20 lines</td><td>~80 lines (lazy ~150)</td></tr>
+<tr><td>Supports any associative op</td><td>Group ops only (sum/XOR/mult mod p)</td><td>Any associative op</td></tr>
+<tr><td>Range updates</td><td>Two-BIT trick (no lazy needed)</td><td>Lazy propagation</td></tr>
+<tr><td>Range max/min</td><td>No (no inverse) — only prefix max if monotone</td><td>Yes</td></tr>
+<tr><td>kth element</td><td>O(log n) via binary lift</td><td>O(log n) via descend</td></tr>
+<tr><td>Persistent variant</td><td>Awkward</td><td>Natural ([[segment_tree]] § Persistent)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Heuristic</strong>: if the problem fits a BIT, use it — shorter and faster. If you need any of {range min/max, range chmin/chmax, complex node structs}, reach for [[segment_tree]].</p>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem pattern</th><th>Recipe</th></tr>
+</thead>
+<tbody>
+<tr><td>“Count of elements ≤ X to the left of i”</td><td>Sweep i left-to-right, query <code>prefix(rank(X))</code>, update <code>rank(a[i])</code></td></tr>
+<tr><td>“Count inversions”</td><td>Reverse + BIT on compressed ranks</td></tr>
+<tr><td>“LIS in O(n log n)”</td><td>Sweep, <code>prefix_max(rank(a[i]) - 1) + 1</code>, update</td></tr>
+<tr><td>“Range sum + point update”</td><td>Plain BIT</td></tr>
+<tr><td>“Range add + point query”</td><td>Difference-array BIT</td></tr>
+<tr><td>“Range add + range sum”</td><td>Two-BIT trick</td></tr>
+<tr><td>“Find smallest i with prefix(i) ≥ k”</td><td>Binary lift on BIT</td></tr>
+<tr><td>“Rectangle sum + point update on a grid”</td><td>2D BIT</td></tr>
+<tr><td>“Rectangle add + point query on a grid”</td><td>2D difference-array BIT (4 updates per add)</td></tr>
+<tr><td>“Median in a sliding window”</td><td>BIT + binary lift (or two heaps)</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="interview--contest-problems"><a class="header" href="#interview--contest-problems">Interview &amp; Contest Problems</a></h2>
+<p><strong>LeetCode</strong></p>
+<ul>
+<li>
+<ol start="307">
+<li>Range Sum Query — Mutable (basic BIT)</li>
+</ol>
+</li>
+<li>
+<ol start="315">
+<li>Count of Smaller Numbers After Self (compressed BIT + reverse sweep)</li>
+</ol>
+</li>
+<li>
+<ol start="327">
+<li>Count of Range Sum (BIT or merge sort tree)</li>
+</ol>
+</li>
+<li>
+<ol start="406">
+<li>Queue Reconstruction by Height (BIT to find kth empty slot)</li>
+</ol>
+</li>
+<li>
+<ol start="493">
+<li>Reverse Pairs (BIT on compressed values)</li>
+</ol>
+</li>
+<li>
+<ol start="673">
+<li>Number of Longest Increasing Subsequence (BIT of (length, count) pairs)</li>
+</ol>
+</li>
+<li>
+<ol start="1395">
+<li>Count Number of Teams (two BITs: smaller/greater)</li>
+</ol>
+</li>
+<li>
+<ol start="1409">
+<li>Queries on a Permutation With Key (BIT of “still present” markers)</li>
+</ol>
+</li>
+<li>
+<ol start="2179">
+<li>Count Good Triplets in an Array (BIT pair sweep)</li>
+</ol>
+</li>
+</ul>
+<p><strong>Competitive</strong></p>
+<ul>
+<li>CSES “Static Range Sum Queries” (warm-up)</li>
+<li>CSES “Dynamic Range Sum Queries”</li>
+<li>CSES “Range Update Queries”</li>
+<li>CSES “Forest Queries” (2D BIT)</li>
+<li>CSES “List Removals” (BIT + binary lift)</li>
+<li>Codeforces 459D “Pashmak and Parmida’s problem”</li>
+<li>SPOJ INVCNT</li>
+</ul>
+<h2 id="complexity-analysis"><a class="header" href="#complexity-analysis">Complexity Analysis</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Time</th><th>Space</th></tr>
+</thead>
+<tbody>
+<tr><td>Build (naive)</td><td>O(n log n)</td><td>O(n)</td></tr>
+<tr><td>Build (O(n) sweep)</td><td>O(n)</td><td>O(n)</td></tr>
+<tr><td>Point update</td><td>O(log n)</td><td>—</td></tr>
+<tr><td>Prefix query</td><td>O(log n)</td><td>—</td></tr>
+<tr><td>Range query (sum/XOR via subtraction)</td><td>O(log n)</td><td>—</td></tr>
+<tr><td>2D point update</td><td>O(log² n)</td><td>O(n²)</td></tr>
+<tr><td>2D rectangle sum</td><td>O(log² n)</td><td>—</td></tr>
+<tr><td>kth via binary lift</td><td>O(log n)</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+<p>Constant factor: extremely low. In CPython, an array-backed BIT is typically the fastest non-trivial data structure you can use; for tight contests use <code>array.array('q', ...)</code> or NumPy if applicable.</p>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<ol>
+<li><strong>1-indexed vs. 0-indexed.</strong> The implementation here uses <strong>1-indexed</strong> access internally. Forgetting to shift indices is the #1 BIT bug. Pick a side and stick with it.</li>
+<li><strong><code>prefix(0)</code> must be 0.</strong> The loop <code>while i &gt; 0</code> handles this automatically — don’t rewrite it to <code>while i &gt;= 0</code>.</li>
+<li><strong>Updating with <code>lowbit</code> from 0.</strong> If <code>i == 0</code>, <code>i &amp; -i == 0</code> and the loop never advances. Always start updates from <code>i &gt;= 1</code>.</li>
+<li><strong>Using a BIT for min/max in general.</strong> Doesn’t work — no inverse. Only the “prefix max with monotone updates” pattern works.</li>
+<li><strong>Negative indices.</strong> Range <code>[l, r]</code> with <code>r &lt; l</code> should return 0 (the identity). Always guard with <code>if r &lt; l: return 0</code>.</li>
+<li><strong>Off-by-one in <code>range_add(r + 1, ...)</code>.</strong> If <code>r == n</code>, you must skip the second update (or size the tree to <code>n + 1</code> cells).</li>
+<li><strong>2D BIT memory.</strong> A 2000 × 2000 BIT is fine; a 10^5 × 10^5 dense BIT is 10 GB and not. Compress one axis or sweep.</li>
+<li><strong>Forgetting compression.</strong> A naive BIT of size 10^9 will TLE/MLE. Always compress to <code>n</code> ranks first when values are sparse.</li>
+<li><strong>Mixing the two-BIT trick with point updates.</strong> If your problem has both range-add and single-point updates, treat single-point as a range-add over <code>[i, i]</code> rather than mixing two APIs that share the same underlying BIT.</li>
+<li><strong>Overflow in C++ ports.</strong> Python’s arbitrary precision hides this, but if you port the two-BIT trick to C++, the <code>B2</code> value can overflow 64-bit for the maximum input — use <code>__int128</code> or be careful about modulus.</li>
+</ol>
+<h2 id="practice-problems"><a class="header" href="#practice-problems">Practice Problems</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Source</th><th>Problem</th></tr>
+</thead>
+<tbody>
+<tr><td>CSES</td><td>Range Queries section (Static Range Sum, Dynamic Range Sum, Range Update, Forest Queries 2D, List Removals)</td></tr>
+<tr><td>LeetCode</td><td>307, 315, 327, 406, 493, 673, 1395, 1409, 2179</td></tr>
+<tr><td>Codeforces</td><td>459D, 540E, 597C, 652D, 793F, 869E</td></tr>
+<tr><td>SPOJ</td><td>INVCNT, FENTREE, MATSUM, KQUERY</td></tr>
+<tr><td>AtCoder</td><td>Library Checker: “Point Add Range Sum”, “Range Affine Range Sum” (latter needs lazy segtree)</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="additional-resources"><a class="header" href="#additional-resources">Additional Resources</a></h2>
+<ul>
+<li>CP-Algorithms: “Fenwick Tree” article — the canonical reference.</li>
+<li>Peter Fenwick’s 1994 paper “A new data structure for cumulative frequency tables.”</li>
+<li>“Competitive Programmer’s Handbook” by Antti Laaksonen, BIT chapter.</li>
+<li>TopCoder tutorial: “Binary Indexed Trees” by boba5551.</li>
+<li>Codeforces blog: “Fenwick trees” series — many variations and tricks.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../algorithms/heuristic_search.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../algorithms/heavy_light_decomposition.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../algorithms/heuristic_search.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../algorithms/heavy_light_decomposition.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

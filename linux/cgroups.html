@@ -1,0 +1,680 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cgroups - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-62d4d51c.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="linux-control-groups-cgroups"><a class="header" href="#linux-control-groups-cgroups">Linux Control Groups (cgroups)</a></h1>
+<blockquote>
+<p><strong>Domain:</strong> Linux Kernel, Systems Programming, Containers, Resource Management
+<strong>Key Concepts:</strong> Control Groups, Hierarchy, Controllers/Subsystems, cgroup v1 vs v2, Unified Hierarchy, cgroupfs, CPU/Memory/IO/PIDs/cpuset Controllers, PSI, Delegation, systemd, Containers</p>
+</blockquote>
+<p><strong>Control groups (cgroups)</strong> are a Linux kernel feature that organizes processes into hierarchical groups and then <strong>limits, accounts for, and isolates</strong> their resource usage — CPU time, memory, block I/O bandwidth, number of processes, and more. They are one of the two pillars of Linux containers: cgroups bound <em>how much</em> a group of processes may consume, while <strong>namespaces</strong> bound <em>what</em> those processes can see. Together they make <code>docker</code>, <code>podman</code>, <code>systemd</code>, and Kubernetes possible.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#1-introduction">Introduction</a></li>
+<li><a href="#2-core-concepts">Core Concepts</a></li>
+<li><a href="#3-cgroup-v1-vs-v2">cgroup v1 vs v2</a></li>
+<li><a href="#4-the-cgroupfs-filesystem-interface">The cgroupfs Filesystem Interface</a></li>
+<li><a href="#5-enabling-controllers-and-subtree_control">Enabling Controllers and subtree_control</a></li>
+<li><a href="#6-the-cpu-controller">The CPU Controller</a></li>
+<li><a href="#7-the-memory-controller">The Memory Controller</a></li>
+<li><a href="#8-the-io-controller">The IO Controller</a></li>
+<li><a href="#9-the-pids-controller">The PIDs Controller</a></li>
+<li><a href="#10-the-cpuset-controller">The cpuset Controller</a></li>
+<li><a href="#11-other-controllers">Other Controllers</a></li>
+<li><a href="#12-psi--pressure-stall-information">PSI — Pressure Stall Information</a></li>
+<li><a href="#13-delegation">Delegation</a></li>
+<li><a href="#14-systemd-integration">systemd Integration</a></li>
+<li><a href="#15-containers-and-cgroups">Containers and cgroups</a></li>
+<li><a href="#16-tools-and-debugging">Tools and Debugging</a></li>
+<li><a href="#17-resources">Resources</a></li>
+</ol>
+<hr>
+<h2 id="1-introduction"><a class="header" href="#1-introduction">1. Introduction</a></h2>
+<p>A control group does two things, and it’s worth keeping them distinct:</p>
+<ol>
+<li><strong>Resource control</strong> — impose limits (you may use at most 2 CPUs, 512 MiB of RAM, 50 MB/s of disk write bandwidth) and guarantees (you are protected up to 256 MiB before reclaim touches you).</li>
+<li><strong>Accounting and grouping</strong> — track exactly how much CPU, memory, and I/O a group of processes has consumed, independent of any limit. Even with no limits set, cgroups give you per-group statistics.</li>
+</ol>
+<p>cgroups are <strong>not</strong> isolation in the security sense. That is the job of <strong>namespaces</strong> (PID, mount, network, user, UTS, IPC, time, and the cgroup namespace itself). The two are orthogonal and complementary:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Mechanism</th><th>Question it answers</th><th>Examples</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>cgroups</strong></td><td><em>How much</em> can these processes use?</td><td>CPU quota, memory cap, I/O bandwidth, PID count</td></tr>
+<tr><td><strong>namespaces</strong></td><td><em>What</em> can these processes see?</td><td>Their own PIDs, mounts, network stack, hostname</td></tr>
+</tbody>
+</table>
+</div>
+<p>A container runtime creates a set of namespaces (so the workload sees a private view of the system) <strong>and</strong> a cgroup (so the workload can’t starve its neighbors). The kernel implementation lives in <code>kernel/cgroup/</code> plus per-controller code (<code>mm/memcontrol.c</code>, <code>kernel/sched/</code>, <code>block/blk-cgroup.c</code>, …).</p>
+<hr>
+<h2 id="2-core-concepts"><a class="header" href="#2-core-concepts">2. Core Concepts</a></h2>
+<ul>
+<li><strong>Control group (cgroup):</strong> A collection of processes bound by the same set of limits and accounting. Represented as a directory in a special filesystem.</li>
+<li><strong>Hierarchy:</strong> cgroups form a tree. Child groups inherit constraints from their ancestors — a child can never exceed limits its parent imposes. The root of the tree is the whole machine.</li>
+<li><strong>Controller (a.k.a. subsystem):</strong> The kernel module that actually enforces one resource type: <code>cpu</code>, <code>memory</code>, <code>io</code>, <code>pids</code>, <code>cpuset</code>, <code>hugetlb</code>, etc. A controller is <em>enabled</em> on a subtree and then exposes interface files in each group.</li>
+<li><strong>Tasks / processes:</strong> Every process belongs to exactly one cgroup (per hierarchy). A new process inherits its parent’s cgroup; you move it by writing its PID into a control file.</li>
+<li><strong>Interface files:</strong> Control and statistics are exposed as plain files (<code>cpu.max</code>, <code>memory.current</code>, <code>io.stat</code>). You configure cgroups by reading and writing text to these files — no special syscall.</li>
+</ul>
+<pre><code>              root cgroup (/sys/fs/cgroup)
+              /            |              \
+        system.slice   user.slice     machine.slice   &lt;- systemd's default layout
+          /     \                          \
+   sshd.service  nginx.service          docker-&lt;id&gt;.scope
+       (procs)      (procs)                 (container procs)
+</code></pre>
+<hr>
+<h2 id="3-cgroup-v1-vs-v2"><a class="header" href="#3-cgroup-v1-vs-v2">3. cgroup v1 vs v2</a></h2>
+<p>cgroups exist in two generations. <strong>v2 (the “unified hierarchy”) is the modern default</strong> on virtually all current distros (systemd ≥ v232 era, kernels ≥ 4.5 for the core, with controllers maturing through 5.x).</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Aspect</th><th>cgroup <strong>v1</strong></th><th>cgroup <strong>v2</strong></th></tr>
+</thead>
+<tbody>
+<tr><td>Hierarchies</td><td><strong>Multiple</strong>, independent — one tree per controller (separate <code>cpu</code>, <code>memory</code>, <code>blkio</code> mounts)</td><td><strong>Single unified</strong> tree; all controllers share it</td></tr>
+<tr><td>Granularity</td><td>Threads could be split across controllers</td><td>Processes attach at the cgroup; threads only in <code>threaded</code> subtrees</td></tr>
+<tr><td>Internal processes</td><td>Allowed anywhere</td><td>Forbidden — only <strong>leaf</strong> cgroups hold processes (“no internal process” rule)</td></tr>
+<tr><td>Controller enablement</td><td>Implicit per-mount</td><td>Explicit, top-down via <code>cgroup.subtree_control</code></td></tr>
+<tr><td>Consistency</td><td>Each controller had its own ad-hoc interface</td><td>Uniform <code>*.max</code> / <code>*.current</code> / <code>*.stat</code> / <code>*.events</code> naming</td></tr>
+<tr><td>Pressure (PSI)</td><td>No</td><td>Yes (<code>*.pressure</code>)</td></tr>
+<tr><td>Mount type</td><td><code>cgroup</code> (one per controller)</td><td><code>cgroup2</code> (single mount)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Why v2 exists:</strong> v1’s independent hierarchies meant a process could sit in different positions in the <code>memory</code> and <code>io</code> trees simultaneously, making it impossible for the memory and I/O controllers to cooperate (e.g. for coordinated writeback throttling). v2’s single tree gives every process one consistent position so controllers can reason jointly.</p>
+<p><strong>The “no internal processes” rule:</strong> in v2, a cgroup that has child cgroups with controllers enabled may <strong>not</strong> itself contain processes. Processes live only in leaf nodes. (The root is exempt.) This keeps resource distribution unambiguous.</p>
+<pre><code class="language-bash"># Which version is in use? cgroup2 mounted on /sys/fs/cgroup =&gt; v2 (unified)
+mount | grep cgroup
+stat -fc %T /sys/fs/cgroup     # "cgroup2fs" =&gt; v2 ; "tmpfs" =&gt; v1/hybrid
+</code></pre>
+<p><strong>Selecting a mode</strong> (kernel cmdline / systemd):</p>
+<ul>
+<li><code>systemd.unified_cgroup_hierarchy=1</code> — force unified v2 (default on modern systemd).</li>
+<li><code>systemd.unified_cgroup_hierarchy=0</code> — legacy v1.</li>
+<li><code>cgroup_no_v1=all</code> — disable all v1 controllers (clean v2). A <em>hybrid</em> mode also exists where v2 is mounted but some controllers remain on v1.</li>
+</ul>
+<blockquote>
+<p>The rest of this document focuses on <strong>cgroup v2</strong> unless stated otherwise.</p>
+</blockquote>
+<hr>
+<h2 id="4-the-cgroupfs-filesystem-interface"><a class="header" href="#4-the-cgroupfs-filesystem-interface">4. The cgroupfs Filesystem Interface</a></h2>
+<p>cgroups are driven entirely through a pseudo-filesystem, normally mounted at <code>/sys/fs/cgroup</code>:</p>
+<pre><code class="language-bash"># v2 is a single mount of type cgroup2
+mount -t cgroup2 none /sys/fs/cgroup        # (systemd does this at boot)
+</code></pre>
+<p>You create a group with <code>mkdir</code> and remove it (when empty) with <code>rmdir</code>:</p>
+<pre><code class="language-bash">cd /sys/fs/cgroup
+mkdir myapp                  # create a child cgroup
+echo $$ &gt; myapp/cgroup.procs # move the current shell into it
+cat myapp/cgroup.procs       # list PIDs in this group
+rmdir myapp                  # destroy it (must contain no procs/children)
+</code></pre>
+<h3 id="key-core-interface-files-present-in-every-v2-group"><a class="header" href="#key-core-interface-files-present-in-every-v2-group">Key core interface files (present in every v2 group)</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>File</th><th>Read / Write</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>cgroup.procs</code></td><td>R/W</td><td>PIDs in this group; write a PID to migrate it here</td></tr>
+<tr><td><code>cgroup.threads</code></td><td>R/W</td><td>TIDs (only meaningful in <code>threaded</code> subtrees)</td></tr>
+<tr><td><code>cgroup.controllers</code></td><td>R</td><td>Controllers <em>available</em> in this group (granted by the parent)</td></tr>
+<tr><td><code>cgroup.subtree_control</code></td><td>R/W</td><td>Controllers <em>enabled for children</em> (write <code>+cpu</code>, <code>-memory</code>, …)</td></tr>
+<tr><td><code>cgroup.type</code></td><td>R/W</td><td><code>domain</code> (default) / <code>threaded</code> / <code>domain threaded</code></td></tr>
+<tr><td><code>cgroup.events</code></td><td>R</td><td><code>populated 0/1</code>, <code>frozen 0/1</code> — notifiable via <code>poll()</code>/<code>inotify</code></td></tr>
+<tr><td><code>cgroup.stat</code></td><td>R</td><td><code>nr_descendants</code>, <code>nr_dying_descendants</code></td></tr>
+<tr><td><code>cgroup.freeze</code></td><td>R/W</td><td>Write <code>1</code> to freeze (SIGSTOP-like) the whole subtree, <code>0</code> to thaw</td></tr>
+<tr><td><code>cgroup.kill</code></td><td>W</td><td>Write <code>1</code> to SIGKILL every process in the subtree (kernel ≥ 5.14)</td></tr>
+</tbody>
+</table>
+</div>
+<p>Migrating a process is just a write — the kernel moves the PID atomically:</p>
+<pre><code class="language-bash">echo 1234 &gt; /sys/fs/cgroup/myapp/cgroup.procs
+cat /proc/1234/cgroup        # confirm: "0::/myapp"
+</code></pre>
+<hr>
+<h2 id="5-enabling-controllers-and-subtree_control"><a class="header" href="#5-enabling-controllers-and-subtree_control">5. Enabling Controllers and subtree_control</a></h2>
+<p>A controller must be <strong>explicitly enabled top-down</strong>. A group can only enable for its children the controllers it was itself granted (visible in <code>cgroup.controllers</code>). You enable/disable by writing <code>+name</code>/<code>-name</code> to <code>cgroup.subtree_control</code>:</p>
+<pre><code class="language-bash">cd /sys/fs/cgroup
+cat cgroup.controllers                 # e.g. "cpuset cpu io memory hugetlb pids"
+echo "+cpu +memory" &gt; cgroup.subtree_control   # grant cpu+memory to children
+
+mkdir workloads
+cat workloads/cgroup.controllers       # now shows "cpu memory"
+echo "+cpu" &gt; workloads/cgroup.subtree_control  # pass cpu down another level
+</code></pre>
+<p>Rules and gotchas:</p>
+<ul>
+<li>You can only enable a controller for children if it is present in <em>your</em> <code>cgroup.controllers</code>. Enablement therefore propagates only as far down as each level chooses to grant it.</li>
+<li><strong>No internal processes:</strong> once a non-root group has controllers enabled in <code>subtree_control</code> <em>and</em> has child groups, it must not contain processes directly — move them into a leaf first.</li>
+<li>Disabling a controller (<code>-cpu</code>) requires that no descendant still depends on it.</li>
+</ul>
+<hr>
+<h2 id="6-the-cpu-controller"><a class="header" href="#6-the-cpu-controller">6. The CPU Controller</a></h2>
+<p>Distributes CPU time, both as a <strong>hard bandwidth cap</strong> and as a <strong>proportional weight</strong>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>File</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>cpu.max</code></td><td>Bandwidth limit: <code>"$QUOTA $PERIOD"</code> in microseconds. <code>"max 100000"</code> = no limit</td></tr>
+<tr><td><code>cpu.weight</code></td><td>Proportional share, <code>1</code>–<code>10000</code>, default <code>100</code> (relative to siblings)</td></tr>
+<tr><td><code>cpu.weight.nice</code></td><td>Same as <code>cpu.weight</code> but expressed on the nice scale (<code>-20</code>..<code>19</code>)</td></tr>
+<tr><td><code>cpu.stat</code></td><td><code>usage_usec</code>, <code>nr_periods</code>, <code>nr_throttled</code>, <code>throttled_usec</code></td></tr>
+<tr><td><code>cpu.pressure</code></td><td>PSI stall metrics for CPU (see §12)</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Bandwidth (<code>cpu.max</code>):</strong> quota is how much CPU time the group may use per period. <code>"50000 100000"</code> means 50 ms of CPU every 100 ms = <strong>0.5 of one CPU</strong>. <code>"200000 100000"</code> = up to <strong>2 full CPUs</strong>. When the quota is exhausted within a period the group is <em>throttled</em> until the next period — visible in <code>cpu.stat</code>’s <code>nr_throttled</code>/<code>throttled_usec</code>.</p>
+<p><strong>Weight (<code>cpu.weight</code>):</strong> only matters under contention. Two sibling groups with weights <code>100</code> and <code>300</code> split a busy CPU <code>25% / 75%</code>. With no contention, either can use the whole CPU.</p>
+<pre><code class="language-bash">cd /sys/fs/cgroup
+echo "+cpu" &gt; cgroup.subtree_control
+mkdir batch
+echo "50000 100000" &gt; batch/cpu.max     # cap at half a CPU
+echo 200 &gt; batch/cpu.weight             # 2x the default share under contention
+echo $$ &gt; batch/cgroup.procs
+cat batch/cpu.stat                       # watch nr_throttled climb under load
+</code></pre>
+<hr>
+<h2 id="7-the-memory-controller"><a class="header" href="#7-the-memory-controller">7. The Memory Controller</a></h2>
+<p>Accounts and limits memory (anonymous, page cache, kernel slab, socket buffers) per group. This is the basis of container memory limits — see also <a href="./memory_management.html">memory_management.md</a> §10 (cgroup memory control) and §11 (OOM killer).</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>File</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>memory.max</code></td><td><strong>Hard limit.</strong> Exceeding it triggers reclaim, then in-cgroup OOM kill</td></tr>
+<tr><td><code>memory.high</code></td><td><strong>Throttle limit.</strong> Over it, allocations are heavily throttled + reclaimed (no kill)</td></tr>
+<tr><td><code>memory.low</code></td><td><strong>Soft protection.</strong> Memory under this is protected from reclaim when possible</td></tr>
+<tr><td><code>memory.min</code></td><td><strong>Hard protection.</strong> Memory under this is never reclaimed (can OOM the system)</td></tr>
+<tr><td><code>memory.current</code></td><td>Current usage in bytes</td></tr>
+<tr><td><code>memory.swap.max</code></td><td>Cap on swap usage for the group</td></tr>
+<tr><td><code>memory.stat</code></td><td>Detailed breakdown: <code>anon</code>, <code>file</code>, <code>slab</code>, <code>sock</code>, <code>shmem</code>, <code>pgfault</code>, …</td></tr>
+<tr><td><code>memory.events</code></td><td>Counters: <code>low</code>, <code>high</code>, <code>max</code>, <code>oom</code>, <code>oom_kill</code></td></tr>
+<tr><td><code>memory.pressure</code></td><td>PSI memory stall metrics (see §12)</td></tr>
+</tbody>
+</table>
+</div>
+<p>The distinction that trips people up: <strong><code>memory.high</code> throttles, <code>memory.max</code> kills.</strong> Set <code>high</code> a bit below <code>max</code> to get aggressive reclaim and back-pressure <em>before</em> the OOM killer fires.</p>
+<pre><code class="language-bash">cd /sys/fs/cgroup
+echo "+memory" &gt; cgroup.subtree_control
+mkdir webapp
+echo 512M &gt; webapp/memory.max
+echo 450M &gt; webapp/memory.high      # throttle/reclaim before hitting the hard cap
+echo 128M &gt; webapp/memory.min       # guarantee at least 128M, never reclaimed
+echo $$ &gt; webapp/cgroup.procs
+cat webapp/memory.current
+cat webapp/memory.events            # oom_kill count, etc.
+</code></pre>
+<p>When a group exceeds <code>memory.max</code> and reclaim can’t recover enough, the kernel runs an <strong>OOM kill scoped to that cgroup</strong> rather than the whole machine.</p>
+<hr>
+<h2 id="8-the-io-controller"><a class="header" href="#8-the-io-controller">8. The IO Controller</a></h2>
+<p>Controls block-device bandwidth and IOPS. Limits are <strong>per device</strong>, keyed by <code>major:minor</code> (find them with <code>lsblk</code> / <code>ls -l /dev</code>).</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>File</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>io.max</code></td><td>Hard limits per device: <code>rbps</code>, <code>wbps</code> (bytes/s), <code>riops</code>, <code>wiops</code> (ops/s)</td></tr>
+<tr><td><code>io.weight</code></td><td>Proportional weight <code>1</code>–<code>10000</code> (default <code>100</code>); needs <code>bfq</code> or <code>blk-iocost</code></td></tr>
+<tr><td><code>io.latency</code></td><td>Target latency (ms) per device — a latency-based QoS / protection mechanism</td></tr>
+<tr><td><code>io.cost.*</code></td><td>The cost-model (<code>blk-iocost</code>) tunables for proportional control on any device</td></tr>
+<tr><td><code>io.stat</code></td><td>Per-device <code>rbytes</code>, <code>wbytes</code>, <code>rios</code>, <code>wios</code> accounting</td></tr>
+<tr><td><code>io.pressure</code></td><td>PSI I/O stall metrics (see §12)</td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-bash">cd /sys/fs/cgroup
+echo "+io" &gt; cgroup.subtree_control
+mkdir backup
+# Throttle device 8:0 (e.g. /dev/sda) to 10 MB/s write, 1 MB/s read
+echo "8:0 wbps=10485760 rbps=1048576" &gt; backup/io.max
+echo $$ &gt; backup/cgroup.procs
+cat backup/io.stat
+</code></pre>
+<p>Proportional weighting (<code>io.weight</code>) requires an I/O scheduler/cost model that supports it — historically <code>cfq</code> (v1), now <strong><code>bfq</code></strong> or the schedulerless <strong><code>blk-iocost</code></strong> cost model in v2. Pure <code>io.max</code> rate limits work regardless.</p>
+<hr>
+<h2 id="9-the-pids-controller"><a class="header" href="#9-the-pids-controller">9. The PIDs Controller</a></h2>
+<p>Limits the <strong>number of processes/threads</strong> a group may create — the standard defense against fork bombs and runaway spawning.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>File</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>pids.max</code></td><td>Maximum number of PIDs (<code>max</code> = unlimited)</td></tr>
+<tr><td><code>pids.current</code></td><td>Current count of PIDs in the subtree</td></tr>
+<tr><td><code>pids.events</code></td><td><code>max</code> — number of times a fork was denied by the cap</td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-bash">cd /sys/fs/cgroup
+echo "+pids" &gt; cgroup.subtree_control
+mkdir sandbox
+echo 100 &gt; sandbox/pids.max          # cap at 100 processes
+echo $$ &gt; sandbox/cgroup.procs
+cat sandbox/pids.current
+# A fork bomb inside 'sandbox' now hits EAGAIN once it reaches 100.
+</code></pre>
+<hr>
+<h2 id="10-the-cpuset-controller"><a class="header" href="#10-the-cpuset-controller">10. The cpuset Controller</a></h2>
+<p>Pins a group to specific <strong>CPUs</strong> and <strong>NUMA memory nodes</strong> — used for cache-locality, NUMA-aware placement, and carving the machine into isolated partitions.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>File</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>cpuset.cpus</code></td><td>Allowed logical CPUs, e.g. <code>0-3</code> or <code>0,2,4</code></td></tr>
+<tr><td><code>cpuset.mems</code></td><td>Allowed NUMA memory nodes, e.g. <code>0</code></td></tr>
+<tr><td><code>cpuset.cpus.effective</code></td><td>CPUs actually granted after intersecting with ancestors</td></tr>
+<tr><td><code>cpuset.cpus.partition</code></td><td><code>member</code> / <code>root</code> / <code>isolated</code> — create an exclusive CPU partition</td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-bash">cd /sys/fs/cgroup
+echo "+cpuset" &gt; cgroup.subtree_control
+mkdir lowlatency
+echo "2-3" &gt; lowlatency/cpuset.cpus      # pin to CPUs 2 and 3
+echo "0"   &gt; lowlatency/cpuset.mems      # allocate from NUMA node 0
+echo $$    &gt; lowlatency/cgroup.procs
+cat lowlatency/cpuset.cpus.effective
+</code></pre>
+<p>Setting <code>cpuset.cpus.partition</code> to <code>root</code> (or <code>isolated</code>) carves the listed CPUs out for the group’s exclusive use, keeping other tasks off them — useful for real-time / latency-sensitive workloads. Cross-reference NUMA concepts in <a href="./memory_management.html">memory_management.md</a> §4.2.</p>
+<hr>
+<h2 id="11-other-controllers"><a class="header" href="#11-other-controllers">11. Other Controllers</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Controller</th><th>Key files / interface</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>hugetlb</code></td><td><code>hugetlb.&lt;size&gt;.max</code>, <code>.current</code></td><td>Limit/account explicit huge-page (HugeTLB) usage per group</td></tr>
+<tr><td><code>rdma</code></td><td><code>rdma.max</code>, <code>rdma.current</code></td><td>Cap RDMA/InfiniBand resources (HCA handles, objects)</td></tr>
+<tr><td><code>misc</code></td><td><code>misc.max</code>, <code>misc.current</code></td><td>Account scalar resources (e.g. AMD SEV ASIDs, Intel SGX EPC)</td></tr>
+<tr><td><code>freezer</code></td><td><code>cgroup.freeze</code> (core file in v2)</td><td>Suspend/resume an entire subtree (checkpoint, migration)</td></tr>
+<tr><td><code>perf_event</code></td><td>(enables <code>perf</code> to target a cgroup)</td><td>Scope performance monitoring to a cgroup</td></tr>
+</tbody>
+</table>
+</div>
+<p>In v2 the freezer is folded into the core <code>cgroup.freeze</code> file rather than a separate controller:</p>
+<pre><code class="language-bash">echo 1 &gt; /sys/fs/cgroup/myapp/cgroup.freeze   # SIGSTOP-like pause of whole subtree
+echo 0 &gt; /sys/fs/cgroup/myapp/cgroup.freeze   # resume
+cat /sys/fs/cgroup/myapp/cgroup.events        # "frozen 1"
+</code></pre>
+<hr>
+<h2 id="12-psi--pressure-stall-information"><a class="header" href="#12-psi--pressure-stall-information">12. PSI — Pressure Stall Information</a></h2>
+<p>A cgroup v2 feature: each group exposes <strong><code>cpu.pressure</code></strong>, <strong><code>memory.pressure</code></strong>, and <strong><code>io.pressure</code></strong> files quantifying how much time tasks stalled waiting for that resource. (A system-wide version lives in <code>/proc/pressure/</code>.)</p>
+<pre><code>some avg10=0.00 avg60=0.12 avg300=0.05 total=1234567
+full avg10=0.00 avg60=0.08 avg300=0.03 total=987654
+</code></pre>
+<ul>
+<li><strong><code>some</code></strong> — share of time <em>at least one</em> task was stalled on the resource.</li>
+<li><strong><code>full</code></strong> — share of time <em>all</em> runnable tasks were stalled (pure lost work). Not reported for CPU.</li>
+<li><code>avg10/60/300</code> — percentages over 10 s / 60 s / 5 min windows; <code>total</code> — cumulative microseconds.</li>
+</ul>
+<p>PSI is the signal behind modern OOM/eviction daemons (e.g. <strong><code>oomd</code>/<code>systemd-oomd</code></strong>) and autoscalers: rather than waiting for hard limits or the kernel OOM killer, they watch pressure rising and act early.</p>
+<pre><code class="language-bash">cat /sys/fs/cgroup/webapp/memory.pressure
+cat /proc/pressure/io                 # system-wide I/O pressure
+</code></pre>
+<hr>
+<h2 id="13-delegation"><a class="header" href="#13-delegation">13. Delegation</a></h2>
+<p><strong>Delegation</strong> hands a subtree of the cgroup hierarchy to a less-privileged user or to a container, letting them manage their own sub-cgroups without root.</p>
+<p>How it works: a privileged manager (root / systemd) <code>chown</code>s the <strong>delegated directory</strong> and a specific set of its interface files (<code>cgroup.procs</code>, <code>cgroup.subtree_control</code>, <code>cgroup.threads</code>) to the target user. That user can then create children, enable controllers granted to them, and move <em>their own</em> processes around — but cannot escape upward or grant themselves controllers the parent didn’t enable.</p>
+<p>Containment rules that make this safe:</p>
+<ul>
+<li>A delegatee can only move a process between cgroups if it has write access to the <strong>common ancestor</strong>’s <code>cgroup.procs</code> as well as the source and destination — preventing it from pulling in arbitrary host processes.</li>
+<li>A delegatee can only enable controllers present in its own <code>cgroup.controllers</code> (i.e. ones the parent passed down via <code>subtree_control</code>).</li>
+<li>The <strong><code>nsdelegate</code></strong> mount option makes cgroup-namespace boundaries act as delegation boundaries, so a containerized process treats its namespace root as the top of its world.</li>
+</ul>
+<pre><code class="language-bash">mount -o remount,nsdelegate /sys/fs/cgroup
+mkdir /sys/fs/cgroup/user-subtree
+chown alice:alice /sys/fs/cgroup/user-subtree \
+                  /sys/fs/cgroup/user-subtree/cgroup.procs \
+                  /sys/fs/cgroup/user-subtree/cgroup.subtree_control \
+                  /sys/fs/cgroup/user-subtree/cgroup.threads
+# alice can now manage cgroups under user-subtree without root
+</code></pre>
+<hr>
+<h2 id="14-systemd-integration"><a class="header" href="#14-systemd-integration">14. systemd Integration</a></h2>
+<p>On modern Linux, <strong>systemd is the cgroup manager.</strong> It owns <code>/sys/fs/cgroup</code> and expects to be the single writer — you should generally configure resources <em>through</em> systemd rather than poking cgroupfs directly under <code>system.slice</code>. systemd organizes the tree into three unit types:</p>
+<ul>
+<li><strong>Slices</strong> (<code>*.slice</code>) — partition the tree (<code>system.slice</code>, <code>user.slice</code>, <code>machine.slice</code>). They carry resource policy that children inherit.</li>
+<li><strong>Services</strong> (<code>*.service</code>) — daemons started by systemd; each gets its own cgroup.</li>
+<li><strong>Scopes</strong> (<code>*.scope</code>) — groups of externally-started processes (login sessions, VMs, containers) placed under systemd’s management.</li>
+</ul>
+<p>Resource control via unit directives (in a unit file or with <code>systemctl set-property</code>):</p>
+<pre><code class="language-ini"># /etc/systemd/system/nginx.service.d/limits.conf
+[Service]
+CPUQuota=50%          # -&gt; cpu.max  (50% of one CPU)
+CPUWeight=200         # -&gt; cpu.weight
+MemoryMax=512M        # -&gt; memory.max
+MemoryHigh=450M       # -&gt; memory.high
+IOWeight=100          # -&gt; io.weight
+TasksMax=100          # -&gt; pids.max
+</code></pre>
+<pre><code class="language-bash">systemctl set-property nginx.service MemoryMax=512M CPUQuota=50%
+systemctl daemon-reload
+
+# Run a one-off command in a transient scope/service with limits:
+systemd-run --scope -p CPUQuota=20% -p MemoryMax=200M stress -c 2
+
+# Inspect the live tree and resource usage:
+systemd-cgls                 # tree of slices/services/scopes and their PIDs
+systemd-cgtop                # top-like live CPU/Memory/IO per cgroup
+systemctl status nginx       # shows the unit's cgroup path and member PIDs
+</code></pre>
+<hr>
+<h2 id="15-containers-and-cgroups"><a class="header" href="#15-containers-and-cgroups">15. Containers and cgroups</a></h2>
+<p>Container runtimes translate user-facing flags into cgroup interface files:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Runtime flag</th><th>Resulting cgroup setting</th></tr>
+</thead>
+<tbody>
+<tr><td><code>docker run --cpus=2</code></td><td><code>cpu.max = "200000 100000"</code></td></tr>
+<tr><td><code>docker run --cpu-shares=512</code></td><td><code>cpu.weight</code> (scaled)</td></tr>
+<tr><td><code>docker run --memory=512m</code></td><td><code>memory.max = 512M</code></td></tr>
+<tr><td><code>docker run --memory-swap=1g</code></td><td><code>memory.swap.max</code></td></tr>
+<tr><td><code>docker run --pids-limit=100</code></td><td><code>pids.max = 100</code></td></tr>
+<tr><td><code>docker run --blkio-weight=500</code></td><td><code>io.weight</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>Under the hood <strong>runc</strong> (the OCI runtime used by Docker/containerd) creates the cgroup, applies limits from the OCI spec’s <code>linux.resources</code>, and on cgroup-v2 hosts can drive systemd via the <code>systemd</code> cgroup driver (so containers appear as scopes under <code>system.slice</code>/<code>machine.slice</code>).</p>
+<p><strong>Kubernetes</strong> layers its QoS model on top: the kubelet creates a cgroup hierarchy (<code>kubepods.slice</code> → per-QoS-class → per-pod → per-container) and maps a container’s <code>requests</code>/<code>limits</code> onto <code>cpu.weight</code>/<code>cpu.max</code> and <code>memory.min</code>/<code>memory.max</code>.</p>
+<p><strong>The cgroup namespace</strong> (<code>CLONE_NEWCGROUP</code>) virtualizes the cgroup path a process sees. Inside a container, <code>/proc/self/cgroup</code> shows a root-relative path (<code>/</code>) instead of the real host path (<code>/system.slice/docker-&lt;id&gt;.scope/...</code>), preventing information leaks and making the container’s cgroup view self-contained — this is what <code>nsdelegate</code> (see §13) keys off.</p>
+<pre><code class="language-bash">cat /proc/self/cgroup                 # on host: full path; in container: virtualized
+docker run --rm --cpus=1.5 --memory=256m alpine cat /sys/fs/cgroup/cpu.max
+</code></pre>
+<hr>
+<h2 id="16-tools-and-debugging"><a class="header" href="#16-tools-and-debugging">16. Tools and Debugging</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Tool / file</th><th>Shows</th></tr>
+</thead>
+<tbody>
+<tr><td><code>systemd-cgls</code></td><td>The full cgroup tree with the units and PIDs in each group</td></tr>
+<tr><td><code>systemd-cgtop</code></td><td>Live <code>top</code>-style CPU/memory/IO/PIDs usage per cgroup</td></tr>
+<tr><td><code>cat /proc/&lt;pid&gt;/cgroup</code></td><td>Which cgroup a given process belongs to (v2: a single <code>0::</code> line)</td></tr>
+<tr><td><code>cat /proc/cgroups</code></td><td>Available controllers and whether each is enabled (v1-style listing)</td></tr>
+<tr><td><code>cat /sys/fs/cgroup/.../*.stat</code></td><td>Per-resource accounting (<code>cpu.stat</code>, <code>memory.stat</code>, <code>io.stat</code>)</td></tr>
+<tr><td><code>cat /sys/fs/cgroup/.../*.pressure</code></td><td>PSI stall metrics for the group</td></tr>
+<tr><td><code>cat /sys/fs/cgroup/cgroup.controllers</code></td><td>Controllers compiled-in and available at the root</td></tr>
+<tr><td><code>lscgroup</code> / <code>cgcreate</code> / <code>cgexec</code></td><td>libcgroup userspace tools (create groups, launch a cmd in one)</td></tr>
+<tr><td><code>stat -fc %T /sys/fs/cgroup</code></td><td><code>cgroup2fs</code> (v2) vs <code>tmpfs</code> (v1/hybrid)</td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-bash"># Where is process 1234, and what's its CPU/memory accounting?
+cat /proc/1234/cgroup
+G=/sys/fs/cgroup$(sed 's/^0:://' /proc/1234/cgroup)
+cat "$G/cpu.stat" "$G/memory.current" "$G/memory.pressure"
+
+systemd-cgtop -d 2            # refresh every 2s
+</code></pre>
+<hr>
+<h2 id="17-resources"><a class="header" href="#17-resources">17. Resources</a></h2>
+<h3 id="official-documentation"><a class="header" href="#official-documentation">Official Documentation</a></h3>
+<ul>
+<li><a href="https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html">Control Group v2 — kernel admin guide</a></li>
+<li><a href="https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v1/index.html">cgroup v1 controllers — kernel docs</a></li>
+<li><a href="https://www.kernel.org/doc/html/latest/accounting/psi.html">PSI — Pressure Stall Information</a></li>
+<li><a href="https://www.freedesktop.org/software/systemd/man/systemd.resource-control.html">systemd.resource-control(5)</a></li>
+<li><code>man 7 cgroups</code>, <code>man 7 cgroup_namespaces</code></li>
+</ul>
+<h3 id="articles"><a class="header" href="#articles">Articles</a></h3>
+<ul>
+<li>LWN.net cgroup coverage (the unified hierarchy, the “no internal processes” rule, PSI, io.cost)</li>
+<li><a href="https://systemd.io/CGROUP_DELEGATION/">systemd: Control Group Interfaces</a> — the authoritative delegation contract</li>
+</ul>
+<h3 id="related-notes"><a class="header" href="#related-notes">Related Notes</a></h3>
+<ul>
+<li><a href="./memory_management.html">Memory Management</a> — §10 cgroup memory control, §11 OOM killer, §4 NUMA</li>
+<li><a href="./systemd.html">systemd</a> — units, slices, and service management</li>
+<li><a href="./kernel.html">Kernel Architecture</a> — where the controllers live in the source tree</li>
+</ul>
+<h3 id="books"><a class="header" href="#books">Books</a></h3>
+<ul>
+<li>“Linux Kernel Development” — Robert Love</li>
+<li>“The Linux Programming Interface” — Michael Kerrisk (process groups, namespaces, resource limits)</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../linux/yocto.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../android/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../linux/yocto.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../android/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

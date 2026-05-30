@@ -15,8 +15,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-aafba5d1.js";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f4c5bb4e.js"></script>
+        <script src="../toc-62d4d51c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,133 +178,874 @@
                     <main>
                         <h1 id="sql-structured-query-language"><a class="header" href="#sql-structured-query-language">SQL (Structured Query Language)</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>SQL is the standard language for querying and managing relational databases. Used by PostgreSQL, MySQL, SQL Server, Oracle, and others.</p>
+<p>SQL is the standard language for querying and managing relational databases. It is governed by the ISO/IEC 9075 standard (SQL-92, SQL:1999, SQL:2003, SQL:2016, SQL:2023), though every engine — PostgreSQL, MySQL, SQL Server, Oracle, SQLite, DuckDB — implements its own dialect with extensions and gaps. This page sticks to standard SQL and flags dialect-specific quirks inline.</p>
+<p>SQL is <em>declarative</em>: you describe the result you want, and the engine’s query planner decides how to compute it (which indexes to use, which join algorithm, in what order). Understanding how the planner thinks is what separates writing SQL from writing <em>good</em> SQL.</p>
+<h2 id="data-types"><a class="header" href="#data-types">Data Types</a></h2>
+<p>Standard column types fall into a few families. Exact spellings vary by engine.</p>
+<pre><code class="language-sql">-- Numeric
+SMALLINT          -- 2-byte int
+INTEGER / INT     -- 4-byte int
+BIGINT            -- 8-byte int
+NUMERIC(p, s)     -- exact decimal, p digits total, s after the point
+DECIMAL(p, s)     -- synonym for NUMERIC
+REAL              -- 4-byte float (approximate)
+DOUBLE PRECISION  -- 8-byte float (approximate)
+
+-- Character
+CHAR(n)           -- fixed-length, padded with spaces
+VARCHAR(n)        -- variable-length, max n characters
+TEXT              -- variable-length, no fixed limit (most engines)
+
+-- Boolean
+BOOLEAN           -- TRUE / FALSE / NULL
+
+-- Date and time
+DATE              -- 2026-05-28
+TIME              -- 14:30:00
+TIMESTAMP         -- date + time, no timezone
+TIMESTAMP WITH TIME ZONE   -- timestamptz; stores UTC, displays per session
+INTERVAL          -- a duration ('3 days', '2 hours')
+
+-- Binary / large objects
+BLOB / BYTEA      -- raw bytes
+JSON / JSONB      -- structured documents (Postgres uses JSONB for indexed access)
+
+-- Identifiers
+UUID              -- 128-bit identifier
+SERIAL            -- Postgres: auto-incrementing INTEGER (legacy; prefer GENERATED)
+GENERATED ALWAYS AS IDENTITY  -- standard auto-increment (SQL:2003)
+
+-- Collections (Postgres, others)
+INTEGER[]         -- one-dimensional array
+</code></pre>
+<p>Use <code>NUMERIC</code> for money, never <code>REAL</code>/<code>DOUBLE</code> — floating-point rounding will eat you alive.</p>
+<h2 id="ddl-schema-definition"><a class="header" href="#ddl-schema-definition">DDL (Schema Definition)</a></h2>
+<p>Data Definition Language statements create, alter, and drop schema objects.</p>
+<pre><code class="language-sql">-- Create a schema (namespace)
+CREATE SCHEMA reporting;
+DROP SCHEMA reporting CASCADE;
+
+-- Create a table
+CREATE TABLE users (
+    id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    email       VARCHAR(255) NOT NULL UNIQUE,
+    name        VARCHAR(100),
+    is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- IF NOT EXISTS prevents errors on re-run
+CREATE TABLE IF NOT EXISTS users (...);
+
+-- Alter table
+ALTER TABLE users ADD COLUMN age INTEGER;
+ALTER TABLE users DROP COLUMN age;
+ALTER TABLE users RENAME COLUMN name TO full_name;
+ALTER TABLE users ALTER COLUMN email TYPE TEXT;
+ALTER TABLE users RENAME TO accounts;
+
+-- Drop
+DROP TABLE users;
+DROP TABLE IF EXISTS users CASCADE;  -- CASCADE drops dependent FKs/views
+
+-- Truncate (fast bulk delete, can't ROLLBACK in all engines)
+TRUNCATE TABLE users;
+</code></pre>
+<h2 id="constraints"><a class="header" href="#constraints">Constraints</a></h2>
+<p>Constraints declare rules the engine enforces on every write. Push validation into the schema where you can — application-layer checks lie.</p>
+<pre><code class="language-sql">CREATE TABLE orders (
+    id          INTEGER PRIMARY KEY,                            -- unique + not null
+    user_id     INTEGER NOT NULL,                               -- mandatory
+    total       NUMERIC(10, 2) NOT NULL CHECK (total &gt;= 0),     -- value rule
+    status      VARCHAR(20) NOT NULL DEFAULT 'pending'
+                  CHECK (status IN ('pending','paid','shipped','cancelled')),
+    coupon_code VARCHAR(20),
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE (user_id, coupon_code),                              -- composite uniqueness
+    FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE                                       -- delete orders when user deleted
+        ON UPDATE RESTRICT                                      -- block user.id changes
+);
+
+-- Add constraints later
+ALTER TABLE orders ADD CONSTRAINT chk_total_positive CHECK (total &gt; 0);
+ALTER TABLE orders DROP CONSTRAINT chk_total_positive;
+</code></pre>
+<p><code>ON DELETE</code> options: <code>CASCADE</code> (delete children), <code>SET NULL</code>, <code>SET DEFAULT</code>, <code>RESTRICT</code> (block), <code>NO ACTION</code> (block, but checked at end of statement).</p>
 <h2 id="basic-queries"><a class="header" href="#basic-queries">Basic Queries</a></h2>
 <h3 id="select"><a class="header" href="#select">SELECT</a></h3>
 <pre><code class="language-sql">SELECT column1, column2 FROM table WHERE condition;
 SELECT * FROM users WHERE age &gt; 18;
 SELECT DISTINCT city FROM customers;
+
+-- Sorting and limiting
+SELECT * FROM users ORDER BY created_at DESC, id ASC;
+SELECT * FROM users LIMIT 10 OFFSET 20;     -- pages 3 (10 per page)
+SELECT * FROM users ORDER BY id FETCH FIRST 10 ROWS ONLY;  -- SQL standard
+-- SQL Server: SELECT TOP 10 * FROM users;
 </code></pre>
 <h3 id="insert"><a class="header" href="#insert">INSERT</a></h3>
-<pre><code class="language-sql">INSERT INTO users (name, email) VALUES ('John', 'john@example.com');
-INSERT INTO users VALUES (1, 'John', 'john@example.com');
+<pre><code class="language-sql">-- Single row
+INSERT INTO users (name, email) VALUES ('John', 'john@example.com');
+
+-- Multiple rows in one statement (always cheaper than many INSERTs)
+INSERT INTO users (name, email) VALUES
+    ('Alice', 'alice@example.com'),
+    ('Bob',   'bob@example.com');
+
+-- From a query
+INSERT INTO users_archive (id, name, email)
+SELECT id, name, email FROM users WHERE is_active = FALSE;
+
+-- Return generated values (Postgres, SQL Server uses OUTPUT)
+INSERT INTO users (name) VALUES ('Jane') RETURNING id, created_at;
 </code></pre>
 <h3 id="update"><a class="header" href="#update">UPDATE</a></h3>
 <pre><code class="language-sql">UPDATE users SET age = 30 WHERE id = 1;
 UPDATE products SET price = price * 1.1;
+
+-- Update from another table (Postgres syntax)
+UPDATE orders o
+SET status = 'flagged'
+FROM users u
+WHERE o.user_id = u.id AND u.is_active = FALSE;
 </code></pre>
 <h3 id="delete"><a class="header" href="#delete">DELETE</a></h3>
 <pre><code class="language-sql">DELETE FROM users WHERE id = 1;
 DELETE FROM logs WHERE created_at &lt; '2023-01-01';
+
+-- Delete using a join (Postgres)
+DELETE FROM orders o
+USING users u
+WHERE o.user_id = u.id AND u.is_active = FALSE;
+</code></pre>
+<h2 id="filtering--operators"><a class="header" href="#filtering--operators">Filtering &amp; Operators</a></h2>
+<pre><code class="language-sql">-- Comparison
+WHERE age = 18
+WHERE age &lt;&gt; 18           -- != also works in most engines
+WHERE age &gt; 18 AND age &lt; 65
+WHERE name LIKE 'Jo%'     -- % = any chars, _ = single char
+WHERE name ILIKE 'jo%'    -- case-insensitive (Postgres)
+
+-- Sets
+WHERE id IN (1, 2, 3)
+WHERE id NOT IN (1, 2, 3)
+WHERE id IN (SELECT user_id FROM orders)
+
+-- Ranges
+WHERE created_at BETWEEN '2026-01-01' AND '2026-12-31'
+WHERE price NOT BETWEEN 10 AND 20
+
+-- Null tests
+WHERE deleted_at IS NULL
+WHERE deleted_at IS NOT NULL
+
+-- Pattern matching (engine-specific)
+WHERE email ~ '^[a-z]+@'      -- Postgres POSIX regex
+WHERE email REGEXP '^[a-z]+@' -- MySQL
+WHERE email LIKE 'a%' ESCAPE '\'  -- literal % needs escape
+</code></pre>
+<h2 id="null-handling"><a class="header" href="#null-handling">NULL Handling</a></h2>
+<p>NULL means <em>unknown</em>. Three-valued logic (TRUE / FALSE / UNKNOWN) makes NULL surprisingly easy to mishandle.</p>
+<pre><code class="language-sql">-- These all evaluate to UNKNOWN, NOT TRUE
+SELECT NULL = NULL;           -- UNKNOWN
+SELECT NULL &lt;&gt; NULL;          -- UNKNOWN
+SELECT NULL = 5;              -- UNKNOWN
+SELECT NOT NULL;              -- UNKNOWN
+
+-- WHERE filters keep only TRUE rows — UNKNOWN rows drop out silently
+SELECT * FROM users WHERE manager_id &lt;&gt; 7;  -- excludes rows where manager_id IS NULL
+
+-- The fix: explicit null handling
+SELECT * FROM users WHERE manager_id &lt;&gt; 7 OR manager_id IS NULL;
+
+-- Or use IS DISTINCT FROM (treats NULLs as comparable)
+SELECT * FROM users WHERE manager_id IS DISTINCT FROM 7;
+
+-- Replace nulls with a default
+SELECT COALESCE(nickname, name, 'Unknown') FROM users;
+
+-- Treat a sentinel value as NULL
+SELECT NULLIF(score, -1) FROM games;   -- -1 becomes NULL
+
+-- Aggregates skip NULLs silently
+SELECT AVG(score) FROM games;          -- NULL scores excluded
+SELECT COUNT(*) FROM games;            -- counts all rows
+SELECT COUNT(score) FROM games;        -- counts non-NULL scores only
+</code></pre>
+<h2 id="case-expressions"><a class="header" href="#case-expressions">CASE Expressions</a></h2>
+<p>CASE is SQL’s <code>if/else</code>. Use it inline in SELECT, WHERE, ORDER BY, GROUP BY — anywhere an expression is allowed.</p>
+<pre><code class="language-sql">-- Searched CASE (most flexible)
+SELECT name,
+    CASE
+        WHEN age &lt; 13 THEN 'child'
+        WHEN age &lt; 20 THEN 'teen'
+        WHEN age &lt; 65 THEN 'adult'
+        ELSE 'senior'
+    END AS age_group
+FROM users;
+
+-- Simple CASE (compares one value)
+SELECT
+    CASE status
+        WHEN 'paid'    THEN 'Done'
+        WHEN 'pending' THEN 'Waiting'
+        ELSE 'Other'
+    END
+FROM orders;
+
+-- Conditional aggregation (a CASE inside an aggregate)
+SELECT
+    COUNT(*) FILTER (WHERE status = 'paid')      AS paid_count,    -- SQL:2003 FILTER
+    COUNT(CASE WHEN status = 'paid' THEN 1 END)  AS paid_count_v2  -- portable equivalent
+FROM orders;
 </code></pre>
 <h2 id="joins"><a class="header" href="#joins">Joins</a></h2>
-<pre><code class="language-sql">-- INNER JOIN: Only matching rows
-SELECT u.name, o.order_id
+<pre><code class="language-sql">-- INNER JOIN: only matching rows
+SELECT u.name, o.id
 FROM users u INNER JOIN orders o ON u.id = o.user_id;
 
--- LEFT JOIN: All from left table
-SELECT u.name, o.order_id
+-- LEFT JOIN: all rows from left, NULLs where no match
+SELECT u.name, o.id
 FROM users u LEFT JOIN orders o ON u.id = o.user_id;
 
--- RIGHT JOIN: All from right table
-SELECT u.name, o.order_id
+-- RIGHT JOIN: all rows from right (mirror of LEFT — usually rewritable as LEFT)
+SELECT u.name, o.id
 FROM users u RIGHT JOIN orders o ON u.id = o.user_id;
 
--- FULL OUTER JOIN: All rows
-SELECT u.name, o.order_id
+-- FULL OUTER JOIN: all rows from both sides
+SELECT u.name, o.id
 FROM users u FULL OUTER JOIN orders o ON u.id = o.user_id;
+
+-- CROSS JOIN: Cartesian product — every row of A paired with every row of B
+SELECT s.size, c.color FROM sizes s CROSS JOIN colors c;
+
+-- USING shorthand (when join columns share a name)
+SELECT name, total FROM users u JOIN orders o USING (user_id);
+
+-- Self join (a table joined to itself)
+SELECT e.name AS employee, m.name AS manager
+FROM employees e LEFT JOIN employees m ON e.manager_id = m.id;
+
+-- Multiple join conditions
+SELECT *
+FROM orders o JOIN shipments s
+    ON s.order_id = o.id AND s.shipped_at &gt;= o.created_at;
+
+-- Anti-join: rows in A with no match in B
+SELECT u.* FROM users u
+WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id);
+</code></pre>
+<p>Prefer <code>NOT EXISTS</code> over <code>NOT IN</code> when the right side can contain NULLs — <code>NOT IN (NULL, ...)</code> returns no rows.</p>
+<h2 id="subqueries"><a class="header" href="#subqueries">Subqueries</a></h2>
+<p>A query nested inside another query.</p>
+<pre><code class="language-sql">-- Scalar subquery: returns one value
+SELECT name,
+    (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id) AS order_count
+FROM users u;
+
+-- Subquery in WHERE
+SELECT * FROM users
+WHERE id IN (SELECT user_id FROM orders WHERE total &gt; 1000);
+
+-- Correlated subquery (references outer table — re-evaluated per outer row)
+SELECT u.name FROM users u
+WHERE EXISTS (
+    SELECT 1 FROM orders o
+    WHERE o.user_id = u.id AND o.total &gt; 1000
+);
+
+-- Subquery in FROM (derived table)
+SELECT category, avg_price
+FROM (
+    SELECT category, AVG(price) AS avg_price
+    FROM products GROUP BY category
+) AS t
+WHERE avg_price &gt; 100;
+
+-- ANY / ALL
+SELECT * FROM products WHERE price &gt; ALL (SELECT price FROM products WHERE category = 'books');
+SELECT * FROM products WHERE price = ANY (SELECT price FROM featured);  -- equivalent to IN
+</code></pre>
+<p>Most planners will rewrite <code>IN (subquery)</code> and <code>EXISTS</code> to the same plan, but <code>EXISTS</code> is more explicit about intent and handles NULLs cleanly.</p>
+<h2 id="common-table-expressions-ctes"><a class="header" href="#common-table-expressions-ctes">Common Table Expressions (CTEs)</a></h2>
+<p>A CTE is a named subquery defined at the top of a statement. Use them to break complex queries into readable steps.</p>
+<pre><code class="language-sql">-- Single CTE
+WITH active_users AS (
+    SELECT id, name FROM users WHERE is_active = TRUE
+)
+SELECT * FROM active_users WHERE name LIKE 'A%';
+
+-- Multiple CTEs (comma-separated, each can reference earlier ones)
+WITH
+recent_orders AS (
+    SELECT user_id, SUM(total) AS spent
+    FROM orders
+    WHERE created_at &gt; CURRENT_DATE - INTERVAL '30 days'
+    GROUP BY user_id
+),
+big_spenders AS (
+    SELECT user_id FROM recent_orders WHERE spent &gt; 1000
+)
+SELECT u.name, r.spent
+FROM users u
+JOIN recent_orders r ON r.user_id = u.id
+WHERE u.id IN (SELECT user_id FROM big_spenders);
+
+-- Recursive CTE: walk a tree (here, employee → manager chain)
+WITH RECURSIVE org_chart AS (
+    -- Anchor: top-level managers
+    SELECT id, name, manager_id, 1 AS depth
+    FROM employees
+    WHERE manager_id IS NULL
+
+    UNION ALL
+
+    -- Recursive step: join children to the partial result
+    SELECT e.id, e.name, e.manager_id, oc.depth + 1
+    FROM employees e
+    JOIN org_chart oc ON e.manager_id = oc.id
+)
+SELECT * FROM org_chart ORDER BY depth, name;
+
+-- Recursive CTE for a sequence (1..10)
+WITH RECURSIVE nums(n) AS (
+    SELECT 1
+    UNION ALL
+    SELECT n + 1 FROM nums WHERE n &lt; 10
+)
+SELECT * FROM nums;
+</code></pre>
+<p>Always include a termination condition in the recursive step or the query won’t stop.</p>
+<h2 id="set-operations"><a class="header" href="#set-operations">Set Operations</a></h2>
+<p>Combine result sets that have the same column structure.</p>
+<pre><code class="language-sql">-- UNION: rows from either query, duplicates removed
+SELECT email FROM customers
+UNION
+SELECT email FROM suppliers;
+
+-- UNION ALL: same but keeps duplicates (much faster — no dedup sort)
+SELECT email FROM customers
+UNION ALL
+SELECT email FROM suppliers;
+
+-- INTERSECT: rows in both
+SELECT email FROM customers
+INTERSECT
+SELECT email FROM newsletter_subscribers;
+
+-- EXCEPT (MINUS in Oracle): rows in first that aren't in second
+SELECT email FROM customers
+EXCEPT
+SELECT email FROM unsubscribed;
 </code></pre>
 <h2 id="aggregation"><a class="header" href="#aggregation">Aggregation</a></h2>
 <pre><code class="language-sql">SELECT COUNT(*) FROM users;
-SELECT AVG(price) FROM products;
-SELECT SUM(amount) FROM transactions WHERE status = 'completed';
-SELECT MAX(salary) FROM employees;
+SELECT COUNT(DISTINCT email) FROM users;
+SELECT AVG(price), SUM(amount), MIN(price), MAX(price) FROM products;
+SELECT STRING_AGG(name, ', ') FROM users;  -- LISTAGG in Oracle, GROUP_CONCAT in MySQL
 
--- GROUP BY
-SELECT department, COUNT(*) FROM employees GROUP BY department;
-SELECT category, AVG(price) FROM products GROUP BY category;
+-- GROUP BY: collapse rows sharing a key
+SELECT department, COUNT(*), AVG(salary)
+FROM employees
+GROUP BY department;
 
--- HAVING (filter groups)
-SELECT department, AVG(salary)
+-- HAVING: filter groups (WHERE filters rows before grouping)
+SELECT department, AVG(salary) AS avg_sal
 FROM employees
 GROUP BY department
 HAVING AVG(salary) &gt; 50000;
-</code></pre>
-<h2 id="indexes"><a class="header" href="#indexes">Indexes</a></h2>
-<pre><code class="language-sql">-- Create index for faster queries
-CREATE INDEX idx_email ON users(email);
-CREATE INDEX idx_user_date ON orders(user_id, created_at);
 
--- Drop index
-DROP INDEX idx_email;
-</code></pre>
-<h2 id="transactions"><a class="header" href="#transactions">Transactions</a></h2>
-<pre><code class="language-sql">BEGIN TRANSACTION;
-
-UPDATE accounts SET balance = balance - 100 WHERE id = 1;
-UPDATE accounts SET balance = balance + 100 WHERE id = 2;
-
-COMMIT;  -- Save changes
--- ROLLBACK;  -- Undo changes
-</code></pre>
-<h2 id="window-functions"><a class="header" href="#window-functions">Window Functions</a></h2>
-<pre><code class="language-sql">-- Rank rows
-SELECT name, salary,
-  RANK() OVER (ORDER BY salary DESC) as rank
+-- FILTER clause (SQL:2003): per-aggregate predicate
+SELECT
+    COUNT(*) FILTER (WHERE status = 'active')   AS active_count,
+    COUNT(*) FILTER (WHERE status = 'inactive') AS inactive_count,
+    AVG(salary) FILTER (WHERE department = 'Eng') AS eng_avg
 FROM employees;
 
--- Running total
+-- Grouping sets: multiple GROUP BYs in one query
+SELECT department, role, COUNT(*)
+FROM employees
+GROUP BY GROUPING SETS ((department), (role), (department, role), ());
+
+-- ROLLUP: hierarchical subtotals (department, then grand total)
+SELECT department, role, COUNT(*)
+FROM employees
+GROUP BY ROLLUP (department, role);
+
+-- CUBE: every combination of groupings
+SELECT department, role, COUNT(*)
+FROM employees
+GROUP BY CUBE (department, role);
+</code></pre>
+<h2 id="window-functions"><a class="header" href="#window-functions">Window Functions</a></h2>
+<p>Window functions compute per-row results over a related set of rows (the <em>window</em>) without collapsing the result set the way GROUP BY does.</p>
+<pre><code class="language-sql">-- Anatomy: FUNCTION() OVER (PARTITION BY ... ORDER BY ... frame)
+
+-- Ranking
+SELECT name, department, salary,
+    ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn,
+    RANK()       OVER (PARTITION BY department ORDER BY salary DESC) AS rnk,    -- 1,2,2,4
+    DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS drnk,   -- 1,2,2,3
+    NTILE(4)     OVER (ORDER BY salary)                              AS quartile
+FROM employees;
+
+-- Running total / cumulative sum
 SELECT date, amount,
-  SUM(amount) OVER (ORDER BY date) as running_total
+    SUM(amount) OVER (ORDER BY date) AS running_total
+FROM transactions;
+
+-- Moving average (frame clause defines the window of rows)
+SELECT date, price,
+    AVG(price) OVER (
+        ORDER BY date
+        ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ) AS ma_7d
+FROM prices;
+
+-- Compare to previous/next row
+SELECT date, price,
+    LAG(price)  OVER (ORDER BY date) AS prev_price,
+    LEAD(price) OVER (ORDER BY date) AS next_price,
+    price - LAG(price) OVER (ORDER BY date) AS daily_change
+FROM prices;
+
+-- First/last value in a partition
+SELECT name, department, salary,
+    FIRST_VALUE(name) OVER (PARTITION BY department ORDER BY salary DESC) AS top_paid,
+    LAST_VALUE(name)  OVER (
+        PARTITION BY department ORDER BY salary DESC
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS bottom_paid
+FROM employees;
+</code></pre>
+<p>Frame defaults are surprising: <code>ORDER BY</code> without an explicit frame defaults to <code>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code>, which is why <code>LAST_VALUE</code> so often returns the current row unless you set the frame.</p>
+<p><code>RANGE</code> works on logical value ranges (peers tied on ORDER BY share a frame); <code>ROWS</code> works on physical row positions.</p>
+<h2 id="string-functions"><a class="header" href="#string-functions">String Functions</a></h2>
+<pre><code class="language-sql">-- Concatenation: || is standard, CONCAT is widely supported
+SELECT first_name || ' ' || last_name FROM users;
+SELECT CONCAT(first_name, ' ', last_name) FROM users;
+
+-- Length, case
+SELECT CHAR_LENGTH(name), UPPER(name), LOWER(name) FROM users;
+
+-- Substring (positions are 1-indexed)
+SELECT SUBSTRING(email FROM 1 FOR 5) FROM users;
+SELECT SUBSTRING(email, 1, 5) FROM users;       -- shorthand
+SELECT POSITION('@' IN email) FROM users;
+
+-- Trim
+SELECT TRIM('  hello  ');                       -- 'hello'
+SELECT TRIM(LEADING '0' FROM '00042');          -- '42'
+SELECT BTRIM(name, ' ');                        -- Postgres
+
+-- Replace
+SELECT REPLACE(phone, '-', '');
+
+-- Split (engine-specific)
+SELECT SPLIT_PART(email, '@', 2) FROM users;    -- Postgres: domain part
+SELECT SUBSTRING_INDEX(email, '@', -1) FROM users;  -- MySQL
+
+-- Pad
+SELECT LPAD(order_id::text, 8, '0');
+SELECT RPAD(name, 20, '.');
+
+-- Regex (Postgres)
+SELECT regexp_replace(phone, '[^0-9]', '', 'g');
+SELECT regexp_matches(text, '([A-Z]+)([0-9]+)');
+</code></pre>
+<h2 id="datetime-functions"><a class="header" href="#datetime-functions">Date/Time Functions</a></h2>
+<pre><code class="language-sql">-- Current values
+SELECT CURRENT_DATE;                         -- 2026-05-28
+SELECT CURRENT_TIME;
+SELECT CURRENT_TIMESTAMP;                    -- with timezone
+SELECT LOCALTIMESTAMP;                       -- without timezone
+SELECT NOW();                                -- Postgres / MySQL alias
+
+-- Extract parts
+SELECT EXTRACT(YEAR FROM created_at);
+SELECT EXTRACT(DOW  FROM created_at);        -- day of week
+SELECT EXTRACT(EPOCH FROM created_at);       -- unix timestamp
+
+-- Truncate to a unit (group by month, etc.)
+SELECT DATE_TRUNC('month', created_at) AS month, COUNT(*)
+FROM orders
+GROUP BY month;
+
+-- Arithmetic with intervals
+SELECT created_at + INTERVAL '7 days'  FROM orders;
+SELECT created_at - INTERVAL '1 month' FROM orders;
+SELECT CURRENT_DATE - DATE '2026-01-01';     -- difference in days
+
+-- Format / parse
+SELECT TO_CHAR(created_at, 'YYYY-MM-DD');    -- Postgres / Oracle
+SELECT DATE_FORMAT(created_at, '%Y-%m-%d');  -- MySQL
+SELECT TO_DATE('2026-05-28', 'YYYY-MM-DD');
+
+-- Time zones
+SELECT created_at AT TIME ZONE 'UTC';
+SELECT created_at AT TIME ZONE 'America/New_York';
+</code></pre>
+<p>Store timestamps in UTC (<code>TIMESTAMPTZ</code> in Postgres). Convert at the edges of the system.</p>
+<h2 id="json-operations"><a class="header" href="#json-operations">JSON Operations</a></h2>
+<p>Standard SQL/JSON (SQL:2016) defines <code>JSON_VALUE</code>, <code>JSON_QUERY</code>, <code>JSON_TABLE</code>, but Postgres uses its older <code>-&gt;</code>/<code>-&gt;&gt;</code> operators. Most modern engines now have first-class JSON support.</p>
+<pre><code class="language-sql">-- Table with a JSON column
+CREATE TABLE events (
+    id   INTEGER PRIMARY KEY,
+    data JSON                       -- Postgres prefers JSONB for indexing
+);
+
+INSERT INTO events (id, data) VALUES
+    (1, '{"type": "click", "user": {"id": 42}, "tags": ["a","b"]}');
+
+-- Postgres operators
+SELECT data -&gt; 'user'                       FROM events;  -- JSON object
+SELECT data -&gt;&gt; 'type'                      FROM events;  -- text
+SELECT data #&gt; '{user,id}'                  FROM events;  -- nested as JSON
+SELECT data #&gt;&gt; '{user,id}'                 FROM events;  -- nested as text
+SELECT data -&gt; 'tags' -&gt; 0                  FROM events;  -- array index
+SELECT * FROM events WHERE data @&gt; '{"type":"click"}';    -- containment
+
+-- Standard SQL/JSON path expressions (SQL:2016)
+SELECT JSON_VALUE(data, '$.user.id')        FROM events;  -- scalar
+SELECT JSON_QUERY(data, '$.tags')           FROM events;  -- subtree
+SELECT * FROM events WHERE JSON_EXISTS(data, '$.user.id');
+
+-- Building JSON
+SELECT JSON_OBJECT('id' VALUE id, 'name' VALUE name) FROM users;
+SELECT JSON_ARRAYAGG(name) FROM users;
+</code></pre>
+<p>Index JSON keys you query often: in Postgres, <code>CREATE INDEX ON events USING GIN (data jsonb_path_ops);</code>.</p>
+<h2 id="upsert"><a class="header" href="#upsert">UPSERT</a></h2>
+<p>Insert if the row is new, update if it conflicts. The syntax is one of the worst-standardized parts of SQL.</p>
+<pre><code class="language-sql">-- Standard SQL:2003 MERGE (Postgres 15+, SQL Server, Oracle, DB2)
+MERGE INTO users AS u
+USING (VALUES (1, 'jane@example.com', 'Jane')) AS s(id, email, name)
+ON u.id = s.id
+WHEN MATCHED THEN UPDATE SET email = s.email, name = s.name
+WHEN NOT MATCHED THEN INSERT (id, email, name) VALUES (s.id, s.email, s.name);
+
+-- Postgres / SQLite: INSERT ... ON CONFLICT
+INSERT INTO users (id, email, name)
+VALUES (1, 'jane@example.com', 'Jane')
+ON CONFLICT (id) DO UPDATE
+    SET email = EXCLUDED.email,
+        name  = EXCLUDED.name;
+
+-- Postgres: skip duplicates
+INSERT INTO users (email) VALUES ('a@example.com')
+ON CONFLICT (email) DO NOTHING;
+
+-- MySQL: INSERT ... ON DUPLICATE KEY UPDATE
+INSERT INTO users (id, email, name) VALUES (1, 'jane@example.com', 'Jane')
+ON DUPLICATE KEY UPDATE email = VALUES(email), name = VALUES(name);
+</code></pre>
+<h2 id="indexes"><a class="header" href="#indexes">Indexes</a></h2>
+<p>Indexes trade write speed and disk space for read speed. Add them based on actual query patterns, not guesses.</p>
+<pre><code class="language-sql">-- Single-column B-tree (default for most engines)
+CREATE INDEX idx_users_email ON users(email);
+
+-- Composite index — order matters. Use the leftmost prefix rule.
+CREATE INDEX idx_orders_user_date ON orders(user_id, created_at);
+-- This index helps: WHERE user_id = ?    and    WHERE user_id = ? AND created_at &gt; ?
+-- This index does NOT help: WHERE created_at &gt; ?
+
+-- Unique index (also enforces uniqueness)
+CREATE UNIQUE INDEX idx_users_email_unique ON users(email);
+
+-- Partial index: only index rows matching a predicate (smaller, faster)
+CREATE INDEX idx_orders_pending ON orders(created_at) WHERE status = 'pending';
+
+-- Expression / functional index: index a computed value
+CREATE INDEX idx_users_lower_email ON users(LOWER(email));
+-- Now WHERE LOWER(email) = ? can use the index
+
+-- Covering index (INCLUDE non-key columns to satisfy queries from the index alone)
+CREATE INDEX idx_orders_user ON orders(user_id) INCLUDE (total, status);
+
+-- Inspect / drop
+DROP INDEX idx_users_email;
+</code></pre>
+<h3 id="index-types-postgres-flavored-common-elsewhere"><a class="header" href="#index-types-postgres-flavored-common-elsewhere">Index types (Postgres-flavored, common elsewhere)</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Type</th><th>Good for</th></tr>
+</thead>
+<tbody>
+<tr><td>B-tree</td><td>Equality and range on ordered values (default)</td></tr>
+<tr><td>Hash</td><td>Equality only, no range</td></tr>
+<tr><td>GIN</td><td>Containment queries: arrays, full-text, JSONB</td></tr>
+<tr><td>GiST</td><td>Geometric / nearest-neighbor / range types</td></tr>
+<tr><td>BRIN</td><td>Very large tables where values correlate with physical row order</td></tr>
+</tbody>
+</table>
+</div>
+<p>When indexes hurt: write-heavy tables (every INSERT/UPDATE/DELETE must update every index), tables that fit in memory and scan faster than they seek, columns with very low cardinality (boolean flags).</p>
+<h2 id="views"><a class="header" href="#views">Views</a></h2>
+<p>A view is a saved query that looks like a table.</p>
+<pre><code class="language-sql">-- Standard view: runs the query every time
+CREATE VIEW active_users AS
+SELECT id, name, email FROM users WHERE is_active = TRUE;
+
+SELECT * FROM active_users;
+DROP VIEW active_users;
+
+-- Materialized view: stores the result on disk; must be refreshed
+CREATE MATERIALIZED VIEW user_order_stats AS
+SELECT user_id, COUNT(*) AS order_count, SUM(total) AS lifetime_value
+FROM orders GROUP BY user_id;
+
+REFRESH MATERIALIZED VIEW user_order_stats;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY user_order_stats;  -- Postgres, needs unique idx
+
+-- Updatable view: a simple SELECT can sometimes be INSERTed/UPDATEd through
+CREATE VIEW vip_users AS SELECT * FROM users WHERE tier = 'vip';
+UPDATE vip_users SET email = 'new@example.com' WHERE id = 1;
+</code></pre>
+<p>Materialized views are a cache. Standard views are an abstraction.</p>
+<h2 id="transactions"><a class="header" href="#transactions">Transactions</a></h2>
+<p>A transaction groups statements so they commit or roll back together.</p>
+<pre><code class="language-sql">BEGIN;  -- or START TRANSACTION;
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;       -- save all changes
+-- ROLLBACK;  -- undo all changes since BEGIN
+
+-- Savepoints: partial rollback
+BEGIN;
+    INSERT INTO orders (...) VALUES (...);
+    SAVEPOINT before_risky;
+    UPDATE inventory SET qty = qty - 1 WHERE id = 99;
+    -- oh no
+    ROLLBACK TO SAVEPOINT before_risky;
+    -- order INSERT survives
+COMMIT;
+</code></pre>
+<h3 id="isolation-levels-sql1992"><a class="header" href="#isolation-levels-sql1992">Isolation levels (SQL:1992)</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Level</th><th>Dirty read</th><th>Non-repeatable read</th><th>Phantom read</th></tr>
+</thead>
+<tbody>
+<tr><td>READ UNCOMMITTED</td><td>possible</td><td>possible</td><td>possible</td></tr>
+<tr><td>READ COMMITTED</td><td>prevented</td><td>possible</td><td>possible</td></tr>
+<tr><td>REPEATABLE READ</td><td>prevented</td><td>prevented</td><td>possible</td></tr>
+<tr><td>SERIALIZABLE</td><td>prevented</td><td>prevented</td><td>prevented</td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-sql">SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+BEGIN;
+-- ...
+COMMIT;
+</code></pre>
+<ul>
+<li><strong>Dirty read</strong>: see uncommitted data from another transaction.</li>
+<li><strong>Non-repeatable read</strong>: same row read twice returns different values.</li>
+<li><strong>Phantom read</strong>: same query returns different <em>rows</em> twice (new rows appeared).</li>
+</ul>
+<p>Defaults vary: Postgres = READ COMMITTED, MySQL InnoDB = REPEATABLE READ, SQL Server = READ COMMITTED. SERIALIZABLE in Postgres uses SSI (serializable snapshot isolation) and may abort transactions with a serialization error — your app must retry.</p>
+<h3 id="locking"><a class="header" href="#locking">Locking</a></h3>
+<pre><code class="language-sql">-- Lock rows you're about to update (pessimistic)
+SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
+
+-- Lock for read but allow other reads (block writes)
+SELECT * FROM accounts WHERE id = 1 FOR SHARE;
+
+-- Skip rows another transaction has locked (queue / worker patterns)
+SELECT * FROM jobs WHERE status = 'queued'
+ORDER BY created_at
+FOR UPDATE SKIP LOCKED
+LIMIT 1;
+</code></pre>
+<h2 id="permissions"><a class="header" href="#permissions">Permissions</a></h2>
+<pre><code class="language-sql">-- Users vs roles: a role is a permission grouping; users are roles you can log in as
+CREATE ROLE readonly;
+CREATE USER analyst WITH PASSWORD 'secret';
+GRANT readonly TO analyst;
+
+-- Grants
+GRANT SELECT ON users TO readonly;
+GRANT SELECT, INSERT, UPDATE ON orders TO app_user;
+GRANT ALL PRIVILEGES ON SCHEMA public TO admin;
+GRANT USAGE ON SCHEMA reporting TO analyst;
+
+-- Revoke
+REVOKE INSERT ON orders FROM app_user;
+
+-- Row-level security (Postgres)
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+CREATE POLICY user_orders_own ON orders
+    FOR SELECT USING (user_id = current_setting('app.user_id')::int);
+</code></pre>
+<h2 id="query-optimization--explain"><a class="header" href="#query-optimization--explain">Query Optimization &amp; EXPLAIN</a></h2>
+<p>The planner picks a plan; <code>EXPLAIN</code> shows it. <code>EXPLAIN ANALYZE</code> actually runs the query and reports real timings.</p>
+<pre><code class="language-sql">EXPLAIN SELECT * FROM users WHERE email = 'a@b.com';
+EXPLAIN ANALYZE SELECT * FROM users WHERE email = 'a@b.com';
+EXPLAIN (ANALYZE, BUFFERS) SELECT ...;   -- Postgres: also shows cache hits
+</code></pre>
+<p>What to look for:</p>
+<ul>
+<li><strong>Seq Scan vs Index Scan vs Index Only Scan</strong> — sequential scans on big tables are usually the problem.</li>
+<li><strong>Estimated vs actual row counts</strong> — large divergence means stats are stale (<code>ANALYZE table;</code>) or the planner can’t estimate well.</li>
+<li><strong>Join algorithm</strong> — Nested Loop (good for small inputs), Hash Join (good for big unsorted inputs), Merge Join (good for sorted inputs).</li>
+<li><strong>Sort / Hash spilling to disk</strong> — increase <code>work_mem</code> or rewrite to need less sorting.</li>
+</ul>
+<h3 id="common-performance-pitfalls"><a class="header" href="#common-performance-pitfalls">Common performance pitfalls</a></h3>
+<pre><code class="language-sql">-- Function on indexed column kills index use
+WHERE LOWER(email) = 'a@b.com'    -- bad, unless you have an expression index
+WHERE email ILIKE 'a@b.com'       -- bad, no index help
+
+-- Leading wildcard kills LIKE index use
+WHERE email LIKE '%example.com'   -- bad
+WHERE email LIKE 'alice%'         -- ok
+
+-- Implicit type cast disables index
+WHERE user_id = '42'              -- bad if user_id is INTEGER
+
+-- OR across columns often defeats indexes — rewrite as UNION
+SELECT * FROM users WHERE email = 'x' OR phone = 'y';
+SELECT * FROM users WHERE email = 'x'
+UNION
+SELECT * FROM users WHERE phone = 'y';
+
+-- N+1 query: don't loop selects in the app; use JOIN or IN
+
+-- SELECT *: pulls every column over the network; specify what you need
+</code></pre>
+<p>General rules:</p>
+<ol>
+<li>Index columns used in WHERE, JOIN, ORDER BY.</li>
+<li>Keep statistics fresh: <code>ANALYZE</code> after large data changes.</li>
+<li>Batch writes — many small inserts in one transaction beats many transactions.</li>
+<li><code>LIMIT</code> early when paging.</li>
+<li>For paging, prefer keyset (<code>WHERE id &gt; last_seen_id ORDER BY id LIMIT 20</code>) over <code>OFFSET</code> once the offset gets large.</li>
+</ol>
+<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
+<h3 id="find-duplicates"><a class="header" href="#find-duplicates">Find duplicates</a></h3>
+<pre><code class="language-sql">SELECT email, COUNT(*)
+FROM users
+GROUP BY email
+HAVING COUNT(*) &gt; 1;
+</code></pre>
+<h3 id="top-n-per-group"><a class="header" href="#top-n-per-group">Top N per group</a></h3>
+<pre><code class="language-sql">-- Window function approach (portable)
+SELECT * FROM (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn
+    FROM employees
+) t WHERE rn &lt;= 3;
+
+-- Postgres shortcut: DISTINCT ON (one row per group)
+SELECT DISTINCT ON (department) department, name, salary
+FROM employees
+ORDER BY department, salary DESC;
+</code></pre>
+<h3 id="pivot-rows-to-columns"><a class="header" href="#pivot-rows-to-columns">Pivot (rows to columns)</a></h3>
+<pre><code class="language-sql">SELECT
+    user_id,
+    SUM(CASE WHEN status = 'paid'    THEN total ELSE 0 END) AS paid_total,
+    SUM(CASE WHEN status = 'pending' THEN total ELSE 0 END) AS pending_total
+FROM orders
+GROUP BY user_id;
+</code></pre>
+<h3 id="running-total"><a class="header" href="#running-total">Running total</a></h3>
+<pre><code class="language-sql">SELECT date, amount,
+    SUM(amount) OVER (PARTITION BY user_id ORDER BY date) AS running_total
 FROM transactions;
 </code></pre>
-<h2 id="common-patterns"><a class="header" href="#common-patterns">Common Patterns</a></h2>
-<h3 id="duplicate-finding"><a class="header" href="#duplicate-finding">Duplicate Finding</a></h3>
-<pre><code class="language-sql">SELECT email, COUNT(*) FROM users GROUP BY email HAVING COUNT(*) &gt; 1;
+<h3 id="gaps-and-islands-group-consecutive-sequences"><a class="header" href="#gaps-and-islands-group-consecutive-sequences">Gaps and islands (group consecutive sequences)</a></h3>
+<pre><code class="language-sql">-- "Islands" of consecutive logins per user, using the row-number difference trick
+SELECT user_id, MIN(login_date) AS start, MAX(login_date) AS end
+FROM (
+    SELECT user_id, login_date,
+        login_date - (ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY login_date)) * INTERVAL '1 day'
+            AS grp
+    FROM logins
+) t
+GROUP BY user_id, grp;
 </code></pre>
-<h3 id="top-n-per-group"><a class="header" href="#top-n-per-group">Top N per Group</a></h3>
-<pre><code class="language-sql">SELECT DISTINCT ON (department) name, salary, department
-FROM employees ORDER BY department, salary DESC;
+<h3 id="keyset-pagination"><a class="header" href="#keyset-pagination">Keyset pagination</a></h3>
+<pre><code class="language-sql">-- Instead of: ... ORDER BY id LIMIT 20 OFFSET 100000  -- slow on big tables
+SELECT * FROM users
+WHERE id &gt; :last_seen_id
+ORDER BY id
+LIMIT 20;
 </code></pre>
-<h3 id="data-validation"><a class="header" href="#data-validation">Data Validation</a></h3>
+<h3 id="data-validation"><a class="header" href="#data-validation">Data validation</a></h3>
 <pre><code class="language-sql">SELECT * FROM users WHERE email NOT LIKE '%@%.%';
 </code></pre>
-<h2 id="performance-tips"><a class="header" href="#performance-tips">Performance Tips</a></h2>
-<ol>
-<li><strong>Use indexes</strong> on frequently queried columns</li>
-<li><strong>EXPLAIN</strong> query plans: <code>EXPLAIN SELECT ...</code></li>
-<li>**Avoid SELECT *** - specify columns needed</li>
-<li><strong>Use LIMIT</strong> for large result sets</li>
-<li><strong>Batch operations</strong> instead of individual queries</li>
-</ol>
+<h2 id="sql-injection"><a class="header" href="#sql-injection">SQL Injection</a></h2>
+<p>Never concatenate user input into SQL. Always use parameterized queries.</p>
+<pre><code class="language-python"># Bad — string concatenation: user can submit "'; DROP TABLE users; --"
+cur.execute("SELECT * FROM users WHERE name = '" + name + "'")
+
+# Good — parameterized: driver escapes and binds safely
+cur.execute("SELECT * FROM users WHERE name = %s", (name,))
+</code></pre>
+<pre><code class="language-sql">-- Server-side prepared statement (Postgres)
+PREPARE find_user (text) AS
+    SELECT * FROM users WHERE email = $1;
+
+EXECUTE find_user('a@b.com');
+DEALLOCATE find_user;
+</code></pre>
+<p>Parameterized queries also let the planner cache the plan across calls.</p>
 <h2 id="acid-properties"><a class="header" href="#acid-properties">ACID Properties</a></h2>
 <ul>
-<li><strong>Atomicity</strong>: All or nothing</li>
-<li><strong>Consistency</strong>: Valid state to valid state</li>
-<li><strong>Isolation</strong>: Concurrent transactions independent</li>
-<li><strong>Durability</strong>: Committed data survives failures</li>
+<li><strong>Atomicity</strong>: a transaction is all-or-nothing.</li>
+<li><strong>Consistency</strong>: a transaction takes the database from one valid state to another (constraints, triggers, application invariants).</li>
+<li><strong>Isolation</strong>: concurrent transactions don’t interfere (controlled by isolation level).</li>
+<li><strong>Durability</strong>: once committed, data survives crashes.</li>
 </ul>
+<p>NoSQL systems often relax these in exchange for availability and scale; see <a href="acid_vs_base.html"><code>acid_vs_base.md</code></a>.</p>
+<h2 id="sql-dialects"><a class="header" href="#sql-dialects">SQL Dialects</a></h2>
+<p>Common differences between major engines:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>PostgreSQL</th><th>MySQL</th><th>SQL Server</th><th>SQLite</th><th>Oracle</th></tr>
+</thead>
+<tbody>
+<tr><td>Auto-increment</td><td><code>GENERATED ... IDENTITY</code> / <code>SERIAL</code></td><td><code>AUTO_INCREMENT</code></td><td><code>IDENTITY(1,1)</code></td><td><code>INTEGER PRIMARY KEY</code></td><td><code>GENERATED ... IDENTITY</code></td></tr>
+<tr><td>Limit</td><td><code>LIMIT n OFFSET m</code></td><td><code>LIMIT m, n</code></td><td><code>OFFSET m ROWS FETCH NEXT n</code></td><td><code>LIMIT n OFFSET m</code></td><td><code>FETCH FIRST n ROWS ONLY</code></td></tr>
+<tr><td>String concat</td><td><code>||</code> or <code>CONCAT</code></td><td><code>CONCAT</code> (<code>||</code> = OR by default)</td><td><code>+</code> or <code>CONCAT</code></td><td><code>||</code></td><td><code>||</code> or <code>CONCAT</code></td></tr>
+<tr><td>Current timestamp</td><td><code>NOW()</code> / <code>CURRENT_TIMESTAMP</code></td><td><code>NOW()</code></td><td><code>GETDATE()</code></td><td><code>CURRENT_TIMESTAMP</code></td><td><code>SYSDATE</code> / <code>CURRENT_TIMESTAMP</code></td></tr>
+<tr><td>Boolean</td><td><code>BOOLEAN</code> (true type)</td><td><code>TINYINT(1)</code></td><td><code>BIT</code></td><td>none (use INTEGER)</td><td>none (use NUMBER(1) or CHAR(1))</td></tr>
+<tr><td>UPSERT</td><td><code>ON CONFLICT</code></td><td><code>ON DUPLICATE KEY UPDATE</code></td><td><code>MERGE</code></td><td><code>ON CONFLICT</code></td><td><code>MERGE</code></td></tr>
+<tr><td>Case-insensitive LIKE</td><td><code>ILIKE</code></td><td><code>LIKE</code> (default collation)</td><td><code>LIKE</code> (default collation)</td><td><code>LIKE</code> (default ASCII-only)</td><td><code>LIKE</code> with <code>UPPER()</code></td></tr>
+<tr><td>Identifier quoting</td><td><code>"name"</code></td><td><code>`name`</code></td><td><code>[name]</code> or <code>"name"</code></td><td><code>"name"</code></td><td><code>"name"</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>When code targets multiple engines, lean on standard SQL and isolate dialect quirks behind a thin layer.</p>
 <h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
 <p>SQL is like a filing system for data:</p>
 <ul>
 <li><strong>SELECT</strong>: “Show me these files”</li>
-<li><strong>INSERT</strong>: “Add new file”</li>
-<li><strong>UPDATE</strong>: “Modify existing file”</li>
-<li><strong>DELETE</strong>: “Remove file”</li>
+<li><strong>INSERT</strong>: “Add a new file”</li>
+<li><strong>UPDATE</strong>: “Change this file”</li>
+<li><strong>DELETE</strong>: “Throw this file away”</li>
 </ul>
-<p>Joins = combining data from multiple filing cabinets!</p>
+<p>Joins are how you combine drawers from different filing cabinets (“for each customer, find their orders”). Indexes are the tabs that let you skip flipping through every page. Transactions are envelopes — everything inside happens together or not at all. Window functions let you write notes in the margin of each row that compare it to its neighbors.</p>
 <h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
 <ul>
-<li><a href="https://www.w3schools.com/sql/">SQL Tutorial</a></li>
+<li><a href="https://www.w3schools.com/sql/">SQL Tutorial (W3Schools)</a></li>
 <li><a href="https://www.postgresql.org/docs/">PostgreSQL Docs</a></li>
-<li><a href="https://www.postgresql.org/docs/current/sql-explain.html">Explain Plans</a></li>
+<li><a href="https://use-the-index-luke.com/">Use The Index, Luke!</a> — practical index tuning</li>
+<li><a href="https://modern-sql.com/">Modern SQL</a> — what’s in recent SQL standards</li>
+<li><a href="https://www.postgresql.org/docs/current/sql-explain.html">Explain Plans (Postgres)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/SQL:2016">SQL:2016 standard overview</a></li>
 </ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../databases/database_design.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../databases/acid_vs_base.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
@@ -318,7 +1059,7 @@ FROM employees ORDER BY department, salary DESC;
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../databases/database_design.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../databases/acid_vs_base.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
@@ -344,11 +1085,11 @@ FROM employees ORDER BY department, salary DESC;
 
         <script src="../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

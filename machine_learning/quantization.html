@@ -15,8 +15,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-aafba5d1.js";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f4c5bb4e.js"></script>
+        <script src="../toc-62d4d51c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -888,6 +888,86 @@ NF4_LEVELS = [
     0.7229568362236023, 1.0
 ]
 </code></pre>
+<h2 id="gguf-quantization-and-naming-q4_k_m-etc"><a class="header" href="#gguf-quantization-and-naming-q4_k_m-etc">GGUF Quantization and Naming (Q4_K_M, etc.)</a></h2>
+<p>When you download community models from sites like Hugging Face, you’ll often see files named like <code>llama-3-8b-instruct.Q4_K_M.gguf</code>. This naming comes from <strong>llama.cpp</strong> and its <strong>GGUF</strong> file format (the successor to the older GGML format), which is the de facto standard for running LLMs on CPUs, Apple Silicon, and consumer GPUs.</p>
+<p>The schemes here are different from GPTQ/AWQ/NF4 above: they are weight-only quantization formats designed for fast CPU/GPU inference inside llama.cpp, not Hugging Face <code>transformers</code>.</p>
+<h3 id="decoding-the-name"><a class="header" href="#decoding-the-name">Decoding the Name</a></h3>
+<p>A name like <code>Q4_K_M</code> breaks into three parts:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Segment</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Q4</code></td><td>The precision budget — roughly <strong>4 bits per weight</strong>. <code>Q</code> = quantized.</td></tr>
+<tr><td><code>K</code></td><td>The <strong>K-quant method</strong> (super-block scaling). It is <em>not</em> a version number.</td></tr>
+<tr><td><code>M</code></td><td>A <strong>size tier</strong>: <code>S</code> &lt; <code>M</code> &lt; <code>L</code>. Controls how many tensors are bumped to higher precision.</td></tr>
+</tbody>
+</table>
+</div>
+<p>So <code>Q4_K_M</code> = “4-bit K-quant, medium tier.”</p>
+<blockquote>
+<p><strong>Important nuance:</strong> “4 bits per weight” is nominal, not actual. The <em>effective</em> bits-per-weight is higher because quantization metadata (per-block scales and mins) is stored alongside the weights. Q4_K is roughly <strong>4.5 bpw</strong> in practice, which is why a 7B model in Q4_K_M lands near ~4.1 GB rather than the naive 7B × 4 bits = 3.5 GB.</p>
+</blockquote>
+<h3 id="legacy-quants-the-type-01-formats"><a class="header" href="#legacy-quants-the-type-01-formats">Legacy Quants (the “type 0/1” formats)</a></h3>
+<p>The original llama.cpp quants used a single flat scale per block of 32 weights:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Bits</th><th>Scheme</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Q4_0</code></td><td>4</td><td>Symmetric (scale only)</td><td>Oldest, fastest, lowest quality</td></tr>
+<tr><td><code>Q4_1</code></td><td>4</td><td>Asymmetric (scale + min)</td><td>Slightly better than Q4_0</td></tr>
+<tr><td><code>Q5_0</code></td><td>5</td><td>Symmetric</td><td>Better quality, larger</td></tr>
+<tr><td><code>Q5_1</code></td><td>5</td><td>Asymmetric</td><td></td></tr>
+<tr><td><code>Q8_0</code></td><td>8</td><td>Symmetric</td><td>Near-lossless, often used as a baseline</td></tr>
+</tbody>
+</table>
+</div>
+<p>These are largely superseded by K-quants for 2–6 bit ranges, but <code>Q8_0</code> is still common when you want minimal quality loss.</p>
+<h3 id="k-quants-the-_k-family"><a class="header" href="#k-quants-the-_k-family">K-Quants (the <code>_K</code> family)</a></h3>
+<p>K-quants (“K” for the super-block scheme) improved quality at the same bit budget by using <strong>two levels of scaling</strong>:</p>
+<ol>
+<li>Weights are grouped into <strong>super-blocks of 256</strong>, each split into <strong>8 sub-blocks of 32</strong>.</li>
+<li>Each sub-block gets its own quantized scale (and min, for asymmetric variants), stored compactly (e.g. 6-bit).</li>
+<li>A single higher-precision (FP16) <strong>super-block scale</strong> multiplies all the sub-block scales.</li>
+</ol>
+<p>This hierarchical scaling adapts to local weight variation far better than one flat scale per block, so K-quants give noticeably lower perplexity than legacy quants at the same nominal bit width.</p>
+<p>K-quants exist at multiple bit budgets: <code>Q2_K</code>, <code>Q3_K</code>, <code>Q4_K</code>, <code>Q5_K</code>, <code>Q6_K</code>. (<code>Q8_0</code> has no K variant — at 8 bits the extra machinery isn’t worth it.)</p>
+<h3 id="size-tiers-s-m-l"><a class="header" href="#size-tiers-s-m-l">Size Tiers: S, M, L</a></h3>
+<p>The <code>_S</code> / <code>_M</code> / <code>_L</code> suffix is a <strong>mixed-precision</strong> knob. Within a single file, llama.cpp keeps some tensors at higher precision than the base type because they matter more for quality — typically the attention <code>wv</code> (value) and the feed-forward <code>w2</code> (down-projection) tensors, plus embeddings/output.</p>
+<ul>
+<li><code>_S</code> (small): everything at the base type (e.g. all Q4_K). Smallest, lowest quality.</li>
+<li><code>_M</code> (medium): a subset of important tensors bumped up (e.g. some tensors in Q6_K while the rest stay Q4_K). The usual recommended default.</li>
+<li><code>_L</code> (large): even more tensors bumped to higher precision. Largest, best quality of the three.</li>
+</ul>
+<p>So <code>Q4_K_M</code> and <code>Q5_K_M</code> aren’t <em>uniformly</em> 4- or 5-bit — they’re mostly that, with the sensitive tensors carried at 6 bits.</p>
+<h3 id="i-quants-the-iq-family"><a class="header" href="#i-quants-the-iq-family">I-Quants (the <code>IQ</code> family)</a></h3>
+<p>Newer <code>IQ</code> types (e.g. <code>IQ2_XXS</code>, <code>IQ3_XS</code>, <code>IQ4_NL</code>) use <strong>importance-matrix (imatrix)</strong> calibration plus codebook/lookup-based quantization to squeeze quality out of very low bit budgets (2–4 bits). They generally beat K-quants on quality-per-byte at the low end, at the cost of:</p>
+<ul>
+<li>Slower inference on some hardware (more compute per weight).</li>
+<li>Requiring an imatrix (calibration data) to build well.</li>
+</ul>
+<p><code>NL</code> = “non-linear” (non-uniform levels, similar in spirit to NF4); <code>XXS</code>/<code>XS</code>/<code>S</code> are size tiers as before.</p>
+<h3 id="common-types-and-when-to-use-them"><a class="header" href="#common-types-and-when-to-use-them">Common Types and When to Use Them</a></h3>
+<p>Approximate bits-per-weight and the usual guidance:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Type</th><th>~bpw</th><th>Quality</th><th>Typical use</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Q2_K</code> / <code>IQ2_*</code></td><td>2.5–3</td><td>Low</td><td>Only when severely memory-limited</td></tr>
+<tr><td><code>Q3_K_M</code> / <code>IQ3_*</code></td><td>~3.5</td><td>Fair</td><td>Squeezing a bigger model onto small VRAM</td></tr>
+<tr><td><code>Q4_K_M</code></td><td>~4.5</td><td>Good</td><td><strong>Recommended default</strong> — best size/quality balance</td></tr>
+<tr><td><code>Q5_K_M</code></td><td>~5.5</td><td>Better</td><td>When you have a bit more memory to spare</td></tr>
+<tr><td><code>Q6_K</code></td><td>~6.5</td><td>Near-FP16</td><td>High quality, diminishing returns vs Q5</td></tr>
+<tr><td><code>Q8_0</code></td><td>~8.5</td><td>~Lossless</td><td>Baseline / quality reference</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Rule of thumb:</strong> start with <code>Q4_K_M</code>. Drop to <code>Q3_K_M</code>/<code>IQ3</code> only if it doesn’t fit; move up to <code>Q5_K_M</code>/<code>Q6_K</code> if you have headroom and want more quality. A larger model at a lower quant (e.g. 13B <code>Q4_K_M</code>) usually beats a smaller model at a higher quant (7B <code>Q6_K</code>) for the same memory budget.</p>
 <h2 id="quantization-for-different-architectures"><a class="header" href="#quantization-for-different-architectures">Quantization for Different Architectures</a></h2>
 <h3 id="convolutional-neural-networks-cnns"><a class="header" href="#convolutional-neural-networks-cnns">Convolutional Neural Networks (CNNs)</a></h3>
 <p>CNNs are relatively robust to quantization due to:</p>
@@ -2103,11 +2183,11 @@ model_int8.save("model_quantized.mlmodel")
 
         <script src="../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

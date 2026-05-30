@@ -1,0 +1,560 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>HardFault Debugging - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-62d4d51c.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="hardfault-debugging-on-cortex-m"><a class="header" href="#hardfault-debugging-on-cortex-m">HardFault Debugging on Cortex-M</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>When a Cortex-M CPU executes an illegal instruction, dereferences a bad pointer, divides by zero with the trap enabled, or hits an unrecoverable bus error, it takes an <strong>exception</strong>. If the exception itself can’t be handled — or if a fault occurs inside a fault handler — the CPU escalates to <strong>HardFault</strong>.</p>
+<p>The classic symptom: your firmware is stuck in <code>HardFault_Handler</code> (which usually defaults to <code>while (1);</code>). The good news: Cortex-M preserves enough state for you to figure out <strong>which instruction faulted</strong>, <strong>why</strong>, and <strong>with what registers</strong>.</p>
+<h2 id="fault-hierarchy"><a class="header" href="#fault-hierarchy">Fault Hierarchy</a></h2>
+<p>Cortex-M3/M4/M7 split the fault sources across four handlers (M0/M0+ only has HardFault):</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Handler</th><th>Triggered By</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>MemManage_Handler</strong></td><td>MPU violations, exec from non-X region, stacking errors with MPU on</td></tr>
+<tr><td><strong>BusFault_Handler</strong></td><td>Bad address (no slave at that bus location), wrong size, imprecise bus errors</td></tr>
+<tr><td><strong>UsageFault_Handler</strong></td><td>Undefined instruction, divide by zero, unaligned access (if trap-on enabled), invalid EPSR state</td></tr>
+<tr><td><strong>HardFault_Handler</strong></td><td>Any of the above when their handler is disabled, <strong>OR</strong> a fault inside a fault handler, <strong>OR</strong> vector fetch failed</td></tr>
+</tbody>
+</table>
+</div>
+<p>By default after reset, only <code>HardFault_Handler</code> is enabled — everything escalates. <strong>Always enable the specific handlers during debug</strong>:</p>
+<pre><code class="language-c">// Enable the fine-grained handlers so faults don't all show up as HardFault
+SCB-&gt;SHCSR |= SCB_SHCSR_USGFAULTENA_Msk
+            | SCB_SHCSR_BUSFAULTENA_Msk
+            | SCB_SHCSR_MEMFAULTENA_Msk;
+
+// Enable divide-by-zero and unaligned traps
+SCB-&gt;CCR  |= SCB_CCR_DIV_0_TRP_Msk
+           | SCB_CCR_UNALIGN_TRP_Msk;
+</code></pre>
+<p>Now a divide-by-zero takes you straight to UsageFault, not HardFault, and the CFSR bits below tell you exactly what happened.</p>
+<h2 id="the-stack-frame-at-fault-entry"><a class="header" href="#the-stack-frame-at-fault-entry">The Stack Frame at Fault Entry</a></h2>
+<p>On exception entry, Cortex-M auto-pushes 8 (or 26 with FPU) registers onto the stack that was in use when the fault hit. The handler can decode them.</p>
+<pre><code>                  Stack frame layout (basic, no FPU)
+       
+       SP (after entry) ──► ┌────────────┐
+                             │   R0       │   ← arg0 / scratch
+                             ├────────────┤
+                             │   R1       │
+                             ├────────────┤
+                             │   R2       │
+                             ├────────────┤
+                             │   R3       │
+                             ├────────────┤
+                             │   R12      │
+                             ├────────────┤
+                             │   LR       │   ← return address of the caller
+                             ├────────────┤
+                             │   PC       │   ◄── INSTRUCTION THAT FAULTED
+                             ├────────────┤
+                             │   xPSR     │
+                             └────────────┘
+</code></pre>
+<p>The <strong>PC</strong> in that frame is the gold: it’s the address of (approximately) the instruction that triggered the fault. Pointing addr2line / <code>arm-none-eabi-addr2line</code> at it gives the source line.</p>
+<pre><code class="language-bash">arm-none-eabi-addr2line -e firmware.elf 0x080012ae
+# → src/sensor.c:142
+</code></pre>
+<h2 id="exc_return-which-stack-was-active"><a class="header" href="#exc_return-which-stack-was-active">EXC_RETURN: Which Stack Was Active?</a></h2>
+<p>When the fault fires, the CPU might have been on either MSP (handler / main) or PSP (thread / RTOS task). The LR register on entry is loaded with a special <strong>EXC_RETURN</strong> value that tells you.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>EXC_RETURN</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>0xFFFFFFF1</code></td><td>Handler mode, MSP, basic frame</td></tr>
+<tr><td><code>0xFFFFFFF9</code></td><td>Thread mode, MSP, basic frame</td></tr>
+<tr><td><code>0xFFFFFFFD</code></td><td>Thread mode, <strong>PSP</strong>, basic frame</td></tr>
+<tr><td><code>0xFFFFFFE1/E9/ED</code></td><td>Same as above but with FPU extended frame</td></tr>
+</tbody>
+</table>
+</div>
+<p>Bit 2 (<code>0x4</code>) of EXC_RETURN: 0 = MSP, 1 = PSP. This decides which SP to dereference to find the auto-pushed frame.</p>
+<h2 id="a-diagnostic-fault-handler"><a class="header" href="#a-diagnostic-fault-handler">A Diagnostic Fault Handler</a></h2>
+<p>This is the workhorse pattern: a HardFault handler that grabs the offending SP and either jumps to C code to print the state or just spins so the debugger can attach.</p>
+<pre><code class="language-c">__attribute__((naked)) void HardFault_Handler(void) {
+    __asm volatile (
+        "tst lr, #4              \n"   // bit 2 of EXC_RETURN: 1 = PSP
+        "ite eq                  \n"
+        "mrseq r0, msp           \n"
+        "mrsne r0, psp           \n"
+        "mov r1, lr              \n"   // pass EXC_RETURN too
+        "b hardfault_report      \n"
+    );
+}
+
+typedef struct {
+    uint32_t r0, r1, r2, r3, r12;
+    uint32_t lr;          // caller's LR
+    uint32_t pc;          // faulting instruction
+    uint32_t psr;
+} cm_stack_frame_t;
+
+void hardfault_report(cm_stack_frame_t* frame, uint32_t exc_return) {
+    uint32_t cfsr  = SCB-&gt;CFSR;
+    uint32_t hfsr  = SCB-&gt;HFSR;
+    uint32_t mmfar = SCB-&gt;MMFAR;
+    uint32_t bfar  = SCB-&gt;BFAR;
+
+    printf("\n*** HARDFAULT ***\n");
+    printf("PC    = 0x%08lx\n", frame-&gt;pc);
+    printf("LR    = 0x%08lx\n", frame-&gt;lr);
+    printf("PSR   = 0x%08lx\n", frame-&gt;psr);
+    printf("R0-R3 = %08lx %08lx %08lx %08lx\n",
+           frame-&gt;r0, frame-&gt;r1, frame-&gt;r2, frame-&gt;r3);
+    printf("R12   = 0x%08lx\n", frame-&gt;r12);
+    printf("CFSR  = 0x%08lx\n", cfsr);
+    printf("HFSR  = 0x%08lx\n", hfsr);
+    printf("MMFAR = 0x%08lx (valid=%d)\n", mmfar, !!(cfsr &amp; (1&lt;&lt;7)));
+    printf("BFAR  = 0x%08lx (valid=%d)\n", bfar,  !!(cfsr &amp; (1&lt;&lt;15)));
+    printf("EXC_RETURN = 0x%08lx (sp was %s)\n",
+           exc_return, (exc_return &amp; 4) ? "PSP" : "MSP");
+
+    while (1) { __BKPT(0); }
+}
+</code></pre>
+<p>In a release build, replace <code>printf</code> with writing the frame to a backup register or NVM region, then reset — so the next boot can report the previous crash.</p>
+<h2 id="decoding-cfsr--hfsr--mmfar--bfar"><a class="header" href="#decoding-cfsr--hfsr--mmfar--bfar">Decoding CFSR / HFSR / MMFAR / BFAR</a></h2>
+<p>The <strong>Configurable Fault Status Register</strong> (CFSR @ 0xE000ED28) is three sub-registers packed into 32 bits.</p>
+<pre><code> 31         16 15          8 7          0
+┌─────────────┬─────────────┬─────────────┐
+│   UFSR      │    BFSR     │    MMFSR    │
+│ (UsageFault)│ (BusFault)  │ (MemManage) │
+└─────────────┴─────────────┴─────────────┘
+</code></pre>
+<h3 id="mmfsr-bits-0-7--memmanage-fault-status"><a class="header" href="#mmfsr-bits-0-7--memmanage-fault-status">MMFSR (bits 0-7) — MemManage Fault Status</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Bit</th><th>Name</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>0</td><td>IACCVIOL</td><td>Instruction access violation (exec from non-X region)</td></tr>
+<tr><td>1</td><td>DACCVIOL</td><td>Data access violation (read/write to forbidden region)</td></tr>
+<tr><td>3</td><td>MUNSTKERR</td><td>Fault during exception return unstacking</td></tr>
+<tr><td>4</td><td>MSTKERR</td><td>Fault during exception entry stacking</td></tr>
+<tr><td>5</td><td>MLSPERR</td><td>Lazy FPU state preservation failed</td></tr>
+<tr><td>7</td><td>MMARVALID</td><td><strong>MMFAR is valid</strong> — address is the offender</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="bfsr-bits-8-15--bus-fault-status"><a class="header" href="#bfsr-bits-8-15--bus-fault-status">BFSR (bits 8-15) — Bus Fault Status</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Bit</th><th>Name</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>8</td><td>IBUSERR</td><td>Bus error fetching instruction</td></tr>
+<tr><td>9</td><td>PRECISERR</td><td><strong>Precise</strong> data bus error — BFAR points at the bad address</td></tr>
+<tr><td>10</td><td>IMPRECISERR</td><td>Imprecise data bus error (write buffer drained later)</td></tr>
+<tr><td>11</td><td>UNSTKERR</td><td>Bus fault on exception return unstack</td></tr>
+<tr><td>12</td><td>STKERR</td><td>Bus fault on exception entry stack</td></tr>
+<tr><td>13</td><td>LSPERR</td><td>Lazy FPU bus error</td></tr>
+<tr><td>15</td><td>BFARVALID</td><td><strong>BFAR is valid</strong></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="ufsr-bits-16-31--usage-fault-status"><a class="header" href="#ufsr-bits-16-31--usage-fault-status">UFSR (bits 16-31) — Usage Fault Status</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Bit</th><th>Name</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>16</td><td>UNDEFINSTR</td><td>Undefined instruction</td></tr>
+<tr><td>17</td><td>INVSTATE</td><td>Invalid EPSR (e.g., tried to enter ARM state on Cortex-M)</td></tr>
+<tr><td>18</td><td>INVPC</td><td>Invalid PC load (bad EXC_RETURN, return to non-thumb addr)</td></tr>
+<tr><td>19</td><td>NOCP</td><td>Coprocessor access not supported (often: tried FP without enabling FPU)</td></tr>
+<tr><td>24</td><td>UNALIGNED</td><td>Unaligned access with UNALIGN_TRP enabled</td></tr>
+<tr><td>25</td><td>DIVBYZERO</td><td>Divide by zero with DIV_0_TRP enabled</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="hfsr-hardfault-status-0xe000ed2c"><a class="header" href="#hfsr-hardfault-status-0xe000ed2c">HFSR (HardFault Status, 0xE000ED2C)</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Bit</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>VECTTBL — fault reading vector table (bad VTOR? Flash unmapped?)</td></tr>
+<tr><td>30</td><td>FORCED — escalated from another fault (look at CFSR)</td></tr>
+<tr><td>31</td><td>DEBUGEVT — debug event</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Workflow:</strong> start at HFSR. If FORCED=1, read CFSR to find the original culprit. Then read MMFAR or BFAR if the matching VALID bit is set.</p>
+<h2 id="common-faults-and-what-they-look-like"><a class="header" href="#common-faults-and-what-they-look-like">Common Faults and What They Look Like</a></h2>
+<h3 id="null-pointer-write"><a class="header" href="#null-pointer-write">Null Pointer Write</a></h3>
+<pre><code class="language-c">uint32_t* p = NULL;
+*p = 42;
+</code></pre>
+<ul>
+<li>BFSR: <code>PRECISERR=1</code>, <code>BFARVALID=1</code></li>
+<li>BFAR: <code>0x00000000</code></li>
+<li>PC: address of the store instruction</li>
+</ul>
+<h3 id="stack-overflow-into-msp-underflow"><a class="header" href="#stack-overflow-into-msp-underflow">Stack Overflow Into MSP Underflow</a></h3>
+<p>Task stack overflows into another’s memory, or MSP rolls into a region without RAM.</p>
+<ul>
+<li>Usually shows up as MMFSR <code>MSTKERR</code> during a later exception entry, or</li>
+<li>Random data corruption preceding a HardFault elsewhere.</li>
+</ul>
+<p>Use an MPU region as a stack guard band, or enable the H7’s <strong>stack limit check</strong> (<code>PSPLIM</code> register, ARMv8-M).</p>
+<h3 id="execution-from-ram-without-xn-off"><a class="header" href="#execution-from-ram-without-xn-off">Execution From RAM Without XN Off</a></h3>
+<p>Trying to run code from a region the MPU has marked execute-never.</p>
+<ul>
+<li>MMFSR <code>IACCVIOL=1</code></li>
+<li>PC = address you tried to execute from</li>
+</ul>
+<h3 id="fpu-used-without-enabling-it"><a class="header" href="#fpu-used-without-enabling-it">FPU Used Without Enabling It</a></h3>
+<p>Cortex-M4F has a hardware FPU but it’s disabled at reset.</p>
+<ul>
+<li>UFSR <code>NOCP=1</code></li>
+<li>PC = the first FPU instruction the compiler emitted</li>
+</ul>
+<pre><code class="language-c">// Enable CP10 and CP11 (FPU)
+SCB-&gt;CPACR |= ((3UL &lt;&lt; 10*2) | (3UL &lt;&lt; 11*2));
+__DSB(); __ISB();
+</code></pre>
+<h3 id="returning-from-an-isr-with-a-corrupted-lr"><a class="header" href="#returning-from-an-isr-with-a-corrupted-lr">Returning From an ISR With a Corrupted LR</a></h3>
+<p>Common when an ISR is written in raw assembly and stomps on LR, or an ISR is declared <code>__attribute__((interrupt))</code> on Cortex-M (it shouldn’t be — Cortex-M handlers are normal functions).</p>
+<ul>
+<li>UFSR <code>INVPC=1</code></li>
+</ul>
+<h3 id="unaligned-32-bit-load"><a class="header" href="#unaligned-32-bit-load">Unaligned 32-bit Load</a></h3>
+<pre><code class="language-c">uint8_t buf[8];
+uint32_t v = *(uint32_t*)(buf + 1);   // misaligned
+</code></pre>
+<ul>
+<li>With <code>UNALIGN_TRP</code> enabled: UFSR <code>UNALIGNED=1</code></li>
+<li>Without: silently succeeds on Cortex-M3/M4 for normal loads (LDR), faults for LDM/STM.</li>
+</ul>
+<h3 id="imprecise-bus-error"><a class="header" href="#imprecise-bus-error">Imprecise Bus Error</a></h3>
+<p>The most painful kind. The CPU’s write buffer drained after the offending instruction had already retired, so PC points somewhere later. To turn imprecise into precise:</p>
+<pre><code class="language-c">// Disable write buffer (Cortex-M3/M4)
+SCnSCB-&gt;ACTLR |= SCnSCB_ACTLR_DISDEFWBUF_Msk;
+</code></pre>
+<p>This slows things down — use only while hunting the bug.</p>
+<h2 id="catching-stack-overflows"><a class="header" href="#catching-stack-overflows">Catching Stack Overflows</a></h2>
+<p>Hardware help on ARMv8-M (Cortex-M23/M33/M55/M85, e.g., STM32U5): <code>MSPLIM</code> and <code>PSPLIM</code> registers cause an exception the instant SP drops below the limit. On older M3/M4/M7 cores there’s no SP limit, so use:</p>
+<ul>
+<li><strong>MPU stack guard</strong>: place an MPU region with no-access permissions just below each stack. Overflow → MemManage fault.</li>
+<li><strong>Canary words</strong>: write a magic value at the bottom of each stack, periodically check it hasn’t changed.</li>
+<li><strong>FreeRTOS <code>configCHECK_FOR_STACK_OVERFLOW = 2</code></strong>: kernel checks at every context switch via both methods.</li>
+</ul>
+<pre><code class="language-c">// Canary-based check
+#define CANARY 0xDEADC0DE
+extern uint32_t _sstack;
+
+void check_stack(void) {
+    if (*(uint32_t*)&amp;_sstack != CANARY) {
+        panic("MSP stack overflow");
+    }
+}
+</code></pre>
+<h2 id="gdb-recipe"><a class="header" href="#gdb-recipe">GDB Recipe</a></h2>
+<p>When stopped in HardFault_Handler:</p>
+<pre><code>(gdb) bt                          # backtrace shows the fault handler
+(gdb) p/x $sp                     # current SP
+(gdb) p/x ((uint32_t*)$sp)[6]    # PC of faulting instruction
+(gdb) p/x $lr                     # EXC_RETURN
+(gdb) p/x *(SCB_Type*)0xE000ED00 # full SCB
+(gdb) x/i 0x080012ae              # disassemble the faulting instruction
+</code></pre>
+<p>OpenOCD/JLink helper macros (saved in <code>.gdbinit</code>):</p>
+<pre><code class="language-gdb">define hardfault
+  set $sp_real = ($lr &amp; 4) ? $psp : $msp
+  printf "PC  = 0x%08x\n", ((uint32_t*)$sp_real)[6]
+  printf "LR  = 0x%08x\n", ((uint32_t*)$sp_real)[5]
+  printf "PSR = 0x%08x\n", ((uint32_t*)$sp_real)[7]
+  printf "CFSR= 0x%08x\n", *(uint32_t*)0xE000ED28
+  printf "HFSR= 0x%08x\n", *(uint32_t*)0xE000ED2C
+  printf "MMFAR=0x%08x\n", *(uint32_t*)0xE000ED34
+  printf "BFAR =0x%08x\n", *(uint32_t*)0xE000ED38
+end
+</code></pre>
+<h2 id="persisting-fault-reports-across-reset"><a class="header" href="#persisting-fault-reports-across-reset">Persisting Fault Reports Across Reset</a></h2>
+<p>For field-deployed devices, dump the fault frame somewhere it survives the reset:</p>
+<ol>
+<li><strong>Backup SRAM</strong> (STM32 BKPSRAM, ~4 KB powered by VBAT) — write the frame, reset, app reads it on next boot.</li>
+<li><strong>RTC backup registers</strong> (small, ~80 bytes on F4, more on H7) — for a compact fault report.</li>
+<li><strong>A flash sector</strong> dedicated to crash dumps — slower to write but persistent without VBAT.</li>
+</ol>
+<p>Then on next boot, ship the dump to your telemetry pipeline. This is how production firmware learns about field crashes.</p>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<h3 id="pitfall-1-default-while1-handler-silently-hangs-the-device"><a class="header" href="#pitfall-1-default-while1-handler-silently-hangs-the-device">Pitfall 1: Default <code>while(1)</code> Handler Silently Hangs the Device</a></h3>
+<p>The CMSIS startup file has a weak <code>HardFault_Handler</code> that’s an infinite loop. Production firmware needs at minimum a watchdog reset path, ideally a crash dump too.</p>
+<h3 id="pitfall-2-faulting-inside-the-fault-handler"><a class="header" href="#pitfall-2-faulting-inside-the-fault-handler">Pitfall 2: Faulting Inside the Fault Handler</a></h3>
+<p>If <code>hardfault_report</code> calls printf, and printf walks a corrupt heap, you fault again → HardFault locks up. Keep the fault path <strong>dependency-minimal</strong> (raw UART writes, no malloc, no FreeRTOS API).</p>
+<h3 id="pitfall-3-reading-stale-cfsr-bits"><a class="header" href="#pitfall-3-reading-stale-cfsr-bits">Pitfall 3: Reading Stale CFSR Bits</a></h3>
+<p>CFSR bits are sticky — clear them by writing 1 to clear (after you’ve recorded the value).</p>
+<pre><code class="language-c">SCB-&gt;CFSR = SCB-&gt;CFSR;  // W1C clears all set bits
+</code></pre>
+<h3 id="pitfall-4-compiler-reorders-stack-setup-mangling-the-frame"><a class="header" href="#pitfall-4-compiler-reorders-stack-setup-mangling-the-frame">Pitfall 4: Compiler Reorders Stack Setup, Mangling the Frame</a></h3>
+<p>Use <code>__attribute__((naked))</code> on the entry stub so the compiler doesn’t add prologue code that overwrites the frame layout.</p>
+<h3 id="pitfall-5-calling-stack-hungry-functions-in-the-fault-handler-when-msp-is-almost-full"><a class="header" href="#pitfall-5-calling-stack-hungry-functions-in-the-fault-handler-when-msp-is-almost-full">Pitfall 5: Calling Stack-Hungry Functions in the Fault Handler When MSP Is Almost Full</a></h3>
+<p>The fault may itself be a near-overflow. Switch to a dedicated emergency stack:</p>
+<pre><code class="language-c">__attribute__((naked)) void HardFault_Handler(void) {
+    __asm volatile (
+        "ldr sp, =_emergency_stack_top \n"
+        "b hardfault_report             \n"
+    );
+}
+</code></pre>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<ol>
+<li><strong>Enable MemManage/BusFault/UsageFault handlers</strong> so faults are categorized, not all-HardFault.</li>
+<li><strong>CFSR + MMFAR/BFAR + stacked PC</strong> is the diagnostic core.</li>
+<li><strong>Decode EXC_RETURN bit 2</strong> to pick MSP vs PSP for the frame.</li>
+<li><strong>PRECISERR + BFARVALID = address you faulted on.</strong></li>
+<li><strong>NOCP = used FPU without enabling it.</strong></li>
+<li><strong>Imprecise errors</strong> can be made precise by disabling the write buffer (debug only).</li>
+<li><strong>Stack overflow protection</strong>: MPU guard, canaries, RTOS stack-check, or ARMv8-M SP limit.</li>
+<li><strong>Persist crash frames to backup SRAM / RTC regs</strong> for field crash telemetry.</li>
+<li><strong>Keep the fault handler dependency-light</strong> — don’t fault inside the fault handler.</li>
+</ol>
+<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
+<ul>
+<li><a href="interrupts.html">Interrupts</a> — exception model, NVIC</li>
+<li><a href="linker_scripts.html">Linker Scripts</a> — stack placement, .ramfunc</li>
+<li><a href="jtag_swd.html">JTAG/SWD</a> — attaching a debugger to inspect SCB live</li>
+<li><a href="watchdog.html">Watchdog</a> — recovery when crash dump fails</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../embedded/debugging.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../embedded/jtag_swd.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../embedded/debugging.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../embedded/jtag_swd.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

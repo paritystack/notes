@@ -1,0 +1,819 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>MinHash &amp; LSH - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-62d4d51c.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="minhash--locality-sensitive-hashing"><a class="header" href="#minhash--locality-sensitive-hashing">MinHash &amp; Locality-Sensitive Hashing</a></h1>
+<blockquote>
+<p><strong>Key Concepts:</strong> Jaccard Similarity, Permutation Sampling, Signatures, Banding, Locality-Sensitive Hashing, b-bit MinHash, SuperMinHash, Weighted MinHash</p>
+</blockquote>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#jaccard-similarity">Jaccard Similarity</a></li>
+<li><a href="#brute-force-vs-sketching">Brute Force vs Sketching</a></li>
+<li><a href="#minhash-the-core-idea">MinHash: The Core Idea</a></li>
+<li><a href="#constructing-signatures">Constructing Signatures</a></li>
+<li><a href="#locality-sensitive-hashing-lsh">Locality-Sensitive Hashing (LSH)</a></li>
+<li><a href="#tuning-bands-and-rows">Tuning Bands and Rows</a></li>
+<li><a href="#b-bit-minhash">b-bit MinHash</a></li>
+<li><a href="#superminhash">SuperMinHash</a></li>
+<li><a href="#weighted-minhash">Weighted MinHash</a></li>
+<li><a href="#implementation">Implementation</a></li>
+<li><a href="#complexity-analysis">Complexity Analysis</a></li>
+<li><a href="#simhash-companion-technique">SimHash (Companion Technique)</a></li>
+<li><a href="#lsh-for-other-distances">LSH for Other Distances</a></li>
+<li><a href="#real-world-systems">Real-World Systems</a></li>
+<li><a href="#when-to-use">When to Use</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#related-topics">Related Topics</a></li>
+</ul>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p><strong>MinHash</strong> is a probabilistic data structure that estimates the <strong>Jaccard similarity</strong> between two sets in O(1) time, using fixed-size signatures (a few KB) regardless of original set size. <strong>Locality-Sensitive Hashing (LSH)</strong> uses MinHash signatures to build a sub-linear-time index for “find all pairs of sets with Jaccard similarity above a threshold.”</p>
+<p>Together, they solve at web scale: near-duplicate detection (Google’s web-page dedup), document similarity for search/recommendation, training-data deduplication for LLMs (huge in 2023-2026 — required for GPT-4, Llama, Claude training pipelines), plagiarism detection, entity resolution, and genomics k-mer comparison.</p>
+<p>For dense vectors (embeddings), see [[hnsw]] / [[product-quantization]]. MinHash is the right tool when your data is naturally <strong>set-shaped</strong>: tokens, n-grams, shingles, k-mers, item interactions, feature membership.</p>
+<h3 id="why-it-matters"><a class="header" href="#why-it-matters">Why It Matters</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem</th><th>Naive</th><th>MinHash + LSH</th></tr>
+</thead>
+<tbody>
+<tr><td>Compute Jaccard(A, B)</td><td>O(|A| + |B|)</td><td>O(k) signature comparison</td></tr>
+<tr><td>Find all pairs with sim &gt; 0.8 in N sets</td><td>O(N² · avg_set_size)</td><td>O(N · 1/p(false_positive))</td></tr>
+<tr><td>Dedupe 1B documents</td><td>weeks</td><td>hours</td></tr>
+<tr><td>Cluster 10M near-duplicates</td><td>impossible</td><td>tractable</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="jaccard-similarity"><a class="header" href="#jaccard-similarity">Jaccard Similarity</a></h2>
+<p>For sets A and B:</p>
+<pre><code>Jaccard(A, B) = |A ∩ B| / |A ∪ B|
+</code></pre>
+<p>Range: [0, 1]. 1 = identical, 0 = disjoint.</p>
+<p>Properties:</p>
+<ul>
+<li>A distance metric (<code>1 - Jaccard</code>) — symmetric, identity-of-indiscernibles, triangle inequality.</li>
+<li>Insensitive to set size when scaled properly (unlike raw intersection size).</li>
+<li>Natural for sets of “shingles” (k-grams of text) → text similarity.</li>
+</ul>
+<h3 id="shingling-text-into-sets"><a class="header" href="#shingling-text-into-sets">Shingling Text into Sets</a></h3>
+<p>A document becomes a set via <strong>shingling</strong>: take every contiguous k-gram of words or characters.</p>
+<pre><code>doc  = "the quick brown fox"
+3-word shingles = {"the quick brown", "quick brown fox"}
+3-char shingles = {"the", "he ", "e q", " qu", "qui", "uic", ...}
+</code></pre>
+<p>Two near-duplicate documents (one word swapped, one paragraph reordered) share most shingles → high Jaccard. Two unrelated documents share few → low Jaccard. Shingling makes textual similarity a set-similarity problem.</p>
+<p>Typical choices:</p>
+<ul>
+<li>Word shingles, k=5-9: classic web dedup (Broder, 1997).</li>
+<li>Character n-grams, n=5-10: robust to small edits.</li>
+<li>Token shingles for LLM training data dedup: k=13 for 13-gram dedup (Pile, RedPajama).</li>
+</ul>
+<h2 id="brute-force-vs-sketching"><a class="header" href="#brute-force-vs-sketching">Brute Force vs Sketching</a></h2>
+<p>For N sets:</p>
+<ul>
+<li><strong>Pairwise Jaccard</strong>: N²/2 comparisons, each O(set size). Infeasible past N=1M.</li>
+<li><strong>Inverted index</strong>: build a token→sets map; for each pair sharing tokens, compute Jaccard. Still O(N²) worst case for dense shingles.</li>
+<li><strong>MinHash signatures</strong>: fixed-size summary per set. O(N · k) total to compute; O(k) per pair-comparison.</li>
+<li><strong>LSH</strong>: index signatures so only candidate-similar pairs are even compared. Sublinear in N.</li>
+</ul>
+<h2 id="minhash-the-core-idea"><a class="header" href="#minhash-the-core-idea">MinHash: The Core Idea</a></h2>
+<h3 id="the-magic-identity"><a class="header" href="#the-magic-identity">The Magic Identity</a></h3>
+<p>Let <code>h</code> be a uniformly random hash function from elements to {0, 1, …, M-1} for large M (essentially “a random permutation of the universe”).</p>
+<pre><code>Pr[ argmin_{x ∈ A} h(x) == argmin_{x ∈ B} h(x) ] = Jaccard(A, B)
+</code></pre>
+<p>In words: <strong>the probability that two sets have the same minimum-hash element equals their Jaccard similarity.</strong></p>
+<h3 id="why-this-works"><a class="header" href="#why-this-works">Why This Works</a></h3>
+<p>Consider the universe of elements that appear in <code>A ∪ B</code>. The element with the smallest hash value is equally likely to be any one of them (by uniformity of h). For both sets to share that minimum, the smallest-hashing element must be in the intersection <code>A ∩ B</code>. So:</p>
+<pre><code>Pr[min(h(A)) == min(h(B))] = |A ∩ B| / |A ∪ B| = Jaccard(A, B)
+</code></pre>
+<p>One hash function gives a noisy 0-or-1 estimate. Use <code>k</code> independent hash functions, count how many give matches, divide by k → unbiased estimate of Jaccard.</p>
+<h3 id="signatures"><a class="header" href="#signatures">Signatures</a></h3>
+<p>The MinHash <strong>signature</strong> of a set is the vector:</p>
+<pre><code>sig(A) = [min_x h_1(x), min_x h_2(x), ..., min_x h_k(x)]   ∈ N^k
+</code></pre>
+<p><code>k</code> is typically 64–512. Signatures are fixed-size regardless of |A|.</p>
+<p>Estimating Jaccard:</p>
+<pre><code>estimated_jaccard(A, B) = |{i : sig(A)[i] == sig(B)[i]}| / k
+</code></pre>
+<p>This is unbiased; standard error is <code>≈ √(j(1-j)/k)</code>. For <code>k=200, j=0.7</code>: stderr ≈ 0.032.</p>
+<h2 id="constructing-signatures"><a class="header" href="#constructing-signatures">Constructing Signatures</a></h2>
+<h3 id="naive-k-hash-functions"><a class="header" href="#naive-k-hash-functions">Naive: k Hash Functions</a></h3>
+<pre><code class="language-python">def minhash(set_, k, hashes):
+    sig = [float('inf')] * k
+    for x in set_:
+        for i in range(k):
+            h = hashes[i](x)
+            if h &lt; sig[i]:
+                sig[i] = h
+    return sig
+</code></pre>
+<p>Cost: O(|set| · k). For large k and large sets, that’s expensive.</p>
+<h3 id="universal-hashing"><a class="header" href="#universal-hashing">Universal Hashing</a></h3>
+<p>Generate <code>k</code> hash functions cheaply by:</p>
+<pre><code>h_i(x) = (a_i * x + b_i) mod p
+</code></pre>
+<p>where <code>p</code> is a large prime and <code>(a_i, b_i)</code> are k random <code>(a, b)</code> pairs. Approximates k independent uniform hashes. Standard in <code>datasketch</code> and most production libraries.</p>
+<h3 id="optimization-one-permutation-hashing-li--könig-2010"><a class="header" href="#optimization-one-permutation-hashing-li--könig-2010">Optimization: One-Permutation Hashing (Li &amp; König, 2010)</a></h3>
+<p>Instead of k full hashes, hash each element once into k “bins” by partitioning the hash range. Each bin’s MinHash is the minimum within it.</p>
+<p>Cost: O(|set|) total (one hash per element, not k hashes per element). ~k× speedup. Slight bias if some bins are empty — filled by neighbor-bin densification (Shrivastava 2014).</p>
+<h3 id="optimization-bottomk-minhash"><a class="header" href="#optimization-bottomk-minhash">Optimization: BottomK MinHash</a></h3>
+<p>Take the bottom-k smallest hash values from a <em>single</em> hash function:</p>
+<pre><code>sig(A) = sorted(h(x) for x in A)[:k]
+</code></pre>
+<p>Better statistical properties (smaller variance per signature element) than k independent hashes for the same k. Slightly different similarity estimator. Used by Mash (genomics) and some dedup pipelines.</p>
+<h2 id="locality-sensitive-hashing-lsh"><a class="header" href="#locality-sensitive-hashing-lsh">Locality-Sensitive Hashing (LSH)</a></h2>
+<p>MinHash signatures let you compute pairwise Jaccard quickly, but you still need O(N²) signature comparisons to find all similar pairs. LSH indexes signatures to retrieve only candidate-similar pairs in sub-linear time.</p>
+<h3 id="banding-technique-the-canonical-lsh-for-minhash"><a class="header" href="#banding-technique-the-canonical-lsh-for-minhash">Banding Technique (the canonical LSH for MinHash)</a></h3>
+<p>Split the k-element signature into <code>b</code> <strong>bands</strong> of <code>r</code> rows each (<code>b · r = k</code>):</p>
+<pre><code>sig = [v_0, v_1, ..., v_{k-1}]
+band_0 = (v_0, v_1, ..., v_{r-1})
+band_1 = (v_r, v_{r+1}, ..., v_{2r-1})
+...
+band_{b-1} = (v_{k-r}, ..., v_{k-1})
+</code></pre>
+<p>For each band, hash the entire band-tuple to a bucket. Two sets become <strong>candidate pairs</strong> if any band hashes them to the same bucket.</p>
+<h3 id="probability-of-becoming-a-candidate-pair"><a class="header" href="#probability-of-becoming-a-candidate-pair">Probability of Becoming a Candidate Pair</a></h3>
+<p>Let <code>s = Jaccard(A, B)</code>. The probability they match in a single band (all r positions agree) is <code>s^r</code>. The probability they match in <em>at least one</em> of b bands is:</p>
+<pre><code>P(candidate | sim = s) = 1 - (1 - s^r)^b
+</code></pre>
+<p>This <strong>s-curve</strong> sharply rises around a tunable threshold.</p>
+<pre><code>s     P(candidate)  for (b=20, r=5)
+0.2   0.006
+0.4   0.187
+0.5   0.470
+0.6   0.802         ← roughly the threshold
+0.7   0.964
+0.8   0.998
+0.9   ~1.0
+</code></pre>
+<p>The threshold (50% probability of candidacy) is approximately:</p>
+<pre><code>t ≈ (1/b)^(1/r)
+</code></pre>
+<h3 id="lsh-index"><a class="header" href="#lsh-index">LSH Index</a></h3>
+<pre><code>For each set A:
+  compute sig(A)
+  for each band i in [0..b):
+    bucket_key = hash(band_i(sig(A)))
+    buckets[i][bucket_key].add(A)
+
+Query(B): collect all candidates from any band's bucket containing B.
+For each candidate, verify exact Jaccard (signature or original).
+</code></pre>
+<p>Memory: O(N · b) hash table entries. Query cost: O(b + #candidates).</p>
+<h2 id="tuning-bands-and-rows"><a class="header" href="#tuning-bands-and-rows">Tuning Bands and Rows</a></h2>
+<p>You control:</p>
+<ul>
+<li><code>k = b · r</code> (signature size)</li>
+<li><code>b</code> (number of bands; affects recall)</li>
+<li><code>r</code> (rows per band; affects precision)</li>
+</ul>
+<h3 id="choosing-for-a-threshold"><a class="header" href="#choosing-for-a-threshold">Choosing for a Threshold</a></h3>
+<p>Pick the similarity threshold <code>t</code> (e.g., 0.8 for near-dup detection). Then:</p>
+<ul>
+<li>Larger <code>r</code>: steeper s-curve at the threshold (sharper cutoff)</li>
+<li>More <code>b</code>: more chances to match (higher recall, more false candidates)</li>
+</ul>
+<p>For <code>t = 0.8</code>:</p>
+<ul>
+<li><code>k = 128, b = 32, r = 4</code> → threshold ≈ 0.56 (too low — many false candidates)</li>
+<li><code>k = 128, b = 16, r = 8</code> → threshold ≈ 0.84 (close to target)</li>
+<li><code>k = 128, b = 8, r = 16</code> → threshold ≈ 0.92 (above target — false negatives)</li>
+</ul>
+<p>Practical recipe: solve for <code>(b, r)</code> given desired threshold and acceptable error rates. <code>datasketch.MinHashLSH</code> has a built-in optimizer.</p>
+<h3 id="s-curve-visualization"><a class="header" href="#s-curve-visualization">S-Curve Visualization</a></h3>
+<pre><code>P(candidate)
+1.0 |                  ___________
+    |                 /
+    |                /
+0.5 |- - - - - - - -+- - - - - - - - -
+    |              /
+    |             /
+0.0 |___________/
+    0          t                  1.0
+                similarity →
+</code></pre>
+<p>Steeper around <code>t</code> is better (fewer false positives just below, fewer false negatives just above).</p>
+<h2 id="b-bit-minhash"><a class="header" href="#b-bit-minhash">b-bit MinHash</a></h2>
+<p>Storing full 32-bit or 64-bit hash values is wasteful — only the equality comparisons matter, not the actual magnitudes.</p>
+<p><strong>b-bit MinHash</strong> (Li &amp; König, 2010) stores only the <code>b</code> least significant bits of each MinHash. Comparison reduces to bit-equality:</p>
+<pre><code>sig_b(A) = [h_1(A) &amp; mask_b, ..., h_k(A) &amp; mask_b]    # k × b bits total
+</code></pre>
+<p>Estimator changes slightly (collisions due to truncated hashes have a small baseline rate):</p>
+<pre><code>estimated_jaccard ≈ (observed_match_rate - 2^{-b}) / (1 - 2^{-b})
+</code></pre>
+<p>Typical: b = 1 or 2 bits. Yields 16-32× memory reduction with minor accuracy loss for high-similarity regimes.</p>
+<p>For very high similarity (near-duplicate detection, threshold &gt; 0.8), 1-bit MinHash works well. For mid-range similarity (0.3-0.7), use more bits.</p>
+<h2 id="superminhash"><a class="header" href="#superminhash">SuperMinHash</a></h2>
+<p><strong>SuperMinHash</strong> (Ertl, 2017) uses a single hash function and <em>Fisher-Yates</em>-style sampling to produce k MinHash-equivalent values with much lower per-element cost.</p>
+<ul>
+<li>O(|set|) total time, not O(|set| · k)</li>
+<li>Lower variance than basic one-permutation MinHash</li>
+<li>Drop-in replacement for MinHash signatures</li>
+</ul>
+<p>Implementation is subtle (must track sampled positions and handle empty bins), but the result is the same: k-element signature usable for Jaccard estimation and LSH.</p>
+<h2 id="weighted-minhash"><a class="header" href="#weighted-minhash">Weighted MinHash</a></h2>
+<p>When elements have <strong>weights</strong> (token frequencies, TF-IDF scores), generalize Jaccard:</p>
+<pre><code>WeightedJaccard(A, B) = Σ min(w_A(x), w_B(x)) / Σ max(w_A(x), w_B(x))
+</code></pre>
+<p><strong>Consistent Weighted Sampling (CWS)</strong> (Manasse et al., 2010) extends MinHash to weighted sets. Per element, generate not one hash but a hash drawn from a distribution scaled by the weight; the minimum is the weighted MinHash.</p>
+<p>ICWS (Improved CWS, Ioffe 2010) and 0-bit CWS (Li 2015) are the practical implementations.</p>
+<p>Used for: TF-IDF-weighted document similarity, scientific paper similarity (citation weights), recommendation systems with item ratings.</p>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<p>A complete MinHash + LSH implementation with shingling, signature construction, and an LSH index for similarity search.</p>
+<pre><code class="language-python">import hashlib
+import random
+from collections import defaultdict
+from dataclasses import dataclass
+
+
+# ------------------------------------------------------------------
+# Shingling
+# ------------------------------------------------------------------
+def shingles(text: str, k: int = 5) -&gt; set[str]:
+    """Word-level k-shingles."""
+    tokens = text.lower().split()
+    if len(tokens) &lt; k:
+        return {" ".join(tokens)}
+    return {" ".join(tokens[i:i + k]) for i in range(len(tokens) - k + 1)}
+
+
+def char_shingles(text: str, k: int = 5) -&gt; set[str]:
+    """Character-level k-shingles."""
+    return {text[i:i + k] for i in range(len(text) - k + 1)}
+
+
+# ------------------------------------------------------------------
+# MinHash
+# ------------------------------------------------------------------
+MERSENNE_PRIME = (1 &lt;&lt; 61) - 1
+MAX_HASH = (1 &lt;&lt; 32) - 1
+
+
+def _hash32(s: str) -&gt; int:
+    return int(hashlib.md5(s.encode()).hexdigest()[:8], 16)
+
+
+@dataclass
+class MinHash:
+    num_perm: int
+    seed: int = 1
+    _coeffs: list[tuple[int, int]] = None
+    sig: list[int] = None
+
+    def __post_init__(self):
+        rng = random.Random(self.seed)
+        self._coeffs = [
+            (rng.randint(1, MERSENNE_PRIME - 1), rng.randint(0, MERSENNE_PRIME - 1))
+            for _ in range(self.num_perm)
+        ]
+        self.sig = [MAX_HASH] * self.num_perm
+
+    def update(self, x: str) -&gt; None:
+        h = _hash32(x)
+        for i, (a, b) in enumerate(self._coeffs):
+            v = ((a * h + b) % MERSENNE_PRIME) &amp; MAX_HASH
+            if v &lt; self.sig[i]:
+                self.sig[i] = v
+
+    def update_batch(self, xs) -&gt; None:
+        for x in xs:
+            self.update(x)
+
+    def jaccard(self, other: "MinHash") -&gt; float:
+        assert self.num_perm == other.num_perm
+        return sum(1 for a, b in zip(self.sig, other.sig) if a == b) / self.num_perm
+
+
+# ------------------------------------------------------------------
+# LSH (banding)
+# ------------------------------------------------------------------
+class MinHashLSH:
+    def __init__(self, num_perm: int = 128, bands: int = 16):
+        assert num_perm % bands == 0, "num_perm must divide evenly by bands"
+        self.num_perm = num_perm
+        self.bands = bands
+        self.rows = num_perm // bands
+        self.buckets: list[dict[bytes, list[str]]] = [defaultdict(list) for _ in range(bands)]
+        self.signatures: dict[str, list[int]] = {}
+
+    def insert(self, key: str, mh: MinHash) -&gt; None:
+        assert mh.num_perm == self.num_perm
+        self.signatures[key] = mh.sig
+        for i in range(self.bands):
+            band = tuple(mh.sig[i * self.rows:(i + 1) * self.rows])
+            bucket_key = hashlib.md5(repr(band).encode()).digest()
+            self.buckets[i][bucket_key].append(key)
+
+    def query(self, mh: MinHash, min_jaccard: float = 0.0) -&gt; list[tuple[str, float]]:
+        candidates: set[str] = set()
+        for i in range(self.bands):
+            band = tuple(mh.sig[i * self.rows:(i + 1) * self.rows])
+            bucket_key = hashlib.md5(repr(band).encode()).digest()
+            candidates.update(self.buckets[i].get(bucket_key, []))
+
+        results = []
+        for c in candidates:
+            sim = self._sig_jaccard(mh.sig, self.signatures[c])
+            if sim &gt;= min_jaccard:
+                results.append((c, sim))
+        results.sort(key=lambda x: -x[1])
+        return results
+
+    @staticmethod
+    def _sig_jaccard(a: list[int], b: list[int]) -&gt; float:
+        return sum(1 for x, y in zip(a, b) if x == y) / len(a)
+
+    # Compute approximate threshold for current (b, r)
+    @property
+    def threshold(self) -&gt; float:
+        return (1.0 / self.bands) ** (1.0 / self.rows)
+
+
+# ------------------------------------------------------------------
+# Auto-tuner: pick (bands, rows) for a target threshold
+# ------------------------------------------------------------------
+def best_bands_rows(num_perm: int, threshold: float) -&gt; tuple[int, int]:
+    """Pick (b, r) such that (1/b)^(1/r) ≈ threshold, with b*r = num_perm."""
+    best = (1, num_perm, abs((1.0)**(1.0 / num_perm) - threshold))
+    for b in range(1, num_perm + 1):
+        if num_perm % b != 0:
+            continue
+        r = num_perm // b
+        est = (1.0 / b) ** (1.0 / r)
+        err = abs(est - threshold)
+        if err &lt; best[2]:
+            best = (b, r, err)
+    return (best[0], best[1])
+</code></pre>
+<h3 id="usage"><a class="header" href="#usage">Usage</a></h3>
+<pre><code class="language-python">docs = {
+    "d1": "the quick brown fox jumps over the lazy dog",
+    "d2": "the quick brown fox jumped over a lazy dog",
+    "d3": "completely unrelated text about astronomy and stars",
+    "d4": "a quick brown fox jumps over the lazy dog yesterday",
+}
+
+mhs = {}
+for doc_id, text in docs.items():
+    mh = MinHash(num_perm=128)
+    for sh in shingles(text, k=3):
+        mh.update(sh)
+    mhs[doc_id] = mh
+
+# Direct similarity:
+print("d1 vs d2:", mhs["d1"].jaccard(mhs["d2"]))  # ~0.4-0.6
+print("d1 vs d3:", mhs["d1"].jaccard(mhs["d3"]))  # ~0.0
+
+# LSH for "near-duplicate" search
+b, r = best_bands_rows(num_perm=128, threshold=0.5)
+lsh = MinHashLSH(num_perm=128, bands=b)
+for doc_id, mh in mhs.items():
+    lsh.insert(doc_id, mh)
+
+print("Threshold:", lsh.threshold)
+query_mh = MinHash(num_perm=128)
+for sh in shingles("quick brown fox over the lazy dog", k=3):
+    query_mh.update(sh)
+print("Matches:", lsh.query(query_mh, min_jaccard=0.3))
+</code></pre>
+<p>For production: use <code>datasketch</code> (well-tested Python lib), Spark MLlib’s <code>MinHashLSH</code>, or <code>simhash</code>/<code>Mash</code> for specialized variants.</p>
+<h2 id="complexity-analysis"><a class="header" href="#complexity-analysis">Complexity Analysis</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Time</th><th>Space</th></tr>
+</thead>
+<tbody>
+<tr><td>Build signature for one set of size n</td><td>O(n · k) classic / O(n) one-perm</td><td>O(k)</td></tr>
+<tr><td>Compare two signatures</td><td>O(k)</td><td>—</td></tr>
+<tr><td>Estimate Jaccard standard error</td><td>≈ √(j(1-j)/k)</td><td>—</td></tr>
+<tr><td>LSH insert</td><td>O(k)</td><td>O(b) buckets per item</td></tr>
+<tr><td>LSH query (output #C candidates)</td><td>O(b + #C)</td><td>—</td></tr>
+<tr><td>Total LSH index for N sets</td><td>O(N · b)</td><td>O(N · b)</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="concrete-dedup-100m-documents"><a class="header" href="#concrete-dedup-100m-documents">Concrete: Dedup 100M Documents</a></h3>
+<ul>
+<li>100M docs, ~1000 shingles each, k=128.</li>
+<li>Signatures: 100M × 128 × 4 bytes = 51 GB. Sharded across machines.</li>
+<li>LSH: 100M × 16 bands = 1.6B hash entries. Distributed hash table or Spark shuffle.</li>
+<li>Query throughput: ~10K QPS per machine for the candidate phase.</li>
+<li>Total dedup of 100M docs: ~hours on a small cluster (vs centuries for naive pairwise).</li>
+</ul>
+<h2 id="simhash-companion-technique"><a class="header" href="#simhash-companion-technique">SimHash (Companion Technique)</a></h2>
+<p><strong>SimHash</strong> (Charikar 2002, used by Google for web crawl dedup since the 2000s) is a different LSH technique for <strong>cosine</strong> similarity in high-dim binary space, often confused with MinHash. Different use case.</p>
+<h3 id="how-simhash-works"><a class="header" href="#how-simhash-works">How SimHash Works</a></h3>
+<p>For each feature (token), compute a random hash → a vector of ±1s. Sum (weighted by feature frequency) to get a fingerprint vector. Take the sign bit-by-bit:</p>
+<pre><code>fingerprint(doc) ∈ {0, 1}^b      (e.g., b = 64)
+</code></pre>
+<p>Two documents have <strong>Hamming distance</strong> in fingerprints proportional to their cosine distance. Near-duplicates → small Hamming distance.</p>
+<h3 id="simhash-vs-minhash"><a class="header" href="#simhash-vs-minhash">SimHash vs MinHash</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>MinHash</th><th>SimHash</th></tr>
+</thead>
+<tbody>
+<tr><td>Metric</td><td>Jaccard (set similarity)</td><td>Cosine (vector similarity)</td></tr>
+<tr><td>Signature</td><td>k integers (e.g., 128 × 4 B = 512 B)</td><td>b bits (e.g., 64 bits = 8 B)</td></tr>
+<tr><td>LSH</td><td>Banding</td><td>Hamming-LSH (bit-prefix tables)</td></tr>
+<tr><td>Used by</td><td>Web dedup, training-data dedup</td><td>Google web-dedup (post-2007)</td></tr>
+</tbody>
+</table>
+</div>
+<p>SimHash is more compact; MinHash is more accurate on small set-similarity differences.</p>
+<h2 id="lsh-for-other-distances"><a class="header" href="#lsh-for-other-distances">LSH for Other Distances</a></h2>
+<p>The LSH framework generalizes — anywhere you have a hash family that maps similar items to the same bucket with high probability, you can build a sub-linear similarity index.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Distance</th><th>LSH Family</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>Jaccard</td><td>MinHash</td><td>This document</td></tr>
+<tr><td>Cosine</td><td>SimHash, hyperplane LSH</td><td>Above</td></tr>
+<tr><td>L2 / Euclidean</td><td>p-stable LSH (Datar et al.)</td><td>Project onto random vector, quantize</td></tr>
+<tr><td>Hamming</td><td>Bit-sampling LSH</td><td>Random bit positions</td></tr>
+<tr><td>Inner product</td><td>Asymmetric LSH (Shrivastava &amp; Li)</td><td>Augment vectors with norms</td></tr>
+<tr><td>Edit distance</td><td>Embedding into Hamming via shingling</td><td>Approximate</td></tr>
+</tbody>
+</table>
+</div>
+<p>For dense vectors and inner-product / cosine, modern graph-based ANN ([[hnsw]]) typically outperforms LSH on recall-vs-latency. LSH remains popular for:</p>
+<ul>
+<li>Theoretical analyzability (PAC-style guarantees)</li>
+<li>Streaming / online settings (LSH naturally supports inserts)</li>
+<li>Hardware-friendly bit operations (SimHash, Hamming-LSH on GPU/FPGA)</li>
+<li>Set similarity specifically (where MinHash wins)</li>
+</ul>
+<h2 id="real-world-systems"><a class="header" href="#real-world-systems">Real-World Systems</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>System</th><th>Use Case</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>datasketch</strong> (Python)</td><td>Reference MinHash + LSH library; weighted MinHash, HyperLogLog.</td></tr>
+<tr><td><strong>Apache Spark MLlib</strong></td><td><code>MinHashLSH</code> for large-scale similarity over distributed datasets.</td></tr>
+<tr><td><strong>Google</strong></td><td>SimHash for web page dedup at crawl time.</td></tr>
+<tr><td><strong>Mash / sourmash</strong></td><td>Bottom-k MinHash for genome / metagenome comparison.</td></tr>
+<tr><td><strong>Bigslice / Flockdb</strong></td><td>LSH at Twitter for similar-account / similar-tweet detection.</td></tr>
+<tr><td><strong>The Pile, RedPajama, FineWeb</strong></td><td>MinHash dedup for LLM training corpora. <strong>Dedup at this scale is what makes LLMs trainable</strong> — duplicates inflate loss, harm generalization.</td></tr>
+<tr><td><strong>GPT-4 / Claude / Llama training pipelines</strong></td><td>MinHash + LSH for dedup of pretraining text; one of the most-cited stages of “data work” in model papers.</td></tr>
+<tr><td><strong>PostgreSQL <code>pg_trgm</code></strong></td><td>Trigram similarity (related idea, different mechanics).</td></tr>
+<tr><td><strong>Lucene <code>MinHashFilter</code></strong></td><td>Tokenstream filter to produce MinHash terms; index those for LSH-like recall.</td></tr>
+<tr><td><strong>ScaNN, FAISS LSH</strong></td><td>LSH for dense vectors (less competitive than HNSW today).</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="when-to-use"><a class="header" href="#when-to-use">When to Use</a></h2>
+<h3 id="use-minhash--lsh-when"><a class="header" href="#use-minhash--lsh-when">Use MinHash + LSH when:</a></h3>
+<ul>
+<li>Data is naturally <strong>set-shaped</strong> (shingles, n-grams, k-mers, feature sets)</li>
+<li>Similarity metric is Jaccard or its weighted variant</li>
+<li>Need near-dup detection at corpus scale (10M – 100B documents)</li>
+<li>LLM training-data dedup</li>
+<li>Want streaming / online inserts (no global retraining)</li>
+<li>Need PAC-style guarantees on recall</li>
+</ul>
+<h3 id="use-simhash-when"><a class="header" href="#use-simhash-when">Use SimHash when:</a></h3>
+<ul>
+<li>Cosine / dot-product similarity on weighted feature vectors</li>
+<li>Need ultra-compact fingerprints (64-128 bits per item)</li>
+<li>Web-page near-dup specifically</li>
+</ul>
+<h3 id="use-hnsw--ivf-pq-instead-when"><a class="header" href="#use-hnsw--ivf-pq-instead-when">Use HNSW / IVF-PQ instead when:</a></h3>
+<ul>
+<li>Data is <strong>dense vectors</strong> from neural embeddings</li>
+<li>Cosine/L2 on continuous-valued vectors</li>
+<li>Need higher recall than LSH typically achieves</li>
+</ul>
+<h3 id="use-exact-methods-when"><a class="header" href="#use-exact-methods-when">Use exact methods when:</a></h3>
+<ul>
+<li>N &lt; ~1M and pairwise is feasible</li>
+<li>Recall must be exactly 1.0</li>
+<li>Set sizes are small enough that O(|A ∩ B|) is fast</li>
+</ul>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<ol>
+<li>
+<p><strong>Confusing MinHash and SimHash</strong></p>
+<ul>
+<li>MinHash for Jaccard (sets); SimHash for cosine (vectors). They’re not interchangeable.</li>
+</ul>
+</li>
+<li>
+<p><strong>Using too few permutations (k)</strong></p>
+<ul>
+<li>Standard error scales as 1/√k. For tight similarity discrimination (distinguish 0.7 from 0.75), need k ≥ 256.</li>
+</ul>
+</li>
+<li>
+<p><strong>Picking bad shingle size k</strong></p>
+<ul>
+<li>Too small (k=1): too many shingles match by chance, everything is “similar.”</li>
+<li>Too large (k=20): even paraphrases lose nearly all shingles.</li>
+<li>Typical sweet spots: k=5-9 words, k=3-5 characters for general text. k=13 for LLM training dedup. k=21 for genomic data (Mash default).</li>
+</ul>
+</li>
+<li>
+<p><strong>Forgetting that LSH gives candidates, not answers</strong></p>
+<ul>
+<li>Always verify with full similarity computation. LSH false positives are intrinsic.</li>
+</ul>
+</li>
+<li>
+<p><strong>Bands/rows imbalanced for threshold</strong></p>
+<ul>
+<li>If your threshold is 0.85 and (b,r) gives threshold 0.5, you’ll get millions of false candidates.</li>
+<li>Use the auto-tuner or solve <code>(1/b)^(1/r) = t</code> for your target.</li>
+</ul>
+</li>
+<li>
+<p><strong>Single hash function for k permutations</strong></p>
+<ul>
+<li>All permutations identical → signature is just the single MinHash, k=1 effectively.</li>
+<li>Ensure independent <code>(a_i, b_i)</code> for each i.</li>
+</ul>
+</li>
+<li>
+<p><strong>Not handling empty sets</strong></p>
+<ul>
+<li>Empty set’s MinHash is all <code>MAX_HASH</code>. Two empty sets “match” with Jaccard 1, which is technically correct but often undesired.</li>
+<li>Filter empties upstream.</li>
+</ul>
+</li>
+<li>
+<p><strong>Ignoring set size when interpreting Jaccard</strong></p>
+<ul>
+<li>Jaccard(A,B) = 0.5 means very different things for |A|=10 vs |A|=10M.</li>
+<li>For huge sets where one slightly contains the other, prefer <strong>containment</strong> (|A ∩ B| / min(|A|, |B|)).</li>
+</ul>
+</li>
+<li>
+<p><strong>Forgetting weighted MinHash for weighted features</strong></p>
+<ul>
+<li>Plain MinHash on TF-IDF features ignores weights — incorrect.</li>
+</ul>
+</li>
+<li>
+<p><strong>Storing 64-bit MinHashes when 16 or 32 would do</strong></p>
+<ul>
+<li>For threshold &gt; 0.8 and ~128 permutations, 16-bit MinHash hashes work fine.</li>
+<li>Memory savings compound at scale.</li>
+</ul>
+</li>
+</ol>
+<h2 id="related-topics"><a class="header" href="#related-topics">Related Topics</a></h2>
+<ul>
+<li>[[hnsw]] — dense-vector ANN; the right tool for embeddings, MinHash for sets</li>
+<li>[[product-quantization]] — vector compression; complements HNSW for memory-bound dense ANN</li>
+<li>[[bloom-filter]] — probabilistic set membership (different goal: “does x belong to S?”)</li>
+<li>[[probabilistic]] — sketches family overview (HLL, CMS, T-Digest, MinHash)</li>
+<li>[[inverted-index]] — keyword search; complementary for hybrid retrieval / dedup pipelines</li>
+<li>[[hash-tables]] — universal hashing background that MinHash relies on</li>
+</ul>
+<p>External:</p>
+<ul>
+<li><code>algorithms/hashing_techniques.md</code> — universal hashing, perfect hashing</li>
+<li><code>algorithms/string_algorithms.md</code> — shingling, edit distance, related text-similarity primitives</li>
+<li><code>ai/rag.md</code> — training-data dedup in RAG / LLM pipelines</li>
+</ul>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>MinHash answers “how similar are these two sets?” with a fixed-size signature instead of touching the original sets. The trick — that the probability of matching min-hashes equals Jaccard similarity — is elegant and the standard error is straightforward to control by tuning the signature length. LSH wraps signatures in a hash-bucket index that finds candidate-similar pairs in sublinear time, making “find all pairs above similarity threshold T in a corpus of N” feasible at the scale of billions.</p>
+<p>The technique is foundational for web-scale dedup (Broder’s original use case at AltaVista), and in 2023-2026 it became central to LLM training: every published frontier model (GPT-4, Claude, Llama, Gemini, DeepSeek) describes a MinHash-LSH-based dedup pass over pretraining data, because un-dedup’d corpora produce drastically worse models. SuperMinHash, b-bit MinHash, and weighted MinHash refine the technique for specific accuracy/memory regimes, but the core MinHash + banding algorithm from the late 1990s remains the workhorse.</p>
+<p>For 2026 practice: reach for <code>datasketch</code> for Python, Spark <code>MinHashLSH</code> for distributed pipelines, and don’t confuse it with SimHash (cosine, not Jaccard) or with HNSW/PQ (dense embeddings, not sets). When your data is set-shaped, MinHash is unbeatable.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../data_structures/product_quantization.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../algorithms/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../data_structures/product_quantization.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../algorithms/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,1011 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>HNSW - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-62d4d51c.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="hnsw-hierarchical-navigable-small-world-graphs"><a class="header" href="#hnsw-hierarchical-navigable-small-world-graphs">HNSW: Hierarchical Navigable Small World Graphs</a></h1>
+<blockquote>
+<p><strong>Key Concepts:</strong> Approximate Nearest Neighbor (ANN), Multi-layer Graph, Greedy Search, Neighbor Selection Heuristic, Logarithmic Search</p>
+</blockquote>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#background-the-nearest-neighbor-problem">Background: The Nearest Neighbor Problem</a></li>
+<li><a href="#foundations-nsw-and-skip-lists">Foundations: NSW and Skip Lists</a></li>
+<li><a href="#hnsw-structure">HNSW Structure</a></li>
+<li><a href="#search-algorithm">Search Algorithm</a></li>
+<li><a href="#insert-algorithm">Insert Algorithm</a></li>
+<li><a href="#neighbor-selection-heuristic">Neighbor Selection Heuristic</a></li>
+<li><a href="#key-parameters">Key Parameters</a></li>
+<li><a href="#implementation">Implementation</a></li>
+<li><a href="#complexity-analysis">Complexity Analysis</a></li>
+<li><a href="#distance-metrics">Distance Metrics</a></li>
+<li><a href="#deletes">Deletes</a></li>
+<li><a href="#concurrency">Concurrency</a></li>
+<li><a href="#filtered-search">Filtered Search</a></li>
+<li><a href="#disk-resident-variants">Disk-Resident Variants</a></li>
+<li><a href="#real-world-systems">Real-World Systems</a></li>
+<li><a href="#when-to-use-hnsw">When to Use HNSW</a></li>
+<li><a href="#tuning-guide">Tuning Guide</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#related-topics">Related Topics</a></li>
+</ul>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p><strong>HNSW (Hierarchical Navigable Small World)</strong> is a graph-based index for <em>approximate</em> nearest neighbor (ANN) search in high-dimensional vector spaces. It is the dominant in-memory ANN index in production systems (pgvector, Qdrant, Weaviate, Milvus, Lucene 9+, FAISS, hnswlib, Elasticsearch).</p>
+<p>Given a query vector <code>q</code> and a dataset of <code>N</code> vectors, HNSW returns the <code>k</code> closest vectors to <code>q</code> (under a chosen distance metric) in <strong>expected O(log N)</strong> time with high recall, using O(N · M) memory for graph edges (typically <code>M = 8..48</code>).</p>
+<p>The structure was introduced by Malkov &amp; Yashunin (2016) and combines two ideas:</p>
+<ol>
+<li><strong>Navigable Small-World (NSW) graphs</strong> — graphs where greedy routing finds near-optimal paths in logarithmic steps (Kleinberg, 2000).</li>
+<li><strong>Hierarchical layering</strong> — a skip-list-style multi-level graph that lets the search start “from far away” and zoom in.</li>
+</ol>
+<h3 id="why-hnsw-dominates"><a class="header" href="#why-hnsw-dominates">Why HNSW Dominates</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Property</th><th>HNSW</th><th>IVF-PQ</th><th>Brute Force</th></tr>
+</thead>
+<tbody>
+<tr><td>Build cost</td><td>High</td><td>Medium</td><td>None</td></tr>
+<tr><td>Query latency</td><td>Low (log N)</td><td>Medium</td><td>O(N)</td></tr>
+<tr><td>Memory</td><td>High (~M floats/vec extra)</td><td>Low (compressed)</td><td>Just vectors</td></tr>
+<tr><td>Recall@10 (typical)</td><td>0.95–0.99</td><td>0.85–0.95</td><td>1.0</td></tr>
+<tr><td>Update friendliness</td><td>Good (incremental insert)</td><td>Poor (needs retraining)</td><td>Trivial</td></tr>
+<tr><td>Tunability</td><td><code>M</code>, <code>efConstruction</code>, <code>efSearch</code></td><td><code>nlist</code>, <code>nprobe</code>, <code>M_pq</code></td><td>None</td></tr>
+</tbody>
+</table>
+</div>
+<p>HNSW wins on <strong>latency × recall</strong> for in-memory workloads up to ~100M vectors. For larger or memory-constrained workloads, IVF-PQ or DiskANN become preferable.</p>
+<h2 id="background-the-nearest-neighbor-problem"><a class="header" href="#background-the-nearest-neighbor-problem">Background: The Nearest Neighbor Problem</a></h2>
+<h3 id="exact-k-nn"><a class="header" href="#exact-k-nn">Exact k-NN</a></h3>
+<p>Given:</p>
+<ul>
+<li>Dataset <code>D = {x_1, ..., x_N}</code> where each <code>x_i ∈ R^d</code></li>
+<li>Query <code>q ∈ R^d</code></li>
+<li>Distance <code>dist(·, ·)</code> (L2, inner product, cosine)</li>
+</ul>
+<p>Find the <code>k</code> vectors in <code>D</code> closest to <code>q</code>.</p>
+<p><strong>Brute force:</strong> Compute <code>dist(q, x_i)</code> for all <code>i</code>, return top-k. O(N · d) per query.</p>
+<p>For modern embeddings (<code>d = 384..4096</code>) and large <code>N</code>, brute force is too slow. Space-partitioning trees (k-d trees, ball trees) work well in low dimensions but degrade to O(N) when <code>d &gt; ~20</code> — the <strong>curse of dimensionality</strong>.</p>
+<h3 id="approximate-k-nn-ann"><a class="header" href="#approximate-k-nn-ann">Approximate k-NN (ANN)</a></h3>
+<p>Trade exactness for speed: return <em>most</em> of the true top-k. <strong>Recall@k</strong> measures quality:</p>
+<pre><code>recall@k = |returned_top_k ∩ true_top_k| / k
+</code></pre>
+<p>ANN methods aim for <strong>recall ≥ 0.95</strong> at 10–100× the QPS of brute force.</p>
+<p>Major ANN families:</p>
+<ul>
+<li><strong>Tree-based:</strong> Annoy (random projection trees), Spotify</li>
+<li><strong>Hashing-based:</strong> LSH (locality-sensitive hashing) — see [[minhash-lsh]]</li>
+<li><strong>Quantization-based:</strong> PQ, OPQ, ScaNN — see [[product-quantization]]</li>
+<li><strong>Graph-based:</strong> HNSW, NSG, DiskANN — <em>this document</em></li>
+</ul>
+<p>Graph-based methods consistently lead recall-vs-latency benchmarks on dense embeddings (ann-benchmarks.com).</p>
+<h2 id="foundations-nsw-and-skip-lists"><a class="header" href="#foundations-nsw-and-skip-lists">Foundations: NSW and Skip Lists</a></h2>
+<h3 id="navigable-small-world-graphs"><a class="header" href="#navigable-small-world-graphs">Navigable Small-World Graphs</a></h3>
+<p>A graph is <strong>navigable</strong> if greedy routing — at each step, move to the neighbor closest to the target — finds the destination in <code>O(polylog N)</code> steps.</p>
+<p>Kleinberg (2000) showed this requires a mix of:</p>
+<ul>
+<li><strong>Short-range edges</strong> (to local neighbors) — enable convergence to exact answer</li>
+<li><strong>Long-range edges</strong> (to distant nodes) — enable fast traversal across the graph</li>
+</ul>
+<p>A pure k-NN graph (each node connects to its <code>k</code> nearest neighbors) has only short edges; greedy search gets stuck in local minima. Random edges alone produce a small-world graph but poor recall.</p>
+<p>NSW builds long-range edges <em>incrementally as a byproduct of insertion order</em>: early-inserted points become “hubs” because later insertions probabilistically connect to them across the whole space.</p>
+<h3 id="skip-list-analogy"><a class="header" href="#skip-list-analogy">Skip List Analogy</a></h3>
+<p>A <a href="skip_lists.html">skip list</a> is a multi-layer linked list where each node appears in layer <code>ℓ</code> with probability <code>p^ℓ</code>. Search starts at the top layer, scans horizontally, drops down when overshoot occurs. Result: O(log N) search.</p>
+<p>HNSW applies the same idea to graphs:</p>
+<pre><code>Layer 2:         A ───────────────── E
+                 │                   │
+Layer 1:    A ── C ── D ──────────── E ── G
+            │    │    │              │    │
+Layer 0:    A ── B ── C ── D ── E ── F ── G ── H
+            (all nodes, fully connected NSW)
+</code></pre>
+<ul>
+<li><strong>Top layers</strong> are sparse — only the “highest-rolling” nodes appear there. They act as long-range entry points.</li>
+<li><strong>Bottom layer (layer 0)</strong> contains all nodes and supports the final precise search.</li>
+</ul>
+<p>The hierarchy lets search start from a far-away entry point and descend, halving the work at each level — the same logic as a skip list.</p>
+<h2 id="hnsw-structure"><a class="header" href="#hnsw-structure">HNSW Structure</a></h2>
+<h3 id="per-node-state"><a class="header" href="#per-node-state">Per-Node State</a></h3>
+<p>For each node <code>v</code>:</p>
+<ul>
+<li><code>vector</code>: the d-dimensional embedding</li>
+<li><code>level(v)</code>: integer ≥ 0, sampled at insertion time</li>
+<li><code>neighbors[ℓ]</code>: list of edges at each layer <code>ℓ</code> where <code>0 ≤ ℓ ≤ level(v)</code></li>
+</ul>
+<p>Edges are <strong>undirected</strong> in the abstract graph but stored as adjacency lists on both endpoints.</p>
+<h3 id="global-state"><a class="header" href="#global-state">Global State</a></h3>
+<ul>
+<li><code>entry_point</code>: the highest-level node (search starts here)</li>
+<li><code>max_level</code>: current top layer</li>
+<li><code>M</code>: max neighbors per node at layers <code>ℓ ≥ 1</code></li>
+<li><code>M_max0</code> = <code>2 * M</code>: max neighbors at layer 0 (more, because layer 0 carries everything)</li>
+<li><code>mL = 1 / ln(M)</code>: level-generation normalization factor</li>
+<li><code>efConstruction</code>: dynamic candidate list size during build</li>
+<li><code>efSearch</code>: dynamic candidate list size during query (set per-query)</li>
+</ul>
+<h3 id="level-assignment"><a class="header" href="#level-assignment">Level Assignment</a></h3>
+<p>Each new node draws a level from a geometric distribution:</p>
+<pre><code>level = floor(-ln(uniform(0, 1)) * mL)
+</code></pre>
+<p>With <code>mL = 1/ln(M)</code>:</p>
+<ul>
+<li>P(level = 0) ≈ 1 - 1/M</li>
+<li>P(level = 1) ≈ (1/M)(1 - 1/M)</li>
+<li>P(level = ℓ) decays geometrically</li>
+</ul>
+<p>So with <code>M = 16</code>, ~94% of nodes only exist at layer 0, ~6% reach layer 1, ~0.4% reach layer 2, etc. The number of layers grows as <code>O(log N)</code>.</p>
+<h3 id="graph-shape-per-layer"><a class="header" href="#graph-shape-per-layer">Graph Shape per Layer</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Layer</th><th>Nodes</th><th>Edges/node</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td>0</td><td>All <code>N</code></td><td><code>M_max0</code> (2M)</td><td>Final precise search</td></tr>
+<tr><td>1</td><td>~N/M</td><td><code>M</code></td><td>Mid-range routing</td></tr>
+<tr><td>2</td><td>~N/M²</td><td><code>M</code></td><td>Mid-range routing</td></tr>
+<tr><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+<tr><td>top</td><td>~1</td><td><code>M</code></td><td>Long-range entry</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="search-algorithm"><a class="header" href="#search-algorithm">Search Algorithm</a></h2>
+<p>HNSW search has two phases:</p>
+<ol>
+<li><strong>Coarse phase</strong> (layers <code>max_level</code> → <code>1</code>): greedy 1-NN search, find an entry point near <code>q</code> at layer 0.</li>
+<li><strong>Fine phase</strong> (layer 0): beam search with width <code>ef</code>, return top-k.</li>
+</ol>
+<h3 id="greedy-search-at-a-single-layer"><a class="header" href="#greedy-search-at-a-single-layer">Greedy Search at a Single Layer</a></h3>
+<pre><code>search-layer(q, entry, ef, layer):
+    visited      = {entry}
+    candidates   = min-heap by dist(node, q),  init {entry}
+    best         = max-heap by dist(node, q),  init {entry}
+    while candidates non-empty:
+        c = candidates.pop-min()           # closest unexplored
+        f = best.top()                      # furthest of best
+        if dist(c, q) &gt; dist(f, q): break  # no improvement possible
+        for e in c.neighbors[layer]:
+            if e in visited: continue
+            visited.add(e)
+            if dist(e, q) &lt; dist(f, q) or len(best) &lt; ef:
+                candidates.push(e)
+                best.push(e)
+                if len(best) &gt; ef: best.pop()
+    return best                              # ef closest seen
+</code></pre>
+<p>Key invariants:</p>
+<ul>
+<li><code>candidates</code> is a <em>frontier</em> — closest unexpanded nodes.</li>
+<li><code>best</code> is the <em>result set</em> — at most <code>ef</code> closest nodes seen so far.</li>
+<li>Stop when the frontier’s closest is farther than the result set’s furthest — no more improvements possible.</li>
+</ul>
+<p>For the coarse phase, <code>ef = 1</code> (pure greedy 1-NN). For the fine phase, <code>ef = efSearch ≥ k</code>.</p>
+<h3 id="full-search"><a class="header" href="#full-search">Full Search</a></h3>
+<pre><code>search(q, k, efSearch):
+    ep = entry_point
+    for ℓ in max_level downto 1:
+        ep = search-layer(q, ep, ef=1, layer=ℓ).closest()
+    result_set = search-layer(q, ep, ef=efSearch, layer=0)
+    return top-k from result_set
+</code></pre>
+<p><strong>Why this works:</strong> The coarse phase navigates from far away to a node <em>near</em> <code>q</code> in O(log N) hops (each layer has ~N/M^ℓ nodes; one greedy step per layer). The fine phase explores <code>O(efSearch · M)</code> neighborhoods around that entry, which dominates the total cost.</p>
+<h2 id="insert-algorithm"><a class="header" href="#insert-algorithm">Insert Algorithm</a></h2>
+<pre><code>insert(v, M, M_max0, efConstruction):
+    L = current max_level
+    ℓ = floor(-ln(rand()) * mL)
+    v.level = ℓ
+
+    # Phase 1: descend from top to ℓ+1 with ef=1, just routing
+    ep = entry_point
+    for layer in L downto ℓ+1:
+        ep = search-layer(v.vector, ep, ef=1, layer).closest()
+
+    # Phase 2: from layer min(L, ℓ) down to 0, do real insertion
+    for layer in min(L, ℓ) downto 0:
+        candidates = search-layer(v.vector, ep, efConstruction, layer)
+        M_layer = M_max0 if layer == 0 else M
+        neighbors = select-neighbors-heuristic(v, candidates, M_layer)
+        for n in neighbors:
+            add_edge(v, n, layer)            # bidirectional
+            if len(n.neighbors[layer]) &gt; M_layer:
+                n.neighbors[layer] = select-neighbors-heuristic(
+                    n, n.neighbors[layer], M_layer)
+        ep = neighbors                       # entry for next layer
+
+    if ℓ &gt; L:
+        entry_point = v
+        max_level   = ℓ
+</code></pre>
+<p>Insert is essentially “search to find good neighbors, then wire bidirectionally, then re-prune any node that exceeds its degree budget.”</p>
+<p>The asymmetry between layers (<code>M_max0 = 2M</code> vs <code>M</code>) reflects layer 0 carrying all traffic and benefiting from extra connectivity, while upper layers stay sparse for fast routing.</p>
+<h2 id="neighbor-selection-heuristic"><a class="header" href="#neighbor-selection-heuristic">Neighbor Selection Heuristic</a></h2>
+<p>The choice of which <code>M</code> candidates to keep as neighbors is <em>the</em> recall-determining decision in HNSW. Naïve “keep the M closest” produces clustering: a new node connects to its tight cluster and the graph fragments.</p>
+<h3 id="algorithm-4-heuristic-selection--malkov--yashunin"><a class="header" href="#algorithm-4-heuristic-selection--malkov--yashunin">Algorithm 4 (Heuristic Selection) — Malkov &amp; Yashunin</a></h3>
+<pre><code>select-neighbors-heuristic(q, candidates, M, extendCandidates=False, keepPruned=True):
+    if extendCandidates:
+        # also consider neighbors-of-candidates
+        for c in list(candidates):
+            for c2 in c.neighbors[layer]:
+                candidates.add(c2)
+
+    result = []
+    discarded = []
+    W = min-heap by dist(_, q)
+    for c in candidates: W.push(c)
+
+    while W non-empty and len(result) &lt; M:
+        c = W.pop-min()
+        # keep c only if it adds diversity:
+        # c is closer to q than to any already-selected r
+        is_diverse = all(dist(c, q) &lt; dist(c, r) for r in result)
+        if is_diverse:
+            result.append(c)
+        else:
+            discarded.append(c)
+
+    if keepPruned:
+        # fill remaining slots from discarded (closest first)
+        while discarded and len(result) &lt; M:
+            result.append(discarded.pop(0))
+
+    return result
+</code></pre>
+<h3 id="why-the-heuristic-matters"><a class="header" href="#why-the-heuristic-matters">Why the Heuristic Matters</a></h3>
+<p>The “closest M” approach picks neighbors that are all in the same direction from <code>q</code> — typically the dense cluster <code>q</code> belongs to. The graph becomes a bunch of dense cliques weakly connected by random hub nodes; greedy search frequently gets stuck.</p>
+<p>The heuristic enforces <strong>angular diversity</strong>: a candidate <code>c</code> is kept only if it is closer to <code>q</code> than to any already-selected neighbor <code>r</code>. This means selected neighbors “spread out” around <code>q</code>, giving greedy search escape routes in many directions.</p>
+<p>ASCII intuition:</p>
+<pre><code>Without heuristic (closest M=4):       With heuristic (M=4):
+                                       
+        ●  ●  ● ●                              ●  ● 
+      q                                    q
+                                         ●        ●
+
+   All neighbors in one cluster.        Neighbors in four directions.
+   Search stuck if target is left.      Search can escape any direction.
+</code></pre>
+<h3 id="extendcandidates-and-keeppruned"><a class="header" href="#extendcandidates-and-keeppruned"><code>extendCandidates</code> and <code>keepPruned</code></a></h3>
+<ul>
+<li><strong>extendCandidates=True</strong>: search wider by including neighbors-of-candidates before pruning. Higher recall, slower build. Typically off.</li>
+<li><strong>keepPruned=True</strong>: if heuristic prunes too aggressively and result &lt; M, fill remaining slots with closest discards. Default on.</li>
+</ul>
+<h2 id="key-parameters"><a class="header" href="#key-parameters">Key Parameters</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Parameter</th><th>Typical</th><th>Effect</th></tr>
+</thead>
+<tbody>
+<tr><td><code>M</code></td><td>8–48</td><td>Max neighbors per node (upper layers). Higher → better recall, more memory, slower build.</td></tr>
+<tr><td><code>M_max0</code></td><td>2M</td><td>Max neighbors at layer 0. Larger gives extra connectivity where most search happens.</td></tr>
+<tr><td><code>efConstruction</code></td><td>100–500</td><td>Beam width at build. Higher → better graph quality (better recall at query time), slower build.</td></tr>
+<tr><td><code>efSearch</code></td><td>50–500</td><td>Beam width at query. Higher → better recall, slower query. Tunable per query.</td></tr>
+<tr><td><code>mL</code></td><td><code>1/ln(M)</code></td><td>Level normalization. Default value is near-optimal.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="rules-of-thumb"><a class="header" href="#rules-of-thumb">Rules of Thumb</a></h3>
+<ul>
+<li><code>efSearch ≥ k</code>. To get recall, you must search at least <code>k</code> candidates.</li>
+<li><code>efConstruction</code> ~ 2× <code>efSearch</code> gives a good build/query tradeoff.</li>
+<li><code>M = 16</code> is a strong default for most embedding dimensions (~128–768).</li>
+<li>Increase <code>M</code> for higher-dimensional or hard datasets (<code>M = 32..48</code>).</li>
+<li>Memory per vector ≈ <code>d * 4 bytes (vector) + M * 4 bytes (neighbor IDs) * avg_levels_per_node</code>. With <code>M=16</code> and <code>d=768</code>: ~3 KB vector + ~150 B graph.</li>
+</ul>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<p>A working in-memory HNSW in Python. Production implementations (hnswlib, FAISS) use SIMD, contiguous memory layouts, and lock-free reads, but the algorithm is identical.</p>
+<pre><code class="language-python">import math
+import random
+import heapq
+from dataclasses import dataclass, field
+from typing import Callable, Optional
+
+
+@dataclass
+class Node:
+    id: int
+    vector: list[float]
+    level: int
+    neighbors: list[list[int]] = field(default_factory=list)  # neighbors[layer] = [node_id, ...]
+
+
+class HNSW:
+    def __init__(
+        self,
+        dim: int,
+        M: int = 16,
+        ef_construction: int = 200,
+        distance: Callable[[list[float], list[float]], float] = None,
+        seed: Optional[int] = None,
+    ):
+        self.dim = dim
+        self.M = M
+        self.M_max0 = 2 * M
+        self.ef_construction = ef_construction
+        self.mL = 1.0 / math.log(M)
+        self.distance = distance or self._l2
+        self.nodes: dict[int, Node] = {}
+        self.entry_point: Optional[int] = None
+        self.max_level: int = -1
+        self._rng = random.Random(seed)
+
+    @staticmethod
+    def _l2(a, b):
+        return sum((x - y) ** 2 for x, y in zip(a, b))
+
+    def _random_level(self) -&gt; int:
+        return int(-math.log(self._rng.random()) * self.mL)
+
+    # ------------------------------------------------------------------
+    # Core search at a single layer
+    # ------------------------------------------------------------------
+    def _search_layer(self, q: list[float], entry_ids: list[int], ef: int, layer: int) -&gt; list[tuple[float, int]]:
+        visited = set(entry_ids)
+        # candidates: min-heap of (dist, id) — closest unexplored
+        candidates = []
+        # best: max-heap of (-dist, id) — top-ef closest seen
+        best = []
+        for nid in entry_ids:
+            d = self.distance(q, self.nodes[nid].vector)
+            heapq.heappush(candidates, (d, nid))
+            heapq.heappush(best, (-d, nid))
+
+        while candidates:
+            d_c, c = heapq.heappop(candidates)
+            d_f = -best[0][0]
+            if d_c &gt; d_f:
+                break
+            for e in self.nodes[c].neighbors[layer]:
+                if e in visited:
+                    continue
+                visited.add(e)
+                d_e = self.distance(q, self.nodes[e].vector)
+                if len(best) &lt; ef or d_e &lt; -best[0][0]:
+                    heapq.heappush(candidates, (d_e, e))
+                    heapq.heappush(best, (-d_e, e))
+                    if len(best) &gt; ef:
+                        heapq.heappop(best)
+        return [(-d, nid) for d, nid in best]  # (dist, id)
+
+    # ------------------------------------------------------------------
+    # Heuristic neighbor selection (Algorithm 4)
+    # ------------------------------------------------------------------
+    def _select_neighbors_heuristic(
+        self,
+        q: list[float],
+        candidates: list[tuple[float, int]],
+        M: int,
+        keep_pruned: bool = True,
+    ) -&gt; list[int]:
+        # candidates: list of (dist_to_q, id)
+        candidates = sorted(candidates)  # closest first
+        result: list[tuple[float, int]] = []
+        discarded: list[tuple[float, int]] = []
+        for d_qc, c in candidates:
+            if len(result) &gt;= M:
+                break
+            is_diverse = True
+            for _, r in result:
+                d_cr = self.distance(self.nodes[c].vector, self.nodes[r].vector)
+                if d_cr &lt; d_qc:
+                    is_diverse = False
+                    break
+            if is_diverse:
+                result.append((d_qc, c))
+            else:
+                discarded.append((d_qc, c))
+        if keep_pruned:
+            while discarded and len(result) &lt; M:
+                result.append(discarded.pop(0))
+        return [nid for _, nid in result]
+
+    # ------------------------------------------------------------------
+    # Insert
+    # ------------------------------------------------------------------
+    def insert(self, node_id: int, vector: list[float]) -&gt; None:
+        ℓ = self._random_level()
+        node = Node(id=node_id, vector=vector, level=ℓ, neighbors=[[] for _ in range(ℓ + 1)])
+        self.nodes[node_id] = node
+
+        if self.entry_point is None:
+            self.entry_point = node_id
+            self.max_level = ℓ
+            return
+
+        ep = [self.entry_point]
+        # Phase 1: greedy descend from top down to ℓ+1
+        for layer in range(self.max_level, ℓ, -1):
+            results = self._search_layer(vector, ep, ef=1, layer=layer)
+            ep = [results[0][1]]
+
+        # Phase 2: real insert from min(L, ℓ) down to 0
+        for layer in range(min(self.max_level, ℓ), -1, -1):
+            results = self._search_layer(vector, ep, ef=self.ef_construction, layer=layer)
+            M_layer = self.M_max0 if layer == 0 else self.M
+            neighbors = self._select_neighbors_heuristic(vector, results, M_layer)
+            node.neighbors[layer] = neighbors
+            # Add reverse edges and prune if needed
+            for nbr_id in neighbors:
+                nbr = self.nodes[nbr_id]
+                nbr.neighbors[layer].append(node_id)
+                if len(nbr.neighbors[layer]) &gt; M_layer:
+                    # re-prune nbr's neighbor list using heuristic
+                    cands = [
+                        (self.distance(nbr.vector, self.nodes[x].vector), x)
+                        for x in nbr.neighbors[layer]
+                    ]
+                    nbr.neighbors[layer] = self._select_neighbors_heuristic(
+                        nbr.vector, cands, M_layer
+                    )
+            ep = [nid for _, nid in results]
+
+        if ℓ &gt; self.max_level:
+            self.entry_point = node_id
+            self.max_level = ℓ
+
+    # ------------------------------------------------------------------
+    # Query
+    # ------------------------------------------------------------------
+    def search(self, q: list[float], k: int, ef_search: int = 50) -&gt; list[tuple[float, int]]:
+        if self.entry_point is None:
+            return []
+        ep = [self.entry_point]
+        for layer in range(self.max_level, 0, -1):
+            results = self._search_layer(q, ep, ef=1, layer=layer)
+            ep = [results[0][1]]
+        results = self._search_layer(q, ep, ef=max(ef_search, k), layer=0)
+        results.sort()
+        return results[:k]
+</code></pre>
+<h3 id="usage"><a class="header" href="#usage">Usage</a></h3>
+<pre><code class="language-python">import random
+
+random.seed(0)
+hnsw = HNSW(dim=64, M=16, ef_construction=100, seed=0)
+
+# Insert 10k random vectors
+for i in range(10_000):
+    v = [random.random() for _ in range(64)]
+    hnsw.insert(i, v)
+
+# Query
+q = [random.random() for _ in range(64)]
+results = hnsw.search(q, k=10, ef_search=64)
+for dist, idx in results:
+    print(idx, dist)
+</code></pre>
+<p>For production, prefer:</p>
+<ul>
+<li><code>hnswlib</code> (C++ with Python bindings, used by Qdrant, Weaviate)</li>
+<li><code>faiss.IndexHNSWFlat</code> (Facebook AI Research)</li>
+<li><code>pgvector</code> HNSW index for PostgreSQL</li>
+</ul>
+<h2 id="complexity-analysis"><a class="header" href="#complexity-analysis">Complexity Analysis</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Time</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>Search</td><td>O(log N) expected</td><td>Each layer: O(M · ef) distance comps; O(log N) layers</td></tr>
+<tr><td>Insert</td><td>O(log N · M · efConstruction)</td><td>Dominated by efConstruction beam at each layer</td></tr>
+<tr><td>Memory</td><td>O(N · M · d_id + N · d · 4)</td><td>d_id = 4-8 bytes per neighbor id, plus vectors</td></tr>
+</tbody>
+</table>
+</div>
+<p>The O(log N) bound assumes the level distribution is balanced and the graph is well-connected. In adversarial constructions (e.g., all points on a low-dim manifold), search can degrade. In practice on real embeddings, observed scaling matches theory.</p>
+<h3 id="concrete-example-m16-d768-n10m"><a class="header" href="#concrete-example-m16-d768-n10m">Concrete Example (M=16, d=768, N=10M)</a></h3>
+<ul>
+<li>Levels expected: <code>log_M(N) ≈ log_16(10^7) ≈ 5.8</code></li>
+<li>Avg edges per node: ~M · sum_ℓ p^ℓ ≈ M · M/(M-1) ≈ 17 at layer 0, less at upper layers</li>
+<li>Memory: <code>10M * (768 * 4 + 32 * 4)</code> ≈ 30 GB for vectors + 1.3 GB for graph</li>
+<li>Query: traverses ~<code>efSearch * avg_edges</code> nodes — <code>50 * 17 ≈ 850</code> distance computations vs <code>10M</code> for brute force</li>
+</ul>
+<h2 id="distance-metrics"><a class="header" href="#distance-metrics">Distance Metrics</a></h2>
+<p>HNSW is metric-agnostic — any distance/dissimilarity that satisfies <em>informally</em> “triangle-inequality-ish behavior” works. Common choices:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Metric</th><th>Formula</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>L2 (Euclidean²)</td><td><code>Σ(a_i - b_i)²</code></td><td>Skip the sqrt — monotonic with L2</td></tr>
+<tr><td>Inner Product</td><td><code>-Σ a_i · b_i</code> (negate to minimize)</td><td>Not a true metric; HNSW still works in practice</td></tr>
+<tr><td>Cosine</td><td><code>1 - (a·b) / (‖a‖‖b‖)</code></td><td>Normalize vectors → equivalent to inner product</td></tr>
+<tr><td>Manhattan (L1)</td><td>`Σ</td><td>a_i - b_i</td></tr>
+<tr><td>Hamming</td><td>popcount(a XOR b)</td><td>For binary vectors</td></tr>
+</tbody>
+</table>
+</div>
+<p>For cosine similarity, <strong>normalize vectors once at insert time</strong> and use inner product at query — much faster than recomputing norms.</p>
+<h3 id="inner-product-caveat"><a class="header" href="#inner-product-caveat">Inner Product Caveat</a></h3>
+<p>IP is not a true metric (a · a is not the minimum distance from a to itself). The neighbor selection heuristic — which assumes “diverse” means “distinct directions” — can produce odd results with IP if magnitudes vary wildly. Solution: normalize.</p>
+<h2 id="deletes"><a class="header" href="#deletes">Deletes</a></h2>
+<p>HNSW does <strong>not</strong> support true deletes natively. Removing a node disconnects its neighbors and degrades graph quality, especially if the node was a hub.</p>
+<h3 id="tombstone-soft-delete"><a class="header" href="#tombstone-soft-delete">Tombstone (Soft Delete)</a></h3>
+<pre><code class="language-python">def delete(self, node_id: int) -&gt; None:
+    self.deleted.add(node_id)
+
+def search(self, q, k, ef_search):
+    results = self._search_internal(q, k * 2, ef_search)  # over-fetch
+    return [(d, nid) for d, nid in results if nid not in self.deleted][:k]
+</code></pre>
+<ul>
+<li>✅ Simple, O(1) delete</li>
+<li>❌ Graph still traverses deleted nodes (slows search)</li>
+<li>❌ Memory not reclaimed</li>
+<li>❌ Recall degrades as fraction of deleted grows</li>
+</ul>
+<h3 id="heuristic-repair-faiss-qdrant"><a class="header" href="#heuristic-repair-faiss-qdrant">Heuristic Repair (FAISS, Qdrant)</a></h3>
+<p>When a node is deleted:</p>
+<ol>
+<li>For each neighbor <code>n</code> of the deleted node at each layer:
+<ul>
+<li>Replace the deleted entry in <code>n.neighbors[layer]</code> with a candidate found by re-searching from <code>n</code>.</li>
+</ul>
+</li>
+<li>If the deleted node was the entry point, pick the highest-level remaining node.</li>
+</ol>
+<p>Repair preserves graph quality but is expensive (<code>O(efConstruction · M · levels)</code> per delete).</p>
+<h3 id="periodic-rebuild"><a class="header" href="#periodic-rebuild">Periodic Rebuild</a></h3>
+<p>For workloads with bulk deletes (e.g., document expiry), tombstone until deleted fraction crosses a threshold (e.g., 20%), then rebuild the index from scratch.</p>
+<pre><code>deleted_fraction = |deleted| / |nodes|
+if deleted_fraction &gt; 0.2:
+    rebuild_index(alive_only=True)
+</code></pre>
+<p>This is what Lucene’s segmented HNSW does — old segments are eventually merged into clean ones.</p>
+<h2 id="concurrency"><a class="header" href="#concurrency">Concurrency</a></h2>
+<h3 id="read-heavy-workloads"><a class="header" href="#read-heavy-workloads">Read-Heavy Workloads</a></h3>
+<p>HNSW reads are lock-free if the graph is built and frozen:</p>
+<ul>
+<li><code>_search_layer</code> only reads neighbor lists and vectors.</li>
+<li>Multiple threads can search the same index simultaneously with no synchronization.</li>
+</ul>
+<h3 id="concurrent-inserts"><a class="header" href="#concurrent-inserts">Concurrent Inserts</a></h3>
+<p>Concurrent inserts are tricky. Two approaches:</p>
+<p><strong>1. Coarse-grained lock (hnswlib default for builds)</strong></p>
+<ul>
+<li>Serialize all inserts. Simple, correct.</li>
+<li>Throughput limited; fine for batch builds.</li>
+</ul>
+<p><strong>2. Per-node locks (FAISS, Qdrant)</strong></p>
+<ul>
+<li>Lock individual neighbor lists when modifying.</li>
+<li>Lock ordering: lock by node ID to avoid deadlock.</li>
+<li>Reads remain mostly lock-free; snapshot neighbor list under brief read lock or use atomic pointer swap.</li>
+</ul>
+<p><strong>3. Versioned graph (Weaviate, Vespa)</strong></p>
+<ul>
+<li>Inserts go into a delta. Periodic merge applies delta to main index under brief stop-the-world.</li>
+<li>Search reads the current snapshot pointer atomically.</li>
+</ul>
+<h3 id="common-pitfall-concurrent-insert--search"><a class="header" href="#common-pitfall-concurrent-insert--search">Common Pitfall: Concurrent Insert + Search</a></h3>
+<p>A search may visit a partially-inserted node (its neighbor list isn’t fully populated). Mitigations:</p>
+<ul>
+<li>Mark nodes “visible” only after insert completes (don’t add to entry-point pool until done).</li>
+<li>Atomic publish: build the full neighbor list off-graph, then atomically swap in the node.</li>
+</ul>
+<h2 id="filtered-search"><a class="header" href="#filtered-search">Filtered Search</a></h2>
+<p>Real systems often need to combine ANN search with metadata filters: “find similar images, but only those tagged ‘cat’ and uploaded after 2024-01-01”.</p>
+<h3 id="pre-filter-brute-force-on-filtered-subset"><a class="header" href="#pre-filter-brute-force-on-filtered-subset">Pre-filter (Brute Force on Filtered Subset)</a></h3>
+<p>If the filter is highly selective (<code>&lt;1%</code> of corpus matches), just compute brute-force ANN over matching vectors. Skip HNSW entirely.</p>
+<h3 id="post-filter"><a class="header" href="#post-filter">Post-filter</a></h3>
+<ol>
+<li>Run HNSW search with <code>efSearch * overfetch_factor</code> (e.g., 10×).</li>
+<li>Filter results to those matching predicate.</li>
+<li>Return top-k of survivors.</li>
+</ol>
+<ul>
+<li>✅ Simple</li>
+<li>❌ Fails when filter is very selective — may return &lt; k results even after over-fetching massively</li>
+<li>❌ Bad worst-case recall</li>
+</ul>
+<h3 id="filter-aware-traversal-milvus-qdrant-weaviate"><a class="header" href="#filter-aware-traversal-milvus-qdrant-weaviate">Filter-Aware Traversal (Milvus, Qdrant, Weaviate)</a></h3>
+<p>Modify <code>_search_layer</code> to track candidates separately from results:</p>
+<ul>
+<li>Candidates: all visited nodes (used for graph traversal).</li>
+<li>Results: only nodes matching the predicate (returned to user).</li>
+</ul>
+<pre><code class="language-python">def _search_layer_filtered(self, q, entry_ids, ef, layer, predicate):
+    visited = set(entry_ids)
+    candidates = [(dist(q, n), n) for n in entry_ids]
+    heapify(candidates)
+    results = [(dist(q, n), n) for n in entry_ids if predicate(n)]
+    # ... traverse via candidates, append to results only if predicate(e)
+</code></pre>
+<p>Stop condition is trickier: must continue until <em>results</em> are saturated, not just candidates. Slower than vanilla search but maintains recall.</p>
+<h3 id="acorn-filteredhnsw"><a class="header" href="#acorn-filteredhnsw">ACORN, FilteredHNSW</a></h3>
+<p>Recent research (ACORN, 2024) builds HNSW with extra edges that maintain connectivity <em>within</em> common filter classes. The graph has more edges but preserves recall under arbitrary filters.</p>
+<h2 id="disk-resident-variants"><a class="header" href="#disk-resident-variants">Disk-Resident Variants</a></h2>
+<p>When the dataset exceeds RAM, in-memory HNSW fails. Options:</p>
+<h3 id="diskann-microsoft-research-2019"><a class="header" href="#diskann-microsoft-research-2019">DiskANN (Microsoft Research, 2019)</a></h3>
+<ul>
+<li>Single-layer graph (no HNSW hierarchy — uses graph diameter optimization instead).</li>
+<li>PQ-compressed vectors in RAM for approximate distance.</li>
+<li>Full vectors on SSD, fetched on demand for re-ranking.</li>
+<li>1B-vector indexes on a single machine with ~64 GB RAM.</li>
+</ul>
+<h3 id="hnsw-on-ssd-qdrant-weaviate-marqo"><a class="header" href="#hnsw-on-ssd-qdrant-weaviate-marqo">HNSW-on-SSD (qdrant, weaviate, marqo)</a></h3>
+<ul>
+<li>Memory-map graph and vectors.</li>
+<li>Page cache + access pattern works OK if graph fits in RAM and vectors mostly don’t.</li>
+<li>Slower than DiskANN due to random IO on every greedy step.</li>
+</ul>
+<h3 id="tiered-hnsw-vespa-lucene"><a class="header" href="#tiered-hnsw-vespa-lucene">Tiered HNSW (Vespa, Lucene)</a></h3>
+<ul>
+<li>Recent hot data in RAM HNSW.</li>
+<li>Cold data in compressed on-disk format (often IVF-PQ).</li>
+<li>Query both; merge results.</li>
+</ul>
+<h2 id="real-world-systems"><a class="header" href="#real-world-systems">Real-World Systems</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>System</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>hnswlib</strong></td><td>Reference C++ implementation by Malkov. Python bindings. Used by Qdrant and Weaviate.</td></tr>
+<tr><td><strong>FAISS</strong></td><td>Facebook AI Research. <code>IndexHNSWFlat</code>, <code>IndexHNSWPQ</code>, <code>IndexHNSWSQ</code>. SIMD-optimized.</td></tr>
+<tr><td><strong>pgvector</strong></td><td>Postgres extension. <code>CREATE INDEX ... USING hnsw (embedding vector_l2_ops)</code>. M, ef_construction GUCs.</td></tr>
+<tr><td><strong>Lucene</strong></td><td>Java HNSW since v9.0. Used by Elasticsearch, OpenSearch, Solr. Segmented + Lucene’s merge policy handles deletes.</td></tr>
+<tr><td><strong>Qdrant</strong></td><td>Rust. Filtered HNSW with payload indexing. Per-node locks for concurrent writes.</td></tr>
+<tr><td><strong>Weaviate</strong></td><td>Go. HNSW + multi-tenancy + hybrid search.</td></tr>
+<tr><td><strong>Milvus</strong></td><td>Multi-index backend, HNSW + DiskANN + IVF.</td></tr>
+<tr><td><strong>Vespa</strong></td><td>Yahoo/Verizon. HNSW + tiered storage.</td></tr>
+<tr><td><strong>MongoDB Atlas Vector Search</strong></td><td>HNSW under the hood (Lucene-based).</td></tr>
+<tr><td><strong>Redis (RediSearch)</strong></td><td>HNSW + FLAT indexes for VSS.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="when-to-use-hnsw"><a class="header" href="#when-to-use-hnsw">When to Use HNSW</a></h2>
+<h3 id="use-hnsw-when"><a class="header" href="#use-hnsw-when">Use HNSW when:</a></h3>
+<ul>
+<li>Vector count: 10K – 100M</li>
+<li>Vectors fit in RAM (or can fit with quantization)</li>
+<li>Latency target: &lt;100ms p99</li>
+<li>Recall target: ≥ 0.9</li>
+<li>Updates: incremental, low-volume</li>
+</ul>
+<h3 id="consider-alternatives-when"><a class="header" href="#consider-alternatives-when">Consider alternatives when:</a></h3>
+<ul>
+<li><strong>Brute force</strong>: N &lt; 10K, or recall must be exactly 1.0</li>
+<li><strong>IVF-PQ</strong> ([[product-quantization]]): N &gt; 100M, RAM-limited, lower recall tolerable</li>
+<li><strong>DiskANN</strong>: billion-scale, single-machine, tight memory budget</li>
+<li><strong>LSH</strong> ([[minhash-lsh]]): set similarity (Jaccard), not vector L2</li>
+<li><strong>k-d tree</strong>: dimensions &lt; 20 — see [[spatial-structures]]</li>
+<li><strong>ScaNN</strong>: very-high-recall regime with anisotropic loss</li>
+</ul>
+<h2 id="tuning-guide"><a class="header" href="#tuning-guide">Tuning Guide</a></h2>
+<h3 id="recall-too-low"><a class="header" href="#recall-too-low">Recall Too Low</a></h3>
+<ol>
+<li>Increase <code>efSearch</code> (cheapest fix; per-query)</li>
+<li>Increase <code>efConstruction</code> (requires rebuild)</li>
+<li>Increase <code>M</code> (more memory, requires rebuild)</li>
+<li>Check normalization / distance metric (cosine vs IP)</li>
+<li>Inspect data: is it actually low-dim manifold? (try PCA preview)</li>
+</ol>
+<h3 id="latency-too-high"><a class="header" href="#latency-too-high">Latency Too High</a></h3>
+<ol>
+<li>Decrease <code>efSearch</code></li>
+<li>Reduce <code>k</code> (overfetch less if you can)</li>
+<li>Use scalar quantization (SQ8) — 4× memory, ~2% recall hit</li>
+<li>Use PQ on vectors (<code>HNSWPQ</code>)</li>
+<li>Pin index to NUMA-local memory</li>
+</ol>
+<h3 id="memory-too-high"><a class="header" href="#memory-too-high">Memory Too High</a></h3>
+<ol>
+<li>Decrease <code>M</code></li>
+<li>Use SQ or PQ for vectors</li>
+<li>Switch to DiskANN for cold tiers</li>
+<li>Shard across machines</li>
+</ol>
+<h3 id="build-too-slow"><a class="header" href="#build-too-slow">Build Too Slow</a></h3>
+<ol>
+<li>Decrease <code>efConstruction</code></li>
+<li>Parallel inserts (if your impl supports)</li>
+<li>Use FAISS’s <code>IndexHNSWFlat::train</code> shortcut</li>
+<li>Pre-cluster + insert in cluster order (locality-friendly)</li>
+</ol>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<ol>
+<li>
+<p><strong>Forgetting to normalize vectors for cosine similarity</strong></p>
+<ul>
+<li>Cosine ≡ inner product on unit vectors only.</li>
+<li>Compute <code>v / ‖v‖</code> once at insert time; index in IP space.</li>
+</ul>
+</li>
+<li>
+<p><strong>Using <code>efSearch &lt; k</code></strong></p>
+<ul>
+<li>Returns garbage. Must satisfy <code>efSearch ≥ k</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Setting <code>M</code> too high</strong></p>
+<ul>
+<li>Memory blows up linearly. <code>M = 64</code> is rarely better than <code>M = 32</code> and uses 2× memory.</li>
+</ul>
+</li>
+<li>
+<p><strong>Ignoring concurrent insert/search races</strong></p>
+<ul>
+<li>Searches can return stale or partial results during inserts.</li>
+<li>Use library that handles this (hnswlib, faiss) — don’t reinvent.</li>
+</ul>
+</li>
+<li>
+<p><strong>Treating deletes as cheap</strong></p>
+<ul>
+<li>Without repair, recall silently degrades as deletes accumulate.</li>
+<li>Monitor <code>deleted / total</code> and rebuild on threshold.</li>
+</ul>
+</li>
+<li>
+<p><strong>No warmup before benchmarking</strong></p>
+<ul>
+<li>First queries page in graph from disk — orders of magnitude slower.</li>
+<li>Always warm up with 1000+ queries before measuring.</li>
+</ul>
+</li>
+<li>
+<p><strong>Comparing recall across different metrics</strong></p>
+<ul>
+<li>L2 recall and IP recall on the same data are different things.</li>
+<li>Always benchmark with your <em>actual</em> metric.</li>
+</ul>
+</li>
+<li>
+<p><strong>Dimension mismatch silently works</strong></p>
+<ul>
+<li>Inserting a 768-dim vector into a 512-dim index may not error but produces garbage.</li>
+<li>Assert dimension on insert.</li>
+</ul>
+</li>
+</ol>
+<h2 id="related-topics"><a class="header" href="#related-topics">Related Topics</a></h2>
+<ul>
+<li>[[product-quantization]] — vector compression and IVF-based ANN; often combined with HNSW</li>
+<li>[[minhash-lsh]] — hash-based ANN for set similarity (Jaccard)</li>
+<li>[[spatial-structures]] — k-d trees, R-trees for low-dim spatial search</li>
+<li>[[skip-lists]] — direct conceptual ancestor of HNSW’s layered structure</li>
+<li>[[inverted-index]] — keyword search; often hybridized with HNSW for dense+sparse retrieval</li>
+</ul>
+<p>External:</p>
+<ul>
+<li><code>ai/vector_databases.md</code> — application-level view of vector DBs that use HNSW</li>
+<li><code>ai/rag.md</code> — RAG pipelines that depend on vector ANN</li>
+</ul>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>HNSW is the standard for in-memory ANN search because it hits the <strong>best recall-vs-latency tradeoff</strong> on real embeddings while supporting incremental updates. The two ideas that make it work — <strong>multi-layer hierarchy</strong> (for fast routing across the dataset) and the <strong>heuristic neighbor selection</strong> (for graph diversity that prevents greedy search from getting stuck) — are independently elegant and together produce a structure that scales to ~100M vectors per node with sub-100ms queries.</p>
+<p>For most teams building vector search in 2026, the question is not “should I use HNSW” but “which HNSW implementation matches my stack” — pgvector for Postgres shops, Lucene-HNSW for Elasticsearch shops, hnswlib/FAISS for custom serving paths, and managed services (Pinecone, Weaviate Cloud, MongoDB Atlas) for everyone else. The data structure is mature; the engineering is in the integration.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../data_structures/crdt.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../data_structures/inverted_index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../data_structures/crdt.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../data_structures/inverted_index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

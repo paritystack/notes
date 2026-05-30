@@ -1,0 +1,816 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Strongly Connected Components - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-62d4d51c.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="strongly-connected-components-articulation-points-bridges-and-2-sat"><a class="header" href="#strongly-connected-components-articulation-points-bridges-and-2-sat">Strongly Connected Components, Articulation Points, Bridges, and 2-SAT</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#eli10-explanation">ELI10 Explanation</a></li>
+<li><a href="#core-concepts">Core Concepts</a>
+<ul>
+<li><a href="#directed-vs-undirected-connectivity">Directed vs. Undirected Connectivity</a></li>
+<li><a href="#dfs-tree-anatomy">DFS Tree Anatomy</a></li>
+</ul>
+</li>
+<li><a href="#strongly-connected-components">Strongly Connected Components</a>
+<ul>
+<li><a href="#kosarajus-algorithm">Kosaraju’s Algorithm</a></li>
+<li><a href="#tarjans-scc-algorithm">Tarjan’s SCC Algorithm</a></li>
+<li><a href="#condensation-dag">Condensation DAG</a></li>
+</ul>
+</li>
+<li><a href="#articulation-points-cut-vertices">Articulation Points (Cut Vertices)</a></li>
+<li><a href="#bridges-cut-edges">Bridges (Cut Edges)</a></li>
+<li><a href="#biconnected-components">Biconnected Components</a></li>
+<li><a href="#2-sat-via-scc">2-SAT via SCC</a></li>
+<li><a href="#applications">Applications</a></li>
+<li><a href="#interview--contest-problems">Interview &amp; Contest Problems</a></li>
+<li><a href="#complexity-analysis">Complexity Analysis</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#practice-problems">Practice Problems</a></li>
+<li><a href="#additional-resources">Additional Resources</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>This note bundles <strong>connectivity in directed graphs</strong> with the closely-related concepts in undirected graphs:</p>
+<ul>
+<li><strong>Strongly Connected Components (SCCs)</strong>: maximal sets of vertices in a directed graph where every pair of vertices is mutually reachable.</li>
+<li><strong>Condensation DAG</strong>: the directed acyclic graph formed by contracting each SCC to a single node.</li>
+<li><strong>Articulation points</strong> (cut vertices) and <strong>bridges</strong> (cut edges) in an undirected graph: vertices/edges whose removal increases the number of connected components.</li>
+<li><strong>Biconnected components</strong>: maximal subgraphs with no articulation points internal to them.</li>
+<li><strong>2-SAT</strong>: a satisfiability problem on 2-clauses, solvable in linear time via the implication-graph SCC condensation.</li>
+</ul>
+<p>All of these are solved by single DFS-tree analyses in O(n + m). They appear across competitive programming, compiler dataflow analysis, network design, and constraint solving.</p>
+<p>Related notes:</p>
+<ul>
+<li>[[graph_algorithms]] — DFS, BFS, basics of graph traversal.</li>
+<li>[[union_find]] — alternative for some connectivity problems in undirected graphs.</li>
+<li>[[network_flow]] — many connectivity-related problems reduce to flow.</li>
+</ul>
+<h2 id="eli10-explanation"><a class="header" href="#eli10-explanation">ELI10 Explanation</a></h2>
+<p>Imagine a city of one-way streets. You’d like to know which intersections are “tightly connected” — meaning if you start at intersection A, you can drive to B <strong>and</strong> drive back from B to A. Such groups of intersections form <strong>strongly connected components (SCCs)</strong>.</p>
+<p>If you shrink each SCC to a single super-node and keep only the streets between super-nodes, you get a <strong>DAG</strong> (no cycles) called the <strong>condensation</strong>. The original problem on a complicated directed graph often reduces to a much simpler DAG problem on the condensation.</p>
+<p>For two-way streets (undirected), the analogous questions are about <strong>bottlenecks</strong>:</p>
+<ul>
+<li>An <strong>articulation point</strong> is an intersection that, if shut down, splits the city in two.</li>
+<li>A <strong>bridge</strong> is a road whose closure splits the city in two.</li>
+</ul>
+<p>Both are found by carefully tracking which DFS-tree edges are “essential” and which are “redundant” because back-edges provide alternative routes.</p>
+<p><strong>2-SAT</strong> is a logic puzzle: each clue says “if you choose A=true then B must be true.” Building an implication graph and finding SCCs tells you whether a consistent assignment exists.</p>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="directed-vs-undirected-connectivity"><a class="header" href="#directed-vs-undirected-connectivity">Directed vs. Undirected Connectivity</a></h3>
+<ul>
+<li><strong>Undirected</strong>: “connected” means there’s a path. Components partition the vertices uniquely.</li>
+<li><strong>Directed</strong>:
+<ul>
+<li><strong>Weakly connected</strong>: the underlying undirected graph is connected.</li>
+<li><strong>Strongly connected</strong>: every pair of vertices is mutually reachable. SCCs partition the vertices.</li>
+</ul>
+</li>
+</ul>
+<h3 id="dfs-tree-anatomy"><a class="header" href="#dfs-tree-anatomy">DFS Tree Anatomy</a></h3>
+<p>During DFS, edges fall into four categories:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Category</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Tree edges</strong></td><td><code>(u, v)</code> where <code>v</code> is first visited from <code>u</code>.</td></tr>
+<tr><td><strong>Back edges</strong></td><td><code>(u, v)</code> where <code>v</code> is an ancestor of <code>u</code> (already on the DFS stack).</td></tr>
+<tr><td><strong>Forward edges</strong></td><td><code>(u, v)</code> where <code>v</code> is a descendant of <code>u</code> but not via tree edge alone. (Only in directed graphs.)</td></tr>
+<tr><td><strong>Cross edges</strong></td><td><code>(u, v)</code> where <code>v</code> is in a different subtree. (Only in directed graphs.)</td></tr>
+</tbody>
+</table>
+</div>
+<p>Almost every algorithm in this note tracks two arrays:</p>
+<ul>
+<li><code>disc[v]</code> = DFS discovery time of <code>v</code>.</li>
+<li><code>low[v]</code> = smallest <code>disc[w]</code> reachable from <code>v</code>’s subtree via tree edges plus <strong>one</strong> back edge.</li>
+</ul>
+<p>The relationship between <code>disc[v]</code> and <code>low[v]</code> reveals articulation points, bridges, and SCC boundaries.</p>
+<h2 id="strongly-connected-components"><a class="header" href="#strongly-connected-components">Strongly Connected Components</a></h2>
+<p>Both classical algorithms run in O(n + m); pick based on style preference and the secondary structure you want.</p>
+<h3 id="kosarajus-algorithm"><a class="header" href="#kosarajus-algorithm">Kosaraju’s Algorithm</a></h3>
+<p>Two passes; conceptually simple:</p>
+<ol>
+<li>Run DFS on the graph, recording vertices in the order they <strong>finish</strong> (push to a stack).</li>
+<li>Transpose the graph (reverse every edge).</li>
+<li>Run DFS on the transpose, popping start vertices off the stack. Each tree in this DFS is one SCC.</li>
+</ol>
+<pre><code class="language-python">import sys
+sys.setrecursionlimit(300_000)
+
+
+def kosaraju(n, adj):
+    """
+    n: number of nodes (0-indexed).
+    adj: adjacency list (directed).
+    Returns (num_components, comp[]) where comp[v] is the SCC id of v.
+    SCC ids are assigned in topological order on the condensation DAG.
+    """
+    # 1) order by finish time on original graph (iterative DFS)
+    order = []
+    visited = [False] * n
+    for start in range(n):
+        if visited[start]:
+            continue
+        stack = [(start, iter(adj[start]))]
+        visited[start] = True
+        while stack:
+            u, it = stack[-1]
+            found = False
+            for v in it:
+                if not visited[v]:
+                    visited[v] = True
+                    stack.append((v, iter(adj[v])))
+                    found = True
+                    break
+            if not found:
+                order.append(u)
+                stack.pop()
+
+    # 2) build transposed graph
+    radj = [[] for _ in range(n)]
+    for u in range(n):
+        for v in adj[u]:
+            radj[v].append(u)
+
+    # 3) DFS on transpose in reverse-finish order
+    comp = [-1] * n
+    cid = 0
+    for start in reversed(order):
+        if comp[start] != -1:
+            continue
+        comp[start] = cid
+        stack = [start]
+        while stack:
+            u = stack.pop()
+            for v in radj[u]:
+                if comp[v] == -1:
+                    comp[v] = cid
+                    stack.append(v)
+        cid += 1
+    return cid, comp
+
+
+# Example
+#  0 -&gt; 1, 1 -&gt; 2, 2 -&gt; 0  (SCC {0,1,2})
+#  1 -&gt; 3, 3 -&gt; 4, 4 -&gt; 3  (SCC {3,4})
+adj = [[1], [2, 3], [0], [4], [3]]
+cnt, comp = kosaraju(5, adj)
+print(cnt)            # 2
+print(comp)           # e.g. [1, 1, 1, 0, 0]  (ids depend on order)
+</code></pre>
+<p><strong>Why it works</strong>: the finish-time ordering ensures that we visit SCCs in <strong>reverse topological order</strong> on the condensation. After transposing, descending from a vertex <code>v</code> in this order can only reach <code>v</code>’s own SCC — vertices in earlier SCCs are unreachable in the transpose because their forward edges (to <code>v</code>’s SCC) became backward edges (from <code>v</code>’s SCC).</p>
+<h3 id="tarjans-scc-algorithm"><a class="header" href="#tarjans-scc-algorithm">Tarjan’s SCC Algorithm</a></h3>
+<p>A single DFS using <code>disc[]</code>, <code>low[]</code>, and an auxiliary stack:</p>
+<pre><code class="language-python">def tarjan_scc(n, adj):
+    """
+    Tarjan's SCC algorithm, iterative to avoid Python recursion limits.
+    Returns (num_components, comp[]) with comp ids in REVERSE topological order
+    on the condensation (i.e., earlier ids are "later" in topo order).
+    """
+    disc = [-1] * n
+    low = [0] * n
+    on_stack = [False] * n
+    stack = []          # current SCC candidate stack
+    comp = [-1] * n
+    cid = 0
+    timer = 0
+
+    for start in range(n):
+        if disc[start] != -1:
+            continue
+        # iterative DFS frames: (u, iterator over adj[u])
+        frames = [(start, iter(adj[start]))]
+        disc[start] = low[start] = timer; timer += 1
+        stack.append(start); on_stack[start] = True
+
+        while frames:
+            u, it = frames[-1]
+            recurse = False
+            for v in it:
+                if disc[v] == -1:
+                    disc[v] = low[v] = timer; timer += 1
+                    stack.append(v); on_stack[v] = True
+                    frames.append((v, iter(adj[v])))
+                    recurse = True
+                    break
+                elif on_stack[v]:
+                    if disc[v] &lt; low[u]:
+                        low[u] = disc[v]
+            if recurse:
+                continue
+            # post-order for u
+            frames.pop()
+            if frames:
+                p, _ = frames[-1]
+                if low[u] &lt; low[p]:
+                    low[p] = low[u]
+            # is u the root of an SCC?
+            if low[u] == disc[u]:
+                while True:
+                    w = stack.pop()
+                    on_stack[w] = False
+                    comp[w] = cid
+                    if w == u:
+                        break
+                cid += 1
+    return cid, comp
+</code></pre>
+<p><strong>Key invariant</strong>: <code>low[u] == disc[u]</code> exactly when <code>u</code> is the <strong>root</strong> of an SCC. At that moment, every vertex pushed onto <code>stack</code> after <code>u</code> is in the same SCC as <code>u</code>, and we pop them out.</p>
+<p>Tarjan emits SCCs in <strong>reverse topological order</strong> on the condensation (the first SCC found is a sink in the condensation). Kosaraju, by contrast, emits in <strong>forward topological order</strong> (the first SCC found is a source).</p>
+<h3 id="condensation-dag"><a class="header" href="#condensation-dag">Condensation DAG</a></h3>
+<p>Once you have <code>comp[]</code>, building the condensation is trivial:</p>
+<pre><code class="language-python">def condense(adj, comp, num_sccs):
+    """Return adjacency list of the condensation DAG (no duplicate edges, no self-loops)."""
+    out = [set() for _ in range(num_sccs)]
+    for u, nbrs in enumerate(adj):
+        cu = comp[u]
+        for v in nbrs:
+            cv = comp[v]
+            if cu != cv:
+                out[cu].add(cv)
+    return [list(s) for s in out]
+</code></pre>
+<p>Once condensed:</p>
+<ul>
+<li><strong>Number of components</strong>: <code>num_sccs</code>.</li>
+<li><strong>Longest path</strong> = longest path in DAG (DP in O(n + m)).</li>
+<li><strong>Min edges to add to make the whole graph strongly connected</strong>: <code>max(sources, sinks)</code> if there’s more than one SCC, else 0. (Sources = SCCs with in-degree 0; sinks = SCCs with out-degree 0.)</li>
+<li><strong>Topological order</strong>: trivial because Tarjan/Kosaraju already produce it.</li>
+</ul>
+<h2 id="articulation-points-cut-vertices"><a class="header" href="#articulation-points-cut-vertices">Articulation Points (Cut Vertices)</a></h2>
+<p>In an <strong>undirected</strong> graph, a vertex <code>v</code> is an articulation point if removing it (and its incident edges) increases the number of connected components.</p>
+<p>DFS rule:</p>
+<ul>
+<li><strong>Root</strong>: articulation iff it has ≥ 2 tree-children.</li>
+<li><strong>Non-root</strong>: articulation iff it has some tree-child <code>c</code> with <code>low[c] &gt;= disc[v]</code> (no back-edge from <code>c</code>’s subtree skips above <code>v</code>).</li>
+</ul>
+<pre><code class="language-python">def articulation_points(n, adj):
+    """
+    Returns the set of articulation points in an undirected graph.
+    """
+    disc = [-1] * n
+    low = [0] * n
+    is_ap = [False] * n
+    timer = 0
+
+    for root in range(n):
+        if disc[root] != -1:
+            continue
+        # iterative DFS
+        parent = [-1] * n
+        children = [0] * n
+        stack = [(root, iter(adj[root]))]
+        disc[root] = low[root] = timer; timer += 1
+        while stack:
+            u, it = stack[-1]
+            recurse = False
+            for v in it:
+                if disc[v] == -1:
+                    parent[v] = u
+                    children[u] += 1
+                    disc[v] = low[v] = timer; timer += 1
+                    stack.append((v, iter(adj[v])))
+                    recurse = True
+                    break
+                elif v != parent[u]:
+                    if disc[v] &lt; low[u]:
+                        low[u] = disc[v]
+            if recurse:
+                continue
+            stack.pop()
+            if stack:
+                p, _ = stack[-1]
+                if low[u] &lt; low[p]:
+                    low[p] = low[u]
+                if parent[p] != -1 and low[u] &gt;= disc[p]:
+                    is_ap[p] = True
+        if children[root] &gt;= 2:
+            is_ap[root] = True
+    return [v for v in range(n) if is_ap[v]]
+</code></pre>
+<p><strong>Edge case</strong>: in an undirected graph, if a parent and child are connected by <strong>multiple edges</strong>, the back-edge logic must distinguish “different edge to parent” from “same edge as parent.” A clean way is to track <strong>edge ids</strong> rather than vertex ids when comparing against the parent.</p>
+<h2 id="bridges-cut-edges"><a class="header" href="#bridges-cut-edges">Bridges (Cut Edges)</a></h2>
+<p>A bridge is an edge <code>(u, v)</code> whose removal disconnects the graph.</p>
+<p>DFS rule: edge <code>(u, v)</code> (where <code>v</code> is a tree-child of <code>u</code>) is a bridge iff <code>low[v] &gt; disc[u]</code>.</p>
+<pre><code class="language-python">def bridges(n, edges):
+    """
+    Returns list of bridge edges as (u, v) pairs.
+    edges: list of (u, v) undirected edges (may include duplicates).
+    """
+    adj = [[] for _ in range(n)]
+    for i, (u, v) in enumerate(edges):
+        adj[u].append((v, i))
+        adj[v].append((u, i))
+
+    disc = [-1] * n
+    low = [0] * n
+    timer = 0
+    bridge_ids = []
+
+    for root in range(n):
+        if disc[root] != -1:
+            continue
+        disc[root] = low[root] = timer; timer += 1
+        stack = [(root, -1, iter(adj[root]))]
+        while stack:
+            u, parent_edge, it = stack[-1]
+            recurse = False
+            for v, eid in it:
+                if eid == parent_edge:
+                    continue  # skip the edge we came in on
+                if disc[v] == -1:
+                    disc[v] = low[v] = timer; timer += 1
+                    stack.append((v, eid, iter(adj[v])))
+                    recurse = True
+                    break
+                else:
+                    if disc[v] &lt; low[u]:
+                        low[u] = disc[v]
+            if recurse:
+                continue
+            stack.pop()
+            if stack:
+                p, _, _ = stack[-1]
+                if low[u] &gt; disc[p]:
+                    bridge_ids.append((p, u))
+                if low[u] &lt; low[p]:
+                    low[p] = low[u]
+    return bridge_ids
+</code></pre>
+<p><strong>Why <code>disc[v]</code> (not <code>low[v]</code>) on a back edge?</strong> Using <code>low[v]</code> for back edges would incorrectly propagate over re-entry into the subtree and miss bridges. The convention “tree edges: <code>low[u] = min(low[u], low[v])</code>; back edges: <code>low[u] = min(low[u], disc[v])</code>” is universal.</p>
+<h2 id="biconnected-components"><a class="header" href="#biconnected-components">Biconnected Components</a></h2>
+<p>A <strong>biconnected component (BCC)</strong> of an undirected graph is a maximal subgraph that remains connected after the removal of any single vertex. Equivalently: a maximal set of edges with no internal articulation points. BCCs partition the <strong>edges</strong> (not vertices — articulation points belong to multiple BCCs).</p>
+<p>Algorithm: same DFS as for articulation points, plus an auxiliary edge stack. When you detect an articulation, pop edges off the stack until you pop the tree-edge <code>(p, u)</code>. That popped set is one BCC.</p>
+<pre><code class="language-python">def biconnected_components(n, edges):
+    """
+    Return list of BCCs; each BCC is a list of edge ids.
+    """
+    adj = [[] for _ in range(n)]
+    for i, (u, v) in enumerate(edges):
+        adj[u].append((v, i))
+        adj[v].append((u, i))
+
+    disc = [-1] * n
+    low = [0] * n
+    timer = 0
+    edge_stack = []
+    bccs = []
+
+    for root in range(n):
+        if disc[root] != -1:
+            continue
+        disc[root] = low[root] = timer; timer += 1
+        stack = [(root, -1, iter(adj[root]))]
+        while stack:
+            u, parent_edge, it = stack[-1]
+            recurse = False
+            for v, eid in it:
+                if eid == parent_edge:
+                    continue
+                if disc[v] == -1:
+                    disc[v] = low[v] = timer; timer += 1
+                    edge_stack.append(eid)
+                    stack.append((v, eid, iter(adj[v])))
+                    recurse = True
+                    break
+                elif disc[v] &lt; disc[u]:
+                    # back edge going up
+                    edge_stack.append(eid)
+                    if disc[v] &lt; low[u]:
+                        low[u] = disc[v]
+            if recurse:
+                continue
+            stack.pop()
+            if stack:
+                p, _, _ = stack[-1]
+                if low[u] &gt;= disc[p]:
+                    # pop edges up to and including tree edge (p, u)
+                    comp_edges = []
+                    while edge_stack:
+                        e = edge_stack.pop()
+                        comp_edges.append(e)
+                        # find the tree edge into u; it's the last one pushed
+                        # before recursing into u
+                        if e == parent_edge_of(u):
+                            break
+                    # NOTE: in the iterative form, we track parent_edge per
+                    # frame so we can compare here. The cleanest implementation
+                    # stashes that tree edge id in the frame itself.
+                    bccs.append(comp_edges)
+                if low[u] &lt; low[p]:
+                    low[p] = low[u]
+    return bccs
+</code></pre>
+<p>The pseudocode above keeps the algorithm visible; in production you’d inline the parent-edge tracking and avoid the helper. For undirected BCC code that’s well-tested, see CP-Algorithms.</p>
+<p>The <strong>block-cut tree</strong> built from BCCs and articulation points is a powerful auxiliary structure for tree-DP-like problems on general undirected graphs.</p>
+<h2 id="2-sat-via-scc"><a class="header" href="#2-sat-via-scc">2-SAT via SCC</a></h2>
+<p><strong>2-SAT</strong>: given <code>n</code> boolean variables and <code>m</code> clauses each of the form <code>(a ∨ b)</code> (literals), decide satisfiability.</p>
+<p><strong>Implication graph</strong>: each clause <code>(a ∨ b)</code> is equivalent to two implications <code>¬a → b</code> and <code>¬b → a</code>. Build a directed graph on <code>2n</code> nodes (one per literal: <code>x_i</code> at index <code>2i</code>, <code>¬x_i</code> at index <code>2i + 1</code>) and add both implications.</p>
+<p><strong>Theorem</strong>: the formula is satisfiable iff no SCC contains both <code>x</code> and <code>¬x</code>.</p>
+<p><strong>Witness</strong>: after computing SCCs in <strong>reverse topological order</strong> (which Tarjan gives natively), assign each variable to the literal whose SCC appears <strong>later</strong> in the order:</p>
+<ul>
+<li>If <code>comp[x_i] &gt; comp[¬x_i]</code>, assign <code>x_i = true</code>; otherwise <code>false</code>.</li>
+</ul>
+<pre><code class="language-python">class TwoSAT:
+    """
+    2-SAT solver via implication graph + Tarjan's SCC.
+    Variables are 0..n-1.
+    Literal encoding: 2*i = x_i,  2*i + 1 = ¬x_i.
+    """
+
+    def __init__(self, n):
+        self.n = n
+        self.adj = [[] for _ in range(2 * n)]
+
+    def _lit(self, var, value):
+        return 2 * var + (0 if value else 1)
+
+    def add_clause(self, var_a, val_a, var_b, val_b):
+        """Add (lit_a OR lit_b)."""
+        a = self._lit(var_a, val_a)
+        b = self._lit(var_b, val_b)
+        # ¬a → b
+        self.adj[a ^ 1].append(b)
+        # ¬b → a
+        self.adj[b ^ 1].append(a)
+
+    def add_implication(self, var_a, val_a, var_b, val_b):
+        """Add (lit_a → lit_b)."""
+        a = self._lit(var_a, val_a)
+        b = self._lit(var_b, val_b)
+        self.adj[a].append(b)
+        # contrapositive
+        self.adj[b ^ 1].append(a ^ 1)
+
+    def force(self, var, val):
+        """Force variable to a value: add clause (lit OR lit)."""
+        self.add_clause(var, val, var, val)
+
+    def solve(self):
+        num_scc, comp = tarjan_scc(2 * self.n, self.adj)
+        assignment = [False] * self.n
+        for i in range(self.n):
+            if comp[2 * i] == comp[2 * i + 1]:
+                return None  # unsatisfiable
+            # Tarjan gives SCC ids in REVERSE topological order:
+            # smaller id = "later" in topo. The literal whose SCC has a SMALLER
+            # id is the one to set true.
+            assignment[i] = comp[2 * i] &lt; comp[2 * i + 1]
+        return assignment
+
+
+# Example: variables x0, x1, x2
+# Clauses: (x0 OR x1), (¬x0 OR x2), (¬x1 OR ¬x2)
+s = TwoSAT(3)
+s.add_clause(0, True,  1, True)
+s.add_clause(0, False, 2, True)
+s.add_clause(1, False, 2, False)
+print(s.solve())  # one valid assignment, e.g. [True, False, True]
+</code></pre>
+<p><strong>Note on the comparison</strong>: the exact direction (<code>&lt;</code> vs <code>&gt;</code>) depends on which SCC numbering convention you use. In the Tarjan implementation above, SCCs are emitted in reverse topological order, so smaller comp id = later in topo, so we pick the literal with smaller comp id. Test on a known-satisfiable instance to confirm direction.</p>
+<h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Problem</th><th>Approach</th></tr>
+</thead>
+<tbody>
+<tr><td>Number of SCCs</td><td>Kosaraju or Tarjan</td></tr>
+<tr><td>Topological sort of condensation</td><td>SCC algorithm output is already in order</td></tr>
+<tr><td>Min edges to make graph strongly connected</td><td><code>max(num_sources, num_sinks)</code> of condensation (or 0 if it’s a single SCC)</td></tr>
+<tr><td>“Mother vertex” / “vertex reaching all others”</td><td>Last finished vertex in DFS; check it actually reaches all</td></tr>
+<tr><td>Functional graph cycle detection</td><td>Each node has one out-edge; SCC = cycle + in-trees</td></tr>
+<tr><td>Constraint propagation</td><td>2-SAT on Horn-like clauses</td></tr>
+<tr><td>Find all bridges</td><td>DFS with low link</td></tr>
+<tr><td>Find all articulation points</td><td>DFS with low link</td></tr>
+<tr><td>Block-cut tree (BCC)</td><td>DFS with edge stack</td></tr>
+<tr><td>Reachability between fixed pairs (small set)</td><td>Compute SCCs, then DAG reachability via bit DP</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="interview--contest-problems"><a class="header" href="#interview--contest-problems">Interview &amp; Contest Problems</a></h2>
+<p><strong>LeetCode</strong></p>
+<ul>
+<li>
+<ol start="1192">
+<li>Critical Connections in a Network (bridges)</li>
+</ol>
+</li>
+<li>
+<ol start="1568">
+<li>Minimum Number of Days to Disconnect Island (articulation-flavored)</li>
+</ol>
+</li>
+<li>
+<ol start="2360">
+<li>Longest Cycle in a Graph (functional graph SCC)</li>
+</ol>
+</li>
+<li>1192 variants for cut-vertex problems</li>
+<li>
+<ol start="802">
+<li>Find Eventual Safe States (reverse-graph + topo on condensation)</li>
+</ol>
+</li>
+</ul>
+<p><strong>Competitive</strong></p>
+<ul>
+<li>Codeforces 999E “Reachability from the Capital” (sources in condensation)</li>
+<li>Codeforces 22E “Scheme” (min edges for strongly connected)</li>
+<li>Codeforces 427C “Checkposts” (min cost + count over SCCs)</li>
+<li>Codeforces 1239D “Catowice City” (2-SAT)</li>
+<li>Codeforces 776D “The Door Problem” (2-SAT)</li>
+<li>SPOJ TOUR (2-SAT)</li>
+<li>CSES “Planets and Kingdoms” (SCCs), “Coin Collector” (DAG longest path on condensation)</li>
+<li>Library Checker: “Strongly Connected Components,” “Two SAT,” “Biconnected Components”</li>
+</ul>
+<h2 id="complexity-analysis"><a class="header" href="#complexity-analysis">Complexity Analysis</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Algorithm</th><th>Time</th><th>Space</th></tr>
+</thead>
+<tbody>
+<tr><td>Kosaraju</td><td>O(n + m)</td><td>O(n + m) (transpose graph)</td></tr>
+<tr><td>Tarjan SCC</td><td>O(n + m)</td><td>O(n)</td></tr>
+<tr><td>Articulation points / bridges</td><td>O(n + m)</td><td>O(n)</td></tr>
+<tr><td>Biconnected components</td><td>O(n + m)</td><td>O(n + m) (edge stack)</td></tr>
+<tr><td>2-SAT (Tarjan-based)</td><td>O(n + m) (n = variables, m = clauses)</td><td>O(n + m)</td></tr>
+</tbody>
+</table>
+</div>
+<p>For huge n in Python (10^6+), the iterative form is essential. The Tarjan and bridge implementations above keep an explicit DFS stack with per-frame iterators, which avoids the ~1000-deep CPython recursion limit.</p>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<ol>
+<li><strong>Recursion depth in Python.</strong> Always use iterative DFS for n &gt; ~5000.</li>
+<li><strong>Back edge vs. parent edge in undirected DFS.</strong> If you only track parent <strong>vertex</strong>, multi-edges between <code>u</code> and <code>parent(u)</code> get misclassified. Track parent <strong>edge id</strong> instead.</li>
+<li><strong>Wrong update for back edge.</strong> Use <code>low[u] = min(low[u], disc[v])</code> for back edges, NOT <code>low[v]</code>. Using <code>low[v]</code> is a subtle bug that hides bridges.</li>
+<li><strong><code>&gt;=</code> vs. <code>&gt;</code> for articulation/bridge condition.</strong> Articulation: <code>low[child] &gt;= disc[u]</code>. Bridge: <code>low[child] &gt; disc[u]</code>. Don’t swap these.</li>
+<li><strong>Root articulation check.</strong> The root is an articulation iff it has at least <strong>two</strong> tree children. A normal <code>low/disc</code> check doesn’t detect the root.</li>
+<li><strong>SCC order convention.</strong> Tarjan emits SCCs in <strong>reverse</strong> topological order; Kosaraju in <strong>forward</strong> topological order. Always check before using SCC ids as topo positions.</li>
+<li><strong>2-SAT direction.</strong> Match the assignment rule to your SCC-ordering convention. If you mix Tarjan’s “comp ids reverse topo” with the wrong inequality, your solver silently emits unsatisfying assignments.</li>
+<li><strong>Forgetting self-loops and multi-edges.</strong> Tarjan handles them but the bridge/articulation logic on undirected graphs is sensitive. A self-loop is never a bridge.</li>
+<li><strong>Disconnected graphs.</strong> Wrap your DFS in a loop over all start vertices.</li>
+<li><strong>Forgetting to handle isolated vertices in BCC.</strong> A vertex with no incident edges forms its own (degenerate) BCC.</li>
+</ol>
+<h2 id="practice-problems"><a class="header" href="#practice-problems">Practice Problems</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Source</th><th>Problem</th></tr>
+</thead>
+<tbody>
+<tr><td>CSES</td><td>Planets and Kingdoms (SCC), Strongly Connected Edges, Coin Collector (condensation DP), Giant Pizza (2-SAT)</td></tr>
+<tr><td>LeetCode</td><td>1192, 1568, 802, 2360</td></tr>
+<tr><td>Codeforces</td><td>22E, 427C, 999E, 1239D, 776D, 1213F</td></tr>
+<tr><td>SPOJ</td><td>TOUR, ARRPRM (2-SAT), SUBMERGE (BCC), EC_P (bridges)</td></tr>
+<tr><td>Library Checker</td><td>Strongly Connected Components, Two SAT, Biconnected Components, Articulation Points</td></tr>
+<tr><td>AtCoder</td><td>ABC 245 F (SCC + DP), ABC 357 E (functional graph SCC)</td></tr>
+<tr><td>UVa</td><td>11838 “Come and Go” (SCC), 315 “Network” (articulation)</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="additional-resources"><a class="header" href="#additional-resources">Additional Resources</a></h2>
+<ul>
+<li>CP-Algorithms: “Strongly Connected Components” (Tarjan &amp; Kosaraju), “Cut Vertices and Bridges,” “2-SAT” articles.</li>
+<li>Tarjan’s original 1972 paper “Depth-first search and linear graph algorithms.”</li>
+<li>“Competitive Programming 4” by Halim &amp; Halim — graph chapter on connectivity.</li>
+<li>Aspvall, Plass, Tarjan 1979: “A linear-time algorithm for testing the truth of certain quantified boolean formulas” (the original 2-SAT-via-SCC paper).</li>
+<li>Errichto’s YouTube series on SCC and 2-SAT.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../algorithms/sparse_table.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../networking/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../algorithms/sparse_table.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../networking/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

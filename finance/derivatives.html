@@ -15,8 +15,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-aafba5d1.js";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f4c5bb4e.js"></script>
+        <script src="../toc-62d4d51c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,68 +178,531 @@
                     <main>
                         <h1 id="derivatives"><a class="header" href="#derivatives">Derivatives</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>Derivatives are financial contracts whose value derives from an underlying asset. Beyond options and futures (covered in separate guides), this document covers swaps, forwards, and exotic derivatives.</p>
-<h2 id="types-of-derivatives"><a class="header" href="#types-of-derivatives">Types of Derivatives</a></h2>
-<h3 id="swaps"><a class="header" href="#swaps">Swaps</a></h3>
+<p>A derivative is a financial contract whose value is <em>derived</em> from an underlying — a stock, bond, rate, currency, commodity, index, or even another derivative. Derivatives are among the most powerful instruments in finance: they let you hedge precise risks, gain leveraged exposure, replicate payoffs that don’t exist as cash instruments, and arbitrage between markets. They also concentrate risk in ways that have produced the largest blowups in history (LTCM 1998, AIG 2008, Archegos 2021).</p>
+<p>The global notional value of outstanding OTC derivatives is over $700 trillion. Most of this is interest rate swaps. Options and futures are covered in dedicated guides ([[options]], [[futures]]); this file focuses on swaps, forwards, exotics, and the structural concepts that tie all derivatives together.</p>
+<h2 id="the-two-big-categories"><a class="header" href="#the-two-big-categories">The Two Big Categories</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Category</th><th>Examples</th><th>Venue</th><th>Counterparty Risk</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Exchange-traded</strong></td><td>Futures, listed options</td><td>CME, ICE, CBOE</td><td>Cleared by exchange</td></tr>
+<tr><td><strong>OTC (Over-the-Counter)</strong></td><td>Swaps, forwards, exotics</td><td>Bilateral</td><td>Direct (unless cleared)</td></tr>
+</tbody>
+</table>
+</div>
+<p>Post-2008 regulation (Dodd-Frank, EMIR) pushed most standardized OTC derivatives into central clearing. Bespoke and exotic deals remain bilateral.</p>
+<h2 id="forwards"><a class="header" href="#forwards">Forwards</a></h2>
+<h3 id="what-they-are"><a class="header" href="#what-they-are">What They Are</a></h3>
+<p>A forward is a private contract to buy or sell an asset at a future date for a price agreed today. The simplest derivative.</p>
 <ul>
-<li><strong>Interest Rate Swaps</strong>: Exchange fixed for floating rates</li>
-<li><strong>Currency Swaps</strong>: Exchange cash flows in different currencies</li>
-<li><strong>Commodity Swaps</strong>: Lock in commodity prices</li>
-<li><strong>Credit Default Swaps (CDS)</strong>: Insurance against default</li>
+<li><strong>Buyer (long)</strong>: agrees to buy at strike K</li>
+<li><strong>Seller (short)</strong>: agrees to sell at strike K</li>
+<li><strong>Payoff at maturity</strong> = S_T − K (long) or K − S_T (short)</li>
+<li>No cash changes hands at inception (usually)</li>
+<li>Settled at maturity (physical delivery or cash)</li>
 </ul>
-<h3 id="forwards"><a class="header" href="#forwards">Forwards</a></h3>
+<h3 id="forward-vs-futures"><a class="header" href="#forward-vs-futures">Forward vs. Futures</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th>Forward</th><th>Future</th></tr>
+</thead>
+<tbody>
+<tr><td>Trading venue</td><td>OTC</td><td>Exchange</td></tr>
+<tr><td>Customization</td><td>Full</td><td>Standardized</td></tr>
+<tr><td>Settlement</td><td>Maturity only</td><td>Daily mark-to-market</td></tr>
+<tr><td>Counterparty</td><td>Bilateral</td><td>Clearinghouse</td></tr>
+<tr><td>Margin</td><td>Negotiated/none</td><td>Required, daily</td></tr>
+<tr><td>Liquidity</td><td>Lower</td><td>Higher</td></tr>
+</tbody>
+</table>
+</div>
+<p>For deep coverage of futures, see [[futures]].</p>
+<h3 id="forward-pricing-cost-of-carry"><a class="header" href="#forward-pricing-cost-of-carry">Forward Pricing (Cost-of-Carry)</a></h3>
+<p>The no-arbitrage forward price for an asset paying no income:</p>
+<pre><code>F = S × e^(r × T)
+</code></pre>
+<p>For an asset with continuous yield <code>q</code> (e.g., dividend yield, foreign rate):</p>
+<pre><code>F = S × e^((r − q) × T)
+</code></pre>
+<p>For an asset with storage costs <code>u</code> minus convenience yield <code>y</code>:</p>
+<pre><code>F = S × e^((r + u − y) × T)
+</code></pre>
+<pre><code class="language-python">import math
+
+def forward_price(spot, risk_free_rate, time_to_maturity, dividend_yield=0,
+                  storage_cost=0, convenience_yield=0):
+    """
+    Generic cost-of-carry forward price (continuous compounding).
+    """
+    carry = risk_free_rate - dividend_yield + storage_cost - convenience_yield
+    return spot * math.exp(carry * time_to_maturity)
+
+def forward_value(current_forward_price, original_forward_price,
+                  risk_free_rate, time_to_maturity):
+    """PV of an existing forward contract (long position)."""
+    return (current_forward_price - original_forward_price) * \
+           math.exp(-risk_free_rate * time_to_maturity)
+</code></pre>
+<h3 id="fx-forwards-covered-interest-parity"><a class="header" href="#fx-forwards-covered-interest-parity">FX Forwards (Covered Interest Parity)</a></h3>
+<p>For FX, the forward price is set by interest-rate differentials:</p>
+<pre><code>F = S × (1 + r_domestic × T) / (1 + r_foreign × T)
+</code></pre>
+<p>This is <strong>covered interest parity (CIP)</strong>. When CIP breaks (it has, notably 2008 and 2020), arbitrageurs profit until balance restores. See [[forex]] for currency mechanics.</p>
+<pre><code class="language-python">def fx_forward(spot_fx, r_domestic, r_foreign, time_to_maturity):
+    """FX forward via covered interest parity (annualized rates)."""
+    return spot_fx * (1 + r_domestic * time_to_maturity) / \
+                     (1 + r_foreign * time_to_maturity)
+</code></pre>
+<h3 id="forward-rate-agreements-fras"><a class="header" href="#forward-rate-agreements-fras">Forward Rate Agreements (FRAs)</a></h3>
+<p>A forward on an interest rate. Buyer locks a future borrowing rate; seller locks a lending rate.</p>
 <ul>
-<li><strong>Forward Contracts</strong>: Like futures but OTC, customized</li>
-<li><strong>FX Forwards</strong>: Currency hedging</li>
-<li><strong>Forward Rate Agreements (FRA)</strong>: Interest rate hedging</li>
+<li>Notional: $10M</li>
+<li>Period: 3-month rate starting in 6 months (“6×9 FRA”)</li>
+<li>Strike: 4.5%</li>
+<li>Reference rate at settlement: SOFR fixing</li>
 </ul>
-<h3 id="exotic-options"><a class="header" href="#exotic-options">Exotic Options</a></h3>
+<p>If actual 3-month rate at settlement is 5.0%:</p>
 <ul>
-<li><strong>Barrier Options</strong>: Activated/deactivated at price levels</li>
-<li><strong>Asian Options</strong>: Payout based on average price</li>
-<li><strong>Binary Options</strong>: All-or-nothing payout</li>
-<li><strong>Lookback Options</strong>: Based on maximum/minimum price</li>
+<li>Buyer (long, locked in 4.5%) wins: receives 50bp × $10M × 90/360 = $12,500</li>
 </ul>
-<h2 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h2>
-<h3 id="hedging"><a class="header" href="#hedging">Hedging</a></h3>
+<p>FRAs are settled at the <strong>start</strong> of the period (discounted for the term).</p>
+<pre><code class="language-python">def fra_payoff(notional, fixed_rate, floating_rate, day_count_frac):
+    """Settled at start of period, present-valued back."""
+    interest_diff = (floating_rate - fixed_rate) * day_count_frac * notional
+    pv_factor = 1 / (1 + floating_rate * day_count_frac)
+    return interest_diff * pv_factor
+</code></pre>
+<h2 id="swaps"><a class="header" href="#swaps">Swaps</a></h2>
+<p>A swap is a series of exchanges of cash flows between two parties over time. Mechanically, a strip of forwards.</p>
+<h3 id="interest-rate-swap-irs"><a class="header" href="#interest-rate-swap-irs">Interest Rate Swap (IRS)</a></h3>
+<p>The most important derivative on Earth — $300T+ notional outstanding.</p>
+<p><strong>Plain vanilla IRS</strong>:</p>
 <ul>
-<li><strong>Interest Rate Risk</strong>: Swap fixed for floating</li>
-<li><strong>Currency Risk</strong>: Forward contracts</li>
-<li><strong>Commodity Price Risk</strong>: Commodity swaps</li>
-<li><strong>Credit Risk</strong>: Credit default swaps</li>
+<li>Party A pays fixed rate (e.g., 4.5%)</li>
+<li>Party B pays floating rate (e.g., SOFR + 10bp)</li>
+<li>Notional never exchanged — just net cash flows</li>
+<li>Standard tenors: 2, 5, 10, 30 years</li>
 </ul>
-<h3 id="speculation"><a class="header" href="#speculation">Speculation</a></h3>
+<h4 id="mechanics"><a class="header" href="#mechanics">Mechanics</a></h4>
+<pre><code>Notional: $100M
+Tenor: 5 years
+Fixed leg: 4.50% semi-annual
+Floating leg: SOFR quarterly
+
+Every 6 months:
+  Fixed pays: $100M × 4.50% / 2 = $2.25M
+Every 3 months:
+  Float pays: $100M × SOFR × 0.25
+  
+Net = exchange (netted to single payment)
+</code></pre>
+<h4 id="why-use-irs"><a class="header" href="#why-use-irs">Why Use IRS</a></h4>
 <ul>
-<li><strong>Leverage</strong>: Control large positions with small capital</li>
-<li><strong>Directional Bets</strong>: Options, futures</li>
-<li><strong>Volatility Trading</strong>: Straddles, strangles</li>
-<li><strong>Arbitrage</strong>: Exploit price inefficiencies</li>
+<li><strong>Liability management</strong>: corporation issued fixed bonds, wants floating exposure → “pay floating / receive fixed”</li>
+<li><strong>Asset management</strong>: bank receiving floating loan income, wants stable revenue → “pay floating / receive fixed”</li>
+<li><strong>Speculation</strong>: betting rates rise → “pay fixed / receive floating”</li>
+<li><strong>Hedge bond portfolio duration</strong>: shorter or longer duration via swaps without selling bonds</li>
 </ul>
-<h3 id="income-generation"><a class="header" href="#income-generation">Income Generation</a></h3>
+<h4 id="pricing"><a class="header" href="#pricing">Pricing</a></h4>
+<p>The fair swap rate makes the PV of fixed leg equal PV of expected floating leg. Built from the swap curve (bootstrapped from observed swap rates).</p>
+<pre><code class="language-python">def swap_pv_fixed_leg(notional, fixed_rate, year_fractions, discount_factors):
+    """PV of fixed leg cash flows."""
+    return sum(notional * fixed_rate * yf * df
+               for yf, df in zip(year_fractions, discount_factors))
+
+def swap_par_rate(notional, year_fractions, discount_factors,
+                   forward_rates):
+    """
+    Par swap rate: makes both legs PV equal.
+    """
+    pv_float = sum(notional * fr * yf * df
+                   for fr, yf, df in zip(forward_rates, year_fractions,
+                                          discount_factors))
+    annuity = sum(yf * df for yf, df in zip(year_fractions, discount_factors))
+    return pv_float / (notional * annuity)
+</code></pre>
+<h4 id="risks"><a class="header" href="#risks">Risks</a></h4>
 <ul>
-<li><strong>Covered Calls</strong>: Sell calls on owned stock</li>
-<li><strong>Cash-Secured Puts</strong>: Sell puts, willing to buy</li>
-<li><strong>Iron Condors</strong>: Sell spreads for credit</li>
+<li><strong>Rate risk</strong> — duration-equivalent exposure</li>
+<li><strong>Counterparty risk</strong> — historically the major concern; now mitigated by clearing</li>
+<li><strong>Basis risk</strong> — when floating reference doesn’t match underlying exposure</li>
+<li><strong>Curve risk</strong> — different points of curve move differently</li>
 </ul>
-<h2 id="risks"><a class="header" href="#risks">Risks</a></h2>
+<h3 id="currency-swap-xcs--cross-currency-swap"><a class="header" href="#currency-swap-xcs--cross-currency-swap">Currency Swap (XCS / Cross-Currency Swap)</a></h3>
+<p>Exchange principal + interest in different currencies. Unlike IRS, principal IS exchanged at start and end.</p>
+<pre><code>Day 0: 
+  Party A gives $100M USD to Party B
+  Party B gives €90M EUR to Party A
+  
+Quarterly:
+  A pays B EUR interest on €90M
+  B pays A USD interest on $100M
+  
+Maturity:
+  A returns €90M to B
+  B returns $100M to A
+</code></pre>
+<h4 id="use-cases"><a class="header" href="#use-cases">Use Cases</a></h4>
+<ul>
+<li>Foreign company issues USD bonds → swap proceeds + payments back to home currency</li>
+<li>Bank wants synthetic foreign-currency funding</li>
+<li>Hedging multi-year FX exposure</li>
+</ul>
+<h3 id="equity-swap--total-return-swap-trs"><a class="header" href="#equity-swap--total-return-swap-trs">Equity Swap / Total Return Swap (TRS)</a></h3>
+<p>Exchange equity return for a financing rate.</p>
+<pre><code>Party A pays SOFR + spread
+Party B pays total return on equity (price + dividends)
+</code></pre>
+<h4 id="why-used"><a class="header" href="#why-used">Why Used</a></h4>
+<ul>
+<li><strong>Hidden long exposure</strong> — don’t appear on 13F (Archegos)</li>
+<li><strong>Tax-efficient ownership</strong> transfer</li>
+<li><strong>Avoid disclosure thresholds</strong> (HSR, 5% owner)</li>
+<li><strong>Leverage</strong> — much higher than prime brokerage margin</li>
+<li><strong>Short access</strong> — synthetic shorts on hard-to-borrow names</li>
+</ul>
+<h4 id="archegos-blowup-2021"><a class="header" href="#archegos-blowup-2021">Archegos Blowup (2021)</a></h4>
+<p>Bill Hwang’s family office held ~$100B notional through TRS at multiple prime brokers. None saw the aggregate exposure. When ViacomCBS, Discovery, and Chinese tech stocks fell, margin calls cascaded. Credit Suisse alone lost $5.5B; Nomura ~$3B. Largest single-counterparty loss for a prime broker since LTCM.</p>
+<h3 id="commodity-swap"><a class="header" href="#commodity-swap">Commodity Swap</a></h3>
+<p>Exchange floating commodity price for fixed price, cash-settled.</p>
+<pre><code>Airline hedges jet fuel:
+  Pays fixed $90/bbl
+  Receives floating spot price
+  
+If spot averages $110: airline receives $20/bbl × notional
+</code></pre>
+<p>Used heavily by airlines, utilities, shipping, energy producers.</p>
+<h3 id="variance-swap-and-volatility-swap"><a class="header" href="#variance-swap-and-volatility-swap">Variance Swap and Volatility Swap</a></h3>
+<p>Pure exposure to realized volatility.</p>
+<pre><code>Variance swap payoff = (Realized Variance − Strike Variance) × Vega Notional
+
+Volatility swap payoff = (Realized Vol − Strike Vol) × Vega Notional
+</code></pre>
+<p>Used by:</p>
+<ul>
+<li>Hedging vol exposure precisely</li>
+<li>Speculating on volatility levels</li>
+<li>Trading the variance risk premium (see [[volatility_trading]])</li>
+</ul>
+<p>Variance swaps were popular pre-2008 but never recovered to their previous size. VIX futures filled much of the demand.</p>
+<h3 id="credit-default-swap-cds"><a class="header" href="#credit-default-swap-cds">Credit Default Swap (CDS)</a></h3>
+<p>Insurance against default. Covered in depth in [[credit_markets]].</p>
+<ul>
+<li><strong>Buyer of protection</strong>: pays premium, gets paid if default</li>
+<li><strong>Seller of protection</strong>: collects premium, pays out on default</li>
+<li><strong>Reference entity</strong>: company/sovereign being insured</li>
+<li><strong>Trigger events</strong>: bankruptcy, failure to pay, restructuring</li>
+</ul>
+<p>CDS spreads are often the cleanest market signal of credit risk — more liquid than the underlying bonds for many large issuers.</p>
+<h3 id="inflation-swap"><a class="header" href="#inflation-swap">Inflation Swap</a></h3>
+<p>Exchange fixed rate for realized inflation (CPI year-over-year). Used by pension funds, insurers, sovereigns to hedge real liabilities.</p>
+<p>The market-implied breakeven inflation = fixed rate side. Track this for inflation expectations — equivalent to the TIPS breakeven, but cleaner. See [[interest_rates]].</p>
+<h2 id="exotic-options"><a class="header" href="#exotic-options">Exotic Options</a></h2>
+<p>Beyond plain vanilla calls and puts ([[options]]), exotic options have non-standard payoffs.</p>
+<h3 id="barrier-options"><a class="header" href="#barrier-options">Barrier Options</a></h3>
+<p>Activated or deactivated when underlying crosses a barrier level.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Type</th><th>Behavior</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Up-and-in</strong></td><td>Call/put that activates when price rises above barrier</td></tr>
+<tr><td><strong>Up-and-out</strong></td><td>Knocks out (becomes worthless) when price rises above barrier</td></tr>
+<tr><td><strong>Down-and-in</strong></td><td>Activates on price falling below barrier</td></tr>
+<tr><td><strong>Down-and-out</strong></td><td>Knocks out when price falls below barrier</td></tr>
+</tbody>
+</table>
+</div>
+<p>Cheaper than vanilla options (give up some payoff). Used by structurers and hedgers.</p>
+<pre><code class="language-python">def knock_out_check(price_path, barrier, direction='down'):
+    """Returns True if barrier was breached during the path."""
+    if direction == 'down':
+        return any(p &lt;= barrier for p in price_path)
+    return any(p &gt;= barrier for p in price_path)
+</code></pre>
+<h3 id="asian-options"><a class="header" href="#asian-options">Asian Options</a></h3>
+<p>Payoff based on <strong>average price</strong> over the observation period, not just final price.</p>
+<ul>
+<li>Average price call: max(0, Avg(S) − K)</li>
+<li>Average strike call: max(0, S_T − Avg(S))</li>
+</ul>
+<p>Cheaper than vanilla (less volatility in average vs. spot). Common in commodities and FX hedging.</p>
+<h3 id="binary--digital-options"><a class="header" href="#binary--digital-options">Binary / Digital Options</a></h3>
+<p>All-or-nothing payoff:</p>
+<ul>
+<li>Pays fixed amount if condition met (e.g., S_T &gt; K)</li>
+<li>Pays zero otherwise</li>
+</ul>
+<p>Used in structured products, FX options, and as building blocks. Retail “binary options” platforms (often offshore, unregulated) have been associated with widespread fraud.</p>
+<h3 id="lookback-options"><a class="header" href="#lookback-options">Lookback Options</a></h3>
+<p>Payoff based on extreme prices during the option’s life:</p>
+<ul>
+<li>Floating-strike lookback call: max(0, S_T − min(S))</li>
+<li>Floating-strike lookback put: max(0, max(S) − S_T)</li>
+</ul>
+<p>Always end up in the money (if any movement). Expensive premium.</p>
+<h3 id="cliquet-ratchet-options"><a class="header" href="#cliquet-ratchet-options">Cliquet (Ratchet) Options</a></h3>
+<p>Series of forward-starting options. Each period locks in the gain and resets the strike. Used in equity-linked structured products.</p>
+<h3 id="rainbow-options"><a class="header" href="#rainbow-options">Rainbow Options</a></h3>
+<p>Payoff depends on multiple underlyings:</p>
+<ul>
+<li>“Best of”: pays the best-performing asset</li>
+<li>“Worst of”: pays the worst-performing asset</li>
+<li>“Spread”: pays difference between two assets</li>
+</ul>
+<p>Common in structured notes and currency strategies.</p>
+<h3 id="quanto-options"><a class="header" href="#quanto-options">Quanto Options</a></h3>
+<p>Payoff in one currency based on underlying in another, with FX risk hedged out at a fixed exchange rate. Used by foreign investors wanting clean exposure without FX risk.</p>
+<h3 id="compound-options"><a class="header" href="#compound-options">Compound Options</a></h3>
+<p>Options on options. Pay premium today for the right to buy an option later. Convex pricing.</p>
+<h2 id="structured-products"><a class="header" href="#structured-products">Structured Products</a></h2>
+<p>Pre-packaged combinations of bonds + derivatives, sold to retail and institutions.</p>
+<h3 id="principal-protected-notes-ppn"><a class="header" href="#principal-protected-notes-ppn">Principal-Protected Notes (PPN)</a></h3>
+<ul>
+<li>Zero-coupon bond + call option</li>
+<li>Protects principal at maturity</li>
+<li>Capped upside</li>
+<li>Lookbacks like 5-10 years</li>
+<li><strong>High fees, often poor value vs. DIY</strong> (buy zero + LEAPS yourself)</li>
+</ul>
+<h3 id="autocallable-notes"><a class="header" href="#autocallable-notes">Autocallable Notes</a></h3>
+<ul>
+<li>Periodic check (e.g., quarterly): if underlying ≥ initial, redeem early with coupon</li>
+<li>If never redeemed, principal at risk based on underlying performance</li>
+<li>High coupons (8–12%) until autocalled</li>
+<li>Sold in $billions in Europe and Asia</li>
+<li>Risk: tail event triggers loss of principal</li>
+</ul>
+<h3 id="reverse-convertibles"><a class="header" href="#reverse-convertibles">Reverse Convertibles</a></h3>
+<ul>
+<li>Bond paying high coupon</li>
+<li>Buyer is short an OTM put on the underlying</li>
+<li>If put expires OTM: get principal back</li>
+<li>If ITM: receive shares (usually at a loss)</li>
+<li>Effectively selling vol for high yield ([[volatility_trading]])</li>
+</ul>
+<h3 id="equity-linked-notes-eln"><a class="header" href="#equity-linked-notes-eln">Equity-Linked Notes (ELN)</a></h3>
+<ul>
+<li>Return tied to an equity index</li>
+<li>Many flavors: capped, floored, leveraged, basket</li>
+</ul>
+<h3 id="snowballs-and-phoenix-autocallables"><a class="header" href="#snowballs-and-phoenix-autocallables">Snowballs and Phoenix Autocallables</a></h3>
+<p>Complex Asia-prevalent structures. Snowball notes wiped out billions in China in 2024 when CSI 500 fell sharply.</p>
+<h2 id="pricing-principles"><a class="header" href="#pricing-principles">Pricing Principles</a></h2>
+<h3 id="no-arbitrage"><a class="header" href="#no-arbitrage">No Arbitrage</a></h3>
+<p>If two portfolios produce identical cash flows in all states, they must cost the same. Violation = riskless profit (arbitrage), which gets traded away.</p>
+<h3 id="replication"><a class="header" href="#replication">Replication</a></h3>
+<p>Most derivative pricing comes from constructing a replicating portfolio of simpler instruments:</p>
+<ul>
+<li>Forward = spot + cash position</li>
+<li>European call = (BSM hedging strategy with stock + cash)</li>
+<li>Swap = strip of forwards</li>
+</ul>
+<h3 id="risk-neutral-pricing"><a class="header" href="#risk-neutral-pricing">Risk-Neutral Pricing</a></h3>
+<p>Discount expected payoffs at the risk-free rate under a synthetic “risk-neutral” probability measure. The math is convenient — though it’s not how real probabilities work.</p>
+<h3 id="black-scholes-for-options"><a class="header" href="#black-scholes-for-options">Black-Scholes for Options</a></h3>
+<p>Vanilla European option pricing covered in [[options]]. Foundation for most exotic pricing too.</p>
+<h3 id="monte-carlo-simulation"><a class="header" href="#monte-carlo-simulation">Monte Carlo Simulation</a></h3>
+<p>For path-dependent or multi-asset derivatives, simulate thousands of price paths and average payoffs.</p>
+<pre><code class="language-python">import numpy as np
+
+def monte_carlo_european_call(spot, strike, risk_free, vol, time, n_paths=100_000):
+    """Monte Carlo price of European call (sanity check vs. Black-Scholes)."""
+    z = np.random.standard_normal(n_paths)
+    s_t = spot * np.exp((risk_free - 0.5 * vol**2) * time + vol * np.sqrt(time) * z)
+    payoffs = np.maximum(s_t - strike, 0)
+    return np.exp(-risk_free * time) * payoffs.mean()
+
+def monte_carlo_barrier_call(spot, strike, barrier, risk_free, vol, time,
+                              n_paths=100_000, n_steps=252, barrier_type='up_out'):
+    """Monte Carlo price of up-and-out call (path-dependent)."""
+    dt = time / n_steps
+    z = np.random.standard_normal((n_paths, n_steps))
+    paths = np.zeros((n_paths, n_steps + 1))
+    paths[:, 0] = spot
+    for t in range(n_steps):
+        paths[:, t+1] = paths[:, t] * np.exp(
+            (risk_free - 0.5 * vol**2) * dt + vol * np.sqrt(dt) * z[:, t]
+        )
+    # Knock-out condition
+    knocked_out = (paths.max(axis=1) &gt;= barrier)
+    payoffs = np.where(knocked_out, 0, np.maximum(paths[:, -1] - strike, 0))
+    return np.exp(-risk_free * time) * payoffs.mean()
+</code></pre>
+<h2 id="risks-of-derivatives"><a class="header" href="#risks-of-derivatives">Risks of Derivatives</a></h2>
+<h3 id="market-risk"><a class="header" href="#market-risk">Market Risk</a></h3>
+<p>Same as the underlying, but often levered. A futures position with 10x leverage moves your P&amp;L 10x faster.</p>
+<h3 id="counterparty-risk-otc"><a class="header" href="#counterparty-risk-otc">Counterparty Risk (OTC)</a></h3>
+<p>If the other side defaults, you may not get paid. Mitigations:</p>
+<ul>
+<li><strong>Central clearing</strong> (CCPs like LCH, CME, ICE)</li>
+<li><strong>Collateral / variation margin</strong> posted daily</li>
+<li><strong>Initial margin</strong> (independent collateral)</li>
+<li><strong>ISDA Master Agreements</strong> with CSA (Credit Support Annex)</li>
+</ul>
+<h3 id="basis-risk"><a class="header" href="#basis-risk">Basis Risk</a></h3>
+<p>When your hedge instrument doesn’t perfectly match your exposure. Examples:</p>
+<ul>
+<li>Airline hedges jet fuel with heating oil futures</li>
+<li>Bank hedges FRN with swap of slightly different reference rate</li>
+<li>Equity index hedge for portfolio that’s not exactly index-weighted</li>
+</ul>
+<h3 id="liquidity-risk"><a class="header" href="#liquidity-risk">Liquidity Risk</a></h3>
+<p>OTC contracts can be hard to unwind. Even cleared products can gap in stress. The bid-ask widens dramatically in exotic instruments.</p>
+<h3 id="model-risk"><a class="header" href="#model-risk">Model Risk</a></h3>
+<p>Exotic pricing depends on models. If your model assumptions break (e.g., constant vol assumption in BSM), prices may be wrong. Famous example: LTCM’s risk models assumed normal distributions; tail events killed them.</p>
+<h3 id="operational-and-legal-risk"><a class="header" href="#operational-and-legal-risk">Operational and Legal Risk</a></h3>
+<p>Complex documentation, settlement chains, regulatory compliance, novation issues. Big OTC books require entire operations teams.</p>
+<h3 id="wrong-way-risk"><a class="header" href="#wrong-way-risk">Wrong-Way Risk</a></h3>
+<p>Counterparty credit risk and exposure correlate. E.g., AIG was selling massive CDS protection on subprime MBS — exactly when subprime defaulted (creating exposure), AIG itself was insolvent (counterparty failure).</p>
+<h2 id="regulatory-landscape-post-2008"><a class="header" href="#regulatory-landscape-post-2008">Regulatory Landscape (Post-2008)</a></h2>
+<h3 id="dodd-frank-us-and-emir-eu"><a class="header" href="#dodd-frank-us-and-emir-eu">Dodd-Frank (U.S.) and EMIR (EU)</a></h3>
+<p>Major changes:</p>
+<ul>
+<li><strong>Central clearing mandate</strong> for standardized OTC derivatives (most swaps)</li>
+<li><strong>Trade reporting</strong> to swap data repositories</li>
+<li><strong>Margin requirements</strong> for non-cleared trades</li>
+<li><strong>Push-out rule</strong> for certain bank derivatives (later softened)</li>
+<li><strong>Volcker Rule</strong> restricts proprietary trading</li>
+</ul>
+<h3 id="central-counterparties-ccps"><a class="header" href="#central-counterparties-ccps">Central Counterparties (CCPs)</a></h3>
+<p>LCH (UK), CME (U.S.), Eurex (Germany), ICE Clear — interpose themselves between counterparties. Risk concentrated in CCPs is now itself systemic.</p>
+<h3 id="isda-documentation"><a class="header" href="#isda-documentation">ISDA Documentation</a></h3>
+<p>The International Swaps and Derivatives Association master agreement is the legal backbone of OTC derivatives. Specifies events of default, close-out netting, governing law. Every serious derivatives counterparty has ISDA agreements.</p>
+<h2 id="notable-derivatives-blowups"><a class="header" href="#notable-derivatives-blowups">Notable Derivatives Blowups</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Year</th><th>Entity</th><th>Loss</th><th>Cause</th></tr>
+</thead>
+<tbody>
+<tr><td>1994</td><td>Procter &amp; Gamble</td><td>$157M</td><td>Exotic leveraged swaps mis-sold by Bankers Trust</td></tr>
+<tr><td>1995</td><td>Barings Bank</td><td>£827M</td><td>Nick Leeson Nikkei futures, $1.3B loss → bankruptcy</td></tr>
+<tr><td>1998</td><td>LTCM</td><td>$4.6B</td><td>Convergence trades on massive leverage</td></tr>
+<tr><td>2001</td><td>Enron</td><td>bankruptcy</td><td>Hidden derivatives liabilities</td></tr>
+<tr><td>2008</td><td>AIG</td><td>$182B bailout</td><td>CDS protection sold without capital</td></tr>
+<tr><td>2008</td><td>Lehman</td><td>bankruptcy</td><td>Counterparty defaults cascade</td></tr>
+<tr><td>2012</td><td>JPM London Whale</td><td>$6.2B</td><td>Outsized credit index positions</td></tr>
+<tr><td>2015</td><td>Swiss National Bank</td><td>major losses by clients</td><td>Removed EUR/CHF floor; $20B in retail FX losses</td></tr>
+<tr><td>2018</td><td>XIV</td><td>wiped out overnight</td><td>Short vol ETN</td></tr>
+<tr><td>2021</td><td>Archegos</td><td>$10B+ across banks</td><td>Hidden equity TRS exposure</td></tr>
+<tr><td>2024</td><td>China Snowballs</td><td>tens of billions</td><td>Autocallable note triggers</td></tr>
+</tbody>
+</table>
+</div>
+<p>Theme: most blowups involved hidden leverage, model failures, or counterparty cascades.</p>
+<h2 id="hedging-use-cases"><a class="header" href="#hedging-use-cases">Hedging Use Cases</a></h2>
+<h3 id="corporate-hedging"><a class="header" href="#corporate-hedging">Corporate Hedging</a></h3>
+<ul>
+<li><strong>Airline</strong>: hedge jet fuel via commodity swap</li>
+<li><strong>Exporter</strong>: hedge foreign revenue via FX forwards</li>
+<li><strong>REIT</strong> ([[reits]]): hedge floating-rate debt via IRS (pay fixed)</li>
+<li><strong>Bank</strong>: hedge loan portfolio duration via swaps</li>
+</ul>
+<h3 id="institutional-hedging"><a class="header" href="#institutional-hedging">Institutional Hedging</a></h3>
+<ul>
+<li><strong>Pension</strong>: LDI (Liability-Driven Investing) — match duration with long swaps</li>
+<li><strong>Insurance</strong>: hedge variable annuity guarantees with options</li>
+<li><strong>Endowment</strong>: hedge equity exposure with index puts</li>
+</ul>
+<h3 id="investor-hedging"><a class="header" href="#investor-hedging">Investor Hedging</a></h3>
+<ul>
+<li><strong>Portfolio insurance</strong>: index puts on equity exposure</li>
+<li><strong>Currency hedging</strong>: forwards on international stocks</li>
+<li><strong>Interest rate hedge</strong>: TLT puts when long bonds</li>
+<li><strong>Tail hedge</strong>: OTM puts for crash protection (see [[volatility_trading]])</li>
+</ul>
+<h2 id="speculation-use-cases"><a class="header" href="#speculation-use-cases">Speculation Use Cases</a></h2>
+<p>Beyond hedging, derivatives concentrate directional bets:</p>
+<ul>
+<li><strong>Leveraged directional</strong>: futures (10–50x leverage on margin)</li>
+<li><strong>Volatility trading</strong>: variance swaps, straddles ([[volatility_trading]])</li>
+<li><strong>Curve trades</strong>: swap spread, butterflies on rates ([[interest_rates]])</li>
+<li><strong>Spread trades</strong>: pairs via TRS ([[pairs_mean_reversion]])</li>
+<li><strong>Credit spread bets</strong>: CDS, index CDX</li>
+</ul>
+<h2 id="practical-considerations"><a class="header" href="#practical-considerations">Practical Considerations</a></h2>
+<h3 id="when-to-use-what"><a class="header" href="#when-to-use-what">When to Use What</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Need</th><th>Best Tool</th></tr>
+</thead>
+<tbody>
+<tr><td>Hedge an existing exposure</td><td>Forward, swap, option</td></tr>
+<tr><td>Leveraged directional bet</td><td>Future, option</td></tr>
+<tr><td>Tail protection</td><td>OTM put, VIX call</td></tr>
+<tr><td>Steady income from vol</td><td>Short strangle/condor</td></tr>
+<tr><td>Custom payoff</td><td>Exotic option, structured note</td></tr>
+<tr><td>Lock in future borrowing rate</td><td>FRA, swap</td></tr>
+<tr><td>Synthetic short hard-to-borrow</td><td>TRS</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="diy-vs-structured-products"><a class="header" href="#diy-vs-structured-products">DIY vs. Structured Products</a></h3>
+<p>Most structured products can be replicated with bonds + listed options at lower cost. Always check: would buying the components yourself cost less? Usually yes (the fee differential is 2–5% upfront on retail-sold structures).</p>
+<h2 id="common-mistakes"><a class="header" href="#common-mistakes">Common Mistakes</a></h2>
 <ol>
-<li><strong>Leverage Risk</strong>: Magnified losses</li>
-<li><strong>Counterparty Risk</strong>: OTC derivatives</li>
-<li><strong>Complexity Risk</strong>: Difficult to understand</li>
-<li><strong>Liquidity Risk</strong>: Hard to exit positions</li>
-<li><strong>Mark-to-Market Risk</strong>: Daily P&amp;L swings</li>
-<li><strong>Tail Risk</strong>: Extreme events</li>
+<li><strong>Using exotics when vanilla works</strong> — added complexity rarely justifies the cost</li>
+<li><strong>Ignoring counterparty risk</strong> — bilateral OTC means you can be left holding the bag</li>
+<li><strong>Underestimating leverage</strong> — derivatives amplify both ways</li>
+<li><strong>Naked short options on tail risk</strong> — many small wins, occasional catastrophic loss</li>
+<li><strong>Trusting model prices in stressed markets</strong> — Gaussian assumptions break in crises</li>
+<li><strong>Forgetting margin requirements</strong> — can balloon overnight (Volmageddon 2018)</li>
+<li><strong>Concentrating across counterparties</strong> — diversify even when cleared</li>
+<li><strong>Buying retail structured products</strong> at high markups</li>
+<li><strong>Not understanding the embedded derivatives</strong> in your portfolio (bond calls, autocalls)</li>
+<li><strong>Hedging the wrong risk</strong> — basis risk can leave you exposed despite the hedge</li>
 </ol>
-<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<h3 id="books"><a class="header" href="#books">Books</a></h3>
 <ul>
-<li>Use derivatives for hedging, not speculation (for most investors)</li>
-<li>Understand the product completely</li>
-<li>Use exchange-traded when possible (lower counterparty risk)</li>
-<li>Size positions appropriately</li>
-<li>Monitor regularly</li>
-<li>Have exit strategy</li>
+<li><em>Options, Futures, and Other Derivatives</em> — John Hull (the standard text)</li>
+<li><em>Dynamic Hedging</em> — Nassim Taleb (practitioner perspective)</li>
+<li><em>The Volatility Smile</em> — Emanuel Derman &amp; Michael Miller</li>
+<li><em>FX Options and Smile Risk</em> — Antonio Castagna</li>
+<li><em>Interest Rate Models</em> — Damiano Brigo, Fabio Mercurio</li>
+<li><em>When Genius Failed</em> — Roger Lowenstein (LTCM)</li>
+<li><em>The Big Short</em> — Michael Lewis (CDS/CDO)</li>
+<li><em>Liar’s Poker</em> — Michael Lewis (mortgage derivatives)</li>
 </ul>
-<p>See also: <a href="options.html">Options</a>, <a href="futures.html">Futures</a></p>
+<h3 id="sites-and-data"><a class="header" href="#sites-and-data">Sites and Data</a></h3>
+<ul>
+<li><strong>ISDA</strong> — documentation, market stats</li>
+<li><strong>DTCC</strong> — swap data repository</li>
+<li><strong>BIS triennial survey</strong> — global OTC derivatives statistics</li>
+<li><strong>CME, ICE, Eurex</strong> — exchange-traded data</li>
+<li><strong>OpenGamma</strong>, <strong>QuantLib</strong> — open-source pricing libraries</li>
+</ul>
+<h2 id="key-takeaways"><a class="header" href="#key-takeaways">Key Takeaways</a></h2>
+<ol>
+<li><strong>Derivatives are tools, not strategies</strong> — what matters is what you do with them</li>
+<li><strong>No-arbitrage and replication</strong> underpin all pricing</li>
+<li><strong>Forwards are the building block</strong> — swaps are strips, options add convexity</li>
+<li><strong>Interest rate swaps dominate</strong> — $300T+ notional; the largest derivative market</li>
+<li><strong>Central clearing reduced counterparty risk</strong> post-2008 but concentrated it in CCPs</li>
+<li><strong>Exotics cost more in fees + model risk</strong> — usually replicable with vanillas</li>
+<li><strong>Structured products often poor value</strong> for retail — DIY replication beats the fee</li>
+<li><strong>TRS hide exposure</strong> — Archegos showed why broker aggregation matters</li>
+<li><strong>Hedging requires basis discipline</strong> — perfect hedges are rare</li>
+<li><strong>Tail risk asymmetric</strong> — selling tail premium is profitable until it isn’t</li>
+</ol>
+<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
+<ul>
+<li>[[options]] — vanilla call/put pricing and strategies</li>
+<li>[[futures]] — exchange-traded forwards</li>
+<li>[[interest_rates]] — yield curve, Fed, duration</li>
+<li>[[credit_markets]] — CDS in depth, structured credit</li>
+<li>[[volatility_trading]] — variance swaps, vol selling</li>
+<li>[[forex]] — FX forwards and swaps</li>
+<li>[[commodities]] — commodity swaps and futures</li>
+<li>[[risk_management]] — hedging mechanics, portfolio risk</li>
+<li>[[private_markets]] — TRS in private fund structures</li>
+</ul>
 
                     </main>
 
@@ -285,11 +748,11 @@
 
         <script src="../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

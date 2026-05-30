@@ -15,8 +15,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-aafba5d1.js";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f4c5bb4e.js"></script>
+        <script src="../toc-62d4d51c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,109 +177,387 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="over-the-air-ota-updates"><a class="header" href="#over-the-air-ota-updates">Over-the-Air (OTA) Updates</a></h1>
-<blockquote>
-<p><strong>Domain:</strong> Embedded Systems, IoT, Firmware
-<strong>Key Concepts:</strong> Bootloader, Dual Bank Partitioning, Image Signing, Rollback</p>
-</blockquote>
-<p><strong>Over-the-Air (OTA) Updates</strong> allow embedded devices to upgrade their firmware remotely. In the IoT era, this is a strict requirement for patching security vulnerabilities and adding features post-deployment.</p>
-<hr>
-<h2 id="1-the-core-challenge"><a class="header" href="#1-the-core-challenge">1. The Core Challenge</a></h2>
-<p>Updating a microcontroller is dangerous. If power fails during the write process, or if the new firmware is buggy (e.g., infinite loop on boot), the device becomes a “brick.” A truck roll to fix it costs $500+.</p>
-<p><strong>The Golden Rule:</strong> The device must <strong>never</strong> be unbootable.</p>
-<hr>
-<h2 id="2-partitioning-strategies"><a class="header" href="#2-partitioning-strategies">2. Partitioning Strategies</a></h2>
-<h3 id="21-dual-bank-ab-partitioning"><a class="header" href="#21-dual-bank-ab-partitioning">2.1. Dual Bank (A/B Partitioning)</a></h3>
-<p>The industry standard for reliability. Flash memory is divided into two large slots (banks).</p>
+<h2 id="1-introduction-to-ota-updates"><a class="header" href="#1-introduction-to-ota-updates">1. Introduction to OTA Updates</a></h2>
+<p>Over-the-Air (OTA) updates are the process of remotely delivering new software, firmware, or configuration data to an embedded device or IoT node. In the modern era of connected devices, an OTA mechanism is not an optional feature; it is a critical requirement for the entire product lifecycle.</p>
+<h3 id="why-ota-is-mandatory"><a class="header" href="#why-ota-is-mandatory">Why OTA is Mandatory</a></h3>
+<ol>
+<li><strong>Security Vulnerability Patching:</strong> IoT devices are constantly under attack. When a vulnerability in a networking stack (like a TCP/IP or TLS bug) is discovered, it must be patched across the entire fleet immediately. Without OTA, the device remains forever vulnerable.</li>
+<li><strong>Feature Expansion:</strong> Product requirements evolve. OTA allows companies to ship a Minimum Viable Product (MVP) and add features over time, generating ongoing value for the customer.</li>
+<li><strong>Bug Fixes:</strong> No firmware is perfect upon release. Software bugs that cause crashes, memory leaks, or sensor inaccuracies can be silently fixed without user intervention.</li>
+<li><strong>Cost Reduction:</strong> The alternative to OTA is a physical product recall or sending a technician to the site (“truck roll”), which can cost hundreds of dollars per device.</li>
+</ol>
+<h3 id="the-core-challenge-avoiding-the-brick"><a class="header" href="#the-core-challenge-avoiding-the-brick">The Core Challenge: Avoiding the “Brick”</a></h3>
+<p>Updating a microcontroller or Linux SoC in the field is inherently dangerous.</p>
 <ul>
-<li><strong>Bank A (Active):</strong> Running the current firmware (v1.0).</li>
-<li><strong>Bank B (Passive):</strong> Empty or holding old firmware.</li>
+<li>What happens if the power fails halfway through erasing the flash memory?</li>
+<li>What happens if the network connection drops during the download?</li>
+<li>What happens if the new firmware has a critical bug (like an infinite loop or a hard fault) immediately upon boot?</li>
 </ul>
-<p><strong>The Flow:</strong></p>
-<ol>
-<li>Device downloads v1.1 into <strong>Bank B</strong> while v1.0 keeps running.</li>
-<li>Download verifies (Checksum/Signature).</li>
-<li>Device sets a flag in non-volatile memory: <code>BOOT_FROM_BANK_B</code>.</li>
-<li>Reboot.</li>
-<li><strong>Bootloader</strong> sees the flag, maps Bank B to the execution address, and jumps to it.</li>
-</ol>
-<p><strong>Pros:</strong> Zero downtime during download. Instant rollback (just switch the flag back).
-<strong>Cons:</strong> Requires 2x Flash memory.</p>
-<h3 id="22-single-bank-compression--swap"><a class="header" href="#22-single-bank-compression--swap">2.2. Single Bank (Compression / Swap)</a></h3>
-<p>Used on constrained devices.</p>
-<ol>
-<li>Download update to an external SPI Flash or a temporary “Swap” partition.</li>
-<li>Reboot into Bootloader.</li>
-<li>Bootloader erases the App partition and copies the new image from the Swap partition.</li>
-<li>Boot.</li>
-</ol>
-<p><strong>Cons:</strong> High risk. If copy fails, no valid app exists (must stay in Bootloader).</p>
+<p>If any of these scenarios occur and the device cannot recover automatically, it becomes completely non-functional—a “brick.” The golden rule of OTA architecture is: <strong>The device must never, under any circumstances, become unbootable or permanently disconnected from the cloud due to a failed update.</strong></p>
 <hr>
-<h2 id="3-the-bootloader-logic"><a class="header" href="#3-the-bootloader-logic">3. The Bootloader Logic</a></h2>
-<p>The Bootloader is the immutable code at the start of Flash (e.g., <code>0x08000000</code>). It runs before the App.</p>
-<pre><code class="language-c">void main() {
-    Status status = read_boot_status();
-    
-    if (status == UPDATE_PENDING) {
-        if (verify_signature(BANK_B)) {
-            swap_banks(); // or just update the mapping
-            commit_update(); // Mark as "Tentative"
-        }
-    }
-    
-    // Watchdog Logic
-    if (status == TENTATIVE &amp;&amp; crashed_last_time()) {
-        rollback(); // Switch back to Bank A
-    }
-    
-    jump_to_app();
-}
-</code></pre>
+<h2 id="2-bootloaders-the-foundation-of-ota"><a class="header" href="#2-bootloaders-the-foundation-of-ota">2. Bootloaders: The Foundation of OTA</a></h2>
+<p>The bootloader is a small, specialized piece of software that runs immediately when the microcontroller powers on or resets. Its primary jobs are to initialize basic hardware (clocks, memory controllers), verify the integrity of the main application firmware, and then jump to that application.</p>
+<p>In an OTA-enabled system, the bootloader takes on the massive responsibility of managing the update process.</p>
+<h3 id="primary-vs-secondary-bootloaders"><a class="header" href="#primary-vs-secondary-bootloaders">Primary vs. Secondary Bootloaders</a></h3>
+<p>In complex systems, the boot process is often staged:</p>
+<ol>
+<li><strong>Primary Bootloader (ROM Bootloader):</strong> Burned into silicon by the chip manufacturer (e.g., STMicroelectronics, Espressif). It is immutable. It usually checks specific GPIO pins on boot to decide whether to load code from internal Flash, USB, or UART.</li>
+<li><strong>Secondary Bootloader (The OTA Bootloader):</strong> Written by the device developer or an open-source project (like MCUboot). It sits at the very beginning of the writable Flash memory. This is the software that understands partitions, cryptography, and OTA state machines.</li>
+</ol>
+<h3 id="bootloader-responsibilities-in-ota"><a class="header" href="#bootloader-responsibilities-in-ota">Bootloader Responsibilities in OTA</a></h3>
+<ol>
+<li><strong>Image Verification:</strong> Before executing any application code, the bootloader must calculate a cryptographic hash of the firmware image and verify its digital signature to ensure it is authentic and uncorrupted.</li>
+<li><strong>Partition Management:</strong> The bootloader decides which memory partition contains the “active” firmware and maps that partition into the CPU’s execution space.</li>
+<li><strong>Applying Updates:</strong> If a new firmware image has been downloaded to a temporary location, the bootloader is responsible for safely copying or swapping it into the active execution slot.</li>
+<li><strong>Watchdog and Rollback:</strong> If the bootloader detects that the active firmware is continuously crashing, it must automatically roll back to the previously known good firmware.</li>
+</ol>
+<hr>
+<h2 id="3-partitioning-strategies"><a class="header" href="#3-partitioning-strategies">3. Partitioning Strategies</a></h2>
+<p>To safely update a device, the non-volatile memory (Flash) must be logically divided into distinct regions called partitions. The layout of these partitions dictates the update strategy.</p>
+<h3 id="31-dual-bank-ab-partitioning-the-industry-standard"><a class="header" href="#31-dual-bank-ab-partitioning-the-industry-standard">3.1. Dual Bank (A/B) Partitioning (The Industry Standard)</a></h3>
+<p>This is the most robust and common approach for devices with sufficient memory. The flash memory is divided into two identical, executable slots: Bank A and Bank B.</p>
+<ul>
+<li><strong>State 1:</strong> The device is running firmware v1.0 from <strong>Bank A</strong>.</li>
+<li><strong>Download:</strong> The device downloads firmware v1.1 and writes it directly into <strong>Bank B</strong> in the background. The device continues to operate normally during this entire process.</li>
+<li><strong>Verification:</strong> Once downloaded, the application verifies the cryptographic signature of Bank B.</li>
+<li><strong>Switch:</strong> The application writes a flag to a dedicated, small persistent storage area (e.g., an EEPROM, a specific flash sector, or an RTC backup register) indicating: <code>BOOT_FROM = BANK_B</code>.</li>
+<li><strong>Reboot:</strong> The device reboots.</li>
+<li><strong>Bootloader Action:</strong> The bootloader reads the flag, verifies Bank B’s integrity one last time, and then jumps to the entry point of Bank B.</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Zero downtime during the download phase.</li>
+<li>Instant, safe rollback (if Bank B fails, the bootloader just switches the flag back to Bank A).</li>
+<li>Power-fail safe at all times.</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Requires exactly 2x the flash memory of the application size, which increases hardware costs.</li>
+</ul>
+<h3 id="32-single-bank-with-external-swap"><a class="header" href="#32-single-bank-with-external-swap">3.2. Single Bank with External Swap</a></h3>
+<p>Used on highly constrained microcontrollers where the internal executable Flash is too small to hold two copies of the firmware, but cheap external SPI Flash is available.</p>
+<ul>
+<li><strong>State 1:</strong> Firmware runs from Internal Flash.</li>
+<li><strong>Download:</strong> The new firmware is downloaded to the External SPI Flash (which cannot be executed from directly).</li>
+<li><strong>Reboot:</strong> The device reboots into the Secondary Bootloader.</li>
+<li><strong>Swap Phase (Danger Zone):</strong> The Bootloader erases the Internal Flash and copies the new firmware from the External SPI Flash into the Internal Flash.</li>
+<li><strong>Boot:</strong> The Bootloader jumps to the newly copied application.</li>
+</ul>
+<p><strong>Pros:</strong> Saves internal MCU flash space.
+<strong>Cons:</strong> The “Swap Phase” is dangerous. If power fails while the bootloader is erasing the Internal Flash, the device has no valid application. The bootloader must be extremely robust to detect this partial state on the next boot and resume the copy from the External Flash.</p>
+<h3 id="33-advanced-swap-scratch-partition"><a class="header" href="#33-advanced-swap-scratch-partition">3.3. Advanced Swap (Scratch Partition)</a></h3>
+<p>Used by bootloaders like MCUboot. It involves a primary slot (executable), a secondary slot (storage), and a tiny “scratch” sector.</p>
+<p>Instead of just erasing the primary slot, the bootloader uses the scratch sector to swap the images block by block.</p>
+<ol>
+<li>Copy Block 1 of Primary to Scratch.</li>
+<li>Copy Block 1 of Secondary to Primary.</li>
+<li>Copy Scratch to Secondary.
+<em>(Repeat for all blocks)</em></li>
+</ol>
+<p>If a power failure occurs, the bootloader analyzes the state of the scratch partition to figure out exactly which block it was swapping and resumes the process. This ensures that the old firmware is never destroyed; it simply ends up in the secondary slot, allowing for a safe rollback.</p>
+<h3 id="34-golden-image--recovery-partition"><a class="header" href="#34-golden-image--recovery-partition">3.4. Golden Image / Recovery Partition</a></h3>
+<p>For critical infrastructure, devices may have three partitions:</p>
+<ol>
+<li><strong>Active Partition:</strong> Normal firmware.</li>
+<li><strong>Update Partition:</strong> Where new firmware is downloaded.</li>
+<li><strong>Golden / Recovery Partition:</strong> A factory-programmed, highly minimal firmware whose <em>only</em> job is to connect to the network and download an update. It is never overwritten. If the active partition gets totally corrupted, the bootloader falls back to the Golden Image.</li>
+</ol>
 <hr>
 <h2 id="4-security-the-chain-of-trust"><a class="header" href="#4-security-the-chain-of-trust">4. Security: The Chain of Trust</a></h2>
-<p>An attacker who can push their own firmware owns the device.</p>
-<h3 id="41-image-signing"><a class="header" href="#41-image-signing">4.1. Image Signing</a></h3>
-<ol>
-<li><strong>Build Server:</strong> Has a <strong>Private Key</strong>. Hashes the binary (SHA-256) and encrypts the hash with the Private Key (Signature). Appends signature to the binary.</li>
-<li><strong>Device:</strong> Has the matching <strong>Public Key</strong> burned into read-only memory (or eFuse).</li>
-<li><strong>Verification:</strong> Bootloader decrypts the signature with Public Key. Hashes the downloaded binary. If <code>Hash_Calc == Hash_Decrypted</code>, the image is authentic.</li>
-</ol>
-<h3 id="42-anti-rollback"><a class="header" href="#42-anti-rollback">4.2. Anti-Rollback</a></h3>
-<p>Attacker pushes a valid, signed <em>old</em> firmware (v1.0) that had a known vulnerability.</p>
+<p>If an attacker can push their own firmware to your devices, they own your entire fleet. They can turn IoT devices into a botnet, steal user data, or permanently brick the hardware. OTA security relies on cryptography to establish a <strong>Chain of Trust</strong>.</p>
+<h3 id="41-cryptographic-hashing-integrity"><a class="header" href="#41-cryptographic-hashing-integrity">4.1. Cryptographic Hashing (Integrity)</a></h3>
+<p>When downloading a multi-megabyte file over a noisy network (like Cellular or Wi-Fi), bits will flip. The device must verify the integrity of the file.</p>
 <ul>
-<li><strong>Fix:</strong> Firmware header contains a monotonic version counter. Bootloader rejects any image where <code>New_Ver &lt; Current_Ver</code>.</li>
+<li>The build server calculates a SHA-256 hash of the compiled firmware binary.</li>
+<li>The device calculates the SHA-256 hash of the downloaded file.</li>
+<li>If they match, the file was not corrupted in transit. <em>However, a hash alone provides no security against a malicious attacker, who can simply calculate a new hash for their malicious file.</em></li>
 </ul>
-<hr>
-<h2 id="5-the-update-cycle-state-machine"><a class="header" href="#5-the-update-cycle-state-machine">5. The Update Cycle (State Machine)</a></h2>
+<h3 id="42-asymmetric-cryptography-authenticity"><a class="header" href="#42-asymmetric-cryptography-authenticity">4.2. Asymmetric Cryptography (Authenticity)</a></h3>
+<p>To prove the file came from the true manufacturer, Digital Signatures are used (typically RSA-2048 or ECDSA secp256r1).</p>
+<p><strong>The Build Server (Private Key):</strong></p>
 <ol>
-<li><strong>Idle:</strong> Normal operation.</li>
-<li><strong>Downloading:</strong> Storing chunks to flash.</li>
-<li><strong>Verifying:</strong> CRC/Hash check.</li>
-<li><strong>Pending Reboot:</strong> Waiting for user or safe time.</li>
-<li><strong>Testing (Trial Boot):</strong> The most critical phase.
+<li>Compiles the firmware.</li>
+<li>Calculates the SHA-256 hash.</li>
+<li>Encrypts that hash using a closely guarded <strong>Private Key</strong>. This encrypted hash is the <strong>Signature</strong>.</li>
+<li>Appends the Signature to the firmware binary.</li>
+</ol>
+<p><strong>The Device (Public Key):</strong></p>
+<ol>
+<li>Has the corresponding <strong>Public Key</strong> embedded in its bootloader or burned into hardware eFuses.</li>
+<li>Downloads the firmware and the Signature.</li>
+<li>Calculates its own SHA-256 hash of the firmware.</li>
+<li>Decrypts the Signature using the Public Key to reveal the server’s hash.</li>
+<li>If <code>Calculated_Hash == Decrypted_Hash</code>, the device guarantees two things:
 <ul>
-<li>After update, the bootloader marks the state as “Testing”.</li>
-<li>The App <em>must</em> call a function <code>confirm_update_success()</code> after running successfully for 2 minutes (and connecting to cloud).</li>
-<li>If the Watchdog resets the device <em>before</em> confirmation, the Bootloader assumes a crash loop and reverts to the old bank.</li>
+<li>The file is not corrupted (Integrity).</li>
+<li>The file could <em>only</em> have been created by someone possessing the Private Key (Authenticity).</li>
 </ul>
 </li>
 </ol>
+<h3 id="43-hardware-root-of-trust-and-secure-boot"><a class="header" href="#43-hardware-root-of-trust-and-secure-boot">4.3. Hardware Root of Trust and Secure Boot</a></h3>
+<p>If the bootloader itself can be modified by an attacker, the entire signature check can be bypassed.
+Modern microcontrollers utilize <strong>Secure Boot</strong>.</p>
+<ol>
+<li>The manufacturer’s Public Key is burned into One-Time-Programmable (OTP) memory (eFuses) inside the silicon during factory production.</li>
+<li>When the chip powers on, the immutable ROM bootloader reads the eFuse Public Key and uses it to verify the signature of the Secondary Bootloader.</li>
+<li>If valid, it runs the Secondary Bootloader.</li>
+<li>The Secondary Bootloader uses its own embedded Public Key to verify the Application firmware.</li>
+</ol>
+<p>This creates an unbreakable chain from the silicon itself up to the application.</p>
+<h3 id="44-anti-rollback-protection"><a class="header" href="#44-anti-rollback-protection">4.4. Anti-Rollback Protection</a></h3>
+<p>Imagine a scenario where firmware v1.0 had a critical buffer overflow vulnerability. The manufacturer releases v1.1 to fix it. The devices update successfully.</p>
+<p>An attacker intercepts the network traffic and pushes the old, validly signed v1.0 firmware back to the devices. The devices accept it because the signature is mathematically valid. The attacker then exploits the known vulnerability. This is a <strong>Rollback Attack</strong>.</p>
+<p><strong>The Fix: Hardware Monotonic Counters.</strong></p>
+<ol>
+<li>The firmware header contains a Security Version Number (e.g., SVN = 2).</li>
+<li>The microcontroller has a hardware-backed monotonic counter (eFuses that can only be blown from 0 to 1, but never reset from 1 to 0).</li>
+<li>When the bootloader installs v1.1 (SVN=2), it blows an eFuse so the hardware counter equals 2.</li>
+<li>If the attacker tries to flash v1.0 (SVN=1), the bootloader checks the hardware counter. Because <code>1 &lt; 2</code>, the bootloader immediately rejects the image, even if the cryptographic signature is perfectly valid.</li>
+</ol>
 <hr>
-<h2 id="6-tools--libraries"><a class="header" href="#6-tools--libraries">6. Tools &amp; Libraries</a></h2>
+<h2 id="5-the-ota-state-machine-and-trial-boots"><a class="header" href="#5-the-ota-state-machine-and-trial-boots">5. The OTA State Machine and Trial Boots</a></h2>
+<p>The most dangerous moment in an OTA update is the first boot of the new firmware. It might pass all cryptographic checks, but contain a logical bug (e.g., it connects to the wrong Wi-Fi SSID, or a NULL pointer dereference causes an instant hard fault).</p>
+<p>If the device boots this bad firmware and stays on it, it will never connect to the cloud again to receive a fix. It is bricked.</p>
+<p>To prevent this, OTA relies on a “Trial Boot” or “Test” state machine.</p>
+<h3 id="the-standard-ota-state-machine"><a class="header" href="#the-standard-ota-state-machine">The Standard OTA State Machine</a></h3>
+<ol>
+<li><strong>State: IDLE / ACTIVE:</strong> The device is running normally from Bank A.</li>
+<li><strong>State: DOWNLOADING:</strong> A new update is detected. The device downloads chunks and writes them to Bank B.</li>
+<li><strong>State: VERIFIED:</strong> The download finishes. The application verifies the signature of Bank B.</li>
+<li><strong>State: PENDING_REBOOT:</strong> The application sets a flag (<code>STATE = TESTING_BANK_B</code>) in persistent storage and issues a system reset.</li>
+<li><strong>State: TRIAL BOOT (The Danger Zone):</strong>
 <ul>
-<li><strong>MCUBoot:</strong> Open source secure bootloader (Zephyr, generic).</li>
-<li><strong>ESP-IDF OTA:</strong> Native implementation for ESP32.</li>
-<li><strong>Mender / Balena:</strong> Full fleet management platforms for Linux-based embedded (Raspberry Pi, i.MX).</li>
+<li>The Bootloader sees the <code>TESTING</code> flag. It boots into Bank B.</li>
+<li>At the exact same time, it starts an <strong>Independent Hardware Watchdog Timer (WDT)</strong>.</li>
+<li>Firmware v1.1 starts running. It must initialize hardware, connect to the network, and connect to the cloud server.</li>
+<li>Once the firmware successfully communicates with the cloud, the application code explicitly calls a function: <code>ota_commit_update()</code>.</li>
 </ul>
+</li>
+<li><strong>State: COMMITTED:</strong> The <code>ota_commit_update()</code> function overwrites the persistent flag to <code>STATE = ACTIVE_BANK_B</code>. The Watchdog is fed/disabled. The update is permanent.</li>
+</ol>
+<h3 id="the-rollback-scenario-trial-boot-failure"><a class="header" href="#the-rollback-scenario-trial-boot-failure">The Rollback Scenario (Trial Boot Failure)</a></h3>
+<p>What if firmware v1.1 crashes immediately upon boot?</p>
+<ol>
+<li>Because it crashes, it never reaches the <code>ota_commit_update()</code> function.</li>
+<li>Because it crashed, the CPU halts, or a hard fault handler spins infinitely.</li>
+<li>The Independent Hardware Watchdog Timer (started by the bootloader) eventually times out (e.g., after 60 seconds).</li>
+<li>The Watchdog forces a hard reset of the microcontroller.</li>
+<li>The Bootloader wakes up. It reads the persistent flag. It sees <code>STATE = TESTING_BANK_B</code>.</li>
+<li>The Bootloader realizes that a reboot occurred <em>while</em> in the testing phase. This implies a catastrophic crash.</li>
+<li>The Bootloader automatically rewrites the flag to <code>STATE = ACTIVE_BANK_A</code> and boots the old, known-good firmware. The device is saved.</li>
+</ol>
+<hr>
+<h2 id="6-transport-protocols-and-delivery"><a class="header" href="#6-transport-protocols-and-delivery">6. Transport Protocols and Delivery</a></h2>
+<p>How does a 2MB binary actually get from the cloud to the device?</p>
+<h3 id="61-https-http-over-tls"><a class="header" href="#61-https-http-over-tls">6.1. HTTPS (HTTP over TLS)</a></h3>
+<p>The most common method for Wi-Fi and Ethernet devices.</p>
+<ul>
+<li><strong>Mechanism:</strong> The device makes a standard HTTP <code>GET</code> request to a secure URL (e.g., an AWS S3 bucket).</li>
+<li><strong>Chunking:</strong> Embedded devices don’t have 2MB of RAM to hold the whole file. They use the HTTP <code>Range</code> header (e.g., <code>Range: bytes=0-4095</code>) to download the file in 4KB chunks. They write one chunk to flash, then request the next.</li>
+<li><strong>Security:</strong> TLS prevents Man-in-the-Middle (MitM) attacks from intercepting or modifying the binary in transit.</li>
+</ul>
+<h3 id="62-mqtt"><a class="header" href="#62-mqtt">6.2. MQTT</a></h3>
+<p>Commonly used in highly constrained IoT systems where the device is already using MQTT for telemetry.</p>
+<ul>
+<li><strong>Mechanism:</strong> The server publishes the binary data as payloads to a specific MQTT topic.</li>
+<li><strong>Pros:</strong> Keeps the device architecture simple (only one networking stack required).</li>
+<li><strong>Cons:</strong> MQTT is not optimized for large file transfers. Handing massive binaries through an MQTT broker can cause memory pressure on the broker.</li>
+</ul>
+<h3 id="63-ble-bluetooth-low-energy"><a class="header" href="#63-ble-bluetooth-low-energy">6.3. BLE (Bluetooth Low Energy)</a></h3>
+<p>Used for wearables, smart home sensors, and devices without direct internet access.</p>
+<ul>
+<li><strong>Mechanism:</strong> A smartphone app downloads the firmware from the internet. The app then connects to the device via BLE and streams the binary over a custom GATT characteristic.</li>
+<li><strong>Challenges:</strong> BLE throughput is incredibly slow (often 10-50 kbps). A 1MB update can take several minutes, during which the user must keep their phone close to the device.</li>
+</ul>
+<h3 id="64-coap--lwm2m"><a class="header" href="#64-coap--lwm2m">6.4. CoAP / LwM2M</a></h3>
+<p>Used in cellular IoT (NB-IoT, LTE-M) where bandwidth is expensive and UDP is preferred over TCP.</p>
+<ul>
+<li>Lightweight M2M (LwM2M) has dedicated, standardized objects precisely for managing firmware updates over UDP.</li>
+</ul>
+<hr>
+<h2 id="7-differential-updates-delta-ota"><a class="header" href="#7-differential-updates-delta-ota">7. Differential Updates (Delta OTA)</a></h2>
+<p>For devices on cellular networks (where data costs money per megabyte) or devices with very slow connections (BLE, LoRaWAN), downloading a full 2MB firmware image for a tiny bug fix is unacceptable.</p>
+<p><strong>Delta OTA</strong> solves this by only sending the <em>differences</em> between the old firmware and the new firmware.</p>
+<h3 id="the-delta-process"><a class="header" href="#the-delta-process">The Delta Process</a></h3>
+<ol>
+<li><strong>Server Side:</strong> The cloud server takes Firmware v1.0 and Firmware v1.1 and runs a diffing algorithm (like <code>bsdiff</code>, <code>courgette</code>, or <code>JojoDiff</code>). This generates a small “Patch” file.
+<ul>
+<li><em>Example:</em> A 2MB firmware might only have a 15KB patch file if only a few lines of code changed.</li>
+</ul>
+</li>
+<li><strong>Delivery:</strong> The server sends the 15KB patch to the device.</li>
+<li><strong>Device Side:</strong> The device contains a patching engine in its bootloader or application.</li>
+<li><strong>Application:</strong> The patching algorithm reads the old firmware (v1.0) block by block from Bank A, applies the mathematical transformations defined in the 15KB patch file, and writes the resulting new firmware (v1.1) into Bank B.</li>
+</ol>
+<h3 id="challenges-of-delta-updates"><a class="header" href="#challenges-of-delta-updates">Challenges of Delta Updates</a></h3>
+<ul>
+<li><strong>RAM/CPU Constraints:</strong> Algorithms like <code>bsdiff</code> are designed for desktop computers and require massive amounts of RAM to apply a patch. Embedded systems require specialized, streaming patch algorithms that operate with just a few kilobytes of RAM.</li>
+<li><strong>Code Shifting:</strong> If you add one line of C code at the top of your program, the compiler will shift the memory address of <em>every single function</em> below it. A standard binary diff will see this as a 100% completely different file, resulting in a massive patch. Modern embedded delta algorithms (like Courgette) disassemble the binary, abstract the memory addresses, diff the underlying logic, and then re-assemble, resulting in tiny patches even when memory shifts.</li>
+</ul>
+<hr>
+<h2 id="8-real-world-implementations"><a class="header" href="#8-real-world-implementations">8. Real-World Implementations</a></h2>
+<h3 id="81-esp-idf-ota-espressif-esp32"><a class="header" href="#81-esp-idf-ota-espressif-esp32">8.1. ESP-IDF OTA (Espressif ESP32)</a></h3>
+<p>Espressif provides one of the most robust, out-of-the-box OTA frameworks in the industry for the ESP32.</p>
+<ul>
+<li><strong>Partition Table:</strong> Defined via a CSV file. Typically includes a <code>factory</code> app partition, <code>ota_0</code>, <code>ota_1</code>, and an <code>otadata</code> partition.</li>
+<li><strong>Mechanism:</strong> The <code>esp_https_ota</code> component manages the entire process. It connects to the URL, reads the image header, finds the passive OTA slot, streams the chunks directly to flash, and verifies the SHA-256 and ECDSA signatures.</li>
+<li><strong>State Machine:</strong> Uses the <code>otadata</code> partition (which is just two small flash sectors) to maintain the state (<code>ESP_OTA_IMG_NEW</code>, <code>ESP_OTA_IMG_PENDING_VERIFY</code>, <code>ESP_OTA_IMG_VALID</code>). The hardware RTC watchdog is deeply integrated for the trial boot rollback.</li>
+</ul>
+<h3 id="82-mcuboot-zephyr--rtos"><a class="header" href="#82-mcuboot-zephyr--rtos">8.2. MCUboot (Zephyr / RTOS)</a></h3>
+<p>MCUboot is a highly secure, OS-agnostic open-source bootloader originally developed for the Apache Mynewt project and now heavily used by Zephyr RTOS, nRF Connect SDK, and others.</p>
+<ul>
+<li><strong>Architecture:</strong> It relies heavily on image signing (RSA/ECDSA/ed25519) and supports the “Scratch” partition swap mechanism to allow updates on devices with only a single executable flash bank.</li>
+<li><strong>Features:</strong> It supports multiple independent executable images (e.g., updating a main CPU and a dedicated network co-processor simultaneously), hardware cryptographic offloading, and strict anti-rollback counters.</li>
+</ul>
+<h3 id="83-linux-ota-mender-swupdate-rauc"><a class="header" href="#83-linux-ota-mender-swupdate-rauc">8.3. Linux OTA (Mender, SWUpdate, RAUC)</a></h3>
+<p>For embedded Linux devices (Raspberry Pi, i.MX6, BeagleBone), updating single files via <code>apt-get</code> is extremely dangerous. If power fails during an <code>apt upgrade</code>, the filesystem will be corrupted and the Linux kernel will kernel panic on boot.</p>
+<p>Embedded Linux uses <strong>Image-Based OTA</strong>.</p>
+<ul>
+<li>The eMMC or SD Card is partitioned with two identical Root Filesystems (RootFS A and RootFS B).</li>
+<li>Tools like <strong>Mender</strong> or <strong>RAUC</strong> run as daemons in Linux.</li>
+<li>They download a complete, compressed, read-only <code>ext4</code> or <code>squashfs</code> filesystem image.</li>
+<li>They <code>dd</code> this image block-by-block directly into the passive RootFS partition.</li>
+<li>They modify the U-Boot bootloader environment variables to switch the active boot partition.</li>
+<li>They integrate with systemd to perform health checks on the next boot before committing the update in U-Boot.</li>
+</ul>
+<hr>
+<h2 id="9-best-practices-for-designing-ota-systems"><a class="header" href="#9-best-practices-for-designing-ota-systems">9. Best Practices for Designing OTA Systems</a></h2>
+<p>If you are engineering a connected device, adhere to these rules:</p>
+<ol>
+<li><strong>OTA is Feature #1:</strong> Do not write a single line of application code until your bootloader, partitioning, and OTA update mechanisms are fully implemented and tested. It is the foundation of the product.</li>
+<li><strong>Test the Failure Paths:</strong> Don’t just test successful updates. Write automated scripts that cut the power to the device randomly during the download phase, the flash write phase, and the trial boot phase. The device <em>must</em> recover every time.</li>
+<li><strong>Use Hardware Watchdogs:</strong> Never rely on a software watchdog. If the CPU hard faults or deadlocks, software watchdogs stop running. The watchdog must be an independent hardware timer that physically pulls the reset pin if it isn’t fed.</li>
+<li><strong>Version Everything:</strong> The hardware revision, the bootloader version, and the application version must be strictly tracked. Ensure an update meant for Hardware Rev B cannot be installed on Hardware Rev A.</li>
+<li><strong>Bandwidth Management:</strong> Randomize the time devices check for updates. If you have 100,000 devices and push an update, and they all make an HTTPS GET request to your server at the exact same second, you will accidentally DDoS your own infrastructure.</li>
+<li><strong>Secure Your Keys:</strong> The Private Key used to sign firmware is the keys to the kingdom. It should never touch a developer’s laptop. It should be generated and stored inside a Hardware Security Module (HSM) on AWS or Azure, and the CI/CD pipeline should only be able to request signatures from the HSM.</li>
+</ol>
+<h2 id="10-deep-dive-the-mcuboot-trailer-and-swap-mechanism"><a class="header" href="#10-deep-dive-the-mcuboot-trailer-and-swap-mechanism">10. Deep Dive: The MCUboot Trailer and Swap Mechanism</a></h2>
+<p>To truly understand how a safe “Swap” partition works on constrained devices (where you don’t have enough space for two full executable banks), we must examine the <strong>MCUboot Trailer</strong>.</p>
+<p>When MCUboot performs a swap, it doesn’t just blindly copy memory. It manages state across power failures using a cryptographic trailer appended to the end of every image slot.</p>
+<h3 id="the-trailer-structure"><a class="header" href="#the-trailer-structure">The Trailer Structure</a></h3>
+<p>The end of the image slot contains:</p>
+<ol>
+<li><strong>Swap Status:</strong> A record of exactly which sectors have been swapped so far. If power fails, MCUboot reads this to resume the operation.</li>
+<li><strong>Copy Done Flag:</strong> A single byte that indicates if the image copy was completely successful.</li>
+<li><strong>Image OK Flag:</strong> A single byte that indicates if the image has been confirmed as working (the Trial Boot succeeded).</li>
+<li><strong>MAGIC Number:</strong> A constant byte sequence (<code>0x96f3b83d...</code>) that tells the bootloader a valid trailer exists.</li>
+</ol>
+<h3 id="the-swap-state-machine"><a class="header" href="#the-swap-state-machine">The Swap State Machine</a></h3>
+<ol>
+<li><strong>Testing State:</strong> The user downloads an update to the Secondary Slot. A script writes the MAGIC number to the Secondary Slot trailer. On reboot, MCUboot sees the MAGIC number, sees that <code>Image OK</code> is NOT set, and begins swapping the Primary and Secondary slots block by block. It then boots the Primary slot.</li>
+<li><strong>Trial Boot:</strong> The new application runs. If it works, it writes the <code>Image OK</code> flag to the Primary Slot trailer.</li>
+<li><strong>Revert State:</strong> If the application crashes and the watchdog reboots the device, MCUboot checks the Primary Slot trailer. It sees the MAGIC number, but <code>Image OK</code> is STILL unset. It concludes the update failed, and it automatically swaps the Primary and Secondary slots back, restoring the original firmware.</li>
+<li><strong>Permanent State:</strong> If the update was confirmed (<code>Image OK</code> is set), MCUboot considers the update permanent.</li>
+</ol>
+<h2 id="11-deep-dive-esp-idf-ota-api-and-configuration"><a class="header" href="#11-deep-dive-esp-idf-ota-api-and-configuration">11. Deep Dive: ESP-IDF OTA API and Configuration</a></h2>
+<p>Espressif’s ESP-IDF provides a high-level API for OTA.</p>
+<h3 id="111-the-partition-table-partitionscsv"><a class="header" href="#111-the-partition-table-partitionscsv">11.1. The Partition Table (<code>partitions.csv</code>)</a></h3>
+<p>You must define the flash layout explicitly.</p>
+<pre><code class="language-csv"># Name,   Type, SubType, Offset,  Size, Flags
+nvs,      data, nvs,     0x9000,  0x4000,
+otadata,  data, ota,     0xd000,  0x2000,
+phy_init, data, phy,     0xf000,  0x1000,
+factory,  app,  factory, 0x10000, 1M,
+ota_0,    app,  ota_0,   ,        1M,
+ota_1,    app,  ota_1,   ,        1M,
+</code></pre>
+<ul>
+<li><code>otadata</code>: Two small sectors that the ESP-IDF bootloader uses to track whether <code>ota_0</code> or <code>ota_1</code> is the active partition, and the state of the trial boot.</li>
+</ul>
+<h3 id="112-the-c-api"><a class="header" href="#112-the-c-api">11.2. The C API</a></h3>
+<p>A minimal implementation using the raw OTA APIs:</p>
+<pre><code class="language-c">#include "esp_ota_ops.h"
+
+void do_ota_update(const uint8_t *image_data, size_t image_size) {
+    esp_ota_handle_t update_handle = 0;
+    const esp_partition_t *update_partition = esp_ota_get_next_update_partition(NULL);
+
+    // 1. Begin OTA: Erases the passive partition
+    esp_ota_begin(update_partition, OTA_WITH_SEQUENTIAL_WRITES, &amp;update_handle);
+
+    // 2. Write Data (usually in a loop as chunks arrive over Wi-Fi)
+    esp_ota_write(update_handle, image_data, image_size);
+
+    // 3. End OTA: Verifies SHA-256 and ECDSA signature
+    if (esp_ota_end(update_handle) == ESP_OK) {
+        // 4. Set boot partition: Modifies the otadata sector
+        esp_ota_set_boot_partition(update_partition);
+        
+        // 5. Restart into the trial boot
+        esp_restart();
+    }
+}
+</code></pre>
+<h2 id="12-data-migration-during-ota-nvseeprom"><a class="header" href="#12-data-migration-during-ota-nvseeprom">12. Data Migration During OTA (NVS/EEPROM)</a></h2>
+<p>Updating the code is only half the battle. Often, firmware v1.1 requires a different configuration structure in Non-Volatile Storage (NVS) than v1.0.</p>
+<p><em>Example:</em> v1.0 stored a <code>struct</code> with Wi-Fi credentials. v1.1 adds an MQTT broker IP address to that <code>struct</code>.</p>
+<p>If v1.1 boots and blindly casts the old NVS memory to the new <code>struct</code>, it will read garbage data, potentially crashing the device or causing a network disconnect.</p>
+<h3 id="migration-strategies"><a class="header" href="#migration-strategies">Migration Strategies</a></h3>
+<ol>
+<li><strong>Schema Versioning:</strong> Every data blob stored in NVS must include a schema version integer.
+<pre><code class="language-c">typedef struct {
+    uint8_t schema_version; // Must be 1
+    char ssid[32];
+    char pass[64];
+} config_v1_t;
+
+typedef struct {
+    uint8_t schema_version; // Must be 2
+    char ssid[32];
+    char pass[64];
+    char mqtt_ip[16];
+} config_v2_t;
+</code></pre>
+</li>
+<li><strong>Upgrading:</strong> On boot, the application reads the schema version. If it is <code>1</code>, it reads the data into <code>config_v1_t</code>, maps those fields into <code>config_v2_t</code>, sets defaults for the new fields, writes the new <code>config_v2_t</code> back to NVS, and increments the version to <code>2</code>.</li>
+<li><strong>Downgrading (Rollback Danger):</strong> If the trial boot fails and the bootloader reverts to v1.0, v1.0 will wake up and see schema version <code>2</code>. It doesn’t know how to read version <code>2</code>.
+<ul>
+<li><em>Solution:</em> Always write new configurations to a <em>new</em> NVS key/file. Only delete the old v1.0 configuration after the v1.1 update has been permanently committed.</li>
+</ul>
+</li>
+</ol>
+<h2 id="13-network-resilience-and-error-handling"><a class="header" href="#13-network-resilience-and-error-handling">13. Network Resilience and Error Handling</a></h2>
+<p>Embedded devices often operate on the edge of connectivity (weak Wi-Fi, low-signal Cellular). The OTA engine must be highly resilient.</p>
+<ul>
+<li><strong>HTTP Range Requests:</strong> If a 2MB download fails at 1.9MB, starting over wastes bandwidth and battery. The device should request the remaining bytes using the HTTP header: <code>Range: bytes=1900000-2000000</code>.</li>
+<li><strong>Chunk-Level Hashing:</strong> Instead of just hashing the entire 2MB file at the end, the server can provide a manifest with a hash for every 4KB chunk. The device verifies each chunk as it arrives. If a chunk is corrupted, it re-requests just that chunk.</li>
+<li><strong>Battery Level Checks:</strong> Never start an OTA if the battery is below 20%. The high current draw of erasing and writing to Flash memory causes the battery voltage to dip. If it drops below the Brown-Out Detect (BOD) threshold, the device will hard reset mid-update.</li>
+</ul>
+<h2 id="14-ota-in-the-automotive-industry-unece-wp29"><a class="header" href="#14-ota-in-the-automotive-industry-unece-wp29">14. OTA in the Automotive Industry (UNECE WP.29)</a></h2>
+<p>Automotive OTA is heavily regulated. The UN Economic Commission for Europe (UNECE) WP.29 regulation enforces strict cybersecurity and software update management systems (CSMS and SUMS).</p>
+<h3 id="automotive-ota-architecture"><a class="header" href="#automotive-ota-architecture">Automotive OTA Architecture</a></h3>
+<p>A modern car contains over 100 ECUs (Electronic Control Units).</p>
+<ol>
+<li><strong>The OTA Gateway:</strong> Usually the Telematics Control Unit (TCU). It acts as the central orchestrator. It connects to the OEM cloud over LTE/5G.</li>
+<li><strong>The In-Vehicle Network:</strong> The Gateway distributes the firmware updates over internal networks like Automotive Ethernet, CAN-FD, or LIN to the target ECUs.</li>
+<li><strong>UDS over DoIP:</strong> Updates are typically flashed using Unified Diagnostic Services (UDS) over Diagnostics over Internet Protocol (DoIP).</li>
+<li><strong>Campaign Management:</strong> Cars can only be updated when in a “Safe State” (engine off, parking brake engaged, doors locked). The OTA Campaign Manager orchestrates this state machine.</li>
+<li><strong>A/B Clusters:</strong> Unlike IoT devices, cars often A/B update entire clusters of ECUs simultaneously to ensure strict compatibility between software versions (e.g., the Engine Control Unit and the Transmission Control Unit must run paired software versions).</li>
+</ol>
+<h2 id="15-factory-provisioning-getting-the-keys-on-the-device"><a class="header" href="#15-factory-provisioning-getting-the-keys-on-the-device">15. Factory Provisioning: Getting the Keys on the Device</a></h2>
+<p>An OTA system is only secure if the cryptographic keys are securely injected into the device during manufacturing.</p>
+<ol>
+<li><strong>The Hardware Security Module (HSM):</strong> On the factory floor, a highly secure server (HSM) generates a unique Private/Public keypair (or Device Certificate) for every single microcontroller.</li>
+<li><strong>JTAG/SWD Injection:</strong> Over a physical programming cable, the factory flasher writes the primary bootloader, the initial application, and the Public Key into the device.</li>
+<li><strong>Blowing the eFuses:</strong> The factory flasher sends a command to blow the hardware eFuses on the microcontroller.
+<ul>
+<li>This permanently write-protects the sector containing the Public Key.</li>
+<li>It completely disables the JTAG/SWD debugging interface, preventing physical attackers from reading out the firmware or injecting malicious code later.</li>
+<li>It enables the “Secure Boot” hardware feature.</li>
+</ul>
+</li>
+<li><strong>Cloud Registration:</strong> The factory HSM securely transmits the device’s unique ID and Public Certificate to the OEM’s cloud database, allowing the cloud to recognize and trust the device when it connects for its first OTA update.</li>
+</ol>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../embedded/power_management.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../embedded/linker_scripts.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../embedded/debugging.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../embedded/bootloaders.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -289,11 +567,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../embedded/power_management.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../embedded/linker_scripts.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../embedded/debugging.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../embedded/bootloaders.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
@@ -315,11 +593,11 @@
 
         <script src="../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

@@ -15,8 +15,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-aafba5d1.js";
+            window.path_to_searchindex_js = "../searchindex-09a4798c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f4c5bb4e.js"></script>
+        <script src="../toc-62d4d51c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -181,6 +181,15 @@
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#important-components">Important Components</a></li>
+<li><a href="#ingress-vs-egress-traffic-control">Ingress vs Egress Traffic Control</a>
+<ul>
+<li><a href="#egress-outgoing">Egress (Outgoing)</a></li>
+<li><a href="#ingress-incoming">Ingress (Incoming)</a></li>
+<li><a href="#the-ingress-and-clsact-qdiscs">The ingress and clsact qdiscs</a></li>
+<li><a href="#shaping-ingress-with-ifb">Shaping Ingress with IFB</a></li>
+<li><a href="#tc-and-ebpf">tc and eBPF</a></li>
+</ul>
+</li>
 <li><a href="#command-syntax">Command Syntax</a></li>
 <li><a href="#common-queuing-disciplines-qdiscs">Common Queuing Disciplines (qdiscs)</a></li>
 <li><a href="#uses-of-tc">Uses of tc</a></li>
@@ -199,6 +208,7 @@
 <li><a href="#traffic-shaping-with-htb">Traffic Shaping with HTB</a></li>
 <li><a href="#qos-prioritization">QoS Prioritization</a></li>
 <li><a href="#advanced-network-emulation">Advanced Network Emulation</a></li>
+<li><a href="#ingress-policing-and-shaping">Ingress Policing and Shaping</a></li>
 </ul>
 </li>
 <li><a href="#viewing-and-managing-configurations">Viewing and Managing Configurations</a></li>
@@ -230,6 +240,71 @@
 <p><strong>action</strong>: Defines what to do with packets that match a filter. Actions can include marking, mirroring, or redirecting packets.</p>
 </li>
 </ol>
+<h2 id="ingress-vs-egress-traffic-control"><a class="header" href="#ingress-vs-egress-traffic-control">Ingress vs Egress Traffic Control</a></h2>
+<p><strong>Yes — <code>tc</code> works on both ingress (incoming) and egress (outgoing) traffic, but the two directions are fundamentally asymmetric.</strong> Egress is where <code>tc</code> is most powerful; ingress is deliberately limited by how the network stack works.</p>
+<p>The reason is <strong>queuing</strong>. Traffic shaping means <em>delaying</em> packets so they leave at a controlled rate, which requires a buffer (a queue) the kernel owns. On egress, the kernel owns the transmit queue and can hold packets back. On ingress, by the time a packet has arrived it has <em>already</em> consumed downstream bandwidth — there is nothing to buffer it into and “slowing it down” by delaying it gains nothing. So:</p>
+<ul>
+<li><strong>Egress can shape <em>and</em> police.</strong></li>
+<li><strong>Ingress can only classify and police</strong> (drop/rate-limit), not shape — unless you redirect the traffic to a virtual device (IFB) and shape it there as egress.</li>
+</ul>
+<h3 id="egress-outgoing"><a class="header" href="#egress-outgoing">Egress (Outgoing)</a></h3>
+<p>The default and most capable direction. Attaching a qdisc to <code>root</code> operates on egress:</p>
+<ul>
+<li>Full <strong>qdisc → class → filter</strong> hierarchy.</li>
+<li>Real <strong>shaping</strong> (delay/queue): HTB, TBF, netem, fq_codel, prio, etc.</li>
+<li>Bandwidth guarantees, borrowing, prioritization, network emulation.</li>
+</ul>
+<pre><code class="language-bash"># 'root' = egress qdisc
+sudo tc qdisc add dev eth0 root handle 1: htb default 30
+</code></pre>
+<h3 id="ingress-incoming"><a class="header" href="#ingress-incoming">Ingress (Incoming)</a></h3>
+<p>Attached via the special <code>ingress</code> (or modern <code>clsact</code>) qdisc. On ingress you can:</p>
+<ul>
+<li><strong>Classify</strong> packets (attach filters: <code>u32</code>, <code>flower</code>, <code>bpf</code>, …).</li>
+<li><strong>Police</strong> — drop or rate-limit packets that exceed a rate. This works by <em>dropping</em> excess packets; for TCP this triggers congestion control at the sender so the flow backs off. It is a blunt instrument compared to egress shaping (no smoothing, retransmits waste bandwidth).</li>
+<li>Run <strong>actions</strong> (mark, redirect via <code>mirred</code>) and <strong>eBPF</strong> programs.</li>
+</ul>
+<p>You <strong>cannot</strong> shape (smoothly delay/queue) on ingress directly — there is no egress queue to hold packets in.</p>
+<h3 id="the-ingress-and-clsact-qdiscs"><a class="header" href="#the-ingress-and-clsact-qdiscs">The ingress and clsact qdiscs</a></h3>
+<p>There are two ways to attach ingress filters:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Qdisc</th><th>Hooks</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><code>ingress</code></td><td>ingress only</td><td>Classless, reserved handle <code>ffff:</code>. Filter/action only. The older approach.</td></tr>
+<tr><td><code>clsact</code></td><td><strong>ingress and egress</strong></td><td>Modern replacement. Lets you attach filters/actions (including eBPF) on <em>both</em> directions from a single qdisc without disturbing the root egress qdisc. Preferred today.</td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-bash"># Legacy ingress qdisc
+sudo tc qdisc add dev eth0 handle ffff: ingress
+
+# Modern clsact: exposes both ingress and egress filter hooks
+sudo tc qdisc add dev eth0 clsact
+# then attach filters with 'parent ffff:fff2' (ingress) or 'ffff:fff3' (egress)
+</code></pre>
+<h3 id="shaping-ingress-with-ifb"><a class="header" href="#shaping-ingress-with-ifb">Shaping Ingress with IFB</a></h3>
+<p>To actually <em>shape</em> inbound traffic (not just police it), redirect ingress packets onto an <strong>IFB (Intermediate Functional Block)</strong> virtual device with the <code>mirred</code> action, then apply a normal egress qdisc on the IFB device. The packet’s “ingress” becomes the IFB’s “egress”, where full shaping is available.</p>
+<pre><code class="language-bash"># Load the IFB module and bring up a virtual device
+sudo modprobe ifb
+sudo ip link set dev ifb0 up
+
+# Add an ingress qdisc on the real interface and redirect all ingress to ifb0
+sudo tc qdisc add dev eth0 handle ffff: ingress
+sudo tc filter add dev eth0 parent ffff: protocol ip u32 \
+    match u32 0 0 action mirred egress redirect dev ifb0
+
+# Now shape on ifb0 as if it were egress (HTB, netem, ...)
+sudo tc qdisc add dev ifb0 root handle 1: htb default 10
+sudo tc class add dev ifb0 parent 1: classid 1:10 htb rate 10mbit
+</code></pre>
+<h3 id="tc-and-ebpf"><a class="header" href="#tc-and-ebpf">tc and eBPF</a></h3>
+<p><code>tc</code> is one of the main attachment points for <strong>eBPF</strong> networking programs (<code>tc-bpf</code>). Using <code>clsact</code>, you can attach an eBPF classifier/action program at the ingress and/or egress hook for fast, programmable packet processing (used heavily by Cilium, etc.). This is distinct from XDP, which runs even earlier (at the driver, before the stack). See <a href="ebpf.html">eBPF</a> for details.</p>
+<pre><code class="language-bash">sudo tc qdisc add dev eth0 clsact
+sudo tc filter add dev eth0 ingress bpf da obj prog.o sec ingress
+</code></pre>
 <h2 id="command-syntax"><a class="header" href="#command-syntax">Command Syntax</a></h2>
 <p>Basic <code>tc</code> command structure:</p>
 <pre><code class="language-bash">tc qdisc [ add | del | replace | change | show ] dev DEVICE [ parent QHANDLE ] [ handle QHANDLE ] [ QDISC ]
@@ -297,7 +372,7 @@ tc filter [ add | del | change | show ] dev DEVICE [ parent QHANDLE ] protocol P
 <tbody>
 <tr><td><strong>Primary Purpose</strong></td><td>Traffic shaping and QoS</td><td>Packet filtering and firewalling</td></tr>
 <tr><td><strong>Operating Layer</strong></td><td>Layer 2 (Link) and Layer 3 (Network)</td><td>Layer 3 (Network) and Layer 4 (Transport)</td></tr>
-<tr><td><strong>Default Direction</strong></td><td>Egress (outgoing) traffic</td><td>Both ingress and egress</td></tr>
+<tr><td><strong>Default Direction</strong></td><td>Egress by default; ingress via <code>ingress</code>/<code>clsact</code> qdiscs (and IFB for shaping)</td><td>Both ingress and egress</td></tr>
 <tr><td><strong>Bandwidth Control</strong></td><td>Native and sophisticated</td><td>Limited, requires additional modules</td></tr>
 <tr><td><strong>Packet Filtering</strong></td><td>Basic classification</td><td>Advanced and flexible</td></tr>
 <tr><td><strong>Queue Management</strong></td><td>Extensive (multiple qdiscs)</td><td>Not applicable</td></tr>
@@ -314,7 +389,8 @@ tc filter [ add | del | change | show ] dev DEVICE [ parent QHANDLE ] protocol P
 <ul>
 <li>Processes packets as they leave the interface</li>
 <li>Controls queuing disciplines and scheduling</li>
-<li>For ingress control, requires IFB (Intermediate Functional Block) devices</li>
+<li>Also supports ingress via the <code>ingress</code>/<code>clsact</code> qdiscs, but ingress is <strong>classify/police-only</strong> (no shaping) — see <a href="#ingress-vs-egress-traffic-control">Ingress vs Egress Traffic Control</a></li>
+<li>For true ingress <em>shaping</em>, requires IFB (Intermediate Functional Block) devices</li>
 <li>Works at the queueing layer</li>
 </ul>
 <p><strong>Netfilter</strong> operates at multiple <strong>hook points</strong> in the network stack:</p>
@@ -436,7 +512,7 @@ sudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 50mbit ceil 50mbit
 <p><strong>“iptables can do traffic shaping”</strong>: Partially true. While iptables has some rate limiting capabilities (like <code>limit</code> and <code>hashlimit</code> modules), they are far less sophisticated than tc’s QoS features.</p>
 </li>
 <li>
-<p><strong>“tc only works on outgoing traffic”</strong>: Mostly true. tc primarily controls egress traffic, but can be configured for ingress using IFB devices or ingress qdiscs.</p>
+<p><strong>“tc only works on outgoing traffic”</strong>: Misleading. tc can attach to ingress too (via the <code>ingress</code>/<code>clsact</code> qdiscs), where it can classify and <strong>police</strong> (drop/rate-limit) incoming packets. What it <em>cannot</em> do on ingress is <strong>shape</strong> (smoothly delay/queue) — that requires redirecting traffic to an IFB device and shaping it as egress.</p>
 </li>
 <li>
 <p><strong>“Netfilter can control bandwidth as well as tc”</strong>: False. Netfilter’s rate limiting is packet-based and much simpler than tc’s queue-based traffic control.</p>
@@ -528,6 +604,43 @@ sudo tc qdisc add dev eth0 root netem corrupt 0.1%
 <h4 id="complex-scenario-combining-multiple-effects"><a class="header" href="#complex-scenario-combining-multiple-effects">Complex scenario combining multiple effects</a></h4>
 <pre><code class="language-bash"># Simulate degraded network: 5mbit, 200ms delay, 5% loss, occasional duplicates
 sudo tc qdisc add dev eth0 root netem rate 5mbit delay 200ms 50ms loss 5% duplicate 1%
+</code></pre>
+<h3 id="ingress-policing-and-shaping"><a class="header" href="#ingress-policing-and-shaping">Ingress Policing and Shaping</a></h3>
+<p>See <a href="#ingress-vs-egress-traffic-control">Ingress vs Egress Traffic Control</a> for the why behind these.</p>
+<h4 id="police-inbound-traffic-drop-excess"><a class="header" href="#police-inbound-traffic-drop-excess">Police inbound traffic (drop excess)</a></h4>
+<pre><code class="language-bash"># Attach the ingress qdisc
+sudo tc qdisc add dev eth0 handle ffff: ingress
+
+# Drop all inbound traffic above 1mbit (burst 10k). This *polices*, it does not shape.
+sudo tc filter add dev eth0 parent ffff: protocol ip prio 1 u32 \
+    match u32 0 0 \
+    police rate 1mbit burst 10k drop flowid :1
+</code></pre>
+<h4 id="use-clsact-for-both-ingress-and-egress-filters"><a class="header" href="#use-clsact-for-both-ingress-and-egress-filters">Use clsact for both ingress and egress filters</a></h4>
+<pre><code class="language-bash"># Single qdisc exposing both hooks (does not replace the root egress qdisc)
+sudo tc qdisc add dev eth0 clsact
+
+# Egress hook
+sudo tc filter add dev eth0 egress protocol ip prio 1 u32 \
+    match ip dport 80 0xffff police rate 5mbit burst 20k drop flowid :1
+# Ingress hook
+sudo tc filter add dev eth0 ingress protocol ip prio 1 u32 \
+    match u32 0 0 police rate 2mbit burst 10k drop flowid :1
+</code></pre>
+<h4 id="actually-shape-inbound-traffic-via-ifb"><a class="header" href="#actually-shape-inbound-traffic-via-ifb">Actually shape inbound traffic via IFB</a></h4>
+<pre><code class="language-bash"># 1. Bring up an IFB virtual device
+sudo modprobe ifb
+sudo ip link set dev ifb0 up
+
+# 2. Redirect all eth0 ingress onto ifb0
+sudo tc qdisc add dev eth0 handle ffff: ingress
+sudo tc filter add dev eth0 parent ffff: protocol ip u32 \
+    match u32 0 0 action mirred egress redirect dev ifb0
+
+# 3. Shape on ifb0 with a normal egress qdisc (HTB here, netem also works)
+sudo tc qdisc add dev ifb0 root handle 1: htb default 10
+sudo tc class add dev ifb0 parent 1: classid 1:1 htb rate 10mbit
+sudo tc class add dev ifb0 parent 1:1 classid 1:10 htb rate 10mbit ceil 10mbit
 </code></pre>
 <h2 id="viewing-and-managing-configurations"><a class="header" href="#viewing-and-managing-configurations">Viewing and Managing Configurations</a></h2>
 <h3 id="view-current-qdisc-configuration"><a class="header" href="#view-current-qdisc-configuration">View current qdisc configuration</a></h3>
@@ -661,8 +774,8 @@ sudo tc filter add dev eth0 parent 1: protocol ip prio 1 u32 \
 <li>Document your tc configurations as they don’t persist across reboots</li>
 <li>Use <code>tc -s</code> to monitor actual traffic through classes and qdiscs</li>
 <li>Start with simple configurations and gradually add complexity</li>
-<li>Remember that tc only controls egress (outgoing) traffic by default</li>
-<li>For ingress (incoming) traffic control, use IFB (Intermediate Functional Block) devices</li>
+<li>Remember that tc controls egress (outgoing) traffic by default; ingress is policing/classification only</li>
+<li>For ingress (incoming) traffic, attach an <code>ingress</code> or modern <code>clsact</code> qdisc; to actually <em>shape</em> ingress, redirect to an IFB (Intermediate Functional Block) device — see <a href="#ingress-vs-egress-traffic-control">Ingress vs Egress Traffic Control</a></li>
 </ul>
 <h3 id="making-tc-rules-persistent"><a class="header" href="#making-tc-rules-persistent">Making tc Rules Persistent</a></h3>
 <p>Traffic control rules are not persistent across reboots. To make them persistent:</p>
@@ -730,11 +843,11 @@ WantedBy=multi-user.target
 
         <script src="../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

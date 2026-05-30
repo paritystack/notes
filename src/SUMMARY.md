@@ -471,3 +471,5 @@
 - [RTOS](rtos/README.md)
     - [FreeRTOS](rtos/freertos.md)
     - [ThreadX](rtos/threadx.md)
+    - [Zephyr](rtos/zephyr.md)
+    - [RT-Linux](rtos/rt_linux.md)

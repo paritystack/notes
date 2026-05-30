@@ -11,19 +11,29 @@ This knowledge repository contains in-depth documentation on diverse technical t
 ### Artificial Intelligence & Machine Learning
 
 - **[AI](./ai/)** - Artificial Intelligence, LLMs, prompt engineering, generative AI
-  - Large Language Models (GPT, Claude, Llama, PaLM)
-  - Prompt engineering techniques and software development patterns
-  - Stable Diffusion, Flux.1, and image generation models
-  - Fine-tuning, LoRA, and model optimization
-  - Generative AI applications
+  - Large Language Models (GPT, Claude, Llama, DeepSeek R1, Phi)
+  - Prompt engineering and software development prompt patterns
+  - Transformers architecture, RAG, and vector databases
+  - Agent frameworks, tool use, MCP, and agent skills
+  - Model serving and inference (vLLM), speech (Whisper)
+  - Stable Diffusion, Flux.1, ComfyUI, and image generation
+  - Fine-tuning, LoRA, and generative AI applications
 
 - **[Machine Learning](./machine_learning/)** - ML algorithms, frameworks, and deep learning
-  - Supervised, unsupervised, and reinforcement learning
-  - Neural networks and deep learning architectures
-  - PyTorch, TensorFlow, Hugging Face Transformers
-  - Model quantization (GPTQ, AWQ, INT8/INT4)
-  - CUDA programming and GPU optimization
-  - Transfer learning and domain adaptation
+  - Supervised, unsupervised, and reinforcement learning (incl. deep RL)
+  - Neural networks, convolution, and transformer architectures
+  - Mixture of Experts (MoE) and deep generative models
+  - PyTorch, JAX, NumPy, and Hugging Face
+  - Gradient boosting, transfer learning, and evaluation metrics
+  - Model quantization (GPTQ, AWQ, INT8/INT4) and CUDA/GPU optimization
+  - Notable research papers
+
+### Mathematics
+
+- **[Maths](./maths/)** - Mathematical foundations for CS and ML
+  - Linear algebra (vectors, matrices, decompositions)
+  - Calculus and optimization
+  - Probability and statistics
 
 ### Systems Programming & Operating Systems
 
@@ -37,13 +47,16 @@ This knowledge repository contains in-depth documentation on diverse technical t
 
 - **[Embedded](./embedded/)** - Embedded systems development and microcontrollers
   - Development platforms (Arduino, ESP32, STM32, AVR, Raspberry Pi)
-  - Communication protocols (UART, SPI, I2C, CAN, USB)
-  - GPIO, ADC, DAC, PWM, and peripheral interfaces
-  - Real-time operation and power management
-  - Interrupt-driven programming
+  - Communication protocols (UART, SPI, I2C, CAN, SDIO, Ethernet)
+  - Peripherals: GPIO, ADC, DAC, PWM, DMA, timers, RTC, clock systems
+  - Wireless: BLE and LoRa
+  - Bootloaders, OTA updates, linker scripts, and flash filesystems
+  - Security: secure boot, ARM TrustZone-M
+  - Debugging: JTAG/SWD, GDB, RTT/semihosting, hardfault analysis
+  - Processor design, ISA, CMSIS, and signal integrity
 
 - **[RTOS](./rtos/)** - Real-time operating systems
-  - FreeRTOS, Zephyr, RT-Linux
+  - FreeRTOS, ThreadX, Zephyr, and RT-Linux (PREEMPT_RT)
   - Task scheduling and priority management
   - Synchronization primitives
   - Interrupt handling and timing constraints
@@ -51,32 +64,36 @@ This knowledge repository contains in-depth documentation on diverse technical t
 ### Software Development
 
 - **[Programming](./programming/)** - Programming languages and paradigms
-  - Python, C, C++, Rust, Go, JavaScript/TypeScript
-  - Language features, idioms, and best practices
-  - Memory management and concurrency patterns
-  - Functional and object-oriented programming
+  - Python, C, C++, Rust, Go, Zig, Java, Kotlin, Lua
+  - JavaScript/TypeScript, Bash, and SQL
+  - Language features, idioms, and design patterns
+  - Memory management, concurrency, and compilers
+  - Interview questions
 
 - **[Algorithms](./algorithms/)** - Algorithm design, analysis, and patterns
-  - Sorting, searching, and graph algorithms
-  - Dynamic programming and greedy algorithms
-  - Divide and conquer, backtracking, recursion
-  - Time and space complexity (Big O notation)
+  - Sorting, searching, and graph algorithms (flow, SCC, LCA)
+  - Dynamic programming, greedy, divide and conquer, backtracking
+  - Range query structures (segment/Fenwick trees, sparse table, HLD)
+  - Patterns: sliding window, two pointers, monotonic stack/queue, binary search
+  - Bit manipulation, string algorithms, hashing, heuristic search
+  - Time and space complexity (Big O), interview patterns
   - Raft consensus algorithm
 
 - **[Data Structures](./data_structures/)** - Core data structures and implementations
-  - Arrays, linked lists, stacks, queues
-  - Trees (BST, AVL, Red-Black), heaps, tries
-  - Hash tables and collision resolution
-  - Graphs and graph representations
-  - Bloom filters and probabilistic structures
+  - Arrays, linked lists, stacks, queues, circular buffers
+  - Trees (BST, AVL, Red-Black, advanced), heaps, tries
+  - Hash tables, skip lists, and union-find
+  - Graphs, spatial structures, and suffix arrays
+  - Probabilistic structures (Bloom filter, MinHash/LSH, HNSW, product quantization)
+  - Inverted index, LRU cache, persistent structures, and CRDTs
 
 - **[Web Development](./web_development/)** - Modern web technologies
-  - Frontend: React, Next.js, Vue.js, Svelte
+  - Frontend: React, Next.js, Vue.js, Svelte, SvelteKit
   - Styling: CSS, Tailwind CSS
   - Backend: Express.js, NestJS, Django, Flask, FastAPI
-  - APIs: REST, GraphQL, gRPC
+  - APIs: REST, GraphQL, gRPC, and API design
   - WebAssembly for high-performance web applications
-  - Browser APIs (Storage, Workers, Notifications, File handling)
+  - Browser/Web APIs, accessibility, frontend performance, web security
 
 - **[Mobile Development](./mobile_development/)** - Mobile application development
   - Native iOS development (Swift, SwiftUI, UIKit)
@@ -98,44 +115,48 @@ This knowledge repository contains in-depth documentation on diverse technical t
   - Containerization (Docker) and orchestration (Kubernetes)
   - Infrastructure as Code (Terraform, CloudFormation)
   - Monitoring, logging, and observability
+  - Site Reliability Engineering (SRE) and chaos engineering
   - Cloud deployment strategies
 
 - **[System Design](./system_design/)** - Software architecture and scalability
-  - Distributed systems patterns
-  - Microservices vs monolithic architecture
-  - Caching strategies, load balancing, CDNs
-  - Database sharding and replication
-  - High availability and fault tolerance
-  - CAP theorem and consistency models
+  - Distributed systems, microservices, and consensus
+  - Caching strategies, load balancing, CDNs, consistent hashing
+  - Database sharding, replication, and message queues
+  - Rate limiting, idempotency, id generation, and RPC
+  - High availability, fault tolerance, CAP theorem, and observability
+  - Worked design problems (URL shortener, chat, news feed, typeahead,
+    ride-sharing, video streaming) and an interview framework
 
 ### Data & Databases
 
 - **[Databases](./databases/)** - Database systems and data engineering
   - Relational databases (PostgreSQL, SQLite, DuckDB)
-  - NoSQL databases (MongoDB, Redis)
+  - Analytical and NoSQL databases (ClickHouse, MongoDB, Redis)
   - Database design, normalization, and indexing
   - SQL query optimization
-  - Message queues (Apache Kafka)
-  - Data pipelines and ETL
+  - ACID vs BASE and consistency trade-offs
+  - Message queues (Apache Kafka), data pipelines, and ETL
 
 ### Security
 
 - **[Security](./security/)** - Application security and cryptography
-  - Secure coding practices
-  - Authentication and authorization
-  - Cryptographic algorithms and protocols
+  - Authentication and authorization (OAuth2, JWT)
+  - Encryption, hashing, HMAC, and digital signatures
+  - Certificates, SSL/TLS, and PKI
+  - Zero trust architecture
   - OWASP Top 10 vulnerabilities
-  - Security testing and penetration testing
-  - Web application security
+  - Security testing and web application security
 
 ### Networking
 
 - **[Networking](./networking/)** - Network protocols and architecture
-  - OSI and TCP/IP models
-  - HTTP/HTTPS, DNS, TLS/SSL
-  - TCP, UDP, and transport protocols
-  - Network troubleshooting and diagnostics
-  - VPNs, tunneling, and network security
+  - OSI and TCP/IP models; IPv4, IPv6, ARP, DHCP, DNS, mDNS
+  - Transport: TCP, UDP, QUIC, RTP; MTU/PMTUD
+  - Application: HTTP, HTTP/2, WebSocket, gRPC, SSH
+  - Routing: BGP/anycast, OSPF/IS-IS
+  - Real-time & NAT traversal: WebRTC, STUN, TURN, ICE, NAT-PMP, PCP, UPnP
+  - Overlay/container networking, IPsec, WireGuard, firewalls
+  - IoT protocols and Ethernet/VLAN
 
 - **[WiFi](./wifi/)** - Wireless networking technologies
   - IEEE 802.11 standards and protocols
@@ -146,10 +167,12 @@ This knowledge repository contains in-depth documentation on diverse technical t
 ### Development Tools & Practices
 
 - **[Tools](./tools/)** - Development tools and utilities
-  - Editors, IDEs, and productivity tools
-  - Build systems and package managers
-  - Command-line utilities
-  - Development workflow optimization
+  - Editors and multiplexers (Vim, tmux)
+  - Build systems (Make, Ninja, Bazel) and toolchains (GCC, Clang)
+  - Code navigation (ctags, cscope) and package management (uv)
+  - Text processing (grep, ripgrep, sed, awk, find)
+  - Networking & capture (curl, wget, nmap, tcpdump, tshark, Wireshark)
+  - Media (ffmpeg), automation (Ansible), Wi-Fi (hostapd, wpa_supplicant), docs (mdBook)
 
 - **[Git](./git/)** - Version control and collaboration
   - Git fundamentals and advanced commands
@@ -180,16 +203,19 @@ This knowledge repository contains in-depth documentation on diverse technical t
 
 ### Other Topics
 
-- **[Finance](./finance/)** - Personal finance and investing
-  - Investment strategies and portfolio management
-  - Retirement planning
-  - Financial independence concepts
-  - Tax optimization
+- **[Finance](./finance/)** - Markets, trading, and investing
+  - Asset classes: stocks, bonds, ETFs, REITs, forex, commodities, crypto
+  - Derivatives: options, futures, volatility, and credit markets
+  - Strategies: momentum/trend, pairs/mean reversion, event-driven, algorithmic trading
+  - Analysis: technical, fundamental, and valuation
+  - Risk and portfolio management, interest rates, and market cycles
+  - Macroeconomics, private markets, tax strategies, and financial planning
 
 - **[Misc](./misc/)** - Miscellaneous topics and utilities
-  - Various tools and techniques
-  - General reference material
-  - Productivity tips
+  - Operating systems and computer graphics
+  - Blockchain and Solana
+  - Data tooling (pandas, matplotlib)
+  - U-Boot, Ubuntu, and BLE reference material
 
 ## Documentation Philosophy
 
@@ -233,4 +259,4 @@ This is a living knowledge base, continuously updated with:
 
 **Note**: This is an evolving project. Content is regularly updated, reorganized, and expanded to reflect current best practices and emerging technologies.
 
-*Last updated: 2025*
+*Last updated: 2026*

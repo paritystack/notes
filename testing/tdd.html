@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-07110964.js";
+            window.path_to_searchindex_js = "../searchindex-66a42351.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-6513fff1.js"></script>
+        <script src="../toc-0da8040f.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -192,6 +192,116 @@
 <pre><code class="language-python">def add(a, b):
     return a + b  # Proper implementation
 </code></pre>
+<h2 id="red-green-refactor-deep-dive"><a class="header" href="#red-green-refactor-deep-dive">Red-Green-Refactor Deep Dive</a></h2>
+<h3 id="the-three-laws-of-tdd"><a class="header" href="#the-three-laws-of-tdd">The Three Laws of TDD</a></h3>
+<p>Robert C. Martin’s three rules govern the micro-cycle:</p>
+<ol>
+<li><strong>You may not write production code until you have written a failing test.</strong></li>
+<li><strong>You may not write more of a test than is sufficient to fail</strong> — and a
+compilation/import error counts as a failure.</li>
+<li><strong>You may not write more production code than is sufficient to pass the
+currently failing test.</strong></li>
+</ol>
+<p>These laws force a very short loop — seconds to a couple of minutes per turn.
+You are never more than one failing test away from working code.</p>
+<h3 id="what-each-phase-really-does"><a class="header" href="#what-each-phase-really-does">What Each Phase Really Does</a></h3>
+<p><strong>🔴 Red — prove the test can fail.</strong>
+Run the test and <em>watch it fail</em> before writing any code. This is the step
+beginners skip, and skipping it is dangerous: a test that never fails might be
+asserting nothing, testing the wrong thing, or already passing for the wrong
+reason. A red you actually observed is the only proof the test has teeth.</p>
+<p><strong>🟢 Green — get to passing as fast as possible.</strong>
+Cleanliness does not matter here. Hardcode, copy-paste, take shortcuts —
+whatever turns the bar green quickest. Speed here keeps the cycle tight; the
+mess gets cleaned in the next phase.</p>
+<p><strong>🔵 Refactor — clean up under a safety net.</strong>
+With tests green, improve the design: remove duplication, rename, extract.
+<strong>No behavior changes and no new tests</strong> in this phase — if the tests still
+pass, the refactor was safe. New behavior means a new red test first.</p>
+<h3 id="strategies-for-getting-to-green"><a class="header" href="#strategies-for-getting-to-green">Strategies for Getting to Green</a></h3>
+<p>Kent Beck describes three ways to make a failing test pass:</p>
+<p><strong>Fake it</strong> — return a constant, then generalize. The hardcoded <code>return 5</code>
+above is a fake; it gets you green so you can then drive out the real logic.</p>
+<p><strong>Triangulation</strong> — add a second example to force generalization. One case can
+be faked with a constant; two cases that disagree force the real implementation:</p>
+<pre><code class="language-python">def test_add():
+    assert add(2, 3) == 5   # return 5 passes this...
+    assert add(4, 1) == 5   # ...and this, so triangulate:
+    assert add(2, 2) == 4   # now a constant can't pass — forces a + b
+</code></pre>
+<p><strong>Obvious implementation</strong> — when the real code is trivial and you’re
+confident, just write it directly instead of faking. Use this when the path is
+clear; fall back to fake-it/triangulation when you’re unsure.</p>
+<h3 id="cycle-mechanics--tips"><a class="header" href="#cycle-mechanics--tips">Cycle Mechanics &amp; Tips</a></h3>
+<ul>
+<li><strong>Keep cycles short</strong> — one behavior at a time. If a step feels big, take a
+smaller one.</li>
+<li><strong>Commit on each green</strong> (and again after each refactor). You get a clean,
+revertible history and can always roll back to the last working state.</li>
+<li><strong>Keep a test list</strong> — jot down cases you want to cover as you think of them,
+but write them one at a time. Don’t write all the tests up front.</li>
+<li><strong>Keep the phases distinct</strong> — never refactor while red. If a refactor breaks
+a test, revert it; don’t try to refactor and fix behavior at once.</li>
+</ul>
+<h3 id="anti-patterns--pitfalls"><a class="header" href="#anti-patterns--pitfalls">Anti-patterns &amp; Pitfalls</a></h3>
+<p>❌ <strong>Skipping red</strong> — never seeing the test fail; you don’t know it can catch
+the bug it’s meant to.
+❌ <strong>Over-engineering green</strong> — adding abstraction or unrequested features
+before a test demands them.
+❌ <strong>Testing implementation, not behavior</strong> — asserting on private internals;
+the tests then break on every refactor.
+❌ <strong>Writing all tests at once</strong> — loses the tight feedback loop and the
+test-list discipline.
+❌ <strong>Refactoring while red</strong> — mixing cleanup with behavior changes, so a
+failure could come from either.
+❌ <strong>Asserting nothing</strong> — a test that runs code but checks no outcome is green
+theater; it can never fail.</p>
+<h2 id="tdd-schools"><a class="header" href="#tdd-schools">TDD Schools</a></h2>
+<p>Two styles of TDD differ in how they treat collaborators (the other objects the
+unit talks to). See <a href="mocking.html">Mocking</a> for the test-double mechanics behind
+each.</p>
+<h3 id="london-mockist--outside-in"><a class="header" href="#london-mockist--outside-in">London (mockist) — outside-in</a></h3>
+<p>Start at the outer boundary (e.g. a controller) and work inward. <strong>Mock the
+collaborators</strong> of the unit under test and verify the <em>interactions</em> between
+them. Design emerges from the conversations between objects.</p>
+<pre><code class="language-python">def test_checkout_charges_the_card():
+    gateway = Mock()                 # collaborator is mocked
+    Checkout(gateway).pay(order)
+    gateway.charge.assert_called_once_with(order.total)  # assert interaction
+</code></pre>
+<p>✅ Drives interfaces top-down; tests are isolated and fast.
+❌ Tests couple to <em>how</em> objects collaborate → more brittle on refactor; risk of
+over-mocking.</p>
+<h3 id="detroit--chicago-classicist--inside-out"><a class="header" href="#detroit--chicago-classicist--inside-out">Detroit / Chicago (classicist) — inside-out</a></h3>
+<p>Start with the core domain and build outward using <strong>real objects</strong>, mocking
+only at true boundaries (network, DB, time). Assert on the resulting <em>state</em>.</p>
+<pre><code class="language-python">def test_checkout_records_payment():
+    account = Account(balance=1000)  # real collaborator
+    Checkout(account).pay(order)
+    assert account.balance == 800    # assert state
+</code></pre>
+<p>✅ Tests survive internal refactors; fewer mocks.
+❌ Failures can span several real objects; design feedback comes later.</p>
+<p><strong>Which to use?</strong> Mock at architectural seams and external dependencies
+(classicist by default); reach for outside-in/mockist when designing the
+collaboration protocol of a new feature. Most teams blend both.</p>
+<h2 id="tdd-on-legacy-code"><a class="header" href="#tdd-on-legacy-code">TDD on Legacy Code</a></h2>
+<p>Classic TDD assumes a clean slate, but most work is on existing code with no
+tests. The dilemma: <em>to change code safely you want tests, but to test it you
+often must change it.</em></p>
+<p><strong>Characterization tests</strong> break the cycle: pin the code’s <strong>current</strong> behavior
+(bugs and all) before you touch it, so any change that alters behavior shows up.</p>
+<pre><code class="language-python">def test_characterize_legacy_pricing():
+    # Not "correct" — just what it does today, captured as a safety net
+    assert legacy_price(qty=3, code="X") == 27.0
+</code></pre>
+<p>To get untestable code under test, find <strong>seams</strong> — places to substitute
+behavior without rewriting everything (inject a dependency, subclass-and-override,
+extract a method/parameter). Then write characterization tests, refactor under
+their cover, and only then change behavior with normal red-green-refactor.</p>
+<p>This is the core of Michael Feathers’ <em>Working Effectively with Legacy Code</em>
+(“legacy code” = code without tests). Watch for <a href="test_smells.html">test smells</a>
+like over-mocking while wrapping crufty code.</p>
 <h2 id="benefits"><a class="header" href="#benefits">Benefits</a></h2>
 <p>✅ Better design (code written to be testable)
 ✅ Fewer bugs (test before shipping)
@@ -252,12 +362,6 @@ def multiply(a, b):
 
 # Refactor if needed
 </code></pre>
-<h2 id="anti-patterns"><a class="header" href="#anti-patterns">Anti-patterns</a></h2>
-<p>❌ Writing all tests at once
-❌ Over-engineering the implementation
-❌ Ignoring red phase
-❌ Poorly named tests
-❌ Testing implementation, not behavior</p>
 <h2 id="coverage-with-tdd"><a class="header" href="#coverage-with-tdd">Coverage with TDD</a></h2>
 <p>TDD naturally leads to high coverage:</p>
 <pre><code class="language-python"># Typical TDD: 90%+ coverage

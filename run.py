@@ -1,6 +1,11 @@
 #! /usr/bin/env python3
 import argparse
 import os
+import re
+
+# Match the target of a markdown link: [label](target). The label may itself
+# contain parentheses (e.g. "[... (ACE)](ai/ace.md)"), so anchor on "](".
+LINK_TARGET_RE = re.compile(r"\]\(([^)]+)\)")
 
 def get_files_from_summary(summary_file):
     """Extract all .md file references from SUMMARY.md"""
@@ -8,8 +13,7 @@ def get_files_from_summary(summary_file):
     with open(summary_file, "r") as f:
         content = f.read()
         for line in content.split("\n"):
-            if "(" in line and ")" in line:
-                filename = line[line.find("(")+1:line.find(")")]
+            for filename in LINK_TARGET_RE.findall(line):
                 if filename.endswith(".md"):
                     files.append(filename)
     return files

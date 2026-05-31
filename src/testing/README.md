@@ -18,14 +18,25 @@ Testing strategies, frameworks, and best practices for ensuring code quality and
 ### Testing Practices
 
 - **[TDD](tdd.md)**: Test-driven development approaches and best practices
+- **[BDD with Gherkin](bdd_gherkin.md)**: Behavior-driven development with Given-When-Then and step definitions
 - **[Mocking](mocking.md)**: Isolating code under test with mocks, stubs, spies, and fakes
+- **[Test Data Management](test_data.md)**: Factories, builders, fixtures, seeding, and deterministic data
 - **[Coverage](coverage.md)**: Measuring test completeness and setting coverage thresholds
 - **[Debugging](debugging.md)**: Finding and fixing test failures and flaky tests
+- **[Test Smells](test_smells.md)**: Maintainability anti-patterns in test code and how to fix them
 
-### Code Quality
+### Advanced Techniques
+
+- **[Property-Based Testing](property_based_testing.md)**: Generative testing with Hypothesis and fast-check
+- **[Mutation Testing](mutation_testing.md)**: Measuring test-suite quality beyond coverage percentage
+- **[Contract Testing](contract_testing.md)**: Verifying service boundaries with consumer-driven contracts (Pact)
+
+### Code Quality & Automation
 
 - **[Code Quality](code_quality.md)**: Linting, formatting, type checking, and static analysis
 - **[Performance Testing](performance_testing.md)**: Load testing, stress testing, and benchmarking
+- **[Security Testing](security_testing.md)**: SAST, DAST, dependency scanning, and secrets detection
+- **[CI/CD Test Automation](ci_testing.md)**: Running test suites in pipelines — parallelization, caching, flaky-test handling
 
 ## Testing Pyramid
 

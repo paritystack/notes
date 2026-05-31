@@ -636,6 +636,7 @@ Explore detailed guides for specific topics:
 12. [Technical Analysis](technical_analysis.md) - Chart patterns and indicators
 13. [Valuation](valuation.md) - DCF, multiples, and valuation methods
 14. [Algorithmic Trading](algorithmic_trading.md) - Automated trading systems
+    - [Building Trading Bots](trading_bots.md) - Hands-on bot engineering: broker APIs, live data, order execution, deployment
 
 ### Portfolio and Risk Management
 15. [Portfolio Management](portfolio_management.md) - Asset allocation and optimization

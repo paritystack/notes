@@ -53,7 +53,20 @@ The practical 4-layer model used in modern networks:
 - MSS clamping for VPNs and tunnels
 - Container / overlay network MTU pitfalls
 
+### [Multicast (IGMP & PIM)](multicast_igmp_pim.md)
+- Multicast group addressing (224.0.0.0/4, IPv6 ff00::/8)
+- IGMP v2/v3 join/leave and L2 IGMP snooping
+- PIM-SM / PIM-DM / SSM and rendezvous points
+- Reverse Path Forwarding (RPF) loop prevention
+- Use cases: IPTV, market data, mDNS, VXLAN BUM traffic
+
 ## Core Protocols
+
+### [IP (Internet Protocol)](ip.md)
+- Network-layer addressing and routing overview
+- IPv4 vs IPv6 at a glance
+- Packet structure and the role of IP in the stack
+- Bridges into the version-specific notes below
 
 ### [IPv4 (Internet Protocol version 4)](ipv4.md)
 - 32-bit addressing and packet format
@@ -93,6 +106,33 @@ The practical 4-layer model used in modern networks:
 - Authentication and CORS
 - REST API design
 
+### [QUIC / HTTP/3](quic.md)
+- UDP-based transport with built-in TLS 1.3
+- Stream multiplexing without head-of-line blocking
+- 0-RTT / 1-RTT connection establishment
+- Connection migration across network changes
+- HTTP/3 mapping and comparison to [HTTP/2](http2.md)
+
+## Routing & Traffic Engineering
+
+### [BGP & Anycast](bgp_anycast.md)
+- Path-vector routing between autonomous systems
+- eBGP vs iBGP, route attributes and policy
+- Anycast for CDN/DNS load distribution and resilience
+- Route propagation, hijacks, and RPKI
+
+### [OSPF & IS-IS](ospf_isis.md)
+- Link-state interior gateway protocols
+- Areas, LSAs, and SPF (Dijkstra) computation
+- Adjacency formation and flooding
+- OSPF vs IS-IS design trade-offs
+
+### [QoS & Traffic Shaping](qos_traffic_shaping.md)
+- DiffServ/DSCP marking, ECN, Per-Hop Behaviors
+- Policing vs shaping, token buckets
+- Linux tc qdiscs (HTB, fq_codel, CAKE), bufferbloat
+- Prioritizing voice/[RTP](rtp.md), wireless WMM
+
 ## Application Protocols
 
 ### [SSH (Secure Shell)](ssh.md)
@@ -125,6 +165,20 @@ The practical 4-layer model used in modern networks:
 - CoAP REST-like over UDP
 - Confirmable messages, Observe, block-wise transfer
 - DTLS, CoAP-HTTP proxying
+
+### [Email Protocols (SMTP / IMAP / POP3)](email_protocols.md)
+- SMTP relay vs submission, envelope vs headers
+- IMAP vs POP3 mailbox access models
+- STARTTLS vs implicit TLS ports
+- SPF, DKIM, DMARC, MTA-STS, DANE
+- Anti-spoofing and spam defenses
+
+### [Time Synchronization (NTP & PTP)](ntp_ptp.md)
+- NTP stratum hierarchy, offset/delay calculation
+- chrony configuration and operation
+- PTP (IEEE 1588) for sub-microsecond accuracy
+- Hardware timestamping, boundary/transparent clocks
+- NTS security and amplification abuse
 
 ## Name Resolution
 
@@ -206,6 +260,20 @@ The practical 4-layer model used in modern networks:
 - Security with mandatory encryption
 - Simulcast and bandwidth management
 
+### [RTP / RTCP / SRTP](rtp.md)
+- Real-time media transport over UDP
+- Sequence numbers, timestamps, jitter buffers
+- RTCP sender/receiver reports and quality stats
+- Payload types and codec carriage
+- SRTP encryption and DTLS-SRTP keying
+
+### [SIP & VoIP](sip_voip.md)
+- SIP signaling (INVITE/ACK/BYE), registrars, proxies
+- SDP offer/answer codec negotiation
+- Relationship to [RTP](rtp.md) media and [ICE](ice.md) NAT traversal
+- SIPS, SRTP, and DTLS-SRTP security
+- Tooling: sipp, Wireshark VoIP analysis
+
 ## VPN & Overlay Networks
 
 ### [WireGuard](wireguard.md)
@@ -261,6 +329,20 @@ The practical 4-layer model used in modern networks:
 - Firewall architectures (DMZ, screened subnet)
 - Security best practices
 
+### [TLS/SSL & PKI](tls_ssl.md)
+- TLS 1.3 handshake (1-RTT/0-RTT) vs TLS 1.2
+- X.509 certificates, chains, CA trust, OCSP stapling
+- SNI, ALPN, ECH extensions
+- Mutual TLS (mTLS) and forward secrecy
+- ACME / Let's Encrypt, openssl inspection
+
+### [802.1X / RADIUS / NAC](nac_8021x.md)
+- Port-based network access control
+- Supplicant / authenticator / RADIUS server model
+- EAP methods (EAP-TLS, PEAP, EAP-TTLS), EAPOL
+- RADIUS AAA and dynamic VLAN assignment
+- MAC Authentication Bypass and posture/NAC
+
 ## Quick Reference
 
 ### Protocol Port Numbers
@@ -269,13 +351,19 @@ The practical 4-layer model used in modern networks:
 |----------|------|-----------|---------|
 | **HTTP** | 80 | TCP | Web pages |
 | **HTTPS** | 443 | TCP | Secure web |
+| **HTTP/3 (QUIC)** | 443 | UDP | Secure web over QUIC |
 | **SSH** | 22 | TCP | Secure shell |
 | **FTP** | 20/21 | TCP | File transfer |
 | **DNS** | 53 | UDP/TCP | Name resolution |
 | **DHCP** | 67/68 | UDP | IP configuration |
-| **SMTP** | 25 | TCP | Email sending |
-| **POP3** | 110 | TCP | Email retrieval |
-| **IMAP** | 143 | TCP | Email access |
+| **SMTP** | 25/587 | TCP | Email relay / submission |
+| **SMTPS** | 465 | TCP | SMTP over TLS |
+| **POP3 / POP3S** | 110 / 995 | TCP | Email retrieval |
+| **IMAP / IMAPS** | 143 / 993 | TCP | Email access |
+| **NTP** | 123 | UDP | Time synchronization |
+| **PTP** | 319/320 | UDP | Precision time |
+| **SIP / SIPS** | 5060 / 5061 | UDP/TCP | VoIP signaling |
+| **RADIUS** | 1812/1813 | UDP | AAA auth / accounting |
 | **STUN** | 3478 | UDP | NAT discovery |
 | **SSDP** | 1900 | UDP | UPnP discovery |
 | **mDNS** | 5353 | UDP | Local DNS |

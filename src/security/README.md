@@ -64,6 +64,48 @@ Comprehensive security reference covering cryptography, authentication, and secu
 - Common vulnerabilities (BEAST, POODLE, Heartbleed)
 - Best practices and configuration
 
+## Application & API Security
+
+### [API Security](api_security.md)
+- OWASP API Security Top 10 (BOLA/IDOR, mass assignment, SSRF)
+- Authentication (API keys, OAuth2, JWT, mTLS) vs authorization
+- Input validation, rate limiting, and gateway controls
+- GraphQL/gRPC specifics and API inventory
+
+### [Threat Modeling](threat_modeling.md)
+- Data-flow diagrams and trust boundaries
+- STRIDE taxonomy and attack trees
+- Risk ranking (DREAD, likelihood × impact)
+- Mitigation strategies and tooling
+
+## Key & Secrets Management
+
+### [Key Management](key_management.md)
+- Key lifecycle (generate → rotate → revoke → destroy)
+- HSMs, cloud KMS, and envelope encryption
+- Key hierarchy, separation, and rotation
+- Standards (PKCS#11, KMIP, JWK, FIPS 140)
+
+### [Secrets Management](secrets_management.md)
+- Vault, cloud secret stores, sealed/external secrets
+- Static vs dynamic (short-lived) secrets
+- Workload identity and the secret-zero problem
+- Leak detection and rotation
+
+## Supply Chain & Future-Proofing
+
+### [Supply Chain Security](supply_chain_security.md)
+- SBOM, SLSA, and dependency hygiene
+- Dependency confusion, typosquatting, build compromise
+- Signing & provenance (Sigstore/cosign, in-toto)
+- Securing the CI/CD pipeline
+
+### [Post-Quantum Cryptography](post_quantum_crypto.md)
+- Shor/Grover and the quantum threat model
+- NIST standards (ML-KEM, ML-DSA, SLH-DSA)
+- Hybrid deployment and crypto-agility
+- Harvest-now-decrypt-later and migration
+
 ## Quick Reference
 
 ### Common Algorithms

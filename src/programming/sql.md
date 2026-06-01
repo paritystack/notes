@@ -2,7 +2,7 @@
 
 ## Overview
 
-SQL is a domain-specific language used for managing and manipulating relational databases. It's the standard language for relational database management systems (RDBMS).
+SQL is a domain-specific language used for managing and manipulating relational databases. It's the standard language for relational database management systems (RDBMS). It is the mainstream [declarative](paradigms.md) language — you describe *what* result you want and the query planner decides *how* to compute it. The deeper engine concepts behind these queries (indexes, query planning, MVCC, the write-ahead log) live in [database internals](../databases/database_internals.md) and the broader [databases](../databases/README.md) section. Scripts and applications reach it from languages like [Python](python.md), [Java](java.md), and [Bash](bash.md).
 
 **Key Concepts:**
 - Declarative language (what, not how)
@@ -1079,3 +1079,20 @@ sqlite3 database.db
 .schema table_name
 .quit
 ```
+
+## Where this connects
+
+- [Databases](../databases/README.md) — the section covering relational and non-relational stores, indexing, and transactions in depth.
+- [Database internals](../databases/database_internals.md) — B-trees, query planning, MVCC, and the WAL that execute the SQL on this page.
+- [Paradigms](paradigms.md) — SQL is the canonical declarative/query language; set-based thinking over imperative loops.
+- [Python](python.md) / [Java](java.md) — application code talks to SQL via drivers and ORMs (SQLAlchemy, Hibernate).
+- [Bash](bash.md) — scripts shell out to `psql`/`mysql`/`sqlite3` for one-off queries and migrations.
+
+## Pitfalls
+
+- **SQL injection.** Building queries by string concatenation; always use parameterized/prepared statements.
+- **N+1 queries.** ORMs firing one query per row instead of a join; watch the generated SQL.
+- **`NULL` three-valued logic.** `NULL = NULL` is unknown, not true; `NOT IN (… NULL …)` returns no rows. Use `IS NULL`/`IS NOT NULL`.
+- **Missing or wrong indexes.** Full table scans on large tables; but over-indexing slows writes — index for your actual query patterns.
+- **Implicit cross joins.** Forgetting the `ON`/`WHERE` join condition produces a Cartesian product.
+- **Non-deterministic `SELECT` without `ORDER BY`.** Row order isn't guaranteed; relying on insertion order is a bug.

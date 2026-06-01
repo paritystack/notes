@@ -2,7 +2,7 @@
 
 ## Overview
 
-C is a general-purpose, procedural programming language developed by Dennis Ritchie at Bell Labs in 1972. It's widely used for system programming, embedded systems, operating systems (Unix/Linux), and applications requiring high performance and low-level memory access.
+C is a general-purpose, procedural programming language developed by Dennis Ritchie at Bell Labs in 1972. It's widely used for system programming, embedded systems, operating systems (Unix/Linux), and applications requiring high performance and low-level memory access. It is the archetypal [procedural](paradigms.md) language with manual [memory management](memory_management.md) (`malloc`/`free`, raw pointers), error-code-based [error handling](error_handling.md), and a thin layer over the machine that an ahead-of-time [compiler](compilers.md) translates to native code. It is the foundation [C++](cpp.md) extends and the model [Rust](rust.md) and [Zig](zig.md) set out to make safer.
 
 **Key Features:**
 - **Low-level access to memory** via pointers
@@ -1941,3 +1941,21 @@ The `printf` and `scanf` functions are commonly used for input and output in C. 
    ```
 
 These variants of `printf` and `scanf` provide flexibility for different input and output scenarios in C programming.
+
+## Where this connects
+
+- [Memory management](memory_management.md) — manual `malloc`/`free`, the stack/heap divide, and the bugs (leaks, use-after-free, double-free) that motivate everything else.
+- [C++](cpp.md) — the superset that adds classes, templates, RAII, and the STL on top of C.
+- [Rust](rust.md) / [Zig](zig.md) — modern systems languages explicitly designed to keep C's control while removing its footguns.
+- [Compilers](compilers.md) — C maps closely to machine code; undefined behavior is what lets the optimizer be aggressive.
+- [Error handling](error_handling.md) — return codes and `errno`, the pattern result types react against.
+- [Pointers ↔ data structures](../data_structures/README.md) — manual pointer manipulation underlies linked lists, trees, and buffers.
+
+## Pitfalls
+
+- **Undefined behavior.** Signed overflow, out-of-bounds access, and use-after-free are UB the optimizer may exploit — build with sanitizers (ASan/UBSan), not trust.
+- **Manual memory errors.** Leaks, double-frees, and dangling pointers; every `malloc` needs exactly one `free`. Use Valgrind.
+- **Buffer overflows.** `gets`, unchecked `strcpy`/`sprintf`, and off-by-one indexing are classic security holes; prefer bounded variants.
+- **Uninitialized variables.** Reading uninitialized stack memory yields garbage and nondeterministic bugs.
+- **Implicit conversions & integer promotion.** Silent narrowing, signed/unsigned mixing, and `char` sign issues cause subtle errors.
+- **String/null-terminator mistakes.** Forgetting the `\0`, or sizing buffers without room for it, corrupts memory.

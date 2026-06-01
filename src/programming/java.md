@@ -2,7 +2,7 @@
 
 ## Overview
 
-Java is a high-level, class-based, object-oriented programming language designed to have minimal implementation dependencies. It follows the "write once, run anywhere" (WORA) principle.
+Java is a high-level, class-based, object-oriented programming language designed to have minimal implementation dependencies. It follows the "write once, run anywhere" (WORA) principle. It is the canonical [OOP](oop_concepts.md) language — classes, interfaces, and subtype polymorphism — with [garbage-collected memory management](memory_management.md), checked-and-unchecked exception [error handling](error_handling.md), erased [generics](generics.md), and thread-based [concurrency](concurrency.md). It compiles to bytecode that a JIT [compiler](compilers.md) finishes at runtime. [Kotlin](kotlin.md) is its modern JVM successor (100% interoperable), and [C++](cpp.md) is its closest C-family relative.
 
 **Key Features:**
 - Platform independent (runs on JVM)
@@ -818,3 +818,22 @@ try {
 - **Jackson**: JSON processing
 - **Log4j/SLF4J**: Logging
 - **Apache Commons**: Utility libraries
+
+## Where this connects
+
+- [OOP concepts](oop_concepts.md) — Java is the textbook OOP language: classes, interfaces, inheritance, and dynamic dispatch.
+- [Kotlin](kotlin.md) — the modern JVM language; fully interoperable and removes much of Java's boilerplate (see the comparison table on that page).
+- [Generics](generics.md) — Java generics use type erasure: no runtime type args, no `new T[]`, unchecked-cast warnings.
+- [Memory management](memory_management.md) — generational garbage collection; tuning and pauses live there.
+- [Concurrency](concurrency.md) — threads, `java.util.concurrent`, the memory model, and structured concurrency.
+- [Error handling](error_handling.md) — checked vs unchecked exceptions, a design choice unique among mainstream languages.
+- [Compilers](compilers.md) — `javac` to bytecode, then a profiling JIT (HotSpot) at runtime.
+
+## Pitfalls
+
+- **`==` vs `.equals()`.** `==` compares references for objects; use `.equals()` for value equality and keep `equals`/`hashCode` consistent.
+- **`null` and NPEs.** No null safety; the "billion-dollar mistake" is everywhere. `Optional` and annotations help.
+- **Autoboxing surprises.** `Integer` caching makes `==` "work" for small values and fail for large ones; unboxing a `null` throws.
+- **Erasure limits.** Can't do `new T()`, `T[]`, or `instanceof List<String>`; reflection on type args is lost.
+- **Checked-exception noise.** Over-wrapping or swallowing checked exceptions (`catch (Exception e) {}`) hides bugs.
+- **Mutable shared state.** Sharing non-thread-safe collections across threads without synchronization causes data races.

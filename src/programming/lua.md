@@ -2,7 +2,7 @@
 
 ## Overview
 
-Lua is a lightweight, high-level, multi-paradigm programming language designed primarily for embedded use in applications. It's known for its simplicity, efficiency, and powerful data description constructs.
+Lua is a lightweight, high-level, [multi-paradigm](paradigms.md) programming language designed primarily for embedded use in applications. It's known for its simplicity, efficiency, and powerful data description constructs. It is [dynamically typed](type_systems.md) with [first-class functions](functional_programming.md) and closures, garbage-collected [memory management](memory_management.md), and a single data-structure primitive — the table — from which [OOP](oop_concepts.md) is built via metatables. Concurrency is cooperative through coroutines (see [async programming](async_programming.md)). It is most often embedded in a host [C](c.md)/[C++](cpp.md) program. Compare with [JavaScript](javascript.md) and [Python](python.md) as fellow dynamic scripting languages.
 
 **Key Features:**
 - Lightweight and embeddable
@@ -913,3 +913,21 @@ end
 - **LÖVE**: Game framework
 - **OpenResty**: Web platform (Nginx + Lua)
 - **LuaRocks**: Package manager
+
+## Where this connects
+
+- [C](c.md) / [C++](cpp.md) — Lua is built to embed; its C API is how host programs expose functions and consume scripts.
+- [OOP concepts](oop_concepts.md) — there are no classes; OOP is emulated with tables, metatables, and `__index`.
+- [Functional programming](functional_programming.md) — first-class functions, closures, and proper tail calls.
+- [Async programming](async_programming.md) — cooperative coroutines (`coroutine.yield`/`resume`) give async without threads.
+- [Memory management](memory_management.md) — an incremental garbage collector you can tune from the host.
+- [JavaScript](javascript.md) / [Python](python.md) — sibling dynamic scripting languages with similar trade-offs.
+
+## Pitfalls
+
+- **1-based indexing.** Arrays/tables start at index 1, not 0 — a constant source of off-by-one bugs for newcomers.
+- **`nil` removes table keys.** Assigning `nil` deletes the entry; `#t` (length) is undefined for tables with holes.
+- **Global-by-default variables.** Forgetting `local` creates globals, leaking state and risking name clashes.
+- **`==` doesn't coerce.** `1 == "1"` is `false`; and only `nil`/`false` are falsy (`0` and `""` are truthy).
+- **Integer vs float (5.3+).** Lua 5.3 split integer/float subtypes; division `/` always yields a float, `//` floors.
+- **Version fragmentation.** 5.1 / 5.2 / 5.3 / 5.4 and LuaJIT differ in syntax and APIs; know your target runtime.

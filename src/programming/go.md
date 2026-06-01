@@ -2,7 +2,7 @@
 
 ## Overview
 
-Go (Golang) is a statically typed, compiled programming language designed at Google. It's known for its simplicity, efficiency, and excellent support for concurrent programming.
+Go (Golang) is a statically typed, compiled programming language designed at Google. It's known for its simplicity, efficiency, and excellent support for concurrent programming. It is deliberately small: structs + interfaces instead of class inheritance (a lighter take on [OOP](oop_concepts.md)), explicit value-based [error handling](error_handling.md) (no exceptions), [garbage-collected memory](memory_management.md), and goroutines + channels as its signature [concurrency](concurrency.md) model. It compiles ahead-of-time to native code (see [compilers](compilers.md)) and added [generics](generics.md) in 1.18. Compare with [Rust](rust.md) (the other modern systems language) and [C](c.md) (its spiritual ancestor in simplicity).
 
 **Key Features:**
 - Fast compilation and execution
@@ -1205,3 +1205,21 @@ go get package
 # Show documentation
 go doc fmt.Println
 ```
+
+## Where this connects
+
+- [Concurrency](concurrency.md) — goroutines and channels ("share memory by communicating") are Go's defining feature.
+- [Error handling](error_handling.md) — explicit `if err != nil` values, `errors.Is`/`As`, no exceptions.
+- [OOP concepts](oop_concepts.md) — composition over inheritance, with structs and implicitly-satisfied (structural) interfaces.
+- [Generics](generics.md) — added in 1.18 via GC-shape stenciling + dictionaries (a middle path between monomorphization and erasure).
+- [Memory management](memory_management.md) — a low-latency concurrent garbage collector; escape analysis decides stack vs heap.
+- [Rust](rust.md) / [C](c.md) — contrast Go's GC + simplicity against Rust's ownership and C's manual control.
+
+## Pitfalls
+
+- **`nil` interface gotcha.** An interface holding a `nil` pointer is not `== nil`; a common source of surprising bugs.
+- **Loop variable capture.** Pre-1.22, goroutines/closures capturing the loop variable all saw the last value; know your Go version.
+- **Unchecked errors.** Ignoring returned `error` values (or `_`-discarding them) hides failures; lint for it.
+- **Goroutine leaks.** Spawning goroutines that block forever on a channel with no consumer; always have a cancellation/`context` path.
+- **Slice aliasing.** Slices share backing arrays; `append` may mutate another slice or not, depending on capacity.
+- **Data races.** Goroutines sharing memory without synchronization; run the race detector (`go test -race`).

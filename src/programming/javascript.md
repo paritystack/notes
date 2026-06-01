@@ -2,7 +2,7 @@
 
 ## Overview
 
-JavaScript is a high-level, interpreted programming language primarily used for web development. It enables interactive web pages and is an essential part of web applications alongside HTML and CSS.
+JavaScript is a high-level, interpreted programming language primarily used for web development. It enables interactive web pages and is an essential part of web applications alongside HTML and CSS. It is [dynamically typed](type_systems.md) and [multi-paradigm](paradigms.md), with [first-class functions](functional_programming.md), prototype-based [OOP](oop_concepts.md), garbage-collected [memory management](memory_management.md), and a single-threaded event loop that powers its [asynchronous programming](async_programming.md) model. [TypeScript](typescript.md) is its statically-typed superset, and [Python](python.md) is the closest comparison among other dynamic languages.
 
 **Key Features:**
 - Event-driven, functional, and imperative programming styles
@@ -968,3 +968,21 @@ const letters = words.flatMap(w => w.split(' '));
 - **Axios**: HTTP client
 - **Moment.js/Day.js**: Date manipulation
 - **D3.js**: Data visualization
+
+## Where this connects
+
+- [TypeScript](typescript.md) — a superset that adds static typing; the page to read next.
+- [Asynchronous programming](async_programming.md) — the event loop, microtask queue, Promises, and `async`/`await` are JavaScript's whole concurrency story.
+- [Functional programming](functional_programming.md) — first-class functions, closures, `map`/`filter`/`reduce`.
+- [OOP concepts](oop_concepts.md) — prototype-based objects and the ES6 `class` sugar over them.
+- [Type systems](type_systems.md) — dynamic, weakly-typed, with coercion quirks that TypeScript constrains.
+- [Memory management](memory_management.md) — garbage collected; closures can retain memory unexpectedly.
+
+## Pitfalls
+
+- **Coercion and `==`.** Loose equality coerces types (`'' == 0`, `[] == false`); prefer `===`/`!==`.
+- **`this` binding.** `this` depends on call site; arrow functions capture lexically while regular functions don't.
+- **`var` hoisting / scope.** `var` is function-scoped and hoisted; use `let`/`const` for block scope.
+- **`NaN`, `null`, `undefined`.** `NaN !== NaN`, `typeof null === 'object'`, and `undefined` vs `null` distinctions trip people up.
+- **Floating point.** `0.1 + 0.2 !== 0.3`; all numbers are IEEE-754 doubles.
+- **Unhandled promise rejections.** Forgetting `await`/`.catch()` swallows async errors silently.

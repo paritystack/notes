@@ -2,7 +2,7 @@
 
 ## Overview
 
-Bash (Bourne Again SHell) is a Unix shell and command language used for automating tasks, system administration, and scripting. It's the default shell on most Linux distributions and macOS.
+Bash (Bourne Again SHell) is a Unix shell and command language used for automating tasks, system administration, and scripting. It's the default shell on most Linux distributions and macOS. It is an [imperative](paradigms.md), dynamically-typed glue language: everything is a string, control flow drives external commands, and pipes compose programs. It leans on exit-code-based [error handling](error_handling.md) (`set -e`, `$?`) rather than exceptions. For anything beyond a few hundred lines, reach for [Python](python.md) instead; for querying databases from scripts, see [SQL](sql.md).
 
 **Key Features:**
 - Command execution and scripting
@@ -920,3 +920,19 @@ done
 - **Bash Manual**: `man bash`
 - **Bash Guide**: https://mywiki.wooledge.org/BashGuide
 - **Explainshell**: Explain shell commands (explainshell.com)
+
+## Where this connects
+
+- [Python](python.md) — the language to graduate to once a Bash script grows logic, data structures, or error handling.
+- [Error handling](error_handling.md) — exit codes, `$?`, `set -euo pipefail`, and `trap` are Bash's only error mechanism.
+- [Paradigms](paradigms.md) — Bash is imperative shell glue; pipelines are a small taste of dataflow composition.
+- [SQL](sql.md) — scripts frequently shell out to `psql`/`mysql`/`sqlite3` to run queries.
+
+## Pitfalls
+
+- **Unquoted variables.** `$var` undergoes word-splitting and globbing; almost always use `"$var"` and `"${arr[@]}"`.
+- **No `set -euo pipefail`.** Scripts plow on after failures by default; enable strict mode and use `trap` for cleanup.
+- **Parsing `ls`.** Iterating `for f in $(ls)` breaks on spaces/newlines; glob directly (`for f in *`) or use `find -print0`.
+- **`[ ]` vs `[[ ]]`.** POSIX `[` needs careful quoting and lacks `&&`/regex; prefer `[[ ]]` in Bash.
+- **Subshell variable loss.** Pipelines run in subshells, so `cmd | while read; do x=...; done` loses `x` afterward.
+- **Spaces around `=`.** Assignment must be `x=1`, not `x = 1` (the latter runs `x` as a command).

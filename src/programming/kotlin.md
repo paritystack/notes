@@ -2,7 +2,7 @@
 
 ## Overview
 
-Kotlin is a modern, statically-typed programming language that runs on the JVM and is fully interoperable with Java. Developed by JetBrains, it's the preferred language for Android development and is increasingly used for server-side applications.
+Kotlin is a modern, statically-typed programming language that runs on the JVM and is fully interoperable with [Java](java.md). Developed by JetBrains, it's the preferred language for Android development and is increasingly used for server-side applications. It keeps Java's [OOP](oop_concepts.md) model but adds [null safety](type_systems.md) in the type system, first-class [functional programming](functional_programming.md), declaration-site variance for [generics](generics.md), and coroutines for [async programming](async_programming.md) and [concurrency](concurrency.md). It compiles to JVM bytecode (also JS/native) via the [compiler](compilers.md). Its closest siblings here are [Java](java.md) (its host), [TypeScript](typescript.md), and [Dart](dart.md) — the pragmatic statically-typed niche.
 
 **Key Features:**
 - Concise syntax with less boilerplate
@@ -2399,3 +2399,21 @@ class StringUtilsTest {
 | Extension | Not available | `fun String.ext() {...}` |
 | Null check | `if (x != null) x.length()` | `x?.length` |
 | Smart cast | Manual cast needed | Automatic after null check |
+
+## Where this connects
+
+- [Java](java.md) — Kotlin's host platform and 100% interop target; the comparison table above maps the differences.
+- [Type systems](type_systems.md) — null safety (`T` vs `T?`), smart casts, and declaration-site variance (`in`/`out`).
+- [Async programming](async_programming.md) / [concurrency](concurrency.md) — coroutines and structured concurrency are Kotlin's flagship concurrency model.
+- [Functional programming](functional_programming.md) — first-class functions, lambdas, and a rich collection-operations API.
+- [Dart](dart.md) / [TypeScript](typescript.md) — the closest siblings in syntax, null safety, and the pragmatic-typed niche.
+- [OOP concepts](oop_concepts.md) — classes, interfaces, `object` singletons, delegation, and `data class`es.
+
+## Pitfalls
+
+- **`!!` defeats null safety.** The not-null assertion throws an NPE if you're wrong; prefer `?.`, `?:`, or a real check that smart-casts.
+- **Platform types from Java.** Values crossing from Java have unknown nullability (`String!`); they can sneak nulls past the checker.
+- **Coroutine scope leaks.** Launching in the wrong `CoroutineScope` (e.g. `GlobalScope`) leaks work that outlives its owner.
+- **`equals`/`hashCode` on non-data classes.** Forgetting them breaks set/map membership; `data class` generates them for you.
+- **Extension-function dispatch.** Extensions resolve statically by declared type, not dynamically — surprising next to normal methods.
+- **Overusing scope functions.** Nesting `let`/`run`/`apply`/`also`/`with` hurts readability; pick one per purpose.

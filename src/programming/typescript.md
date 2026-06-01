@@ -1,26 +1,16 @@
 # TypeScript
 
-TypeScript is a strongly-typed superset of JavaScript developed by Microsoft that compiles to plain JavaScript. It adds optional static typing, classes, interfaces, and other features to JavaScript, making it easier to build and maintain large-scale applications.
+## Overview
 
-## Table of Contents
-- [Why TypeScript?](#why-typescript)
-- [Basic Types](#basic-types)
-- [Interfaces](#interfaces)
-- [Type Aliases](#type-aliases)
-- [Union and Intersection Types](#union-and-intersection-types)
-- [Generics](#generics)
-- [Classes](#classes)
-- [Enums](#enums)
-- [Type Assertions](#type-assertions)
-- [Type Guards](#type-guards)
-- [Utility Types](#utility-types)
-- [TypeScript with React](#typescript-with-react)
-- [TypeScript with Node.js](#typescript-with-nodejs)
-- [Configuration (tsconfig.json)](#configuration-tsconfigjson)
-- [Advanced Types](#advanced-types)
-- [Best Practices](#best-practices)
-
----
+TypeScript is a strongly-typed superset of [JavaScript](javascript.md) developed by Microsoft
+that compiles to plain JavaScript. It adds optional static typing, classes, interfaces, and
+other features to JavaScript, making it easier to build and maintain large-scale applications.
+It is a [transpiler](compilers.md), not a runtime — types are erased after checking, so it adds
+no runtime cost (and no runtime [generics](generics.md) info). Its structural [type system](type_systems.md)
+is unusually expressive (union/intersection types, mapped and conditional types, narrowing via
+type guards), bringing exhaustiveness checks close to [pattern matching](pattern_matching.md).
+Closest siblings here are [JavaScript](javascript.md) (its base), [Kotlin](kotlin.md), and
+[Dart](dart.md) in the pragmatic statically-typed niche.
 
 ## Why TypeScript?
 
@@ -1986,3 +1976,21 @@ console.log(db1 === db2); // true
 ---
 
 TypeScript significantly improves the development experience by catching errors early, providing better tooling support, and making code more maintainable. The initial learning curve is worth the long-term benefits, especially for large-scale applications and team projects.
+
+## Where this connects
+
+- [JavaScript](javascript.md) — TypeScript compiles to it and inherits all its runtime semantics (and quirks).
+- [Type systems](type_systems.md) — structural typing, union/intersection/conditional/mapped types, and flow-based narrowing.
+- [Generics](generics.md) — erased at runtime (like Java), so no reflection on type args and no `new T()`.
+- [Compilers](compilers.md) — `tsc` is a transpiler; types are checked then erased to plain JS.
+- [Pattern matching](pattern_matching.md) — discriminated unions + `switch` give exhaustiveness checks (with `never`).
+- [Kotlin](kotlin.md) / [Dart](dart.md) — siblings in the pragmatic, null-aware, statically-typed space.
+
+## Pitfalls
+
+- **`any` defeats the point.** A single `any` (often from untyped JSON or libraries) silently disables checking downstream; prefer `unknown` and narrow.
+- **Types are erased.** No runtime type info — you can't `instanceof` a generic or interface; validate external data at the boundary (e.g. zod).
+- **Type assertions lie.** `as` overrides the checker without verifying; a wrong assertion crashes at runtime.
+- **Structural typing surprises.** Two unrelated types with the same shape are interchangeable; excess-property checks only fire on object literals.
+- **`strictNullChecks` off.** Without strict mode, `null`/`undefined` slip into every type, recreating the JS problem TS exists to solve.
+- **Declaration drift.** Hand-written or stale `@types` packages can disagree with the actual library, giving false confidence.

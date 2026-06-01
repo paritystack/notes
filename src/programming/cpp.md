@@ -1,7 +1,7 @@
 # C++
 
 ## Overview
-C++ is an extension of C that adds object-oriented features and other enhancements.
+C++ is an extension of [C](c.md) that adds object-oriented features and other enhancements. It is a large multi-paradigm language: full [OOP](oop_concepts.md) (classes, inheritance, virtual dispatch), template-based [generics](generics.md) and [metaprogramming](metaprogramming.md), deterministic [memory management](memory_management.md) via RAII and smart pointers (no GC), and exception-based [error handling](error_handling.md). It compiles ahead-of-time to native code (see [compilers](compilers.md)) and competes with [Rust](rust.md) and [Zig](zig.md) in the high-performance systems space.
 
 ## Key Features
 - Object-oriented programming
@@ -1495,3 +1495,21 @@ Choosing the right data structure can make or break your solution.
   Keep abreast of new algorithms and techniques emerging in the competitive programming community.
 
 By mastering these methods and leveraging C++'s powerful features, competitive programmers can efficiently tackle a wide array of challenging problems and excel in contests.
+
+## Where this connects
+
+- [C](c.md) — C++ is (mostly) a superset; the C memory and pointer model underlies everything here.
+- [Memory management](memory_management.md) — RAII, `unique_ptr`/`shared_ptr`/`weak_ptr`, and deterministic destruction instead of GC.
+- [Generics](generics.md) / [metaprogramming](metaprogramming.md) — templates are monomorphized generics that double as compile-time computation (`constexpr`, concepts).
+- [OOP concepts](oop_concepts.md) — classes, multiple inheritance, virtual functions, and vtables.
+- [Rust](rust.md) / [Zig](zig.md) — the modern alternatives aiming for C++ performance with fewer footguns.
+- [Compilers](compilers.md) — undefined behavior, optimization levels, and long template-driven compile times.
+
+## Pitfalls
+
+- **Manual lifetime errors.** Dangling references, use-after-free, and ownership confusion; lean on RAII and smart pointers, avoid raw `new`/`delete`.
+- **Undefined behavior.** Signed overflow, OOB access, and reading uninitialized memory; the optimizer assumes UB never happens.
+- **The rule of 0/3/5.** Defining one of destructor/copy/move but not the others leads to leaks or double-frees.
+- **Object slicing.** Assigning a derived object to a base value drops the derived part; pass by reference/pointer for polymorphism.
+- **Template error walls.** A small mistake yields pages of diagnostics; concepts (C++20) help constrain and clarify.
+- **Iterator/reference invalidation.** Mutating a container (e.g. `vector` reallocation) invalidates existing iterators and references.

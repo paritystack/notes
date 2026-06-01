@@ -2,7 +2,7 @@
 
 ## Overview
 
-Rust is a systems programming language focused on safety, speed, and concurrency. It achieves memory safety without garbage collection through its ownership system.
+Rust is a systems programming language focused on safety, speed, and concurrency. It achieves [memory safety](memory_management.md) without garbage collection through its ownership system — the [compiler](compilers.md) enforces ownership and borrowing at compile time. Errors are values via `Result`/`Option` ([error handling](error_handling.md)), it has monomorphized [generics](generics.md) and traits (its take on [OOP](oop_concepts.md) polymorphism), exhaustive [pattern matching](pattern_matching.md), and "fearless" [concurrency](concurrency.md) backed by `Send`/`Sync`. It compiles ahead-of-time to native code. Compare with [C++](cpp.md) and [Zig](zig.md) (the other systems languages) and [Go](go.md) (GC-based simplicity vs Rust's control).
 
 **Key Features:**
 - Memory safety without garbage collection
@@ -1062,3 +1062,21 @@ cargo clippy
 - **log**: Logging facade
 - **anyhow**: Error handling
 - **thiserror**: Custom error types
+
+## Where this connects
+
+- [Memory management](memory_management.md) — ownership, borrowing, and lifetimes move allocation safety to compile time with no GC.
+- [Error handling](error_handling.md) — `Result<T, E>`/`Option<T>`, the `?` operator, and no exceptions.
+- [Pattern matching](pattern_matching.md) — exhaustive `match` over enums (sum types) is central to idiomatic Rust.
+- [Generics](generics.md) — monomorphized generics + trait bounds; the type-safe corner that can cause code bloat.
+- [Concurrency](concurrency.md) — `Send`/`Sync` and the borrow checker make data races a compile error.
+- [C++](cpp.md) / [Zig](zig.md) / [Go](go.md) — the systems-language neighbours; compare ownership vs RAII vs manual vs GC.
+
+## Pitfalls
+
+- **Fighting the borrow checker.** Reaching for `clone()`, `Rc<RefCell>`, or `unsafe` to silence errors instead of restructuring ownership.
+- **Lifetime annotation overload.** Over-annotating where elision would do, or building self-referential structs that lifetimes can't express.
+- **`.unwrap()`/`.expect()` everywhere.** Convenient in prototypes, but panics in production; propagate with `?` instead.
+- **Monomorphization bloat.** Heavy generic + inline use balloons binary size and compile times.
+- **`async` complexity.** Pinning, `Send` bounds, and runtime choice (tokio/async-std) add real friction.
+- **Interior mutability misuse.** `RefCell` moves borrow checks to runtime — a wrong access panics instead of failing to compile.

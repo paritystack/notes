@@ -2,7 +2,7 @@
 
 ## Overview
 
-Python is a high-level, interpreted, dynamically-typed programming language known for its simplicity and readability. It's widely used for web development, data science, machine learning, automation, and scripting.
+Python is a high-level, interpreted, dynamically-typed programming language known for its simplicity and readability. It's widely used for web development, data science, machine learning, automation, and scripting. It is [multi-paradigm](paradigms.md) — blending [object-oriented](oop_concepts.md) and [functional](functional_programming.md) styles — with [dynamic typing](type_systems.md), reference-counting plus cyclic GC for [memory management](memory_management.md), exception-based [error handling](error_handling.md), and an event-loop model for [async programming](async_programming.md). Closest comparison points here are [JavaScript](javascript.md) (the other big dynamic language) and [TypeScript](typescript.md) (Python's type hints play a similar role).
 
 **Key Features:**
 - Clean, readable syntax emphasizing indentation
@@ -889,3 +889,21 @@ deactivate
 - **pytest**: Testing
 - **Beautiful Soup**: Web scraping
 - **Pillow**: Image processing
+
+## Where this connects
+
+- [Paradigms](paradigms.md) / [OOP concepts](oop_concepts.md) / [functional programming](functional_programming.md) — Python mixes all three; comprehensions, generators, and first-class functions are the functional side.
+- [Type systems](type_systems.md) — dynamic and duck-typed at runtime; `typing`/mypy add optional static checks (compare [TypeScript](typescript.md) over [JavaScript](javascript.md)).
+- [Async programming](async_programming.md) — `asyncio`, `async`/`await`, and the single-threaded event loop; the GIL means threads don't parallelize CPU work (see [concurrency](concurrency.md)).
+- [Memory management](memory_management.md) — reference counting plus a cyclic garbage collector.
+- [Iterators & generators](iterators_generators.md) — the iterator protocol and lazy `yield` pipelines are core Python.
+- [Error handling](error_handling.md) — EAFP (`try`/`except`) over exceptions.
+
+## Pitfalls
+
+- **Mutable default arguments.** `def f(x=[])` shares one list across calls; use `None` and create inside.
+- **Late-binding closures.** Lambdas in a loop capture the variable, not its value — classic `for i in range(n): fns.append(lambda: i)` bug.
+- **The GIL.** Threads don't give CPU parallelism; reach for `multiprocessing` or async I/O instead.
+- **`is` vs `==`.** `is` tests identity, not equality; it only "works" for small ints/`None` by accident of interning.
+- **Mutating while iterating.** Changing a list/dict during iteration raises or silently skips elements.
+- **Dependency/version sprawl.** System Python vs virtualenvs vs Python 2 leftovers; always work in a venv.

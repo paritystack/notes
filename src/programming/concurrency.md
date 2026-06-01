@@ -1,22 +1,17 @@
-# Concurrency Programming Guide
+# Concurrency
 
-A comprehensive guide to concurrent programming, covering fundamentals, synchronization primitives, patterns, and practical implementations across multiple programming languages.
+## Overview
 
-## Table of Contents
-
-1. [Fundamentals](#fundamentals)
-2. [Synchronization Primitives](#synchronization-primitives)
-3. [Concurrency Patterns](#concurrency-patterns)
-4. [Language-Specific Implementations](#language-specific-implementations)
-5. [Deadlock Prevention](#deadlock-prevention)
-6. [Performance Considerations](#performance-considerations)
-7. [Real-World Applications](#real-world-applications)
-8. [Best Practices](#best-practices)
-9. [Anti-Patterns](#anti-patterns)
-10. [Debugging Concurrent Programs](#debugging-concurrent-programs)
-11. [Testing Concurrent Code](#testing-concurrent-code)
-
----
+Concurrency is about *structuring* a program as multiple tasks that make progress
+independently; parallelism is *executing* them at the same time on multiple cores — the two
+are related but distinct. This page covers the fundamentals, synchronization primitives, and
+patterns, with implementations across several languages. It builds directly on
+[memory management](memory_management.md) (data races are about shared mutable memory and the
+memory model) and is the shared-state, multi-threaded counterpart to single-threaded
+[asynchronous programming](async_programming.md). The language models differ sharply:
+[Go](go.md) (goroutines + channels), [Rust](rust.md) (ownership prevents data races at compile
+time), [Java](java.md)/[Kotlin](kotlin.md) (threads + structured concurrency), and
+[Python](python.md) (the GIL) each make different trade-offs.
 
 ## Fundamentals
 
@@ -4084,3 +4079,16 @@ Concurrency is a powerful tool but comes with complexity:
 - "Java Concurrency in Practice" by Goetz et al.
 - "Seven Concurrency Models in Seven Weeks" by Butcher
 - "Programming Rust" (Chapter on Concurrency) by Blandy & Orendorff
+
+## Where this connects
+
+- [Asynchronous programming](async_programming.md) — the single-threaded, event-loop side of
+  the same problem; `async`/`await` handles I/O-bound concurrency without threads.
+- [Memory management](memory_management.md) — data races, cache lines / false sharing, and the
+  memory model are all about how threads see shared memory.
+- [Rust](rust.md) — "fearless concurrency": ownership and `Send`/`Sync` reject data races at
+  compile time.
+- [Go](go.md) — goroutines and channels ("share memory by communicating").
+- [Java](java.md) / [Kotlin](kotlin.md) — threads, `java.util.concurrent`, and coroutines /
+  structured concurrency.
+- [Python](python.md) — the GIL means threads don't parallelize CPU work; use processes or async.

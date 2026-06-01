@@ -432,6 +432,7 @@
     - [REITs](finance/reits.md)
     - [Private Markets](finance/private_markets.md)
     - [Credit Markets](finance/credit_markets.md)
+    - [Behavioral Finance](finance/behavioral_finance.md)
 
 - [Databases](databases/README.md)
     - [Database Design](databases/database_design.md)

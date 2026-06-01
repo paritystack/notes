@@ -660,6 +660,9 @@ Explore detailed guides for specific topics:
 27. [Private Markets](private_markets.md) - PE, VC, GP/LP structure, J-curve
 28. [Credit Markets](credit_markets.md) - IG vs HY, spreads, CDS, MBS/ABS/CLOs
 
+### Behavioral & Concepts
+29. [Behavioral Finance](behavioral_finance.md) - Biases, prospect theory, anomalies, sentiment
+
 ## Important Disclaimers
 
 1. **Not Financial Advice**: This is educational content only

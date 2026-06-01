@@ -295,6 +295,9 @@
     - [LLM Evaluation](ai/llm_evaluation.md)
     - [LLM Observability & LLMOps](ai/llm_observability.md)
     - [Prompt Caching](ai/prompt_caching.md)
+    - [LLM Security](ai/llm_security.md)
+    - [Guardrails & Moderation](ai/guardrails.md)
+    - [Alignment](ai/alignment.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)

@@ -135,6 +135,12 @@ The open standard for connecting AI assistants to external systems:
 - [LLM Observability & LLMOps](./llm_observability.md) — tracing, token/cost/latency, the prod feedback loop
 - [Prompt Caching](./prompt_caching.md) — KV-prefix reuse, cache breakpoints, cost/latency savings
 
+### Security & Safety
+
+- [LLM Security](./llm_security.md) — prompt injection, jailbreaks, OWASP LLM Top 10, defenses
+- [Guardrails & Moderation](./guardrails.md) — input/output checks, content moderation, PII, validation
+- [Alignment](./alignment.md) — SFT, RLHF, DPO, Constitutional AI (applied post-training)
+
 ## Key AI Concepts
 
 ### Large Language Models (LLMs)

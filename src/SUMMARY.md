@@ -572,6 +572,10 @@
     - [Optimization](maths/optimization.md)
     - [Information Theory](maths/information_theory.md)
     - [Numerical Methods](maths/numerical_methods.md)
+    - [Stochastic Processes](maths/stochastic_processes.md)
+    - [Signal Processing](maths/signal_processing.md)
+    - [Game Theory](maths/game_theory.md)
+    - [Abstract Algebra](maths/abstract_algebra.md)
 
 - [Miscellaneous](misc/README.md)
     - [Matplotlib](misc/matplotlib.md)

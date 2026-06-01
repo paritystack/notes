@@ -13,7 +13,7 @@
 
 ## Introduction
 
-Convolution is a mathematical operation that combines two functions to produce a third function. In machine learning, particularly in Convolutional Neural Networks (CNNs), convolutions are fundamental operations that enable models to learn spatial hierarchies of features from input data.
+Convolution is a mathematical operation that combines two functions to produce a third function. In machine learning, particularly in Convolutional Neural Networks (CNNs), convolutions are fundamental operations that enable models to learn spatial hierarchies of features from input data. For the signal-processing roots — the convolution theorem, filters, and the FFT that accelerates large convolutions — see [signal processing](../maths/signal_processing.md).
 
 ### Why Convolutions Matter
 

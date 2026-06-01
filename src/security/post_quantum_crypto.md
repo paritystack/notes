@@ -6,7 +6,8 @@ Post-quantum cryptography (PQC) is the set of cryptographic algorithms designed 
 attacks by **large-scale quantum computers**. The public-key crypto securing the internet
 today — RSA, Diffie–Hellman, and elliptic curves underpinning [TLS](ssl_tls.md),
 [certificates](certificates.md), and [digital signatures](digital_signatures.md) — relies
-on math problems (integer factorization, discrete log; see [number theory](../maths/discrete_math.md))
+on math problems (integer factorization, discrete log in cyclic groups; see [number
+theory](../maths/discrete_math.md) and [abstract algebra](../maths/abstract_algebra.md))
 that a quantum computer running **Shor's algorithm** would solve efficiently. PQC replaces
 those with problems believed hard even for quantum machines. This is a *now* problem despite
 quantum computers not yet being capable — because of "harvest now, decrypt later."

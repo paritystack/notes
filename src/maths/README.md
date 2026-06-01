@@ -13,6 +13,11 @@ note favours intuition first, then the machinery, then where it shows up in prac
   [machine learning](../machine_learning/README.md).
 - **[Statistics](statistics.md)** — descriptive statistics, distributions, inference,
   hypothesis testing, correlation, and regression.
+- **[Stochastic Processes](stochastic_processes.md)** — random walks, Poisson processes,
+  martingales, and Brownian motion. The time-extended sibling of [probability](probability.md),
+  feeding queueing, [finance](../finance/risk_management.md), and RL.
+- **[Abstract Algebra](abstract_algebra.md)** — groups, rings, fields, and finite fields.
+  The structure behind [cryptography](../security/encryption.md) and error-correcting codes.
 
 ## Analysis
 
@@ -20,6 +25,9 @@ note favours intuition first, then the machinery, then where it shows up in prac
   multivariable calculus, and differential equations.
 - **[Linear Algebra](linear_algebra.md)** — vectors, matrices, decompositions
   (eigen/SVD), and their use in ML, graphics, and scientific computing.
+- **[Signal Processing](signal_processing.md)** — Fourier analysis, the DFT/FFT, sampling
+  and Nyquist, convolution and filters. Underpins ML [convolution](../machine_learning/convolution.md)
+  and embedded DSP.
 
 ## Applied
 
@@ -29,16 +37,20 @@ note favours intuition first, then the machinery, then where it shows up in prac
   information, and source/channel coding. Underlies ML loss functions and compression.
 - **[Numerical Methods](numerical_methods.md)** — floating point, conditioning &
   stability, root finding, numerical linear algebra, and ODE solvers.
+- **[Game Theory](game_theory.md)** — Nash equilibria, mixed strategies, minimax, and
+  mechanism design. The math under adversarial ML (GANs), multi-agent RL, and markets.
 
 ## Reading guide
 
 ```
-Discrete Math ─┐
-               ├─► Algorithms / Data Structures / Crypto
-Probability ───┼─► Statistics ─► ML
-               │
-Calculus ──────┼─► Optimization ─► ML training
-Linear Algebra ┘        │
-                        └─► Numerical Methods (how it runs on real hardware)
+Discrete Math ─┬─► Algorithms / Data Structures
+               └─► Abstract Algebra ─► Crypto / Error-correcting codes
+Probability ───┬─► Statistics ─► ML
+               └─► Stochastic Processes ─► Queueing / Finance / RL
+Calculus ──────┬─► Optimization ─► ML training
+Linear Algebra ┤        │
+               │        └─► Numerical Methods (how it runs on real hardware)
+               └─► Signal Processing (Fourier/FFT) ─► DSP / ML convolution
 Probability ─► Information Theory ─► ML losses / compression
+Game Theory ─► Adversarial ML (GANs) / Multi-agent RL / Markets
 ```

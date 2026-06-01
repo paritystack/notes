@@ -2,7 +2,7 @@
 
 ## Overview
 
-Risk management is the process of identifying, assessing, and controlling threats to an investment portfolio. Effective risk management protects capital while allowing for growth, balancing potential returns against acceptable levels of risk.
+Risk management is the process of identifying, assessing, and controlling threats to an investment portfolio. Effective risk management protects capital while allowing for growth, balancing potential returns against acceptable levels of risk. The quantitative models here — value-at-risk, volatility, option pricing — rest on the [stochastic processes](../maths/stochastic_processes.md) (Brownian motion, martingales) that model how prices evolve.
 
 ## What is Risk?
 

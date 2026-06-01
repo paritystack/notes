@@ -206,6 +206,9 @@ int main(void) {
 | **[I2C](i2c.md)** | Synchronous | 100-400 kHz | 2 (SDA/SCL) | Sensors, RTCs, EEPROMs |
 | **[CAN](can.md)** | Differential | Up to 1 Mbps | 2 (CAN_H/CAN_L) | Automotive, industrial |
 | **[USB](usb.md)** | Differential | 1.5-480 Mbps | 2 (D+/D-) | PC interface, peripherals |
+| **[Modbus & RS-485](modbus.md)** | Differential multidrop | Up to ~10 Mbps | 2 (A/B) | Industrial fieldbus, PLCs, meters |
+| **[I2S](i2s.md)** | Synchronous audio | Fs-based | 3+ (BCLK/WS/SD) | Audio codecs, MEMS mics, DACs |
+| **[1-Wire](one_wire.md)** | Single-wire | ~16 kbps | 1 (+GND) | Temperature probes, ID chips |
 
 ### Protocol Comparison
 
@@ -251,6 +254,20 @@ Speed (Mbps)
 - **[SDIO](sdio.md)**: SD card interface
 - **[Ethernet](ethernet.md)**: Network connectivity
 - **[DMA](dma.md)**: Direct memory access for peripheral streaming
+- **[QSPI & External Flash](qspi.md)**: Quad/Octal-SPI, memory-mapped XIP, external NOR flash
+
+## Applications
+
+- **[Motor Control](motor_control.md)**: H-bridge, BLDC/PMSM, FOC, steppers, encoders
+- **[Sensors & Sensor Fusion](sensors.md)**: signal chain, sampling, IMU, complementary/Kalman filters
+- **[DSP & Fixed-Point Math](dsp.md)**: CMSIS-DSP, Q-formats, FIR/IIR/FFT on MCUs
+
+## Memory & Runtime
+
+- **[Startup Code & C Runtime](startup_code.md)**: reset vector, .data/.bss init, before main()
+- **[Memory Management](memory_management.md)**: static allocation, pools, stack sizing, fragmentation
+- **[MPU](mpu.md)**: Cortex-M memory protection, region permissions, stack guards
+- **[Cache & TCM](cache_tcm.md)**: Cortex-M7 caches, TCM, DMA coherency
 
 ## Firmware Infrastructure
 
@@ -265,6 +282,8 @@ Speed (Mbps)
 
 - **[BLE](ble.md)**: GAP, GATT, advertising, pairing, MCU BLE stacks
 - **[LoRa & LoRaWAN](lora.md)**: Sub-GHz long-range, chirp spread spectrum, OTAA/ABP
+- **[NFC & RFID](nfc_rfid.md)**: 13.56 MHz/UHF, ISO 14443/15693, NDEF, card emulation
+- **[802.15.4 & Low-Power Mesh](ieee_802154.md)**: Thread/Zigbee/Matter, 6LoWPAN, mesh routing
 
 ## Hardware Fundamentals
 
@@ -274,6 +293,10 @@ Speed (Mbps)
 
 - **[Secure Boot](secure_boot.md)**: Chain of trust, signed images, RDP, anti-rollback
 - **[TrustZone-M](trustzone_m.md)**: Armv8-M hardware isolation, SAU, NSC, PSA, TF-M
+
+## Code Quality
+
+- **[MISRA C & Defensive Firmware](coding_standards.md)**: coding standards, static analysis, volatile/UB pitfalls, assertions
 
 ## Debugging
 

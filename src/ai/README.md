@@ -123,6 +123,12 @@ The open standard for connecting AI assistants to external systems:
 - [GraphRAG](./graphrag.md) — knowledge-graph retrieval, community summaries, local vs global search
 - [Chunking & Ingestion](./chunking_strategies.md) — parsing, chunk sizing, contextual retrieval, metadata
 
+### Agents
+
+- [Agent Memory & Context Engineering](./agent_memory.md) — working/episodic/semantic memory, compaction, retrieval
+- [Multi-Agent Systems](./multi_agent_systems.md) — supervisor/swarm/pipeline patterns, handoffs, shared state
+- [Coding & Computer-Use Agents](./coding_agents.md) — autonomous coding loops, SWE-bench, browser/computer use
+
 ## Key AI Concepts
 
 ### Large Language Models (LLMs)

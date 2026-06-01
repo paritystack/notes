@@ -1205,3 +1205,9 @@ training_args = TrainingArguments(
 ## License
 
 Microsoft Phi models are released under the **MIT License**, allowing commercial use, modification, and distribution with minimal restrictions.
+
+## Where this connects
+
+- [LLMs](llms.md) — Phi is a family of small but capable LLMs from Microsoft
+- [Fine-tuning](fine_tuning.md) — Phi models are popular fine-tuning targets due to their small size
+- [vLLM](vllm.md) — Phi models can be served with vLLM

@@ -83,3 +83,9 @@ The Decoder has two differences:
 *   **Self-Attention:** $O(N^2)$ complexity. Long sequences are expensive.
 *   **FlashAttention:** An IO-aware optimization that makes attention faster and memory-efficient by tiling GPU memory operations.
 *   **RoPE (Rotary Positional Embeddings):** A modern replacement for sinusoidal encodings, used in Llama/PaLM.
+
+## Where this connects
+
+- [LLMs](llms.md) — LLMs are transformer-based; architecture choices (RoPE, SwiGLU, GQA) directly affect LLM design
+- [../machine_learning/transformers](../machine_learning/transformers.md) — the ML-focused transformer reference with training details
+- [Prompt engineering](prompt_engineering.md) — understanding context windows and attention helps write better prompts

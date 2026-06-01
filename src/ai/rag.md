@@ -111,3 +111,10 @@ docs = compression_retriever.get_relevant_documents("How does the flux capacitor
 ## 6. Conclusion
 
 RAG is moving from "POC" to "Production" by adding complexity to the retrieval side. The future is **Agentic RAG**, where an agent autonomously decides *what* to retrieve, *how* to filter it, and *when* to stop searching.
+
+## Where this connects
+
+- [LLMs](llms.md) — RAG augments LLMs with retrieved context to reduce hallucination
+- [Prompt engineering](prompt_engineering.md) — retrieved chunks are injected via prompt templates
+- [Fine-tuning](fine_tuning.md) — RAG vs fine-tuning: retrieval for knowledge, fine-tuning for behavior
+- [Agent frameworks](agent_frameworks.md) — agentic RAG uses agents to decide what to retrieve

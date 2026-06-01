@@ -2249,3 +2249,10 @@ DeepSeek R1 represents a milestone in open-source AI, bringing advanced reasonin
 - **Monitor Performance**: Track tokens/sec and memory usage
 
 The model's native reasoning capabilities, combined with its open-source nature, make it an excellent choice for applications requiring complex problem-solving, mathematical reasoning, code generation, and logical analysis.
+
+## Where this connects
+
+- [LLMs](llms.md) — DeepSeek R1 is an open-source reasoning LLM comparable to OpenAI o1
+- [Transformers architecture](transformers_architecture.md) — R1 uses a transformer architecture with chain-of-thought training
+- [Fine-tuning](fine_tuning.md) — R1 can be distilled and fine-tuned for specialized reasoning tasks
+- [vLLM](vllm.md) — vLLM serves DeepSeek R1 for high-throughput inference

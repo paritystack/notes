@@ -1115,3 +1115,11 @@ Transformers are like super-smart assistants that help computers understand and 
 1. **Text Generation**: Given a prompt, transformers can generate coherent and contextually relevant text.
 2. **Translation**: They can translate sentences from one language to another by understanding the meaning of the words in context.
 3. **Summarization**: Transformers can read long articles and provide concise summaries, capturing the main points effectively.
+
+## Where this connects
+
+- [Neural networks](neural_networks.md) — transformers are a specific neural architecture (self-attention + FFN)
+- [Deep learning](deep_learning.md) — transformers are the dominant deep learning architecture for sequence tasks
+- [../ai/transformers_architecture](../ai/transformers_architecture.md) — detailed transformer architecture breakdown
+- [PyTorch](pytorch.md) — transformers are trained and implemented in PyTorch
+- [Hugging Face](hugging_face.md) — the standard library for pre-trained transformer models

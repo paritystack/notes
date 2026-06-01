@@ -2006,3 +2006,10 @@ The field continues to evolve rapidly with models like OpenAI's o1 demonstrating
   - See reinforcement_learning.md for RL fundamentals
   - See transformers.md for architecture details
   - See deep_learning.md for neural network basics
+
+## Where this connects
+
+- [Deep learning](deep_learning.md) — neural network basics referenced in thinking.md
+- [Neural networks](neural_networks.md) — the architectural foundations of thinking/reasoning models
+- [Transformers](transformers.md) — the architecture underlying modern reasoning-capable LLMs
+- [../ai/llms](../ai/llms.md) — LLMs are the practical thinking models

@@ -937,3 +937,10 @@ negative = ", ".join([
 ## Conclusion
 
 Stable Diffusion offers incredible flexibility and power for image generation. Success comes from understanding the fundamentals, experimenting with parameters, and iterating on prompts. Start simple, learn the basics, then explore advanced techniques like ControlNet and LoRA for professional results.
+
+## Where this connects
+
+- [../machine_learning/generative_models](../machine_learning/generative_models.md) — stable diffusion is a latent diffusion model
+- [ComfyUI](comfyui.md) — the node-based GUI for running Stable Diffusion workflows
+- [Flux.1](fluxdev.md) — the next-generation image generation model from SD's creators
+- [Generative AI](generative_ai.md) — stable diffusion is the foundational open-source image gen model

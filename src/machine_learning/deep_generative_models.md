@@ -694,3 +694,10 @@ class CLIPGuidedGenerator:
 - Imagen paper: https://arxiv.org/abs/2205.11487
 - NeRF: https://www.matthewtancik.com/nerf
 
+
+## Where this connects
+
+- [Generative models](generative_models.md) — the foundations; deep generative models are the advanced versions
+- [Neural networks](neural_networks.md) — VAEs, GANs, and diffusion models are all neural architectures
+- [../ai/stable_diffusion](../ai/stable_diffusion.md) — practical diffusion model implementation
+- [Transformers](transformers.md) — transformers underpin many modern generative architectures

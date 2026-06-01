@@ -706,3 +706,11 @@ def test_prompt(prompt, test_cases, model):
 Prompt engineering is an iterative process. Start simple, test thoroughly, and refine based on results. The key is understanding both your task requirements and how the model interprets instructions.
 
 Remember: The best prompt is the one that consistently produces the results you need with minimal tokens and maximum clarity.
+
+## Where this connects
+
+- [LLMs](llms.md) — prompt engineering is the primary interface to LLMs
+- [RAG](rag.md) — RAG combines retrieval with prompting to ground LLM responses
+- [Tool use](tool_use.md) — tool use extends prompting with structured function calls
+- [Fine-tuning](fine_tuning.md) — fine-tuning vs prompting: trade-off between flexibility and specialization
+true  # no-op

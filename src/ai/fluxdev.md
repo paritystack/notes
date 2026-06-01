@@ -923,3 +923,9 @@ Key takeaways:
 - **Pro**: Highest quality, API-only, commercial
 
 Choose based on your needs, hardware, and use case. Experiment with natural language prompts and leverage Flux's superior understanding for best results.
+
+## Where this connects
+
+- [Stable diffusion](stable_diffusion.md) — Flux.1 is the successor from Black Forest Labs (SD creators)
+- [ComfyUI](comfyui.md) — ComfyUI is the standard workflow tool for Flux.1 generation
+- [../machine_learning/generative_models](../machine_learning/generative_models.md) — Flux uses flow matching, a generative model technique

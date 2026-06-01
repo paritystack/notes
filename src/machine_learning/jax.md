@@ -1207,3 +1207,9 @@ result = f(jnp.ones(10))  # Fast!
 ### Community
 - [JAX Discussions](https://github.com/google/jax/discussions)
 - [JAX Examples](https://github.com/google/jax/tree/main/examples)
+
+## Where this connects
+
+- [PyTorch](pytorch.md) — the main alternative; PyTorch is imperative/eager, JAX is functional and XLA-compiled
+- [NumPy](numpy.md) — JAX provides a NumPy-compatible API (jnp) for hardware-accelerated computation
+- [Deep learning](deep_learning.md) — JAX is used for deep learning research via Flax/Haiku/Equinox

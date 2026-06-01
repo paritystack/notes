@@ -885,3 +885,10 @@ def calculate_fid(real_imgs, fake_imgs):
 - Distill.pub: https://distill.pub/
 - Papers with Code: https://paperswithcode.com/
 
+
+## Where this connects
+
+- [Deep generative models](deep_generative_models.md) — advanced architectures (VAEs, GANs, diffusion) for high-quality generation
+- [Neural networks](neural_networks.md) — generative models are specialized neural networks
+- [Unsupervised learning](unsupervised_learning.md) — generative modeling is a key form of unsupervised learning
+- [../ai/generative_ai](../ai/generative_ai.md) — applied generative AI tools and models

@@ -474,3 +474,10 @@ Key Contributions:
 - Distill.pub: Clear explanations
 - Two Minute Papers: Video summaries
 
+
+## Where this connects
+
+- [Neural networks](neural_networks.md) — foundational papers define the core neural network concepts
+- [Transformers](transformers.md) — the "Attention Is All You Need" paper introduced transformers
+- [Generative models](generative_models.md) — GAN, VAE, and diffusion model papers are covered
+- [../ai/llms](../ai/llms.md) — GPT/BERT/LLaMA papers describe the LLM architectures in use today

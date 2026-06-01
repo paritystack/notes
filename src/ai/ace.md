@@ -315,3 +315,8 @@ By separating the concerns of *doing* (Generator), *analyzing* (Reflector), and 
 3.  **Improve their ROI with every single usage.**
 
 For any production-grade agentic system, implementing an ACE-like loop is not just an optimization—it is a requirement for reliability.
+## Where this connects
+
+- [Agent frameworks](agent_frameworks.md) — ACE principles apply to any agent framework
+- [Tool use](tool_use.md) — ACE defines how tool results are integrated into the agent context
+- [Prompt engineering](prompt_engineering.md) — ACE context management is an advanced form of prompt engineering

@@ -3616,3 +3616,9 @@ Machine learning metrics are essential tools for evaluating model performance, b
 - **Detection**: IoU for localization, mAP for overall performance
 
 Always combine multiple metrics and visualizations to get a complete picture of model performance. The best metric aligns with your business goals and the costs of different types of errors.
+
+## Where this connects
+
+- [Supervised learning](supervised_learning.md) — metrics evaluate how well supervised models generalize
+- [Deep learning](deep_learning.md) — loss functions (cross-entropy, MSE) are the training-time metrics
+- [Gradient boosting](gradient_boosting.md) — XGBoost/LightGBM optimize a user-specified loss/metric

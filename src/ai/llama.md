@@ -1195,3 +1195,10 @@ Key takeaways:
 - **Monitor**: Watch memory and performance
 
 The open-source nature and active community make Llama models an excellent choice for both research and production applications.
+
+## Where this connects
+
+- [LLMs](llms.md) — Llama is the dominant open-source LLM family
+- [Fine-tuning](fine_tuning.md) — Llama is the most common base model for fine-tuning
+- [vLLM](vllm.md) — vLLM is the standard serving infrastructure for Llama models
+- [../machine_learning/quantization](../machine_learning/quantization.md) — quantized Llama (GGUF, AWQ) enables local deployment

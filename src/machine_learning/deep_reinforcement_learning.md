@@ -1052,3 +1052,9 @@ class TD3Agent(DDPGAgent):
 - "Deep Reinforcement Learning Hands-On" by Maxim Lapan
 - DeepMind papers: https://www.deepmind.com/research
 
+
+## Where this connects
+
+- [Reinforcement learning](reinforcement_learning.md) — the base RL framework that deep RL extends with neural function approximators
+- [Deep learning](deep_learning.md) — the neural network techniques applied to RL
+- [Neural networks](neural_networks.md) — policy networks and value networks are standard DNNs

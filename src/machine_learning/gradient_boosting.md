@@ -95,3 +95,9 @@ bst = xgb.train(param, dtrain, num_round)
 # 4. Predict
 preds = bst.predict(dtrain)
 ```
+
+## Where this connects
+
+- [Supervised learning](supervised_learning.md) — gradient boosting is a supervised ensemble learning method
+- [Metrics](metrics.md) — XGBoost/LightGBM optimize a loss; metrics evaluate the result
+- [Neural networks](neural_networks.md) — the deep learning alternative; gradient boosting wins on tabular data

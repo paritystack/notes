@@ -758,3 +758,11 @@ It's like learning to cook - you follow the recipe, taste the result, adjust ing
 - [PyTorch Lightning](https://lightning.ai/) - High-level wrapper
 - [Hugging Face Transformers](https://huggingface.co/transformers/) - NLP with PyTorch
 - [Fast.ai](https://course.fast.ai/) - Practical deep learning course
+
+## Where this connects
+
+- [Neural networks](neural_networks.md) — PyTorch is the primary framework for building and training neural networks
+- [Deep learning](deep_learning.md) — PyTorch implements the gradient descent, backprop, and layer primitives
+- [JAX](jax.md) — the main alternative; JAX is functional and XLA-compiled, PyTorch is imperative
+- [NumPy](numpy.md) — PyTorch tensors are compatible with NumPy arrays; common to interop
+- [Hugging Face](hugging_face.md) — Hugging Face models are PyTorch (or JAX) models with a unified API

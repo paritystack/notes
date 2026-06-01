@@ -884,3 +884,10 @@ def plot_clusters_3d(X, labels, title='3D Cluster Visualization'):
 - "Introduction to Data Mining" by Tan, Steinbach, Kumar
 - UMAP documentation: https://umap-learn.readthedocs.io/
 
+
+## Where this connects
+
+- [Supervised learning](supervised_learning.md) — the labeled-data counterpart to unsupervised learning
+- [Generative models](generative_models.md) — generative modeling is a form of unsupervised learning
+- [Neural networks](neural_networks.md) — autoencoders and self-supervised learning are neural unsupervised approaches
+- [../ai/rag](../ai/rag.md) — embeddings from unsupervised models power RAG retrieval

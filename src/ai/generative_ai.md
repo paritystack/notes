@@ -908,3 +908,10 @@ def safe_generate(prompt):
 ## Conclusion
 
 Generative AI is rapidly evolving, with new models and capabilities emerging constantly. Success comes from understanding the fundamentals, choosing appropriate tools, and applying ethical practices. Experiment, iterate, and stay updated with the latest developments.
+
+## Where this connects
+
+- [LLMs](llms.md) — LLMs are the dominant generative AI technology for text
+- [../machine_learning/generative_models](../machine_learning/generative_models.md) — the ML foundations (VAEs, GANs, diffusion)
+- [Stable diffusion](stable_diffusion.md) — the canonical open-source image generation model
+- [Fine-tuning](fine_tuning.md) — adapting generative models to specific styles or domains

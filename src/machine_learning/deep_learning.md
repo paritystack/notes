@@ -957,3 +957,11 @@ for epoch in range(num_epochs):
 - TensorFlow Documentation: https://www.tensorflow.org/
 - Papers with Code: https://paperswithcode.com/
 
+
+## Where this connects
+
+- [Neural networks](neural_networks.md) — the foundational building blocks; deep learning stacks many layers
+- [Supervised learning](supervised_learning.md) — most deep learning models are trained with supervision
+- [Transformers](transformers.md) — the dominant deep learning architecture for sequence tasks
+- [PyTorch](pytorch.md) — the primary framework for deep learning research and production
+- [Transfer learning](transfer_learning.md) — fine-tuning pre-trained deep models is the standard practice

@@ -160,3 +160,9 @@ A useful rule: *if you find yourself writing the same multi-step instruction to 
 ## 9. Conclusion
 
 Skills are the durable unit of reusable agent behavior. Tools give a model new abilities; skills give it new *habits*. The most valuable skills in practice — `code-review`, `verify`, `run`, `init`, `claude-api`, `grill-me` — are not exotic; they are the boring, repeatable workflows of real engineering, captured once and reused everywhere. Treat the `description` field as a prompt, keep the body lean, and let progressive disclosure handle the rest.
+
+## Where this connects
+
+- [Agent frameworks](agent_frameworks.md) — skills are the reusable behavioral units that agents execute
+- [Tool use](tool_use.md) — skills encapsulate specific tool-use patterns as named capabilities
+- [Prompt engineering](prompt_engineering.md) — skill SKILL.md files contain structured prompt templates

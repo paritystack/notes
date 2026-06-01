@@ -1377,3 +1377,11 @@ Total ≈ 2-3× Model Size for training (Adam, FP16)
 - [3Blue1Brown Neural Networks Series](https://www.youtube.com/watch?v=aircAruvnKk)
 - [PyTorch Tutorials](https://pytorch.org/tutorials/)
 - [Deep Learning Book](https://www.deeplearningbook.org/)
+
+## Where this connects
+
+- [Deep learning](deep_learning.md) — deep learning = neural networks with many layers
+- [Supervised learning](supervised_learning.md) — most neural networks are trained with supervised objectives
+- [Transformers](transformers.md) — the dominant neural architecture for NLP and vision
+- [PyTorch](pytorch.md) — the primary framework for building and training neural networks
+- [Metrics](metrics.md) — loss functions and evaluation metrics guide neural network training

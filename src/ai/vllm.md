@@ -1344,3 +1344,10 @@ curl http://localhost:8000/metrics
 | `temperature` | Randomness | 0.0-2.0 |
 | `top_p` | Nucleus sampling | 0.9-1.0 |
 | `max_tokens` | Generation limit | 128-2048 |
+
+## Where this connects
+
+- [LLMs](llms.md) — vLLM serves LLMs at high throughput via PagedAttention
+- [../machine_learning/quantization](../machine_learning/quantization.md) — vLLM supports AWQ/GPTQ quantization for memory-efficient inference
+- [Fine-tuning](fine_tuning.md) — vLLM serves both base and fine-tuned models
+- [Llama](llama.md) — Llama models are one of the most common workloads for vLLM

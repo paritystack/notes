@@ -2051,3 +2051,10 @@ Quantization is an essential technique for deploying neural networks efficiently
 7. Hardware matters: use appropriate backend and test on target device
 
 Quantization transforms impractical models into deployable solutions, making AI accessible on everything from smartphones to data centers.
+
+## Where this connects
+
+- [Neural networks](neural_networks.md) — quantization reduces the precision of neural network weights
+- [LoRA](lora.md) — QLoRA combines quantization with LoRA for memory-efficient fine-tuning
+- [../ai/vllm](../ai/vllm.md) — vLLM uses quantization (AWQ, GPTQ) for efficient LLM inference
+- [../ai/llms](../ai/llms.md) — quantized models enable LLMs to run on consumer hardware

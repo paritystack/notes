@@ -681,3 +681,10 @@ So instead of just chatting, your AI assistant can actually complete complex tas
 - [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/)
 - [Agent Benchmarks (AgentBench)](https://github.com/THUDM/AgentBench)
 - [LangSmith for Agent Debugging](https://smith.langchain.com/)
+
+## Where this connects
+
+- [LLMs](llms.md) — agent frameworks orchestrate LLM calls with tool use and memory
+- [Tool use](tool_use.md) — tool use is the core mechanism that makes agents capable
+- [RAG](rag.md) — agentic RAG uses agents to adaptively retrieve knowledge
+- [ACE](ace.md) — ACE (Agentic Context Engineering) defines principles for reliable agent loops

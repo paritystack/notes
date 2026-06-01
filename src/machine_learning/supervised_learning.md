@@ -1305,3 +1305,11 @@ print(f"Best parameters: {grid_search.best_params_}")
 - "Introduction to Statistical Learning" by James et al.
 - "Pattern Recognition and Machine Learning" by Bishop
 
+
+## Where this connects
+
+- [Neural networks](neural_networks.md) — deep neural networks are the most powerful supervised learning models
+- [Gradient boosting](gradient_boosting.md) — tree-based supervised learning; often outperforms DL on tabular data
+- [Metrics](metrics.md) — precision, recall, F1, AUC — the metrics that evaluate supervised models
+- [Unsupervised learning](unsupervised_learning.md) — the counterpart; learning without labels
+- [Transfer learning](transfer_learning.md) — supervised fine-tuning of pre-trained models

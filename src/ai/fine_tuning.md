@@ -103,3 +103,10 @@ print(f"Accuracy: {accuracy}")
 ```
 
 Fine-tuning enables customization of powerful pre-trained models for specific applications with minimal resources.
+
+## Where this connects
+
+- [LLMs](llms.md) — fine-tuning adapts pre-trained LLMs to specific tasks
+- [../machine_learning/lora](../machine_learning/lora.md) — LoRA is the dominant parameter-efficient fine-tuning method
+- [../machine_learning/transfer_learning](../machine_learning/transfer_learning.md) — fine-tuning is applied transfer learning
+- [vLLM](vllm.md) — fine-tuned models are served with vLLM for high-throughput inference

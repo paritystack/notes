@@ -248,3 +248,11 @@ The trick: They learn statistics of language, not true understanding. So they mi
 - [OpenAI GPT Blog](https://openai.com/research/)
 - [Hugging Face](https://huggingface.co/)
 - [Prompt Engineering Guide](https://www.promptingguide.ai/)
+
+## Where this connects
+
+- [Transformers architecture](transformers_architecture.md) — the attention-based architecture underlying all modern LLMs
+- [Prompt engineering](prompt_engineering.md) — techniques to get the best outputs from LLMs
+- [Fine-tuning](fine_tuning.md) — adapting pre-trained LLMs to specific tasks
+- [RAG](rag.md) — augmenting LLMs with retrieved knowledge for grounded generation
+- [vLLM](vllm.md) — high-performance serving infrastructure for LLMs

@@ -1727,3 +1727,9 @@ NumPy mastery is essential for ML engineering. Key takeaways:
 - [NumPy Paper (Nature)](https://www.nature.com/articles/s41586-020-2649-2)
 - [From Python to NumPy](https://www.labri.fr/perso/nrougier/from-python-to-numpy/)
 - [Advanced NumPy](https://scipy-lectures.org/advanced/advanced_numpy/)
+
+## Where this connects
+
+- [PyTorch](pytorch.md) — PyTorch tensors interop with NumPy arrays; same mental model, GPU-accelerated
+- [JAX](jax.md) — JAX provides jnp (JAX NumPy) with the same API but XLA-compiled on GPU/TPU
+- [Supervised learning](supervised_learning.md) — NumPy is the data manipulation layer for classical ML (scikit-learn)

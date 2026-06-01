@@ -1575,3 +1575,10 @@ LoRA revolutionizes fine-tuning by:
 - Test thoroughly before deployment
 
 LoRA has become the de facto standard for fine-tuning large language models, enabling individuals and small teams to customize state-of-the-art models for their specific needs without massive computational resources.
+
+## Where this connects
+
+- [Transfer learning](transfer_learning.md) — LoRA is a parameter-efficient method for fine-tuning pre-trained models
+- [../ai/fine_tuning](../ai/fine_tuning.md) — LoRA is the dominant fine-tuning technique for LLMs
+- [Quantization](quantization.md) — QLoRA combines LoRA with quantization for memory-efficient training
+- [PyTorch](pytorch.md) — LoRA is implemented in PyTorch via PEFT library

@@ -1487,3 +1487,10 @@ Tool use transforms LLMs from text generators into capable agents that can inter
 The key is finding the right balance between giving the model enough tools to be useful while maintaining security and performance. Start with a small set of well-designed tools and expand based on real usage patterns.
 
 Remember: Good tool use is about **empowering the model** to help users accomplish tasks, not just adding features for the sake of it.
+
+## Where this connects
+
+- [LLMs](llms.md) — tool use is a capability built into modern LLMs via function calling
+- [Agent frameworks](agent_frameworks.md) — agent frameworks orchestrate sequences of tool calls
+- [Prompt engineering](prompt_engineering.md) — tool definitions are injected into the system prompt
+- [RAG](rag.md) — retrieval is implemented as a tool in agentic RAG

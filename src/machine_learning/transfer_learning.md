@@ -809,3 +809,10 @@ trainer = DistillationTrainer(teacher, student, temperature=3.0, alpha=0.5)
 - "Transfer Learning" book by Tan et al.
 - Papers with Code Transfer Learning: https://paperswithcode.com/task/transfer-learning
 
+
+## Where this connects
+
+- [Deep learning](deep_learning.md) — transfer learning reuses deep learning representations
+- [Neural networks](neural_networks.md) — pre-trained neural networks are the source of transferred representations
+- [LoRA](lora.md) — LoRA is the standard parameter-efficient fine-tuning method for transfer learning
+- [../ai/fine_tuning](../ai/fine_tuning.md) — practical fine-tuning guide for LLMs

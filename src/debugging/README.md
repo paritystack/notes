@@ -5,7 +5,15 @@ This directory contains guides for debugging software at various levels.
 ## Contents
 
 - **[GDB](gdb.md)** - GNU Debugger for C/C++ applications
+- **[LLDB](lldb.md)** - The LLVM debugger; GDB counterpart for Clang/macOS/Rust
+- **[Binary Analysis Tools](tools.md)** - objdump, readelf, nm, strace, ltrace, and friends
+- **[Valgrind](valgrind.md)** - Memory errors, leaks, races, and profiling via instrumentation
+- **[Sanitizers](sanitizers.md)** - Compile-time ASan/UBSan/TSan/MSan runtime checks
+- **[perf & Flame Graphs](perf_profiling.md)** - Sampling profiler and hardware counters
+- **[rr (Record & Replay)](rr_debugging.md)** - Deterministic time-travel reverse debugging
 - **[Core Dumps](core_dump.md)** - Analyzing program crashes
+- **[Reverse Engineering](reverse_engineering.md)** - Ghidra, radare2, IDA; analysing binaries without source
+- **[Debugging Methodology](debugging_methodology.md)** - Systematic approach, git bisect, delta debugging
 - **[Linux Kernel](linux_kernel.md)** - Kernel-level debugging techniques
 
 ## Common Debugging Workflow

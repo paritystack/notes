@@ -62,6 +62,8 @@ Embedded systems are specialized computing systems designed to perform dedicated
 | **[AVR](avr.md)** | AVR | 1-20 MHz | 512B-16KB RAM | Low-power, bare-metal programming |
 | **[Raspberry Pi](raspberry_pi.md)** | ARM Cortex-A | 700MHz-2.4GHz | 512MB-8GB RAM | Linux-based, complex applications |
 
+See **[Embedded Linux & Device Tree](embedded_linux.md)** for the boot chain, Device Tree, and Buildroot/Yocto build systems behind application-class Linux boards.
+
 ### Comparison Matrix
 
 ```
@@ -205,6 +207,7 @@ int main(void) {
 | **[SPI](spi.md)** | Synchronous | Up to 50 Mbps | 4+ (MOSI/MISO/SCK/CS) | SD cards, displays, high-speed sensors |
 | **[I2C](i2c.md)** | Synchronous | 100-400 kHz | 2 (SDA/SCL) | Sensors, RTCs, EEPROMs |
 | **[CAN](can.md)** | Differential | Up to 1 Mbps | 2 (CAN_H/CAN_L) | Automotive, industrial |
+| **[LIN & FlexRay](lin_flexray.md)** | Single-wire / TDMA | 20 kbps / 10 Mbps | 1 / 2-4 | Automotive sub-bus & x-by-wire backbone |
 | **[USB](usb.md)** | Differential | 1.5-480 Mbps | 2 (D+/D-) | PC interface, peripherals |
 | **[Modbus & RS-485](modbus.md)** | Differential multidrop | Up to ~10 Mbps | 2 (A/B) | Industrial fieldbus, PLCs, meters |
 | **[I2S](i2s.md)** | Synchronous audio | Fs-based | 3+ (BCLK/WS/SD) | Audio codecs, MEMS mics, DACs |
@@ -255,6 +258,7 @@ Speed (Mbps)
 - **[Ethernet](ethernet.md)**: Network connectivity
 - **[DMA](dma.md)**: Direct memory access for peripheral streaming
 - **[QSPI & External Flash](qspi.md)**: Quad/Octal-SPI, memory-mapped XIP, external NOR flash
+- **[Displays & Graphics](display_graphics.md)**: SPI/parallel TFT, framebuffers, double-buffering, LVGL, MIPI DSI
 
 ## Applications
 
@@ -268,6 +272,11 @@ Speed (Mbps)
 - **[Memory Management](memory_management.md)**: static allocation, pools, stack sizing, fragmentation
 - **[MPU](mpu.md)**: Cortex-M memory protection, region permissions, stack guards
 - **[Cache & TCM](cache_tcm.md)**: Cortex-M7 caches, TCM, DMA coherency
+
+## Firmware Patterns
+
+- **[State Machines & Event-Driven Firmware](state_machines.md)**: FSM encodings, statecharts, event queues, run-to-completion
+- **[Ring Buffers & Lock-Free Concurrency](ring_buffers.md)**: circular buffers, SPSC queues, memory barriers, ISR↔task handoff
 
 ## Firmware Infrastructure
 
@@ -297,6 +306,8 @@ Speed (Mbps)
 ## Code Quality
 
 - **[MISRA C & Defensive Firmware](coding_standards.md)**: coding standards, static analysis, volatile/UB pitfalls, assertions
+- **[Embedded Unit Testing](embedded_testing.md)**: Unity/Ceedling/CMock, HAL mocking, host vs target, hardware-in-the-loop
+- **[Functional Safety](functional_safety.md)**: ISO 26262/IEC 61508, SIL/ASIL, redundancy, lockstep cores, runtime self-tests
 
 ## Debugging
 

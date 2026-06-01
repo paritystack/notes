@@ -551,8 +551,15 @@
 
 - [Debugging](debugging/README.md)
     - [GDB](debugging/gdb.md)
+    - [LLDB](debugging/lldb.md)
     - [Binary Analysis Tools](debugging/tools.md)
+    - [Valgrind](debugging/valgrind.md)
+    - [Sanitizers](debugging/sanitizers.md)
+    - [perf & Flame Graphs](debugging/perf_profiling.md)
+    - [rr (Record & Replay)](debugging/rr_debugging.md)
     - [Core Dump Analysis](debugging/core_dump.md)
+    - [Reverse Engineering](debugging/reverse_engineering.md)
+    - [Debugging Methodology](debugging/debugging_methodology.md)
     - [Linux Kernel Debugging](debugging/linux_kernel.md)
 
 - [Maths](maths/README.md)

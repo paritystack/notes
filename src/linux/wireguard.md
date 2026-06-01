@@ -4,7 +4,7 @@ WireGuard is a modern, high-performance VPN protocol that aims to be faster, sim
 
 ## Overview
 
-WireGuard uses state-of-the-art cryptography and is designed with simplicity in mind, consisting of only about 4,000 lines of code compared to hundreds of thousands in older VPN implementations.
+WireGuard uses state-of-the-art cryptography and is designed with simplicity in mind. It operates as a kernel network interface; traffic is filtered by [nftables](nftables.md) or [iptables](iptables.md). See [Linux networking](networking.md) for the broader stack; [sysctl](sysctl.md) tunes the network parameters WireGuard uses. It consists of only about 4,000 lines of code compared to hundreds of thousands in older VPN implementations.
 
 **Key Features:**
 - **Performance**: Significantly faster than IPsec and OpenVPN
@@ -2600,3 +2600,9 @@ PersistentKeepalive = 25
 - [ ] No IP conflicts with existing networks
 - [ ] WireGuard kernel module loaded
 - [ ] Correct permissions on configuration files (600)
+
+## Where this connects
+
+- [Networking](networking.md) — WireGuard is a kernel network interface (like eth0 or wlan0)
+- [nftables](nftables.md) / [iptables](iptables.md) — firewall rules filter traffic on the WireGuard interface
+- [sysctl](sysctl.md) — network sysctls (ip_forward, etc.) must be configured for WireGuard routing

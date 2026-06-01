@@ -4,7 +4,7 @@ systemd is a system and service manager for Linux operating systems. It provides
 
 ## Overview
 
-systemd replaces the traditional SysV init system and provides a more modern approach to system initialization and service management.
+systemd replaces the traditional SysV init system and provides a more modern approach to system initialization. It manages [processes](process.md) via cgroups; integrates [udev](udev.md) as `systemd-udevd`; configures the kernel via [sysctl](sysctl.md) at boot; uses [namespace](namespace.md) sandboxing for service security.
 
 **Key Features:**
 - Parallel service startup
@@ -704,3 +704,10 @@ sudo systemd-analyze verify myapp.service
 | `journalctl -k` | Kernel messages |
 
 systemd provides a powerful, modern init system with extensive features for service management, logging, and system administration, making it the standard for most Linux distributions.
+
+## Where this connects
+
+- [Process](process.md) — systemd manages process lifecycle via cgroups and PID tracking
+- [udev](udev.md) — systemd-udevd handles hotplug events and device node creation
+- [sysctl](sysctl.md) — systemd-sysctl applies kernel parameters at boot
+- [Namespace](namespace.md) — systemd uses namespaces for service sandboxing (PrivateTmp, PrivateNetwork)

@@ -1,5 +1,9 @@
 # udev - Linux Dynamic Device Management
 
+## Overview
+
+udev is the Linux device manager that handles device node creation and rule-based actions when devices are added/removed. It reads [sysfs](sysfs.md) to discover device attributes; [device tree](device_tree.md) OF_MATCH rules feed into udev; [driver development](driver_development.md) registers devices that udev then manages; [systemd](systemd.md) includes udev (as `systemd-udevd`) in modern distributions.
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Architecture](#architecture)
@@ -2700,3 +2704,10 @@ SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x1234", \
 - `lsblk` - List block devices
 - `hwinfo` - Hardware information
 - `systemd-analyze` - Boot performance analysis
+
+## Where this connects
+
+- [sysfs](sysfs.md) — udev reads /sys device attributes to match rules
+- [Driver development](driver_development.md) — drivers register devices that udev then manages
+- [Device tree](device_tree.md) — OF compatible strings from DTS inform udev OF_MATCH rules
+- [systemd](systemd.md) — modern distributions ship systemd-udevd; udev events feed systemd device units

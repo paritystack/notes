@@ -1,6 +1,6 @@
 # iptables
 
-iptables is a user-space utility program that allows a system administrator to configure the IP packet filter rules of the Linux kernel firewall, implemented by the Netfilter project. It is a powerful tool for managing network traffic, implementing network address translation (NAT), and enhancing security through packet filtering and manipulation.
+iptables configures the [Netfilter](netfilter.md) kernel packet filtering rules for IPv4. [nftables](nftables.md) is the modern replacement with unified IPv4/IPv6 syntax. [eBPF](ebpf.md) provides programmatic filtering at the XDP layer. See [Linux networking](networking.md) for the broader stack.
 
 ## Architecture
 
@@ -1312,3 +1312,10 @@ netfilter-persistent save
 - [ ] Is conntrack table not full?
 - [ ] Are there no conflicting rules?
 - [ ] Is the interface name correct?
+
+## Where this connects
+
+- [Netfilter](netfilter.md) — iptables is a frontend for the Netfilter kernel framework
+- [nftables](nftables.md) — the modern replacement; use nftables for new deployments
+- [eBPF](ebpf.md) — programmatic alternative at XDP/TC for high-performance filtering
+- [Networking](networking.md) — iptables rules apply to packets traversing the Linux network stack

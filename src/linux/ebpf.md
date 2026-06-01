@@ -1,5 +1,9 @@
 # eBPF (Extended Berkeley Packet Filter)
 
+## Overview
+
+eBPF is a programmable in-kernel virtual machine for packet processing, tracing, and security. It attaches at XDP/TC hooks in [networking](networking.md) (bypassing [netfilter](netfilter.md) for maximum performance), at kprobes/tracepoints for tracing, and uses [netlink](netlink.md) for program loading. eBPF maps share data between kernel programs and userspace as an alternative to [sysfs](sysfs.md). [Kernel patterns](kernel_patterns.md) like RCU locking govern safe map access.
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Architecture](#architecture)
@@ -1470,3 +1474,11 @@ cat /sys/kernel/debug/tracing/trace_pipe
 
 **Last Updated**: 2026-05
 **Kernel Version Coverage**: Linux 3.18 - 6.13
+
+## Where this connects
+
+- [Networking](networking.md) — eBPF XDP/TC programs attach to the Linux network stack for packet processing
+- [Netfilter](netfilter.md) — eBPF bypasses Netfilter at XDP for maximum performance
+- [Kernel patterns](kernel_patterns.md) — RCU locking and spinlocks govern safe eBPF map access
+- [Netlink](netlink.md) — eBPF programs communicate via the BPF syscall; maps via generic netlink
+- [sysfs](sysfs.md) — eBPF maps are an alternative to sysfs for kernel-userspace data sharing

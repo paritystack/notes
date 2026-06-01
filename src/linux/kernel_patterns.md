@@ -1,5 +1,9 @@
 # Linux Kernel Development Patterns
 
+## Overview
+
+Common patterns, idioms, and best practices in the Linux kernel: locking (spinlocks, mutexes, RCU), reference counting (kref), error handling (goto unwind), and completion primitives. [Driver development](driver_development.md) uses these patterns throughout; [memory management](memory_management.md) patterns (GFP flags, slab) are a key subset; [eBPF](ebpf.md) programs must follow kernel locking rules when accessing shared maps.
+
 Common patterns, idioms, and best practices used throughout the Linux kernel codebase.
 
 ## Table of Contents
@@ -1409,3 +1413,9 @@ spin_unlock(&lock);
 ---
 
 Linux kernel development follows well-established patterns that promote consistency, safety, and performance. Understanding these patterns is essential for writing quality kernel code that integrates well with the rest of the kernel.
+
+## Where this connects
+
+- [Driver development](driver_development.md) — drivers use kernel patterns for safe resource management and concurrency
+- [Memory management](memory_management.md) — GFP flags, slab allocator, and devm_ helpers are memory patterns
+- [eBPF](ebpf.md) — eBPF verifier enforces safe access patterns; maps use RCU for concurrent access

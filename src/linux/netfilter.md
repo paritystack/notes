@@ -1,6 +1,6 @@
 # Netfilter
 
-Netfilter is a framework provided by the Linux kernel for packet filtering, network address translation (NAT), and other packet mangling. It allows system administrators to define rules for how packets should be handled by the kernel. Netfilter is the foundation upon which tools like iptables and nftables are built.
+Netfilter is a framework provided by the Linux kernel for packet filtering, NAT, and packet mangling. [iptables](iptables.md) is the legacy frontend; [nftables](nftables.md) is the modern replacement. [Netlink](netlink.md) is the kernel-userspace socket both use. [eBPF](ebpf.md) provides an alternative programmable hook at the XDP/TC layer for high-performance filtering. See [Linux networking](networking.md) for the broader stack.
 
 ## Table of Contents
 
@@ -1613,3 +1613,11 @@ Netfilter is a powerful and flexible framework for packet filtering and manipula
 - [Linux Kernel Documentation - Netfilter](https://www.kernel.org/doc/Documentation/networking/netfilter/)
 - [nftables Wiki](https://wiki.nftables.org/)
 - [Netfilter Connection Tracking](https://conntrack-tools.netfilter.org/)
+
+## Where this connects
+
+- [iptables](iptables.md) — legacy frontend for Netfilter packet filtering rules
+- [nftables](nftables.md) — modern replacement; unified IPv4/IPv6/ARP filtering
+- [Netlink](netlink.md) — socket family used to load/modify Netfilter rules
+- [eBPF](ebpf.md) — alternative high-performance hook at XDP/TC that bypasses Netfilter
+- [Networking](networking.md) — Netfilter sits in the Linux network stack between the NIC and routing

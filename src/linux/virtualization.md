@@ -3,7 +3,7 @@
 > **Domain:** Linux Kernel, Cloud Computing, Systems
 > **Key Concepts:** Hypervisor, KVM, QEMU, VirtIO, Namespaces vs. VMs
 
-**Virtualization** is the process of creating a software-based (or "virtual") representation of something, such as virtual applications, servers, storage, and networks. In the context of Linux, it typically refers to running multiple operating systems (Guests) on a single physical host.
+**Virtualization** creates software-based virtual representations of hardware and systems. [Namespaces](namespace.md) and cgroups provide OS-level isolation (containers); KVM/QEMU provide full hardware virtualization. Network virtualization depends on [networking](networking.md) subsystems; [memory management](memory_management.md) underlies VM memory ballooning and hugepages. In the context of Linux, it typically refers to running multiple operating systems (Guests) on a single physical host.
 
 ---
 
@@ -104,3 +104,10 @@ virsh console ubuntu-guest
     *   *Use Case:* Gaming on a Windows VM inside Linux, or AI training inside a VM.
 *   **Live Migration:** Moving a running VM from Host A to Host B with zero downtime.
     *   *Mechanism:* Copy RAM pages to Host B. If a page changes while copying, mark it "dirty" and copy again. Once dirty rate is low, pause VM, copy final state, resume on Host B.
+
+## Where this connects
+
+- [Namespaces](namespace.md) — OS-level isolation for containers; VMs use hardware-level isolation
+- [Networking](networking.md) — virtual bridges and TAP devices connect VMs to the host network stack
+- [Memory management](memory_management.md) — EPT/NPT for VM memory; balloon drivers and hugepages
+- [KVM/QEMU context](../devops/infrastructure.md) — hypervisors run on top of the Linux virtualization stack

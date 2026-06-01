@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Netlink is a Linux kernel interface used for communication between the kernel and user-space processes, as well as between different user-space processes. It provides a flexible, extensible mechanism for transferring information and is the modern replacement for older interfaces like ioctl, /proc, and sysfs for many kernel subsystems.
+Netlink is a Linux kernel interface for kernel-userspace communication — the socket family used by [networking](networking.md) tools (`ip`, `ss`), [netfilter](netfilter.md)/[nftables](nftables.md) rule management, and many kernel subsystems. Compare [sysfs](sysfs.md) (filesystem-based attributes) and [eBPF](ebpf.md) maps (programmatic kernel-userspace data sharing). Netlink is the modern replacement for ioctl and /proc for many kernel subsystems.
 
 ### What is Netlink?
 
@@ -2068,3 +2068,9 @@ Netlink is a powerful and flexible IPC mechanism that has become the standard fo
 - iproute2 source code: https://git.kernel.org/pub/scm/network/iproute2/iproute2.git
 
 Netlink continues to evolve, with new families and features being added regularly. Understanding netlink is essential for anyone working with Linux networking, device management, or kernel-userspace communication.
+## Where this connects
+
+- [Networking](networking.md) — `ip`, `ss`, `tc` all use the RTNETLINK family for network configuration
+- [Netfilter](netfilter.md) / [nftables](nftables.md) — use NETLINK_NETFILTER to load/query firewall rules
+- [eBPF](ebpf.md) — BPF programs are loaded via syscall; maps can be exposed via netlink genetlink
+- [sysfs](sysfs.md) — filesystem alternative for device attribute access; netlink better for dynamic events

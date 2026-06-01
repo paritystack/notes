@@ -1,6 +1,6 @@
 # sysctl
 
-sysctl is a powerful tool for examining and changing kernel parameters at runtime. It allows system administrators to modify kernel behavior without rebooting, making it essential for performance tuning, security hardening, and troubleshooting.
+sysctl examines and changes kernel parameters at runtime via `/proc/sys`. Network parameters (tcp_keepalive, ip_forward) affect [networking](networking.md); memory parameters affect [memory management](memory_management.md); [systemd](systemd.md) applies sysctl settings at boot via `systemd-sysctl`. Compare [sysfs](sysfs.md) for device-level attributes. It allows modifying kernel behavior without rebooting.
 
 ## Basic Usage
 
@@ -383,3 +383,10 @@ sar -n DEV 1                               # Network stats (if sysstat installed
 7. **Keep backups:** Save original values before making changes
 
 sysctl provides powerful runtime kernel tuning for optimizing system performance, hardening security, and troubleshooting issues without requiring system reboots.
+
+## Where this connects
+
+- [Networking](networking.md) — net.* sysctls control TCP keepalives, IP forwarding, buffer sizes
+- [Memory management](memory_management.md) — vm.* sysctls control swappiness, dirty ratios, hugepages
+- [systemd](systemd.md) — systemd-sysctl applies sysctl settings at boot from /etc/sysctl.d/
+- [sysfs](sysfs.md) — /proc/sys is the sysctl interface; /sys is the device model interface

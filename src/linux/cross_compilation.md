@@ -1,5 +1,9 @@
 # Cross Compilation
 
+## Overview
+
+Cross compilation builds software on a host platform for a different target architecture (e.g., x86 host → ARM target). [Driver development](driver_development.md) uses cross-compilation to build kernel modules for embedded targets; [device tree](device_tree.md) source (DTS) is compiled to DTB alongside the kernel.
+
 A comprehensive guide to cross compilation for Linux - building software on one platform (host) to run on a different platform (target).
 
 ## Table of Contents
@@ -1151,3 +1155,9 @@ Cross compilation is essential for embedded Linux development:
 - [Buildroot](https://buildroot.org/)
 - [Yocto Project](https://www.yoctoproject.org/)
 - [Embedded Linux Wiki](https://elinux.org/)
+
+## Where this connects
+
+- [Driver development](driver_development.md) — cross-compilation produces kernel modules (.ko) for the target
+- [Device tree](device_tree.md) — DTC compiles device tree source alongside the cross-compiled kernel
+- [RTOS/Zephyr](../rtos/zephyr.md) — Zephyr uses the same cross-compilation toolchain concepts

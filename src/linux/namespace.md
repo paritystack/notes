@@ -1,6 +1,6 @@
 # Linux Namespaces
 
-Linux namespaces are a kernel feature that partitions kernel resources so that one set of processes sees one set of resources while another set of processes sees a different set of resources. They are the fundamental building blocks for containerization technologies like Docker, LXC, and Kubernetes.
+Linux namespaces are a kernel feature that partitions kernel resources for [process](process.md) isolation. They are the fundamental building blocks for containerization ([virtualization](virtualization.md)). [Systemd](systemd.md) uses namespaces for service sandboxing; network namespaces isolate the [networking](networking.md) stack per container.
 
 ## Overview
 
@@ -1349,3 +1349,10 @@ time ip netns add test && ip netns delete test
 | `CLONE_NEWTIME` | Time namespace |
 
 Linux namespaces provide powerful isolation mechanisms that form the foundation of modern containerization, enabling secure multi-tenancy, resource partitioning, and lightweight virtualization for diverse use cases from development environments to production container orchestration.
+
+## Where this connects
+
+- [Process](process.md) — namespaces isolate per-process views of kernel resources (PID, mount, etc.)
+- [Virtualization](virtualization.md) — containers use namespaces + cgroups; VMs use hardware isolation
+- [Networking](networking.md) — network namespaces give each container an independent network stack
+- [systemd](systemd.md) — uses namespaces for service sandboxing (PrivateTmp, PrivateNetwork)

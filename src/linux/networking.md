@@ -1,6 +1,6 @@
 # Linux Networking
 
-Linux provides a comprehensive networking stack with powerful tools for configuration, monitoring, and troubleshooting. This guide covers network interfaces, routing, firewalling, debugging, and common networking patterns.
+Linux provides a comprehensive networking stack. [Netfilter](netfilter.md) is the kernel packet filtering framework; [iptables](iptables.md) and [nftables](nftables.md) are its frontends; [netlink](netlink.md) is the kernel-userspace socket for network configuration; [eBPF](ebpf.md) enables programmable packet processing; [WireGuard](wireguard.md) is the modern VPN built into the kernel.
 
 ## Overview
 
@@ -1576,3 +1576,11 @@ done
 | Create namespace | `sudo ip netns add ns1` |
 
 Linux networking provides robust, flexible network management suitable for everything from simple connectivity to complex enterprise networking scenarios.
+
+## Where this connects
+
+- [Netfilter](netfilter.md) — the kernel packet filtering/NAT framework
+- [iptables](iptables.md) / [nftables](nftables.md) — the legacy and modern frontends for Netfilter rules
+- [Netlink](netlink.md) — the kernel-userspace socket for network configuration (used by `ip`, `ss`)
+- [eBPF](ebpf.md) — programmable XDP/TC packet processing that bypasses Netfilter for high performance
+- [WireGuard](wireguard.md) — in-kernel VPN built on the Linux network device model

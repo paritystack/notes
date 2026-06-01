@@ -1,5 +1,9 @@
 # Device Tree
 
+## Overview
+
+The Linux Device Tree is a data structure for describing hardware configuration passed to the kernel at boot time. [Driver development](driver_development.md) uses DTS bindings to match devices to drivers; [sysfs](sysfs.md) exposes the device tree at `/sys/firmware/devicetree`; [udev](udev.md) uses OF_MATCH rules for device node creation. [Cross compilation](cross_compilation.md) produces the DTB alongside the kernel image.
+
 A comprehensive guide to Linux Device Tree, a data structure for describing hardware configuration that can be passed to the kernel at boot time.
 
 ## Table of Contents
@@ -1513,3 +1517,10 @@ Device Tree provides:
 - [Device Tree Specification](https://www.devicetree.org/)
 - [Linux Device Tree Documentation](https://www.kernel.org/doc/Documentation/devicetree/)
 - [Device Tree Bindings](https://www.kernel.org/doc/Documentation/devicetree/bindings/)
+
+## Where this connects
+
+- [Driver development](driver_development.md) — DTS bindings match devices to drivers at boot via OF_MATCH tables
+- [sysfs](sysfs.md) — device tree content is visible at /sys/firmware/devicetree at runtime
+- [udev](udev.md) — udev rules match OF compatible strings for device node creation
+- [Cross compilation](cross_compilation.md) — DTC compiles .dts to .dtb alongside the cross-compiled kernel

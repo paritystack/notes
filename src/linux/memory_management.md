@@ -3,7 +3,7 @@
 > **Domain:** Linux Kernel, Systems Programming, OS Theory
 > **Key Concepts:** Virtual Memory, MMU, Paging, Page Tables, TLB, Zones, NUMA, Slab Allocator, Page Cache, Swap, Reclaim, Huge Pages, cgroups, OOM
 
-Memory Management is the subsystem responsible for managing the computer's primary memory. It provides processes with the illusion of a large, contiguous private memory space (Virtual Memory) while multiplexing the limited physical RAM and backing storage (swap, files).
+Memory Management provides [processes](process.md) with virtual memory via paging and the MMU. [Kernel patterns](kernel_patterns.md) (slab allocator, kref, GFP flags) are the memory allocation idioms for driver/kernel code. [Sysctl](sysctl.md) controls vm.* parameters (swappiness, dirty ratios); [virtualization](virtualization.md) adds balloon drivers and EPT layers. It multiplexes limited physical RAM across processes using swap and page cache.
 
 ## Table of Contents
 1. [Introduction](#1-introduction)
@@ -353,3 +353,10 @@ slabtop -o | head
 
 ### Articles
 - LWN.net memory-management coverage (folios, THP, reclaim, MGLRU)
+
+## Where this connects
+
+- [Process](process.md) — each process gets a virtual address space managed by the MM subsystem
+- [Kernel patterns](kernel_patterns.md) — GFP flags, slab/kmalloc, kref are the kernel memory allocation idioms
+- [sysctl](sysctl.md) — vm.* sysctls tune swappiness, dirty ratios, and transparent hugepages
+- [Virtualization](virtualization.md) — EPT/NPT adds a hardware second-level paging layer for VMs

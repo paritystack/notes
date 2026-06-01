@@ -1,6 +1,6 @@
 # sysfs
 
-sysfs is a virtual filesystem that exports information about kernel subsystems, hardware devices, and associated device drivers to userspace. Introduced in Linux 2.6, sysfs provides a structured, hierarchical view of the system's device model and allows both reading device information and configuring device/kernel parameters dynamically.
+sysfs is a virtual filesystem mounted at `/sys` that exports kernel device model, hardware, and driver information to userspace. [Driver development](driver_development.md) creates sysfs attributes via `DEVICE_ATTR`; [udev](udev.md) reads sysfs to create device nodes and run rules; [device tree](device_tree.md) content is visible at `/sys/firmware/devicetree`; [sysctl](sysctl.md) similarly exposes kernel parameters via `/proc/sys`. [Netlink](netlink.md) is the modern alternative for network-subsystem configuration.
 
 ## Overview
 
@@ -850,3 +850,11 @@ sudo ip link set ens0 up
 sysfs provides a unified, hierarchical interface for interacting with kernel subsystems and hardware. It enables both monitoring and configuration of system parameters, making it invaluable for system administration, debugging, performance tuning, and automation. Remember that changes are temporary unless made persistent through systemd, udev, or other initialization mechanisms.
 
 For most use cases, prefer high-level tools (`ip`, `cpupower`, `ethtool`) for convenience, but use sysfs directly when you need fine-grained control, are writing scripts, or troubleshooting at a low level.
+
+## Where this connects
+
+- [Driver development](driver_development.md) — DEVICE_ATTR macros create sysfs attributes for driver parameters
+- [udev](udev.md) — reads sysfs device attributes to match udev rules and create /dev nodes
+- [Device tree](device_tree.md) — /sys/firmware/devicetree exposes the parsed device tree
+- [sysctl](sysctl.md) — /proc/sys is the sysctl interface; /sys is the sysfs device model interface
+- [Netlink](netlink.md) — the modern alternative for network subsystem configuration

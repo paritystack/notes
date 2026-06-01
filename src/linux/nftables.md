@@ -2,7 +2,7 @@
 
 ## Introduction
 
-**nftables** is the modern Linux kernel packet filtering framework that replaces the legacy iptables, ip6tables, arptables, and ebtables frameworks. It was merged into the Linux kernel in version 3.13 (January 2014) and provides a unified interface for packet filtering, network address translation (NAT), and packet mangling.
+**nftables** is the modern Linux kernel packet filtering framework replacing [iptables](iptables.md), built on [Netfilter](netfilter.md), configured via [netlink](netlink.md). For programmatic XDP/TC filtering, see [eBPF](ebpf.md). **nftables** was merged into the Linux kernel in version 3.13 (January 2014) and provides a unified interface for packet filtering, NAT, and packet mangling.
 
 ### Why nftables?
 
@@ -3084,3 +3084,9 @@ If someone knocks more than that, the guard gets suspicious and might block them
 - **Connection Tracking** = Guard's memory
 
 nftables is just a very organized way of telling your computer who to trust and who to keep out!
+## Where this connects
+
+- [Netfilter](netfilter.md) — nftables is the modern Netfilter frontend
+- [iptables](iptables.md) — legacy alternative; iptables-translate converts rules to nftables syntax
+- [Netlink](netlink.md) — nftables uses the NETLINK_NETFILTER socket family for rule management
+- [eBPF](ebpf.md) — XDP/TC hooks provide programmatic filtering below nftables for ultra-low latency

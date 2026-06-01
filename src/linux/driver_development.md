@@ -1,5 +1,9 @@
 # Linux Driver Development
 
+## Overview
+
+Linux drivers use the kernel's device model to bind hardware to software. [Device tree](device_tree.md) provides hardware description; [sysfs](sysfs.md) exports driver attributes; [udev](udev.md) creates device nodes; [kernel patterns](kernel_patterns.md) (reference counting, locking, completion) are the idioms that make drivers safe. [Cross compilation](cross_compilation.md) produces out-of-tree kernel modules for target hardware.
+
 Comprehensive guide to developing device drivers for the Linux kernel, covering the driver model, device types, and best practices.
 
 ## Table of Contents
@@ -2056,3 +2060,11 @@ MODULE_ALIAS("platform:my-device");
 ---
 
 Linux driver development requires understanding of kernel internals, hardware interfaces, and proper resource management. Following best practices and using the kernel's device model framework ensures drivers are maintainable, efficient, and safe.
+
+## Where this connects
+
+- [Device tree](device_tree.md) — platform_device matching uses OF compatible strings from DTS bindings
+- [sysfs](sysfs.md) — DEVICE_ATTR macros expose driver parameters as sysfs attributes
+- [udev](udev.md) — creates /dev device nodes for character/block drivers on probe
+- [Kernel patterns](kernel_patterns.md) — reference counting, locking, completions are the driver idioms
+- [Cross compilation](cross_compilation.md) — out-of-tree kernel modules are cross-compiled for the target

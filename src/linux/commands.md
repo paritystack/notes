@@ -1,5 +1,9 @@
 # Essential Linux Commands Reference
 
+## Overview
+
+Essential Linux commands reference covering filesystem, process, networking, and system management. For networking-specific commands see [networking](networking.md); for service management see [systemd](systemd.md); for kernel parameter tuning see [sysctl](sysctl.md).
+
 A comprehensive guide to essential Linux commands with examples, use cases, and practical tips.
 
 ## Table of Contents
@@ -1308,3 +1312,9 @@ command &> file            # Redirect both (shorthand)
 command < file             # Read from file
 command << EOF             # Here document
 multiline input
+
+## Where this connects
+
+- [Networking](networking.md) — `ip`, `ss`, `ping`, `traceroute` are the key networking commands
+- [systemd](systemd.md) — `systemctl`, `journalctl` are the key service/log management commands
+- [sysctl](sysctl.md) — `sysctl -a` and `sysctl -w` are covered in the sysctl reference page

@@ -1,5 +1,9 @@
 # Linux Process Management
 
+## Overview
+
+Linux process management covers fork/exec/wait, scheduling, signals, and the process lifecycle. [Memory management](memory_management.md) provides each process its virtual address space; [namespace](namespace.md) isolates process views of resources; [systemd](systemd.md) manages process groups via cgroups; [kernel patterns](kernel_patterns.md) (wait queues, completion) synchronize processes in kernel context.
+
 ## Table of Contents
 - [Overview](#overview)
 - [Process Fundamentals](#process-fundamentals)
@@ -2146,3 +2150,10 @@ int main() {
 - `man 5 proc`
 - [Linux Kernel Documentation](https://www.kernel.org/doc/Documentation/)
 - [The Linux Programming Interface](http://man7.org/tlpi/) by Michael Kerrisk
+
+## Where this connects
+
+- [Memory management](memory_management.md) — each process has a virtual address space with heap, stack, mmap regions
+- [Namespace](namespace.md) — namespaces isolate process-visible kernel resources (PID, mount, net)
+- [systemd](systemd.md) — systemd manages process groups, tracks them via cgroups, handles service lifecycle
+- [Kernel patterns](kernel_patterns.md) — wait queues, completions, and work queues synchronize kernel threads

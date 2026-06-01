@@ -5,17 +5,17 @@
 Heuristic search algorithms use domain knowledge and estimation functions to guide the search process, making them more efficient than blind search methods (BFS, DFS) for large state spaces. These algorithms are essential in AI, pathfinding, optimization, and machine learning applications where exhaustive search is impractical.
 
 **Key Concepts:**
-- **Heuristic Function** $h(n)$: Estimates cost from node $n$ to goal
-- **Cost Function** $g(n)$: Actual cost from start to node $n$
-- **Evaluation Function** $f(n)$: Combines $g(n)$ and $h(n)$ to prioritize nodes
+- **Heuristic Function** h(n): Estimates cost from node n to goal
+- **Cost Function** g(n): Actual cost from start to node n
+- **Evaluation Function** f(n): Combines g(n) and h(n) to prioritize nodes
 - **Admissibility**: A heuristic is admissible if it never overestimates the true cost
-- **Consistency**: A heuristic is consistent if $h(n) \leq c(n,n') + h(n')$ for all neighbors
+- **Consistency**: A heuristic is consistent if h(n) ≤ c(n,n') + h(n') for all neighbors
 
 ## Beam Search
 
-**Time**: $O(b \cdot w \cdot d)$ | **Space**: $O(w \cdot d)$ | **Use Case**: NLP, sequence generation, constrained optimization
+**Time**: O(b · w · d) | **Space**: O(w · d) | **Use Case**: NLP, sequence generation, constrained optimization
 
-Where $b$ is branching factor, $w$ is beam width, $d$ is solution depth.
+Where b is branching factor, w is beam width, d is solution depth.
 
 Beam search is a heuristic search algorithm that explores a graph by expanding the most promising nodes in a limited set (the "beam"). It's a greedy algorithm that maintains only the top-k most promising candidates at each level, trading completeness for memory efficiency.
 
@@ -461,9 +461,9 @@ def adaptive_beam_width(depth: int, base_width: int = 3, max_width: int = 10) ->
 
 ## A* Search
 
-**Time**: $O(b^d)$ worst case | **Space**: $O(b^d)$ | **Use Case**: Pathfinding, puzzle solving
+**Time**: O(b^d) worst case | **Space**: O(b^d) | **Use Case**: Pathfinding, puzzle solving
 
-A* is an informed search algorithm that finds the optimal path using both actual cost $g(n)$ and heuristic estimate $h(n)$. With an admissible heuristic, A* is guaranteed to find the optimal solution.
+A* is an informed search algorithm that finds the optimal path using both actual cost g(n) and heuristic estimate h(n). With an admissible heuristic, A* is guaranteed to find the optimal solution.
 
 ### Core Implementation
 
@@ -593,7 +593,7 @@ def diagonal_distance(pos1, pos2, D=1, D2=1.414):
 
 ## Greedy Best-First Search
 
-**Time**: $O(b^m)$ | **Space**: $O(b^m)$ | **Use Case**: Fast approximate solutions
+**Time**: O(b^m) | **Space**: O(b^m) | **Use Case**: Fast approximate solutions
 
 Greedy best-first search expands nodes with the best heuristic value, ignoring path cost. It's fast but not optimal or complete.
 
@@ -639,7 +639,7 @@ def greedy_best_first_search(
 
 ## IDA* (Iterative Deepening A*)
 
-**Time**: $O(b^d)$ | **Space**: $O(d)$ | **Use Case**: Memory-constrained optimal search
+**Time**: O(b^d) | **Space**: O(d) | **Use Case**: Memory-constrained optimal search
 
 IDA* combines benefits of A* (optimality) with iterative deepening (low memory).
 
@@ -704,7 +704,7 @@ def ida_star_search(
 
 ## Hill Climbing
 
-**Time**: $O(n \cdot m)$ where $n$ = iterations, $m$ = neighbors | **Space**: $O(1)$ | **Use Case**: Local optimization
+**Time**: O(n · m) where n = iterations, m = neighbors | **Space**: O(1) | **Use Case**: Local optimization
 
 Hill climbing is a local search algorithm that continually moves toward increasing value (or decreasing cost).
 
@@ -802,7 +802,7 @@ def random_restart_hill_climbing(
 
 ## Simulated Annealing
 
-**Time**: $O(n \cdot m)$ | **Space**: $O(1)$ | **Use Case**: Global optimization with acceptance of worse moves
+**Time**: O(n · m) | **Space**: O(1) | **Use Case**: Global optimization with acceptance of worse moves
 
 Simulated annealing allows occasional moves to worse states to escape local optima, with probability decreasing over time.
 
@@ -904,17 +904,17 @@ def tsp_simulated_annealing(cities, distances):
 
 | Algorithm | Time | Space | Optimal | Complete | Memory Use | Best For |
 |-----------|------|-------|---------|----------|------------|----------|
-| Beam Search | $O(w \cdot b \cdot d)$ | $O(w \cdot d)$ | ❌ | ❌ | Low | NLP, constrained search |
-| A* | $O(b^d)$ | $O(b^d)$ | ✅* | ✅* | High | Optimal pathfinding |
-| Greedy Best-First | $O(b^m)$ | $O(b^m)$ | ❌ | ❌ | Medium | Fast approximate paths |
-| IDA* | $O(b^d)$ | $O(d)$ | ✅* | ✅* | Very Low | Memory-constrained optimal |
-| Hill Climbing | $O(n \cdot m)$ | $O(1)$ | ❌ | ❌ | Minimal | Local optimization |
-| Simulated Annealing | $O(n \cdot m)$ | $O(1)$ | ❌ | ~✅ | Minimal | Global optimization |
+| Beam Search | O(w · b · d) | O(w · d) | ❌ | ❌ | Low | NLP, constrained search |
+| A* | O(b^d) | O(b^d) | ✅* | ✅* | High | Optimal pathfinding |
+| Greedy Best-First | O(b^m) | O(b^m) | ❌ | ❌ | Medium | Fast approximate paths |
+| IDA* | O(b^d) | O(d) | ✅* | ✅* | Very Low | Memory-constrained optimal |
+| Hill Climbing | O(n · m) | O(1) | ❌ | ❌ | Minimal | Local optimization |
+| Simulated Annealing | O(n · m) | O(1) | ❌ | ~✅ | Minimal | Global optimization |
 
 \* With admissible heuristic and finite branching factor
 
 **Legend:**
-- $w$ = beam width, $b$ = branching factor, $d$ = depth, $m$ = maximum depth, $n$ = iterations
+- w = beam width, b = branching factor, d = depth, m = maximum depth, n = iterations
 
 ## Decision Tree
 

@@ -100,8 +100,8 @@ sorted_arr = merge_sort(arr)
 print(sorted_arr)  # Output: [3, 9, 10, 27, 38, 43, 82]
 ```
 
-**Time Complexity**: $O(n \log n)$ - We divide the array log n times, and merging takes O(n) at each level
-**Space Complexity**: $O(n)$ - We need extra space for the temporary arrays during merging
+**Time Complexity**: O(n log n) - We divide the array log n times, and merging takes O(n) at each level
+**Space Complexity**: O(n) - We need extra space for the temporary arrays during merging
 
 **Space-Time Tradeoff**: Merge sort trades space for guaranteed performance. Unlike QuickSort which sorts in-place, merge sort needs O(n) extra space. However, it guarantees O(n log n) time in all cases, while QuickSort can degrade to O(n²) in the worst case.
 
@@ -191,11 +191,11 @@ print(arr)  # Output: [1, 5, 7, 8, 9, 10]
 - **In-place version**: More efficient with O(1) extra space, but slightly harder to understand
 
 **Time Complexity**:
-- **Average case**: $O(n \log n)$ - When pivots roughly split the array in half
-- **Worst case**: $O(n^2)$ - When pivots are always smallest/largest (sorted arrays with poor pivot choice)
-- **Best case**: $O(n \log n)$ - When pivots always split array evenly
+- **Average case**: O(n log n) - When pivots roughly split the array in half
+- **Worst case**: O(n²) - When pivots are always smallest/largest (sorted arrays with poor pivot choice)
+- **Best case**: O(n log n) - When pivots always split array evenly
 
-**Space Complexity**: $O(\log n)$ for recursion stack (in-place version); $O(n)$ for simple version
+**Space Complexity**: O(log n) for recursion stack (in-place version); O(n) for simple version
 
 ## Binary Search
 
@@ -274,8 +274,8 @@ print(binary_search(arr, 7))  # Output: 3
 print(binary_search_recursive(arr, 13, 0, len(arr) - 1))  # Output: 6
 ```
 
-**Time Complexity**: $O(\log n)$ - We halve the search space each iteration (log₂ n iterations)
-**Space Complexity**: $O(1)$ iterative (only a few variables), $O(\log n)$ recursive (call stack depth)
+**Time Complexity**: O(log n) - We halve the search space each iteration (log₂ n iterations)
+**Space Complexity**: O(1) iterative (only a few variables), O(log n) recursive (call stack depth)
 
 ## Maximum Subarray (Divide and Conquer)
 
@@ -375,8 +375,8 @@ max_sum = max_subarray_divide_conquer(arr, 0, len(arr) - 1)
 print(f"Maximum subarray sum: {max_sum}")  # Output: 6 (subarray [4,-1,2,1])
 ```
 
-**Time Complexity**: $O(n \log n)$ - At each level of recursion, we do O(n) work to find crossing sum. There are O(log n) levels.
-**Space Complexity**: $O(\log n)$ - Recursion stack depth
+**Time Complexity**: O(n log n) - At each level of recursion, we do O(n) work to find crossing sum. There are O(log n) levels.
+**Space Complexity**: O(log n) - Recursion stack depth
 
 ## Count Inversions
 
@@ -478,8 +478,8 @@ print(f"Inversions: {inversions}")  # Output: 3
 print(f"Sorted array: {sorted_arr}")  # Output: [1, 2, 3, 4, 5]
 ```
 
-**Time Complexity**: $O(n \log n)$ - Same as merge sort
-**Space Complexity**: $O(n)$ - For temporary arrays during merging
+**Time Complexity**: O(n log n) - Same as merge sort
+**Space Complexity**: O(n) - For temporary arrays during merging
 
 ## Closest Pair of Points
 
@@ -602,8 +602,8 @@ min_distance = closest_pair(points)
 print(f"Smallest distance: {min_distance:.2f}")
 ```
 
-**Time Complexity**: $O(n \log n)$ - Sorting takes O(n log n), and the recursive part is T(n) = 2T(n/2) + O(n) = O(n log n)
-**Space Complexity**: $O(n)$ - For storing sorted arrays and strip
+**Time Complexity**: O(n log n) - Sorting takes O(n log n), and the recursive part is T(n) = 2T(n/2) + O(n) = O(n log n)
+**Space Complexity**: O(n) - For storing sorted arrays and strip
 
 ## Matrix Multiplication (Strassen's Algorithm)
 
@@ -719,8 +719,8 @@ result = strassen_matrix_multiply(A, B)
 print("Result:", result)  # [[19, 22], [43, 50]]
 ```
 
-**Time Complexity**: $O(n^{2.807})$ vs $O(n^3)$ for standard multiplication - significant speedup for very large matrices
-**Space Complexity**: $O(n^2)$ - For storing intermediate matrices and recursive call stacks
+**Time Complexity**: O(n^2.807) vs O(n³) for standard multiplication - significant speedup for very large matrices
+**Space Complexity**: O(n²) - For storing intermediate matrices and recursive call stacks
 
 **Note**: This implementation requires matrix dimensions to be powers of 2. In practice, you can pad matrices to the next power of 2.
 

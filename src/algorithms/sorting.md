@@ -32,7 +32,7 @@ A sorting algorithm is **stable** if it preserves the relative order of elements
 
 ### Bubble Sort
 
-**Time**: $O(n^2)$ average/worst, $O(n)$ best | **Space**: $O(1)$ | **Stable**: ✓ | **Adaptive**: ✓
+**Time**: O(n²) average/worst, O(n) best | **Space**: O(1) | **Stable**: ✓ | **Adaptive**: ✓
 
 #### How It Works
 Bubble Sort repeatedly steps through the list, comparing adjacent elements and swapping them if they're in the wrong order. The algorithm gets its name because smaller elements "bubble" to the top (beginning) of the list. After each pass, the largest unsorted element "bubbles" to its correct position at the end.
@@ -86,7 +86,7 @@ Sorting `[64, 34, 25, 12, 22]`:
 
 ### Selection Sort
 
-**Time**: $O(n^2)$ all cases | **Space**: $O(1)$ | **Stable**: ✗ | **Adaptive**: ✗
+**Time**: O(n²) all cases | **Space**: O(1) | **Stable**: ✗ | **Adaptive**: ✗
 
 #### How It Works
 Selection Sort divides the array into sorted and unsorted regions. It repeatedly finds the minimum element from the unsorted region and places it at the beginning of that region. Unlike Bubble Sort, Selection Sort performs exactly n-1 passes regardless of input, making it non-adaptive.
@@ -137,7 +137,7 @@ Sorting `[64, 25, 12, 22, 11]`:
 
 ### Insertion Sort
 
-**Time**: $O(n^2)$ average/worst, $O(n)$ best | **Space**: $O(1)$ | **Stable**: ✓ | **Adaptive**: ✓
+**Time**: O(n²) average/worst, O(n) best | **Space**: O(1) | **Stable**: ✓ | **Adaptive**: ✓
 
 #### How It Works
 Insertion Sort builds the final sorted array one element at a time. It works similarly to how you might sort playing cards in your hands. The algorithm maintains a sorted subarray and repeatedly picks the next element from the unsorted portion, inserting it into the correct position in the sorted portion.
@@ -197,7 +197,7 @@ Sorting `[12, 11, 13, 5, 6]`:
 
 ### Merge Sort
 
-**Time**: $O(n \log n)$ all cases | **Space**: $O(n)$ | **Stable**: ✓ | **Adaptive**: ✗
+**Time**: O(n log n) all cases | **Space**: O(n) | **Stable**: ✓ | **Adaptive**: ✗
 
 #### How It Works
 Merge Sort is a divide-and-conquer algorithm that divides the array into two halves, recursively sorts them, and then merges the two sorted halves. The recursion continues until subarrays of size 1 are reached (which are trivially sorted).
@@ -298,7 +298,7 @@ Left exhausted, take remaining 43: [3, 27, 38, 43]
 
 ### Quick Sort
 
-**Time**: $O(n \log n)$ average, $O(n^2)$ worst | **Space**: $O(\log n)$ | **Stable**: ✗ | **Adaptive**: ✗
+**Time**: O(n log n) average, O(n²) worst | **Space**: O(log n) | **Stable**: ✗ | **Adaptive**: ✗
 
 #### How It Works
 Quick Sort is a divide-and-conquer algorithm that selects a 'pivot' element and partitions the array around it. All elements smaller than the pivot go to its left, all larger elements go to its right. The algorithm then recursively sorts the left and right partitions.
@@ -401,7 +401,7 @@ Sorting `[10, 7, 8, 9, 1, 5]` with last element as pivot:
 
 ### Heap Sort
 
-**Time**: $O(n \log n)$ all cases | **Space**: $O(1)$ | **Stable**: ✗ | **Adaptive**: ✗
+**Time**: O(n log n) all cases | **Space**: O(1) | **Stable**: ✗ | **Adaptive**: ✗
 
 #### How It Works
 Heap Sort uses a binary heap data structure (specifically a max-heap) to sort elements. The algorithm has two main phases:
@@ -517,7 +517,7 @@ Max-heap built: [10, 5, 3, 4, 1]
 
 ### Counting Sort
 
-**Time**: $O(n + k)$ where k = range | **Space**: $O(k)$ | **Stable**: ✓ | **Comparison**: ✗
+**Time**: O(n + k) where k = range | **Space**: O(k) | **Stable**: ✓ | **Comparison**: ✗
 
 #### How It Works
 Counting Sort is a non-comparison sorting algorithm that works by counting the occurrences of each distinct element. It then uses arithmetic to determine the positions of elements in the output array. This algorithm exploits the fact that if you know there are 3 elements less than x, then x belongs at position 4.
@@ -629,7 +629,7 @@ Process from right to left:
 
 ### Radix Sort
 
-**Time**: $O(d \cdot (n + k))$ where d = digits, k = base | **Space**: $O(n + k)$ | **Stable**: ✓ | **Comparison**: ✗
+**Time**: O(d · (n + k)) where d = digits, k = base | **Space**: O(n + k) | **Stable**: ✓ | **Comparison**: ✗
 
 #### How It Works
 Radix Sort sorts numbers by processing individual digits. It uses a stable sorting algorithm (typically Counting Sort) as a subroutine to sort by each digit position, starting from the least significant digit (LSD) to the most significant digit (MSD).
@@ -756,7 +756,7 @@ Output: [170, 90, 802, 2, 24, 45, 75, 66]
 
 ### Bucket Sort
 
-**Time**: $O(n + k)$ average, $O(n^2)$ worst | **Space**: $O(n + k)$ | **Stable**: ✓ | **Comparison**: ✗
+**Time**: O(n + k) average, O(n²) worst | **Space**: O(n + k) | **Stable**: ✓ | **Comparison**: ✗
 
 #### How It Works
 Bucket Sort distributes elements into several "buckets" (usually arrays or lists), sorts each bucket individually (often with insertion sort), and then concatenates the buckets. It works best when input is uniformly distributed across a range.
@@ -896,7 +896,7 @@ Bucket 4: [0.94] → [0.94]
 
 ### Tim Sort
 
-**Time**: $O(n \log n)$ worst, $O(n)$ best | **Space**: $O(n)$ | **Stable**: ✓ | **Adaptive**: ✓
+**Time**: O(n log n) worst, O(n) best | **Space**: O(n) | **Stable**: ✓ | **Adaptive**: ✓
 
 #### How It Works
 Tim Sort is a hybrid stable sorting algorithm derived from Merge Sort and Insertion Sort. It's the default sorting algorithm in Python and Java because it performs exceptionally well on real-world data, which often has some inherent order.
@@ -1045,16 +1045,16 @@ Take remaining: [3, 5, 7, 11, 15, 17, 19, 21, 23, 28]
 
 | Algorithm | Best | Average | Worst | Space | Stable | Adaptive |
 |-----------|------|---------|-------|-------|--------|----------|
-| **Bubble** | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✓ | ✓ |
-| **Selection** | $O(n^2)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✗ | ✗ |
-| **Insertion** | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✓ | ✓ |
-| **Merge** | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | ✓ | ✗ |
-| **Quick** | $O(n \log n)$ | $O(n \log n)$ | $O(n^2)$ | $O(\log n)$ | ✗ | ✗ |
-| **Heap** | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(1)$ | ✗ | ✗ |
-| **Counting** | $O(n + k)$ | $O(n + k)$ | $O(n + k)$ | $O(k)$ | ✓ | N/A |
-| **Radix** | $O(d(n + k))$ | $O(d(n + k))$ | $O(d(n + k))$ | $O(n + k)$ | ✓ | N/A |
-| **Bucket** | $O(n + k)$ | $O(n + k)$ | $O(n^2)$ | $O(n + k)$ | ✓ | ✗ |
-| **Tim** | $O(n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | ✓ | ✓ |
+| **Bubble** | O(n) | O(n²) | O(n²) | O(1) | ✓ | ✓ |
+| **Selection** | O(n²) | O(n²) | O(n²) | O(1) | ✗ | ✗ |
+| **Insertion** | O(n) | O(n²) | O(n²) | O(1) | ✓ | ✓ |
+| **Merge** | O(n log n) | O(n log n) | O(n log n) | O(n) | ✓ | ✗ |
+| **Quick** | O(n log n) | O(n log n) | O(n²) | O(log n) | ✗ | ✗ |
+| **Heap** | O(n log n) | O(n log n) | O(n log n) | O(1) | ✗ | ✗ |
+| **Counting** | O(n + k) | O(n + k) | O(n + k) | O(k) | ✓ | N/A |
+| **Radix** | O(d(n + k)) | O(d(n + k)) | O(d(n + k)) | O(n + k) | ✓ | N/A |
+| **Bucket** | O(n + k) | O(n + k) | O(n²) | O(n + k) | ✓ | ✗ |
+| **Tim** | O(n) | O(n log n) | O(n log n) | O(n) | ✓ | ✓ |
 
 **Legend:**
 - k = range of input values (for counting/radix) or number of buckets

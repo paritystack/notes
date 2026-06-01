@@ -1325,16 +1325,16 @@ Backtracking algorithms typically have exponential time complexity, but the exac
 
 | Problem | Time Complexity | Explanation |
 |---------|----------------|-------------|
-| **Subsets** | $O(n \cdot 2^n)$ | 2^n subsets, each taking O(n) to copy |
-| **Permutations** | $O(n \cdot n!)$ | n! permutations, O(n) to build each |
-| **N-Queens** | $O(n!)$ | Place queen in n positions row 1, ≤n-1 in row 2, etc. Pruning reduces actual runtime significantly |
-| **Sudoku** | $O(9^m)$ | Try up to 9 values for each of m empty cells |
-| **Combination Sum** | $O(n^{t/m})$ | n candidates, depth t/m where t=target, m=min value |
-| **Word Search** | $O(m \cdot n \cdot 4^L)$ | Try each of m×n cells, explore 4 directions for L chars |
-| **Palindrome Partition** | $O(n \cdot 2^n)$ | 2^n ways to partition, O(n) to check each palindrome |
-| **Graph Coloring** | $O(m^n)$ | m colors, n vertices |
-| **Knight's Tour** | $O(8^{n^2})$ | 8 moves per cell, n² cells (heavily pruned in practice) |
-| **Letter Combinations** | $O(4^n)$ | Up to 4 letters per digit, n digits |
+| **Subsets** | O(n · 2ⁿ) | 2ⁿ subsets, each taking O(n) to copy |
+| **Permutations** | O(n · n!) | n! permutations, O(n) to build each |
+| **N-Queens** | O(n!) | Place queen in n positions row 1, ≤n-1 in row 2, etc. Pruning reduces actual runtime significantly |
+| **Sudoku** | O(9^m) | Try up to 9 values for each of m empty cells |
+| **Combination Sum** | O(n^(t/m)) | n candidates, depth t/m where t=target, m=min value |
+| **Word Search** | O(m · n · 4^L) | Try each of m×n cells, explore 4 directions for L chars |
+| **Palindrome Partition** | O(n · 2ⁿ) | 2ⁿ ways to partition, O(n) to check each palindrome |
+| **Graph Coloring** | O(m^n) | m colors, n vertices |
+| **Knight's Tour** | O(8^(n²)) | 8 moves per cell, n² cells (heavily pruned in practice) |
+| **Letter Combinations** | O(4ⁿ) | Up to 4 letters per digit, n digits |
 
 ### Space Complexity Considerations
 

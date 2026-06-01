@@ -6,7 +6,7 @@ Searching algorithms help find elements in data structures. The choice depends o
 
 ## Linear Search
 
-**Time**: $O(n)$ | **Space**: $O(1)$ | **Works on**: Unsorted arrays
+**Time**: O(n) | **Space**: O(1) | **Works on**: Unsorted arrays
 
 ```python
 def linear_search(arr, target):
@@ -23,7 +23,7 @@ def linear_search(arr, target):
 
 ## Binary Search
 
-**Time**: $O(\log n)$ | **Space**: $O(1)$ iterative, $O(\log n)$ recursive | **Requires**: Sorted array
+**Time**: O(log n) | **Space**: O(1) iterative, O(log n) recursive | **Requires**: Sorted array
 
 ```python
 def binary_search(arr, target):
@@ -127,11 +127,11 @@ def upper_bound(arr, target):
     return left
 ```
 
-**When to use**: Large sorted datasets, need $O(\log n)$ performance
+**When to use**: Large sorted datasets, need O(log n) performance
 
 ## Two Pointer Technique
 
-**Time**: $O(n)$ | **Space**: $O(1)$
+**Time**: O(n) | **Space**: O(1)
 
 ```python
 def two_sum(arr, target):
@@ -180,7 +180,7 @@ def three_sum_closest(arr, target):
 
 ## Jump Search
 
-**Time**: $O(\sqrt{n})$ | **Space**: $O(1)$ | **Requires**: Sorted array
+**Time**: O(√n) | **Space**: O(1) | **Requires**: Sorted array
 
 ```python
 import math
@@ -217,7 +217,7 @@ def jump_search(arr, target):
 
 ## Interpolation Search
 
-**Time**: $O(\log \log n)$ average, $O(n)$ worst | **Requires**: Sorted uniformly distributed data
+**Time**: O(log log n) average, O(n) worst | **Requires**: Sorted uniformly distributed data
 
 ```python
 def interpolation_search(arr, target):
@@ -250,11 +250,11 @@ def interpolation_search(arr, target):
 **When to use**: Uniformly distributed sorted data (e.g., dictionary, phone book)
 
 **Pros**: Faster than binary for uniform data
-**Cons**: Worst case $O(n)$, doesn't work well with non-uniform distribution
+**Cons**: Worst case O(n), doesn't work well with non-uniform distribution
 
 ## Exponential Search
 
-**Time**: $O(\log n)$ | **Space**: $O(1)$ | **Requires**: Sorted array
+**Time**: O(log n) | **Space**: O(1) | **Requires**: Sorted array
 
 ```python
 def exponential_search(arr, target):
@@ -292,7 +292,7 @@ def exponential_search(arr, target):
 
 ## Fibonacci Search
 
-**Time**: $O(\log n)$ | **Space**: $O(1)$ | **Requires**: Sorted array
+**Time**: O(log n) | **Space**: O(1) | **Requires**: Sorted array
 
 ```python
 def fibonacci_search(arr, target):
@@ -341,7 +341,7 @@ def fibonacci_search(arr, target):
 
 ## Ternary Search
 
-**Time**: $O(\log_3 n)$ | **Space**: $O(1)$ | **Requires**: Sorted array or unimodal function
+**Time**: O(log₃ n) | **Space**: O(1) | **Requires**: Sorted array or unimodal function
 
 ```python
 def ternary_search(arr, target):
@@ -389,7 +389,7 @@ def ternary_search_max(f, left, right, epsilon=1e-9):
 
 ## Hash Table Search
 
-**Time**: $O(1)$ average, $O(n)$ worst | **Space**: $O(n)$
+**Time**: O(1) average, O(n) worst | **Space**: O(n)
 
 ```python
 def hash_table_search():
@@ -433,14 +433,14 @@ class HashTable:
         return None
 ```
 
-**When to use**: Need $O(1)$ lookups, have extra memory, data doesn't need to be sorted
+**When to use**: Need O(1) lookups, have extra memory, data doesn't need to be sorted
 
 **Pros**: Fastest average case
-**Cons**: Extra space, no ordering, worst case $O(n)$
+**Cons**: Extra space, no ordering, worst case O(n)
 
 ## Sentinel Search
 
-**Time**: $O(n)$ | **Space**: $O(1)$ | **Works on**: Unsorted arrays
+**Time**: O(n) | **Space**: O(1) | **Works on**: Unsorted arrays
 
 Optimize linear search by eliminating boundary check:
 
@@ -467,14 +467,14 @@ def sentinel_search(arr, target):
 
 | Algorithm | Time (Avg) | Time (Worst) | Space | Requires Sorted | Best For |
 |-----------|-----------|-------------|-------|-----------------|----------|
-| Linear | $O(n)$ | $O(n)$ | $O(1)$ | No | Small/unsorted data |
-| Binary | $O(\log n)$ | $O(\log n)$ | $O(1)$ | Yes | Large sorted data |
-| Jump | $O(\sqrt{n})$ | $O(\sqrt{n})$ | $O(1)$ | Yes | Large arrays, costly comparisons |
-| Interpolation | $O(\log \log n)$ | $O(n)$ | $O(1)$ | Yes (uniform) | Uniform distribution |
-| Exponential | $O(\log n)$ | $O(\log n)$ | $O(1)$ | Yes | Unbounded arrays |
-| Fibonacci | $O(\log n)$ | $O(\log n)$ | $O(1)$ | Yes | Sequential access media |
-| Ternary | $O(\log_3 n)$ | $O(\log_3 n)$ | $O(1)$ | Yes | Finding extrema |
-| Hash Table | $O(1)$ | $O(n)$ | $O(n)$ | No | Fast lookups with space |
+| Linear | O(n) | O(n) | O(1) | No | Small/unsorted data |
+| Binary | O(log n) | O(log n) | O(1) | Yes | Large sorted data |
+| Jump | O(√n) | O(√n) | O(1) | Yes | Large arrays, costly comparisons |
+| Interpolation | O(log log n) | O(n) | O(1) | Yes (uniform) | Uniform distribution |
+| Exponential | O(log n) | O(log n) | O(1) | Yes | Unbounded arrays |
+| Fibonacci | O(log n) | O(log n) | O(1) | Yes | Sequential access media |
+| Ternary | O(log₃ n) | O(log₃ n) | O(1) | Yes | Finding extrema |
+| Hash Table | O(1) | O(n) | O(n) | No | Fast lookups with space |
 
 ## Decision Tree
 
@@ -567,10 +567,10 @@ def robust_binary_search(arr, target):
 
 ## Key Takeaways
 
-1. **Unsorted data?** Use Linear Search ($O(n)$) or Hash Table ($O(1)$ average)
-2. **Sorted data?** Use Binary Search for $O(\log n)$ - it's the default choice
-3. **Uniformly distributed?** Try Interpolation Search for $O(\log \log n)$
-4. **Need fastest lookup?** Build a Hash Table for $O(1)$ average lookup
+1. **Unsorted data?** Use Linear Search (O(n)) or Hash Table (O(1) average)
+2. **Sorted data?** Use Binary Search for O(log n) - it's the default choice
+3. **Uniformly distributed?** Try Interpolation Search for O(log log n)
+4. **Need fastest lookup?** Build a Hash Table for O(1) average lookup
 5. **Unbounded data?** Use Exponential Search
 6. **Finding extrema?** Use Ternary Search on unimodal functions
 7. **Space constrained?** Stick with in-place algorithms like Binary or Jump Search

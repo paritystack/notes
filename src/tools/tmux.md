@@ -734,3 +734,8 @@ fi
 | `Ctrl+b ?` | List keybindings |
 
 tmux is an essential tool for managing terminal workflows, especially valuable for remote server management, development environments, and maintaining persistent sessions.
+
+## Where this connects
+
+- [vim](vim.md) — vim + tmux is the standard terminal-based development environment
+- [../linux/commands](../linux/commands.md) — tmux multiplexes the Linux terminal sessions

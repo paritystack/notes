@@ -896,3 +896,9 @@ for name, details in portfolios.items():
 8. Stay disciplined and avoid frequent trading
 
 Remember: ETFs are tools. Focus on your overall asset allocation strategy, not on finding the "best" ETF. Low costs, broad diversification, and consistent execution matter more than picking the perfect funds.
+
+## Where this connects
+
+- [Portfolio management](portfolio_management.md) — ETFs are the primary vehicle for building a diversified portfolio
+- [Tax strategies](tax_strategies.md) — ETF tax efficiency (no capital gains distributions) is a key advantage
+- [Bonds](bonds.md) — bond ETFs are the most accessible way to hold fixed income

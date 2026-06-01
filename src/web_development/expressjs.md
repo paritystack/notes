@@ -1840,3 +1840,9 @@ if (cluster.isPrimary) {
 ---
 
 Express.js remains the most popular Node.js framework due to its simplicity, flexibility, and robust ecosystem. Its minimalist approach allows developers to structure applications as they see fit, making it suitable for everything from small APIs to large-scale enterprise applications.
+
+## Where this connects
+
+- [REST APIs](rest_apis.md) — Express.js is the de facto Node.js framework for REST APIs
+- [NestJS](nestjs.md) — NestJS is an opinionated framework built on top of Express
+- [React](react.md) — Express is commonly the backend API for React frontend applications

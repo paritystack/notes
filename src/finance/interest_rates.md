@@ -382,3 +382,10 @@ Higher U.S. rates → stronger USD → headwind for:
 5. **Don't fight the Fed** — policy regime determines what works
 6. **Watch the path, not the level** — markets price expectations, not absolutes
 7. **Term premium drives long end** — supply/demand, not just expected growth
+
+## Where this connects
+
+- [Bonds](bonds.md) — bond prices move inversely to interest rates; the yield curve is the key
+- [Macroeconomics](macroeconomics.md) — central bank policy drives interest rates
+- [Derivatives](derivatives.md) — interest rate derivatives (swaps, swaptions) hedge rate exposure
+- [REITs](reits.md) — REITs are highly sensitive to interest rate changes

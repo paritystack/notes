@@ -2230,3 +2230,9 @@ interface ImportMeta {
 | Slot | `<slot name="header" />` |
 
 Vue.js provides an approachable, versatile, and performant framework for building modern web interfaces with comprehensive tooling for state management, routing, testing, and production optimization.
+
+## Where this connects
+
+- [Tailwind CSS](tailwind.md) — commonly used with Vue for utility-first styling
+- [CSS](css.md) — Vue's single-file components include scoped CSS
+- [REST APIs](rest_apis.md) — Vue apps consume REST APIs; Pinia handles the state layer

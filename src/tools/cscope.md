@@ -526,3 +526,8 @@ export CSCOPE_DB=/path/to/cscope.out
 | `:cs find g` | Vim: Find definition |
 
 cscope is an essential tool for navigating large C codebases, providing fast symbol lookups and cross-references that make code exploration and maintenance significantly easier.
+
+## Where this connects
+
+- [ctags](ctags.md) — ctags provides jump-to-definition; cscope adds caller/callee search for C code
+- [vim](vim.md) — cscope integrates with vim for in-editor symbol navigation

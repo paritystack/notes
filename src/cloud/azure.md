@@ -2816,3 +2816,9 @@ Foundational
 ---
 
 **Updated**: January 2025
+
+## Where this connects
+
+- [AWS](aws.md) — the Amazon cloud alternative to Azure
+- [Google Cloud](google_cloud.md) — the Google cloud alternative to Azure
+- [../devops/infrastructure](../devops/infrastructure.md) — Terraform and infrastructure-as-code for Azure

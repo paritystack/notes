@@ -168,3 +168,10 @@ def test_with_mocker(mocker):
 | `pytest --pdb` | Drop into debugger on failure |
 
 pytest is the de facto standard for Python testing with its simple syntax, powerful features, and extensive plugin ecosystem.
+
+## Where this connects
+
+- [Unit testing](unit_testing.md) — pytest is the standard Python unit testing framework
+- [Integration](integration.md) — pytest fixtures power integration test setup and teardown
+- [Mocking](mocking.md) — pytest monkeypatch and unittest.mock integrate with pytest via fixtures
+- [Coverage](coverage.md) — pytest-cov generates coverage reports from pytest runs

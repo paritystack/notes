@@ -292,3 +292,9 @@ As shown, the pot size grows exponentially with each betting round.
 ### Conclusion
 
 Pot Geometry is a powerful betting strategy that leverages exponential growth and risk management principles. By consistently betting a fraction of the pot, players can maximize potential winnings while maintaining controlled risk. This strategy is particularly effective in poker, where strategic pot management can significantly influence long-term success.
+
+## Where this connects
+
+- [Portfolio management](portfolio_management.md) — Sharpe ratio and Kelly criterion are portfolio management tools
+- [Behavioral finance](behavioral_finance.md) — the behavior gap explains why investors underperform their own funds
+- [Market cycles](market_cycles.md) — general market principles apply across cycles

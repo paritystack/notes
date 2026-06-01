@@ -950,3 +950,10 @@ const DynamicComponent = dynamic(() => import('@/components/Heavy'), {
 - [Next.js Conf](https://nextjs.org/conf)
 - [Vercel Guide](https://vercel.com/guides)
 - [Awesome Next.js](https://github.com/unicodeveloper/awesome-nextjs)
+
+## Where this connects
+
+- [React](react.md) — Next.js is the production-grade React framework
+- [Tailwind CSS](tailwind.md) — the standard CSS pairing for Next.js projects
+- [REST APIs](rest_apis.md) — Next.js API routes expose REST endpoints
+- [FastAPI](fastapi.md) — a common Python backend paired with a Next.js frontend

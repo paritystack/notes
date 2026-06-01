@@ -370,3 +370,9 @@ def short_straddle_pnl(premium_collected, underlying_move, stock_price,
 6. **Binary events (FDA) need tiny position sizes**
 7. **Activist filings (13D) trigger short-term pops** — fade or follow
 8. **Document expected vs. realized** for every event trade — your edge requires calibration
+
+## Where this connects
+
+- [Volatility trading](volatility_trading.md) — earnings IV crush combines event-driven and volatility trading
+- [Options](options.md) — event catalysts create option strategies (straddles, spreads)
+- [Credit markets](credit_markets.md) — credit events (distressed, restructuring) are a key event-driven category

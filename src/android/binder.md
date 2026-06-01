@@ -83,3 +83,7 @@ bindService(intent, connection, Context.BIND_AUTO_CREATE);
 - **Asynchronous**: Non-blocking calls with oneway keyword
 
 Binder is fundamental to Android's architecture, enabling system services and app communication.
+
+## Where this connects
+
+- [Android internals](internals.md) — Binder is the core IPC mechanism in Android's architecture

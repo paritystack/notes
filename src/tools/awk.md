@@ -1217,3 +1217,8 @@ gawk '{ switch ($1) { case "a": print "A"; break; case "b": print "B"; break } }
 ---
 
 AWK is an incredibly powerful tool for text processing. Master these patterns and you'll be able to handle virtually any text manipulation task from the command line.
+
+## Where this connects
+
+- [grep](grep.md) — grep filters lines; awk processes and transforms them
+- [../linux/commands](../linux/commands.md) — awk is one of the essential Linux text processing commands

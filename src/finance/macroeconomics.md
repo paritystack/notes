@@ -315,3 +315,10 @@ def macro_risk_on_score(indicators):
 5. **Inflation is the master variable** — it determines whether bonds work or fail
 6. **Yield curve > 90% of forecasters** — for U.S. recessions, historically
 7. **Don't overtrade macro** — slow-moving; quarterly rebalancing is usually enough
+
+## Where this connects
+
+- [Interest rates](interest_rates.md) — central bank policy is the primary macro lever
+- [Market cycles](market_cycles.md) — macro drives the business cycle and sector rotation
+- [Bonds](bonds.md) — macro regime (growth vs recession, inflation vs deflation) determines bond positioning
+- [Forex](forex.md) — macro differentials drive currency pair movements

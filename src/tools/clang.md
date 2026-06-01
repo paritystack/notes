@@ -1815,3 +1815,9 @@ make asan
 10. **Test with multiple sanitizers** to catch different classes of bugs
 
 Clang provides a comprehensive ecosystem of tools that improve code quality, catch bugs early, and enhance developer productivity through excellent IDE integration and static analysis capabilities.
+
+## Where this connects
+
+- [gcc](gcc.md) — GCC is the main alternative compiler; both support the same C/C++ standards
+- [make](make.md) — Makefiles can invoke clang instead of GCC via CC= override
+- [bazel](bazel.md) — Bazel supports clang as its compiler backend

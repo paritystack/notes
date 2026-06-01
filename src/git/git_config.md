@@ -1376,3 +1376,9 @@ git rebase -i <commit-before>^
 - [ ] Backup strategy in place
 
 Effective repository management ensures smooth collaboration, optimal performance, and long-term maintainability of your projects.
+
+## Where this connects
+
+- [Commands](commands.md) — git config sets up aliases that shorten the commands in this reference
+- [Internals](internals.md) — config options like core.compression and pack.* affect object storage
+- [GitHub](github.md) — credential helpers and SSH config for GitHub authentication

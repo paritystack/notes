@@ -73,3 +73,10 @@ Cookies are the primary vector for **Session Hijacking** and **CSRF (Cross-Site 
 *   **Prevention:**
     1.  **SameSite=Strict/Lax** cookies (Modern default).
     2.  **CSRF Tokens:** A random token in the HTML form that must match the session. `evil.com` cannot read this token (due to SOP), so the request fails.
+
+## Where this connects
+
+- [../security/owasp_top_10](../security/owasp_top_10.md) — OWASP Top 10 is the web security vulnerability reference
+- [REST APIs](rest_apis.md) — REST APIs must implement authentication, CORS, and input validation
+- [../security/jwt](../security/jwt.md) — JWT is the standard stateless authentication token for web APIs
+- [../security/oauth2](../security/oauth2.md) — OAuth2 is the authorization standard for web applications

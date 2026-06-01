@@ -585,3 +585,9 @@ Automated trading can help you execute trades more efficiently and take advantag
 6. **QuantConnect**: QuantConnect is a cloud-based algorithmic trading platform that integrates with multiple brokers, including Interactive Brokers and Tradier, allowing traders to develop and deploy automated trading strategies.
 
 By leveraging these sources for options data and brokers with automated trading capabilities, you can enhance your trading strategies and improve your overall trading performance.
+
+## Where this connects
+
+- [Derivatives](derivatives.md) — options are a category of derivatives
+- [Volatility trading](volatility_trading.md) — options are the primary instrument for trading implied volatility
+- [Portfolio management](portfolio_management.md) — options strategies (collars, covered calls) are used for portfolio hedging

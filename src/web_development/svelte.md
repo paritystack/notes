@@ -2639,3 +2639,10 @@ export const auth = createAuth();
 | Style directive | `style:color={color}` |
 
 Svelte compiles components to highly efficient imperative code, resulting in small bundle sizes and excellent performance.
+
+## Where this connects
+
+- [SvelteKit](sveltekit.md) — the full-stack application framework built on Svelte
+- [Tailwind CSS](tailwind.md) — the standard CSS pairing for Svelte/SvelteKit projects
+- [CSS](css.md) — Svelte's component-scoped styles compile down to standard CSS
+- [REST APIs](rest_apis.md) — Svelte apps consume REST APIs from the backend

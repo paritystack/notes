@@ -2979,3 +2979,10 @@ Master CSS by:
 7. Staying current with modern CSS features
 
 CSS continues to evolve with new features like Container Queries, :has() selector, and more powerful layout capabilities. Regular practice and staying updated with modern techniques will make you proficient in creating beautiful, responsive, and performant web interfaces.
+
+## Where this connects
+
+- [Tailwind CSS](tailwind.md) — utility-first CSS framework built on CSS custom properties and cascade
+- [React](react.md) — CSS is styled via CSS Modules, CSS-in-JS, or Tailwind in React
+- [Frontend performance](frontend_performance.md) — critical CSS, paint order, and render-blocking resources
+- [Accessibility](accessibility.md) — CSS affects color contrast, focus styles, and motion sensitivity

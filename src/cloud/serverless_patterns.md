@@ -81,3 +81,9 @@ Serverless fits naturally with CQRS (Command Query Responsibility Segregation).
 
 *   **IAM Roles:** Every function should have its own role. The "Thumbnail Generator" role should only have `s3:GetObject` (Source) and `s3:PutObject` (Destination), nothing else.
 *   **VPC:** Running Lambda inside a VPC adds significant cold start time (unless using updated Hyperplane ENIs). Avoid unless you need to access RDS/ElastiCache.
+
+## Where this connects
+
+- [AWS](aws.md) — AWS Lambda is the dominant serverless compute platform
+- [../devops/cicd](../devops/cicd.md) — serverless functions are commonly triggered from CI/CD pipelines
+- [../system_design/message_queues](../system_design/message_queues.md) — event-driven serverless functions are triggered by message queues

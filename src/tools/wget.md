@@ -665,3 +665,7 @@ wget -S https://example.com/file.zip
 | `--timeout=N` | Timeout seconds |
 
 wget is a versatile tool for reliable file downloads, website mirroring, and automated download tasks, essential for system administrators and developers.
+
+## Where this connects
+
+- [curl](curl.md) — curl for API testing; wget for file downloads and site mirroring

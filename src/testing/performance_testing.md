@@ -769,3 +769,9 @@ pytest --benchmark-only
 - [JMeter Documentation](https://jmeter.apache.org/usermanual/index.html)
 - [Artillery Documentation](https://artillery.io/docs/)
 - [Performance Testing Guidance](https://martinfowler.com/articles/practical-test-pyramid.html)
+
+## Where this connects
+
+- [E2E testing](e2e_testing.md) — E2E tests measure correctness; performance tests measure throughput and latency
+- [Unit testing](unit_testing.md) — the test pyramid: performance tests complement functional tests at a different level
+- [../devops/observability](../devops/observability.md) — performance test results feed into observability dashboards

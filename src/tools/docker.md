@@ -624,3 +624,8 @@ alias dexec='docker exec -it'
 | `docker-compose down` | Stop services |
 
 Docker simplifies application deployment and ensures consistency across development, testing, and production environments.
+
+## Where this connects
+
+- [../devops/docker](../devops/docker.md) — the detailed Docker operational reference
+- [../devops/kubernetes](../devops/kubernetes.md) — Kubernetes orchestrates Docker containers

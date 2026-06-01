@@ -82,3 +82,9 @@ Text must differ sufficiently from the background.
 3.  **Screen Readers:**
     *   **NVDA:** Free, Windows. Highly recommended for testing.
     *   **VoiceOver:** Built-in on macOS.
+
+## Where this connects
+
+- [CSS](css.md) — ARIA attributes, focus styles, and color contrast are implemented in CSS
+- [React](react.md) — React components must use semantic HTML and ARIA roles for accessibility
+- [Frontend performance](frontend_performance.md) — performance and accessibility overlap: fast render = better experience for all users

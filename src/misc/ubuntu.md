@@ -1994,3 +1994,9 @@ tail -f /var/log/syslog                 # Follow syslog
 
 **Last Updated**: January 2025
 **Version**: Ubuntu 24.04 LTS (Noble Numbat)
+
+## Where this connects
+
+- [../linux/commands](../linux/commands.md) — Linux commands reference applies to Ubuntu
+- [../linux/systemd](../linux/systemd.md) — Ubuntu uses systemd for service management
+- [../linux/networking](../linux/networking.md) — Ubuntu networking uses the same Linux networking stack

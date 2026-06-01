@@ -1150,3 +1150,7 @@ uv pip install --only-binary :all: package
 | `--extra-index-url <url>` | Add additional package index |
 
 uv represents the future of Python package management, combining the speed of Rust with the flexibility of Python's ecosystem to deliver a superior developer experience.
+
+## Where this connects
+
+- [../machine_learning/pytorch](../machine_learning/pytorch.md) — uv is the fast package manager for installing PyTorch and ML dependencies

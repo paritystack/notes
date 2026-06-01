@@ -1645,3 +1645,7 @@ Key takeaways:
 - **HAL** enables hardware abstraction while maintaining stability
 
 This deep technical knowledge empowers developers to create optimized, secure, and efficient Android applications.
+
+## Where this connects
+
+- [Android Binder](binder.md) — Binder IPC is the central communication mechanism in Android internals

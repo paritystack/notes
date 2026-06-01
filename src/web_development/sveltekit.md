@@ -2913,3 +2913,9 @@ export const load: PageLoad = async ({ params, fetch }) => {
 - [Joy of Code](https://joyofcode.xyz/)
 - [Svelte Mastery](https://sveltemastery.com/)
 - [SvelteKit Examples](https://github.com/sveltejs/kit/tree/master/examples)
+
+## Where this connects
+
+- [Svelte](svelte.md) — SvelteKit is the full-stack framework built on the Svelte component model
+- [REST APIs](rest_apis.md) — SvelteKit server routes expose REST endpoints
+- [FastAPI](fastapi.md) — a Python backend alternative when SvelteKit's server routes aren't enough

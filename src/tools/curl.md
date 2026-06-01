@@ -646,3 +646,9 @@ curl --tlsv1.2 https://example.com
 ```
 
 curl is an incredibly powerful tool for working with APIs, testing endpoints, and automating HTTP requests. Master these patterns and you'll be able to handle almost any HTTP-related task from the command line.
+
+## Where this connects
+
+- [wget](wget.md) — the download-focused alternative; curl is for API testing, wget for file downloads
+- [tcpdump](tcpdump.md) — tcpdump captures what curl puts on the wire
+- [../web_development/rest_apis](../web_development/rest_apis.md) — curl is the primary CLI tool for testing REST APIs

@@ -1094,3 +1094,9 @@ wpa_passphrase=password
 - [hostapd Documentation](https://w1.fi/hostapd/)
 - [Linux Wireless](https://wireless.wiki.kernel.org/)
 - [ArchWiki: Software access point](https://wiki.archlinux.org/title/Software_access_point)
+
+## Where this connects
+
+- [wpa_supplicant](wpa_supplicant.md) — wpa_supplicant is the client side; hostapd is the access point side
+- [../linux/cfg80211_mac80211](../linux/cfg80211_mac80211.md) — hostapd uses cfg80211/mac80211 kernel interfaces via nl80211
+- [../wifi/security](../wifi/security.md) — hostapd implements WPA2/WPA3 authentication for the AP

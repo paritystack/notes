@@ -2352,3 +2352,10 @@ tcpdump is an essential and powerful tool for network analysis, troubleshooting,
 tcpdump's power lies in its simplicity and efficiency. While newer tools offer GUIs and advanced features, tcpdump remains the go-to tool for quick network analysis, remote troubleshooting, and scenarios where resources are limited. Master tcpdump, and you'll have a reliable tool for network analysis wherever you go.
 
 Happy capturing!
+
+## Where this connects
+
+- [Wireshark](wireshark.md) — GUI version of tcpdump; tshark is the CLI version with more features
+- [tshark](tshark.md) — tcpdump alternative with Wireshark's dissectors
+- [nmap](nmap.md) — network discovery; tcpdump captures traffic from discovered hosts
+- [curl](curl.md) — curl makes HTTP requests; tcpdump captures what's on the wire

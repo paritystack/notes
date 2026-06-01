@@ -495,3 +495,9 @@ def liquidity_plan(commitments, expected_call_schedule):
 8. **TVPI > IRR** for measuring absolute wealth
 9. **Top fund access is the alpha** — without it, public proxies (BX, KKR, BDCs) suffice
 10. **Allocate from non-liquidity-sensitive portion** of portfolio
+
+## Where this connects
+
+- [Portfolio management](portfolio_management.md) — private markets provide illiquidity premium for accredited investors
+- [Valuation](valuation.md) — private company valuation uses DCF and comparable transactions
+- [Credit markets](credit_markets.md) — private credit (direct lending) is a growing private markets category

@@ -234,3 +234,9 @@ GraphQL is like ordering food:
 - [GraphQL Official](https://graphql.org/)
 - [How to GraphQL](https://www.howtographql.com/)
 - [Apollo Documentation](https://www.apollographql.com/docs/)
+
+## Where this connects
+
+- [REST APIs](rest_apis.md) — REST alternative; GraphQL trades URL conventions for typed query language
+- [gRPC](grpc.md) — another REST alternative; gRPC is binary, GraphQL is JSON over HTTP
+- [React](react.md) — Apollo Client and urql are the standard React GraphQL clients

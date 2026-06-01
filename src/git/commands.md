@@ -1052,3 +1052,9 @@ git help -g
 # Show config options
 git help config
 ```
+## Where this connects
+
+- [Cheatsheet](cheatsheet.md) — the quick-reference version of this page
+- [Git config](git_config.md) — aliases shorten the commands in this reference
+- [Internals](internals.md) — understanding the object model explains why commands work as they do
+- [GitHub](github.md) — GitHub-specific commands (gh CLI, PR workflows)

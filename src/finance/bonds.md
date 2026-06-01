@@ -710,3 +710,10 @@ print(f"Portfolio Yield: {port_yield:.2f}%")
 8. Rebalance as needed to maintain target allocation
 
 Remember: Bonds are generally less volatile than stocks but still carry risks. Understand these risks and how bonds fit into your overall investment strategy.
+
+## Where this connects
+
+- [Interest rates](interest_rates.md) — bond prices move inversely to interest rates; duration quantifies sensitivity
+- [Portfolio management](portfolio_management.md) — bonds provide the fixed income allocation in a balanced portfolio
+- [Credit markets](credit_markets.md) — corporate bonds trade in the credit market
+- [ETFs](etfs.md) — bond ETFs (BND, AGG) are the standard way to hold fixed income

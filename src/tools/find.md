@@ -67,3 +67,9 @@ find is a command-line utility for searching for files in directories. It is a p
     ```
 
 These commands cover a variety of common use cases for the `find` command, making it a versatile tool for file searching and manipulation.
+
+## Where this connects
+
+- [grep](grep.md) — combine find + grep to search file contents
+- [ripgrep](ripgrep.md) — ripgrep automatically recurses directories; often replaces find + grep
+- [../linux/commands](../linux/commands.md) — find is a core Linux command

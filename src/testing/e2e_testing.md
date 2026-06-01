@@ -2364,3 +2364,9 @@ npx cypress run --browser chrome      # Specific browser
 - [Testing Best Practices](https://testingjavascript.com/)
 - [Web Accessibility Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [Martin Fowler - Testing](https://martinfowler.com/testing/)
+
+## Where this connects
+
+- [Integration](integration.md) — integration tests at the component level; E2E at the user workflow level
+- [Unit testing](unit_testing.md) — the test pyramid: many unit tests, fewer integration, even fewer E2E
+- [Performance testing](performance_testing.md) — E2E tests measure user-facing latency; performance tests measure throughput under load

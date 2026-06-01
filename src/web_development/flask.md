@@ -1320,3 +1320,9 @@ volumes:
 **Books:**
 - Flask Web Development by Miguel Grinberg
 - Flask Framework Cookbook
+
+## Where this connects
+
+- [REST APIs](rest_apis.md) — Flask is the minimal Python framework for REST APIs
+- [FastAPI](fastapi.md) — the modern async successor to Flask with type-safe validation
+- [Django](django.md) — the full-featured Python alternative with built-in ORM and admin

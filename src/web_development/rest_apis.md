@@ -164,3 +164,11 @@ Standard ways to order without confusion!
 - [REST API Best Practices](https://restfulapi.net/)
 - [HTTP Status Codes](https://httpstat.us/)
 - [OpenAPI/Swagger](https://swagger.io/)
+
+## Where this connects
+
+- [GraphQL](graphql.md) — the flexible query alternative to REST; better for complex data graphs
+- [gRPC](grpc.md) — the binary, typed alternative to REST; better for high-performance service-to-service
+- [Web security](web_security.md) — REST APIs must implement authentication, rate limiting, and input validation
+- [FastAPI](fastapi.md) — the modern Python framework for building REST APIs
+- [Django](django.md) — DRF (Django REST Framework) for REST APIs in Django

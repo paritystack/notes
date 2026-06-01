@@ -1702,3 +1702,9 @@ buildozer 'add deps :new_dep' //src:*
 | `@repo//path:target` | External repository |
 
 Bazel provides a powerful, scalable build system that ensures fast, correct, and reproducible builds across multiple languages and platforms.
+
+## Where this connects
+
+- [make](make.md) — the simpler traditional alternative; Bazel is for large, multi-language projects
+- [ninja](ninja.md) — Bazel can use Ninja as its underlying build executor
+- [gcc](gcc.md) / [clang](clang.md) — Bazel manages compiler toolchain selection

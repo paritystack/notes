@@ -106,3 +106,10 @@ def run():
 | Bidirectional | Both stream |
 
 gRPC provides efficient, type-safe communication between services, ideal for microservices architectures.
+
+## Where this connects
+
+- [REST APIs](rest_apis.md) — REST alternative for service-to-service; gRPC uses HTTP/2 + protobuf
+- [GraphQL](graphql.md) — another REST alternative; GraphQL is JSON over HTTP, gRPC is binary
+- [../system_design/rpc](../system_design/rpc.md) — gRPC is the modern RPC framework covered in system design
+- [NestJS](nestjs.md) — NestJS supports gRPC for microservice communication

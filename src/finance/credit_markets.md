@@ -505,3 +505,10 @@ def credit_cycle_indicator(ccc_pct_of_new_issue, default_rate, hy_oas_bp):
 8. **CLOs are the dominant leveraged loan buyer** — different from infamous 2008 CDOs
 9. **Munis for high tax brackets** — calculate TEY ([[tax_strategies]])
 10. **Credit cycle ≠ business cycle** — watch CCC issuance, defaults, distressed share as cycle markers
+
+## Where this connects
+
+- [Bonds](bonds.md) — credit markets include investment-grade and high-yield bonds
+- [Interest rates](interest_rates.md) — credit spreads widen when rates rise; rates drive the risk-free base
+- [Derivatives](derivatives.md) — credit default swaps (CDS) are the primary credit derivatives
+- [Private markets](private_markets.md) — private credit (direct lending) is growing as banks retreat

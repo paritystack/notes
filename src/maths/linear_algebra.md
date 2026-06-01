@@ -3474,3 +3474,8 @@ print(f"Speedup: {time_dense/time_sparse:.1f}x")
 ---
 
 **Guide Complete!** This comprehensive linear algebra reference covers fundamentals through advanced applications with beginner-friendly intuitions, formal definitions, geometric interpretations, and extensive Python implementations using NumPy and SciPy.
+## Where this connects
+
+- [../maths/statistics](statistics.md) — statistics uses linear algebra for PCA, regression, and covariance
+- [../machine_learning/neural_networks](../machine_learning/neural_networks.md) — neural networks are matrix multiplications; backprop uses Jacobians
+- [../maths/calculus](calculus.md) — matrix calculus (Jacobian, Hessian) combines linear algebra with calculus

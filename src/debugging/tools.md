@@ -1474,3 +1474,9 @@ diff <(ldd working) <(ldd broken)
 | Compare binaries | `diff <(objdump -d bin1) <(objdump -d bin2)` |
 
 These tools form the foundation of binary analysis and debugging on Unix-like systems. Mastering them enables effective troubleshooting, security analysis, and reverse engineering of compiled programs.
+
+## Where this connects
+
+- [GDB](gdb.md) — GDB is the primary runtime debugger; these tools analyze static binaries
+- [Core dump](core_dump.md) — tools like objdump help interpret symbols in core dump analysis
+- [Linux kernel debugging](linux_kernel.md) — perf and ftrace are kernel-level debugging tools

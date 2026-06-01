@@ -2662,3 +2662,9 @@ TShark is an essential tool for network analysis, troubleshooting, and security 
 TShark's power lies in its flexibility and depth. Master its basics first, then gradually explore advanced features as needed. Combined with proper authorization and ethical use, it becomes an invaluable tool for understanding network behavior and diagnosing issues.
 
 Happy analyzing!
+
+## Where this connects
+
+- [Wireshark](wireshark.md) — TShark is the CLI version of Wireshark with identical protocol dissectors
+- [tcpdump](tcpdump.md) — simpler alternative; tcpdump for quick captures, tshark for deep analysis
+- [nmap](nmap.md) — network scanning; tshark captures and analyzes the resulting traffic

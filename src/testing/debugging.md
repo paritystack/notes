@@ -797,3 +797,11 @@ node --inspect-brk jest          # Debug with DevTools
 - [Jest Debugging](https://jestjs.io/docs/troubleshooting)
 - [Chrome DevTools](https://developer.chrome.com/docs/devtools/)
 - [VS Code Debugging](https://code.visualstudio.com/docs/editor/debugging)
+
+## Where this connects
+
+- [Unit testing](unit_testing.md) — unit test failures are the starting point for debugging
+- [Integration](integration.md) — integration test failures often reveal environment or contract issues
+- [Mocking](mocking.md) — debugging often reveals overly tight mocks that mask real behavior
+- [Jest](jest.md) — Jest's --verbose and --detectOpenHandles help debug async test failures
+- [pytest](pytest.md) — pytest -v, -s, and pdb integration are the Python debugging entry points

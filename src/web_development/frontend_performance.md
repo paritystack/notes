@@ -1553,3 +1553,10 @@ Think of your website like a pizza delivery:
 - [Performance Budget Calculator](https://www.performancebudget.io/)
 - [Can I Use](https://caniuse.com/) - Browser feature support
 - [HTTP Archive](https://httparchive.org/) - Web performance trends
+
+## Where this connects
+
+- [React](react.md) — React-specific performance patterns: memoization, virtualization, code splitting
+- [Next.js](nextjs.md) — SSG, SSR, and image optimization are Next.js performance levers
+- [CSS](css.md) — critical CSS, paint order, and render-blocking resources are CSS performance concerns
+- [WebAssembly](webassembly.md) — WebAssembly enables native-speed compute in the browser for performance-critical paths

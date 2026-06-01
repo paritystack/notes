@@ -640,3 +640,9 @@ def crude_oil_trading_guide():
 8. Rebalance regularly
 
 Remember: Commodities are more volatile than stocks. They're best used as portfolio diversifiers, not core holdings. Most investors should limit commodity exposure to 5-15% of their portfolio.
+
+## Where this connects
+
+- [Macroeconomics](macroeconomics.md) — commodities are inflation hedges and economic cycle indicators
+- [Portfolio management](portfolio_management.md) — commodities provide diversification uncorrelated with stocks and bonds
+- [Derivatives](derivatives.md) — commodity exposure is often accessed via futures contracts

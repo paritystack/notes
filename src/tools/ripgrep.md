@@ -2051,3 +2051,9 @@ ripgrep is a modern, fast, and user-friendly search tool that has become essenti
 ripgrep's combination of speed, usability, and intelligent defaults makes it an indispensable tool for modern development workflows. Once you start using it, you'll wonder how you lived without it.
 
 Happy searching!
+
+## Where this connects
+
+- [grep](grep.md) — the classic alternative; ripgrep is grep with speed and .gitignore awareness
+- [find](find.md) — combine find + rg for complex file and content searches
+- [awk](awk.md) — awk processes structured text; rg finds matching lines first

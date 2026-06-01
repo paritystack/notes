@@ -1218,3 +1218,9 @@ Vim is more than a text editor—it's a highly efficient, composable language fo
 - Avoid using Vim for everything immediately—gradually increase usage
 
 Vim proficiency is a journey, not a destination. Each technique you master compounds with others, making you exponentially more efficient. Happy Vimming!
+
+## Where this connects
+
+- [tmux](tmux.md) — vim + tmux is the standard terminal-based development environment
+- [ctags](ctags.md) — ctags generates the tag file that vim uses for symbol navigation
+- [cscope](cscope.md) — cscope provides cross-reference navigation for C codebases in vim

@@ -487,3 +487,9 @@ Merge:     git merge <name>
 Delete:    git branch -d <name>
 Remote:    git push -u origin <name>
 ```
+
+## Where this connects
+
+- [Commands](commands.md) — the full command reference; cheatsheet is the quick-reference subset
+- [Git config](git_config.md) — aliases and configuration that make cheatsheet commands faster
+- [Internals](internals.md) — understanding what each command does at the object level

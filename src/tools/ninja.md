@@ -1193,3 +1193,9 @@ build build.ninja: configure configure.py
 10. **Integrate with meta-build systems** - CMake, Meson, GN handle complexity better
 
 Ninja excels at fast, parallel builds with minimal overhead. It's the build system of choice for large projects like Chromium, LLVM, and Android, where build speed is critical.
+
+## Where this connects
+
+- [make](make.md) — Make is the traditional alternative; CMake generates both Makefiles and Ninja files
+- [bazel](bazel.md) — Bazel is the advanced alternative for large-scale projects
+- [gcc](gcc.md) — Ninja invokes the compiler (gcc, clang) for each build step

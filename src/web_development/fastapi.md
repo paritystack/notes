@@ -1194,3 +1194,10 @@ volumes:
 - [SQLModel](https://sqlmodel.tiangolo.com/) - SQL databases with Python
 - [Uvicorn](https://www.uvicorn.org/) - ASGI server
 - [Starlette](https://www.starlette.io/) - Underlying framework
+
+## Where this connects
+
+- [REST APIs](rest_apis.md) — FastAPI builds REST APIs with automatic OpenAPI docs from type hints
+- [Django](django.md) — the full-featured Python web alternative with ORM and admin
+- [Flask](flask.md) — the lightweight Python alternative; FastAPI is its async, typed successor
+- [gRPC](grpc.md) — gRPC for high-performance binary RPC; FastAPI for HTTP/REST

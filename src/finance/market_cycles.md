@@ -402,3 +402,10 @@ You won't pick it. Instead:
 6. **Sentiment is contrarian at extremes** — buy fear, sell euphoria
 7. **Cycles repeat; details differ** — pattern recognition, not prediction
 8. **Defensive in late-cycle, aggressive after capitulation** — discipline beats forecasting
+
+## Where this connects
+
+- [Macroeconomics](macroeconomics.md) — the business cycle is the macro foundation of market cycles
+- [Momentum trend](momentum_trend.md) — trend following exploits multi-quarter market cycles
+- [Portfolio management](portfolio_management.md) — sector rotation and risk-on/risk-off shifts asset allocation
+- [Behavioral finance](behavioral_finance.md) — investor psychology drives cycle amplitude at peaks and troughs

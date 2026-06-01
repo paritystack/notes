@@ -646,3 +646,8 @@ head -n 20 tags
 | `--fields=+iaS` | Extra tag fields |
 
 ctags is an essential tool for code navigation, enabling developers to efficiently explore and understand large codebases by providing instant access to symbol definitions and references.
+
+## Where this connects
+
+- [vim](vim.md) — vim uses ctags files (tags) for jump-to-definition navigation
+- [cscope](cscope.md) — cscope complements ctags with cross-reference and call-graph search

@@ -1239,3 +1239,10 @@ clean:
 10. **Use makefiles** for complex projects to manage dependencies
 
 GCC is a powerful, flexible compiler that provides comprehensive control over the compilation process, enabling developers to optimize for performance, size, debugging, or security depending on their needs.
+
+## Where this connects
+
+- [clang](clang.md) — the main alternative compiler; clang has better diagnostics, GCC has broader platform support
+- [make](make.md) — Makefiles invoke gcc/clang for compilation
+- [bazel](bazel.md) — Bazel can use GCC as one of its compiler toolchains
+- [../linux/cross_compilation](../linux/cross_compilation.md) — cross-gcc toolchains are the standard for ARM/embedded cross-compilation

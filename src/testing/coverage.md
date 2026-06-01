@@ -743,3 +743,9 @@ Function Coverage = (Called Functions / Total Functions) × 100%
 - [Istanbul/NYC](https://istanbul.js.org/)
 - [Codecov](https://about.codecov.io/)
 - [Martin Fowler - Test Coverage](https://martinfowler.com/bliki/TestCoverage.html)
+
+## Where this connects
+
+- [Unit testing](unit_testing.md) — coverage measures how much code is exercised by tests
+- [Code quality](code_quality.md) — coverage is one code quality metric alongside linting and complexity
+- [Integration](integration.md) — integration tests often cover paths missed by unit tests

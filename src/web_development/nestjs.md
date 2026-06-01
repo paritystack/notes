@@ -1663,3 +1663,10 @@ import { CacheModule } from '@nestjs/cache-manager';
 - [Swagger UI](https://swagger.io/tools/swagger-ui/)
 - [TypeORM](https://typeorm.io/)
 - [Prisma](https://www.prisma.io/)
+
+## Where this connects
+
+- [Express.js](expressjs.md) — NestJS is an opinionated layer on top of Express (or Fastify)
+- [REST APIs](rest_apis.md) — NestJS provides controllers and modules for building REST APIs
+- [gRPC](grpc.md) — NestJS supports gRPC for microservice communication
+- [GraphQL](graphql.md) — NestJS has built-in GraphQL support via code-first or schema-first

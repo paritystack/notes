@@ -402,3 +402,9 @@ For completeness — alternatives to REITs:
 8. **Industrial, data centers, towers** were 2010s leaders; cycle has rotated
 9. **Stick to public listed** for liquidity and transparency
 10. **5–15% portfolio allocation** is a typical strategic weight
+
+## Where this connects
+
+- [Portfolio management](portfolio_management.md) — REITs provide real estate exposure with stock-like liquidity
+- [Interest rates](interest_rates.md) — REITs are sensitive to rate changes (like bonds but with equity upside)
+- [Tax strategies](tax_strategies.md) — REIT dividends have specific tax treatment (ordinary income, QBI deduction)

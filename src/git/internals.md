@@ -1481,3 +1481,8 @@ The next time a porcelain command behaves unexpectedly, you'll understand why an
 - [Explain Git with D3](https://onlywei.github.io/explain-git-with-d3/)
 
 Remember: With great power (plumbing commands) comes great responsibility. Always have backups!
+
+## Where this connects
+
+- [Commands](commands.md) — plumbing commands (cat-file, hash-object) expose the internals
+- [Cheatsheet](cheatsheet.md) — the high-level commands that build on the object model

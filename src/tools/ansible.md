@@ -907,3 +907,8 @@ ansible all -m setup --tree /tmp/facts
 | `ansible-inventory --list` | Show inventory |
 
 Ansible simplifies IT automation with its agentless architecture and simple YAML syntax, making infrastructure management efficient and reproducible.
+
+## Where this connects
+
+- [../devops/infrastructure](../devops/infrastructure.md) — Ansible and Terraform complement each other for infrastructure automation
+- [../devops/cicd](../devops/cicd.md) — Ansible playbooks are often triggered from CI/CD pipelines

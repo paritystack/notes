@@ -1609,3 +1609,9 @@ window.addEventListener('resize', debounce(() => {
 - [Dexie.js](https://dexie.org/) - IndexedDB wrapper
 - [localForage](https://localforage.github.io/localForage/) - Unified storage API
 - [Comlink](https://github.com/GoogleChromeLabs/comlink) - Web Worker RPC
+
+## Where this connects
+
+- [WebAssembly](webassembly.md) — WebAssembly accesses browser capabilities through the Web APIs layer
+- [REST APIs](rest_apis.md) — REST APIs are server-side; Web APIs are the browser's built-in JS interfaces
+- [React](react.md) — React apps use Web APIs (Fetch, localStorage, WebSocket) for browser integration

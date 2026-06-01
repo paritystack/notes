@@ -821,3 +821,11 @@ React is like LEGO blocks:
 - [React Tutorial](https://react.dev/learn) - Official interactive tutorial
 - [React Patterns](https://reactpatterns.com/) - Common design patterns
 - [Awesome React](https://github.com/enaqx/awesome-react) - Curated list of resources
+
+## Where this connects
+
+- [Next.js](nextjs.md) — the production React framework with SSR, SSG, and API routes
+- [Tailwind CSS](tailwind.md) — the utility-first CSS framework commonly paired with React
+- [CSS](css.md) — the styling layer beneath Tailwind and CSS-in-JS solutions
+- [REST APIs](rest_apis.md) — React apps consume REST or GraphQL APIs from the backend
+- [Frontend performance](frontend_performance.md) — code splitting, lazy loading, and memoization are React performance patterns

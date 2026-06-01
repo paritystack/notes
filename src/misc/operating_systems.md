@@ -1676,3 +1676,9 @@ The principles covered in this document—process management, memory management,
   - UC Berkeley CS162: Operating Systems
   - Stanford CS140: Operating Systems
 
+
+## Where this connects
+
+- [../linux/process](../linux/process.md) — Linux process management is a concrete OS implementation
+- [../linux/memory_management](../linux/memory_management.md) — Linux virtual memory is the OS memory management implementation
+- [../rtos/freertos](../rtos/freertos.md) — FreeRTOS is a real-time OS implementation for embedded systems

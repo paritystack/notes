@@ -410,3 +410,9 @@ Lesson: short vol = picking up pennies in front of a steamroller. Survival requi
 7. **Always define max loss** — iron condors > naked strangles
 8. **Diversify tail hedges** — buy cheap OTM puts as insurance, especially in low-vol regimes
 9. **Vol trading combines with [[event_driven]]** for earnings IV crush plays
+
+## Where this connects
+
+- [Options](options.md) — options are the primary instrument for volatility trading (IV vs RV)
+- [Derivatives](derivatives.md) — VIX futures and variance swaps are volatility derivatives
+- [Event driven](event_driven.md) — earnings IV crush is a volatility trading + event driven strategy

@@ -3340,3 +3340,10 @@ function MyDialog({ isOpen, onClose }) {
 ---
 
 **Last Updated**: January 2025
+
+## Where this connects
+
+- [CSS](css.md) — Tailwind is a utility-first layer on top of standard CSS
+- [React](react.md) — the most common Tailwind pairing for component-based UIs
+- [Next.js](nextjs.md) — Next.js projects commonly include Tailwind out of the box
+- [Frontend performance](frontend_performance.md) — Tailwind's JIT compiler eliminates unused CSS for minimal bundle size

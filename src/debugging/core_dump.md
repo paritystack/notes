@@ -152,3 +152,9 @@ spec:
 6. Strip production binaries but keep debug symbols separate
 
 Core dumps are invaluable for debugging crashes in production systems.
+
+## Where this connects
+
+- [GDB](gdb.md) — gdb is the primary tool for analyzing core dumps
+- [Linux kernel debugging](linux_kernel.md) — kernel core dumps (vmcore) use different tools (crash, kdump)
+- [Tools](tools.md) — binary analysis tools (readelf, objdump) help interpret core dumps

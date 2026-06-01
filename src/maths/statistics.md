@@ -2683,3 +2683,9 @@ Availability = MTBF / (MTBF + MTTR)
 - Explain what statistics mean, not just values
 
 Statistics is the science of learning from incomplete information. Master it, and you can make better decisions in an uncertain world.
+
+## Where this connects
+
+- [Linear algebra](linear_algebra.md) — PCA, regression, and covariance matrices use linear algebra
+- [../maths/probability](probability.md) — statistics is applied probability; distributions and inference
+- [../machine_learning/metrics](../machine_learning/metrics.md) — statistical metrics (precision, AUC, confidence intervals) underpin ML evaluation

@@ -798,3 +798,9 @@ for event, details in events.items():
 8. Never risk more than you can afford to lose
 
 Remember: 70-80% of retail forex traders lose money. Success requires discipline, education, and proper risk management. If you can't handle the leverage and volatility, stick to stocks or ETFs.
+
+## Where this connects
+
+- [Macroeconomics](macroeconomics.md) — macro differentials (growth, inflation, rates) drive currency pairs
+- [Derivatives](derivatives.md) — forex forwards, options, and swaps are the primary derivatives
+- [Interest rates](interest_rates.md) — interest rate differentials are the primary driver of carry trades

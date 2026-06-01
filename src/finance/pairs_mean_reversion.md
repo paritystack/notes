@@ -410,3 +410,9 @@ Avoid stacking mean-revert with mean-revert (RSI(2) + pairs + vol selling) — t
 6. **Stat-arb is crowded** — pure spread trading edge has decayed; need extra angle
 7. **Borrow costs matter** — short-side fees can be lethal on hard-to-borrow names
 8. **Mean reversion fails in trends** — diversify with [[momentum_trend]] for balance
+
+## Where this connects
+
+- [Momentum trend](momentum_trend.md) — mean reversion and trend following are complementary; diversify between them
+- [Derivatives](derivatives.md) — pairs trades are often implemented with swaps or CFDs for capital efficiency
+- [Portfolio management](portfolio_management.md) — market-neutral pairs trades reduce beta exposure

@@ -910,3 +910,10 @@ help:
 8. **Keep Makefiles readable** with comments and organization
 
 make simplifies building complex projects by managing dependencies and minimizing rebuild time, making it an essential tool for C/C++ development and beyond.
+
+## Where this connects
+
+- [gcc](gcc.md) — Makefiles invoke GCC for C/C++ compilation
+- [clang](clang.md) — Makefiles can use clang as the compiler via CC=clang
+- [ninja](ninja.md) — Ninja is the faster build executor; CMake generates Ninja files instead of Makefiles
+- [bazel](bazel.md) — Bazel is the advanced alternative to Make for large, multi-language projects

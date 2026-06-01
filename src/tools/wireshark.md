@@ -3796,3 +3796,9 @@ The more you use Wireshark, the more proficient you'll become at quickly identif
 Remember: With great power comes great responsibility. Use Wireshark ethically, legally, and with proper authorization.
 
 Happy analyzing!
+
+## Where this connects
+
+- [tcpdump](tcpdump.md) — the CLI alternative; tcpdump is for captures, Wireshark for analysis
+- [tshark](tshark.md) — the CLI version of Wireshark with identical dissectors
+- [nmap](nmap.md) — network scanning that complements Wireshark analysis

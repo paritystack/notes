@@ -667,3 +667,10 @@ These are aggressive; ~50th percentile retirees have far less, but those are the
 10. **Estate planning is for your family, not you** — keep it current
 
 See also: [[portfolio_management]], [[risk_management]], [[tax_strategies]], [[interest_rates]], [[private_markets]] (for accredited investors), [[reits]]
+
+## Where this connects
+
+- [Portfolio management](portfolio_management.md) — financial planning sets the goals; portfolio management executes them
+- [Tax strategies](tax_strategies.md) — tax planning is integral to financial planning (401k, IRA, Roth)
+- [ETFs](etfs.md) — ETFs are the standard investment vehicle in personal financial plans
+- [REITs](reits.md) — real estate is a major component of personal financial planning

@@ -2101,3 +2101,8 @@ Matplotlib is incredibly powerful and flexible. Key takeaways:
 - [Matplotlib Gallery](https://matplotlib.org/stable/gallery/index.html)
 - [Nicolas Rougier's Tutorial](https://github.com/rougier/matplotlib-tutorial)
 - [Python Graph Gallery](https://www.python-graph-gallery.com/)
+
+## Where this connects
+
+- [../misc/pandas](pandas.md) — pandas DataFrame.plot() wraps matplotlib for quick EDA charts
+- [../machine_learning/numpy](../machine_learning/numpy.md) — matplotlib visualizes NumPy arrays

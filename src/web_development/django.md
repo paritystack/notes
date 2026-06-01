@@ -1562,3 +1562,10 @@ server {
 - [Django Packages](https://djangopackages.org/)
 - [Awesome Django](https://github.com/wsvincent/awesome-django)
 - [Django Debug Toolbar](https://django-debug-toolbar.readthedocs.io/)
+
+## Where this connects
+
+- [REST APIs](rest_apis.md) — Django REST Framework (DRF) builds REST APIs on top of Django
+- [FastAPI](fastapi.md) — the modern async alternative to Django for API-first projects
+- [Flask](flask.md) — the lightweight Python alternative for simpler web apps
+- [../databases/postgres](../databases/postgres.md) — Django's ORM is most commonly used with PostgreSQL

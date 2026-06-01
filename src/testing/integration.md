@@ -224,3 +224,10 @@ def test_external_api_integration():
 | Network | Use test servers or mocks |
 
 Integration tests ensure your system components work together correctly, catching issues that unit tests might miss.
+
+## Where this connects
+
+- [Unit testing](unit_testing.md) — unit tests test in isolation; integration tests test interactions
+- [E2E testing](e2e_testing.md) — integration tests verify component interactions; E2E tests verify full user workflows
+- [Mocking](mocking.md) — integration tests use fewer mocks than unit tests by design
+- [pytest](pytest.md) — pytest fixtures are the standard approach for Python integration test setup/teardown

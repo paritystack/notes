@@ -428,3 +428,9 @@ Below safe harbor → underpayment penalty (~7% in 2024).
 8. **Backdoor + Mega Backdoor Roth** for high earners
 9. **State + NIIT** stack on federal — true marginal rates can hit 50%+
 10. **Donate appreciated stock**, not cash, when possible
+
+## Where this connects
+
+- [Portfolio management](portfolio_management.md) — tax-loss harvesting and account location are portfolio decisions
+- [ETFs](etfs.md) — ETF tax efficiency is a key advantage over mutual funds
+- [Financial planning](financial_planning.md) — tax-advantaged accounts (401k, IRA) are the foundation of financial planning

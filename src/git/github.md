@@ -670,3 +670,8 @@ gh api repos/<owner>/<repo>/discussions \
 8. **Milestones**: Track progress with milestones
 9. **Projects**: Use GitHub Projects for project management
 10. **Documentation**: Keep README and CONTRIBUTING.md updated
+## Where this connects
+
+- [Commands](commands.md) — the local git commands used before pushing to GitHub
+- [Git config](git_config.md) — SSH and credential configuration for GitHub authentication
+- [../devops/cicd](../devops/cicd.md) — GitHub Actions powers CI/CD pipelines in GitHub

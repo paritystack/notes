@@ -1519,3 +1519,8 @@ token::transfer(cpi_ctx, amount)?;            // Then CPI
 ---
 
 **Last Updated**: 2025-01-19
+
+## Where this connects
+
+- [Blockchain](blockchain.md) — Solana is a specific high-performance blockchain implementation
+- [../security/digital_signatures](../security/digital_signatures.md) — Solana transactions use Ed25519 digital signatures

@@ -33,3 +33,8 @@ sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
+
+## Where this connects
+
+- [AWS](aws.md) — AWS GPU instance setup is covered in setup.md
+- [Google Cloud](google_cloud.md) — GCP GPU instances as an alternative

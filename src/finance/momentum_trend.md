@@ -354,3 +354,9 @@ Classic AQR "Style Premia" approach: value, momentum, carry, defensive — acros
 6. **Momentum crashes are real** — defenses: trend filter, vol targeting, crash hedges
 7. **Combine with [[pairs_mean_reversion]]** — negative correlation smooths returns
 8. **Simple trend rules work** — 10-month SMA cuts SPY drawdowns dramatically
+
+## Where this connects
+
+- [Market cycles](market_cycles.md) — trend following exploits multi-quarter cycle momentum
+- [Pairs mean reversion](pairs_mean_reversion.md) — momentum and mean reversion are complementary strategies
+- [Portfolio management](portfolio_management.md) — trend rules can be used as tactical overlays on strategic allocation

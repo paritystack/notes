@@ -758,3 +758,10 @@ Useful for biotech, M&A targets ([[event_driven]]), and distressed situations.
 10. **Calibrate your forecasts** — track accuracy; humbleness scales with experience
 
 See also: [[fundamental_analysis]], [[stocks]], [[reits]], [[private_markets]], [[credit_markets]], [[interest_rates]], [[market_cycles]], [[event_driven]]
+
+## Where this connects
+
+- [Private markets](private_markets.md) — DCF and comparable transactions are used for private company valuation
+- [Interest rates](interest_rates.md) — the discount rate in DCF models is driven by interest rates
+- [Credit markets](credit_markets.md) — credit analysis uses valuation to assess debt capacity
+- [Portfolio management](portfolio_management.md) — valuation determines whether assets are cheap or expensive relative to fundamentals

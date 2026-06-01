@@ -683,3 +683,9 @@ expect(fn).toHaveBeenCalledWith(args)     // Mock called with args
 - [Testing Library](https://testing-library.com/)
 - [Jest Cheat Sheet](https://github.com/sapegin/jest-cheat-sheet)
 - [Common Testing Mistakes](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
+
+## Where this connects
+
+- [Unit testing](unit_testing.md) — Jest is the standard JavaScript/TypeScript unit testing framework
+- [Mocking](mocking.md) — Jest provides built-in mocking with jest.mock(), jest.fn(), and jest.spyOn()
+- [Coverage](coverage.md) — Jest includes built-in Istanbul coverage reporting

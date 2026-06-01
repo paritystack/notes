@@ -929,3 +929,9 @@ python_files = ["test_*.py"]
 - [Prettier Options](https://prettier.io/docs/en/options.html)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
 - [mypy Documentation](https://mypy.readthedocs.io/)
+
+## Where this connects
+
+- [Coverage](coverage.md) — test coverage is a code quality metric
+- [Unit testing](unit_testing.md) — unit tests are the enforcement mechanism for code quality
+- [Integration](integration.md) — integration tests catch quality issues that unit tests miss

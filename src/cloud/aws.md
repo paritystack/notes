@@ -2857,3 +2857,10 @@ Foundational
 ---
 
 **Updated**: January 2025
+
+## Where this connects
+
+- [Azure](azure.md) — the Microsoft cloud alternative to AWS
+- [Google Cloud](google_cloud.md) — the Google cloud alternative to AWS
+- [Serverless patterns](serverless_patterns.md) — AWS Lambda and serverless architecture patterns
+- [../devops/infrastructure](../devops/infrastructure.md) — infrastructure-as-code for AWS (Terraform, CDK)

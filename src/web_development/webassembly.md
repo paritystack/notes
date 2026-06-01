@@ -1214,3 +1214,9 @@ WebAssembly is a **game-changing technology** that brings:
 - Build complexity is a concern
 
 The future of web development is **JavaScript + WebAssembly** working together! 🚀
+
+## Where this connects
+
+- [Web APIs](web_apis.md) — WebAssembly modules interact with the browser via JavaScript Web APIs
+- [Frontend performance](frontend_performance.md) — WebAssembly enables near-native performance for compute-intensive browser tasks
+- [REST APIs](rest_apis.md) — WebAssembly apps still consume REST/GraphQL APIs for data

@@ -65,3 +65,9 @@ grep is a command-line utility for searching for text in files. It is a powerful
     ```
 
 These commands cover a variety of common use cases for the `grep` command, making it a versatile tool for text searching and manipulation.
+
+## Where this connects
+
+- [ripgrep](ripgrep.md) — faster alternative to grep; respects .gitignore and uses modern regex
+- [awk](awk.md) — awk for structured text processing; grep for pattern matching
+- [find](find.md) — combine find + grep to search file contents in a directory tree

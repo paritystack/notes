@@ -827,3 +827,9 @@ setenv uboot_version 'U-Boot 2023.10 Custom Build 1.0'
 - Kernel Configuration
 - Cross-compilation
 - Embedded System Development
+
+## Where this connects
+
+- [../linux/device_tree](../linux/device_tree.md) — U-Boot loads and passes the device tree blob (DTB) to the Linux kernel
+- [../linux/cross_compilation](../linux/cross_compilation.md) — U-Boot is cross-compiled for the target hardware
+- [../embedded/ota_updates](../embedded/ota_updates.md) — U-Boot's bootcount and environment are used in OTA update flows

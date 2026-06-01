@@ -1384,3 +1384,7 @@ ffmpeg -i input.mp4 -b:v 1000k -pass 2 output.mp4
 ---
 
 FFmpeg is an incredibly powerful tool with nearly limitless capabilities for audio and video processing. Master these patterns and you'll be able to handle virtually any multimedia task from the command line.
+
+## Where this connects
+
+- [curl](curl.md) — curl handles HTTP transport; ffmpeg processes the media streams

@@ -2295,3 +2295,9 @@ Pandas is the cornerstone of data analysis in Python. Key takeaways:
 - [Pandas Cookbook](https://pandas.pydata.org/docs/user_guide/cookbook.html)
 - [Modern Pandas](https://tomaugspurger.github.io/modern-1-intro.html)
 - [Effective Pandas](https://github.com/TomAugspurger/effective-pandas)
+
+## Where this connects
+
+- [Matplotlib](matplotlib.md) — pandas uses matplotlib for DataFrame.plot() visualization
+- [../machine_learning/numpy](../machine_learning/numpy.md) — pandas builds on NumPy; .values returns a NumPy array
+- [../databases/duckdb](../databases/duckdb.md) — DuckDB can query pandas DataFrames directly via Python

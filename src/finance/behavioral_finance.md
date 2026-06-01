@@ -179,3 +179,9 @@ def rules_gate(trade, plan):
 6. **Sentiment is contrarian at extremes** — but extremes can deepen; confirm with trend
 7. **You can't unlearn biases — you can out-process them** — written rules, pre-commitment, journals, checklists
 8. **The behavior gap is real money** — investors underperform their own funds by mistiming; discipline is the edge
+
+## Where this connects
+
+- [Market cycles](market_cycles.md) — behavioral biases amplify cycle peaks and troughs
+- [Portfolio management](portfolio_management.md) — behavioral finance explains why investors underperform their own funds
+- [Momentum trend](momentum_trend.md) — momentum partly exploits investors' underreaction to information

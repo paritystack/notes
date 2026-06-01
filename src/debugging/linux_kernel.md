@@ -126,3 +126,10 @@ crash /usr/lib/debug/boot/vmlinux-$(uname -r) /var/crash/*/dump.*
 ```
 
 Kernel debugging requires patience and specialized knowledge, but these tools make it manageable.
+
+## Where this connects
+
+- [GDB](gdb.md) — KGDB enables GDB-style debugging of the running kernel
+- [Core dump](core_dump.md) — vmcore (kernel crash dump) is the kernel equivalent of a process core dump
+- [Tools](tools.md) — tools like perf and ftrace are essential kernel debugging tools
+- [../linux/kernel_patterns](../linux/kernel_patterns.md) — kernel code patterns help interpret debug output

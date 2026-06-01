@@ -961,3 +961,9 @@ watch -n 2 'wpa_cli -i wlan0 status | grep -E "wpa_state|ssid|ip_address"'
 - [wpa_supplicant Documentation](https://w1.fi/wpa_supplicant/)
 - [ArchWiki: wpa_supplicant](https://wiki.archlinux.org/title/Wpa_supplicant)
 - [Ubuntu WiFi Guide](https://help.ubuntu.com/community/WifiDocs)
+
+## Where this connects
+
+- [hostapd](hostapd.md) — hostapd is the access point side; wpa_supplicant is the client side
+- [../linux/cfg80211_mac80211](../linux/cfg80211_mac80211.md) — wpa_supplicant uses nl80211 to communicate with the kernel
+- [../wifi/security](../wifi/security.md) — wpa_supplicant implements WPA2/WPA3 client authentication

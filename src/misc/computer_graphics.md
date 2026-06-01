@@ -1983,3 +1983,8 @@ Computer graphics is a vast and evolving field combining mathematics, physics, c
 - **APIs**: OpenGL, Vulkan, DirectX, Metal, WebGL
 - **Tools**: Blender, Unity, Unreal Engine, Godot
 - **Websites**: Learn OpenGL, Scratchapixel, ShaderToy
+
+## Where this connects
+
+- [../maths/linear_algebra](../maths/linear_algebra.md) — 3D transformations, projection, and lighting all use linear algebra
+- [../maths/calculus](../maths/calculus.md) — ray marching, implicit surfaces, and animation curves use calculus

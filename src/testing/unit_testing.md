@@ -145,3 +145,11 @@ Like quality control in a factory!
 - [pytest Documentation](https://docs.pytest.org/)
 - [Jest Documentation](https://jestjs.io/)
 - [JUnit 5 Guide](https://junit.org/junit5/docs/current/user-guide/)
+
+## Where this connects
+
+- [Integration](integration.md) — unit tests test in isolation; integration tests verify components together
+- [Mocking](mocking.md) — unit tests use mocks to replace external dependencies
+- [Coverage](coverage.md) — unit tests drive coverage metrics; high line coverage doesn't guarantee quality
+- [Jest](jest.md) — the standard JavaScript unit testing framework
+- [pytest](pytest.md) — the standard Python unit testing framework

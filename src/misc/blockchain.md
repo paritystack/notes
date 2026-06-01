@@ -1499,3 +1499,9 @@ Farm → Processing → Distribution → Retail → Consumer
 ---
 
 **Last Updated**: 2025-01-19
+
+## Where this connects
+
+- [Solana](solana.md) — Solana is a high-performance blockchain platform covered in detail
+- [../security/digital_signatures](../security/digital_signatures.md) — blockchains use digital signatures for transaction authentication
+- [../algorithms/hashing_techniques](../algorithms/hashing_techniques.md) — cryptographic hashing is the foundation of blockchain integrity

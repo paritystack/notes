@@ -868,3 +868,10 @@ jest.spyOn(obj, 'method');
 - [Jest Mock Documentation](https://jestjs.io/docs/mock-functions)
 - [pytest-mock](https://pytest-mock.readthedocs.io/)
 - [Testing with Mocks](https://martinfowler.com/articles/mocksArentStubs.html)
+
+## Where this connects
+
+- [Unit testing](unit_testing.md) — mocking isolates the unit under test from its dependencies
+- [Integration](integration.md) — integration tests deliberately avoid mocks to test real interactions
+- [pytest](pytest.md) — pytest's monkeypatch fixture and unittest.mock are the Python mocking tools
+- [Jest](jest.md) — Jest's jest.mock() and jest.fn() are the JavaScript mocking tools

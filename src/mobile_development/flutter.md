@@ -956,3 +956,8 @@ android {
 - [Flutter DevTools](https://flutter.dev/docs/development/tools/devtools/overview)
 - [DartPad](https://dartpad.dev/) - Online IDE
 - [FlutterFire](https://firebase.flutter.dev/) - Firebase integration
+
+## Where this connects
+
+- [React Native](react_native.md) — the JavaScript/React alternative to Flutter for cross-platform mobile
+- [../web_development/react](../web_development/react.md) — React Native shares the React component model; Flutter uses Dart

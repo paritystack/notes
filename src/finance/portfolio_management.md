@@ -874,3 +874,10 @@ for category, items in checklist.items():
 8. Adjust as life circumstances change
 
 Remember: Portfolio management is a continuous process, not a one-time event. Regular monitoring and disciplined rebalancing are keys to long-term success.
+
+## Where this connects
+
+- [ETFs](etfs.md) — ETFs are the primary vehicle for building a diversified portfolio
+- [Risk management](../finance/general.md) — position sizing and drawdown control are portfolio management fundamentals
+- [Tax strategies](tax_strategies.md) — tax-loss harvesting and account location are portfolio management decisions
+- [Behavioral finance](behavioral_finance.md) — behavioral biases are the primary reason investors underperform

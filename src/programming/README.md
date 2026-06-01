@@ -14,6 +14,7 @@ This section contains references and guides for various programming languages.
 - [Go](go.md) - A statically typed, compiled language with built-in concurrency
 - [Lua](lua.md) - A lightweight, embeddable scripting language
 - [Rust](rust.md) - A systems programming language focused on safety and performance
+- [Dart](dart.md) - A client-optimized language for fast apps (Flutter), with sound null safety
 - [SQL](sql.md) - A domain-specific language for managing databases
 
 ## Concepts & Paradigms

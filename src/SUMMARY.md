@@ -28,6 +28,7 @@
     - [Interview Questions](programming/interview_questions.md)
     - [Design Patterns](programming/design_patterns.md)
     - [Kotlin](programming/kotlin.md)
+    - [Dart](programming/dart.md)
     - [Concurrency](programming/concurrency.md)
     - [Memory Management](programming/memory_management.md)
     - [Compilers](programming/compilers.md)

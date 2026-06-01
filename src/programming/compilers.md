@@ -2,230 +2,107 @@
 
 ## Overview
 
-A compiler is a specialized program that translates source code written in a high-level programming language into machine code, bytecode, or another programming language. Compilers are fundamental tools in software development, enabling developers to write code in human-readable languages while producing efficient executable programs.
-
-## Compiler Phases
-
-The compilation process is typically divided into several distinct phases:
-
-### 1. Lexical Analysis (Scanning)
-
-- Breaks source code into tokens (keywords, identifiers, operators, literals)
-- Removes whitespace and comments
-- Identifies lexical errors
-- Output: Stream of tokens
-
-### 2. Syntax Analysis (Parsing)
-
-- Analyzes the grammatical structure of the token stream
-- Builds an Abstract Syntax Tree (AST) or Parse Tree
-- Checks for syntax errors
-- Output: Parse tree or AST
-
-### 3. Semantic Analysis
-
-- Checks for semantic consistency
-- Type checking and type inference
-- Scope resolution
-- Verifies that operations are semantically valid
-- Output: Annotated AST
-
-### 4. Intermediate Code Generation
-
-- Generates platform-independent intermediate representation (IR)
-- Common formats: Three-address code, quadruples, SSA form
-- Facilitates optimization and portability
-- Output: Intermediate representation
-
-### 5. Code Optimization
-
-- Improves code efficiency without changing functionality
-- Types of optimization:
-  - **Constant folding**: Evaluates constant expressions at compile time
-  - **Dead code elimination**: Removes unreachable code
-  - **Loop optimization**: Unrolling, fusion, invariant code motion
-  - **Inline expansion**: Replaces function calls with function body
-  - **Common subexpression elimination**: Avoids redundant computations
-
-### 6. Code Generation
-
-- Translates IR into target machine code or assembly
-- Performs register allocation
-- Instruction selection
-- Output: Assembly or machine code
-
-### 7. Code Linking and Assembly
-
-- Assembles machine code into object files
-- Links object files and libraries
-- Resolves external references
-- Output: Executable binary
-
-## Types of Compilers
-
-### 1. Native Compilers
-
-Compile source code directly to machine code for a specific architecture (e.g., x86, ARM).
-
-**Examples**: GCC, Clang, MSVC
-
-### 2. Cross Compilers
-
-Generate code for a platform different from the one on which the compiler runs.
-
-**Use cases**: Embedded systems, mobile development
-
-### 3. Just-In-Time (JIT) Compilers
-
-Compile code during program execution rather than before.
-
-**Examples**: Java HotSpot, V8 JavaScript engine, PyPy
-
-### 4. Transpilers (Source-to-Source Compilers)
-
-Translate source code from one high-level language to another.
-
-**Examples**:
-- TypeScript → JavaScript
-- C++ → C
-- Babel (ES6+ → ES5 JavaScript)
-
-### 5. Bytecode Compilers
-
-Compile to an intermediate bytecode format for a virtual machine.
-
-**Examples**: Java → JVM bytecode, Python → .pyc files, C# → CIL
-
-## Compiler Architecture Patterns
-
-### Single-Pass Compilers
-
-- Process source code in one pass
-- Fast but limited optimization capabilities
-- Example: Early Pascal compilers
-
-### Multi-Pass Compilers
-
-- Process code multiple times
-- Better optimization opportunities
-- Modern compilers typically use multiple passes
-
-### Ahead-of-Time (AOT) Compilation
-
-- Compilation happens before program execution
-- Faster startup time, predictable performance
-- Examples: C, C++, Rust, Go
-
-### Just-In-Time (JIT) Compilation
-
-- Compilation during runtime
-- Can optimize based on runtime profiling
-- Examples: Java, C#, JavaScript (V8)
-
-## Popular Compiler Frameworks
-
-### LLVM
-
-- Modular compiler infrastructure
-- Provides reusable compiler components
-- Language-agnostic IR
-- Used by: Clang, Rust, Swift, Julia
-
-### GCC (GNU Compiler Collection)
-
-- Mature, widely-used compiler suite
-- Supports many languages: C, C++, Fortran, Ada
-- Excellent optimization capabilities
-
-### JVM (Java Virtual Machine)
-
-- Bytecode interpreter and JIT compiler
-- Platform independence
-- Languages: Java, Kotlin, Scala, Groovy
-
-## Optimization Levels
-
-Most compilers offer different optimization levels:
-
-- **-O0**: No optimization (fastest compilation, easiest debugging)
-- **-O1**: Basic optimization
-- **-O2**: Moderate optimization (common default for production)
-- **-O3**: Aggressive optimization (may increase binary size)
-- **-Os**: Optimize for size
-- **-Ofast**: Maximum performance (may break standards compliance)
-
-## Compiler Design Considerations
-
-### Performance
-
-- Compilation speed vs. runtime performance
-- Optimization trade-offs
-- Memory usage during compilation
-
-### Error Reporting
-
-- Clear, actionable error messages
-- Warning levels and diagnostics
-- Error recovery strategies
-
-### Portability
-
-- Target multiple architectures
-- Platform-specific optimizations
-- Cross-compilation support
-
-### Maintainability
-
-- Modular design
-- Well-defined intermediate representations
-- Extensibility for new features
-
-## Modern Trends
-
-### 1. Incremental Compilation
-
-Only recompile changed parts of the codebase to speed up development cycles.
-
-### 2. Link-Time Optimization (LTO)
-
-Optimize across translation units during linking phase.
-
-### 3. Profile-Guided Optimization (PGO)
-
-Use runtime profiling data to guide optimization decisions.
-
-### 4. Compiler-as-a-Service
-
-Expose compiler functionality through APIs for IDE integration, code analysis tools, etc.
-
-### 5. Machine Learning in Compilers
-
-Using ML for:
-- Optimization heuristics
-- Code generation decisions
-- Predictive compilation
-
-## Resources
-
-- **Books**:
-  - "Compilers: Principles, Techniques, and Tools" (Dragon Book) by Aho, Lam, Sethi, and Ullman
-  - "Engineering a Compiler" by Cooper and Torczon
-  - "Modern Compiler Implementation in ML/Java/C" by Appel
-
-- **Online Courses**:
-  - Stanford CS143: Compilers
-  - MIT 6.035: Computer Language Engineering
-
-- **Tools**:
-  - Flex/Bison: Lexer and parser generators
-  - ANTLR: Parser generator
-  - LLVM: Compiler infrastructure
-
-## See Also
-
-- Interpreters
-- Virtual Machines
-- Assembly Language
-- Code Optimization Techniques
-- Static Analysis
-
+A compiler translates source code into a lower-level form — machine code, bytecode, or
+another language — checking that the program is well-formed along the way. It is where most
+of the guarantees in this section are actually enforced: type checking is a compiler phase
+(see [type systems](type_systems.md)), [generics](generics.md) are expanded or erased during
+codegen, [metaprogramming](metaprogramming.md) is scripting the front end, and a language's
+[memory management](memory_management.md) model decides what the back end must emit. The
+compiled languages here exercise different points of the design space —
+[Rust](rust.md), [C++](cpp.md), [Go](go.md) and [Zig](zig.md) compile ahead-of-time to native
+code, [Java](java.md)/[Kotlin](kotlin.md) compile to bytecode that a JIT finishes at runtime,
+and [TypeScript](typescript.md) is a transpiler that lowers to JavaScript.
+
+## The pipeline
+
+A compiler is a pipeline that narrows source text down to a target, one representation at a
+time.
+
+```
+source ─▶ LEXER ─▶ tokens ─▶ PARSER ─▶ AST ─▶ SEMANTIC ─▶ typed AST
+                                              (type-check,
+                                               scope/name res)
+                                                    │
+                                                    ▼
+target ◀─ LINKER ◀─ codegen ◀─ OPTIMIZER ◀───────── IR
+          (back end)          (middle end)      (lowering)
+```
+
+Conventionally this splits into three parts. The **front end** (lex → parse → semantic
+analysis) is language-specific: it turns text into a typed AST and rejects ill-formed
+programs, leaning on the [type system](type_systems.md) for type checking and inference. The
+**middle end** lowers the AST to an intermediate representation and optimizes it. The **back
+end** is target-specific: instruction selection, register allocation, and emitting
+machine/bytecode, then linking object files and libraries into the final artifact.
+
+## IR and optimization
+
+The middle works on an **intermediate representation** rather than the AST or raw assembly.
+An IR decouples the *N* source languages from the *M* target architectures: each front end
+lowers to the shared IR, each back end consumes it, so you write `N + M` pieces instead of
+`N × M`. **SSA** (static single assignment — every variable assigned exactly once) is the
+dominant IR form because it makes data flow explicit and most optimizations cheap to express.
+
+Optimizations rewrite the IR to be faster or smaller without changing observable behavior:
+
+```
+constant folding:   x = 2 * 60 * 60     ─▶  x = 7200
+dead-code elim:      if (false) { ... }  ─▶  (removed)
+inlining:            y = square(a)       ─▶  y = a * a   (then fold/simplify)
+```
+
+Inlining is the keystone — once a call is inlined, constant folding, dead-code elimination,
+and common-subexpression elimination cascade through the exposed code. Flags like `-O0`…`-O3`
+/`-Os` trade compile time and binary size against runtime speed; `-O0` keeps a one-to-one
+mapping to source for debugging, higher levels reorder and erase it.
+
+## AOT vs JIT vs transpilers
+
+*When* compilation happens shapes the whole trade-off.
+
+```
+AHEAD-OF-TIME (AOT)                  JUST-IN-TIME (JIT)
+------------------                   ------------------
+compile fully before running         compile hot paths during execution
+C, C++, Rust, Go                     JVM (Java/Kotlin), V8 (JS), PyPy
+
++ fast, predictable startup          + optimizes on real runtime profiles
++ no runtime compiler shipped        + can speculate, deoptimize, recompile
+- can't use runtime information      - warm-up cost; compiler runs in-process
+```
+
+A **transpiler** (source-to-source compiler) is just a compiler whose target is another
+high-level language: [TypeScript](typescript.md) → JavaScript, or Babel down-leveling new JS
+to older JS. Much of this machinery is shared infrastructure: **LLVM** provides a
+language-agnostic IR and back ends (used by Clang, Rust, Swift, Zig), **GCC** is the long-
+standing native suite, and the **JVM** pairs a bytecode interpreter with a profiling JIT.
+
+## Where this connects
+
+- [Type systems](type_systems.md) — type checking and inference are compiler phases; inference
+  is constraint solving over the typed AST.
+- [Metaprogramming](metaprogramming.md) — macros are syntax-tree transformations; you're
+  scripting the front end.
+- [Generics](generics.md) — monomorphization vs type erasure is a codegen strategy decided in
+  the back end.
+- [Memory management](memory_management.md) — the compiler emits allocation/free or GC barriers
+  and (in Rust) enforces ownership during semantic analysis.
+- [Rust](rust.md) / [C++](cpp.md) / [Go](go.md) / [Zig](zig.md) / [Java](java.md) for concrete
+  compilation models.
+
+## Pitfalls
+
+- **Optimization exploiting undefined behavior.** The optimizer assumes UB never happens and
+  may delete checks or "impossible" branches; in C/C++ a signed overflow or null deref can make
+  whole blocks vanish. Build with sanitizers, not just trust.
+- **`-Ofast` breaks the rules.** `-ffast-math` reorders floating-point and assumes no NaN/Inf,
+  silently changing numeric results — never enable it blindly in numerical code.
+- **Debug vs release divergence.** Bugs that appear only at `-O2` (or only at `-O0`) usually
+  point at UB, uninitialized memory, or a data race the optimizer exposed — not a compiler bug.
+- **JIT warm-up.** Benchmarks that don't account for warm-up measure the interpreter, not the
+  JIT-compiled steady state.
+- **Trusting the optimizer over the algorithm.** No optimization level turns an O(n²) loop into
+  O(n); fix algorithms and data layout first.
+- **Miscompilation and "trusting trust".** Compilers have bugs, and a compromised compiler can
+  inject code invisible in source — reproducible builds and cross-compiler checks matter for
+  high-assurance work.

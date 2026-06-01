@@ -1,8 +1,16 @@
 # Design Patterns
 
-## Introduction to Design Patterns
+## Overview
 
-Design patterns are proven solutions to common problems encountered in software development. They provide a standardized approach to solving issues related to object creation, structure, and behavior, promoting code reusability, scalability, and maintainability. Understanding design patterns is essential for building robust and efficient software systems.
+Design patterns are proven solutions to common problems encountered in software development.
+They provide a standardized approach to solving issues related to object creation, structure,
+and behavior, promoting code reusability, scalability, and maintainability. Most of the classic
+(Gang of Four) patterns are answers to limitations of [object-oriented](oop_concepts.md)
+languages — many evaporate in languages with [first-class functions](functional_programming.md)
+(Strategy is just a function) or [generics](generics.md) — so read them as one of several
+[paradigms](paradigms.md) rather than universal truths. The examples below are in
+[C++](cpp.md) and [Python](python.md); they lean on [generics](generics.md) and the SOLID
+guidance in [code quality](../testing/code_quality.md).
 
 ### Categories of Design Patterns
 
@@ -5359,5 +5367,33 @@ Design patterns are invaluable tools for software developers, providing standard
 - **Structural** (Adapter, Bridge, Composite, Decorator, Facade, Flyweight, Proxy): Object composition and relationships
 - **Behavioral** (Observer, Strategy, Command, and others): Communication between objects
 
-This guide has covered the most fundamental and widely-used design patterns with comprehensive examples in both C++ and Python. Each pattern includes practical implementations, real-world use cases, and guidance on when to apply them. By mastering these patterns, you'll be better equipped to design robust, maintainable, and scalable software systems.
+This guide has covered the most fundamental and widely-used design patterns with comprehensive examples in both [C++](cpp.md) and [Python](python.md). Each pattern includes practical implementations, real-world use cases, and guidance on when to apply them. By mastering these patterns, you'll be better equipped to design robust, maintainable, and scalable software systems.
+
+## Where this connects
+
+- [OOP concepts](oop_concepts.md) — most GoF patterns are built on encapsulation, inheritance,
+  and polymorphism; "composition over inheritance" underlies Decorator, Strategy, and Bridge.
+- [Functional programming](functional_programming.md) — first-class functions collapse several
+  patterns (Strategy, Command, Observer callbacks) into plain function values.
+- [Paradigms](paradigms.md) — patterns are largely OOP workarounds; the functional dual is
+  higher-order functions and [pattern matching](pattern_matching.md).
+- [Generics](generics.md) — parametric polymorphism replaces some type-driven patterns and
+  powers type-safe Factories and containers.
+- [Code quality / SOLID](../testing/code_quality.md) — patterns are concrete applications of the
+  open/closed and dependency-inversion principles.
+- [C++](cpp.md) / [Python](python.md) / [Java](java.md) — concrete language idioms for the
+  implementations shown here.
+
+## Pitfalls
+
+- **Pattern fever.** Reaching for a pattern when a plain function or struct would do adds
+  indirection and class count for no benefit — apply patterns to real, recurring problems.
+- **Patterns as goals, not tools.** Naming everything after a GoF pattern obscures intent; the
+  problem and the data flow matter more than the label.
+- **Singleton as global state.** The most overused pattern — it hides dependencies, breaks
+  testability, and causes lifecycle/threading bugs. Prefer dependency injection.
+- **Porting OOP patterns verbatim to FP/dynamic languages.** Strategy, Command, and Factory are
+  often a one-liner with first-class functions; the ceremony is unnecessary.
+- **Over-abstraction up front.** Designing for hypothetical flexibility (deep Abstract Factory
+  hierarchies) before the requirement exists; refactor *toward* a pattern when the need is clear.
 

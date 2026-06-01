@@ -225,5 +225,12 @@ Hash on `code` → assign to one of N shards. Even distribution by design (codes
 
 - `id_generation.md` — alternative code-generation schemes
 - `caching.md` — read-side cache design
-- `cdn.md` — edge caching of redirects
-- `databases.md` — sharding strategies
+- [CDN](cdn.md) — edge caching of redirects
+- [Databases](databases.md) — sharding strategies
+
+## Where this connects
+
+- [ID generation](id_generation.md) — the short code is a distributed ID; Snowflake or Base62 encoding
+- [Caching](caching.md) — hot URLs cached in Redis to avoid DB lookup on redirect
+- [CDN](cdn.md) — edge caching of redirects for global low-latency reads
+- [Databases](databases.md) — KV store (Cassandra) for URL mapping at scale

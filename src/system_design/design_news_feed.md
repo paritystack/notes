@@ -215,5 +215,12 @@ Tradeoff: heavier reads, but better engagement. Hybrid: fetch top 200 candidates
 - `caching.md` — Redis sorted-set sizing
 - `message_queues.md` — Kafka fan-out pattern
 - `consistent_hashing.md` — sharding the timeline cache
-- `databases.md` — Cassandra wide-row patterns
-- `id_generation.md` — Snowflake tweet IDs
+- [Databases](databases.md) — Cassandra wide-row patterns for feed storage
+- [ID generation](id_generation.md) — Snowflake tweet IDs for time-ordered feeds
+
+## Where this connects
+
+- [Caching](caching.md) — pre-computed fan-out feeds cached in Redis for read performance
+- [Message queues](message_queues.md) — async fan-out on post creation via Kafka or similar
+- [Databases](databases.md) — Cassandra for the feed store, MySQL for user/post metadata
+- [Consistent hashing](consistent_hashing.md) — shard user feeds across cache/DB nodes

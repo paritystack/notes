@@ -203,5 +203,11 @@ If the question involves "many writers", "many shards", "trace ID", or "object I
 
 - `databases.md` — sequence vs uuid pk tradeoffs
 - `distributed_systems.md` — clock synchronization, vector clocks
-- `consistent_hashing.md` — sharding by ID prefix
-- `design_url_shortener.md` — case study using ID gen heavily
+- [Consistent hashing](consistent_hashing.md) — sharding by ID prefix
+- [Design: URL shortener](design_url_shortener.md) — case study using ID gen heavily
+
+## Where this connects
+
+- [Distributed systems](distributed_systems.md) — ID generation must work without central coordination (distributed context)
+- [Databases](databases.md) — ID choice (UUID vs Snowflake) affects database index performance and sharding
+- [Consistent hashing](consistent_hashing.md) — time-ordered IDs enable range-based consistent hash partitioning

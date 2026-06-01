@@ -4350,3 +4350,11 @@ Load balancing is essential for building scalable, highly available distributed 
 8. **Design globally**: GSLB for global availability
 
 Load balancing is not just about distributing traffic—it's about ensuring your application remains available, performant, and resilient under any conditions.
+
+## Where this connects
+
+- [Scalability](scalability.md) — load balancing is the traffic distribution component of horizontal scaling
+- [Rate limiting](rate_limiting.md) — load balancers often enforce rate limits at the edge
+- [Microservices](microservices.md) — service mesh load balancing (Envoy, Istio) routes traffic within microservice clusters
+- [Websockets/realtime](websockets_realtime.md) — WS-aware load balancers must maintain sticky sessions for long-lived connections
+- [Consistent hashing](consistent_hashing.md) — stateful load balancing uses consistent hashing for session affinity

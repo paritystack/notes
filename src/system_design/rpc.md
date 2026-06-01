@@ -73,3 +73,9 @@ message Result {
 - Error handling complexity
 
 RPC simplifies distributed system development by providing procedure call semantics over network communication.
+
+## Where this connects
+
+- [Microservices](microservices.md) — RPC (gRPC/REST) is the primary inter-service communication mechanism
+- [Distributed systems](distributed_systems.md) — RPC is a network call masquerading as a local call; failures require different handling
+- [../networking/grpc](../networking/grpc.md) — gRPC is the modern high-performance RPC framework

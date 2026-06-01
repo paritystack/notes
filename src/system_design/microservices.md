@@ -893,3 +893,11 @@ describe('User Service Contract', () => {
 **Learning:**
 - [Microservices.io](https://microservices.io/)
 - [Martin Fowler's Blog](https://martinfowler.com/articles/microservices.html)
+
+## Where this connects
+
+- [Message queues](message_queues.md) — async inter-service communication via events (Kafka, RabbitMQ)
+- [RPC](rpc.md) — synchronous inter-service communication via gRPC or REST
+- [Observability](observability.md) — distributed tracing is essential when a request spans many services
+- [Load balancing](load_balancing.md) — service mesh handles load balancing and health checks between microservices
+- [Databases](databases.md) — each microservice owns its database; polyglot persistence

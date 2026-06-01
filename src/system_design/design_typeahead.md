@@ -245,5 +245,12 @@ Query logs are sensitive. Mitigations:
 - `caching.md` — edge caching of suggestions
 - `data_structures/inverted_index.md` — adjacent search-side structure
 - `consistent_hashing.md` — sharding the read tier
-- `message_queues.md` — Kafka log → aggregation
-- `design_news_feed.md` — similar two-loop (read/write) pattern
+- [Message queues](message_queues.md) — Kafka log → aggregation pipeline for frequency counting
+- [Design: News feed](design_news_feed.md) — similar two-path (read/write) pattern
+
+## Where this connects
+
+- [Caching](caching.md) — top-k suggestions are pre-computed and cached at the prefix level
+- [Databases](databases.md) — Trie or inverted index stored in Redis or a custom key-value store
+- [Message queues](message_queues.md) — query log → Kafka → aggregation pipeline updates suggestion frequencies
+- [Consistent hashing](consistent_hashing.md) — distribute the prefix-shard cache across multiple nodes

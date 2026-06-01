@@ -193,5 +193,11 @@ Expected breakdown:
 
 - `caching.md` — caching principles that apply to CDN tiers
 - `load_balancing.md` — anycast and global load balancing
-- `design_video_streaming.md` — heavy CDN case study
-- `scalability.md` — CDN as a horizontal-scaling primitive for reads
+- [Design: Video streaming](design_video_streaming.md) — heavy CDN case study
+- [Scalability](scalability.md) — CDN as a horizontal-scaling primitive for reads
+
+## Where this connects
+
+- [Caching](caching.md) — CDN edge nodes are geographically distributed caches
+- [Scalability](scalability.md) — CDN offloads origin servers and reduces global read latency
+- [Design: Video streaming](design_video_streaming.md) — CDN is the primary delivery mechanism for video chunks

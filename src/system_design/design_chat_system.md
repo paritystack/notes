@@ -241,5 +241,12 @@ E2E complicates server-side features (search, ML, anti-spam) — push to client.
 - `websockets_realtime.md` — connection tier patterns
 - `message_queues.md` — Kafka bus details
 - `id_generation.md` — Snowflake + per-conv seq
-- `databases.md` — Cassandra wide rows
-- `idempotency.md` — client_msg_id dedup
+- [Databases](databases.md) — Cassandra wide rows for message storage
+- [Idempotency](idempotency.md) — client_msg_id dedup for at-most-once delivery
+
+## Where this connects
+
+- [Websockets/realtime](websockets_realtime.md) — WebSocket or SSE long-lived connections for push-from-server
+- [Message queues](message_queues.md) — fan-out to group members via pub/sub
+- [Databases](databases.md) — Cassandra for message persistence, Redis for presence
+- [Load balancing](load_balancing.md) — sticky sessions needed for WebSocket connections

@@ -139,3 +139,12 @@ Design for growth from day one!
 
 - [Designing Data-Intensive Applications](https://dataintensive.app/)
 - [System Design Interview](https://www.systemdesigninterview.com/)
+
+## Where this connects
+
+- [Distributed systems](distributed_systems.md) — scalability trade-offs (CAP, consistency) underpin every scaling decision
+- [Caching](caching.md) — the highest-leverage read scalability lever
+- [Load balancing](load_balancing.md) — distributes traffic so no single server is the bottleneck
+- [Databases](databases.md) — read replicas, sharding, and NoSQL choices for write scalability
+- [Consistent hashing](consistent_hashing.md) — enables horizontal scaling without full rehashing on node changes
+- [Message queues](message_queues.md) — decouple producers and consumers for async scalability

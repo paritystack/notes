@@ -257,5 +257,11 @@ When you hear "live", "real-time", "instant" — reach for:
 
 - `design_chat_system.md` — full case study
 - `message_queues.md` — pub/sub bus underneath
-- `load_balancing.md` — WS-aware load balancers
-- `design_patterns.md` — backpressure, circuit-breaker patterns
+- [Load balancing](load_balancing.md) — WS-aware load balancers need sticky sessions
+- [Design patterns](design_patterns.md) — backpressure, circuit-breaker patterns for realtime systems
+
+## Where this connects
+
+- [Load balancing](load_balancing.md) — WebSocket connections are stateful; load balancers must use sticky routing
+- [Message queues](message_queues.md) — fan-out via pub/sub or queues delivers messages to multiple WebSocket connections
+- [Databases](databases.md) — message persistence often uses Cassandra or Redis for realtime chat

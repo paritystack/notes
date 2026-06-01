@@ -97,3 +97,10 @@ class ConsistentHash:
             
         return self.ring[self.sorted_keys[idx]]
 ```
+
+## Where this connects
+
+- [Databases](databases.md) — consistent hashing assigns data partitions to database nodes
+- [Caching](caching.md) — cache clusters use consistent hashing to distribute keys across nodes
+- [ID generation](id_generation.md) — Snowflake-style IDs can be range-partitioned using consistent hashing
+- [Distributed systems](distributed_systems.md) — consistent hashing is a core distributed systems primitive

@@ -195,5 +195,11 @@ Each case study in this directory follows the same skeleton. If you've cracked o
 
 - `estimation_cheatsheet.md` — numbers to memorize
 - `scalability.md` — horizontal/vertical scaling primitives
-- `design_patterns.md` — patterns interviewers expect you to name-drop
-- `distributed_systems.md` — CAP, consensus, replication background
+- [Design patterns](design_patterns.md) — patterns interviewers expect you to name-drop
+- [Distributed systems](distributed_systems.md) — CAP, consensus, replication background
+
+## Where this connects
+
+- [Estimation cheatsheet](estimation_cheatsheet.md) — back-of-envelope numbers to use in the requirements phase
+- [Design patterns](design_patterns.md) — named patterns (circuit breaker, saga, CQRS) to reference in deep dives
+- [Distributed systems](distributed_systems.md) — CAP theorem and consistency levels to discuss during trade-offs

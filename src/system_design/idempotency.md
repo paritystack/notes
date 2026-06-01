@@ -222,5 +222,11 @@ Without these, a payment system is incorrect, not just inefficient.
 
 - `design_patterns.md` — saga, retry-with-backoff patterns
 - `message_queues.md` — at-least-once delivery semantics
-- `distributed_systems.md` — why "exactly-once" is an illusion
-- `databases.md` — unique constraints, transactional outbox
+- [Distributed systems](distributed_systems.md) — why "exactly-once" is an illusion
+- [Databases](databases.md) — unique constraints, transactional outbox
+
+## Where this connects
+
+- [Distributed systems](distributed_systems.md) — retries are mandatory in distributed systems; idempotency makes them safe
+- [Databases](databases.md) — unique constraints and transactional outbox are the primary implementation tools
+- [Message queues](message_queues.md) — at-least-once delivery semantics require idempotent consumers

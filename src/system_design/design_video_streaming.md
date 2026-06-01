@@ -313,5 +313,12 @@ Public count lags reality but is robust.
 - `cdn.md` — heavy detail on the read path
 - `caching.md` — multi-tier caching
 - `message_queues.md` — transcoding pipeline (Kafka)
-- `databases.md` — Spanner vs Bigtable choice
-- `design_news_feed.md` — recommendation/feed parallels
+- [Databases](databases.md) — Spanner vs Bigtable choice for metadata
+- [Design: News feed](design_news_feed.md) — recommendation/feed parallels
+
+## Where this connects
+
+- [CDN](cdn.md) — the primary delivery mechanism for video chunks; edge PoPs serve the majority of traffic
+- [Message queues](message_queues.md) — video upload triggers async transcoding pipeline via Kafka
+- [Databases](databases.md) — Bigtable/Cassandra for view counts and metadata at scale
+- [Caching](caching.md) — video metadata, top-K recommendations cached in Redis

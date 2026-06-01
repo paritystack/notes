@@ -96,3 +96,9 @@ Implement inside the code (e.g., Express.js middleware, Django decorators).
 ## 6. Conclusion
 
 Rate limiting is not just about blocking bots; it's a fundamental part of system reliability. For most distributed systems, the **Token Bucket** algorithm backed by **Redis Lua scripts** is the industry standard balance of performance and accuracy.
+
+## Where this connects
+
+- [Caching](caching.md) — Redis backs rate limiting counters; it's the same infrastructure as caching
+- [Load balancing](load_balancing.md) — L7 load balancers enforce rate limits before requests reach services
+- [Distributed systems](distributed_systems.md) — distributed rate limiting requires coordination (Redis) or approximate local counters

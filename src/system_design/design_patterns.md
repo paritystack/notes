@@ -869,3 +869,9 @@ Use the right pattern for the right problem!
 - [Designing Data-Intensive Applications](https://dataintensive.app/)
 - [Pattern: Saga](https://microservices.io/patterns/data/saga.html)
 - [Martin Fowler's Blog](https://martinfowler.com/)
+
+## Where this connects
+
+- [Microservices](microservices.md) — most patterns (saga, CQRS, event sourcing) are microservices architecture patterns
+- [Distributed systems](distributed_systems.md) — circuit breaker, bulkhead, and retry patterns address distributed failure modes
+- [Message queues](message_queues.md) — event-driven patterns (saga, outbox) use message queues as the backbone

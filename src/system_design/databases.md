@@ -582,3 +582,11 @@ Choose the right tool for the job!
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [MongoDB University](https://university.mongodb.com/)
 - [Database Design Patterns](https://en.wikipedia.org/wiki/Database_design)
+
+## Where this connects
+
+- [Caching](caching.md) — Redis/Memcached cache database reads to absorb hot reads
+- [Consistent hashing](consistent_hashing.md) — horizontal sharding uses consistent hashing for partition assignment
+- [Distributed systems](distributed_systems.md) — CAP theorem governs database consistency/availability trade-offs
+- [Idempotency](idempotency.md) — unique constraints and transactional outbox pattern enforce idempotent writes
+- [../databases/postgres](../databases/postgres.md) — the detailed PostgreSQL operational reference

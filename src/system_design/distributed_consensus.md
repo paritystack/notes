@@ -723,3 +723,9 @@ Getting distributed systems to agree is hard!
 - [Jepsen: Distributed Systems Safety Research](https://jepsen.io/)
 - [CAP Theorem Explained](https://www.ibm.com/topics/cap-theorem)
 - [CRDTs: Conflict-free Replicated Data Types](https://crdt.tech/)
+
+## Where this connects
+
+- [Distributed systems](distributed_systems.md) — consensus solves the leader election and log replication problems in distributed systems
+- [Databases](databases.md) — distributed databases (etcd, CockroachDB) use consensus algorithms internally
+- [Algorithms/raft](../algorithms/raft.md) — Raft is the most readable consensus algorithm; the implementation reference

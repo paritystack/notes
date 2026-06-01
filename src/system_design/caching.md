@@ -213,3 +213,11 @@ Trade memory for speed!
 
 - [Redis Documentation](https://redis.io/docs/)
 - [Caching Patterns](https://codeahoy.com/2017/08/11/caching-strategies-and-patterns/)
+
+## Where this connects
+
+- [Databases](databases.md) — caches sit in front of databases; cache invalidation is the hard problem
+- [Consistent hashing](consistent_hashing.md) — cache clusters use consistent hashing to distribute keys without full rehashing
+- [CDN](cdn.md) — CDNs are geographic caches for static assets and API responses at the edge
+- [Rate limiting](rate_limiting.md) — Redis backing the cache is also the standard store for rate limiting counters
+- [Scalability](scalability.md) — caching is the highest-leverage read scalability primitive

@@ -206,5 +206,11 @@ Don't:
 ## Related
 
 - `interview_framework.md` — when in the interview to do this
-- `scalability.md` — what to do once you've established the load
-- `caching.md` — how to spend the cache budget
+- [Scalability](scalability.md) — what to do once you've established the load
+- [Caching](caching.md) — how to spend the cache budget
+
+## Where this connects
+
+- [Scalability](scalability.md) — load estimates from this cheatsheet drive the scalability decisions
+- [Caching](caching.md) — cache budget calculation uses storage/throughput numbers from this sheet
+- [Interview framework](interview_framework.md) — back-of-envelope estimation is phase 2 of the interview framework

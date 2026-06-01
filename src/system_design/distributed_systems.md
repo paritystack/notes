@@ -2712,3 +2712,11 @@ query {
 
 *Note: Distributed systems require careful consideration of requirements, constraints, and trade-offs. There is no one-size-fits-all solution. Choose the right tool and pattern for your specific use case.*
 
+## Where this connects
+
+- [Distributed consensus](distributed_consensus.md) — Paxos/Raft solve leader election and log replication inside a distributed system
+- [Databases](databases.md) — distributed databases embody the CAP trade-offs discussed here
+- [Idempotency](idempotency.md) — "exactly-once" delivery is impossible; idempotency + at-least-once is the answer
+- [Consistent hashing](consistent_hashing.md) — enables horizontal partitioning without full data reshuffling
+- [Scalability](scalability.md) — distributed systems are the foundation of horizontal scalability
+

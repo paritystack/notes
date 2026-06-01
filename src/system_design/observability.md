@@ -259,5 +259,11 @@ If the interview asks "how would you monitor/operate this?", hit:
 ## Related
 
 - `design_patterns.md#observability` — observability patterns at architecture level
-- `microservices.md` — why observability matters more in microservices
-- `distributed_systems.md` — debugging distributed bugs starts with traces
+- [Microservices](microservices.md) — why observability matters more in microservices
+- [Distributed systems](distributed_systems.md) — debugging distributed bugs starts with traces
+
+## Where this connects
+
+- [Microservices](microservices.md) — distributed tracing connects spans across service boundaries
+- [Distributed systems](distributed_systems.md) — observability reveals the internal state of a distributed system
+- [Message queues](message_queues.md) — queue depth and consumer lag are key observability metrics

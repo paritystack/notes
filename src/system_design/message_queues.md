@@ -640,3 +640,11 @@ Don't wait for responses - queue it up!
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
 - [AWS SQS Best Practices](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-best-practices.html)
 - [Enterprise Integration Patterns](https://www.enterpriseintegrationpatterns.com/)
+
+## Where this connects
+
+- [Microservices](microservices.md) — message queues decouple microservices for async event-driven communication
+- [Databases](databases.md) — outbox pattern writes events to DB and queues them reliably
+- [Idempotency](idempotency.md) — at-least-once delivery requires idempotent consumers
+- [Scalability](scalability.md) — queues buffer traffic spikes and allow independent scaling of producers/consumers
+- [Observability](observability.md) — queue depth and consumer lag are key metrics to monitor

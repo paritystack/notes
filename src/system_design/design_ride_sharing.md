@@ -257,5 +257,12 @@ Use saga pattern for cross-service compensations (e.g., rollback hold-on-card if
 - `websockets_realtime.md` — driver connection tier
 - `caching.md` — Redis geo index
 - `message_queues.md` — Kafka event stream
-- `databases.md` — Cassandra time-series writes
-- `id_generation.md` — Snowflake trip IDs
+- [Databases](databases.md) — Cassandra time-series for location writes, PostGIS for geospatial queries
+- [ID generation](id_generation.md) — Snowflake trip IDs
+
+## Where this connects
+
+- [Databases](databases.md) — geospatial database for driver location; time-series for location history
+- [Message queues](message_queues.md) — async matching and trip event propagation
+- [Websockets/realtime](websockets_realtime.md) — real-time location updates pushed to driver and rider apps
+- [Consistent hashing](consistent_hashing.md) — geohash + consistent hashing for geographic partitioning

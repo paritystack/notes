@@ -586,3 +586,7 @@
     - [Synchronization](rtos/synchronization.md)
     - [Context Switching](rtos/context_switching.md)
     - [RTOS vs Bare-Metal](rtos/rtos_vs_bare_metal.md)
+    - [OSEK/AUTOSAR OS](rtos/osek_autosar.md)
+    - [ARINC 653](rtos/arinc653.md)
+    - [Tickless Idle](rtos/tickless_idle.md)
+    - [RTOS Tracing](rtos/rtos_tracing.md)

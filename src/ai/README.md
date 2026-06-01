@@ -111,6 +111,12 @@ The open standard for connecting AI assistants to external systems:
 - Building servers in Python and TypeScript
 - Ecosystem (GitHub, Postgres, Slack, Playwright, ...) and security model
 
+### Inference & Serving
+
+- [Local LLM Inference](./local_inference.md) — Ollama, llama.cpp, GGUF, LM Studio, VRAM sizing
+- [Inference Optimization](./inference_optimization.md) — KV cache, continuous batching, PagedAttention, speculative decoding, FlashAttention
+- [Structured Outputs](./structured_outputs.md) — JSON mode, constrained/grammar-guided decoding, Instructor/Outlines
+
 ## Key AI Concepts
 
 ### Large Language Models (LLMs)

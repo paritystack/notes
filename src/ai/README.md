@@ -8,143 +8,71 @@ This directory contains documentation on various AI topics, focusing on practica
 
 ## Contents
 
-### 1. [Prompt Engineering](./prompt_engineering.md)
-Learn the art and science of crafting effective prompts for Large Language Models (LLMs):
-- Core principles and techniques
-- Prompt patterns and templates
-- Chain-of-Thought reasoning
-- Few-shot and zero-shot learning
-- Advanced strategies for different tasks
+### Foundations
 
-### 2. [Software Development Prompts](./software_dev_prompts.md)
-Comprehensive guide to AI-assisted software development with proven prompt patterns:
-- Code generation (functions, classes, APIs, full applications)
-- Debugging and troubleshooting strategies
-- Code review and quality assurance
-- Refactoring and optimization patterns
-- Testing (unit, integration, E2E)
-- Documentation generation
-- Database design and queries
-- API design (REST, GraphQL, gRPC)
-- DevOps and infrastructure as code
-- Security patterns and best practices
-- Migration and upgrade workflows
-- Git and version control operations
-- Meta-development (planning, architecture, estimation)
+- [Large Language Models (LLMs)](./llms.md) — fundamentals, training, inference, API usage
+- [Transformers Architecture](./transformers_architecture.md) — attention, embeddings, the core building block
+- [Generative AI](./generative_ai.md) — text, image, audio, and multimodal generation overview
+- [Model Families](./model_families.md) — GPT/Claude/Gemini vs Llama/Mistral/Qwen/Gemma/DeepSeek/Phi, selection
+- [Reasoning Models & Test-Time Compute](./reasoning_models.md) — o-series/R1, long CoT, RL with verifiable rewards
 
-### 3. [Generative AI](./generative_ai.md)
-Comprehensive overview of generative AI models and applications:
-- Text generation (GPT, Claude, PaLM)
-- Image generation (DALL-E, Midjourney, Stable Diffusion)
-- Audio and video synthesis
-- Multimodal models
-- Real-world applications and use cases
+### Prompting
 
-### 3. [Stable Diffusion](./stable_diffusion.md)
-Detailed guide to Stable Diffusion for image generation:
-- Installation and setup
-- Prompt engineering for images
-- Parameters and settings
-- ControlNet and extensions
-- Optimization tips
+- [Prompt Engineering](./prompt_engineering.md) — patterns, Chain-of-Thought, few-/zero-shot
+- [Software Development Prompts](./software_dev_prompts.md) — proven prompt patterns for coding workflows
+- [Structured Outputs](./structured_outputs.md) — JSON mode, constrained/grammar-guided decoding, Instructor/Outlines
 
-### 4. [Flux.1](./fluxdev.md)
-Documentation for Black Forest Labs' Flux.1 model:
-- Model variants (Dev, Schnell, Pro)
-- Setup and usage
-- Comparison with other models
-- Advanced techniques
+### RAG & Retrieval
 
-### 5. [Llama Models](./llama.md)
-Complete guide to Meta's Llama family of models:
-- Model architecture and variants
-- Installation and setup
-- Fine-tuning techniques
-- Inference optimization
-- Deployment strategies
+- [Retrieval Augmented Generation (RAG)](./rag.md) — grounding LLMs in external knowledge
+- [Vector Databases](./vector_databases.md) — ANN search, HNSW/IVF, similarity metrics
+- [Embeddings & Reranking](./embeddings.md) — bi- vs cross-encoders, MTEB, rerankers, hybrid search
+- [Chunking & Ingestion](./chunking_strategies.md) — parsing, chunk sizing, contextual retrieval, metadata
+- [GraphRAG](./graphrag.md) — knowledge-graph retrieval, community summaries, local vs global search
 
-### 6. [Large Language Models (LLMs)](./llms.md)
-Comprehensive overview of Large Language Models:
-- LLM fundamentals and architecture
-- Transformer models and attention mechanisms
-- Training and inference
-- Prompt engineering techniques
-- API usage and best practices
+### Agents & Tools
 
-### 8. [ComfyUI](./comfyui.md)
-Node-based interface for Stable Diffusion workflows:
-- Installation and setup
-- Workflow creation
-- Custom nodes and extensions
-- Advanced generation techniques
-- Integration with other tools
-
-### 9. [Fine-Tuning](./fine_tuning.md)
-Model adaptation and customization:
-- Fine-tuning strategies and approaches
-- Parameter-efficient methods (LoRA, QLoRA)
-- Dataset preparation and quality
-- Training configuration and optimization
-- Evaluation and deployment
-
-### 10. [Skills](./skills.md)
-Claude / Agent Skills — packaged, model-invocable capabilities:
-- SKILL.md structure and YAML frontmatter
-- Progressive disclosure and context efficiency
-- Invocation flow (automatic vs. explicit `/skill-name`)
-- Authoring, distribution, and plugin namespacing
-- Skills vs. tools vs. subagents
-
-### 11. [Claude Code CLI](./cli.md)
-Best practices for developing with Anthropic's Claude Code:
-- Plan mode, subagents, and parallel tool use
-- CLAUDE.md, slash commands, and skills
-- Permissions, hooks, and settings.json
-- MCP servers and IDE integrations
-- Context management and multi-model workflows (Opus/Sonnet/Haiku)
-
-### 12. [Model Context Protocol (MCP)](./mcp.md)
-The open standard for connecting AI assistants to external systems:
-- Client/server architecture and JSON-RPC transports (stdio, HTTP)
-- Core primitives: tools, resources, prompts
-- Sampling, roots, notifications, and OAuth 2.1
-- Building servers in Python and TypeScript
-- Ecosystem (GitHub, Postgres, Slack, Playwright, ...) and security model
+- [Agent Frameworks](./agent_frameworks.md) — plan/act/observe loops, LangChain/LangGraph/CrewAI
+- [Multi-Agent Systems](./multi_agent_systems.md) — supervisor/swarm/pipeline patterns, handoffs, shared state
+- [Agent Memory & Context Engineering](./agent_memory.md) — working/episodic/semantic memory, compaction, retrieval
+- [Agentic Context Engineering (ACE)](./ace.md) — evolving context playbooks for agents
+- [Tool Use](./tool_use.md) — function calling, schemas, tool orchestration
+- [Model Context Protocol (MCP)](./mcp.md) — open standard connecting assistants to external systems
+- [Skills](./skills.md) — packaged, model-invocable capabilities (SKILL.md)
+- [Coding & Computer-Use Agents](./coding_agents.md) — autonomous coding loops, SWE-bench, browser/computer use
+- [Claude Code CLI](./cli.md) — plan mode, subagents, hooks, MCP, multi-model workflows
 
 ### Inference & Serving
 
 - [Local LLM Inference](./local_inference.md) — Ollama, llama.cpp, GGUF, LM Studio, VRAM sizing
 - [Inference Optimization](./inference_optimization.md) — KV cache, continuous batching, PagedAttention, speculative decoding, FlashAttention
-- [Structured Outputs](./structured_outputs.md) — JSON mode, constrained/grammar-guided decoding, Instructor/Outlines
+- [vLLM](./vllm.md) — high-throughput serving engine
+- [Prompt Caching](./prompt_caching.md) — KV-prefix reuse, cache breakpoints, cost/latency savings
 
-### RAG & Retrieval
+### Models & Training
 
-- [Embeddings & Reranking](./embeddings.md) — bi- vs cross-encoders, MTEB, rerankers, hybrid search
-- [GraphRAG](./graphrag.md) — knowledge-graph retrieval, community summaries, local vs global search
-- [Chunking & Ingestion](./chunking_strategies.md) — parsing, chunk sizing, contextual retrieval, metadata
+- [Llama](./llama.md) — Meta's open-weight family
+- [Phi](./phi.md) — Microsoft's small high-quality models
+- [DeepSeek R1](./deepseek_r1.md) — open-source reasoning model
+- [Fine-Tuning](./fine_tuning.md) — adaptation, LoRA/QLoRA, dataset prep
+- [Alignment](./alignment.md) — SFT, RLHF, DPO, Constitutional AI (applied post-training)
 
-### Agents
+### Image & Audio
 
-- [Agent Memory & Context Engineering](./agent_memory.md) — working/episodic/semantic memory, compaction, retrieval
-- [Multi-Agent Systems](./multi_agent_systems.md) — supervisor/swarm/pipeline patterns, handoffs, shared state
-- [Coding & Computer-Use Agents](./coding_agents.md) — autonomous coding loops, SWE-bench, browser/computer use
+- [Stable Diffusion](./stable_diffusion.md) — text-to-image generation
+- [Flux.1](./fluxdev.md) — Black Forest Labs' image model
+- [ComfyUI](./comfyui.md) — node-based diffusion workflows
+- [Whisper](./whisper.md) — speech-to-text transcription
 
 ### Evaluation & LLMOps
 
 - [LLM Evaluation](./llm_evaluation.md) — benchmarks, evals, LLM-as-judge, RAGAS
 - [LLM Observability & LLMOps](./llm_observability.md) — tracing, token/cost/latency, the prod feedback loop
-- [Prompt Caching](./prompt_caching.md) — KV-prefix reuse, cache breakpoints, cost/latency savings
 
 ### Security & Safety
 
 - [LLM Security](./llm_security.md) — prompt injection, jailbreaks, OWASP LLM Top 10, defenses
 - [Guardrails & Moderation](./guardrails.md) — input/output checks, content moderation, PII, validation
-- [Alignment](./alignment.md) — SFT, RLHF, DPO, Constitutional AI (applied post-training)
-
-### Models & Reasoning
-
-- [Reasoning Models & Test-Time Compute](./reasoning_models.md) — o-series/R1, long CoT, RL with verifiable rewards
-- [Model Families](./model_families.md) — GPT/Claude/Gemini vs Llama/Mistral/Qwen/Gemma/DeepSeek/Phi, selection
 
 ## Key AI Concepts
 

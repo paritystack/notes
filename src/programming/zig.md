@@ -1,26 +1,18 @@
-# The Zig Programming Language Handbook
+# Zig Programming
 
-## Table of Contents
-1.  [Introduction](#introduction)
-2.  [Language Basics](#language-basics)
-3.  [Memory Management](#memory-management)
-4.  [Data Structures](#data-structures)
-5.  [Control Flow](#control-flow)
-6.  [Functions and Errors](#functions-and-errors)
-7.  [Structs, Unions, and Enums](#structs-unions-and-enums)
-8.  [Comptime (Compile Time Metaprogramming)](#comptime)
-9.  [The Standard Library (`std`)](#the-standard-library)
-10. [Build System](#build-system)
-11. [C Interoperability](#c-interoperability)
-12. [Testing](#testing)
-13. [Advanced Topics](#advanced-topics)
-14. [Common Zig Patterns](#common-zig-patterns)
+## Overview
 
----
+Zig is a general-purpose programming language and toolchain for maintaining robust, optimal,
+and reusable software. It is often described as a "modern [C](c.md)" — it keeps the low-level
+control and simple mental model of C but replaces the preprocessor and templates with
+compile-time code (`comptime`), makes [memory management](memory_management.md) explicit, and
+turns errors into values. It sits alongside [Rust](rust.md) and [C++](cpp.md) in the
+ahead-of-time systems-language space (see [compilers](compilers.md)), but trades Rust's borrow
+checker for manual control with safety checks in debug builds. Recurring themes connect to
+[error handling](error_handling.md) (error unions), [generics](generics.md) and
+[metaprogramming](metaprogramming.md) (both are just `comptime`), and [type systems](type_systems.md).
 
-## 1. Introduction <a name="introduction"></a>
-
-Zig is a general-purpose programming language and toolchain for maintaining robust, optimal, and reusable software. It is often described as a "modern C" – it keeps the low-level control and simple mental model of C but adds modern features to make it safer and more ergonomic.
+## Introduction
 
 ### The Zen of Zig
 1.  Communicate intent precisely.
@@ -45,7 +37,7 @@ Zig is a general-purpose programming language and toolchain for maintaining robu
 
 ---
 
-## 2. Language Basics <a name="language-basics"></a>
+## Language Basics
 
 ### Comments
 ```zig
@@ -151,9 +143,9 @@ test "pointers" {
 
 ---
 
-## 3. Memory Management <a name="memory-management"></a>
+## Memory Management
 
-Zig requires manual memory management. There is no `malloc` in the language syntax; instead, the standard library provides the `Allocator` interface.
+Zig requires manual [memory management](memory_management.md). There is no `malloc` in the language syntax; instead, the standard library provides the `Allocator` interface — allocators are passed explicitly rather than hidden behind global state.
 
 ### The `Allocator` Interface
 Most functions that allocate memory accept an `allocator` parameter.
@@ -219,7 +211,7 @@ test "fixed buffer allocator" {
 
 ---
 
-## 4. Data Structures <a name="data-structures"></a>
+## Data Structures
 
 ### `std.ArrayList`
 A contiguous, growable array.
@@ -336,7 +328,7 @@ test "linked list" {
 
 ---
 
-## 5. Control Flow <a name="control-flow"></a>
+## Control Flow
 
 ### If Expression
 `if` is an expression, meaning it returns a value.
@@ -427,7 +419,7 @@ test "labels" {
 
 ---
 
-## 6. Functions and Errors <a name="functions-and-errors"></a>
+## Functions and Errors
 
 ### Functions
 Parameters are immutable by default.
@@ -444,7 +436,7 @@ fn increment(val: *i32) void {
 ```
 
 ### Error Sets
-Errors are values, defined like enums.
+Errors are values, defined like enums — closer to result types than exceptions (see [error handling](error_handling.md)).
 
 ```zig
 const FileError = error{
@@ -516,7 +508,7 @@ fn complexOperation(allocator: std.mem.Allocator) !void {
 
 ---
 
-## 7. Structs, Unions, and Enums <a name="structs-unions-and-enums"></a>
+## Structs, Unions, and Enums
 
 ### Structs
 Structs are namespaced containers for fields and functions.
@@ -589,9 +581,12 @@ fn printValue(v: Value) void {
 
 ---
 
-## 8. Comptime <a name="comptime"></a>
+## Comptime
 
-Zig uses `comptime` to run code during compilation. This replaces macros, C++ templates, and conditional compilation.
+Zig uses `comptime` to run code during compilation. This is Zig's unified answer to
+[generics](generics.md) and [metaprogramming](metaprogramming.md): it replaces macros,
+C++ templates, and conditional compilation with ordinary Zig code that happens to run in the
+[compiler](compilers.md).
 
 ### Generic Functions
 Types are first-class values at compile time.
@@ -644,7 +639,7 @@ test "inline for" {
 
 ---
 
-## 9. The Standard Library <a name="the-standard-library"></a>
+## The Standard Library
 
 ### `std.fs`: File System
 Detailed file operations.
@@ -734,7 +729,7 @@ pub fn processExample(allocator: std.mem.Allocator) !void {
 }
 ```
 
-### `std.thread`: Concurrency
+### `std.thread`: [Concurrency](concurrency.md)
 
 ```zig
 fn worker(id: u32) void {
@@ -803,7 +798,7 @@ pub fn jsonExample(allocator: std.mem.Allocator) !void {
 
 ---
 
-## 10. Build System <a name="build-system"></a>
+## Build System
 
 Zig's build system is written in Zig. It's powerful and portable.
 
@@ -880,9 +875,9 @@ exe.root_module.addImport("zap", zap_dep.module("zap"));
 
 ---
 
-## 11. C Interoperability <a name="c-interoperability"></a>
+## C Interoperability
 
-Zig excels at working with C.
+Zig excels at working with [C](c.md).
 
 ### Importing C Headers
 Use `@cImport` to parse headers and make them available in Zig.
@@ -917,7 +912,7 @@ Compile as a library: `zig build-lib main.zig -dynamic`
 
 ---
 
-## 12. Testing <a name="testing"></a>
+## Testing
 
 Zig has a built-in test runner. Tests are written alongside code.
 
@@ -955,7 +950,7 @@ test "fuzz example" {
 
 ---
 
-## 13. Advanced Topics <a name="advanced-topics"></a>
+## Advanced Topics
 
 ### Async/Await (Status)
 Async is a key feature of Zig (suspend/resume-based coroutines). As of recent versions (0.11/0.12), async is undergoing a major rework in the compiler ("Stage 2"). It is currently not fully available in stable releases but is a core part of the language specification. When enabled, it allows writing non-blocking code that looks synchronous (Colorblind Async).
@@ -997,7 +992,7 @@ Zig tries to prevent UB in Debug/ReleaseSafe modes, but allows it in ReleaseFast
 
 ---
 
-## 14. Common Zig Patterns <a name="common-zig-patterns"></a>
+## Common Zig Patterns
 
 ### Allocator Injection
 In Zig, you don't use a global allocator. instead, you pass it explicitly.
@@ -1122,4 +1117,33 @@ test "sentinel" {
 *   `zig translate-c`: Converts C header/code to Zig code (amazing for learning bindings).
 *   `zls`: The Zig Language Server (highly recommended for editors).
 
-```
+## Where this connects
+
+- [Memory management](memory_management.md) — explicit allocators, arenas, and `defer`/`errdefer`
+  are Zig's whole story; this is the page to read alongside it.
+- [C](c.md) — Zig is "better C": same model, plus `@cImport`, `zig cc`, and first-class
+  cross-compilation. It's a drop-in C/C++ compiler.
+- [Rust](rust.md) / [C++](cpp.md) — the other ahead-of-time systems languages; compare
+  ownership-by-borrow-checker (Rust) and RAII/templates (C++) against Zig's manual + `comptime`.
+- [Error handling](error_handling.md) — error sets and `!T` error unions are result types, not
+  exceptions.
+- [Generics](generics.md) and [metaprogramming](metaprogramming.md) — both collapse into
+  `comptime` (types are compile-time values).
+- [Compilers](compilers.md) — `comptime`, build modes (`Debug`/`ReleaseSafe`/`ReleaseFast`/
+  `ReleaseSmall`), and the Zig-as-build-system model.
+
+## Pitfalls
+
+- **Forgetting `defer`/`deinit`.** Manual memory means every `alloc`/`create` needs a matching
+  `free`/`destroy`; `std.testing.allocator` catches leaks in tests, so test your data structures.
+- **`errdefer` vs `defer`.** `defer` always runs; `errdefer` runs only on the error path. Mixing
+  them up either double-frees or leaks on failure.
+- **Build-mode-dependent UB.** Integer overflow and out-of-bounds access panic in
+  `Debug`/`ReleaseSafe` but are undefined in `ReleaseFast` — a test that passes in debug can
+  miscompile in release. Don't reach for `ReleaseFast` until you've run the safe modes.
+- **Dangling slices.** A slice is a pointer + length; slicing into a buffer or `ArrayList` that
+  later grows/frees leaves the slice pointing at freed memory.
+- **Fast-moving language.** Zig is pre-1.0; std-library APIs and even syntax shift between
+  versions (async is mid-rework). Pin your compiler version and expect churn.
+- **Allocator passed but not stored.** Patterns that take an allocator per-call vs storing it in
+  `init` aren't interchangeable — be consistent so `deinit` frees with the same allocator.

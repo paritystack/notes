@@ -4,7 +4,7 @@ A comprehensive guide to designing robust, scalable, and maintainable database s
 
 ## Overview
 
-Database design is the process of organizing data according to a database model. Good database design ensures data integrity, minimizes redundancy, and optimizes performance.
+Database design is the process of organizing data according to a database model. Good design ensures data integrity, minimizes redundancy, and optimizes performance. [PostgreSQL](postgres.md) and [SQLite](sqlite.md) implement relational models; [NoSQL](nosql.md) databases like [MongoDB](mongodb.md) require different design patterns (embedding vs referencing); [ACID vs BASE](acid_vs_base.md) determines consistency guarantees for each model.
 
 ## Database Design Process
 
@@ -1685,3 +1685,11 @@ CREATE UNIQUE INDEX idx_users_email ON users(email);
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [SQL Style Guide](https://www.sqlstyle.guide/)
 - [Database Design Patterns](https://www.martinfowler.com/eaaCatalog/)
+
+## Where this connects
+
+- [PostgreSQL](postgres.md) — the primary target for relational schema design (normalization, indexes, constraints)
+- [SQLite](sqlite.md) — applies the same relational design principles in an embedded, serverless context
+- [MongoDB](mongodb.md) — document databases require different patterns: embedding vs referencing instead of joins
+- [ACID vs BASE](acid_vs_base.md) — consistency guarantees inform whether to normalize (ACID) or denormalize (BASE)
+- [NoSQL](nosql.md) — different data models (key-value, document, columnar) require different design approaches

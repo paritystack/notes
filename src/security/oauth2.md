@@ -1,5 +1,9 @@
 # OAuth 2.0
 
+## Overview
+
+OAuth 2.0 is the industry-standard authorization framework for delegated access. [JWT](jwt.md) is the most common token format for OAuth access tokens; [SSL/TLS](ssl_tls.md) is mandatory for all OAuth flows; [certificates](certificates.md) back the server identity during TLS; [zero trust](zero_trust.md) architecture uses OAuth/OIDC as its identity plane.
+
 OAuth 2.0 is an industry-standard authorization framework that enables applications to obtain limited access to user accounts on an HTTP service. It works by delegating user authentication to the service that hosts the user account and authorizing third-party applications to access the user account.
 
 ## Table of Contents
@@ -918,3 +922,10 @@ async function validateToken(token) {
 - [OAuth2 Server](https://github.com/oauthjs/node-oauth2-server) (Node.js)
 - [Authlib](https://authlib.org/) (Python)
 - [Spring Security OAuth](https://spring.io/projects/spring-security-oauth) (Java)
+
+## Where this connects
+
+- [JWT](jwt.md) — the standard token format for OAuth access tokens; includes claims, expiry, and scope
+- [SSL/TLS](ssl_tls.md) — TLS is mandatory for all OAuth flows to protect authorization codes and tokens
+- [Certificates](certificates.md) — server TLS certificates and JWKS endpoints use X.509 to establish trust
+- [Zero trust](zero_trust.md) — OAuth/OIDC is the identity plane in a zero-trust architecture

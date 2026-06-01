@@ -1,5 +1,8 @@
 # Wifi Basics
 
+## Overview
+
+Wi-Fi basics covers channels, frame types, and aggregation mechanisms common to all 802.11 networks. The [standards](standards.md) page maps each 802.11 revision to its capabilities; [scanning](scanning.md) explains how devices discover APs; [security](security.md) (WPA2/WPA3) governs authentication; [OFDMA](ofdma.md) is the multi-user scheduler introduced in 802.11ax (Wi-Fi 6); and [QoS management](qos_management.md) prioritizes voice, video, and data traffic.
 
 ## Aggregation
 
@@ -280,3 +283,12 @@ Wi-Fi communication relies on the exchange of various types of frames between de
    - **QoS Data Frames**: Include QoS parameters to prioritize certain types of traffic, such as voice or video.
 
 Understanding the different types of frames in Wi-Fi is essential for analyzing and troubleshooting wireless networks. Each frame type plays a crucial role in the overall operation and performance of the network, ensuring reliable and efficient communication between devices.
+
+## Where this connects
+
+- [Standards](standards.md) — maps each 802.11 revision to the PHY capabilities and bands it introduces
+- [Scanning](scanning.md) — probe requests and beacon frames are the management frames used to discover APs
+- [Security](security.md) — authentication and association frames carry WPA2/WPA3 handshake material
+- [OFDMA](ofdma.md) — Wi-Fi 6's multi-user scheduler subdivides the OFDM channel into Resource Units
+- [QoS management](qos_management.md) — WMM access categories determine how the medium is shared between traffic types
+- [Roaming](roaming.md) — reassociation and protected management frames enable seamless AP handoff

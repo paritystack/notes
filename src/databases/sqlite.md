@@ -4,7 +4,7 @@ SQLite is a C-language library that implements a small, fast, self-contained, hi
 
 ## Overview
 
-SQLite is embedded into the application, requiring no separate server process. The entire database is stored in a single cross-platform file.
+SQLite is embedded into the application, requiring no separate server process. The entire database is stored in a single cross-platform file. It is fully [ACID](acid_vs_base.md)-compliant. Compare with [PostgreSQL](postgres.md) for server-based relational needs, and [DuckDB](duckdb.md) for in-process OLAP (SQLite for analytics).
 
 **Key Features:**
 - Serverless, zero-configuration
@@ -692,3 +692,10 @@ VACUUM;
 | `ANALYZE` | Update statistics |
 
 SQLite is ideal for embedded systems, mobile apps, desktop applications, and scenarios where a simple, reliable, serverless database is needed.
+
+## Where this connects
+
+- [PostgreSQL](postgres.md) — the server-based alternative for production systems needing concurrent writes and full SQL
+- [DuckDB](duckdb.md) — in-process OLAP complement; SQLite handles OLTP, DuckDB handles analytics on the same files
+- [ACID vs BASE](acid_vs_base.md) — SQLite is fully ACID-compliant via WAL mode and serialized writes
+- [Database design](database_design.md) — relational schema design principles (normalization, indexes) apply directly to SQLite

@@ -1,5 +1,9 @@
 # JWT (JSON Web Tokens)
 
+## Overview
+
+JSON Web Token (JWT) is an open standard (RFC 7519) that defines a compact and self-contained way for securely transmitting information between parties as a JSON object. [OAuth2](oauth2.md) uses JWTs as access/refresh tokens; the payload is signed with [HMAC](hmac.md) (HS256) or an asymmetric [digital signature](digital_signatures.md) (RS256/ES256); [SSL/TLS](ssl_tls.md) carries JWTs securely in transit; [certificates](certificates.md) back the public keys used in asymmetric JWT verification.
+
 JSON Web Token (JWT) is an open standard (RFC 7519) that defines a compact and self-contained way for securely transmitting information between parties as a JSON object. This information can be verified and trusted because it is digitally signed.
 
 ## Table of Contents
@@ -902,3 +906,11 @@ async function validateToken(token) {
 **Security:**
 - [JWT Security Best Practices](https://curity.io/resources/learn/jwt-best-practices/)
 - [Common JWT Security Mistakes](https://pragmaticwebsecurity.com/articles/apisecurity/jwt-security.html)
+
+## Where this connects
+
+- [OAuth2](oauth2.md) — OAuth uses JWTs as access and refresh tokens in the Bearer token flow
+- [HMAC](hmac.md) — HS256 signing uses HMAC-SHA256; the shared secret must be kept server-side only
+- [Digital signatures](digital_signatures.md) — RS256/ES256 use asymmetric signatures, eliminating the need to share the secret
+- [Certificates](certificates.md) — JWK Sets (JWKS) distribute public keys for RS256 verification; backed by CA-signed certs
+- [SSL/TLS](ssl_tls.md) — TLS is required to prevent token interception in transit

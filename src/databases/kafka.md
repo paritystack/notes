@@ -1,5 +1,9 @@
 # Apache Kafka
 
+## Overview
+
+Apache Kafka is a distributed event streaming platform for building real-time data pipelines. It fits in the [NoSQL](nosql.md) / log-structured storage category; [Redis](redis.md) Streams offer a lighter-weight alternative for moderate throughput. Kafka feeds data into analytics stores like [ClickHouse](clickhouse.md) for real-time OLAP. It follows BASE semantics ([ACID vs BASE](acid_vs_base.md)) — durability and ordering within a partition, eventual consistency across consumers.
+
 Apache Kafka is a distributed event streaming platform capable of handling trillions of events a day. It's used for building real-time data pipelines and streaming applications, providing high-throughput, fault-tolerant, and scalable messaging.
 
 ## Table of Contents
@@ -706,3 +710,11 @@ const kafka = new Kafka({
 - [Kafka: The Definitive Guide](https://www.confluent.io/resources/kafka-the-definitive-guide/)
 - [Confluent Platform](https://www.confluent.io/)
 - [Apache Kafka Quickstart](https://kafka.apache.org/quickstart)
+
+## Where this connects
+
+- [NoSQL](nosql.md) — Kafka is a log-structured NoSQL store optimized for ordered, durable event streams
+- [ACID vs BASE](acid_vs_base.md) — Kafka guarantees durability and ordering within a partition; consumers are eventually consistent
+- [Redis](redis.md) — Redis Streams is a lighter-weight alternative for moderate-volume, short-retention streams
+- [ClickHouse](clickhouse.md) — Kafka is the primary ingestion path for real-time analytics into ClickHouse
+- [PostgreSQL](postgres.md) — Kafka Change Data Capture (CDC) often feeds Postgres changes to downstream consumers

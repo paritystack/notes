@@ -2,10 +2,12 @@
 
 ## Overview
 
-X.509 certificates are digital documents that bind public keys to identities. They enable:
-- **Authentication**: Verify identity of servers/users
+X.509 certificates are digital documents that bind public keys to identities using [digital signatures](digital_signatures.md) from a Certificate Authority. They enable:
+- **Authentication**: Verify identity of servers/users — used by [SSL/TLS](ssl_tls.md) for server verification
 - **Encryption**: Establish secure connections
-- **Trust**: Chain of trust through Certificate Authorities
+- **Trust**: Chain of trust through Certificate Authorities, backed by [hashing](hashing.md) algorithms (SHA-256)
+
+[OAuth2](oauth2.md) and [JWT](jwt.md) RS256 verification rely on certificates to distribute public keys.
 
 ## X.509 Certificate Structure
 
@@ -1112,3 +1114,10 @@ Certificates are like ID cards for websites:
 - [Certbot Documentation](https://certbot.eff.org/docs/)
 - [OpenSSL Cookbook](https://www.feistyduck.com/library/openssl-cookbook/)
 - [Public Key Infrastructure (PKI) Guide](https://en.wikipedia.org/wiki/Public_key_infrastructure)
+
+## Where this connects
+
+- [Digital signatures](digital_signatures.md) — a certificate is a CA's digital signature over a public key and subject identity
+- [SSL/TLS](ssl_tls.md) — TLS uses certificates to authenticate servers; mTLS uses them for clients too
+- [Hashing](hashing.md) — certificate fingerprints and signature algorithms (SHA-256) are hash-based
+- [OAuth2](oauth2.md) — JWKS endpoints distribute public keys (usually from certificates) for JWT RS256 verification

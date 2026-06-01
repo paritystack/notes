@@ -1,6 +1,8 @@
 # RT-Linux (PREEMPT_RT)
 
-"Real-time Linux" today almost always means the **PREEMPT_RT** preemption model — a set of changes that make the mainline Linux kernel fully preemptible, so high-priority tasks meet tight, bounded latency deadlines. Long maintained as an out-of-tree patch set, PREEMPT_RT has been progressively merged upstream, with `CONFIG_PREEMPT_RT` now selectable in mainline. It delivers *soft/firm* real-time on a full-featured OS — not the hard guarantees of a bare-metal RTOS or a dual-kernel microkernel.
+## Overview
+
+"Real-time Linux" today almost always means the **PREEMPT_RT** preemption model — a set of changes that make the mainline Linux kernel fully preemptible, so high-priority tasks meet tight, bounded latency deadlines. Long maintained as an out-of-tree patch set, PREEMPT_RT has been progressively merged upstream, with `CONFIG_PREEMPT_RT` now selectable in mainline. It delivers *soft/firm* real-time on a full-featured OS — not the hard guarantees of a bare-metal RTOS like [FreeRTOS](freertos.md), [Zephyr](zephyr.md), or [ThreadX](threadx.md). [Interrupts](../embedded/interrupts.md) become threaded IRQs under PREEMPT_RT; understanding [Linux kernel patterns](../linux/kernel_patterns.md) (locking, RCU) is necessary to write RT-safe drivers.
 
 > **Historical note:** the original *RTLinux* (and relatives RTAI and Xenomai) used a **dual-kernel** approach: a small hard-real-time microkernel ran the RT tasks and scheduled stock Linux as its lowest-priority thread. PREEMPT_RT is fundamentally different — there is one kernel, and it is made preemptible from within. This page covers the PREEMPT_RT, single-kernel approach.
 
@@ -317,3 +319,11 @@ sudo taskset -c 2 ./rt_cyclic      # pin to isolated CPU 2
 ```
 
 ## PREEMPT_RT turns mainline Linux into a fully preemptible, low-latency real-time OS — pairing standard POSIX scheduling APIs with careful system tuning (memory locking, CPU isolation, priority inheritance) and `cyclictest`-driven measurement to achieve bounded, deterministic response.
+
+## Where this connects
+
+- [FreeRTOS](freertos.md) — bare-metal alternative for hard real-time on resource-constrained MCUs; no Linux userspace
+- [Zephyr](zephyr.md) — another bare-metal RTOS option with Devicetree and networking stacks
+- [ThreadX](threadx.md) — safety-certified picokernel for deeply embedded targets without OS overhead
+- [Linux kernel patterns](../linux/kernel_patterns.md) — RT-safe locking (sleeping spinlocks, rt_mutex) requires understanding kernel concurrency patterns
+- [Interrupts](../embedded/interrupts.md) — PREEMPT_RT converts interrupt handlers to threaded IRQs, making them schedulable and prioritizable

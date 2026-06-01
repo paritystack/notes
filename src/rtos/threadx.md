@@ -1,5 +1,9 @@
 # ThreadX (Azure RTOS)
 
+## Overview
+
+ThreadX is a professional-grade RTOS for deeply embedded and IoT applications. Compare with [FreeRTOS](freertos.md) (the most widely used open-source RTOS for bare-metal MCUs), [Zephyr](zephyr.md) (Linux Foundation ecosystem with networking stacks and Devicetree), and [RT-Linux](rt_linux.md) for POSIX-compatible real-time on application processors.
+
 ThreadX is a professional-grade real-time operating system (RTOS) designed for deeply embedded, real-time, and IoT applications. Now part of Azure RTOS (open-sourced by Microsoft), it's known for its small footprint, fast execution, and deterministic real-time performance.
 
 ## Key Features
@@ -679,3 +683,10 @@ Certification packages include safety manuals, test reports, and compliance docu
 - **Commercial support**: Available through Microsoft and partners
 
 ThreadX is ideal for resource-constrained embedded systems requiring deterministic real-time performance, safety certification, or long-term support.
+
+## Where this connects
+
+- [FreeRTOS](freertos.md) — the most widely used open-source alternative; similar task/queue/mutex model with larger community
+- [Zephyr](zephyr.md) — Linux Foundation RTOS with broader subsystem ecosystem (networking, Bluetooth, Devicetree)
+- [RT-Linux](rt_linux.md) — PREEMPT_RT for real-time on application processors requiring a full Linux userspace
+- [Interrupts](../embedded/interrupts.md) — ThreadX ISR enter/exit macros bridge hardware interrupts into the scheduler

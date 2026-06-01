@@ -2,7 +2,7 @@
 
 ## Overview
 
-A cryptographic hash function is a mathematical algorithm that takes an input (message) of any size and produces a fixed-size output (hash digest). Hash functions are one-way functions designed to be computationally infeasible to reverse.
+A cryptographic hash function is a mathematical algorithm that takes an input (message) of any size and produces a fixed-size output (hash digest). [HMAC](hmac.md) builds message authentication on top of hash functions; [digital signatures](digital_signatures.md) sign the hash of data rather than the full payload; [certificates](certificates.md) use hash algorithms in their signature chain; [SSL/TLS](ssl_tls.md) uses hashes for key derivation and record MAC. Hash functions are one-way functions designed to be computationally infeasible to reverse.
 
 ## Key Properties
 
@@ -775,3 +775,10 @@ Special properties:
 - [Hash Length Extension Attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 - [bcrypt Documentation](https://github.com/pyca/bcrypt/)
 - [Argon2 Documentation](https://argon2-cffi.readthedocs.io/)
+
+## Where this connects
+
+- [HMAC](hmac.md) — wraps a hash function with a secret key to add message authentication
+- [Digital signatures](digital_signatures.md) — sign the hash of data rather than the full message
+- [Certificates](certificates.md) — X.509 certificates use SHA-256 in their signature chain
+- [SSL/TLS](ssl_tls.md) — PRF and record-layer MAC in TLS use hash-based constructions

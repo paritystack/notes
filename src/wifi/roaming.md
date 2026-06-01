@@ -2,7 +2,7 @@
 
 ## Overview
 
-WiFi roaming is the process by which a client device (such as a smartphone or laptop) seamlessly transitions from one access point (AP) to another within the same network without losing connectivity. This is essential for maintaining uninterrupted service in environments with multiple APs, such as offices, campuses, and large homes.
+WiFi roaming is the process by which a client device (such as a smartphone or laptop) seamlessly transitions from one access point (AP) to another within the same network without losing connectivity. [Scanning](scanning.md) (and 802.11k neighbor reports) discovers candidate APs; [security](security.md) governs the key-exchange during handoff; 802.11r fast BSS transition, 802.11k radio resource management, 802.11v BSS transition management, and 802.11w protected management frames are all part of the same [standards](standards.md) family. This is essential for maintaining uninterrupted service in environments with multiple APs, such as offices, campuses, and large homes.
 
 ### The Roaming Process
 
@@ -888,3 +888,11 @@ skip_inactivity_poll=0
    - Cisco Enterprise Mobility Design Guide
    - Aruba Best Practices for High-Density WiFi Deployments
    - Ruckus SmartRoam Technology Overview
+
+## Where this connects
+
+- [Scanning](scanning.md) — 802.11k neighbor reports enable targeted scanning instead of full channel sweeps when roaming
+- [Security](security.md) — 802.11r fast BSS transition uses a PMK key hierarchy; 802.11w protected management frames prevent deauth attacks
+- [Standards](standards.md) — 802.11r/k/v/w are optional amendments supported on top of any 802.11 PHY revision
+- [Basics](basics.md) — reassociation and authentication frames are the management frames involved in handoff
+- [QoS management](qos_management.md) — low-latency roaming (< 10ms) is essential for maintaining VoIP QoS across AP transitions

@@ -1,5 +1,9 @@
 # FreeRTOS
 
+## Overview
+
+FreeRTOS is a real-time operating system kernel for embedded devices. Compare with [Zephyr](zephyr.md) (Linux Foundation, Devicetree/Kconfig-driven, richer subsystem ecosystem), [ThreadX](threadx.md) (picokernel architecture, safety-certified), and [RT-Linux](rt_linux.md) (PREEMPT_RT for real-time on a full Linux stack). [Interrupts](../embedded/interrupts.md) drive ISR-safe queue and semaphore operations in FreeRTOS; the idle hook is where a [watchdog](../embedded/watchdog.md) feed typically lives.
+
 FreeRTOS is a real-time operating system kernel for embedded devices. It's designed to be small, simple, and easy to use, providing deterministic real-time behavior with minimal resource overhead.
 
 ## Core Concepts
@@ -1014,3 +1018,11 @@ FreeRTOS supports numerous architectures:
 - **Renesas RX**
 
 ## FreeRTOS provides essential RTOS functionality in a small footprint, ideal for resource-constrained embedded systems with deterministic real-time requirements.
+
+## Where this connects
+
+- [Zephyr](zephyr.md) — Linux Foundation RTOS with richer networking/Bluetooth stacks and Devicetree hardware description
+- [ThreadX](threadx.md) — picokernel alternative with IEC/ISO safety certifications; same primitives (tasks, queues, mutexes)
+- [RT-Linux](rt_linux.md) — PREEMPT_RT for when you need real-time behavior on a full Linux system with POSIX APIs
+- [Interrupts](../embedded/interrupts.md) — ISR-safe FromISR API variants bridge hardware interrupts into FreeRTOS queues and semaphores
+- [Watchdog](../embedded/watchdog.md) — hardware watchdog is typically fed in the FreeRTOS idle hook or a dedicated low-priority task

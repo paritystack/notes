@@ -1,5 +1,9 @@
 # Zephyr
 
+## Overview
+
+Zephyr is a scalable, vendor-neutral RTOS from the Linux Foundation. Compare [FreeRTOS](freertos.md) (widely used on bare-metal MCUs, simpler kernel), [ThreadX](threadx.md) (safety-certified picokernel), and [RT-Linux](rt_linux.md) for real-time on full Linux. Zephyr reuses Linux concepts — [Devicetree](../linux/device_tree.md) for hardware description and Kconfig for configuration — applied to bare-metal microcontrollers.
+
 Zephyr is a scalable, vendor-neutral real-time operating system hosted by the Linux Foundation. It targets resource-constrained microcontrollers as well as more capable application processors, offering a small, configurable kernel alongside a large ecosystem of drivers, networking stacks, and subsystems. Configuration is driven by Kconfig and hardware is described with Devicetree, giving a single source tree that builds for hundreds of boards.
 
 ## Core Concepts
@@ -626,3 +630,11 @@ Zephyr runs on a wide range of architectures:
 - **SPARC**, **MIPS**, **POSIX/native_sim** (host-based testing)
 
 ## Zephyr combines a small, configurable real-time kernel with Kconfig/Devicetree-driven portability and a broad subsystem ecosystem, scaling from tiny MCUs to multicore application processors.
+
+## Where this connects
+
+- [FreeRTOS](freertos.md) — simpler alternative for bare-metal MCUs; larger community, fewer built-in subsystems
+- [ThreadX](threadx.md) — picokernel RTOS with IEC/ISO safety certifications; similar thread/queue/mutex primitives
+- [RT-Linux](rt_linux.md) — PREEMPT_RT when you need real-time guarantees on a full Linux system rather than a bare-metal RTOS
+- [Linux device tree](../linux/device_tree.md) — Zephyr reuses the Devicetree format from Linux to describe hardware at build time
+- [Interrupts](../embedded/interrupts.md) — Zephyr ISR API and interrupt routing are central to driver and workqueue design

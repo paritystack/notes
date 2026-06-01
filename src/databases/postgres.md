@@ -1,5 +1,9 @@
 # PostgreSQL
 
+## Overview
+
+PostgreSQL is a powerful, open-source object-relational database system with full [ACID](acid_vs_base.md) compliance. Compare with [SQLite](sqlite.md) (serverless, embedded) and [NoSQL](nosql.md) alternatives like [MongoDB](mongodb.md) for document workloads. For analytics, [DuckDB](duckdb.md) runs OLAP queries directly on Postgres-exported files. [Database design](database_design.md) principles apply directly to Postgres schema modeling.
+
 PostgreSQL is a powerful, open-source object-relational database system with over 35 years of active development. It's known for its reliability, feature robustness, and performance.
 
 ## Installation
@@ -582,3 +586,11 @@ log_min_duration_statement = 1000  # Log queries > 1s
 | `psql -f file.sql` | Execute SQL file |
 
 PostgreSQL is a robust, feature-rich database system suitable for applications ranging from small projects to large-scale enterprise systems.
+
+## Where this connects
+
+- [Database design](database_design.md) — normalization, indexing, and constraints are core to Postgres schema design
+- [ACID vs BASE](acid_vs_base.md) — Postgres implements full ACID via WAL, MVCC, and serializable isolation
+- [SQLite](sqlite.md) — serverless alternative for embedded use; same SQL dialect but no concurrent writes
+- [NoSQL](nosql.md) — the relational alternative; Postgres also supports JSONB for document-style flexibility
+- [DuckDB](duckdb.md) — OLAP complement; often used to run analytics queries on Postgres-exported data

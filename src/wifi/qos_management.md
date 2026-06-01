@@ -4,7 +4,7 @@ Quality of Service (QoS) management in WiFi ensures that different types of traf
 
 ## Overview
 
-WiFi QoS has evolved from basic WMM (WiFi Multimedia) access categories to sophisticated stream-based classification systems. The key QoS mechanisms include:
+WiFi QoS has evolved from basic WMM (WiFi Multimedia) access categories to sophisticated stream-based classification systems. [OFDMA](ofdma.md) in Wi-Fi 6/7 integrates with these mechanisms to allocate per-stream resource units; [standards](standards.md) govern which QoS features apply to each 802.11 revision; [roaming](roaming.md) (802.11v WNM sleep) interacts with QoS power-saving. The key QoS mechanisms include:
 
 - **WMM (WiFi Multimedia)**: Foundation of WiFi QoS with 4 access categories
 - **QoS Map**: Mapping between IP layer DSCP values and WiFi access categories
@@ -584,3 +584,10 @@ wlan.ext_tag.number == 108
 ---
 
 Modern WiFi QoS mechanisms provide sophisticated tools for ensuring application performance in wireless networks. By understanding and properly implementing QoS Map, MSCS, SCS, and DSCP Policy, networks can deliver excellent user experiences for latency-sensitive and bandwidth-intensive applications.
+
+## Where this connects
+
+- [OFDMA](ofdma.md) — Wi-Fi 6/7 OFDMA allocates Resource Units per-stream, directly serving QoS requirements
+- [Standards](standards.md) — WMM (802.11e), MSCS (802.11ax), SCS (802.11be) each require specific standard versions
+- [Roaming](roaming.md) — 802.11v WNM sleep and BSS transition interact with QoS power-saving mechanisms
+- [Basics](basics.md) — QoS Data frames and their AC tagging are part of the Wi-Fi frame taxonomy

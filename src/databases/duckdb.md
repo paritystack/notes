@@ -4,7 +4,7 @@ DuckDB is an in-process SQL OLAP (Online Analytical Processing) database managem
 
 ## Overview
 
-DuckDB is optimized for analytical queries with columnar storage, vectorized execution, and minimal dependencies.
+DuckDB is optimized for analytical queries with columnar storage, vectorized execution, and minimal dependencies. It is often compared to [SQLite](sqlite.md) (OLTP/transactional) — both are serverless and in-process, but DuckDB targets OLAP workloads. For server-grade analytics at massive scale, [ClickHouse](clickhouse.md) is the distributed alternative. [PostgreSQL](postgres.md) is a common source when DuckDB is used for local analysis of exported data.
 
 **Key Features:**
 - In-process, embedded database (no server, links into your process)
@@ -1726,3 +1726,10 @@ result = duckdb.sql("FROM df SELECT region, SUM(amount) GROUP BY region").df()
 | `PRAGMA force_checkpoint` | Flush WAL to file |
 
 DuckDB excels at analytical queries on local data files, making it perfect for data analysis, ETL pipelines, embedded analytics, and lakehouse-style reads against Iceberg/Delta on object storage.
+
+## Where this connects
+
+- [SQLite](sqlite.md) — OLTP counterpart; both are in-process and serverless, but SQLite targets transactional workloads
+- [ClickHouse](clickhouse.md) — distributed OLAP alternative for scale; DuckDB is single-node, ClickHouse clusters to petabytes
+- [PostgreSQL](postgres.md) — common source database; DuckDB's Postgres scanner reads Postgres tables directly
+- [NoSQL](nosql.md) — DuckDB can query Parquet/JSON files produced by NoSQL systems (Kafka, MongoDB exports)

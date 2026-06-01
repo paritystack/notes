@@ -1,5 +1,9 @@
 # Wi-Fi Security
 
+## Overview
+
+Wi-Fi security has evolved from WEP (broken) → WPA-TKIP → WPA2-AES → WPA3-SAE. The WPA2 4-way handshake establishes session keys; 802.11r ([roaming](roaming.md)) uses a hierarchical key cache to skip full re-authentication between APs; 802.11w (Protected Management Frames) is mandatory in WPA3 and prevents deauthentication attacks. [Standards](standards.md) govern which security version each 802.11 PHY revision supports. For application-layer encryption above the Wi-Fi stack see [TLS/SSL](../security/ssl_tls.md).
+
 Wi-Fi security is crucial for protecting wireless networks from unauthorized access and ensuring the confidentiality and integrity of data transmitted over the air. As wireless networks have become ubiquitous in homes, businesses, and public spaces, implementing robust security measures is essential to prevent data breaches, unauthorized access, and network exploitation.
 
 This document covers the evolution of Wi-Fi security protocols, technical implementation details, common threats, and best practices for securing wireless networks.
@@ -324,3 +328,11 @@ Understanding common security threats helps in implementing appropriate counterm
 By understanding and implementing these Wi-Fi security protocols, mechanisms, and best practices, users and network administrators can protect their wireless networks from unauthorized access and ensure the confidentiality and integrity of their data. The transition to WPA3 represents a significant improvement in wireless security, and organizations should prioritize upgrading to this protocol as devices and infrastructure support it.
 
 Remember that security is an ongoing process, requiring regular updates, monitoring, and adaptation to emerging threats. Stay informed about new vulnerabilities and security patches, and maintain a proactive approach to wireless network security.
+
+## Where this connects
+
+- [Standards](standards.md) — each 802.11 revision specifies which security protocol versions it supports
+- [Roaming](roaming.md) — 802.11r fast transition uses a PMK key hierarchy to skip full re-authentication; 802.11w protects management frames
+- [Basics](basics.md) — authentication, association, and EAPOL frames are management frame types described in basics
+- [TLS/SSL](../security/ssl_tls.md) — application-layer encryption above the Wi-Fi stack for end-to-end security
+- [Scanning](scanning.md) — rogue AP detection and MAC randomization are security concerns at scan time

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-OFDMA (Orthogonal Frequency Division Multiple Access) is a key technology introduced in Wi-Fi 6 (802.11ax) and further enhanced in Wi-Fi 7 (802.11be) that enables multiple users to share the same channel simultaneously. OFDMA divides the available channel bandwidth into smaller frequency allocations called Resource Units (RUs), allowing an Access Point (AP) to communicate with multiple stations (STAs) concurrently, improving spectral efficiency and reducing latency, particularly in dense deployment scenarios.
+OFDMA (Orthogonal Frequency Division Multiple Access) is a key technology introduced in Wi-Fi 6 (802.11ax) and further enhanced in Wi-Fi 7 (802.11be) that enables multiple users to share the same channel simultaneously. The [standards](standards.md) page covers the 802.11ax/be revisions; [QoS management](qos_management.md) (WMM, MSCS, SCS) layers on top of OFDMA for per-stream priorities; [basics](basics.md) covers the underlying OFDM subcarrier model that OFDMA extends. OFDMA divides the available channel bandwidth into smaller frequency allocations called Resource Units (RUs), allowing an Access Point (AP) to communicate with multiple stations (STAs) concurrently, improving spectral efficiency and reducing latency, particularly in dense deployment scenarios.
 
 ### Key Benefits
 
@@ -1312,3 +1312,10 @@ OFDMA is most beneficial when:
 - Latency-sensitive applications
 
 For maximum Wi-Fi 6/7 performance, understanding and properly configuring OFDMA is essential.
+
+## Where this connects
+
+- [Standards](standards.md) — OFDMA is introduced in 802.11ax (Wi-Fi 6) and enhanced in 802.11be (Wi-Fi 7)
+- [QoS management](qos_management.md) — MSCS and SCS use OFDMA Resource Units to guarantee per-stream latency and bandwidth
+- [Basics](basics.md) — OFDMA extends the OFDM subcarrier model described in basics; A-MPDU/A-MSDU aggregation complements it
+- [Roaming](roaming.md) — OFDMA trigger frames affect latency measurements used for roaming decisions

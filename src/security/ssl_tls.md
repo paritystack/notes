@@ -2,7 +2,7 @@
 
 ## Overview
 
-TLS (Transport Layer Security) is a cryptographic protocol that provides secure communication over networks. SSL is the predecessor to TLS (now deprecated).
+TLS (Transport Layer Security) is a cryptographic protocol that provides secure communication over networks. SSL is the predecessor to TLS (now deprecated). [Certificates](certificates.md) verify server identity during the TLS handshake; [hashing](hashing.md) underpins key derivation and record-layer MACs; [HMAC](hmac.md) provides record integrity in older TLS versions. [OAuth2](oauth2.md) and [JWT](jwt.md) both require TLS for secure token transmission.
 
 **Key Features:**
 - **Confidentiality**: Encryption prevents eavesdropping
@@ -978,3 +978,11 @@ Step 2: Talk through tunnel
 - [High Performance Browser Networking (Book)](https://hpbn.co/)
 - [TLS Illustrated](https://tls.ulfheim.net/)
 - [Cloudflare TLS 1.3 Guide](https://blog.cloudflare.com/rfc-8446-aka-tls-1-3/)
+
+## Where this connects
+
+- [Certificates](certificates.md) — X.509 certificates authenticate the server during the TLS handshake
+- [Hashing](hashing.md) — key derivation (HKDF) and record MAC use SHA-256/SHA-384
+- [HMAC](hmac.md) — TLS 1.2 record-layer integrity uses HMAC; TLS 1.3 uses AEAD instead
+- [OAuth2](oauth2.md) — all OAuth flows require TLS; tokens must never traverse unencrypted HTTP
+- [JWT](jwt.md) — JWTs are transported in Authorization headers over TLS

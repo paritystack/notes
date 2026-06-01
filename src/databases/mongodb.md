@@ -1,5 +1,9 @@
 # MongoDB
 
+## Overview
+
+MongoDB is a popular [NoSQL](nosql.md) document database that stores data in flexible, JSON-like documents. Compare with [PostgreSQL](postgres.md) (relational, ACID-strict) and [Redis](redis.md) (in-memory key-value). The [ACID vs BASE](acid_vs_base.md) trade-off explains why MongoDB's flexible consistency suits distributed deployments. [Database design](database_design.md) patterns (embedding vs referencing) are especially important for document models.
+
 MongoDB is a popular NoSQL database that stores data in flexible, JSON-like documents. It's designed for scalability, high performance, and ease of development, making it ideal for modern applications that require flexible schema design and horizontal scaling.
 
 ## Table of Contents
@@ -852,3 +856,11 @@ async function getUser(id) {
 - [MongoDB Tutorial](https://www.mongodb.com/docs/manual/tutorial/)
 - [Mongoose Guide](https://mongoosejs.com/docs/guide.html)
 - [MongoDB Performance](https://www.mongodb.com/docs/manual/administration/analyzing-mongodb-performance/)
+
+## Where this connects
+
+- [NoSQL](nosql.md) — MongoDB is the canonical document-store NoSQL database
+- [ACID vs BASE](acid_vs_base.md) — MongoDB uses BASE by default; multi-document ACID transactions added in v4
+- [Database design](database_design.md) — embedding vs referencing is the key schema design decision for documents
+- [PostgreSQL](postgres.md) — relational alternative; use when joins, constraints, and ACID are required
+- [Redis](redis.md) — pair with Redis for caching frequently-accessed documents

@@ -4,7 +4,7 @@ ClickHouse is an open-source, column-oriented OLAP (Online Analytical Processing
 
 ## Overview
 
-ClickHouse stores data column-by-column on disk, compresses each column independently, and executes queries with a vectorized engine that processes blocks of values at a time. It scales horizontally via sharding and replication, and supports a SQL dialect close to standard SQL.
+ClickHouse stores data column-by-column on disk, compresses each column independently, and executes queries with a vectorized engine that processes blocks of values at a time. It scales horizontally via sharding and replication. Compare with [DuckDB](duckdb.md) (single-node, in-process OLAP) and [NoSQL](nosql.md) systems; [Kafka](kafka.md) is commonly used to ingest data into ClickHouse in real time; [PostgreSQL](postgres.md) handles transactional ([ACID](acid_vs_base.md)) workloads that ClickHouse is not suited for.
 
 **Key Features:**
 - Column-oriented storage with per-column codecs
@@ -748,3 +748,10 @@ SELECT event_time, revenue FROM events WHERE ...;
 | `:8123` HTTP / `:9000` native | Default ports |
 
 ClickHouse excels at scanning billions of rows for analytical aggregations in milliseconds, making it the go-to engine for real-time analytics, observability backends, and any workload where columnar compression and vectorized execution pay off.
+
+## Where this connects
+
+- [Kafka](kafka.md) — the primary ingestion path for streaming data into ClickHouse (Kafka table engine / Kafka Connect)
+- [DuckDB](duckdb.md) — single-node OLAP alternative; pick DuckDB for local analysis, ClickHouse for distributed scale
+- [NoSQL](nosql.md) — ClickHouse is a columnar NoSQL store; it does not support ACID transactions or OLTP workloads
+- [PostgreSQL](postgres.md) — OLTP counterpart; typical pattern is Postgres for writes, ClickHouse for analytical reads

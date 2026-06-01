@@ -2,7 +2,7 @@
 
 ## Overview
 
-HMAC is a mechanism for message authentication using cryptographic hash functions. It provides both **data integrity** (message hasn't been altered) and **authentication** (message came from someone with the secret key).
+HMAC is a mechanism for message authentication using cryptographic hash functions built on [hashing](hashing.md) (SHA-256, SHA-3). It provides both **data integrity** (message hasn't been altered) and **authentication** (message came from someone with the secret key). [Digital signatures](digital_signatures.md) provide the same guarantees using asymmetric keys (no shared secret needed); [JWT](jwt.md) uses HS256 (HMAC-SHA256) as one of its signing algorithms; [SSL/TLS](ssl_tls.md) uses HMAC in its record-layer MAC.
 
 ## HMAC Construction
 
@@ -896,3 +896,10 @@ When you log into a website, your browser and the server use HMAC to:
 - [API Authentication Best Practices](https://owasp.org/www-project-api-security/)
 - [Timing Attack Prevention](https://codahale.com/a-lesson-in-timing-attacks/)
 - [HKDF Specification (RFC 5869)](https://tools.ietf.org/html/rfc5869)
+
+## Where this connects
+
+- [Hashing](hashing.md) — HMAC wraps a cryptographic hash function (SHA-256/SHA-3) with a secret key
+- [Digital signatures](digital_signatures.md) — asymmetric alternative to HMAC; no shared secret required
+- [JWT](jwt.md) — HS256 signing uses HMAC-SHA256; simpler to implement but requires sharing the secret
+- [SSL/TLS](ssl_tls.md) — TLS 1.2 uses HMAC in its record-layer MAC; TLS 1.3 replaces it with AEAD

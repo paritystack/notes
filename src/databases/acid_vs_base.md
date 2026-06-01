@@ -3,6 +3,10 @@
 > **Domain:** Databases, Distributed Systems
 > **Key Concepts:** Consistency, Availability, CAP Theorem, Eventual Consistency
 
+## Overview
+
+This is the fundamental trade-off in database design. **ACID** is the gold standard for traditional Relational Databases ([PostgreSQL](postgres.md), [SQLite](sqlite.md)). **BASE** is the model for NoSQL/Distributed systems ([MongoDB](mongodb.md), [Cassandra]) that prioritize scale and availability. [NoSQL](nosql.md) covers the data models that favor BASE semantics.
+
 This is the fundamental trade-off in database design. **ACID** is the gold standard for traditional Relational Databases (SQL). **BASE** is the model for NoSQL/Distributed systems that prioritize scale.
 
 ---
@@ -73,3 +77,11 @@ Even ACID DBs trade consistency for speed.
 | **Social Media Feed** | **BASE** | If a post appears 2 seconds late, nobody cares. Availability is king. |
 | **E-Commerce Cart** | **ACID-ish** | You don't want to sell the last item twice (Inventory count). |
 | **Sensor Logs** | **BASE** | Massive write volume. Occasional lost packet is fine. |
+
+## Where this connects
+
+- [PostgreSQL](postgres.md) — the primary ACID-compliant SQL database; WAL and MVCC implement ACID guarantees
+- [SQLite](sqlite.md) — serverless, fully ACID-compliant; used where a full Postgres server is not needed
+- [NoSQL](nosql.md) — BASE-leaning databases; each type (document, key-value, columnar) has different consistency trade-offs
+- [MongoDB](mongodb.md) — document store; supports multi-document ACID transactions since v4, but historically BASE
+- [Kafka](kafka.md) — BASE streaming platform; durability within a partition, eventual consistency across consumers

@@ -3,6 +3,10 @@
 > **Domain:** Cybersecurity, Web Development
 > **Key Concepts:** Injection, XSS, Broken Access Control, SSRF
 
+## Overview
+
+The **OWASP Top 10** is a standard awareness document for developers and web application security. [Zero trust](zero_trust.md) architecture addresses broken access control risks at the network level; [OAuth2](oauth2.md) and [JWT](jwt.md) handle authentication and identification failures; [SSL/TLS](ssl_tls.md) and [certificates](certificates.md) are the baseline for cryptographic failures.
+
 The **OWASP Top 10** is a standard awareness document for developers and web application security. It represents a broad consensus about the most critical security risks to web applications.
 
 ---
@@ -104,3 +108,11 @@ A new category focusing on risks related to design flaws. You can't "code" your 
 *   **Mitigation:**
     *   Allow-list permitted domains for outgoing requests.
     *   Block internal IP ranges (10.0.0.0/8, 127.0.0.1) in the HTTP client configuration.
+
+## Where this connects
+
+- [Zero trust](zero_trust.md) — micro-segmentation and least-privilege access reduce the blast radius of broken access control
+- [OAuth2](oauth2.md) — the standard mitigation for identification and authentication failures (A07)
+- [JWT](jwt.md) — secure token handling addresses authentication failure risks
+- [SSL/TLS](ssl_tls.md) — mandatory transport encryption addresses cryptographic failures (A02)
+- [Certificates](certificates.md) — proper certificate management is part of cryptographic failure prevention

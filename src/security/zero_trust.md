@@ -3,7 +3,7 @@
 > **Domain:** Cybersecurity, Network Architecture
 > **Key Concepts:** "Never Trust, Always Verify", Least Privilege, Micro-segmentation, Identity Awareness
 
-**Zero Trust** is a security model that assumes breach and verifies each request as though it originates from an open network. It eliminates the traditional concept of a "trusted internal network" (Castle-and-Moat).
+**Zero Trust** is a security model that assumes breach and verifies each request as though it originates from an open network. It eliminates the traditional concept of a "trusted internal network" (Castle-and-Moat). [OAuth2](oauth2.md) and OIDC provide the identity plane; [SSL/TLS](ssl_tls.md) + [certificates](certificates.md) enforce mutual authentication; [OWASP Top 10](owasp_top_10.md) lists the web vulnerabilities that zero trust reduces the blast radius of.
 
 ---
 
@@ -71,3 +71,10 @@ Replaces the VPN.
 Google's implementation of Zero Trust.
 *   **Observation:** Google employees work from coffee shops without VPNs.
 *   **Logic:** The device is managed (MDM). The user is authenticated (2FA). The transport is encrypted (TLS). The network location is irrelevant.
+
+## Where this connects
+
+- [OAuth2](oauth2.md) — OAuth/OIDC provides the identity and authorization plane that zero trust relies on
+- [Certificates](certificates.md) — mutual TLS (mTLS) with client certificates is a common zero-trust enforcement mechanism
+- [SSL/TLS](ssl_tls.md) — TLS everywhere is a zero-trust principle; mTLS extends it to service-to-service auth
+- [OWASP Top 10](owasp_top_10.md) — zero trust reduces the blast radius of many OWASP vulnerabilities

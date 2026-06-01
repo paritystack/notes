@@ -5,9 +5,9 @@
 A digital signature is a cryptographic mechanism that provides:
 - **Authentication**: Proves who created the signature
 - **Integrity**: Detects any changes to the signed data
-- **Non-repudiation**: Signer cannot deny signing (unlike HMAC)
+- **Non-repudiation**: Signer cannot deny signing (unlike [HMAC](hmac.md))
 
-Digital signatures use **asymmetric cryptography** (public/private key pairs).
+Digital signatures use **asymmetric cryptography** (public/private key pairs). The payload is [hashed](hashing.md) first, then the hash is signed. [Certificates](certificates.md) bind a public key to an identity using digital signatures from a CA; [JWT](jwt.md) uses RS256/ES256 digital signatures for stateless token verification.
 
 ## Digital Signature vs HMAC
 
@@ -1045,3 +1045,10 @@ When you download software, the developer signs it:
 - [Cryptography Engineering (Book)](https://www.schneier.com/books/cryptography-engineering/)
 - [Python Cryptography Library](https://cryptography.io/en/latest/)
 - [OpenSSL Command Reference](https://www.openssl.org/docs/man1.1.1/man1/)
+
+## Where this connects
+
+- [Hashing](hashing.md) — the payload is hashed first (SHA-256) and the hash is signed, not the full message
+- [HMAC](hmac.md) — symmetric alternative; both parties share a secret key instead of using a key pair
+- [Certificates](certificates.md) — CA certificates are digital signatures binding a public key to an identity
+- [JWT](jwt.md) — RS256/ES256 JWT signing uses RSA/ECDSA digital signatures for stateless token verification

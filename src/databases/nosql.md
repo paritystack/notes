@@ -2,7 +2,7 @@
 
 ## Overview
 
-NoSQL databases store data in non-relational formats (documents, key-value, graph, etc.). Designed for scalability, flexibility, and high-performance.
+NoSQL databases store data in non-relational formats (documents, key-value, graph, etc.). Designed for scalability, flexibility, and high-performance. The [ACID vs BASE](acid_vs_base.md) trade-off governs when to pick NoSQL over relational; [MongoDB](mongodb.md) (document), [Redis](redis.md) (key-value), [Kafka](kafka.md) (log/streaming), and [ClickHouse](clickhouse.md) (columnar OLAP) are concrete examples. [PostgreSQL](postgres.md) is the relational counterpart.
 
 ## Types
 
@@ -138,3 +138,12 @@ Trade flexibility and speed for less strict structure!
 - [MongoDB Docs](https://docs.mongodb.com/)
 - [Redis Commands](https://redis.io/commands/)
 - [Neo4j Guide](https://neo4j.com/docs/)
+
+## Where this connects
+
+- [ACID vs BASE](acid_vs_base.md) — NoSQL systems trade ACID guarantees for scalability; CAP theorem explains the constraints
+- [MongoDB](mongodb.md) — document store; the canonical NoSQL example for flexible schema workloads
+- [Redis](redis.md) — in-memory key-value store; NoSQL for caching, pub/sub, and lightweight streaming
+- [Kafka](kafka.md) — log-structured event store; NoSQL for durable high-throughput streaming
+- [ClickHouse](clickhouse.md) — columnar NoSQL for OLAP; billions of rows scanned in sub-second queries
+- [PostgreSQL](postgres.md) — the relational counterpart; also supports JSONB for schema-flexible document storage

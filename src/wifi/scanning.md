@@ -1,5 +1,9 @@
 # Wi-Fi Scanning
 
+## Overview
+
+Wi-Fi scanning is how a device discovers available networks by sending probe requests (active) or listening for beacons (passive). [Basics](basics.md) covers the management frame types used during scanning; [roaming](roaming.md) builds on scanning via 802.11k neighbor reports to find a better AP quickly; [security](security.md) considerations (evil-twin, MAC randomization) apply at scan time before association.
+
 Wi-Fi scanning is the process of identifying available wireless networks within range of a Wi-Fi-enabled device. This process is essential for connecting to Wi-Fi networks, troubleshooting connectivity issues, and optimizing network performance. Wi-Fi scanning can be performed using various tools and techniques, and it typically involves the following steps:
 
 1. **Initiate Scan**:
@@ -228,4 +232,11 @@ Wi-Fi scanning is crucial for several reasons:
 - **Site Surveys**: Essential for planning Wi-Fi deployments, identifying coverage gaps, and optimizing AP placement.
 
 By understanding and utilizing Wi-Fi scanning techniques, users and network administrators can ensure reliable, efficient, and secure wireless connectivity.
+
+## Where this connects
+
+- [Basics](basics.md) — probe request, probe response, and beacon are the management frame types used during scanning
+- [Roaming](roaming.md) — 802.11k neighbor reports allow targeted scanning instead of full channel sweeps
+- [Security](security.md) — active scanning reveals SSID history (privacy risk); evil-twin APs are discovered via scanning
+- [Standards](standards.md) — 2.4/5/6 GHz band availability per 802.11 revision determines which channels to scan
 

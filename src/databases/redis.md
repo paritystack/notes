@@ -1,5 +1,9 @@
 # Redis
 
+## Overview
+
+Redis is an in-memory data structure store used as a database, cache, message broker, and streaming engine. It sits in the [NoSQL](nosql.md) key-value category; compare with [MongoDB](mongodb.md) for document storage, [Kafka](kafka.md) for durable event streaming (Redis Streams are a lightweight alternative), and [PostgreSQL](postgres.md) for the primary ACID-compliant store that Redis typically caches in front of.
+
 Redis (Remote Dictionary Server) is an open-source, in-memory data structure store used as a database, cache, message broker, and streaming engine. Known for its high performance and versatility, Redis supports various data structures and is widely used for real-time applications.
 
 ## Table of Contents
@@ -827,3 +831,11 @@ console.log(slowlog);
 - [Redis University](https://university.redis.com/)
 - [Try Redis](https://try.redis.io/)
 - [Redis Patterns](https://redis.io/topics/patterns)
+
+## Where this connects
+
+- [NoSQL](nosql.md) — Redis is the in-memory key-value category of NoSQL
+- [PostgreSQL](postgres.md) — Redis is typically the cache layer in front of a Postgres primary store
+- [MongoDB](mongodb.md) — Redis caches MongoDB query results; both are often used together in the same stack
+- [Kafka](kafka.md) — Redis Streams is a lightweight alternative; Kafka is preferred for durable, high-throughput pipelines
+- [ACID vs BASE](acid_vs_base.md) — Redis is BASE; persistence (RDB/AOF) trades throughput for durability

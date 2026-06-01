@@ -1,5 +1,10 @@
 # Skip Lists
 
+## Overview
+
+A skip list is a randomized [linked list](linked_lists.md) with express lanes enabling O(log n) search, insert, and delete — the same asymptotic complexity as balanced [trees](trees.md), but simpler to implement correctly. Compare [hash tables](hash_tables.md) for O(1) unordered lookup.
+
+
 ## Table of Contents
 - [Overview](#overview)
 - [The Problem It Solves](#the-problem-it-solves)
@@ -1251,3 +1256,9 @@ insert_concurrent(key):
 - Alternative to BST in system design
 
 **Pro Tip**: Skip lists shine in their simplicity. When asked to implement a balanced tree, consider suggesting a skip list as an alternative - it's much easier to code correctly in an interview setting!
+
+## Where this connects
+
+- [Linked lists](linked_lists.md) — skip lists are multi-level linked lists; each element exists at level 0
+- [Trees](trees.md) — same O(log n) search/insert complexity as balanced BSTs, but simpler to implement
+- [Hash tables](hash_tables.md) — O(1) unordered alternative; skip lists maintain sorted order

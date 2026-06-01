@@ -1,5 +1,9 @@
 # Segment Trees
 
+## Overview
+
+Segment trees answer range queries (sum, min, max) with O(log n) update and query. [Fenwick trees](fenwick_tree.md) handle prefix sums with simpler code; [sparse tables](sparse_table.md) answer static RMQ in O(1). Built on [trees](trees.md) + [arrays](arrays.md); used in [heavy-light decomposition](../algorithms/heavy_light_decomposition.md) for tree path queries.
+
 ## Table of Contents
 - [Overview](#overview)
 - [Key Concepts](#key-concepts)
@@ -1157,3 +1161,10 @@ class MergeSortTree:
 - Dynamic RMQ problems
 
 **Pro Tip**: Master the recursive implementation first, understand the three cases (complete/no/partial overlap), then learn lazy propagation for range updates.
+
+## Where this connects
+
+- [Fenwick trees](fenwick_tree.md) — simpler alternative for prefix sum queries; no range updates without bit tricks
+- [Sparse tables](sparse_table.md) — O(1) RMQ but only for static data (no updates)
+- [Trees](trees.md) — segment trees are balanced binary trees stored as arrays
+- [Heavy-light decomposition](../algorithms/heavy_light_decomposition.md) — uses segment trees to answer path queries on trees

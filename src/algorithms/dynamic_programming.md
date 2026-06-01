@@ -2428,3 +2428,11 @@ That's DP! Instead of redoing all the work, you remember answers to smaller prob
 ### Practice Platforms
 - [NeetCode DP Roadmap](https://neetcode.io/roadmap) - Curated problem list
 - [Blind 75](https://www.teamblind.com/post/New-Year-Gift---Curated-List-of-Top-75-LeetCode-Questions-to-Save-Your-Time-OaM1orEU) - Essential interview problems
+
+## Where this connects
+
+- [Recursion](recursion.md) — DP is recursion with memoization; understand recursion first
+- [Divide and conquer](divide_and_conquer.md) — similar paradigm but subproblems don't overlap; DP reuses repeated subproblems
+- [Arrays](../data_structures/arrays.md) — DP tables are stored in 1D or 2D arrays
+- [Greedy algorithms](greedy_algorithms.md) — greedy is DP without needing to look back; use greedy when local optimum = global optimum
+- [Big O](big_o.md) — DP converts exponential brute-force to polynomial via memoization

@@ -1613,3 +1613,10 @@ def partition(start, path):
 ## Conclusion
 
 Backtracking is a powerful algorithmic technique that provides a systematic way to explore all possible solutions to a problem. By leveraging recursion and pruning, it can efficiently solve complex problems that would otherwise require exhaustive search methods.
+
+## Where this connects
+
+- [Recursion](recursion.md) — backtracking is recursion with a choose/unchoose pattern
+- [Stacks](../data_structures/stacks.md) — explicit stack can replace recursion for backtracking
+- [Dynamic programming](dynamic_programming.md) — DP avoids repeated work; backtracking explores but prunes; they solve different problems
+- [Heuristic search](heuristic_search.md) — A* and beam search add heuristics to guide the backtracking-like search

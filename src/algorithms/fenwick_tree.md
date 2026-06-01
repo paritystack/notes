@@ -619,3 +619,9 @@ Constant factor: extremely low. In CPython, an array-backed BIT is typically the
 - "Competitive Programmer's Handbook" by Antti Laaksonen, BIT chapter.
 - TopCoder tutorial: "Binary Indexed Trees" by boba5551.
 - Codeforces blog: "Fenwick trees" series — many variations and tricks.
+
+## Where this connects
+
+- [Segment tree](segment_tree.md) — more powerful alternative; supports arbitrary range queries with lazy propagation
+- [Sparse table](sparse_table.md) — O(1) RMQ for static (immutable) data; Fenwick handles dynamic updates
+- [Data structures/fenwick_tree](../data_structures/fenwick_tree.md) — the data structure reference page

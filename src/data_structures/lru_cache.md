@@ -1,4 +1,9 @@
-# LRU Cache (Least Recently Used Cache)
+# LRU Cache
+
+## Overview
+
+An LRU (Least Recently Used) cache combines a [hash table](hash_tables.md) for O(1) lookup with a doubly [linked list](linked_lists.md) for O(1) eviction order. [Persistent structures](persistent_structures.md) offer functional immutable cache variants. This pattern appears in OS page replacement, CPU caches, and database buffer pools.
+ (Least Recently Used Cache)
 
 ## Table of Contents
 - [Overview](#overview)
@@ -1098,3 +1103,9 @@ class WriteBackCache:
 **Most Common Interview Question**: [LeetCode 146. LRU Cache](https://leetcode.com/problems/lru-cache/)
 
 **Pro Tip**: Master the doubly linked list + hash table approach, but know OrderedDict/Map shortcuts for quick implementation.
+
+## Where this connects
+
+- [Hash tables](hash_tables.md) — provides O(1) lookup by key
+- [Linked lists](linked_lists.md) — doubly linked list provides O(1) move-to-front and eviction
+- [Persistent structures](persistent_structures.md) — functional/immutable cache variants for version-safe caching

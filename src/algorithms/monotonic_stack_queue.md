@@ -665,3 +665,10 @@ def sliding_window_template(nums, k, operation='max'):
 
 - [Monotonic Stack Explanation](https://leetcode.com/tag/monotonic-stack/)
 - [CP-Algorithms: Stack](https://cp-algorithms.com/)
+
+## Where this connects
+
+- [Stacks](../data_structures/stacks.md) — a monotonic stack is a stack with an ordering invariant maintained on push
+- [Queues](../data_structures/queues.md) — monotonic deque enables sliding window max/min in O(1) per element
+- [Sliding window](sliding_window.md) — sliding window max/min requires a monotonic deque
+- [Dynamic programming](dynamic_programming.md) — monotonic structures enable O(n) DP optimizations (e.g., largest rectangle in histogram)

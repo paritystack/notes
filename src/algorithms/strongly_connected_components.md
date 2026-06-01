@@ -577,3 +577,9 @@ For huge n in Python (10^6+), the iterative form is essential. The Tarjan and br
 - "Competitive Programming 4" by Halim & Halim — graph chapter on connectivity.
 - Aspvall, Plass, Tarjan 1979: "A linear-time algorithm for testing the truth of certain quantified boolean formulas" (the original 2-SAT-via-SCC paper).
 - Errichto's YouTube series on SCC and 2-SAT.
+
+## Where this connects
+
+- [Graphs](../data_structures/graphs.md) — SCCs partition a directed graph into maximal strongly connected subgraphs
+- [Union-find](union_find.md) — union-find handles undirected connectivity; SCC handles directed
+- [Stacks](../data_structures/stacks.md) — Tarjan's algorithm uses a stack to track the current DFS path

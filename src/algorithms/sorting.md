@@ -1302,3 +1302,11 @@ Remember: Don't write your own sort unless you have a good reason. Built-in sort
 - [VisuAlgo](https://visualgo.net/en/sorting) - Interactive visualizations with step-by-step execution
 - [Sorting Algorithm Animations](https://www.toptal.com/developers/sorting-algorithms) - Compare algorithm performance
 - [Tim Sort Explained](https://github.com/python/cpython/blob/main/Objects/listsort.txt) - Original documentation by Tim Peters
+
+## Where this connects
+
+- [Arrays](../data_structures/arrays.md) — most sorting algorithms operate on arrays in-place or with auxiliary arrays
+- [Heaps](../data_structures/heaps.md) — heapsort uses a max-heap; also enables O(n log n) k-way merge
+- [Searching](searching.md) — binary search (O(log n)) requires sorted input; sorting enables it
+- [Big O](big_o.md) — O(n log n) comparison sorts vs O(n²) naive sorts; the canonical complexity example
+- [Divide and conquer](divide_and_conquer.md) — merge sort and quicksort are divide-and-conquer algorithms

@@ -879,3 +879,10 @@ class CuckooHash:
 - [Bloom Filter Calculator](https://hur.st/bloomfilter/)
 - [Consistent Hashing](https://www.toptal.com/big-data/consistent-hashing)
 - [CP-Algorithms: Hashing](https://cp-algorithms.com/string/string-hashing.html)
+
+## Where this connects
+
+- [Hash tables](../data_structures/hash_tables.md) — hashing techniques are the function design behind hash tables
+- [Bloom filters](../data_structures/bloom_filter.md) — uses k independent hash functions for probabilistic membership
+- [MinHash/LSH](../data_structures/minhash_lsh.md) — LSH relies on locality-sensitive hash families
+- [Bit manipulation](bit_manipulation.md) — XOR and bit mixing appear in hash function implementations

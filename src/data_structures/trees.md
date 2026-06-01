@@ -1,5 +1,9 @@
 # Tree Traversal Algorithms
 
+## Overview
+
+Tree traversal algorithms visit all nodes in a [tree](trees.md) structure in a specific order. [Heaps](heaps.md) are complete binary trees backed by [arrays](arrays.md); [tries](tries.md) are character-keyed trees; [segment trees](segment_trees.md) and [Fenwick trees](fenwick_tree.md) answer range queries; [graphs](graphs.md) generalize trees by allowing cycles. Traversal order — pre/in/post-order for DFS, level-order for BFS — determines many tree-based algorithms.
+
 Tree traversal algorithms are methods used to visit all the nodes in a tree data structure in a specific order. These algorithms are essential for various operations on trees, such as searching, sorting, and manipulating data. There are several types of tree traversal algorithms, each with its own use cases and characteristics.
 
 ## Types of Tree Traversal Algorithms
@@ -1106,3 +1110,11 @@ Key takeaways:
 5. Always consider edge cases and space-time tradeoffs
 
 With solid understanding of tree algorithms, you'll be well-equipped to tackle a wide variety of programming challenges!
+
+## Where this connects
+
+- [Heaps](heaps.md) — complete binary trees stored as arrays; implement priority queues
+- [Tries](tries.md) — character-keyed trees for prefix string lookups
+- [Segment trees](segment_trees.md) — balanced tree for range sum/min/max queries
+- [Fenwick trees](fenwick_tree.md) — implicit tree structure for prefix sums
+- [Graphs](graphs.md) — trees are acyclic connected graphs; graph algorithms generalize tree algorithms

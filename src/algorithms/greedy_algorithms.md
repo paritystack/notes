@@ -1258,3 +1258,9 @@ However, remember that greedy algorithms don't always guarantee optimal solution
 - **Branch and Bound**: For optimization with constraints
 
 **Key Takeaway**: Greedy algorithms are powerful when applicable, but require careful analysis to ensure correctness.
+
+## Where this connects
+
+- [Dynamic programming](dynamic_programming.md) — DP when greedy fails; greedy is DP that commits immediately without looking back
+- [Sorting](sorting.md) — many greedy algorithms begin by sorting the input (activity selection, interval scheduling)
+- [Heuristic search](heuristic_search.md) — greedy + heuristic guidance when neither exact DP nor pure greedy applies

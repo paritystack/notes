@@ -2,7 +2,7 @@
 
 ## Overview
 
-An array is a fundamental data structure that stores elements of the same type in contiguous memory locations. Arrays provide fast, constant-time access to elements using an index, making them one of the most commonly used data structures in programming.
+An array is a fundamental data structure that stores elements in contiguous memory for O(1) random access. [Linked lists](linked_lists.md) sacrifice that for O(1) insert/delete without shifting; [hash tables](hash_tables.md) and [heaps](heaps.md) are built on arrays internally. [Sorting](../algorithms/sorting.md) and [searching](../algorithms/searching.md) algorithms operate on arrays; [segment trees](segment_trees.md) and [Fenwick trees](fenwick_tree.md) use arrays for range queries.
 
 ## Key Concepts
 
@@ -415,3 +415,11 @@ Think of an array like a row of mailboxes in an apartment building:
 - [MDN JavaScript Arrays](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)
 - [C++ Vector Documentation](https://en.cppreference.com/w/cpp/container/vector)
 - [LeetCode Array Problems](https://leetcode.com/tag/array/)
+
+## Where this connects
+
+- [Linked lists](linked_lists.md) — dynamic alternative; O(1) insert/delete at head but O(n) random access
+- [Hash tables](hash_tables.md) — built on arrays internally; adds key-to-index mapping
+- [Heaps](heaps.md) — complete binary trees stored as arrays; enables O(log n) priority queue
+- [Sorting](../algorithms/sorting.md) — most sorting algorithms operate on arrays; merge sort, quicksort, heapsort
+- [Segment trees](segment_trees.md) — range query structure backed by an array representation

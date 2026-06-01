@@ -2,6 +2,10 @@
 
 > **Key Concepts:** Jaccard Similarity, Permutation Sampling, Signatures, Banding, Locality-Sensitive Hashing, b-bit MinHash, SuperMinHash, Weighted MinHash
 
+## Overview
+
+MinHash estimates Jaccard similarity between sets; LSH groups similar items into buckets for approximate nearest-neighbor search. Part of [probabilistic structures](probabilistic.md). Compare [product quantization](product_quantization.md) for dense vector ANN; [bloom filters](bloom_filter.md) for membership rather than similarity. Uses [hashing techniques](../algorithms/hashing_techniques.md) as the core primitive.
+
 ## Table of Contents
 - [Overview](#overview)
 - [Jaccard Similarity](#jaccard-similarity)
@@ -633,3 +637,10 @@ MinHash answers "how similar are these two sets?" with a fixed-size signature in
 The technique is foundational for web-scale dedup (Broder's original use case at AltaVista), and in 2023-2026 it became central to LLM training: every published frontier model (GPT-4, Claude, Llama, Gemini, DeepSeek) describes a MinHash-LSH-based dedup pass over pretraining data, because un-dedup'd corpora produce drastically worse models. SuperMinHash, b-bit MinHash, and weighted MinHash refine the technique for specific accuracy/memory regimes, but the core MinHash + banding algorithm from the late 1990s remains the workhorse.
 
 For 2026 practice: reach for `datasketch` for Python, Spark `MinHashLSH` for distributed pipelines, and don't confuse it with SimHash (cosine, not Jaccard) or with HNSW/PQ (dense embeddings, not sets). When your data is set-shaped, MinHash is unbeatable.
+
+## Where this connects
+
+- [Probabilistic structures](probabilistic.md) — MinHash is a member of the probabilistic data structure family
+- [Bloom filter](bloom_filter.md) — membership testing; LSH is the similarity extension of the same hashing idea
+- [Product quantization](product_quantization.md) — dense vector ANN counterpart; MinHash/LSH handles set-similarity ANN
+- [Hashing techniques](../algorithms/hashing_techniques.md) — the permutation sampling and banding are hash-based

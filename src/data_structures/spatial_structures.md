@@ -1,5 +1,9 @@
 # Spatial Data Structures
 
+## Overview
+
+Spatial data structures (KD-trees, R-trees, ball trees, quadtrees) partition space to enable efficient multi-dimensional nearest-neighbor search. Built on [trees](trees.md). Compare [product quantization](product_quantization.md) and [MinHash/LSH](minhash_lsh.md) for approximate ANN in high dimensions; spatial structures are preferred for exact search in low dimensions (≤ ~20).
+
 ## Table of Contents
 - [Overview](#overview)
 - [Quadtrees](#quadtrees)
@@ -1658,3 +1662,9 @@ def hilbert_value(x, y, order):
 - **R-tree**: Spatial databases, GIS
 
 **Pro Tip**: For interviews, focus on quadtree and k-d tree as they're most common. Understand the key insight: spatial partitioning lets you prune large portions of the search space, turning O(n) scans into O(log n) searches. Know when to use which structure based on dimensionality and object types!
+
+## Where this connects
+
+- [Trees](trees.md) — spatial structures are multi-dimensional tree extensions (k-d tree is a BST in k dimensions)
+- [Product quantization](product_quantization.md) — approximate ANN for high dimensions when KD-tree degrades
+- [MinHash/LSH](minhash_lsh.md) — set-similarity ANN alternative; spatial structures handle coordinate geometry

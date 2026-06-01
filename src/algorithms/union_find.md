@@ -1010,3 +1010,9 @@ else:
 6. Simple to implement but extremely powerful
 
 Master Union-Find and you'll efficiently solve graph connectivity problems that would be much harder with other approaches!
+
+## Where this connects
+
+- [Graphs](../data_structures/graphs.md) — union-find answers undirected connectivity; used in Kruskal's MST
+- [Strongly connected components](strongly_connected_components.md) — directed graph connectivity algorithm (complement to union-find)
+- [Data structures/union_find](../data_structures/union_find.md) — the data structure view of the same concept

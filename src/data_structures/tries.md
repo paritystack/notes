@@ -1,5 +1,9 @@
 # Tries (Prefix Trees)
 
+## Overview
+
+A trie (prefix tree) is a specialized [tree](trees.md) for efficient storage and retrieval of strings by prefix. Compare [hash tables](hash_tables.md) (O(1) lookup but no prefix ordering) and [suffix arrays](suffix_arrays.md) (O(n log n) build, handles any substring). [Searching](../algorithms/searching.md) in a trie is O(m) where m is string length.
+
 A **trie**, also known as a **prefix tree** or **digital tree**, is a specialized tree-based data structure used for efficient storage and retrieval of strings. The name "trie" comes from the word "retrieval", though it's pronounced "try" to distinguish it from "tree". Tries excel at prefix-based operations and are commonly used in autocomplete systems, spell checkers, IP routing, and dictionary implementations.
 
 ## Visual Example
@@ -4819,3 +4823,10 @@ Keep exploring, keep coding, and remember: every great software engineer started
 **Last Updated:** 2025
 
 ---
+
+## Where this connects
+
+- [Trees](trees.md) — tries are multi-way trees keyed by characters
+- [Hash tables](hash_tables.md) — O(1) lookup alternative; can't answer prefix queries
+- [Suffix arrays](suffix_arrays.md) — for substring (not prefix) search; memory-efficient alternative
+- [Searching](../algorithms/searching.md) — trie search is O(m) where m is the query string length

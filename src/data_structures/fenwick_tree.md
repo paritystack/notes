@@ -1,5 +1,10 @@
 # Fenwick Tree (Binary Indexed Tree)
 
+## Overview
+
+A Fenwick tree (BIT) supports prefix sum queries and point updates in O(log n) with minimal code. Simpler than [segment trees](segment_trees.md) for prefix-sum workloads; [sparse tables](sparse_table.md) are faster (O(1)) for static, immutable data. Backed by an [array](arrays.md). See also [algorithms/fenwick_tree](../algorithms/fenwick_tree.md) for usage patterns.
+
+
 ## Table of Contents
 - [Overview](#overview)
 - [The Problem It Solves](#the-problem-it-solves)
@@ -768,3 +773,10 @@ Use 2D BIT for matrix rectangle sum problems.
 **Time to Implement**: 15-20 minutes
 
 **Most Common Uses**: Range sum queries, inversion counting, order statistics, 2D range sums
+
+## Where this connects
+
+- [Segment trees](segment_trees.md) — more powerful alternative; supports arbitrary range queries with lazy propagation
+- [Sparse tables](sparse_table.md) — O(1) RMQ for static data; Fenwick handles dynamic updates
+- [Arrays](arrays.md) — Fenwick tree is stored as an array with implicit tree structure via bit manipulation
+- [Algorithms/fenwick_tree](../algorithms/fenwick_tree.md) — competitive programming patterns and problem types

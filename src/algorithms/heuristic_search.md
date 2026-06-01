@@ -1177,5 +1177,11 @@ Imagine you're trying to find the best path through a maze:
 
 ### Related Algorithm Files
 - See `graph_algorithms.md` for BFS, DFS, Dijkstra
-- See `dynamic_programming.md` for optimal substructure problems
-- See `greedy_algorithms.md` for greedy strategies
+- See [dynamic programming](dynamic_programming.md) for optimal substructure problems
+- See [greedy algorithms](greedy_algorithms.md) for greedy strategies
+
+## Where this connects
+
+- [Backtracking](backtracking.md) — uninformed search; heuristic search adds an admissible heuristic to guide the frontier
+- [Greedy algorithms](greedy_algorithms.md) — greedy commits irrevocably; A* explores but prunes with a heuristic
+- [Graphs](../data_structures/graphs.md) — heuristic search operates on an implicit or explicit graph state space

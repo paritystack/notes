@@ -372,3 +372,9 @@ If queries are read-only and you use a [[sparse_table]] for the underlying RMQ i
 - AntiForest's HLD tutorial on Codeforces.
 - SPOJ QTREE editorials — a tour through how HLD is applied to varied path-query problems.
 - Codeforces blog by adamant: "Heavy-light decomposition" with explicit recurrences for non-trivial aggregates.
+
+## Where this connects
+
+- [LCA](lca.md) — HLD builds on LCA for path decomposition; LCA is computed during HLD preprocessing
+- [Segment tree](segment_tree.md) — HLD decomposes paths into chains; segment trees answer range queries on each chain
+- [Trees](../data_structures/trees.md) — HLD is a tree algorithm that decomposes a tree into heavy and light chains

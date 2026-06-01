@@ -516,3 +516,9 @@ def get_divisors(n):
 - [CP-Algorithms: Algebra](https://cp-algorithms.com/algebra/)
 - [OEIS](https://oeis.org/) - Encyclopedia of Integer Sequences
 - [Prime Number Theorem](https://en.wikipedia.org/wiki/Prime_number_theorem)
+
+## Where this connects
+
+- [Bit manipulation](bit_manipulation.md) — bit tricks for fast modular arithmetic, GCD, and prime testing
+- [Dynamic programming](dynamic_programming.md) — combinatoric counting and Catalan numbers are DP problems
+- [Hashing techniques](hashing_techniques.md) — polynomial rolling hash uses modular arithmetic from number theory

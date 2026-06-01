@@ -1119,3 +1119,8 @@ Raft is used in production by many distributed systems:
 - **Interactive visualization**: https://raft.github.io/
 - **TLA+ specification**: Formal specification for verification
 - **Raft PhD dissertation**: Extended version with more details and proofs
+
+## Where this connects
+
+- [Strongly connected components](strongly_connected_components.md) — graph reachability concepts underpin distributed system reasoning
+- [Dynamic programming](dynamic_programming.md) — leader election and log replication can be modeled as state machine problems

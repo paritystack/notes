@@ -1066,3 +1066,10 @@ for i in range(len(s1), len(s2)):
 6. Essential for substring/subarray optimization problems
 
 Master sliding window patterns and you'll efficiently solve a huge class of optimization problems!
+
+## Where this connects
+
+- [Two pointers](two_pointers.md) — sliding window is a generalization; fixed-size window is a special case of two pointers
+- [Monotonic stack/queue](monotonic_stack_queue.md) — sliding window maximum/minimum uses a monotonic deque
+- [Arrays](../data_structures/arrays.md) — sliding window processes contiguous subarrays in O(n)
+- [Dynamic programming](dynamic_programming.md) — some DP problems reduce to sliding window when only the last k states matter

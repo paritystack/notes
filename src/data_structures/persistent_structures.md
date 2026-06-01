@@ -1,5 +1,9 @@
 # Persistent Data Structures
 
+## Overview
+
+Persistent data structures preserve all historical versions on modification via structural sharing (path copying). Built on [trees](trees.md) — persistent segment trees, persistent tries. Compare [LRU cache](lru_cache.md) for mutable eviction-based caches. Essential in functional programming and version-control-style problems.
+
 ## Table of Contents
 - [Overview](#overview)
 - [Fundamental Concepts](#fundamental-concepts)
@@ -1272,3 +1276,9 @@ class Observable:
 - Time-travel debugging
 
 **Pro Tip**: Start with persistent linked lists to understand the concepts, then progress to trees. Remember: immutability + structural sharing = efficient persistence. The key insight is that you don't copy everything - just the path from root to modified node!
+
+## Where this connects
+
+- [Trees](trees.md) — persistent segment trees and tries use path copying from the tree root
+- [LRU cache](lru_cache.md) — the mutable counterpart; evicts old data rather than versioning it
+- [Arrays](arrays.md) — persistent arrays exist (via balanced trees) but naive copying is O(n)

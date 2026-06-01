@@ -608,3 +608,10 @@ Binary search is like playing "guess the number" - each guess eliminates half th
 - [LeetCode Binary Search](https://leetcode.com/tag/binary-search/)
 - [Searching Algorithms Visualization](https://visualgo.net/en/search)
 - [Binary Search Tutorial](https://leetcode.com/explore/learn/card/binary-search/)
+
+## Where this connects
+
+- [Binary search patterns](binary_search_patterns.md) — extends binary search to search-on-answer, lower/upper bound
+- [Sorting](sorting.md) — binary search requires sorted input; sorting enables O(log n) search
+- [Arrays](../data_structures/arrays.md) — binary search operates on sorted arrays; linear search on any sequence
+- [Tries](../data_structures/tries.md) — O(m) prefix search for strings; an alternative to binary search for string lookups

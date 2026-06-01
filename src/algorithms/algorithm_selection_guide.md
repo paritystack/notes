@@ -451,3 +451,11 @@ Start with these problem sets to build pattern recognition:
 10. **Backtracking**: Combinations, permutations
 
 Build intuition by solving 5-10 problems per pattern before moving to the next.
+
+## Where this connects
+
+- [Complexity cheatsheet](complexity_cheatsheet.md) — quick O-notation reference for each algorithm category
+- [Interview patterns](interview_patterns.md) — problem categorization guide; use this alongside algorithm selection
+- [Dynamic programming](dynamic_programming.md) — when optimal substructure + overlapping subproblems are detected
+- [Backtracking](backtracking.md) — when the solution space must be explored exhaustively
+- [Sorting](sorting.md) — many algorithms begin with sorting as a preprocessing step

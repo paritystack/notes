@@ -447,3 +447,10 @@ n > 1,000,000 → O(n) or O(log n) needed
 - Hash tables for O(1) lookup
 - Appropriate data structures for the problem
 - Lazy evaluation when applicable
+
+## Where this connects
+
+- [Big O](big_o.md) — the full explanation of asymptotic notation; this page is the quick reference
+- [Sorting](sorting.md) — O(n log n) sorts vs O(n²) naive sorts; the canonical complexity comparison
+- [Searching](searching.md) — O(log n) binary search vs O(n) linear; depends on sortedness
+- [Data structures overview](../data_structures/arrays.md) — per-operation complexities for each data structure

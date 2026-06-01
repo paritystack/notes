@@ -380,3 +380,9 @@ For `N = Q = 10^5` and O(1) updates: ~3×10^7 ops — fine in C++ (under 1s), bo
 - Anudeep Nekkanti's blog: "MO'S ALGORITHM" (the introductory tutorial that popularized it for competitive programming).
 - "Algorithms on Trees and Graphs" — Mo on trees chapter.
 - Codeforces blog: "Mo's algorithm on trees" by adamant.
+
+## Where this connects
+
+- [Sorting](sorting.md) — Mo's algorithm sorts queries by block; the sort order is the key optimization
+- [Segment tree](segment_tree.md) — online alternative for the same range query problems; O(n log n) vs O(n√n)
+- [Fenwick tree](fenwick_tree.md) — online prefix-sum alternative when queries can't be batched offline

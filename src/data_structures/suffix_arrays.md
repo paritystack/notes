@@ -1,5 +1,9 @@
 # Suffix Arrays and Suffix Trees
 
+## Overview
+
+Suffix arrays provide sorted [array](arrays.md) access to all suffixes of a string for O(m log n) substring search. Compare [tries](tries.md) for O(m) prefix lookup with higher memory. [Sparse tables](sparse_table.md) + LCP arrays enable O(1) LCP queries on the suffix array.
+
 ## Table of Contents
 - [Overview](#overview)
 - [Suffix Arrays](#suffix-arrays)
@@ -1136,3 +1140,9 @@ def burrows_wheeler_transform(s):
 - Longest common substring
 
 **Pro Tip**: For interviews, master suffix array construction and LCP array. Suffix trees are often too complex to implement fully but good to understand conceptually. Focus on applications and problem patterns!
+
+## Where this connects
+
+- [Arrays](arrays.md) — a suffix array is literally a sorted array of suffix start indices
+- [Tries](tries.md) — suffix trie/tree is an alternative with O(m) queries but higher memory
+- [Sparse tables](sparse_table.md) — combined with LCP arrays for O(1) LCP queries

@@ -1571,3 +1571,10 @@ Recursion is a fundamental programming technique that enables elegant solutions 
 Mastering recursion involves understanding both its power and its limitations. The key is recognizing when recursive thinking simplifies problem-solving and when iterative approaches are more practical. With practice, you'll develop intuition for choosing the right tool for each problem.
 
 Remember: The best recursive solution is one that is clear, correct, and doesn't blow the stack!
+
+## Where this connects
+
+- [Stacks](../data_structures/stacks.md) — the call stack is an implicit stack; recursion depth = stack depth
+- [Dynamic programming](dynamic_programming.md) — recursion + memoization = top-down DP
+- [Divide and conquer](divide_and_conquer.md) — divide-and-conquer is recursion that splits the problem
+- [Backtracking](backtracking.md) — backtracking is recursion with pruning and undo steps

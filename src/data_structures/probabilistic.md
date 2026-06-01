@@ -3,6 +3,10 @@
 > **Domain:** Big Data, High Performance Computing, Algorithms
 > **Key Concepts:** Bloom Filter, HyperLogLog, Count-Min Sketch, Approximation
 
+## Overview
+
+Probabilistic data structures trade exactness for dramatic space and time savings. Key examples: [Bloom filter](bloom_filter.md) (set membership), HyperLogLog (cardinality), Count-Min Sketch (frequency). [MinHash/LSH](minhash_lsh.md) handles set similarity; [product quantization](product_quantization.md) compresses dense vectors. All use [hashing techniques](../algorithms/hashing_techniques.md) as their core primitive.
+
 **Probabilistic Data Structures** are clever algorithms that use hashing and approximation to answer queries about massive datasets using extremely small amounts of memory. They trade **accuracy** for **space**.
 
 **The Guarantee:** They never lie in a way that hurts you (e.g., False Positives are possible, False Negatives are impossible, or error is bounded).
@@ -92,3 +96,10 @@ class SimpleBloomFilter:
                 return False
         return True
 ```
+
+## Where this connects
+
+- [Bloom filter](bloom_filter.md) — the canonical probabilistic structure: space-efficient membership testing
+- [MinHash/LSH](minhash_lsh.md) — similarity estimation for sets; used for dedup and ANN
+- [Hash tables](hash_tables.md) — exact-answer alternative; use when accuracy is required
+- [Hashing techniques](../algorithms/hashing_techniques.md) — probabilistic structures use multiple hash functions as their core primitive

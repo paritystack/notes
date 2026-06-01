@@ -1115,3 +1115,10 @@ if nums[left] <= nums[mid]:
 6. Applicable beyond arrays: any searchable space
 
 Master binary search patterns and you'll efficiently solve optimization and search problems that would otherwise require expensive linear scans!
+
+## Where this connects
+
+- [Searching](searching.md) — binary search patterns extend basic binary search to monotonic functions and answer ranges
+- [Arrays](../data_structures/arrays.md) — binary search operates on sorted arrays (or sorted answer spaces)
+- [Two pointers](two_pointers.md) — both are O(n) or O(log n) array scanning techniques; pick based on the invariant needed
+- [Sorting](sorting.md) — sorted input is a prerequisite for binary search patterns

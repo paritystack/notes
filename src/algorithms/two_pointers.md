@@ -1128,3 +1128,10 @@ def sort_colors(nums: list[int]) -> None:
 6. Always consider edge cases and pointer update logic
 
 Master two pointers and you'll solve a huge category of interview problems efficiently!
+
+## Where this connects
+
+- [Sliding window](sliding_window.md) — generalization of two pointers; sliding window is a variable-size two-pointer
+- [Arrays](../data_structures/arrays.md) — two pointers scan sorted or unsorted arrays in O(n)
+- [Linked lists](../data_structures/linked_lists.md) — fast/slow pointer (Floyd's cycle detection) is the linked list two-pointer variant
+- [Binary search patterns](binary_search_patterns.md) — alternative O(log n) approach when data is sorted and the goal is search

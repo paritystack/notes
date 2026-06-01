@@ -2,7 +2,7 @@
 
 ## Overview
 
-A linked list is a linear data structure where elements (nodes) are connected via pointers/references rather than stored in contiguous memory. Each node contains data and a reference to the next node, creating a chain-like structure.
+A linked list is a linear data structure where elements (nodes) are connected via pointers rather than stored in contiguous [arrays](arrays.md). O(1) insert/delete at head vs O(1) random access for arrays — the classic trade-off. [Stacks](stacks.md) and [queues](queues.md) can be implemented via linked lists; [skip lists](skip_lists.md) extend linked lists with O(log n) search; [LRU cache](lru_cache.md) uses a doubly linked list for O(1) eviction.
 
 ## Key Concepts
 
@@ -490,3 +490,11 @@ The tricky part: You can only look at clues in order, you can't jump to the midd
 - [Linked List Wikipedia](https://en.wikipedia.org/wiki/Linked_list)
 - [LeetCode Linked List Problems](https://leetcode.com/tag/linked-list/)
 - [Visual Algo - Linked List Visualizations](https://visualgo.net/en/list)
+
+## Where this connects
+
+- [Arrays](arrays.md) — contiguous-memory alternative; O(1) random access vs O(1) head insert trade-off
+- [Stacks](stacks.md) — naturally implemented as a linked list (push/pop at head)
+- [Queues](queues.md) — implemented with head+tail pointers on a linked list
+- [Skip lists](skip_lists.md) — multi-level linked list with O(log n) search
+- [LRU cache](lru_cache.md) — doubly linked list enables O(1) eviction ordering

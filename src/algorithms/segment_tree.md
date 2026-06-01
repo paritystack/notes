@@ -1134,3 +1134,10 @@ For **merge sort tree**: O(n log n) build and memory, O(log² n) per range count
 - CP-Algorithms: "Segment Tree" and "Segment Tree Beats" articles.
 - "Competitive Programmer's Handbook" by Antti Laaksonen — chapter on segment trees.
 - "Competitive Programming 4" by Halim & Halim — segment tree case studies.
+
+## Where this connects
+
+- [Fenwick tree](fenwick_tree.md) — simpler alternative for prefix sums only; less code but less general
+- [Sparse table](sparse_table.md) — O(1) RMQ for static data; segment tree handles dynamic updates
+- [Heavy-light decomposition](heavy_light_decomposition.md) — uses segment trees for path queries on trees
+- [Data structures/segment_trees](../data_structures/segment_trees.md) — the data structure reference page

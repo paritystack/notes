@@ -1,5 +1,10 @@
 # Union-Find (Disjoint Set Union)
 
+## Overview
+
+Union-find (DSU) maintains a collection of disjoint sets with near-O(1) union and find operations. Used in [graph](graphs.md) algorithms — Kruskal's MST, connected components — and in [algorithms/union_find](../algorithms/union_find.md) for competitive programming patterns. [Strongly connected components](../algorithms/strongly_connected_components.md) handles directed graph connectivity.
+
+
 ## Table of Contents
 - [Overview](#overview)
 - [Key Concepts](#key-concepts)
@@ -1034,3 +1039,9 @@ class PersistentUnionFind:
 **When to Use**: Problems involving connectivity, grouping, or equivalence relations
 
 **When NOT to Use**: Directed graphs, shortest paths, need to enumerate members of a set
+
+## Where this connects
+
+- [Graphs](graphs.md) — union-find tests undirected graph connectivity; used in Kruskal's MST
+- [Algorithms/union_find](../algorithms/union_find.md) — usage patterns and competitive programming examples
+- [Strongly connected components](../algorithms/strongly_connected_components.md) — directed graph connectivity (Tarjan's/Kosaraju's)

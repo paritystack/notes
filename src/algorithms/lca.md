@@ -539,3 +539,9 @@ Practical defaults:
 - TopCoder tutorial: "Range Minimum Query and Lowest Common Ancestor" by danielp.
 - "Competitive Programming 4" by Halim & Halim — LCA chapter.
 - CSES Problem Set guide for tree algorithms.
+
+## Where this connects
+
+- [Trees](../data_structures/trees.md) — LCA is a fundamental tree query; finding common ancestors uses tree structure
+- [Sparse table](sparse_table.md) — binary lifting for O(log n) LCA; sparse tables enable O(1) RMQ-based LCA
+- [Heavy-light decomposition](heavy_light_decomposition.md) — HLD uses LCA to identify paths and split them into chains

@@ -441,3 +441,10 @@ For `n = 10^6`, the build is ~20M cells — fine in C++, tight in Python. For `n
 - "Competitive Programmer's Handbook" by Antti Laaksonen — sparse table chapter.
 - Codeforces blog: "Sparse Table" by Errichto.
 - For the O(1) build + O(1) query Cartesian-tree-based RMQ, see "The LCA Problem Revisited" (Bender & Farach-Colton, 2000) — interesting reading but rarely needed in practice; the O(n log n) sparse table is faster in real life.
+
+## Where this connects
+
+- [Segment tree](segment_tree.md) — mutable alternative; O(log n) queries/updates
+- [Fenwick tree](fenwick_tree.md) — dynamic prefix sums when data changes
+- [LCA](lca.md) — sparse table enables O(1) LCA queries via the equivalence between RMQ and LCA
+- [Data structures/sparse_table](../data_structures/sparse_table.md) — the data structure reference page

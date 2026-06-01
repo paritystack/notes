@@ -804,3 +804,9 @@ Divide and conquer is widely used in various algorithms and applications:
 ## Conclusion
 
 The divide and conquer strategy is a powerful tool in algorithm design, enabling efficient solutions to complex problems by breaking them down into manageable parts. Understanding this technique is essential for developing efficient algorithms in computer science and software engineering.
+
+## Where this connects
+
+- [Sorting](sorting.md) — merge sort and quicksort are the canonical divide-and-conquer algorithms
+- [Recursion](recursion.md) — divide and conquer is implemented via recursion
+- [Dynamic programming](dynamic_programming.md) — D&C when subproblems don't overlap; DP when they do

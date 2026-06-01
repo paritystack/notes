@@ -1,5 +1,9 @@
 # Graphs
 
+## Overview
+
+Graphs are nodes + edges representing relationships. Stored as adjacency lists ([linked lists](linked_lists.md) or [arrays](arrays.md)) or adjacency matrices. [Trees](trees.md) are acyclic connected graphs. DFS uses [stacks](stacks.md); BFS uses [queues](queues.md). [Union-find](union_find.md) tests undirected connectivity; [strongly connected components](../algorithms/strongly_connected_components.md) handles directed graphs.
+
 Graphs are a fundamental data structure used to represent relationships between pairs of objects. They consist of vertices (or nodes) and edges (connections between the nodes). Graphs can be directed or undirected, weighted or unweighted, and are widely used in various applications such as social networks, transportation systems, and computer networks.
 
 ## Graph Fundamentals
@@ -3140,3 +3144,12 @@ Graphs are used extensively in:
 - **Game Development**: Pathfinding, AI behavior
 
 Graphs truly are everywhere in computer science and software engineering!
+
+## Where this connects
+
+- [Trees](trees.md) — acyclic connected graphs; tree algorithms are special cases of graph algorithms
+- [Stacks](stacks.md) — DFS uses a stack (or implicit recursion stack)
+- [Queues](queues.md) — BFS uses a queue for level-order traversal
+- [Heaps](heaps.md) — Dijkstra's shortest path uses a priority queue (min-heap)
+- [Union-find](union_find.md) — tests undirected graph connectivity in near-O(1) per query
+- [Strongly connected components](../algorithms/strongly_connected_components.md) — directed graph connectivity algorithm

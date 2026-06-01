@@ -1207,3 +1207,9 @@ print(is_power_of_two(1))   # True (2^0)
 5. Trade-off: code clarity vs performance
 
 Master these techniques and you'll have a powerful tool for optimization and problem-solving!
+
+## Where this connects
+
+- [Mathematical algorithms](mathematical_algorithms.md) — bit tricks for modular arithmetic, GCD, prime testing
+- [Dynamic programming](dynamic_programming.md) — bitmask DP uses integer bit fields to track subsets of elements
+- [Hashing techniques](hashing_techniques.md) — hash functions use XOR, shifts, and bit mixing internally

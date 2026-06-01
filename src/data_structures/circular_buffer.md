@@ -2,7 +2,7 @@
 
 ## Overview
 
-A **circular buffer** (also known as a **ring buffer** or **cyclic buffer**) is a fixed-size buffer that uses a single, continuous block of memory and wraps around when it reaches the end. It operates as if the memory is connected end-to-end in a circular fashion, making it ideal for implementing fixed-size queues where old data is automatically overwritten by new data.
+A **circular buffer** (also known as a **ring buffer** or **cyclic buffer**) is a fixed-size [queue](queues.md) backed by a contiguous [array](arrays.md) that wraps around when it reaches the end. Ideal for producer-consumer streaming in embedded systems (DMA, UART); compare with [linked list](linked_lists.md)-based queues for unbounded FIFO needs.
 
 **Key Characteristics:**
 - **Fixed Size**: Memory is allocated once and size doesn't change
@@ -1045,3 +1045,9 @@ class OptimizedCircularBuffer:
 - Can't tolerate data loss (and buffer size is uncertain)
 
 **Key Takeaway**: Circular buffers are the go-to choice for fixed-size FIFO queues where performance and memory predictability matter. They shine in streaming applications, embedded systems, and high-performance producer-consumer scenarios.
+
+## Where this connects
+
+- [Queues](queues.md) — a circular buffer is a fixed-size queue implementation
+- [Arrays](arrays.md) — the underlying contiguous memory block
+- [Linked lists](linked_lists.md) — dynamic alternative when the maximum size is not known in advance

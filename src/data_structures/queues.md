@@ -1,5 +1,9 @@
 # Queues
 
+## Overview
+
+A queue is a First-In-First-Out (FIFO) data structure implemented over [arrays](arrays.md) or [linked lists](linked_lists.md). [Stacks](stacks.md) are LIFO. [Circular buffers](circular_buffer.md) are ring-queue implementations; [heaps](heaps.md) implement priority queues (dequeue by priority, not arrival order); BFS graph traversal uses a queue (see [graphs](graphs.md)); [monotonic stack/queue](../algorithms/monotonic_stack_queue.md) extends queues with ordering invariants.
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Queue Fundamentals](#queue-fundamentals)
@@ -2624,3 +2628,11 @@ Queues are fundamental data structures with wide-ranging applications in compute
 - Distributed message queues (RabbitMQ, Kafka)
 - Queue-based load balancing algorithms
 - Advanced graph algorithms using queues (bidirectional BFS, 0-1 BFS)
+
+## Where this connects
+
+- [Stacks](stacks.md) — LIFO counterpart; two queues can simulate a stack
+- [Circular buffers](circular_buffer.md) — fixed-size ring-queue backed by an array
+- [Heaps](heaps.md) — priority queue: dequeue by priority rather than FIFO order
+- [Graphs](graphs.md) — BFS uses a queue for level-order traversal
+- [Monotonic stack/queue](../algorithms/monotonic_stack_queue.md) — deque with monotonic invariant for sliding window max/min

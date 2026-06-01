@@ -1,5 +1,9 @@
 # Heaps
 
+## Overview
+
+Heaps are complete binary [trees](trees.md) backed by [arrays](arrays.md) that satisfy the heap property. Used for priority queues (see [queues](queues.md)) and [sorting](../algorithms/sorting.md) (heapsort). [Segment trees](segment_trees.md) and [Fenwick trees](fenwick_tree.md) handle range queries rather than priority ordering.
+
 Heaps are a special tree-based data structure that satisfies the heap property. In a max heap, for any given node, the value of the node is greater than or equal to the values of its children, while in a min heap, the value of the node is less than or equal to the values of its children. Heaps are commonly used to implement priority queues and for efficient sorting algorithms.
 
 ## Key Concepts
@@ -842,3 +846,11 @@ Heaps are a fundamental and versatile data structure that provides efficient sol
 5. **Implementation**: While conceptually a tree, heaps are efficiently implemented as arrays, providing excellent cache performance.
 
 Whether you're implementing a task scheduler, optimizing graph traversal, or processing streaming data, heaps offer a powerful tool in your algorithmic toolkit. Mastery of heap operations and patterns is essential for technical interviews, competitive programming, and building high-performance systems.
+
+## Where this connects
+
+- [Trees](trees.md) — heaps are complete binary trees; tree traversal is implicit in heap operations
+- [Arrays](arrays.md) — heaps are stored as arrays using index arithmetic (parent = (i-1)//2)
+- [Sorting](../algorithms/sorting.md) — heapsort uses a max-heap; O(n log n) in-place sort
+- [Queues](queues.md) — heaps implement priority queues (dequeue by priority, not FIFO order)
+- [Graphs](graphs.md) — Dijkstra's shortest path uses a min-heap priority queue

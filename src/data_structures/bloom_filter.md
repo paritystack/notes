@@ -2,6 +2,11 @@
 
 ## Overview
 
+A bloom filter is a space-efficient probabilistic data structure for set membership queries. Uses [hashing techniques](../algorithms/hashing_techniques.md) (multiple hash functions) over a bit [array](arrays.md). Compare with [hash tables](hash_tables.md) (exact membership, more memory) and other [probabilistic structures](probabilistic.md) like HyperLogLog (cardinality) and [MinHash/LSH](minhash_lsh.md) (similarity).
+
+
+## Overview
+
 A **Bloom filter** is a space-efficient probabilistic data structure designed to test whether an element is a member of a set. Invented by Burton Howard Bloom in 1970, it trades perfect accuracy for significant space savings, making it invaluable in scenarios where memory is constrained and occasional false positives are acceptable.
 
 **Key Characteristics:**
@@ -885,3 +890,10 @@ Time Complexity:
 Space: O(n log(1/p)) bits
 ================================================
 ```
+
+## Where this connects
+
+- [Hash tables](hash_tables.md) — exact membership alternative; more memory but no false positives
+- [Probabilistic structures](probabilistic.md) — bloom filter is the canonical probabilistic data structure family member
+- [Hashing techniques](../algorithms/hashing_techniques.md) — multiple independent hash functions map each element to k bits
+- [MinHash/LSH](minhash_lsh.md) — LSH extends the hashing idea from membership to similarity

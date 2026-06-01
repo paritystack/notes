@@ -1,5 +1,9 @@
 # Sparse Tables
 
+## Overview
+
+A sparse table answers range minimum/maximum queries in O(1) after O(n log n) preprocessing, but only on static (immutable) data. Compare [segment trees](segment_trees.md) and [Fenwick trees](fenwick_tree.md) for mutable data. Used in [LCA](../algorithms/lca.md) algorithms; backed by a 2D [array](arrays.md).
+
 ## Table of Contents
 - [Overview](#overview)
 - [The Problem It Solves](#the-problem-it-solves)
@@ -1047,3 +1051,10 @@ Use sparse table when window queries are complex.
 - Competitive programming RMQ
 
 **Pro Tip**: Sparse tables are perfect when you need blazing-fast queries on static data. Remember: overlapping ranges are okay only for idempotent operations! For sum queries, use prefix sums instead. Master the O(1) query technique - it's a game-changer for many problems!
+
+## Where this connects
+
+- [Segment trees](segment_trees.md) — mutable alternative; O(log n) queries/updates but supports modifications
+- [Fenwick trees](fenwick_tree.md) — dynamic prefix sums when data can change
+- [LCA](../algorithms/lca.md) — sparse table enables O(1) LCA queries after O(n log n) preprocessing
+- [Arrays](arrays.md) — sparse table is a 2D array indexed by (start, log2 of range length)

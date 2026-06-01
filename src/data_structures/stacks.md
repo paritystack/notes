@@ -2,7 +2,7 @@
 
 ## Overview
 
-A stack is a Last-In-First-Out (LIFO) data structure where elements are added and removed from the same end, called the top. Think of it like a stack of dinner plates - you put plates on top and take them from the top.
+A stack is a Last-In-First-Out (LIFO) data structure implemented over [arrays](arrays.md) or [linked lists](linked_lists.md). [Queues](queues.md) are FIFO. [Recursion](../algorithms/recursion.md) uses an implicit call stack; [backtracking](../algorithms/backtracking.md) and DFS use an explicit stack; [monotonic stacks](../algorithms/monotonic_stack_queue.md) solve next-greater-element problems.
 
 ### When to Use Stacks
 
@@ -834,3 +834,11 @@ That's LIFO! Last In = First Out. The last plate you put on is the first one you
 
 - [LeetCode Stack Problems](https://leetcode.com/tag/stack/)
 - [Stack Wikipedia](https://en.wikipedia.org/wiki/Stack_(abstract_data_type))
+
+## Where this connects
+
+- [Arrays](arrays.md) / [Linked lists](linked_lists.md) — backing implementations for stack storage
+- [Queues](queues.md) — FIFO counterpart; two stacks can simulate a queue
+- [Recursion](../algorithms/recursion.md) — the call stack is an implicit stack; recursion depth = stack depth
+- [Backtracking](../algorithms/backtracking.md) — uses a stack to track the current path in the decision tree
+- [Monotonic stack/queue](../algorithms/monotonic_stack_queue.md) — stack with a monotonic ordering invariant

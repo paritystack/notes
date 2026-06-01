@@ -2,6 +2,10 @@
 
 > **Key Concepts:** Vector Quantization, Subspace Decomposition, Codebooks, Symmetric & Asymmetric Distance, Inverted File Index, OPQ, ScaNN
 
+## Overview
+
+Product quantization (PQ) compresses high-dimensional vectors into compact codes for approximate nearest-neighbor search at scale. Part of [probabilistic structures](probabilistic.md) (approximation family). Compare [MinHash/LSH](minhash_lsh.md) for set-similarity ANN and [spatial structures](spatial_structures.md) (KD-tree) for exact low-dimensional ANN.
+
 ## Table of Contents
 - [Overview](#overview)
 - [Vector Quantization Basics](#vector-quantization-basics)
@@ -592,3 +596,9 @@ Product Quantization solved the central problem of large-scale ANN: how to store
 IVF adds the second key piece — coarse partitioning so search only touches a small fraction of the data — and the **IVF-PQ** combination is the workhorse of FAISS, Milvus, DiskANN, and virtually every production vector search system above ~10M vectors. OPQ and ScaNN refine the codebook learning to recover even more recall. The combined memory footprint and query latency are what made web-scale and billion-document semantic search economically viable.
 
 For 2026 production: use HNSW when vectors fit in RAM with margin (best latency-recall); use IVF-PQ or HNSW-PQ when they don't; use DiskANN when even compressed vectors exceed RAM. The decision is driven almost entirely by `bytes_per_vector × N` vs available memory.
+
+## Where this connects
+
+- [MinHash/LSH](minhash_lsh.md) — set-similarity ANN counterpart; for sparse set data rather than dense vectors
+- [Spatial structures](spatial_structures.md) — exact ANN alternative for low-dimensional (≤20) data
+- [Probabilistic structures](probabilistic.md) — PQ is another member of the approximation/lossy family

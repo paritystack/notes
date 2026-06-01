@@ -1630,3 +1630,12 @@ When you see a problem, ask:
 **Week 7-8**: Practice mixed problems and pattern recognition
 
 Solve **10-15 problems per pattern** before moving to the next.
+
+## Where this connects
+
+- [Two pointers](two_pointers.md) — one of the most common patterns; covers sorted array and linked list problems
+- [Sliding window](sliding_window.md) — subarray/substring optimization pattern
+- [Binary search patterns](binary_search_patterns.md) — search-on-answer and lower/upper bound patterns
+- [Dynamic programming](dynamic_programming.md) — the largest category of interview problems by complexity
+- [Backtracking](backtracking.md) — permutation, combination, and subset generation problems
+- [Algorithm selection guide](algorithm_selection_guide.md) — when to pick which algorithmic approach

@@ -2,7 +2,7 @@
 
 ## Overview
 
-A hash table (hash map) stores key-value pairs with $O(1)$ average-case lookup, insertion, and deletion. It uses a hash function to map keys to array indices.
+A hash table stores key-value pairs with O(1) average-case lookup using a hash function to map keys to [array](arrays.md) indices. [Tries](tries.md) handle prefix-ordered string lookups that hash tables can't; [bloom filters](bloom_filter.md) trade exact lookup for space savings; [LRU cache](lru_cache.md) pairs a hash table with a [linked list](linked_lists.md) for O(1) eviction. See [hashing techniques](../algorithms/hashing_techniques.md) for hash function design.
 
 ## How It Works
 
@@ -950,3 +950,11 @@ Instead of searching every shelf, the system instantly tells you which one!
 
 - [LeetCode Hash Table](https://leetcode.com/tag/hash-table/)
 - [Hash Table Wikipedia](https://en.wikipedia.org/wiki/Hash_table)
+
+## Where this connects
+
+- [Arrays](arrays.md) — the underlying storage; hash function maps keys to array indices
+- [Hashing techniques](../algorithms/hashing_techniques.md) — hash function design, collision resolution strategies
+- [Bloom filters](bloom_filter.md) — probabilistic alternative for membership queries with less memory
+- [Tries](tries.md) — ordered string lookup; hash tables can't answer prefix queries
+- [LRU cache](lru_cache.md) — combines hash table with a linked list for O(1) eviction

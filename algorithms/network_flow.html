@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-bcca0e98.js";
+            window.path_to_searchindex_js = "../searchindex-f04597d6.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-088b4aa3.js"></script>
+        <script src="../toc-7644c17c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -176,129 +176,221 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="network-flow-algorithms"><a class="header" href="#network-flow-algorithms">Network Flow Algorithms</a></h1>
-<blockquote>
-<p><strong>Domain:</strong> Graph Theory, Algorithms, Optimization
-<strong>Key Concepts:</strong> Max-Flow, Min-Cut, Residual Graph, Augmenting Paths</p>
-</blockquote>
-<p><strong>Network Flow</strong> theory deals with modeling transport through a graph where edges have capacities. It answers questions like: “What is the maximum amount of water that can flow through these pipes?” or “What is the bottleneck in this traffic network?”</p>
-<hr>
-<h2 id="1-the-max-flow-problem"><a class="header" href="#1-the-max-flow-problem">1. The Max-Flow Problem</a></h2>
+                        <h1 id="network-flow"><a class="header" href="#network-flow">Network Flow</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#eli10-explanation">ELI10 Explanation</a></li>
+<li><a href="#core-concepts">Core Concepts</a>
+<ul>
+<li><a href="#the-max-flow-problem">The Max-Flow Problem</a></li>
+<li><a href="#the-residual-graph">The Residual Graph</a></li>
+<li><a href="#max-flow-min-cut-theorem">Max-Flow Min-Cut Theorem</a></li>
+</ul>
+</li>
+<li><a href="#algorithms-at-a-glance">Algorithms at a Glance</a>
+<ul>
+<li><a href="#ford-fulkerson-method">Ford-Fulkerson Method</a></li>
+<li><a href="#edmonds-karp">Edmonds-Karp</a></li>
+<li><a href="#dinics-algorithm">Dinic’s Algorithm</a></li>
+</ul>
+</li>
+<li><a href="#applications">Applications</a></li>
+<li><a href="#complexity-comparison">Complexity Comparison</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#practice-problems">Practice Problems</a></li>
+<li><a href="#additional-resources">Additional Resources</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p><strong>Network flow</strong> models transport through a directed graph whose edges have <strong>capacities</strong>.
+It answers questions like <em>“what is the most water these pipes can carry from the reservoir
+to the city?”</em> or <em>“where is the bottleneck in this traffic network?”</em> A surprising number
+of combinatorial problems — bipartite matching, image segmentation, scheduling, project
+selection — turn out to be flow problems in disguise.</p>
+<p>This page is the <strong>concept companion</strong> to the flow material in
+<a href="graph_algorithms.html">Graph Algorithms</a>, which holds the full, runnable implementations of
+the algorithms summarised here. Read this for the intuition and the theorems; go there to
+copy the code.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Algorithm</th><th>Path search</th><th>Time</th><th>When to use</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Ford-Fulkerson</strong> (method)</td><td>any augmenting path</td><td><code>O(E · maxflow)</code></td><td>Pseudo-polynomial; only with small integer capacities</td></tr>
+<tr><td><strong>Edmonds-Karp</strong></td><td>BFS (shortest path)</td><td><code>O(V·E²)</code></td><td>Simple, polynomial, fine for moderate graphs</td></tr>
+<tr><td><strong>Dinic’s</strong></td><td>BFS levels + blocking flow</td><td><code>O(V²·E)</code></td><td>Standard high-performance choice; <code>O(E·√V)</code> on unit/bipartite graphs</td></tr>
+</tbody>
+</table>
+</div>
+<p>Related notes:</p>
+<ul>
+<li>[[graph_algorithms]] — full Edmonds-Karp, min-cut, and Dinic’s implementations.</li>
+<li>[[strongly_connected_components]] — many connectivity problems reduce to flow.</li>
+<li>[[union_find]] — alternative for some undirected connectivity questions.</li>
+</ul>
+<h2 id="eli10-explanation"><a class="header" href="#eli10-explanation">ELI10 Explanation</a></h2>
+<p>Picture a network of water pipes. There’s a <strong>source</strong> <code>s</code> (a reservoir) and a <strong>sink</strong> <code>t</code>
+(a city). Every pipe can carry only so much water per second — its <strong>capacity</strong>. You want to
+push as much water as possible from <code>s</code> to <code>t</code> at once.</p>
+<p>Two rules apply:</p>
+<ol>
+<li><strong>You can’t overfill a pipe.</strong> Flow on a pipe never exceeds its capacity.</li>
+<li><strong>Water doesn’t pile up.</strong> At every junction except <code>s</code> and <code>t</code>, the water flowing in
+equals the water flowing out.</li>
+</ol>
+<p>The clever trick is that you’re allowed to <strong>“undo”</strong> water you previously sent. If you
+shoved water down a pipe and later realise a different route is better, you can cancel part
+of the earlier flow and reroute it. Keep finding new routes (including these undo routes)
+until no route from <code>s</code> to <code>t</code> has any spare room. The total you’ve pushed is the <strong>maximum
+flow</strong> — and it’s exactly the size of the cheapest “wall” you could build to cut the city
+off from the reservoir. That’s the magic of max-flow min-cut.</p>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<h3 id="the-max-flow-problem"><a class="header" href="#the-max-flow-problem">The Max-Flow Problem</a></h3>
 <ul>
 <li><strong>Input:</strong>
 <ul>
-<li>A directed graph $G = (V, E)$.</li>
-<li>A <strong>Source</strong> node $s$ (where flow starts).</li>
-<li>A <strong>Sink</strong> node $t$ (where flow ends).</li>
-<li>Each edge $(u, v)$ has a <strong>Capacity</strong> $c(u, v) &gt; 0$.</li>
+<li>A directed graph <code>G = (V, E)</code>.</li>
+<li>A <strong>source</strong> <code>s</code> (where flow originates) and a <strong>sink</strong> <code>t</code> (where flow drains).</li>
+<li>A <strong>capacity</strong> <code>c(u, v) &gt; 0</code> on each edge <code>(u, v)</code>.</li>
 </ul>
 </li>
-<li><strong>Goal:</strong> Find the maximum flow $f$ from $s$ to $t$ such that:
+<li><strong>Goal:</strong> find a flow <code>f</code> from <code>s</code> to <code>t</code> of maximum value subject to:
 <ol>
-<li><strong>Capacity Constraint:</strong> Flow on edge $\le$ Capacity ($f(u,v) \le c(u,v)$).</li>
-<li><strong>Flow Conservation:</strong> Flow In = Flow Out for all nodes except $s$ and $t$.</li>
+<li><strong>Capacity constraint:</strong> <code>f(u, v) ≤ c(u, v)</code> on every edge.</li>
+<li><strong>Flow conservation:</strong> for every node except <code>s</code> and <code>t</code>, flow in = flow out.</li>
 </ol>
 </li>
 </ul>
-<hr>
-<h2 id="2-max-flow-min-cut-theorem"><a class="header" href="#2-max-flow-min-cut-theorem">2. Max-Flow Min-Cut Theorem</a></h2>
-<p>This is the fundamental theorem of network flow.</p>
-<ul>
-<li><strong>Cut:</strong> A partition of vertices into two disjoint sets, one containing $s$ and one containing $t$.</li>
-<li><strong>Cut Capacity:</strong> The sum of capacities of edges going from the $s$-set to the $t$-set.</li>
-<li><strong>Theorem:</strong> The maximum flow in a network is exactly equal to the capacity of the minimum cut.
-$$ \text{Max Flow} = \text{Min Cut} $$</li>
-</ul>
-<p><strong>Intuition:</strong> The flow is limited by the tightest bottleneck in the system.</p>
-<hr>
-<h2 id="3-algorithms"><a class="header" href="#3-algorithms">3. Algorithms</a></h2>
-<h3 id="31-ford-fulkerson-method"><a class="header" href="#31-ford-fulkerson-method">3.1. Ford-Fulkerson Method</a></h3>
-<p>The generic approach.</p>
-<ol>
-<li>Initialize flow to 0.</li>
-<li>While there exists an <strong>Augmenting Path</strong> from $s$ to $t$ in the <strong>Residual Graph</strong>:
-<ul>
-<li>Find the bottleneck capacity on this path.</li>
-<li>Increase flow along the path by this amount.</li>
-<li>Update the Residual Graph (decrease forward capacity, increase backward capacity).</li>
-</ul>
-</li>
-<li>Return max flow.</li>
-</ol>
-<p><strong>The Residual Graph:</strong> If edge $(u, v)$ has capacity 10 and flow 3, the residual graph has:</p>
-<ul>
-<li>Forward edge $(u, v)$ with capacity 7 (remaining room).</li>
-<li>Backward edge $(v, u)$ with capacity 3 (ability to “undo” flow).</li>
-</ul>
-<h3 id="32-edmonds-karp-implementation"><a class="header" href="#32-edmonds-karp-implementation">3.2. Edmonds-Karp Implementation</a></h3>
-<p>Ford-Fulkerson is an “method”, not a specific algorithm, because it doesn’t specify <em>how</em> to find the path.</p>
-<ul>
-<li><strong>Edmonds-Karp:</strong> Uses <strong>BFS (Breadth-First Search)</strong> to find the augmenting path.</li>
-<li><strong>Logic:</strong> Always chooses the shortest path (in number of edges).</li>
-<li><strong>Complexity:</strong> $O(V E^2)$.</li>
-</ul>
-<h3 id="33-dinics-algorithm"><a class="header" href="#33-dinics-algorithm">3.3. Dinic’s Algorithm</a></h3>
-<p>The standard for competitive programming and high-performance needs.</p>
-<ul>
-<li><strong>Level Graph:</strong> Uses BFS to build a layered graph (only keeping edges that progress “forward” from $s$ to $t$).</li>
-<li><strong>Blocking Flow:</strong> Uses DFS on the Level Graph to push flow until no more paths exist in that layer structure.</li>
-<li><strong>Complexity:</strong> $O(V^2 E)$. On unit networks (bipartite matching), it’s $O(E \sqrt{V})$.</li>
-</ul>
-<hr>
-<h2 id="4-applications"><a class="header" href="#4-applications">4. Applications</a></h2>
-<ol>
-<li><strong>Bipartite Matching:</strong> Find the maximum number of pairings (e.g., Job Applicants -&gt; Jobs).
-<ul>
-<li><em>Setup:</em> Create source connected to all Applicants, all Jobs connected to sink. Max Flow = Max Matchings.</li>
-</ul>
-</li>
-<li><strong>Image Segmentation:</strong> Separate foreground from background.</li>
-<li><strong>Airline Scheduling:</strong> Can a fleet of planes cover a set of flights?</li>
-<li><strong>Circulation with Demands:</strong> Flow with lower bounds (minimum flow required).</li>
-</ol>
-<hr>
-<h2 id="5-python-example-edmonds-karp"><a class="header" href="#5-python-example-edmonds-karp">5. Python Example (Edmonds-Karp)</a></h2>
-<pre><code class="language-python">from collections import deque
+<h3 id="the-residual-graph"><a class="header" href="#the-residual-graph">The Residual Graph</a></h3>
+<p>The engine behind every max-flow algorithm is the <strong>residual graph</strong>: for each edge it
+tracks remaining capacity, <em>plus</em> a backward edge that represents the ability to cancel
+existing flow. Given an edge with capacity 10 carrying 3 units of flow:</p>
+<pre><code>            capacity 10, flow 3
+        u ───────────────────────▶ v
 
-def bfs(capacity, source, sink, parent):
-    visited = set()
-    queue = deque([source])
-    visited.add(source)
-    parent[source] = -1
-    
-    while queue:
-        u = queue.popleft()
-        for v in range(len(capacity)):
-            if v not in visited and capacity[u][v] &gt; 0:
-                queue.append(v)
-                visited.add(v)
-                parent[v] = u
-                if v == sink:
-                    return True
-    return False
-
-def max_flow(capacity, source, sink):
-    parent = [0] * len(capacity)
-    max_flow_val = 0
-    
-    while bfs(capacity, source, sink, parent):
-        path_flow = float('Inf')
-        s = sink
-        while(s != source):
-            path_flow = min(path_flow, capacity[parent[s]][s])
-            s = parent[s]
-            
-        max_flow_val += path_flow
-        
-        v = sink
-        while(v != source):
-            u = parent[v]
-            capacity[u][v] -= path_flow
-            capacity[v][u] += path_flow
-            v = parent[v]
-            
-    return max_flow_val
+   residual graph:
+        u ───── 7 (room left) ────▶ v     forward: push up to 7 more
+        u ◀──── 3 (cancel flow) ──── v     backward: undo up to 3 already sent
 </code></pre>
+<p>An <strong>augmenting path</strong> is any path from <code>s</code> to <code>t</code> along edges with positive residual
+capacity. Pushing flow equal to the path’s smallest residual capacity (its <strong>bottleneck</strong>)
+strictly increases total flow. Repeat until no augmenting path remains.</p>
+<h3 id="max-flow-min-cut-theorem"><a class="header" href="#max-flow-min-cut-theorem">Max-Flow Min-Cut Theorem</a></h3>
+<p>The fundamental theorem of network flow ties the maximum flow to the cheapest way to
+<em>disconnect</em> <code>s</code> from <code>t</code>.</p>
+<ul>
+<li>An <strong>s-t cut</strong> partitions the vertices into two sets <code>S ∋ s</code> and <code>T ∋ t</code>.</li>
+<li>The <strong>capacity</strong> of the cut is the sum of capacities of edges crossing from <code>S</code> to <code>T</code>.</li>
+</ul>
+<pre><code>        ┌──────── S ────────┐ ┊ ┌──────── T ────────┐
+        s ──▶ a ──▶ b ──────────▶ c ──▶ t
+                       └── 4 ──┊── crossing edges ──▶
+                          cut capacity = sum of S→T edge capacities
+</code></pre>
+<blockquote>
+<p><strong>Theorem:</strong> the value of the maximum flow equals the capacity of the <strong>minimum</strong> s-t cut.</p>
+</blockquote>
+<p><strong>Intuition:</strong> flow is throttled by the tightest bottleneck, and the min cut <em>is</em> that
+bottleneck. After running a max-flow algorithm, the set of vertices still reachable from <code>s</code>
+in the residual graph is exactly the <code>S</code> side of a minimum cut — that’s how you recover the
+cut itself (see <a href="graph_algorithms.html">Graph Algorithms</a> for the <code>find_min_cut</code> routine).</p>
+<h2 id="algorithms-at-a-glance"><a class="header" href="#algorithms-at-a-glance">Algorithms at a Glance</a></h2>
+<p>All three share the Ford-Fulkerson skeleton — <em>find an augmenting path, push its bottleneck,
+update the residual graph, repeat</em> — and differ only in <strong>how</strong> they choose the path. Full
+implementations live in <a href="graph_algorithms.html#ford-fulkerson-method">Graph Algorithms</a>.</p>
+<h3 id="ford-fulkerson-method"><a class="header" href="#ford-fulkerson-method">Ford-Fulkerson Method</a></h3>
+<p>The generic template:</p>
+<ol>
+<li>Initialise all flow to 0.</li>
+<li>While an augmenting path <code>s → t</code> exists in the residual graph: find its bottleneck and
+push that much flow, updating residual capacities.</li>
+<li>Return the total flow.</li>
+</ol>
+<p>Ford-Fulkerson is a <strong>method</strong>, not a concrete algorithm, because it never says <em>how</em> to
+find the path. With a naïve search and irrational capacities it can even fail to terminate;
+with integer capacities it runs in <code>O(E · maxflow)</code> — fine when <code>maxflow</code> is tiny, dangerous
+otherwise.</p>
+<h3 id="edmonds-karp"><a class="header" href="#edmonds-karp">Edmonds-Karp</a></h3>
+<p>Ford-Fulkerson with <strong>BFS</strong> to always pick the augmenting path with the fewest edges. This
+single choice guarantees termination in <code>O(V·E²)</code> regardless of capacity values — the
+standard, easy-to-trust polynomial flow algorithm.</p>
+<h3 id="dinics-algorithm"><a class="header" href="#dinics-algorithm">Dinic’s Algorithm</a></h3>
+<p>The high-performance default for contests and large graphs:</p>
+<ul>
+<li>
+<p><strong>Level graph:</strong> a BFS from <code>s</code> labels each node with its distance, keeping only edges that
+advance to the next level.</p>
+<pre><code>level:  0      1       2       3
+        s ──▶ a ──▶  c ──▶   t
+         └──▶ b ──▶  c
+        (only forward, level+1 edges survive)
+</code></pre>
+</li>
+<li>
+<p><strong>Blocking flow:</strong> a DFS then saturates the level graph, pushing flow along many paths
+before the next BFS rebuilds levels.</p>
+</li>
+</ul>
+<p>Dinic’s runs in <code>O(V²·E)</code> in general, and a remarkable <code>O(E·√V)</code> on <strong>unit-capacity</strong>
+networks — which is exactly what bipartite matching reduces to.</p>
+<h2 id="applications"><a class="header" href="#applications">Applications</a></h2>
+<ol>
+<li><strong>Bipartite matching</strong> — connect a source to all applicants and all jobs to a sink, each
+edge capacity 1; <strong>max flow = maximum matching</strong>. (See the reduction in
+<a href="graph_algorithms.html">Graph Algorithms</a>.)</li>
+<li><strong>Image segmentation</strong> — separate foreground from background by computing a min cut over a
+pixel graph.</li>
+<li><strong>Airline / fleet scheduling</strong> — can a fleet cover a set of flights? Model coverage as
+flow feasibility.</li>
+<li><strong>Project selection &amp; closure</strong> — pick a maximum-profit subset under prerequisite
+constraints via min cut.</li>
+<li><strong>Circulation with demands</strong> — flows with lower bounds, where edges <em>must</em> carry a minimum
+amount.</li>
+</ol>
+<h2 id="complexity-comparison"><a class="header" href="#complexity-comparison">Complexity Comparison</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Algorithm</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>Ford-Fulkerson (DFS)</td><td><code>O(E · maxflow)</code></td><td><code>O(V)</code></td><td>Pseudo-polynomial; integer capacities only</td></tr>
+<tr><td>Edmonds-Karp (BFS)</td><td><code>O(V·E²)</code></td><td><code>O(V)</code></td><td>Polynomial, independent of capacities</td></tr>
+<tr><td>Dinic’s</td><td><code>O(V²·E)</code></td><td><code>O(V + E)</code></td><td><code>O(E·√V)</code> on unit/bipartite graphs</td></tr>
+</tbody>
+</table>
+</div>
+<p>Use an <strong>adjacency list</strong> for sparse graphs. The adjacency-matrix formulation often shown in
+textbooks costs <code>O(V²)</code> per BFS and blows up on large sparse networks.</p>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<ul>
+<li><strong>Forgetting the reverse edge.</strong> Without backward residual edges you can’t cancel
+sub-optimal flow, and the algorithm returns a value below the true maximum. Always add a
+<code>0</code>-capacity reverse edge when you add a forward edge.</li>
+<li><strong>Confusing the method with an algorithm.</strong> “Ford-Fulkerson” alone doesn’t fix the path
+search; its termination and complexity depend entirely on that choice (BFS → Edmonds-Karp).</li>
+<li><strong>Real-valued capacities.</strong> With irrational capacities a naïve augmenting-path search may
+loop forever; BFS-based Edmonds-Karp avoids this.</li>
+<li><strong>Adjacency-matrix blowup.</strong> <code>O(V²)</code> per search is wasteful on sparse graphs — prefer an
+adjacency-list residual structure.</li>
+<li><strong>Reading the min cut wrong.</strong> The cut is the set reachable from <code>s</code> in the <em>residual</em>
+graph after max flow, not in the original graph.</li>
+</ul>
+<h2 id="practice-problems"><a class="header" href="#practice-problems">Practice Problems</a></h2>
+<ul>
+<li><strong>Maximum Flow</strong> — classic <code>s</code>–<code>t</code> max flow (e.g. SPOJ FASTFLOW, judge “Network Flow”).</li>
+<li><strong>Bipartite matching</strong> — LeetCode 1066 “Campus Bikes II”, maximum matching on a grid.</li>
+<li><strong>Minimum Cut</strong> — partition a graph at the cheapest bottleneck.</li>
+<li><strong>Project selection / maximum closure</strong> — profit maximisation under prerequisites.</li>
+<li><strong>Edge-disjoint / vertex-disjoint paths</strong> — count via unit-capacity flow (Menger’s theorem).</li>
+</ul>
+<h2 id="additional-resources"><a class="header" href="#additional-resources">Additional Resources</a></h2>
+<ul>
+<li>[[graph_algorithms]] — runnable Edmonds-Karp, min-cut, and Dinic’s code.</li>
+<li>CLRS, <em>Introduction to Algorithms</em>, Ch. 26 “Maximum Flow”.</li>
+<li>Competitive Programming literature on Dinic’s and push-relabel for the fastest variants.</li>
+</ul>
 
                     </main>
 

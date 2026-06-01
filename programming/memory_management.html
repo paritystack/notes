@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-bcca0e98.js";
+            window.path_to_searchindex_js = "../searchindex-f04597d6.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-088b4aa3.js"></script>
+        <script src="../toc-7644c17c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,80 +177,16 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h1>
-<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
-<ul>
-<li><a href="#memory-fundamentals">Memory Fundamentals</a>
-<ul>
-<li><a href="#stack-vs-heap-allocation">Stack vs Heap Allocation</a></li>
-<li><a href="#memory-layout">Memory Layout</a></li>
-<li><a href="#virtual-memory">Virtual Memory</a></li>
-<li><a href="#memory-alignment">Memory Alignment</a></li>
-<li><a href="#fragmentation">Fragmentation</a></li>
-</ul>
-</li>
-<li><a href="#allocation-strategies">Allocation Strategies</a>
-<ul>
-<li><a href="#static-allocation">Static Allocation</a></li>
-<li><a href="#stack-allocation">Stack Allocation</a></li>
-<li><a href="#heap-allocation">Heap Allocation</a></li>
-<li><a href="#memory-pools">Memory Pools</a></li>
-<li><a href="#arena-allocators">Arena Allocators</a></li>
-</ul>
-</li>
-<li><a href="#garbage-collection">Garbage Collection</a>
-<ul>
-<li><a href="#reference-counting">Reference Counting</a></li>
-<li><a href="#mark-and-sweep">Mark and Sweep</a></li>
-<li><a href="#generational-gc">Generational GC</a></li>
-<li><a href="#tri-color-marking">Tri-Color Marking</a></li>
-<li><a href="#gc-tuning">GC Tuning</a></li>
-<li><a href="#gc-pauses">GC Pauses</a></li>
-</ul>
-</li>
-<li><a href="#manual-memory-management">Manual Memory Management</a>
-<ul>
-<li><a href="#mallocfree-in-c">malloc/free in C</a></li>
-<li><a href="#newdelete-in-c">new/delete in C++</a></li>
-<li><a href="#memory-leak-detection">Memory Leak Detection</a></li>
-<li><a href="#use-after-free-bugs">Use-After-Free Bugs</a></li>
-<li><a href="#double-free-errors">Double-Free Errors</a></li>
-</ul>
-</li>
-<li><a href="#smart-pointers-c">Smart Pointers (C++)</a>
-<ul>
-<li><a href="#unique_ptr">unique_ptr</a></li>
-<li><a href="#shared_ptr">shared_ptr</a></li>
-<li><a href="#weak_ptr">weak_ptr</a></li>
-<li><a href="#raii-pattern">RAII Pattern</a></li>
-</ul>
-</li>
-<li><a href="#language-specific-memory-management">Language-Specific Memory Management</a>
-<ul>
-<li><a href="#python">Python</a></li>
-<li><a href="#javascript">JavaScript</a></li>
-<li><a href="#go">Go</a></li>
-<li><a href="#rust">Rust</a></li>
-<li><a href="#java">Java</a></li>
-</ul>
-</li>
-<li><a href="#memory-profiling">Memory Profiling</a>
-<ul>
-<li><a href="#profiling-tools">Profiling Tools</a></li>
-<li><a href="#memory-leak-detection-tools">Memory Leak Detection Tools</a></li>
-<li><a href="#heap-profiling">Heap Profiling</a></li>
-</ul>
-</li>
-<li><a href="#performance-optimization">Performance Optimization</a>
-<ul>
-<li><a href="#cache-friendly-data-structures">Cache-Friendly Data Structures</a></li>
-<li><a href="#memory-access-patterns">Memory Access Patterns</a></li>
-<li><a href="#copy-on-write">Copy-on-Write</a></li>
-<li><a href="#memory-mapped-files">Memory-Mapped Files</a></li>
-</ul>
-</li>
-<li><a href="#common-pitfalls-and-best-practices">Common Pitfalls and Best Practices</a></li>
-</ul>
-<hr>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Memory management is how a program obtains, uses, and releases memory — and the strategy a
+language picks here shapes its whole feel. The spectrum runs from fully manual
+(<code>malloc</code>/<code>free</code> in <a href="c.html">C</a>, <code>new</code>/<code>delete</code> and RAII smart pointers in <a href="cpp.html">C++</a>,
+explicit allocators in <a href="zig.html">Zig</a>), through compile-time ownership (<a href="rust.html">Rust</a>’s borrow
+checker), to automatic <a href="#garbage-collection">garbage collection</a> (<a href="java.html">Java</a>,
+<a href="go.html">Go</a>, <a href="python.html">Python</a>, <a href="javascript.html">JavaScript</a>). This page covers the stack/heap
+divide, allocation strategies, GC algorithms, smart pointers, and cache-aware layout. It is the
+foundation under <a href="concurrency.html">concurrency</a> (data races and false sharing are memory issues)
+and is enforced by the <a href="compilers.html">compiler</a>.</p>
 <h2 id="memory-fundamentals"><a class="header" href="#memory-fundamentals">Memory Fundamentals</a></h2>
 <h3 id="stack-vs-heap-allocation"><a class="header" href="#stack-vs-heap-allocation">Stack vs Heap Allocation</a></h3>
 <p>Memory in programs is primarily divided into two main areas: the stack and the heap. Understanding the differences is crucial for writing efficient and correct code.</p>
@@ -6212,6 +6148,20 @@ echo "All tests passed"
 <li><strong>Games/Real-time</strong>: Arenas, pools, manual control</li>
 </ul>
 <p>The right choice depends on your performance requirements, development time constraints, and correctness guarantees needed.</p>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="c.html">C</a> / <a href="cpp.html">C++</a> — manual <code>malloc</code>/<code>free</code>, <code>new</code>/<code>delete</code>, and RAII smart pointers
+(<code>unique_ptr</code>/<code>shared_ptr</code>) are the canonical manual-management story.</li>
+<li><a href="rust.html">Rust</a> — ownership and borrowing move the manual/GC trade-off to compile time, with
+no runtime collector.</li>
+<li><a href="zig.html">Zig</a> — explicit allocator passing and arenas; no hidden allocation.</li>
+<li><a href="go.html">Go</a> / <a href="java.html">Java</a> / <a href="python.html">Python</a> / <a href="javascript.html">JavaScript</a> — garbage
+collected; the GC algorithms (reference counting, mark-and-sweep, generational) live here.</li>
+<li><a href="concurrency.html">Concurrency</a> — the memory model, cache lines, and false sharing decide what
+threads observe; data races are memory-management bugs.</li>
+<li><a href="compilers.html">Compilers</a> — the compiler emits allocation/free and GC barriers, and (in Rust)
+enforces ownership during semantic analysis.</li>
+</ul>
 
                     </main>
 

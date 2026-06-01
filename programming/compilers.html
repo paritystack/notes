@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-bcca0e98.js";
+            window.path_to_searchindex_js = "../searchindex-f04597d6.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-088b4aa3.js"></script>
+        <script src="../toc-7644c17c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,215 +178,93 @@
                     <main>
                         <h1 id="compilers"><a class="header" href="#compilers">Compilers</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>A compiler is a specialized program that translates source code written in a high-level programming language into machine code, bytecode, or another programming language. Compilers are fundamental tools in software development, enabling developers to write code in human-readable languages while producing efficient executable programs.</p>
-<h2 id="compiler-phases"><a class="header" href="#compiler-phases">Compiler Phases</a></h2>
-<p>The compilation process is typically divided into several distinct phases:</p>
-<h3 id="1-lexical-analysis-scanning"><a class="header" href="#1-lexical-analysis-scanning">1. Lexical Analysis (Scanning)</a></h3>
+<p>A compiler translates source code into a lower-level form — machine code, bytecode, or
+another language — checking that the program is well-formed along the way. It is where most
+of the guarantees in this section are actually enforced: type checking is a compiler phase
+(see <a href="type_systems.html">type systems</a>), <a href="generics.html">generics</a> are expanded or erased during
+codegen, <a href="metaprogramming.html">metaprogramming</a> is scripting the front end, and a language’s
+<a href="memory_management.html">memory management</a> model decides what the back end must emit. The
+compiled languages here exercise different points of the design space —
+<a href="rust.html">Rust</a>, <a href="cpp.html">C++</a>, <a href="go.html">Go</a> and <a href="zig.html">Zig</a> compile ahead-of-time to native
+code, <a href="java.html">Java</a>/<a href="kotlin.html">Kotlin</a> compile to bytecode that a JIT finishes at runtime,
+and <a href="typescript.html">TypeScript</a> is a transpiler that lowers to JavaScript.</p>
+<h2 id="the-pipeline"><a class="header" href="#the-pipeline">The pipeline</a></h2>
+<p>A compiler is a pipeline that narrows source text down to a target, one representation at a
+time.</p>
+<pre><code>source ─▶ LEXER ─▶ tokens ─▶ PARSER ─▶ AST ─▶ SEMANTIC ─▶ typed AST
+                                              (type-check,
+                                               scope/name res)
+                                                    │
+                                                    ▼
+target ◀─ LINKER ◀─ codegen ◀─ OPTIMIZER ◀───────── IR
+          (back end)          (middle end)      (lowering)
+</code></pre>
+<p>Conventionally this splits into three parts. The <strong>front end</strong> (lex → parse → semantic
+analysis) is language-specific: it turns text into a typed AST and rejects ill-formed
+programs, leaning on the <a href="type_systems.html">type system</a> for type checking and inference. The
+<strong>middle end</strong> lowers the AST to an intermediate representation and optimizes it. The <strong>back
+end</strong> is target-specific: instruction selection, register allocation, and emitting
+machine/bytecode, then linking object files and libraries into the final artifact.</p>
+<h2 id="ir-and-optimization"><a class="header" href="#ir-and-optimization">IR and optimization</a></h2>
+<p>The middle works on an <strong>intermediate representation</strong> rather than the AST or raw assembly.
+An IR decouples the <em>N</em> source languages from the <em>M</em> target architectures: each front end
+lowers to the shared IR, each back end consumes it, so you write <code>N + M</code> pieces instead of
+<code>N × M</code>. <strong>SSA</strong> (static single assignment — every variable assigned exactly once) is the
+dominant IR form because it makes data flow explicit and most optimizations cheap to express.</p>
+<p>Optimizations rewrite the IR to be faster or smaller without changing observable behavior:</p>
+<pre><code>constant folding:   x = 2 * 60 * 60     ─▶  x = 7200
+dead-code elim:      if (false) { ... }  ─▶  (removed)
+inlining:            y = square(a)       ─▶  y = a * a   (then fold/simplify)
+</code></pre>
+<p>Inlining is the keystone — once a call is inlined, constant folding, dead-code elimination,
+and common-subexpression elimination cascade through the exposed code. Flags like <code>-O0</code>…<code>-O3</code>
+/<code>-Os</code> trade compile time and binary size against runtime speed; <code>-O0</code> keeps a one-to-one
+mapping to source for debugging, higher levels reorder and erase it.</p>
+<h2 id="aot-vs-jit-vs-transpilers"><a class="header" href="#aot-vs-jit-vs-transpilers">AOT vs JIT vs transpilers</a></h2>
+<p><em>When</em> compilation happens shapes the whole trade-off.</p>
+<pre><code>AHEAD-OF-TIME (AOT)                  JUST-IN-TIME (JIT)
+------------------                   ------------------
+compile fully before running         compile hot paths during execution
+C, C++, Rust, Go                     JVM (Java/Kotlin), V8 (JS), PyPy
+
++ fast, predictable startup          + optimizes on real runtime profiles
++ no runtime compiler shipped        + can speculate, deoptimize, recompile
+- can't use runtime information      - warm-up cost; compiler runs in-process
+</code></pre>
+<p>A <strong>transpiler</strong> (source-to-source compiler) is just a compiler whose target is another
+high-level language: <a href="typescript.html">TypeScript</a> → JavaScript, or Babel down-leveling new JS
+to older JS. Much of this machinery is shared infrastructure: <strong>LLVM</strong> provides a
+language-agnostic IR and back ends (used by Clang, Rust, Swift, Zig), <strong>GCC</strong> is the long-
+standing native suite, and the <strong>JVM</strong> pairs a bytecode interpreter with a profiling JIT.</p>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
 <ul>
-<li>Breaks source code into tokens (keywords, identifiers, operators, literals)</li>
-<li>Removes whitespace and comments</li>
-<li>Identifies lexical errors</li>
-<li>Output: Stream of tokens</li>
+<li><a href="type_systems.html">Type systems</a> — type checking and inference are compiler phases; inference
+is constraint solving over the typed AST.</li>
+<li><a href="metaprogramming.html">Metaprogramming</a> — macros are syntax-tree transformations; you’re
+scripting the front end.</li>
+<li><a href="generics.html">Generics</a> — monomorphization vs type erasure is a codegen strategy decided in
+the back end.</li>
+<li><a href="memory_management.html">Memory management</a> — the compiler emits allocation/free or GC barriers
+and (in Rust) enforces ownership during semantic analysis.</li>
+<li><a href="rust.html">Rust</a> / <a href="cpp.html">C++</a> / <a href="go.html">Go</a> / <a href="zig.html">Zig</a> / <a href="java.html">Java</a> for concrete
+compilation models.</li>
 </ul>
-<h3 id="2-syntax-analysis-parsing"><a class="header" href="#2-syntax-analysis-parsing">2. Syntax Analysis (Parsing)</a></h3>
+<h2 id="pitfalls"><a class="header" href="#pitfalls">Pitfalls</a></h2>
 <ul>
-<li>Analyzes the grammatical structure of the token stream</li>
-<li>Builds an Abstract Syntax Tree (AST) or Parse Tree</li>
-<li>Checks for syntax errors</li>
-<li>Output: Parse tree or AST</li>
-</ul>
-<h3 id="3-semantic-analysis"><a class="header" href="#3-semantic-analysis">3. Semantic Analysis</a></h3>
-<ul>
-<li>Checks for semantic consistency</li>
-<li>Type checking and type inference</li>
-<li>Scope resolution</li>
-<li>Verifies that operations are semantically valid</li>
-<li>Output: Annotated AST</li>
-</ul>
-<h3 id="4-intermediate-code-generation"><a class="header" href="#4-intermediate-code-generation">4. Intermediate Code Generation</a></h3>
-<ul>
-<li>Generates platform-independent intermediate representation (IR)</li>
-<li>Common formats: Three-address code, quadruples, SSA form</li>
-<li>Facilitates optimization and portability</li>
-<li>Output: Intermediate representation</li>
-</ul>
-<h3 id="5-code-optimization"><a class="header" href="#5-code-optimization">5. Code Optimization</a></h3>
-<ul>
-<li>Improves code efficiency without changing functionality</li>
-<li>Types of optimization:
-<ul>
-<li><strong>Constant folding</strong>: Evaluates constant expressions at compile time</li>
-<li><strong>Dead code elimination</strong>: Removes unreachable code</li>
-<li><strong>Loop optimization</strong>: Unrolling, fusion, invariant code motion</li>
-<li><strong>Inline expansion</strong>: Replaces function calls with function body</li>
-<li><strong>Common subexpression elimination</strong>: Avoids redundant computations</li>
-</ul>
-</li>
-</ul>
-<h3 id="6-code-generation"><a class="header" href="#6-code-generation">6. Code Generation</a></h3>
-<ul>
-<li>Translates IR into target machine code or assembly</li>
-<li>Performs register allocation</li>
-<li>Instruction selection</li>
-<li>Output: Assembly or machine code</li>
-</ul>
-<h3 id="7-code-linking-and-assembly"><a class="header" href="#7-code-linking-and-assembly">7. Code Linking and Assembly</a></h3>
-<ul>
-<li>Assembles machine code into object files</li>
-<li>Links object files and libraries</li>
-<li>Resolves external references</li>
-<li>Output: Executable binary</li>
-</ul>
-<h2 id="types-of-compilers"><a class="header" href="#types-of-compilers">Types of Compilers</a></h2>
-<h3 id="1-native-compilers"><a class="header" href="#1-native-compilers">1. Native Compilers</a></h3>
-<p>Compile source code directly to machine code for a specific architecture (e.g., x86, ARM).</p>
-<p><strong>Examples</strong>: GCC, Clang, MSVC</p>
-<h3 id="2-cross-compilers"><a class="header" href="#2-cross-compilers">2. Cross Compilers</a></h3>
-<p>Generate code for a platform different from the one on which the compiler runs.</p>
-<p><strong>Use cases</strong>: Embedded systems, mobile development</p>
-<h3 id="3-just-in-time-jit-compilers"><a class="header" href="#3-just-in-time-jit-compilers">3. Just-In-Time (JIT) Compilers</a></h3>
-<p>Compile code during program execution rather than before.</p>
-<p><strong>Examples</strong>: Java HotSpot, V8 JavaScript engine, PyPy</p>
-<h3 id="4-transpilers-source-to-source-compilers"><a class="header" href="#4-transpilers-source-to-source-compilers">4. Transpilers (Source-to-Source Compilers)</a></h3>
-<p>Translate source code from one high-level language to another.</p>
-<p><strong>Examples</strong>:</p>
-<ul>
-<li>TypeScript → JavaScript</li>
-<li>C++ → C</li>
-<li>Babel (ES6+ → ES5 JavaScript)</li>
-</ul>
-<h3 id="5-bytecode-compilers"><a class="header" href="#5-bytecode-compilers">5. Bytecode Compilers</a></h3>
-<p>Compile to an intermediate bytecode format for a virtual machine.</p>
-<p><strong>Examples</strong>: Java → JVM bytecode, Python → .pyc files, C# → CIL</p>
-<h2 id="compiler-architecture-patterns"><a class="header" href="#compiler-architecture-patterns">Compiler Architecture Patterns</a></h2>
-<h3 id="single-pass-compilers"><a class="header" href="#single-pass-compilers">Single-Pass Compilers</a></h3>
-<ul>
-<li>Process source code in one pass</li>
-<li>Fast but limited optimization capabilities</li>
-<li>Example: Early Pascal compilers</li>
-</ul>
-<h3 id="multi-pass-compilers"><a class="header" href="#multi-pass-compilers">Multi-Pass Compilers</a></h3>
-<ul>
-<li>Process code multiple times</li>
-<li>Better optimization opportunities</li>
-<li>Modern compilers typically use multiple passes</li>
-</ul>
-<h3 id="ahead-of-time-aot-compilation"><a class="header" href="#ahead-of-time-aot-compilation">Ahead-of-Time (AOT) Compilation</a></h3>
-<ul>
-<li>Compilation happens before program execution</li>
-<li>Faster startup time, predictable performance</li>
-<li>Examples: C, C++, Rust, Go</li>
-</ul>
-<h3 id="just-in-time-jit-compilation"><a class="header" href="#just-in-time-jit-compilation">Just-In-Time (JIT) Compilation</a></h3>
-<ul>
-<li>Compilation during runtime</li>
-<li>Can optimize based on runtime profiling</li>
-<li>Examples: Java, C#, JavaScript (V8)</li>
-</ul>
-<h2 id="popular-compiler-frameworks"><a class="header" href="#popular-compiler-frameworks">Popular Compiler Frameworks</a></h2>
-<h3 id="llvm"><a class="header" href="#llvm">LLVM</a></h3>
-<ul>
-<li>Modular compiler infrastructure</li>
-<li>Provides reusable compiler components</li>
-<li>Language-agnostic IR</li>
-<li>Used by: Clang, Rust, Swift, Julia</li>
-</ul>
-<h3 id="gcc-gnu-compiler-collection"><a class="header" href="#gcc-gnu-compiler-collection">GCC (GNU Compiler Collection)</a></h3>
-<ul>
-<li>Mature, widely-used compiler suite</li>
-<li>Supports many languages: C, C++, Fortran, Ada</li>
-<li>Excellent optimization capabilities</li>
-</ul>
-<h3 id="jvm-java-virtual-machine"><a class="header" href="#jvm-java-virtual-machine">JVM (Java Virtual Machine)</a></h3>
-<ul>
-<li>Bytecode interpreter and JIT compiler</li>
-<li>Platform independence</li>
-<li>Languages: Java, Kotlin, Scala, Groovy</li>
-</ul>
-<h2 id="optimization-levels"><a class="header" href="#optimization-levels">Optimization Levels</a></h2>
-<p>Most compilers offer different optimization levels:</p>
-<ul>
-<li><strong>-O0</strong>: No optimization (fastest compilation, easiest debugging)</li>
-<li><strong>-O1</strong>: Basic optimization</li>
-<li><strong>-O2</strong>: Moderate optimization (common default for production)</li>
-<li><strong>-O3</strong>: Aggressive optimization (may increase binary size)</li>
-<li><strong>-Os</strong>: Optimize for size</li>
-<li><strong>-Ofast</strong>: Maximum performance (may break standards compliance)</li>
-</ul>
-<h2 id="compiler-design-considerations"><a class="header" href="#compiler-design-considerations">Compiler Design Considerations</a></h2>
-<h3 id="performance"><a class="header" href="#performance">Performance</a></h3>
-<ul>
-<li>Compilation speed vs. runtime performance</li>
-<li>Optimization trade-offs</li>
-<li>Memory usage during compilation</li>
-</ul>
-<h3 id="error-reporting"><a class="header" href="#error-reporting">Error Reporting</a></h3>
-<ul>
-<li>Clear, actionable error messages</li>
-<li>Warning levels and diagnostics</li>
-<li>Error recovery strategies</li>
-</ul>
-<h3 id="portability"><a class="header" href="#portability">Portability</a></h3>
-<ul>
-<li>Target multiple architectures</li>
-<li>Platform-specific optimizations</li>
-<li>Cross-compilation support</li>
-</ul>
-<h3 id="maintainability"><a class="header" href="#maintainability">Maintainability</a></h3>
-<ul>
-<li>Modular design</li>
-<li>Well-defined intermediate representations</li>
-<li>Extensibility for new features</li>
-</ul>
-<h2 id="modern-trends"><a class="header" href="#modern-trends">Modern Trends</a></h2>
-<h3 id="1-incremental-compilation"><a class="header" href="#1-incremental-compilation">1. Incremental Compilation</a></h3>
-<p>Only recompile changed parts of the codebase to speed up development cycles.</p>
-<h3 id="2-link-time-optimization-lto"><a class="header" href="#2-link-time-optimization-lto">2. Link-Time Optimization (LTO)</a></h3>
-<p>Optimize across translation units during linking phase.</p>
-<h3 id="3-profile-guided-optimization-pgo"><a class="header" href="#3-profile-guided-optimization-pgo">3. Profile-Guided Optimization (PGO)</a></h3>
-<p>Use runtime profiling data to guide optimization decisions.</p>
-<h3 id="4-compiler-as-a-service"><a class="header" href="#4-compiler-as-a-service">4. Compiler-as-a-Service</a></h3>
-<p>Expose compiler functionality through APIs for IDE integration, code analysis tools, etc.</p>
-<h3 id="5-machine-learning-in-compilers"><a class="header" href="#5-machine-learning-in-compilers">5. Machine Learning in Compilers</a></h3>
-<p>Using ML for:</p>
-<ul>
-<li>Optimization heuristics</li>
-<li>Code generation decisions</li>
-<li>Predictive compilation</li>
-</ul>
-<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
-<ul>
-<li>
-<p><strong>Books</strong>:</p>
-<ul>
-<li>“Compilers: Principles, Techniques, and Tools” (Dragon Book) by Aho, Lam, Sethi, and Ullman</li>
-<li>“Engineering a Compiler” by Cooper and Torczon</li>
-<li>“Modern Compiler Implementation in ML/Java/C” by Appel</li>
-</ul>
-</li>
-<li>
-<p><strong>Online Courses</strong>:</p>
-<ul>
-<li>Stanford CS143: Compilers</li>
-<li>MIT 6.035: Computer Language Engineering</li>
-</ul>
-</li>
-<li>
-<p><strong>Tools</strong>:</p>
-<ul>
-<li>Flex/Bison: Lexer and parser generators</li>
-<li>ANTLR: Parser generator</li>
-<li>LLVM: Compiler infrastructure</li>
-</ul>
-</li>
-</ul>
-<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
-<ul>
-<li>Interpreters</li>
-<li>Virtual Machines</li>
-<li>Assembly Language</li>
-<li>Code Optimization Techniques</li>
-<li>Static Analysis</li>
+<li><strong>Optimization exploiting undefined behavior.</strong> The optimizer assumes UB never happens and
+may delete checks or “impossible” branches; in C/C++ a signed overflow or null deref can make
+whole blocks vanish. Build with sanitizers, not just trust.</li>
+<li><strong><code>-Ofast</code> breaks the rules.</strong> <code>-ffast-math</code> reorders floating-point and assumes no NaN/Inf,
+silently changing numeric results — never enable it blindly in numerical code.</li>
+<li><strong>Debug vs release divergence.</strong> Bugs that appear only at <code>-O2</code> (or only at <code>-O0</code>) usually
+point at UB, uninitialized memory, or a data race the optimizer exposed — not a compiler bug.</li>
+<li><strong>JIT warm-up.</strong> Benchmarks that don’t account for warm-up measure the interpreter, not the
+JIT-compiled steady state.</li>
+<li><strong>Trusting the optimizer over the algorithm.</strong> No optimization level turns an O(n²) loop into
+O(n); fix algorithms and data layout first.</li>
+<li><strong>Miscompilation and “trusting trust”.</strong> Compilers have bugs, and a compromised compiler can
+inject code invisible in source — reproducible builds and cross-compiler checks matter for
+high-assurance work.</li>
 </ul>
 
                     </main>

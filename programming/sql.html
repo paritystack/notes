@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-bcca0e98.js";
+            window.path_to_searchindex_js = "../searchindex-f04597d6.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-088b4aa3.js"></script>
+        <script src="../toc-7644c17c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,7 +178,7 @@
                     <main>
                         <h1 id="sql-structured-query-language"><a class="header" href="#sql-structured-query-language">SQL (Structured Query Language)</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>SQL is a domain-specific language used for managing and manipulating relational databases. It’s the standard language for relational database management systems (RDBMS).</p>
+<p>SQL is a domain-specific language used for managing and manipulating relational databases. It’s the standard language for relational database management systems (RDBMS). It is the mainstream <a href="paradigms.html">declarative</a> language — you describe <em>what</em> result you want and the query planner decides <em>how</em> to compute it. The deeper engine concepts behind these queries (indexes, query planning, MVCC, the write-ahead log) live in <a href="../databases/database_internals.html">database internals</a> and the broader <a href="../databases/README.html">databases</a> section. Scripts and applications reach it from languages like <a href="python.html">Python</a>, <a href="java.html">Java</a>, and <a href="bash.html">Bash</a>.</p>
 <p><strong>Key Concepts:</strong></p>
 <ul>
 <li>Declarative language (what, not how)</li>
@@ -1144,6 +1144,23 @@ sqlite3 database.db
 .schema table_name
 .quit
 </code></pre>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="../databases/README.html">Databases</a> — the section covering relational and non-relational stores, indexing, and transactions in depth.</li>
+<li><a href="../databases/database_internals.html">Database internals</a> — B-trees, query planning, MVCC, and the WAL that execute the SQL on this page.</li>
+<li><a href="paradigms.html">Paradigms</a> — SQL is the canonical declarative/query language; set-based thinking over imperative loops.</li>
+<li><a href="python.html">Python</a> / <a href="java.html">Java</a> — application code talks to SQL via drivers and ORMs (SQLAlchemy, Hibernate).</li>
+<li><a href="bash.html">Bash</a> — scripts shell out to <code>psql</code>/<code>mysql</code>/<code>sqlite3</code> for one-off queries and migrations.</li>
+</ul>
+<h2 id="pitfalls"><a class="header" href="#pitfalls">Pitfalls</a></h2>
+<ul>
+<li><strong>SQL injection.</strong> Building queries by string concatenation; always use parameterized/prepared statements.</li>
+<li><strong>N+1 queries.</strong> ORMs firing one query per row instead of a join; watch the generated SQL.</li>
+<li><strong><code>NULL</code> three-valued logic.</strong> <code>NULL = NULL</code> is unknown, not true; <code>NOT IN (… NULL …)</code> returns no rows. Use <code>IS NULL</code>/<code>IS NOT NULL</code>.</li>
+<li><strong>Missing or wrong indexes.</strong> Full table scans on large tables; but over-indexing slows writes — index for your actual query patterns.</li>
+<li><strong>Implicit cross joins.</strong> Forgetting the <code>ON</code>/<code>WHERE</code> join condition produces a Cartesian product.</li>
+<li><strong>Non-deterministic <code>SELECT</code> without <code>ORDER BY</code>.</strong> Row order isn’t guaranteed; relying on insertion order is a bug.</li>
+</ul>
 
                     </main>
 

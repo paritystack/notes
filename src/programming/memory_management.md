@@ -1,54 +1,16 @@
 # Memory Management
 
-## Table of Contents
-- [Memory Fundamentals](#memory-fundamentals)
-  - [Stack vs Heap Allocation](#stack-vs-heap-allocation)
-  - [Memory Layout](#memory-layout)
-  - [Virtual Memory](#virtual-memory)
-  - [Memory Alignment](#memory-alignment)
-  - [Fragmentation](#fragmentation)
-- [Allocation Strategies](#allocation-strategies)
-  - [Static Allocation](#static-allocation)
-  - [Stack Allocation](#stack-allocation)
-  - [Heap Allocation](#heap-allocation)
-  - [Memory Pools](#memory-pools)
-  - [Arena Allocators](#arena-allocators)
-- [Garbage Collection](#garbage-collection)
-  - [Reference Counting](#reference-counting)
-  - [Mark and Sweep](#mark-and-sweep)
-  - [Generational GC](#generational-gc)
-  - [Tri-Color Marking](#tri-color-marking)
-  - [GC Tuning](#gc-tuning)
-  - [GC Pauses](#gc-pauses)
-- [Manual Memory Management](#manual-memory-management)
-  - [malloc/free in C](#mallocfree-in-c)
-  - [new/delete in C++](#newdelete-in-c)
-  - [Memory Leak Detection](#memory-leak-detection)
-  - [Use-After-Free Bugs](#use-after-free-bugs)
-  - [Double-Free Errors](#double-free-errors)
-- [Smart Pointers (C++)](#smart-pointers-c)
-  - [unique_ptr](#unique_ptr)
-  - [shared_ptr](#shared_ptr)
-  - [weak_ptr](#weak_ptr)
-  - [RAII Pattern](#raii-pattern)
-- [Language-Specific Memory Management](#language-specific-memory-management)
-  - [Python](#python)
-  - [JavaScript](#javascript)
-  - [Go](#go)
-  - [Rust](#rust)
-  - [Java](#java)
-- [Memory Profiling](#memory-profiling)
-  - [Profiling Tools](#profiling-tools)
-  - [Memory Leak Detection Tools](#memory-leak-detection-tools)
-  - [Heap Profiling](#heap-profiling)
-- [Performance Optimization](#performance-optimization)
-  - [Cache-Friendly Data Structures](#cache-friendly-data-structures)
-  - [Memory Access Patterns](#memory-access-patterns)
-  - [Copy-on-Write](#copy-on-write)
-  - [Memory-Mapped Files](#memory-mapped-files)
-- [Common Pitfalls and Best Practices](#common-pitfalls-and-best-practices)
+## Overview
 
----
+Memory management is how a program obtains, uses, and releases memory — and the strategy a
+language picks here shapes its whole feel. The spectrum runs from fully manual
+(`malloc`/`free` in [C](c.md), `new`/`delete` and RAII smart pointers in [C++](cpp.md),
+explicit allocators in [Zig](zig.md)), through compile-time ownership ([Rust](rust.md)'s borrow
+checker), to automatic [garbage collection](#garbage-collection) ([Java](java.md),
+[Go](go.md), [Python](python.md), [JavaScript](javascript.md)). This page covers the stack/heap
+divide, allocation strategies, GC algorithms, smart pointers, and cache-aware layout. It is the
+foundation under [concurrency](concurrency.md) (data races and false sharing are memory issues)
+and is enforced by the [compiler](compilers.md).
 
 ## Memory Fundamentals
 
@@ -6974,3 +6936,17 @@ Different languages and use cases require different approaches:
 - **Games/Real-time**: Arenas, pools, manual control
 
 The right choice depends on your performance requirements, development time constraints, and correctness guarantees needed.
+
+## Where this connects
+
+- [C](c.md) / [C++](cpp.md) — manual `malloc`/`free`, `new`/`delete`, and RAII smart pointers
+  (`unique_ptr`/`shared_ptr`) are the canonical manual-management story.
+- [Rust](rust.md) — ownership and borrowing move the manual/GC trade-off to compile time, with
+  no runtime collector.
+- [Zig](zig.md) — explicit allocator passing and arenas; no hidden allocation.
+- [Go](go.md) / [Java](java.md) / [Python](python.md) / [JavaScript](javascript.md) — garbage
+  collected; the GC algorithms (reference counting, mark-and-sweep, generational) live here.
+- [Concurrency](concurrency.md) — the memory model, cache lines, and false sharing decide what
+  threads observe; data races are memory-management bugs.
+- [Compilers](compilers.md) — the compiler emits allocation/free and GC barriers, and (in Rust)
+  enforces ownership during semantic analysis.

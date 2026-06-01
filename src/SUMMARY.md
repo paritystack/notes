@@ -292,6 +292,9 @@
     - [Agent Memory & Context Engineering](ai/agent_memory.md)
     - [Multi-Agent Systems](ai/multi_agent_systems.md)
     - [Coding & Computer-Use Agents](ai/coding_agents.md)
+    - [LLM Evaluation](ai/llm_evaluation.md)
+    - [LLM Observability & LLMOps](ai/llm_observability.md)
+    - [Prompt Caching](ai/prompt_caching.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)

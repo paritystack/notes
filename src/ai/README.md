@@ -129,6 +129,12 @@ The open standard for connecting AI assistants to external systems:
 - [Multi-Agent Systems](./multi_agent_systems.md) — supervisor/swarm/pipeline patterns, handoffs, shared state
 - [Coding & Computer-Use Agents](./coding_agents.md) — autonomous coding loops, SWE-bench, browser/computer use
 
+### Evaluation & LLMOps
+
+- [LLM Evaluation](./llm_evaluation.md) — benchmarks, evals, LLM-as-judge, RAGAS
+- [LLM Observability & LLMOps](./llm_observability.md) — tracing, token/cost/latency, the prod feedback loop
+- [Prompt Caching](./prompt_caching.md) — KV-prefix reuse, cache breakpoints, cost/latency savings
+
 ## Key AI Concepts
 
 ### Large Language Models (LLMs)

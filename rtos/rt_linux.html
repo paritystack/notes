@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-61b33de5.js";
+            window.path_to_searchindex_js = "../searchindex-ba612d38.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-3dca3197.js"></script>
@@ -177,7 +177,8 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="rt-linux-preempt_rt"><a class="header" href="#rt-linux-preempt_rt">RT-Linux (PREEMPT_RT)</a></h1>
-<p>“Real-time Linux” today almost always means the <strong>PREEMPT_RT</strong> preemption model — a set of changes that make the mainline Linux kernel fully preemptible, so high-priority tasks meet tight, bounded latency deadlines. Long maintained as an out-of-tree patch set, PREEMPT_RT has been progressively merged upstream, with <code>CONFIG_PREEMPT_RT</code> now selectable in mainline. It delivers <em>soft/firm</em> real-time on a full-featured OS — not the hard guarantees of a bare-metal RTOS or a dual-kernel microkernel.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>“Real-time Linux” today almost always means the <strong>PREEMPT_RT</strong> preemption model — a set of changes that make the mainline Linux kernel fully preemptible, so high-priority tasks meet tight, bounded latency deadlines. Long maintained as an out-of-tree patch set, PREEMPT_RT has been progressively merged upstream, with <code>CONFIG_PREEMPT_RT</code> now selectable in mainline. It delivers <em>soft/firm</em> real-time on a full-featured OS — not the hard guarantees of a bare-metal RTOS like <a href="freertos.html">FreeRTOS</a>, <a href="zephyr.html">Zephyr</a>, or <a href="threadx.html">ThreadX</a>. <a href="../embedded/interrupts.html">Interrupts</a> become threaded IRQs under PREEMPT_RT; understanding <a href="../linux/kernel_patterns.html">Linux kernel patterns</a> (locking, RCU) is necessary to write RT-safe drivers.</p>
 <blockquote>
 <p><strong>Historical note:</strong> the original <em>RTLinux</em> (and relatives RTAI and Xenomai) used a <strong>dual-kernel</strong> approach: a small hard-real-time microkernel ran the RT tasks and scheduled stock Linux as its lowest-priority thread. PREEMPT_RT is fundamentally different — there is one kernel, and it is made preemptible from within. This page covers the PREEMPT_RT, single-kernel approach.</p>
 </blockquote>
@@ -432,6 +433,14 @@ int main(void)
 sudo taskset -c 2 ./rt_cyclic      # pin to isolated CPU 2
 </code></pre>
 <h2 id="preempt_rt-turns-mainline-linux-into-a-fully-preemptible-low-latency-real-time-os--pairing-standard-posix-scheduling-apis-with-careful-system-tuning-memory-locking-cpu-isolation-priority-inheritance-and-cyclictest-driven-measurement-to-achieve-bounded-deterministic-response"><a class="header" href="#preempt_rt-turns-mainline-linux-into-a-fully-preemptible-low-latency-real-time-os--pairing-standard-posix-scheduling-apis-with-careful-system-tuning-memory-locking-cpu-isolation-priority-inheritance-and-cyclictest-driven-measurement-to-achieve-bounded-deterministic-response">PREEMPT_RT turns mainline Linux into a fully preemptible, low-latency real-time OS — pairing standard POSIX scheduling APIs with careful system tuning (memory locking, CPU isolation, priority inheritance) and <code>cyclictest</code>-driven measurement to achieve bounded, deterministic response.</a></h2>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="freertos.html">FreeRTOS</a> — bare-metal alternative for hard real-time on resource-constrained MCUs; no Linux userspace</li>
+<li><a href="zephyr.html">Zephyr</a> — another bare-metal RTOS option with Devicetree and networking stacks</li>
+<li><a href="threadx.html">ThreadX</a> — safety-certified picokernel for deeply embedded targets without OS overhead</li>
+<li><a href="../linux/kernel_patterns.html">Linux kernel patterns</a> — RT-safe locking (sleeping spinlocks, rt_mutex) requires understanding kernel concurrency patterns</li>
+<li><a href="../embedded/interrupts.html">Interrupts</a> — PREEMPT_RT converts interrupt handlers to threaded IRQs, making them schedulable and prioritizable</li>
+</ul>
 
                     </main>
 

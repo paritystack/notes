@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-61b33de5.js";
+            window.path_to_searchindex_js = "../searchindex-ba612d38.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-3dca3197.js"></script>
@@ -180,6 +180,8 @@
 <blockquote>
 <p><strong>Key Concepts:</strong> Vector Quantization, Subspace Decomposition, Codebooks, Symmetric &amp; Asymmetric Distance, Inverted File Index, OPQ, ScaNN</p>
 </blockquote>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Product quantization (PQ) compresses high-dimensional vectors into compact codes for approximate nearest-neighbor search at scale. Part of <a href="probabilistic.html">probabilistic structures</a> (approximation family). Compare <a href="minhash_lsh.html">MinHash/LSH</a> for set-similarity ANN and <a href="spatial_structures.html">spatial structures</a> (KD-tree) for exact low-dimensional ANN.</p>
 <h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
 <ul>
 <li><a href="#overview">Overview</a></li>
@@ -199,7 +201,7 @@
 <li><a href="#common-pitfalls">Common Pitfalls</a></li>
 <li><a href="#related-topics">Related Topics</a></li>
 </ul>
-<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
 <p><strong>Product Quantization (PQ)</strong> is a vector compression technique that allows you to store and search billion-scale high-dimensional vector collections in a fraction of the memory of raw vectors, with controllable accuracy loss. Combined with the <strong>Inverted File Index (IVF)</strong> for partitioning, it forms the basis of FAISS’s most popular indexes (<code>IVF*,PQ*</code>) and powers vector search at Facebook, Spotify, Pinterest, and most large-scale ANN deployments where raw vector storage isn’t viable.</p>
 <p>Where [[hnsw]] gives you near-perfect recall in exchange for high memory (vectors + graph), PQ+IVF gives you 10-100× memory reduction at the cost of some recall — the appropriate tradeoff when N exceeds ~10M and you can’t afford to store full vectors in RAM.</p>
 <h3 id="what-pq-buys-you"><a class="header" href="#what-pq-buys-you">What PQ Buys You</a></h3>
@@ -755,6 +757,12 @@ for dist, vid in hits:
 <p>Product Quantization solved the central problem of large-scale ANN: how to store and compare billion-scale vector collections within commodity RAM. By decomposing high-dimensional vectors into sub-vectors and quantizing each independently with a tiny codebook, PQ compresses 768-dim float32 vectors from 3 KB to 8-64 bytes while keeping distance computations to a handful of table lookups.</p>
 <p>IVF adds the second key piece — coarse partitioning so search only touches a small fraction of the data — and the <strong>IVF-PQ</strong> combination is the workhorse of FAISS, Milvus, DiskANN, and virtually every production vector search system above ~10M vectors. OPQ and ScaNN refine the codebook learning to recover even more recall. The combined memory footprint and query latency are what made web-scale and billion-document semantic search economically viable.</p>
 <p>For 2026 production: use HNSW when vectors fit in RAM with margin (best latency-recall); use IVF-PQ or HNSW-PQ when they don’t; use DiskANN when even compressed vectors exceed RAM. The decision is driven almost entirely by <code>bytes_per_vector × N</code> vs available memory.</p>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="minhash_lsh.html">MinHash/LSH</a> — set-similarity ANN counterpart; for sparse set data rather than dense vectors</li>
+<li><a href="spatial_structures.html">Spatial structures</a> — exact ANN alternative for low-dimensional (≤20) data</li>
+<li><a href="probabilistic.html">Probabilistic structures</a> — PQ is another member of the approximation/lossy family</li>
+</ul>
 
                     </main>
 

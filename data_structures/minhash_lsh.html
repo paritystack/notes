@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-61b33de5.js";
+            window.path_to_searchindex_js = "../searchindex-ba612d38.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-3dca3197.js"></script>
@@ -180,6 +180,8 @@
 <blockquote>
 <p><strong>Key Concepts:</strong> Jaccard Similarity, Permutation Sampling, Signatures, Banding, Locality-Sensitive Hashing, b-bit MinHash, SuperMinHash, Weighted MinHash</p>
 </blockquote>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>MinHash estimates Jaccard similarity between sets; LSH groups similar items into buckets for approximate nearest-neighbor search. Part of <a href="probabilistic.html">probabilistic structures</a>. Compare <a href="product_quantization.html">product quantization</a> for dense vector ANN; <a href="bloom_filter.html">bloom filters</a> for membership rather than similarity. Uses <a href="../algorithms/hashing_techniques.html">hashing techniques</a> as the core primitive.</p>
 <h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
 <ul>
 <li><a href="#overview">Overview</a></li>
@@ -201,7 +203,7 @@
 <li><a href="#common-pitfalls">Common Pitfalls</a></li>
 <li><a href="#related-topics">Related Topics</a></li>
 </ul>
-<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
 <p><strong>MinHash</strong> is a probabilistic data structure that estimates the <strong>Jaccard similarity</strong> between two sets in O(1) time, using fixed-size signatures (a few KB) regardless of original set size. <strong>Locality-Sensitive Hashing (LSH)</strong> uses MinHash signatures to build a sub-linear-time index for “find all pairs of sets with Jaccard similarity above a threshold.”</p>
 <p>Together, they solve at web scale: near-duplicate detection (Google’s web-page dedup), document similarity for search/recommendation, training-data deduplication for LLMs (huge in 2023-2026 — required for GPT-4, Llama, Claude training pipelines), plagiarism detection, entity resolution, and genomics k-mer comparison.</p>
 <p>For dense vectors (embeddings), see [[hnsw]] / [[product-quantization]]. MinHash is the right tool when your data is naturally <strong>set-shaped</strong>: tokens, n-grams, shingles, k-mers, item interactions, feature membership.</p>
@@ -759,6 +761,13 @@ print("Matches:", lsh.query(query_mh, min_jaccard=0.3))
 <p>MinHash answers “how similar are these two sets?” with a fixed-size signature instead of touching the original sets. The trick — that the probability of matching min-hashes equals Jaccard similarity — is elegant and the standard error is straightforward to control by tuning the signature length. LSH wraps signatures in a hash-bucket index that finds candidate-similar pairs in sublinear time, making “find all pairs above similarity threshold T in a corpus of N” feasible at the scale of billions.</p>
 <p>The technique is foundational for web-scale dedup (Broder’s original use case at AltaVista), and in 2023-2026 it became central to LLM training: every published frontier model (GPT-4, Claude, Llama, Gemini, DeepSeek) describes a MinHash-LSH-based dedup pass over pretraining data, because un-dedup’d corpora produce drastically worse models. SuperMinHash, b-bit MinHash, and weighted MinHash refine the technique for specific accuracy/memory regimes, but the core MinHash + banding algorithm from the late 1990s remains the workhorse.</p>
 <p>For 2026 practice: reach for <code>datasketch</code> for Python, Spark <code>MinHashLSH</code> for distributed pipelines, and don’t confuse it with SimHash (cosine, not Jaccard) or with HNSW/PQ (dense embeddings, not sets). When your data is set-shaped, MinHash is unbeatable.</p>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="probabilistic.html">Probabilistic structures</a> — MinHash is a member of the probabilistic data structure family</li>
+<li><a href="bloom_filter.html">Bloom filter</a> — membership testing; LSH is the similarity extension of the same hashing idea</li>
+<li><a href="product_quantization.html">Product quantization</a> — dense vector ANN counterpart; MinHash/LSH handles set-similarity ANN</li>
+<li><a href="../algorithms/hashing_techniques.html">Hashing techniques</a> — the permutation sampling and banding are hash-based</li>
+</ul>
 
                     </main>
 

@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-61b33de5.js";
+            window.path_to_searchindex_js = "../searchindex-ba612d38.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-3dca3197.js"></script>
@@ -180,7 +180,7 @@
 <h2 id="1-introduction-to-linker-scripts"><a class="header" href="#1-introduction-to-linker-scripts">1. Introduction to Linker Scripts</a></h2>
 <p>In the world of desktop software development (Windows, Linux, macOS), the operating system abstracts away the physical hardware. When you compile and run a C++ program on Linux, the OS loader places your executable into virtual memory, sets up the stack, and begins execution. The programmer rarely cares exactly <em>where</em> in physical RAM the program resides.</p>
 <p>In <strong>Embedded Systems</strong> (especially “bare-metal” programming on microcontrollers), this abstraction does not exist. There is no OS loader to dynamically allocate memory or set up virtual address spaces. The programmer is directly responsible for mapping the compiled code and variables to the physical memory addresses provided by the microcontroller’s hardware architecture.</p>
-<p>This critical task is accomplished using a <strong>Linker Script</strong> (typically ending in <code>.ld</code>).</p>
+<p>This critical task is accomplished using a <strong>Linker Script</strong> (typically ending in <code>.ld</code>). The linker script must reflect the <a href="isa.html">ISA</a>’s memory model and the <a href="processor_design.html">processor’s</a> physical memory map; the <a href="startup_code.html">startup code</a> then copies <code>.data</code> and zeros <code>.bss</code> using the symbols the linker script exports.</p>
 <p>A linker script is a text file that commands the linker (like GNU <code>ld</code> or LLVM <code>lld</code>) on how to combine various input object files (<code>.o</code>) into a single output executable (usually an <code>.elf</code> file, which is later converted to <code>.bin</code> or <code>.hex</code> for flashing). It dictates the exact memory layout of the final binary, specifying where the executable code (Flash), read-only constants (Flash), and readable/writable variables (SRAM) must be placed.</p>
 <h3 id="why-are-linker-scripts-crucial"><a class="header" href="#why-are-linker-scripts-crucial">Why are Linker Scripts Crucial?</a></h3>
 <ol>
@@ -789,6 +789,14 @@ Linker script and memory map
 <li><strong>Compatibility:</strong> <code>lld</code> is intended to be a drop-in replacement. It parses the exact same GNU Linker Script syntax.</li>
 <li><strong>Usage:</strong> You can instruct clang or gcc to use lld by passing the flag <code>-fuse-ld=lld</code>.</li>
 <li><strong>Differences:</strong> While syntactically compatible, <code>lld</code> handles Garbage Collection (<code>--gc-sections</code>) and symbol resolution slightly more aggressively than GNU <code>ld</code>. A sloppy linker script that implicitly relied on undefined GNU behaviors might break when transitioning to LLVM.</li>
+</ul>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="isa.html">ISA</a> — the ISA defines alignment requirements, endianness, and section conventions the linker script must honour</li>
+<li><a href="processor_design.html">Processor Design</a> — placing ISR code in TCM (zero-wait-state RAM) requires explicit linker script placement</li>
+<li><a href="startup_code.html">Startup Code</a> — uses linker-exported <code>_sdata</code>, <code>_edata</code>, <code>_sbss</code>, <code>_ebss</code> symbols to initialise RAM</li>
+<li><a href="memory_management.html">Memory Management</a> — linker sections define the pool allocator’s and stack’s fixed addresses</li>
+<li><a href="ota_updates.html">OTA Updates</a> — dual-bank OTA requires the linker script to know each bank’s base address and size</li>
 </ul>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
 <p>The Linker Script is the bridge between software architecture and hardware architecture. Mastering it transitions a developer from simply writing algorithms to engineering a complete, robust embedded system capable of complex memory management, bootloading, and high-performance execution.</p>

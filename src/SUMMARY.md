@@ -298,6 +298,8 @@
     - [LLM Security](ai/llm_security.md)
     - [Guardrails & Moderation](ai/guardrails.md)
     - [Alignment](ai/alignment.md)
+    - [Reasoning Models & Test-Time Compute](ai/reasoning_models.md)
+    - [Model Families](ai/model_families.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)
@@ -579,3 +581,8 @@
     - [ThreadX](rtos/threadx.md)
     - [Zephyr](rtos/zephyr.md)
     - [RT-Linux](rtos/rt_linux.md)
+    - [Real-Time Scheduling](rtos/scheduling.md)
+    - [Priority Inversion](rtos/priority_inversion.md)
+    - [Synchronization](rtos/synchronization.md)
+    - [Context Switching](rtos/context_switching.md)
+    - [RTOS vs Bare-Metal](rtos/rtos_vs_bare_metal.md)

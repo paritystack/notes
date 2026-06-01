@@ -141,6 +141,11 @@ The open standard for connecting AI assistants to external systems:
 - [Guardrails & Moderation](./guardrails.md) — input/output checks, content moderation, PII, validation
 - [Alignment](./alignment.md) — SFT, RLHF, DPO, Constitutional AI (applied post-training)
 
+### Models & Reasoning
+
+- [Reasoning Models & Test-Time Compute](./reasoning_models.md) — o-series/R1, long CoT, RL with verifiable rewards
+- [Model Families](./model_families.md) — GPT/Claude/Gemini vs Llama/Mistral/Qwen/Gemma/DeepSeek/Phi, selection
+
 ## Key AI Concepts
 
 ### Large Language Models (LLMs)

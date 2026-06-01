@@ -2,7 +2,7 @@
 
 ## Overview
 
-IPv4 (Internet Protocol version 4) is the fourth version of the Internet Protocol and the first version to be widely deployed. It is the network layer protocol responsible for addressing and routing packets across networks, providing the addressing scheme that allows devices to find each other on the internet.
+IPv4 (Internet Protocol version 4) is the fourth version of the Internet Protocol and the first version to be widely deployed. It is the network layer protocol responsible for addressing and routing packets across networks, providing the addressing scheme that allows devices to find each other on the internet. [IPv6](ipv6.md) is its successor addressing address exhaustion; [ARP](arp.md) resolves IPv4 addresses to MAC addresses; [DHCP](dhcp.md) assigns IPv4 addresses dynamically; [MTU/PMTUD](mtu_pmtud.md) governs fragmentation.
 
 ## Key Characteristics
 
@@ -1304,5 +1304,13 @@ Routers are like mail sorting facilities:
 - [RFC 1812 - Requirements for IPv4 Routers](https://tools.ietf.org/html/rfc1812)
 - [RFC 3021 - Using 31-Bit Prefixes on IPv4 Point-to-Point Links](https://tools.ietf.org/html/rfc3021)
 - [Subnet Calculator](https://www.subnet-calculator.com/)
+## Where this connects
+
+- [IPv6](ipv6.md) — the successor addressing address exhaustion; many networks are dual-stack
+- [ARP](arp.md) — resolves IPv4 addresses to MAC addresses on the local link
+- [DHCP](dhcp.md) — dynamically assigns IPv4 addresses
+- [NAT-PMP](nat_pmp.md) / [PCP](pcp.md) — manage port forwarding through NAT for inbound connections
+- [MTU/PMTUD](mtu_pmtud.md) — governs fragmentation when packets are too large for a link
+
 - [CIDR to IPv4 Conversion](https://www.ipaddressguide.com/cidr)
 - [IANA IPv4 Address Space Registry](https://www.iana.org/assignments/ipv4-address-space/)

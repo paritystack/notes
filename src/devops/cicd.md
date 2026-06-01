@@ -5,6 +5,8 @@
 **CI (Continuous Integration)**: Automatically test code on every commit
 **CD (Continuous Deployment)**: Automatically deploy to production
 
+CI/CD pipelines build and push [Docker](docker.md) images, deploy to [Kubernetes](kubernetes.md), and are implemented in platforms like [GitHub Actions](github-actions.md). The test stage integrates with the [testing](../testing/README.md) layer.
+
 ## Pipeline Stages
 
 ```
@@ -187,3 +189,11 @@ Catch problems BEFORE customers see them!
 - [GitLab CI/CD](https://docs.gitlab.com/ee/ci/)
 - [Jenkins Guide](https://www.jenkins.io/doc/)
 - [The Twelve-Factor App](https://12factor.net/)
+
+## Where this connects
+
+- [GitHub Actions](github-actions.md) — one of the most common CI/CD platform implementations
+- [Docker](docker.md) — CI builds Docker images; CD pushes them to registries
+- [Kubernetes](kubernetes.md) — CD pipelines deploy new image versions to K8s clusters
+- [Terraform](terraform.md) — infrastructure changes are applied as a Terraform plan/apply step in CD
+- [Observability](observability.md) — deployment events should be correlated with metric changes

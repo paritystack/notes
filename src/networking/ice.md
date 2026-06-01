@@ -2,7 +2,7 @@
 
 ## Overview
 
-ICE (Interactive Connectivity Establishment) is a framework used to establish peer-to-peer connections through NATs and firewalls. It's primarily used by WebRTC, VoIP applications, and other real-time communication systems to find the best path for connecting two endpoints on the internet.
+ICE (Interactive Connectivity Establishment) is a framework used to establish peer-to-peer connections through NATs and [firewalls](firewalls.md). It's primarily used by [WebRTC](webrtc.md), VoIP applications, and other real-time communication systems to find the best path for connecting two endpoints. ICE orchestrates [STUN](stun.md) (address discovery) and [TURN](turn.md) (relay fallback) over [UDP](udp.md).
 
 ## The NAT Problem
 
@@ -1181,5 +1181,13 @@ Best connection = Selected candidate pair
 - [Twilio STUN/TURN](https://www.twilio.com/stun-turn) - Managed service
 
 ### Articles
+## Where this connects
+
+- [WebRTC](webrtc.md) — ICE is the core connectivity framework inside every WebRTC connection
+- [STUN](stun.md) — ICE uses STUN to gather server-reflexive (public) candidates
+- [TURN](turn.md) — ICE falls back to TURN relay candidates when direct paths fail
+- [UDP](udp.md) — ICE candidates are probed over UDP; TCP ICE is a fallback
+- [Firewalls](firewalls.md) — ICE is specifically designed to traverse NATs and firewalls
+
 - [WebRTC ICE](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Connectivity)
 - [Understanding ICE](https://bloggeek.me/webrtc-ice/)

@@ -2,7 +2,7 @@
 
 ## Overview
 
-PCP (Port Control Protocol) is a protocol that allows hosts to control how incoming packets are forwarded by upstream devices such as NAT gateways and firewalls. It's the successor to NAT-PMP and provides more features and flexibility for port mapping and firewall control.
+PCP (Port Control Protocol) is a protocol that allows hosts to control how incoming packets are forwarded by upstream devices such as NAT gateways and [firewalls](firewalls.md). It's the successor to [NAT-PMP](nat_pmp.md) and provides more features and flexibility for port mapping. [UPnP](upnp.md) IGD is the older competing standard; [STUN](stun.md)/[ICE](ice.md) are the alternative approach for peer-to-peer traversal that avoids explicit port mapping.
 
 ## Key Characteristics
 
@@ -993,5 +993,12 @@ Secure because:
 - pcptest - PCP testing tool
 
 ### Comparison
+## Where this connects
+
+- [NAT-PMP](nat_pmp.md) — PCP's predecessor; PCP is backwards-compatible with NAT-PMP gateways
+- [UPnP](upnp.md) — the more complex competing standard; PCP is preferred for new implementations
+- [Firewalls](firewalls.md) — PCP can request firewall rules as well as NAT port mappings
+- [ICE](ice.md) / [STUN](stun.md) — alternative approach for P2P traversal without explicit port mapping
+
 - [PCP vs UPnP-IGD](https://tools.ietf.org/html/rfc6887#appendix-B)
 - [PCP vs NAT-PMP](https://tools.ietf.org/html/rfc6887#appendix-A)

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Docker packages applications into containers - lightweight, isolated environments with all dependencies. Build once, run anywhere.
+Docker packages applications into containers - lightweight, isolated environments with all dependencies. Build once, run anywhere. [Kubernetes](kubernetes.md) orchestrates containers at scale, and [CI/CD](cicd.md) pipelines build and push images automatically.
 
 ## Core Concepts
 
@@ -1868,3 +1868,10 @@ No more "it works on my machine" problems!
 - [Docker Documentation](https://docs.docker.com/)
 - [Docker Hub Images](https://hub.docker.com/)
 - [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+
+## Where this connects
+
+- [Kubernetes](kubernetes.md) — orchestrates fleets of Docker containers across nodes
+- [CI/CD](cicd.md) — pipelines build and push Docker images on every commit
+- [GitHub Actions](github-actions.md) — the most common platform for Docker build/push workflows
+- [Infrastructure](infrastructure.md) — the cloud VMs or bare-metal hosts that run the Docker daemon

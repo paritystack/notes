@@ -2,7 +2,7 @@
 
 ## Overview
 
-A firewall is a network security system that monitors and controls incoming and outgoing network traffic based on predetermined security rules. It acts as a barrier between trusted internal networks and untrusted external networks (like the internet).
+A firewall is a network security system that monitors and controls incoming and outgoing network traffic based on predetermined security rules. It acts as a barrier between trusted internal networks and untrusted external networks (like the internet). Firewalls inspect [IP](ip.md), [TCP](tcp.md), and [UDP](udp.md) headers; [IPsec](ipsec.md) VPNs and [SSH](ssh.md) tunnels traverse firewalls; [NAT-PMP](nat_pmp.md)/[PCP](pcp.md) manage port-forward rules in NAT firewalls.
 
 ## Firewall Types
 
@@ -744,5 +744,12 @@ A firewall is like a security guard at a building entrance:
 
 - [iptables Tutorial](https://www.frozentux.net/iptables-tutorial/iptables-tutorial.html)
 - [NIST Firewall Guide](https://csrc.nist.gov/publications/detail/sp/800-41/rev-1/final)
+## Where this connects
+
+- [IP](ip.md) / [TCP](tcp.md) / [UDP](udp.md) — firewall rules match on IP addresses, ports, and protocols
+- [IPsec](ipsec.md) — firewalls must permit ESP/AH packets for VPN tunnels to pass
+- [SSH](ssh.md) — SSH port 22 is one of the most common firewall allow-rules
+- [NAT-PMP](nat_pmp.md) / [PCP](pcp.md) — protocols that punch holes in NAT firewalls dynamically
+
 - [Firewall Best Practices](https://www.cisecurity.org/controls/)
 - [pf (OpenBSD Firewall)](https://www.openbsd.org/faq/pf/)

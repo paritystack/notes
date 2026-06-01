@@ -1,6 +1,6 @@
 # TCP (Transmission Control Protocol)
 
-TCP is a connection-oriented, reliable transport layer protocol that provides ordered delivery of data between applications running on hosts in an IP network. It is one of the core protocols of the Internet Protocol Suite.
+TCP is a connection-oriented, reliable transport layer protocol that provides ordered delivery of data between applications running on hosts in an [IP](ip.md) network. It is one of the core protocols of the Internet Protocol Suite. [UDP](udp.md) trades reliability for speed; [QUIC](quic.md) reimplements TCP's reliability over UDP with built-in encryption; [TLS/SSL](tls_ssl.md) sits above TCP to add confidentiality; [HTTP](http.md) and [HTTP/2](http2.md) are the most common application protocols carried by TCP.
 
 ## Key Features
 
@@ -2889,5 +2889,13 @@ Convergence:
 - [RFC 2018](https://tools.ietf.org/html/rfc2018) - TCP Selective Acknowledgment
 - [RFC 7413](https://tools.ietf.org/html/rfc7413) - TCP Fast Open
 - [RFC 8684](https://tools.ietf.org/html/rfc8684) - Multipath TCP
+## Where this connects
+
+- [IP](ip.md) — TCP is a transport-layer protocol carried inside IP packets
+- [UDP](udp.md) — the connectionless alternative; pick TCP for reliability, UDP for latency
+- [QUIC](quic.md) — reimplements TCP's connection/reliability/encryption over UDP
+- [TLS/SSL](tls_ssl.md) — wraps TCP to add confidentiality and authentication (HTTPS, SMTPS, etc.)
+- [HTTP](http.md) / [HTTP/2](http2.md) / [WebSocket](websocket.md) — the most common application protocols that ride TCP
+
 - [RFC 9000](https://tools.ietf.org/html/rfc9000) - QUIC: A UDP-Based Multiplexed and Secure Transport
 - [RFC 9114](https://tools.ietf.org/html/rfc9114) - HTTP/3

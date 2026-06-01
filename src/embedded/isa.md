@@ -2,7 +2,7 @@
 
 ## 1. Introduction to Instruction Set Architecture
 
-An Instruction Set Architecture (ISA) defines the abstract model of a computer. It is the critical interface between the hardware (the physical silicon, logic gates, and microarchitecture) and the software (the operating system, compilers, and application code). A well-defined ISA allows hardware engineers to design faster, more efficient processors while guaranteeing that existing software will continue to run without modification.
+An Instruction Set Architecture (ISA) defines the abstract model of a computer. It is the critical interface between the hardware (the physical silicon, logic gates, and microarchitecture) and the software (the operating system, compilers, and application code). A well-defined ISA allows hardware engineers to design faster, more efficient processors while guaranteeing that existing software will continue to run without modification. The ISA defines the instruction set the [processor microarchitecture](processor_design.md) implements, the exception model that [interrupts](interrupts.md) rely on, and the memory model that [linker scripts](linker_scripts.md) must respect.
 
 The ISA specifies everything a machine language programmer or compiler writer needs to know to operate the machine:
 - The set of available instructions.
@@ -349,3 +349,10 @@ To truly understand an ISA, one must look at its assembly language. Consider a s
 .done:
 ```
 *Very clean, simple, orthagonal instructions. No auto-increment addressing mode means explicit `addi` instructions are required.*
+
+## Where this connects
+
+- [Processor Design](processor_design.md) — the microarchitecture that implements this ISA; same ISA, many implementations
+- [Interrupts](interrupts.md) — the ISA defines exception levels, vector tables, and privilege modes
+- [Linker Scripts](linker_scripts.md) — memory layout must respect ISA addressing, alignment, and section conventions
+- [Startup Code](startup_code.md) — the low-level assembly that initialises the CPU state defined by the ISA on reset

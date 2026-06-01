@@ -2,7 +2,7 @@
 
 ## Overview
 
-IP (Internet Protocol) is the network layer protocol responsible for addressing and routing packets across networks. It provides the addressing scheme that allows devices to find each other on the internet.
+IP (Internet Protocol) is the network layer protocol responsible for addressing and routing packets across networks. It provides the addressing scheme that allows devices to find each other on the internet. [IPv4](ipv4.md) and [IPv6](ipv6.md) are the two deployed versions; [TCP](tcp.md) and [UDP](udp.md) sit above IP at the transport layer; [ARP](arp.md) maps IP addresses to MAC addresses on local segments; [BGP](bgp_anycast.md) routes IP prefixes between autonomous systems.
 
 ## IP Versions
 
@@ -598,5 +598,13 @@ IP addresses are like street addresses for computers:
 - [RFC 791 - IPv4 Specification](https://tools.ietf.org/html/rfc791)
 - [RFC 8200 - IPv6 Specification](https://tools.ietf.org/html/rfc8200)
 - [RFC 1918 - Private Address Space](https://tools.ietf.org/html/rfc1918)
+## Where this connects
+
+- [IPv4](ipv4.md) / [IPv6](ipv6.md) — the two deployed versions of the IP protocol
+- [TCP](tcp.md) / [UDP](udp.md) — transport-layer protocols carried inside IP
+- [ARP](arp.md) — resolves IP addresses to MAC addresses on local segments
+- [BGP](bgp_anycast.md) — advertises IP prefixes between autonomous systems
+- [OSPF/IS-IS](ospf_isis.md) — routes IP within a single autonomous system
+
 - [Subnet Calculator](https://www.subnet-calculator.com/)
 - [CIDR to IPv4 Conversion](https://www.ipaddressguide.com/cidr)

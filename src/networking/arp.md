@@ -2,7 +2,7 @@
 
 ## Overview
 
-ARP maps IP addresses to MAC addresses on a local network. When your machine wants to send a packet to `192.168.1.1`, it needs to know which physical Ethernet/Wi-Fi card to send the frame to — ARP answers that question. ARP operates at Layer 2.5 (between data link and network), runs only on the local segment, and is the glue that makes IP-over-Ethernet work.
+ARP maps [IP](ip.md) addresses to MAC addresses on a local network. When your machine wants to send a packet to `192.168.1.1`, it needs to know which physical [Ethernet](ethernet_vlan.md) card to send the frame to — ARP answers that question. ARP operates at Layer 2.5 (between data link and network), runs only on the local segment, and is the glue that makes [IPv4](ipv4.md)-over-Ethernet work. [DHCP](dhcp.md) uses ARP for duplicate-address detection; IPv6 replaces ARP with ICMPv6 Neighbor Discovery.
 
 ## Why ARP?
 
@@ -396,5 +396,12 @@ Now you know to slip the letter under door 304. Next time you write to Alice, yo
 
 - [RFC 826 - ARP](https://tools.ietf.org/html/rfc826)
 - [RFC 5227 - IPv4 Address Conflict Detection](https://tools.ietf.org/html/rfc5227)
+## Where this connects
+
+- [Ethernet/VLAN](ethernet_vlan.md) — ARP runs inside Ethernet frames on the local segment
+- [IPv4](ipv4.md) — ARP resolves IPv4 addresses; IPv6 uses ICMPv6 Neighbor Discovery instead
+- [DHCP](dhcp.md) — DHCP clients ARP for the offered address before accepting it (DAD)
+- [Firewalls](firewalls.md) — ARP spoofing attacks can be mitigated with dynamic ARP inspection (DAI)
+
 - [RFC 4861 - Neighbor Discovery for IPv6](https://tools.ietf.org/html/rfc4861)
 - [Linux kernel ARP documentation](https://www.kernel.org/doc/Documentation/networking/arp.txt)

@@ -3,7 +3,7 @@
 
 ## Overview
 
-I2C (Inter-Integrated Circuit) is a synchronous, multi-master, multi-slave, packet-switched, single-ended, serial communication bus. It was developed by Philips Semiconductor (now NXP Semiconductors) in the 1980s to facilitate communication between integrated circuits on a single board.
+I2C (Inter-Integrated Circuit) is a synchronous, multi-master, multi-slave, packet-switched, single-ended, serial communication bus. It was developed by Philips Semiconductor (now NXP Semiconductors) in the 1980s to facilitate communication between integrated circuits on a single board. I2C trades throughput for simplicity: [SPI](spi.md) is faster and full-duplex but needs more pins, while [UART](uart.md) is asynchronous and point-to-point. I2C's two-wire interface is implemented on [GPIO](gpio.md) pins and many sensors expose an [ADC](adc.md) result over I2C.
 
 ## Key Features
 
@@ -685,4 +685,12 @@ bus.close()
 ## Conclusion
 
 I2C is a versatile and efficient communication protocol that is essential in embedded systems and electronic devices. Its simplicity and flexibility make it a popular choice for connecting various components in a wide range of applications.
+
+## Where this connects
+
+- [SPI](spi.md) — higher-speed, full-duplex alternative; pick SPI for displays and SD cards, I2C for sensor networks
+- [UART](uart.md) — asynchronous alternative for point-to-point debug or module communication
+- [GPIO](gpio.md) — the physical pins I2C uses; bit-banging I2C in software requires GPIO control
+- [ADC](adc.md) — most I2C sensors (temperature, humidity, IMU) internally contain an ADC
+- [Timers](timers.md) — used to implement clock-stretching timeouts and bus-stuck-low recovery
 

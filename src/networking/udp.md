@@ -2,7 +2,7 @@
 
 ## Overview
 
-UDP is a connectionless transport layer protocol that provides fast, unreliable data transmission. Unlike TCP, UDP doesn't guarantee delivery, ordering, or error checking, making it ideal for time-sensitive applications where speed matters more than reliability.
+UDP is a connectionless transport layer protocol that provides fast, unreliable data transmission. Unlike [TCP](tcp.md), UDP doesn't guarantee delivery, ordering, or error checking, making it ideal for time-sensitive applications where speed matters more than reliability. [QUIC](quic.md) builds reliability and encryption on top of UDP; [DNS](dns.md) and [DHCP](dhcp.md) use UDP for their queries; [IoT protocols](iot_protocols.md) such as CoAP prefer UDP on constrained networks.
 
 ## UDP vs TCP
 
@@ -579,5 +579,13 @@ UDP is like sending postcards:
 ## Further Resources
 
 - [RFC 768 - UDP Specification](https://tools.ietf.org/html/rfc768)
+## Where this connects
+
+- [TCP](tcp.md) — the reliable alternative; use UDP when you handle retransmission yourself
+- [QUIC](quic.md) — adds reliability and TLS directly on top of UDP
+- [DNS](dns.md) / [DHCP](dhcp.md) — both use UDP for their request/response pattern
+- [IoT Protocols](iot_protocols.md) — CoAP (UDP-based) is the constrained-device REST protocol
+- [WebRTC](webrtc.md) — media streams (RTP/SRTP) run over UDP for low-latency delivery
+
 - [UDP vs TCP Explained](https://www.cloudflare.com/learning/ddos/glossary/user-datagram-protocol-udp/)
 - [UDP Programming Guide](https://beej.us/guide/bgnet/html/)

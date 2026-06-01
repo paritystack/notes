@@ -4,7 +4,7 @@ Comprehensive guide to building observable systems through strategic instrumenta
 
 ## What is Observability?
 
-Observability is the ability to understand internal system state from external outputs. Unlike monitoring (tracking known issues), observability helps debug unknown unknowns.
+Observability is the ability to understand internal system state from external outputs. Unlike [monitoring](monitoring.md) (tracking known issues), observability helps debug unknown unknowns. Observability pillars (metrics, logs, traces) are essential for [SRE](sre.md) error-budget tracking and feed [chaos engineering](chaos_engineering.md) experiment validation in [Kubernetes](kubernetes.md) environments.
 
 ### Monitoring vs Observability
 
@@ -2184,3 +2184,10 @@ ROI: 18x
 - [Grafana Labs Tutorials](https://grafana.com/tutorials/)
 - [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo)
 - [Charity Majors Blog](https://charity.wtf/)
+
+## Where this connects
+
+- [Monitoring](monitoring.md) — monitoring is the reactive layer; observability is the exploratory layer built on top
+- [SRE](sre.md) — SLO burn-rate alerts and error-budget tracking rely on observability data
+- [Chaos Engineering](chaos_engineering.md) — chaos experiments are only safe when observability can measure the blast radius
+- [Kubernetes](kubernetes.md) — K8s environments are the primary deployment target for Prometheus/Grafana stacks

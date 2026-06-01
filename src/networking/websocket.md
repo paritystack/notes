@@ -2,7 +2,7 @@
 
 ## Overview
 
-WebSocket is a communication protocol that provides full-duplex communication channels over a single TCP connection. It enables real-time, bidirectional communication between a client and server with low overhead, making it ideal for interactive web applications.
+WebSocket is a communication protocol that provides full-duplex communication channels over a single [TCP](tcp.md) connection. It starts as an [HTTP](http.md) upgrade request and then switches to a binary framing protocol. [gRPC](grpc.md) streaming and [WebRTC](webrtc.md) data channels are alternatives for high-performance real-time communication.
 
 ## Key Characteristics
 
@@ -1745,5 +1745,13 @@ WebSocket: Dashboard updates in real-time
 - [PieSocket](https://www.piesocket.com/websocket-tester) - Testing tool
 
 ### Books & Tutorials
+## Where this connects
+
+- [HTTP](http.md) — WebSocket starts as an HTTP/1.1 upgrade request
+- [TCP](tcp.md) — the underlying transport WebSocket runs over
+- [TLS/SSL](tls_ssl.md) — WSS (WebSocket Secure) = WebSocket over TLS
+- [gRPC](grpc.md) — streaming alternative for service-to-service; requires HTTP/2
+- [WebRTC](webrtc.md) — data channels alternative for browser-to-browser peer communication
+
 - [The Definitive Guide to HTML5 WebSocket](https://www.apress.com/gp/book/9781430247401)
 - [Real-Time Web Application Development](https://www.oreilly.com/library/view/real-time-web-application/9781484232705/)

@@ -2,7 +2,7 @@
 
 ## Overview
 
-**QUIC** (Quick UDP Internet Connections) is a modern, UDP-based multiplexed and secure transport protocol designed to improve performance over TCP for connection-oriented web applications.
+**QUIC** (Quick UDP Internet Connections) is a modern, [UDP](udp.md)-based multiplexed and secure transport protocol designed to improve performance over [TCP](tcp.md) for connection-oriented web applications. [TLS](tls_ssl.md) 1.3 is mandatory and baked into the QUIC handshake; HTTP/3 (via [HTTP/2](http2.md) semantics) is the dominant application running over QUIC.
 
 ### Key Facts
 
@@ -2166,3 +2166,11 @@ QUIC is a modern transport protocol that addresses fundamental limitations of TC
 Currently powering **HTTP/3**, deployed by major services (Google, Facebook, Cloudflare), and supported by all modern browsers. While it faces challenges (UDP blocking, CPU overhead), QUIC represents the future of internet transport protocols.
 
 For most new applications requiring secure, multiplexed, low-latency communication, **QUIC should be the default choice** over traditional TCP.
+
+## Where this connects
+
+- [TCP](tcp.md) — QUIC replaces TCP for HTTP/3; same reliability guarantees, lower latency
+- [UDP](udp.md) — QUIC is built on UDP, enabling user-space control of congestion
+- [TLS/SSL](tls_ssl.md) — TLS 1.3 is baked into the QUIC handshake (not a separate layer)
+- [HTTP/2](http2.md) — HTTP/3 takes HTTP/2 semantics and runs them over QUIC
+- [MTU/PMTUD](mtu_pmtud.md) — QUIC performs its own PMTUD to avoid fragmentation

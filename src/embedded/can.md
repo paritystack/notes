@@ -1,6 +1,6 @@
 # CAN (Controller Area Network)
 
-Controller Area Network (CAN) is a robust vehicle bus standard designed to allow microcontrollers and devices to communicate with each other without a host computer. It is widely used in automotive and industrial applications due to its reliability and efficiency.
+Controller Area Network (CAN) is a robust vehicle bus standard designed to allow microcontrollers and devices to communicate with each other without a host computer. It is widely used in automotive and industrial applications due to its reliability and efficiency. Where [UART](uart.md) is point-to-point and [I2C](i2c.md)/[SPI](spi.md) are board-level, CAN is designed for multi-node buses over tens of meters. For automotive sub-bus and high-speed variants see [LIN & FlexRay](lin_flexray.md); for industrial fieldbus see [Modbus](modbus.md).
 
 ## Key Concepts
 
@@ -1501,3 +1501,12 @@ bus.shutdown()
 ## Conclusion
 
 CAN is a critical communication protocol in automotive and industrial systems, providing reliable and efficient data exchange. Understanding CAN's principles and standards is essential for engineers working in these fields.
+
+## Where this connects
+
+- [UART](uart.md) — simpler asynchronous alternative for point-to-point links
+- [SPI](spi.md) — used to interface external CAN controllers (e.g., MCP2515) to MCUs that lack built-in CAN
+- [LIN & FlexRay](lin_flexray.md) — automotive sub-bus (LIN) and ultra-high-speed deterministic bus (FlexRay)
+- [Modbus](modbus.md) — industrial fieldbus that often runs over RS-485, a CAN alternative for PLCs
+- [Interrupts](interrupts.md) — CAN receive events are handled via peripheral interrupts
+- [Power Management](power_management.md) — CAN transceivers support standby/sleep modes to reduce bus power

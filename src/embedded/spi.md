@@ -2,7 +2,7 @@
 
 ## Overview
 
-SPI (Serial Peripheral Interface) is a synchronous serial communication protocol used for short-distance communication between microcontrollers and peripheral devices like sensors, displays, SD cards, and flash memory. Developed by Motorola in the 1980s, SPI is known for its high-speed, full-duplex communication capabilities.
+SPI (Serial Peripheral Interface) is a synchronous serial communication protocol used for short-distance communication between microcontrollers and peripheral devices like sensors, displays, SD cards, and flash memory. Developed by Motorola in the 1980s, SPI is known for its high-speed, full-duplex communication capabilities. Compared to [I2C](i2c.md), SPI uses more [GPIO](gpio.md) pins but achieves much higher throughput; for asynchronous point-to-point links use [UART](uart.md). SPI is the underlying transport for [SDIO](sdio.md) cards and for [QSPI external flash](qspi.md).
 
 ## Key Features
 
@@ -1071,6 +1071,15 @@ Imagine you're playing a game with your friend where you both pass notes at the 
 - **Clock** is like a metronome that keeps everyone in sync - you both write and read at the same time
 
 The cool part? You can both write notes to each other at the exact same time! That's why SPI is called "full-duplex" - it's like talking and listening simultaneously.
+
+## Where this connects
+
+- [I2C](i2c.md) — two-wire alternative; lower pin count but slower and half-duplex
+- [UART](uart.md) — asynchronous point-to-point option; simpler when only two devices need to talk
+- [GPIO](gpio.md) — the physical pins SPI signals use; chip-select lines are plain GPIO outputs
+- [SDIO](sdio.md) — SD cards use SPI mode at low speeds before switching to native SDIO mode
+- [QSPI & External Flash](qspi.md) — quad/octal-SPI extends standard SPI to 4–8 data lines for flash memory
+- [DMA](dma.md) — high-throughput SPI transfers (displays, ADCs) rely on DMA to avoid blocking the CPU
 
 ## Further Resources
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-IPv6 (Internet Protocol version 6) is the most recent version of the Internet Protocol. It was developed to address the IPv4 address exhaustion problem and to provide improvements in routing, security, and network auto-configuration. IPv6 is designed to replace IPv4 and is the future of internet addressing.
+IPv6 (Internet Protocol version 6) is the most recent version of the Internet Protocol. It was developed to address the [IPv4](ipv4.md) address exhaustion problem and to provide improvements in routing, security, and network auto-configuration. IPv6 is designed to replace IPv4 and is the future of internet addressing. [mDNS](mdns.md) handles local name resolution on IPv6 networks; [MTU/PMTUD](mtu_pmtud.md) works differently from IPv4 (no in-network fragmentation); [ICMPv6](ip.md) replaces ARP for neighbor discovery.
 
 ## Key Characteristics
 
@@ -1327,5 +1327,12 @@ Always have both, automatic!
 - [RFC 4861 - Neighbor Discovery for IPv6](https://tools.ietf.org/html/rfc4861)
 - [RFC 4941 - Privacy Extensions for SLAAC](https://tools.ietf.org/html/rfc4941)
 - [RFC 3484 - Default Address Selection](https://tools.ietf.org/html/rfc3484)
+## Where this connects
+
+- [IPv4](ipv4.md) — the predecessor; most networks run dual-stack during the transition period
+- [mDNS](mdns.md) — used for local name resolution alongside DHCPv6 on IPv6 networks
+- [MTU/PMTUD](mtu_pmtud.md) — IPv6 never fragments in-network; PMTUD is mandatory
+- [BGP](bgp_anycast.md) — BGP-4 carries both IPv4 and IPv6 (MP-BGP) prefixes
+
 - [IPv6 Test](https://test-ipv6.com/) - Test your IPv6 connectivity
 - [Hurricane Electric IPv6 Certification](https://ipv6.he.net/certification/) - Free IPv6 training

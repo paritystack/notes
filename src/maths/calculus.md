@@ -2,7 +2,7 @@
 
 ## Overview
 
-Calculus is the mathematical study of continuous change, consisting of two complementary branches: **differential calculus** (concerning rates of change and slopes) and **integral calculus** (concerning accumulation of quantities and areas). Together, they form one of the most powerful frameworks in mathematics, with applications spanning physics, engineering, economics, biology, and beyond.
+Calculus is the mathematical study of continuous change, consisting of two complementary branches: **differential calculus** (concerning rates of change and slopes) and **integral calculus** (concerning accumulation of quantities and areas). Together, they form one of the most powerful frameworks in mathematics, with applications spanning physics, engineering, economics, biology, and beyond. Calculus underpins [optimization](optimization.md) (gradient descent, Lagrange multipliers), [probability](probability.md) (continuous distributions, expectations), and [signal processing](signal_processing.md) (Fourier/Laplace transforms).
 
 ## Historical Context
 
@@ -1302,13 +1302,13 @@ Uniform convergence preserves continuity and allows interchange of limit and int
 
 ### Computer Science
 
-1. **Algorithm analysis:** Growth rates, Big-O notation
-2. **Machine learning:** Gradient descent
+1. **Algorithm analysis:** Growth rates, [Big-O notation](../algorithms/big_o.md)
+2. **Machine learning:** Gradient descent — see [optimization](optimization.md) for the full treatment
    ```
    θ := θ - α·∇J(θ)
    ```
 3. **Computer graphics:** Bezier curves, ray tracing
-4. **Numerical methods:** Approximation algorithms
+4. **Numerical methods:** Approximation algorithms — see [numerical methods](numerical_methods.md)
 
 ## Part VII: Problem-Solving Strategies
 
@@ -1369,6 +1369,17 @@ Modern extensions include complex analysis, differential geometry, functional an
 - **Functional Analysis:** Infinite-dimensional calculus
 - **Calculus of Variations:** Optimizing functionals
 - **Stochastic Calculus:** Calculus with randomness (Ito calculus)
+
+---
+
+## Where this connects
+
+- [Optimization](optimization.md) — gradient descent, Lagrange multipliers, and convex analysis are applied calculus
+- [Probability](probability.md) — continuous distributions are defined by integrals; expectations are integrals
+- [Signal Processing](signal_processing.md) — Fourier and Laplace transforms are integral transforms
+- [Linear Algebra](linear_algebra.md) — matrix calculus and the Jacobian underpin neural network backpropagation
+- [Numerical Methods](numerical_methods.md) — numerical differentiation and integration when closed forms don't exist
+- [Big-O Notation](../algorithms/big_o.md) — growth rates of algorithms use limit analysis from calculus
 
 ---
 

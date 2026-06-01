@@ -2,7 +2,7 @@
 
 ## Overview
 
-An Analog-to-Digital Converter (ADC) is a hardware component that converts continuous analog signals (like voltage, temperature, light intensity) into discrete digital values that a microcontroller can process. ADCs are essential for interfacing with the real world, enabling microcontrollers to read sensors and analog inputs.
+An Analog-to-Digital Converter (ADC) is a hardware component that converts continuous analog signals (like voltage, temperature, light intensity) into discrete digital values that a microcontroller can process. ADCs are essential for interfacing with the real world, enabling microcontrollers to read sensors and analog inputs. The analog input pin is a [GPIO](gpio.md) pin set to analog mode; external ADC chips are often connected via [I2C](i2c.md) or [SPI](spi.md). High-speed continuous sampling relies on [DMA](dma.md) triggered by a [Timer](timers.md), and the complementary output path is the [DAC](dac.md).
 
 ## Key Concepts
 
@@ -519,6 +519,14 @@ An ADC does the same thing! It takes a smooth, continuous voltage (like the temp
 - 12-bit ADC: Can say 4096 different numbers (0-4095)
 
 More bits = more precise measurements = seeing smaller differences!
+
+## Where this connects
+
+- [DAC](dac.md) — the complementary output path; ADC reads the world, DAC drives it
+- [GPIO](gpio.md) — analog input pins are GPIO pins configured in analog mode
+- [Timers](timers.md) — hardware timers trigger periodic ADC sampling for data-acquisition loops
+- [DMA](dma.md) — continuous high-speed ADC sampling streams data to RAM without CPU intervention
+- [I2C](i2c.md) / [SPI](spi.md) — external precision ADC chips (ADS1115, MCP3204) connect via these buses
 
 ## Further Resources
 

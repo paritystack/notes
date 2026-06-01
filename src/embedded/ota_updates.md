@@ -2,7 +2,7 @@
 
 ## 1. Introduction to OTA Updates
 
-Over-the-Air (OTA) updates are the process of remotely delivering new software, firmware, or configuration data to an embedded device or IoT node. In the modern era of connected devices, an OTA mechanism is not an optional feature; it is a critical requirement for the entire product lifecycle.
+Over-the-Air (OTA) updates are the process of remotely delivering new software, firmware, or configuration data to an embedded device or IoT node. A robust OTA system depends on the [bootloader](bootloaders.md) for partition management, the [watchdog timer](watchdog.md) for trial-boot rollback, [secure boot](secure_boot.md) for chain-of-trust, and [flash filesystem](flash_filesystems.md) layout for partition storage. The delivery pipeline mirrors concepts from [CI/CD](../devops/cicd.md). In the modern era of connected devices, an OTA mechanism is not an optional feature; it is a critical requirement for the entire product lifecycle.
 
 ### Why OTA is Mandatory
 1.  **Security Vulnerability Patching:** IoT devices are constantly under attack. When a vulnerability in a networking stack (like a TCP/IP or TLS bug) is discovered, it must be patched across the entire fleet immediately. Without OTA, the device remains forever vulnerable.
@@ -380,3 +380,11 @@ An OTA system is only secure if the cryptographic keys are securely injected int
     *   It completely disables the JTAG/SWD debugging interface, preventing physical attackers from reading out the firmware or injecting malicious code later.
     *   It enables the "Secure Boot" hardware feature.
 4.  **Cloud Registration:** The factory HSM securely transmits the device's unique ID and Public Certificate to the OEM's cloud database, allowing the cloud to recognize and trust the device when it connects for its first OTA update.
+
+## Where this connects
+
+- [Bootloaders](bootloaders.md) — the bootloader manages partition selection and applies the update during reboot
+- [Watchdog](watchdog.md) — the trial-boot state machine relies entirely on the hardware watchdog for rollback safety
+- [Secure Boot](secure_boot.md) — chain-of-trust from ROM bootloader through application prevents unsigned firmware
+- [Flash Filesystems](flash_filesystems.md) — NVS / EEPROM stores OTA state flags across reboots
+- [CI/CD](../devops/cicd.md) — the firmware build, sign, and release pipeline feeds the OTA update server

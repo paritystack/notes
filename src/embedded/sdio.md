@@ -4,7 +4,7 @@
 
 SDIO (Secure Digital Input Output) is an extension of the SD (Secure Digital) card standard that allows for the integration of input/output devices beyond just memory storage. Developed by the SD Card Association, SDIO enables various peripherals such as Wi-Fi modules, Bluetooth adapters, GPS receivers, cameras, and other I/O devices to communicate with a host device through a standard SD card interface.
 
-Unlike standard SD cards that only provide storage, SDIO cards can perform various I/O functions while maintaining backward compatibility with the SD card protocol. The SDIO interface provides high-speed, multi-line data transfer capabilities that make it ideal for bandwidth-intensive applications.
+Unlike standard SD cards that only provide storage, SDIO cards can perform various I/O functions while maintaining backward compatibility with the SD card protocol. The SDIO interface provides high-speed, multi-line data transfer capabilities that make it ideal for bandwidth-intensive applications. At low speeds SD cards can also talk [SPI](spi.md); the SDIO data lines are [GPIO](gpio.md) alternate-function pins, and bulk transfers use [DMA](dma.md) to avoid blocking the CPU. The [Flash Filesystem](flash_filesystems.md) layer sits above the SDIO driver in the storage stack.
 
 ## Key Features
 
@@ -1300,3 +1300,11 @@ And unlike SPI (where you need a separate "tap on the shoulder" line for each fr
 - "SD Card Projects Using the PIC Microcontroller" by Dogan Ibrahim
 - "Embedded Systems Design with Platform FPGAs" - Chapter on SDIO interfaces
 - Research papers on SDIO protocol optimization and analysis
+
+## Where this connects
+
+- [SPI](spi.md) — SD cards fall back to SPI mode at low speeds; SDIO replaces SPI for full performance
+- [GPIO](gpio.md) — SDIO CLK, CMD, and DAT lines are GPIO alternate-function pins
+- [DMA](dma.md) — bulk read/write transfers to SD/SDIO use DMA to keep the CPU free
+- [Flash Filesystems](flash_filesystems.md) — FAT32 / exFAT sits above the SDIO driver to give file-level access
+- [Interrupts](interrupts.md) — DAT1 doubles as a card-interrupt line for signalling the host without polling

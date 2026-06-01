@@ -2,7 +2,7 @@
 
 ## Overview
 
-**BGP** (Border Gateway Protocol) is the routing protocol that makes the internet work. It's how the ~80,000 independent networks ("Autonomous Systems") that compose the internet tell each other which IP prefixes they can deliver. **Anycast** is a routing trick — announcing the same IP from many places — built on top of BGP, used by every major CDN, DNS provider, and DDoS-mitigation service.
+**BGP** (Border Gateway Protocol) is the routing protocol that makes the internet work. It's how the ~80,000 independent networks ("Autonomous Systems") that compose the internet tell each other which [IP](ip.md) prefixes they can deliver. **Anycast** is a routing trick — announcing the same IP from many places — built on top of BGP, used by every major CDN, [DNS](dns.md) provider, and DDoS-mitigation service. Within a single AS, [OSPF or IS-IS](ospf_isis.md) handles intra-domain routing.
 
 This note covers BGP fundamentals (enough to understand "the AWS outage was a BGP leak"), then how anycast leverages it for low-latency global services.
 
@@ -488,5 +488,12 @@ The dangerous moments: when someone in the gossip game lies ("I have the shortes
 - [Cloudflare: How BGP works](https://blog.cloudflare.com/tag/bgp/)
 - [BGP wedgies and route leaks (Cumulus)](https://cumulusnetworks.com/learn/bgp/)
 - [bgp.tools](https://bgp.tools/) — live BGP routing data
+## Where this connects
+
+- [IP](ip.md) — BGP advertises IP prefixes (CIDR blocks) between autonomous systems
+- [OSPF/IS-IS](ospf_isis.md) — the intra-domain IGPs that feed routes into BGP
+- [DNS](dns.md) — global DNS resolvers (8.8.8.8, 1.1.1.1) use anycast routing via BGP
+- [Firewalls](firewalls.md) — BGP community attributes enable remote-triggered blackholing (RTBH) for DDoS
+
 - [routing.party](https://routing.party/) — Andree Toonk's BGP visualization
 - [Pete Lumbis - BGP for the data center](https://www.nvidia.com/en-us/networking/border-gateway-protocol/)

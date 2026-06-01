@@ -2,7 +2,7 @@
 
 ## Overview
 
-TURN is a protocol that helps establish connections between peers when direct peer-to-peer communication fails. Unlike STUN which only discovers addresses, TURN acts as a relay server that forwards traffic between peers when NAT or firewall restrictions prevent direct connections.
+TURN is a protocol that helps establish connections between peers when direct peer-to-peer communication fails. Unlike [STUN](stun.md) which only discovers addresses, TURN acts as a relay server that forwards traffic between peers when NAT or [firewall](firewalls.md) restrictions prevent direct connections. TURN is used by [ICE](ice.md) as the last-resort candidate; [WebRTC](webrtc.md) connections fall back to TURN when symmetric NAT blocks direct paths.
 
 ## Why TURN is Needed
 
@@ -698,5 +698,12 @@ Use TURN only when absolutely needed!
 - [RFC 5766 - TURN Specification](https://tools.ietf.org/html/rfc5766)
 - [RFC 8656 - TURN Update](https://tools.ietf.org/html/rfc8656)
 - [coturn Server](https://github.com/coturn/coturn)
+## Where this connects
+
+- [STUN](stun.md) — TURN is the expensive relay fallback when STUN-only paths fail
+- [ICE](ice.md) — ICE selects TURN relay candidates as a last resort
+- [WebRTC](webrtc.md) — all WebRTC connections configure a TURN server as failsafe
+- [UDP](udp.md) — TURN allocates UDP relay ports on the server
+
 - [WebRTC ICE](https://webrtc.org/)
 - [TURN Server Providers](https://www.twilio.com/stun-turn)

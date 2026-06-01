@@ -2,7 +2,7 @@
 
 ## General Purpose Input/Output (GPIO)
 
-GPIO stands for General Purpose Input/Output. It is a generic pin on an integrated circuit or computer board whose behavior (including whether it is an input or output pin) can be controlled by the user at runtime. GPIO pins are a staple in embedded systems and microcontroller projects due to their versatility and ease of use.
+GPIO stands for General Purpose Input/Output. It is a generic pin on an integrated circuit or computer board whose behavior (including whether it is an input or output pin) can be controlled by the user at runtime. GPIO pins are a staple in embedded systems and microcontroller projects due to their versatility and ease of use. Pins can be reconfigured into alternate functions to serve as [UART](uart.md), [SPI](spi.md), [I2C](i2c.md), [ADC](adc.md), or [PWM](pwm.md) lines; interrupt-capable GPIO pins feed the [interrupt controller](interrupts.md) for event-driven design.
 
 ### Key Features of GPIO
 
@@ -603,3 +603,11 @@ void gpio_low_power_config(void) {
     GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 }
 ```
+
+## Where this connects
+
+- [Interrupts](interrupts.md) — GPIO input pins can trigger external interrupts for event-driven design
+- [PWM](pwm.md) — GPIO pins in alternate-function mode output PWM waveforms from hardware timers
+- [ADC](adc.md) — GPIO pins set to analog mode feed the on-chip ADC
+- [UART](uart.md) / [SPI](spi.md) / [I2C](i2c.md) — all serial protocols mux onto GPIO alternate-function pins
+- [Power Management](power_management.md) — unused GPIO pins configured as analog inputs to minimize leakage current

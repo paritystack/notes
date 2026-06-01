@@ -6,7 +6,7 @@ In the world of desktop software development (Windows, Linux, macOS), the operat
 
 In **Embedded Systems** (especially "bare-metal" programming on microcontrollers), this abstraction does not exist. There is no OS loader to dynamically allocate memory or set up virtual address spaces. The programmer is directly responsible for mapping the compiled code and variables to the physical memory addresses provided by the microcontroller's hardware architecture.
 
-This critical task is accomplished using a **Linker Script** (typically ending in `.ld`).
+This critical task is accomplished using a **Linker Script** (typically ending in `.ld`). The linker script must reflect the [ISA](isa.md)'s memory model and the [processor's](processor_design.md) physical memory map; the [startup code](startup_code.md) then copies `.data` and zeros `.bss` using the symbols the linker script exports.
 
 A linker script is a text file that commands the linker (like GNU `ld` or LLVM `lld`) on how to combine various input object files (`.o`) into a single output executable (usually an `.elf` file, which is later converted to `.bin` or `.hex` for flashing). It dictates the exact memory layout of the final binary, specifying where the executable code (Flash), read-only constants (Flash), and readable/writable variables (SRAM) must be placed.
 
@@ -711,6 +711,14 @@ Historically, the embedded world exclusively used GNU Binutils (`ld` or `ld.bfd`
 *   **Compatibility:** `lld` is intended to be a drop-in replacement. It parses the exact same GNU Linker Script syntax.
 *   **Usage:** You can instruct clang or gcc to use lld by passing the flag `-fuse-ld=lld`.
 *   **Differences:** While syntactically compatible, `lld` handles Garbage Collection (`--gc-sections`) and symbol resolution slightly more aggressively than GNU `ld`. A sloppy linker script that implicitly relied on undefined GNU behaviors might break when transitioning to LLVM.
+
+## Where this connects
+
+- [ISA](isa.md) — the ISA defines alignment requirements, endianness, and section conventions the linker script must honour
+- [Processor Design](processor_design.md) — placing ISR code in TCM (zero-wait-state RAM) requires explicit linker script placement
+- [Startup Code](startup_code.md) — uses linker-exported `_sdata`, `_edata`, `_sbss`, `_ebss` symbols to initialise RAM
+- [Memory Management](memory_management.md) — linker sections define the pool allocator's and stack's fixed addresses
+- [OTA Updates](ota_updates.md) — dual-bank OTA requires the linker script to know each bank's base address and size
 
 ## Conclusion
 

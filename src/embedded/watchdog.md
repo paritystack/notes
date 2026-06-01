@@ -1,6 +1,6 @@
 # Watchdog Timers
 
-A Watchdog Timer (WDT) is a hardware or software timer that is used to detect and recover from computer malfunctions. During normal operation, the system regularly resets the watchdog timer to prevent it from elapsing, or "timing out." If the system fails to reset the watchdog timer, it is assumed to be malfunctioning, and corrective actions are taken, such as resetting the system.
+A Watchdog Timer (WDT) is a hardware or software [timer](timers.md) that is used to detect and recover from computer malfunctions. During normal operation, the system regularly resets the watchdog timer to prevent it from elapsing, or "timing out." If the system fails to reset the watchdog timer, it is assumed to be malfunctioning, and corrective actions are taken, such as resetting the system. Watchdog interaction ties into [power management](power_management.md) (some watchdogs run through sleep modes), [interrupts](interrupts.md) (early-warning IRQ before reset), and is a critical safety requirement in [OTA update](ota_updates.md) trial-boot state machines.
 
 ## Key Concepts
 
@@ -439,6 +439,13 @@ void main_loop(void) {
 2. **Safety-Critical Applications**: In applications where safety is paramount, such as automotive or medical devices, watchdog timers help ensure that the system can recover from faults and continue to operate safely.
 3. **Industrial Control Systems**: PLCs and SCADA systems use watchdogs to maintain continuous operation and automatically recover from transient faults.
 4. **IoT Devices**: Remote devices use watchdogs to recover from network issues or software hangs without manual intervention.
+
+## Where this connects
+
+- [Timers](timers.md) — the watchdog is a specialized timer; understand general timer concepts first
+- [Interrupts](interrupts.md) — window watchdogs fire an early-warning interrupt before the hard reset
+- [Power Management](power_management.md) — some watchdogs (IWDG on STM32) continue running in all sleep modes; others stop
+- [OTA Updates](ota_updates.md) — the trial-boot rollback mechanism depends entirely on the watchdog for safety
 
 ## Conclusion
 

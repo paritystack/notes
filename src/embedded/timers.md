@@ -2,7 +2,7 @@
 
 ## Overview
 
-Timers and counters are essential hardware peripherals in microcontrollers that keep track of time, count events, generate precise delays, create PWM signals, and trigger interrupts at specific intervals. Unlike software delays (which block the CPU), hardware timers run independently, allowing your program to multitask efficiently.
+Timers and counters are essential hardware peripherals in microcontrollers that keep track of time, count events, generate precise delays, create [PWM](pwm.md) signals, and trigger [interrupts](interrupts.md) at specific intervals. Unlike software delays (which block the CPU), hardware timers run independently, allowing your program to multitask efficiently. Timers also trigger [ADC](adc.md) conversions and [DMA](dma.md) transfers at precise rates, and the [watchdog timer](watchdog.md) is a special-purpose timer used for system reliability.
 
 ## Key Concepts
 
@@ -607,6 +607,14 @@ Imagine you have a special alarm clock that can do cool tricks:
 5. **Input Capture**: You press a button, and the timer remembers what number it was at. Press again, and you can figure out how long between presses!
 
 The coolest part? The timer runs by itself in the background - you don't have to watch it! It's like having a helper that tells you when it's time to do something, while you focus on other tasks.
+
+## Where this connects
+
+- [PWM](pwm.md) — PWM is a timer output mode; duty cycle and frequency are set via timer registers
+- [Interrupts](interrupts.md) — timer compare/overflow events fire CPU interrupts for periodic task scheduling
+- [Watchdog](watchdog.md) — the watchdog is a special-purpose timer that resets the system on timeout
+- [ADC](adc.md) — timers trigger periodic ADC conversions for data-acquisition without polling
+- [DMA](dma.md) — timer events kick DMA transfers (DAC waveform output, audio streaming)
 
 ## Further Resources
 

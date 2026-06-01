@@ -2,7 +2,7 @@
 
 ## Overview
 
-IPsec (Internet Protocol Security) is a suite of protocols for authenticating and encrypting IP packets. Unlike TLS (which sits above TCP), IPsec works at Layer 3, so it can secure **any IP traffic** transparently — TCP, UDP, ICMP, even other tunnels. It's the dominant site-to-site VPN technology in enterprises and is heavily used in 4G/5G mobile networks. The flip side: IPsec is famously complex, with many overlapping standards and historical baggage.
+IPsec (Internet Protocol Security) is a suite of protocols for authenticating and encrypting [IP](ip.md) packets. Unlike [TLS](tls_ssl.md) (which sits above [TCP](tcp.md)), IPsec works at Layer 3, so it can secure **any IP traffic** transparently — TCP, [UDP](udp.md), ICMP, even other tunnels. It's the dominant site-to-site VPN technology in enterprises and is heavily used in 4G/5G mobile networks. [Firewalls](firewalls.md) must be aware of IPsec to pass ESP/AH packets correctly.
 
 ## What IPsec Is (and Isn't)
 
@@ -500,5 +500,12 @@ The complicated handshake (**IKE**) is two ambassadors agreeing in advance on wh
 - [RFC 7296 - IKEv2](https://tools.ietf.org/html/rfc7296)
 - [strongSwan documentation](https://docs.strongswan.org/)
 - [Libreswan project](https://libreswan.org/)
+## Where this connects
+
+- [IP](ip.md) — IPsec operates at Layer 3, adding authentication/encryption directly to IP packets
+- [TLS/SSL](tls_ssl.md) — TLS secures individual TCP connections; IPsec secures all traffic between two endpoints
+- [Firewalls](firewalls.md) — firewalls must permit UDP 500/4500 (IKE) and ESP (protocol 50) for IPsec
+- [UDP](udp.md) — IKEv2 negotiation and NAT-T encapsulation use UDP
+
 - [Linux XFRM Framework](https://wiki.strongswan.org/projects/strongswan/wiki/IPsecLinuxKernel)
 - [NIST SP 800-77: Guide to IPsec VPNs](https://csrc.nist.gov/publications/detail/sp/800-77/rev-1/final)

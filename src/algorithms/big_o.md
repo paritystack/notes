@@ -1,6 +1,6 @@
 # Big O Notation
 
-Big O notation is a mathematical concept used to describe the performance or complexity of an algorithm. Specifically, it characterizes algorithms in terms of their time or space requirements in relation to the size of the input data. Understanding Big O notation is crucial for evaluating the efficiency of algorithms and making informed decisions about which algorithm to use in a given situation.
+Big O notation is a mathematical concept used to describe the performance or complexity of an algorithm. Specifically, it characterizes algorithms in terms of their time or space requirements in relation to the size of the input data. Understanding Big O notation is crucial for evaluating the efficiency of algorithms and making informed decisions about which algorithm to use in a given situation. Big O uses limit analysis from [calculus](../maths/calculus.md); a [complexity cheatsheet](complexity_cheatsheet.md) gives a quick reference for common algorithms; and [sorting](sorting.md) and [data structures](../data_structures/README.md) are the domains where these complexities matter most.
 
 ## Key Concepts
 
@@ -115,7 +115,7 @@ arr = [38, 27, 43, 3, 9, 82, 10]
 print(merge_sort(arr))  # O(n log n)
 ```
 
-**Examples**: Merge sort, heap sort, quick sort (average case)
+**Examples**: Merge sort, heap sort, quick sort (average case) — see [sorting algorithms](sorting.md) for implementations
 
 ### O(n²) - Quadratic Time
 
@@ -387,6 +387,14 @@ O(n!):      9.33 × 10¹⁵⁷ operations (impossible!)
 3. **Real-world considerations**: Constants matter for small n
 4. **Amortized analysis**: Some operations are cheaper on average
 5. **Choose appropriately**: Don't over-optimize; O(n²) is fine for small n
+
+## Where this connects
+
+- [Complexity Cheatsheet](complexity_cheatsheet.md) — quick lookup table for common algorithm complexities
+- [Sorting](sorting.md) — the canonical domain for comparing O(n log n) vs O(n²) algorithms
+- [Dynamic Programming](dynamic_programming.md) — converts exponential brute-force to polynomial using memoization
+- [Graph Algorithms](graph_algorithms.md) — BFS/DFS are O(V+E); Dijkstra is O((V+E) log V)
+- [Calculus](../maths/calculus.md) — limit analysis provides the formal foundation for asymptotic notation
 
 ## Conclusion
 

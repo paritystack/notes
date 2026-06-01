@@ -2,7 +2,7 @@
 
 ## Overview
 
-mDNS (Multicast DNS) is a protocol that resolves hostnames to IP addresses within small networks without requiring a conventional DNS server. It's part of Zero Configuration Networking (Zeroconf) and enables devices to discover each other on local networks using the `.local` domain.
+mDNS (Multicast DNS) is a protocol that resolves hostnames to IP addresses within small networks without requiring a conventional [DNS](dns.md) server. It's part of Zero Configuration Networking (Zeroconf) and enables devices to discover each other on local networks using the `.local` domain. [UPnP](upnp.md) and [IoT protocols](iot_protocols.md) rely on mDNS for device discovery; mDNS uses [UDP](udp.md) multicast on port 5353.
 
 ## Why mDNS?
 
@@ -679,5 +679,12 @@ It's perfect for homes and small offices where you just want things to work!
 - [RFC 6762 - mDNS Specification](https://tools.ietf.org/html/rfc6762)
 - [RFC 6763 - DNS-SD](https://tools.ietf.org/html/rfc6763)
 - [Avahi](https://www.avahi.org/)
+## Where this connects
+
+- [DNS](dns.md) — mDNS is the zero-config local equivalent of DNS; same query/record types
+- [UDP](udp.md) — mDNS uses UDP multicast on port 5353
+- [UPnP](upnp.md) — uses SSDP alongside mDNS for service advertisement
+- [IoT Protocols](iot_protocols.md) — IoT devices use mDNS for broker/gateway discovery
+
 - [Apple Bonjour](https://developer.apple.com/bonjour/)
 - [zeroconf Python Library](https://github.com/jstasiak/python-zeroconf)

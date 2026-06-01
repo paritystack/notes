@@ -2,7 +2,7 @@
 
 ## Overview
 
-Two dominant application-layer protocols built for **constrained devices** (low CPU, low memory, intermittent battery-powered radios):
+Two dominant application-layer protocols built for **constrained devices** (low CPU, low memory, intermittent battery-powered radios). MQTT runs over [TCP](tcp.md) and is broker-based; CoAP runs over [UDP](udp.md) and is RESTful. Both are common on devices that use [mDNS](mdns.md) for local discovery and [TLS](tls_ssl.md)/DTLS for security.
 
 - **MQTT** — broker-mediated publish/subscribe over TCP. Best for telemetry from many sensors to a central cloud, asymmetric command/control.
 - **CoAP** — REST-like request/response over UDP. Best for direct device-to-device interaction and HTTP-style APIs that need to fit in tiny packets.
@@ -595,5 +595,13 @@ The big difference: **MQTT needs a building (broker)** in the middle; **CoAP dev
 - [HiveMQ MQTT Essentials (great free series)](https://www.hivemq.com/mqtt-essentials/)
 - [RFC 7252 - CoAP](https://tools.ietf.org/html/rfc7252)
 - [RFC 7641 - CoAP Observe](https://tools.ietf.org/html/rfc7641)
+## Where this connects
+
+- [TCP](tcp.md) — MQTT requires a reliable stream; MQTT over WebSocket needs TCP
+- [UDP](udp.md) — CoAP is RESTful and uses UDP for low-overhead request/response
+- [TLS/SSL](tls_ssl.md) — MQTT TLS and DTLS for CoAP provide security in production
+- [mDNS](mdns.md) — IoT devices use mDNS to discover local MQTT brokers or CoAP servers
+- [WebSocket](websocket.md) — MQTT over WebSocket is common for browser-based IoT dashboards
+
 - [aiocoap (Python CoAP)](https://aiocoap.readthedocs.io/)
 - [libcoap (C CoAP)](https://libcoap.net/)

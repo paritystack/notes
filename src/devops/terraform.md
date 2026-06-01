@@ -1,6 +1,6 @@
 # Terraform
 
-Infrastructure as Code (IaC) tool for provisioning and managing cloud infrastructure across multiple providers.
+Infrastructure as Code (IaC) tool for provisioning and managing cloud infrastructure across multiple providers. Terraform provisions the [infrastructure](infrastructure.md) (VPCs, subnets, load balancers) and the [Kubernetes](kubernetes.md) clusters that [cloud deployments](cloud-deployment.md) run on; Terraform runs are triggered by [CI/CD](cicd.md) pipelines.
 
 ## Core Concepts
 
@@ -667,3 +667,10 @@ terraform apply
 - [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - [Terraform Registry](https://registry.terraform.io/)
 - [Best Practices](https://www.terraform-best-practices.com/)
+
+## Where this connects
+
+- [Infrastructure](infrastructure.md) — Terraform provisions the VPCs, subnets, and security groups described there
+- [Kubernetes](kubernetes.md) — EKS/GKE/AKS cluster creation is a common Terraform use case
+- [Cloud Deployment](cloud-deployment.md) — deployment patterns assume Terraform-managed cloud resources
+- [CI/CD](cicd.md) — `terraform plan/apply` runs as a step in automated pipelines

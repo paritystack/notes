@@ -2,7 +2,7 @@
 
 ## Overview
 
-STUN is a standardized network protocol that allows clients behind NAT (Network Address Translation) to discover their public IP address and the type of NAT they are behind. This information is crucial for establishing peer-to-peer connections in applications like VoIP, video conferencing, and WebRTC.
+STUN is a standardized network protocol that allows clients behind NAT (Network Address Translation) to discover their public IP address and the type of NAT they are behind. This information is crucial for establishing peer-to-peer connections in [WebRTC](webrtc.md), VoIP, and video conferencing. STUN works over [UDP](udp.md); [ICE](ice.md) uses STUN as one candidate-gathering mechanism; [TURN](turn.md) is the relay fallback when STUN-only paths fail.
 
 ## The NAT Problem
 
@@ -601,5 +601,12 @@ They need your full address, not just "Apartment 5"
 - [RFC 5389 - STUN Specification](https://tools.ietf.org/html/rfc5389)
 - [RFC 8489 - STUN Update](https://tools.ietf.org/html/rfc8489)
 - [WebRTC and STUN](https://webrtc.org/)
+## Where this connects
+
+- [ICE](ice.md) — ICE uses STUN to gather server-reflexive candidates during P2P negotiation
+- [TURN](turn.md) — the relay fallback when STUN alone cannot establish a path
+- [UDP](udp.md) — STUN messages are sent over UDP (and TCP as fallback)
+- [WebRTC](webrtc.md) — WebRTC's ICE agent uses STUN automatically
+
 - [Interactive STUN Test](https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/)
 - [coturn Server](https://github.com/coturn/coturn)

@@ -1,6 +1,6 @@
 # Infrastructure
 
-Foundational infrastructure concepts covering networking, security, scaling, and high availability.
+Foundational infrastructure concepts covering networking, security, scaling, and high availability. Infrastructure is provisioned as code via [Terraform](terraform.md), deployed across clouds with [cloud-deployment](cloud-deployment.md) patterns, and applications run on it in [Kubernetes](kubernetes.md) clusters.
 
 ## Networking Fundamentals
 
@@ -1293,3 +1293,10 @@ resource "aws_cloudwatch_dashboard" "main" {
 - [Cloud Design Patterns](https://docs.microsoft.com/en-us/azure/architecture/patterns/)
 - [GCP Best Practices](https://cloud.google.com/architecture)
 - [The Twelve-Factor App](https://12factor.net/)
+
+## Where this connects
+
+- [Terraform](terraform.md) — Infrastructure as Code that provisions the resources described here
+- [Cloud Deployment](cloud-deployment.md) — deployment strategies that run on this infrastructure
+- [Kubernetes](kubernetes.md) — the orchestration layer that runs workloads on the underlying infra
+- [Observability](observability.md) — infrastructure metrics (CPU, memory, network) feed the observability stack

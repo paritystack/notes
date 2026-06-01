@@ -2,7 +2,7 @@
 
 ## Overview
 
-Kubernetes (K8s) orchestrates containerized applications at scale, handling deployment, scaling, and networking.
+Kubernetes (K8s) orchestrates containerized applications at scale, handling deployment, scaling, and networking. It runs [Docker](docker.md) (or other OCI) containers, is provisioned via [Terraform](terraform.md) or [cloud-deployment](cloud-deployment.md) tooling, and is monitored through [observability](observability.md) stacks.
 
 ## Core Concepts
 
@@ -191,3 +191,11 @@ Imagine managing 1000 containers automatically!
 - [Kubernetes Docs](https://kubernetes.io/docs/)
 - [Interactive Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
 - [kubectl Cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+
+## Where this connects
+
+- [Docker](docker.md) — Kubernetes schedules the OCI container images Docker builds
+- [Terraform](terraform.md) — provisions the cloud infrastructure (EKS, GKE, AKS) Kubernetes runs on
+- [CI/CD](cicd.md) — deploys new image versions to Kubernetes via rolling updates
+- [Observability](observability.md) — Prometheus/Grafana stacks run inside Kubernetes to monitor workloads
+- [Infrastructure](infrastructure.md) — VPCs, subnets, and load balancers underpin the Kubernetes network

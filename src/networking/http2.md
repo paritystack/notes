@@ -2,7 +2,7 @@
 
 ## Overview
 
-HTTP/2 (RFC 7540, 2015; updated by RFC 9113) is a major revision of HTTP that retains the same semantics as HTTP/1.1 (methods, headers, status codes) but completely changes the **wire format**. It replaces text framing with a binary protocol that multiplexes many streams over a single TCP connection, eliminating head-of-line blocking at the HTTP layer. HTTP/3 builds on these ideas but runs over QUIC instead of TCP.
+HTTP/2 (RFC 7540, 2015; updated by RFC 9113) is a major revision of [HTTP](http.md) that retains the same semantics (methods, headers, status codes) but completely changes the **wire format**. It replaces text framing with a binary protocol that multiplexes many streams over a single [TCP](tcp.md) connection, eliminating head-of-line blocking at the HTTP layer. HTTP/3 builds on these ideas but runs over [QUIC](quic.md) instead of TCP. [gRPC](grpc.md) uses HTTP/2 as its transport; [TLS](tls_ssl.md) is required for browser-facing HTTP/2.
 
 ## Why HTTP/2?
 
@@ -501,5 +501,13 @@ But: it's still **one road**. If a tree falls anywhere on it (a TCP packet is lo
 - [RFC 7541 - HPACK](https://tools.ietf.org/html/rfc7541)
 - [RFC 9218 - Extensible Priorities](https://www.rfc-editor.org/rfc/rfc9218.html)
 - [HTTP/2 Explained (free book) by Daniel Stenberg](https://daniel.haxx.se/http2/)
+## Where this connects
+
+- [HTTP](http.md) — the HTTP/1.1 semantics HTTP/2 preserves while changing the wire format
+- [QUIC](quic.md) — HTTP/3 takes HTTP/2 semantics and replaces TCP with QUIC
+- [TLS/SSL](tls_ssl.md) — required for HTTP/2 in all browser implementations
+- [gRPC](grpc.md) — the primary user of HTTP/2 multiplexing for RPC streaming
+- [WebSocket](websocket.md) — HTTP/2 has a native `CONNECT` tunnel alternative to WebSocket upgrades
+
 - [nghttp2 - HTTP/2 reference implementation](https://nghttp2.org/)
 - [High Performance Browser Networking, ch. 12 (free online)](https://hpbn.co/http2/)

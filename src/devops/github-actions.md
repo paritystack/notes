@@ -2,6 +2,8 @@
 
 GitHub's native CI/CD and automation platform for building, testing, and deploying code directly from GitHub repositories.
 
+GitHub Actions is one implementation of the [CI/CD](cicd.md) pattern: workflows build [Docker](docker.md) images, run tests, and deploy to [Kubernetes](kubernetes.md) or cloud providers via [Terraform](terraform.md).
+
 ## Core Concepts
 
 ### Workflows
@@ -878,3 +880,10 @@ jobs:
 - [Actions Marketplace](https://github.com/marketplace?type=actions)
 - [Workflow Syntax](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions)
 - [Awesome Actions](https://github.com/sdras/awesome-actions)
+
+## Where this connects
+
+- [CI/CD](cicd.md) — GitHub Actions is one implementation of the broader CI/CD pattern
+- [Docker](docker.md) — most workflows build and push Docker images
+- [Kubernetes](kubernetes.md) — CD steps deploy new images to K8s via kubectl or Helm
+- [Terraform](terraform.md) — infrastructure changes can be applied as a step in GitHub Actions workflows

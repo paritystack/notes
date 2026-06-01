@@ -2,6 +2,8 @@
 
 Comprehensive monitoring, logging, and observability practices for maintaining reliable, performant systems.
 
+Monitoring is the foundation that [observability](observability.md) builds on; [SRE](sre.md) teams use monitoring data to track SLOs and error budgets, while [chaos engineering](chaos_engineering.md) experiments use monitoring to measure fault impact.
+
 ## Core Concepts
 
 ### The Three Pillars of Observability
@@ -828,3 +830,10 @@ Info: FYI, no action required
 - [ELK Stack Guide](https://www.elastic.co/guide/)
 - [OpenTelemetry](https://opentelemetry.io/)
 - [Google SRE Book](https://sre.google/sre-book/table-of-contents/)
+
+## Where this connects
+
+- [Observability](observability.md) — observability extends monitoring: monitoring tracks known metrics, observability explores unknowns
+- [SRE](sre.md) — SLIs and SLOs are defined and tracked via monitoring data
+- [Chaos Engineering](chaos_engineering.md) — monitoring provides the steady-state baseline chaos experiments deviate from
+- [Kubernetes](kubernetes.md) — Prometheus scrapes K8s component and workload metrics automatically

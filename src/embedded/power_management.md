@@ -1,6 +1,6 @@
 # Power Management
 
-Power management refers to the process of managing the power consumption of a device or system to optimize energy efficiency and prolong battery life. It is crucial in various applications, especially in portable devices like smartphones, laptops, and IoT devices. Modern power management involves a sophisticated combination of hardware mechanisms, software policies, and system-level optimizations that work together to minimize energy consumption while maintaining performance requirements.
+Power management refers to the process of managing the power consumption of a device or system to optimize energy efficiency and prolong battery life. It is crucial in various applications, especially in portable devices like smartphones, laptops, and IoT devices. Modern power management involves a sophisticated combination of hardware mechanisms, software policies, and system-level optimizations that work together to minimize energy consumption while maintaining performance requirements. Key techniques include sleep modes (waking via [interrupts](interrupts.md) or [timers](timers.md)), disabling peripheral clocks when [GPIO](gpio.md)/[ADC](adc.md)/UART are idle, and ensuring the [watchdog timer](watchdog.md) is compatible with the chosen sleep depth.
 
 ## Key Concepts
 
@@ -793,6 +793,14 @@ float duty_cycle = (harvested_power_uw - sleep_power_uw) /
 - Linux kernel power management documentation: https://www.kernel.org/doc/html/latest/power/
 - ARM power management documentation
 - Intel Software Developer Manuals (Volume 3B: System Programming)
+
+## Where this connects
+
+- [Interrupts](interrupts.md) — the primary mechanism to wake the MCU from sleep
+- [Timers](timers.md) — RTC and general-purpose timers schedule periodic wake-ups
+- [Watchdog](watchdog.md) — must run (or be suspended) correctly through sleep mode transitions
+- [GPIO](gpio.md) — unused GPIO pins must be driven or pulled to avoid floating-pin leakage current
+- [ADC](adc.md) / [UART](uart.md) / [SPI](spi.md) / [I2C](i2c.md) — peripheral clocks must be gated when not in use
 
 ## Conclusion
 

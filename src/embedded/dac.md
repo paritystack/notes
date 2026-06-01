@@ -2,7 +2,7 @@
 
 ## Overview
 
-A Digital-to-Analog Converter (DAC) does the opposite of an ADC - it converts discrete digital values from a microcontroller into continuous analog voltage signals. DACs are essential for generating analog outputs like audio signals, control voltages, and waveforms.
+A Digital-to-Analog Converter (DAC) does the opposite of an [ADC](adc.md) — it converts discrete digital values from a microcontroller into continuous analog voltage signals. DACs are essential for generating analog outputs like audio signals, control voltages, and waveforms. When a true DAC is unavailable, [PWM](pwm.md) with an RC filter is a common software substitute. External DAC chips (e.g., MCP4725) connect via [I2C](i2c.md), and DMA-driven [Timers](timers.md) enable waveform generation without CPU involvement.
 
 ## Key Concepts
 
@@ -520,6 +520,14 @@ The DAC takes your number choice and creates a voltage:
 It's like having a volume knob that you control with numbers instead of turning it by hand!
 
 **PWM vs DAC**: PWM is like flashing a light super fast to make it look dimmer. DAC is like actually turning down the voltage - it's smoother and better for some jobs!
+
+## Where this connects
+
+- [ADC](adc.md) — the complementary input path; ADC reads analog, DAC outputs it
+- [PWM](pwm.md) — substitute for a true DAC on MCUs without hardware DAC; requires RC low-pass filter
+- [Timers](timers.md) — DMA-triggered timers drive periodic DAC updates for waveform generation
+- [I2C](i2c.md) — external DAC chips (MCP4725) are controlled via I2C
+- [GPIO](gpio.md) — DAC output pins are GPIO pins with analog alternate function
 
 ## Further Resources
 

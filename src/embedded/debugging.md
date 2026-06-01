@@ -4,7 +4,7 @@ Comprehensive guide to debugging embedded systems, covering hardware and softwar
 
 ## Overview
 
-Embedded systems debugging is fundamentally different from desktop application debugging due to resource constraints, real-time requirements, and hardware interactions. Effective debugging requires understanding both software and hardware aspects of the system.
+Embedded systems debugging is fundamentally different from desktop application debugging due to resource constraints, real-time requirements, and hardware interactions. Effective debugging requires understanding both software and hardware aspects of the system. The primary hardware debug interfaces are [JTAG/SWD](jtag_swd.md) and [GDB for embedded](gdb_embedded.md); serial output via [UART](uart.md) and [RTT/semihosting](rtt_semihosting.md) supplement them. Hard faults and memory corruption are diagnosed with [HardFault debugging](hardfault_debugging.md).
 
 **Key Challenges:**
 - Limited debugging resources (memory, CPU cycles)
@@ -1541,3 +1541,12 @@ jobs:
 ---
 
 Effective embedded debugging requires a combination of hardware tools, software techniques, and systematic approaches. Master these tools and patterns to efficiently diagnose and resolve issues in your embedded systems.
+
+## Where this connects
+
+- [JTAG/SWD](jtag_swd.md) — hardware debug interface; required for on-chip breakpoints and register inspection
+- [GDB Embedded](gdb_embedded.md) — the primary debug client for bare-metal and RTOS targets
+- [UART](uart.md) — the simplest debug output channel; printf-style logging before a debugger is available
+- [RTT & Semihosting](rtt_semihosting.md) — low-overhead debug output over the SWD connection without a UART
+- [HardFault Debugging](hardfault_debugging.md) — decoding Cortex-M fault registers after a crash
+- [Interrupts](interrupts.md) — many bugs stem from incorrect ISR interaction; understanding NVIC state is key

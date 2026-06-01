@@ -2,7 +2,7 @@
 
 ## Overview
 
-DHCP automatically assigns IP addresses and other network configuration to devices on a network. Without it, every device would need manual IP configuration. DHCP runs over UDP (server port 67, client port 68) and is the reason your laptop "just works" when you join a Wi-Fi network.
+DHCP automatically assigns [IP](ip.md) addresses and other network configuration to devices on a network. Without it, every device would need manual IP configuration. DHCP runs over [UDP](udp.md) (server port 67, client port 68) and is the reason your laptop "just works" when you join a Wi-Fi network. It also provides the [DNS](dns.md) server address and default gateway; [ARP](arp.md) is used during the DHCP address-conflict-detection phase.
 
 ## Why DHCP?
 
@@ -452,5 +452,12 @@ A "rogue DHCP server" is like a scammer in the lobby pretending to be the recept
 - [RFC 2131 - DHCP](https://tools.ietf.org/html/rfc2131)
 - [RFC 2132 - DHCP Options](https://tools.ietf.org/html/rfc2132)
 - [RFC 8415 - DHCPv6](https://tools.ietf.org/html/rfc8415)
+## Where this connects
+
+- [UDP](udp.md) — DHCP uses broadcast UDP (ports 67/68) before the client has an IP address
+- [IPv4](ipv4.md) — DHCP is the primary dynamic address assignment mechanism for IPv4
+- [DNS](dns.md) — DHCP response includes the DNS server address clients should use
+- [ARP](arp.md) — DHCP clients use ARP to detect address conflicts before accepting a lease
+
 - [ISC Kea (modern DHCP server)](https://www.isc.org/kea/)
 - [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html)

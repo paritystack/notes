@@ -3,7 +3,7 @@
 > **Domain:** DevOps, SRE, Distributed Systems
 > **Key Concepts:** Blast Radius, Fault Injection, Game Days, Resilience
 
-**Chaos Engineering** is the discipline of experimenting on a system in order to build confidence in the system's capability to withstand turbulent conditions in production. It is **not** just "breaking things randomly"; it is a scientific method.
+**Chaos Engineering** is the discipline of experimenting on a system in order to build confidence in the system's capability to withstand turbulent conditions in production. It is **not** just "breaking things randomly"; it is a scientific method. Chaos experiments require a strong [observability](observability.md) foundation to measure the blast radius, are governed by [SRE](sre.md) error-budget policies, and target weaknesses exposed by [monitoring](monitoring.md).
 
 ---
 
@@ -74,3 +74,10 @@ A **Game Day** is a scheduled team event.
 
 *   *"We are too small for Chaos."* -> If you are small, fixing it is cheap. If you wait until you are huge, outages cost millions.
 *   *"Chaos Engineering creates outages."* -> Chaos Engineering *reveals* outages that are already waiting to happen, usually at 3 AM.
+
+## Where this connects
+
+- [Observability](observability.md) — you cannot run chaos experiments without first being able to measure their impact
+- [SRE](sre.md) — error budgets determine how much chaos experimentation is safe to run in production
+- [Monitoring](monitoring.md) — steady-state baselines come from monitoring data; deviations confirm the hypothesis
+- [Kubernetes](kubernetes.md) — Chaos Monkey, Litmus, and Chaos Mesh target Kubernetes workloads

@@ -2,7 +2,7 @@
 
 ## Overview
 
-WebRTC (Web Real-Time Communication) is an open-source framework that enables real-time peer-to-peer communication directly between web browsers and mobile applications. It supports video, audio, and arbitrary data transfer without requiring plugins or third-party software.
+WebRTC (Web Real-Time Communication) is an open-source framework that enables real-time peer-to-peer communication directly between web browsers and mobile applications. It supports video, audio, and arbitrary data transfer without requiring plugins or third-party software. WebRTC uses [ICE](ice.md) for connectivity, [STUN](stun.md) for address discovery, [TURN](turn.md) as relay fallback, [TLS/SSL](tls_ssl.md) (DTLS) for encryption, and [UDP](udp.md) for media transport.
 
 ## Key Features
 
@@ -1378,5 +1378,13 @@ TURN: Using walkie-talkies if too far
 
 ### Books
 - *Real-Time Communication with WebRTC* by Salvatore Loreto
+## Where this connects
+
+- [ICE](ice.md) — the connectivity framework WebRTC uses to find the best peer-to-peer path
+- [STUN](stun.md) — discovers public IP/port for direct P2P candidates
+- [TURN](turn.md) — relay fallback when direct P2P is blocked by symmetric NAT
+- [UDP](udp.md) — media streams (RTP/SRTP) prefer UDP for low-latency delivery
+- [TLS/SSL](tls_ssl.md) — DTLS-SRTP provides mandatory encryption for WebRTC media
+
 - *WebRTC Cookbook* by Andrii Sergiienko
 - *High Performance Browser Networking* by Ilya Grigorik

@@ -2,7 +2,7 @@
 
 ## 1. Introduction to Microarchitecture
 
-If the Instruction Set Architecture (ISA) is the blueprint of a building, the **microarchitecture** (or processor design) is the actual construction: the materials used, the layout of the plumbing, and the speed of the elevators. It defines how the logical instructions of the ISA are executed by physical transistors.
+If the [Instruction Set Architecture (ISA)](isa.md) is the blueprint of a building, the **microarchitecture** (or processor design) is the actual construction: the materials used, the layout of the plumbing, and the speed of the elevators. It defines how the logical instructions of the ISA are executed by physical transistors. The cache hierarchy is covered in [Cache & TCM](cache_tcm.md), and interrupt latency is determined by the [interrupt controller](interrupts.md) together with pipeline depth.
 
 The holy grail of processor design is optimizing the "PPA" metrics:
 1.  **Performance:** Usually measured in IPC (Instructions Per Cycle) multiplied by the Clock Frequency.
@@ -248,3 +248,11 @@ Building a monolithic (single piece of silicon) 600mm^2 chip is incredibly expen
 *   **Chiplets:** AMD revolutionized modern architecture with "Zen" by splitting the processor into smaller, cheaper chiplets. Multiple CPU "Core Complex" (CCX) chiplets (made on an expensive 5nm node) are glued together with a central I/O chiplet (made on a cheaper 12nm node) on an organic substrate.
 *   **2.5D Packaging (Silicon Interposer):** Connecting chiplets using a silicon base layer with microscopic wiring, allowing massive bandwidth between chiplets (e.g., integrating High Bandwidth Memory - HBM directly next to a GPU).
 *   **3D Stacking:** Using Through-Silicon Vias (TSVs) to stack silicon dies directly on top of each other. (e.g., AMD 3D V-Cache, which glues an extra 64MB of SRAM directly on top of the CPU cores to massively expand the L3 cache footprint without increasing the 2D footprint).
+
+## Where this connects
+
+- [ISA](isa.md) — the ISA is the contract the microarchitecture must implement; same ISA, many microarchitectures
+- [Cache & TCM](cache_tcm.md) — the cache hierarchy is the largest single factor affecting real-world IPC
+- [Interrupts](interrupts.md) — pipeline depth and out-of-order execution affect interrupt entry/exit latency
+- [Linker Scripts](linker_scripts.md) — placing hot code in TCM (Tightly Coupled Memory) is a microarchitecture-aware optimization
+- [Power Management](power_management.md) — DVFS, power gating, and clock gating are microarchitecture-level power techniques

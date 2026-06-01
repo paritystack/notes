@@ -15,7 +15,7 @@ Complete guide to Raspberry Pi setup, GPIO programming, and projects.
 
 ## Introduction
 
-The Raspberry Pi is a series of small single-board computers developed by the Raspberry Pi Foundation. Unlike microcontrollers, it runs a full Linux operating system and can function as a complete desktop computer.
+The Raspberry Pi is a series of small single-board computers developed by the Raspberry Pi Foundation. Unlike microcontrollers, it runs a full Linux operating system and can function as a complete desktop computer. Its 40-pin [GPIO](gpio.md) header exposes [UART](uart.md), [SPI](spi.md), and [I2C](i2c.md) buses alongside plain digital I/O; for deep Linux integration see [Embedded Linux](embedded_linux.md).
 
 ### Key Features
 
@@ -1395,3 +1395,12 @@ vcgencmd get_throttled
 
 # Use official 5V 3A power supply
 ```
+
+## Where this connects
+
+- [GPIO](gpio.md) — the 40-pin header is the Raspberry Pi's primary hardware interface
+- [I2C](i2c.md) — enabled via `raspi-config`; connects sensors, OLEDs, and EEPROMs
+- [SPI](spi.md) — high-speed peripheral interface for displays, ADCs, and flash memory
+- [UART](uart.md) — serial console for headless debugging; also used for GPS and Bluetooth modules
+- [Embedded Linux](embedded_linux.md) — device tree, kernel drivers, and bootchain for Linux-based SBCs
+- [OTA Updates](ota_updates.md) — image-based OTA (Mender, RAUC) applies to Pi's eMMC/SD layout

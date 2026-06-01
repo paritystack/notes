@@ -1,6 +1,6 @@
 # Ethernet
 
-Ethernet is a widely used networking technology that enables devices to communicate over a local area network (LAN). It is a fundamental technology for connecting computers, printers, and other devices in homes and businesses. In embedded systems, Ethernet provides reliable, high-speed connectivity for industrial automation, IoT devices, and networked embedded applications.
+Ethernet is a widely used networking technology that enables devices to communicate over a local area network (LAN). It is a fundamental technology for connecting computers, printers, and other devices in homes and businesses. In embedded systems, Ethernet provides reliable, high-speed connectivity for industrial automation, IoT devices, and networked embedded applications. On the networking side, Ethernet is the Layer-1/2 foundation for [Ethernet/VLAN](../networking/ethernet_vlan.md) and the [TCP/IP model](../networking/tcp_ip_model.md); in embedded contexts the MAC peripheral uses [DMA](dma.md) and [Interrupts](interrupts.md) for packet I/O, and [CAN](can.md) is the typical alternative when long cable runs are needed.
 
 ## Key Concepts
 
@@ -447,3 +447,11 @@ Key takeaways for embedded Ethernet design:
 - Use debugging tools effectively for troubleshooting
 
 With proper design and implementation, Ethernet provides robust, high-performance networking for embedded applications ranging from simple IoT devices to complex industrial automation systems.
+
+## Where this connects
+
+- [Ethernet/VLAN](../networking/ethernet_vlan.md) — the networking-side coverage of Ethernet framing, VLANs, and switches
+- [TCP/IP Model](../networking/tcp_ip_model.md) — Ethernet is the physical/data-link foundation of the TCP/IP stack
+- [CAN](can.md) — industrial alternative for multi-node, long-cable networks without a hub
+- [DMA](dma.md) — Ethernet MAC peripherals use DMA rings for zero-copy packet I/O
+- [Interrupts](interrupts.md) — Ethernet MAC fires receive and transmit-complete interrupts to the CPU

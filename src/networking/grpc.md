@@ -2,7 +2,7 @@
 
 ## Overview
 
-gRPC is a high-performance RPC framework originally developed at Google, open-sourced in 2015. It uses **HTTP/2** for transport, **Protocol Buffers** (protobuf) for serialization, and supports four call patterns including bidirectional streaming. It's the dominant RPC system for inter-service communication in microservice architectures.
+gRPC is a high-performance RPC framework originally developed at Google, open-sourced in 2015. It uses **[HTTP/2](http2.md)** for transport, **Protocol Buffers** (protobuf) for serialization, and supports four call patterns including bidirectional streaming. It's the dominant RPC system for inter-service communication in microservice architectures. [TLS](tls_ssl.md) secures gRPC in production; [WebSocket](websocket.md) is a simpler alternative when browser compatibility matters.
 
 The "g" stands for nothing — Google likes recursive backronyms (officially "gRPC Remote Procedure Calls").
 
@@ -650,5 +650,12 @@ The reason gRPC is faster than JSON-over-HTTP is that the shopping list is in co
 - [protobuf Language Guide](https://protobuf.dev/programming-guides/proto3/)
 - [Google API Design Guide](https://cloud.google.com/apis/design)
 - [buf — modern protobuf tooling](https://buf.build/)
+## Where this connects
+
+- [HTTP/2](http2.md) — gRPC is built on HTTP/2 streams for multiplexed RPC calls
+- [TLS/SSL](tls_ssl.md) — TLS is required for gRPC in production (mTLS for service-to-service)
+- [TCP](tcp.md) — the underlying transport HTTP/2 rides
+- [WebSocket](websocket.md) — simpler alternative when bidirectional streaming over HTTP/1.1 suffices
+
 - [Connect — gRPC-compatible alternative](https://connectrpc.com/)
 - [gRPC + Go Tutorial](https://grpc.io/docs/languages/go/quickstart/)

@@ -3,7 +3,7 @@
 > **Domain:** DevOps, Operations, Software Engineering
 > **Key Concepts:** SLI, SLO, SLA, Error Budget, Toil, Post-Mortems
 
-**Site Reliability Engineering (SRE)** is a discipline that incorporates aspects of software engineering and applies them to infrastructure and operations problems. Coined by Google, the core tenet is: *"SRE is what happens when you ask a software engineer to design an operations team."*
+**Site Reliability Engineering (SRE)** is a discipline that incorporates aspects of software engineering and applies them to infrastructure and operations problems. Coined by Google, the core tenet is: *"SRE is what happens when you ask a software engineer to design an operations team."* SRE relies on [observability](observability.md) and [monitoring](monitoring.md) to track SLOs, uses [chaos engineering](chaos_engineering.md) to proactively test reliability, and automates toil through [CI/CD](cicd.md) and [infrastructure-as-code](terraform.md).
 
 ---
 
@@ -92,3 +92,11 @@ Google recommends monitoring these four metrics for every user-facing system:
 2.  **Traffic:** Demand on the system (req/sec).
 3.  **Errors:** Rate of requests that fail (5xx, explicit failures).
 4.  **Saturation:** How "full" the system is (CPU load, memory usage).
+
+## Where this connects
+
+- [Observability](observability.md) — SRE error-budget tracking and SLO alerting require deep observability
+- [Monitoring](monitoring.md) — SLIs are derived from monitoring data; on-call alerting feeds SRE processes
+- [Chaos Engineering](chaos_engineering.md) — SRE teams run chaos experiments within error-budget headroom
+- [CI/CD](cicd.md) — deployment frequency and change failure rate are SRE reliability metrics
+- [Terraform](terraform.md) — eliminating toil through IaC is a core SRE activity

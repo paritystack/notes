@@ -2,7 +2,7 @@
 
 ## Overview
 
-**MTU** (Maximum Transmission Unit) is the largest packet size a link can carry in a single frame. **PMTUD** (Path MTU Discovery) is how endpoints figure out the smallest MTU along a path. **Fragmentation** is what happens when a packet is too big — IPv4 routers can split it; IPv6 routers can't. Get any of this wrong and connections silently hang.
+**MTU** (Maximum Transmission Unit) is the largest packet size a link can carry in a single frame. **PMTUD** (Path MTU Discovery) is how endpoints figure out the smallest MTU along a path. **Fragmentation** is what happens when a packet is too big — [IPv4](ipv4.md) routers can split it; [IPv6](ipv6.md) routers can't. Get any of this wrong and [TCP](tcp.md) connections silently hang. [Ethernet](ethernet_vlan.md) sets the standard MTU of 1500 bytes; [QUIC](quic.md) and [WebRTC](webrtc.md) must also respect PMTUD.
 
 ## What is MTU?
 
@@ -421,5 +421,13 @@ You pack a 2-foot-wide package (the MTU), but one door on the way is only 1.5 fe
 - [RFC 791 - IPv4 (fragmentation)](https://tools.ietf.org/html/rfc791)
 - [RFC 1191 - Path MTU Discovery](https://tools.ietf.org/html/rfc1191)
 - [RFC 8201 - IPv6 PMTUD](https://tools.ietf.org/html/rfc8201)
+## Where this connects
+
+- [IPv4](ipv4.md) — IPv4 allows in-network fragmentation; PMTUD avoids it
+- [IPv6](ipv6.md) — IPv6 never fragments in-network; PMTUD is mandatory
+- [TCP](tcp.md) — TCP sets MSS based on PMTUD to avoid fragmentation
+- [Ethernet/VLAN](ethernet_vlan.md) — the 1500-byte Ethernet MTU is the most common PMTUD constraint
+- [QUIC](quic.md) — QUIC performs its own PMTUD (DPLPMTUD) at the application layer
+
 - [RFC 4821 - Packetization Layer PMTUD](https://tools.ietf.org/html/rfc4821)
 - [Linux PMTUD documentation](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt)

@@ -2,7 +2,7 @@
 
 ## Overview
 
-**OSPF** (Open Shortest Path First) and **IS-IS** (Intermediate System to Intermediate System) are the two dominant **link-state interior gateway protocols (IGPs)** — used *within* a single Autonomous System to compute optimal paths between routers. They serve the same purpose; they differ mainly in heritage (IETF vs ISO), packaging, and how they're deployed in practice.
+**OSPF** (Open Shortest Path First) and **IS-IS** (Intermediate System to Intermediate System) are the two dominant **link-state interior gateway protocols (IGPs)** — used *within* a single Autonomous System to compute optimal paths between routers. They serve the same purpose; they differ mainly in heritage (IETF vs ISO), packaging, and how they're deployed in practice. [BGP](bgp_anycast.md) is the exterior protocol between ASes; OSPF/IS-IS feed routes into BGP. [Ethernet/VLAN](ethernet_vlan.md) and [IP](ip.md) are the data-plane technologies they route over.
 
 For interview prep: knowing **link-state vs distance-vector**, **LSDB**, **SPF/Dijkstra**, **areas**, and OSPF vs IS-IS tradeoffs is usually enough. This note covers both because they share 80% of their concepts and the differences are easy.
 
@@ -438,5 +438,11 @@ If a street closes, the affected intersection shouts "this street is dead!" and 
 - [RFC 1195 - IS-IS for IP](https://tools.ietf.org/html/rfc1195)
 - [ISO/IEC 10589 - IS-IS](https://www.iso.org/standard/30932.html)
 - [Cisco OSPF design guide](https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/7039-1.html)
+## Where this connects
+
+- [BGP](bgp_anycast.md) — BGP is the exterior protocol between ASes; OSPF/IS-IS feeds it with internal routes
+- [IP](ip.md) — OSPF/IS-IS compute the best paths to reach IP prefixes inside the AS
+- [Ethernet/VLAN](ethernet_vlan.md) — OSPF and IS-IS form adjacencies over Ethernet links
+
 - [FRR documentation](http://docs.frrouting.org/)
 - [Network Warrior by Gary A. Donahue](https://www.oreilly.com/library/view/network-warrior-2nd/9781449307974/)

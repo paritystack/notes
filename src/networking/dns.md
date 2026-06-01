@@ -2,7 +2,7 @@
 
 ## Overview
 
-DNS is the internet's phonebook that translates human-readable domain names (like `example.com`) into IP addresses (like `93.184.216.34`) that computers use to identify each other on the network.
+DNS is the internet's phonebook that translates human-readable domain names (like `example.com`) into [IP](ip.md) addresses (like `93.184.216.34`) that computers use to identify each other on the network. DNS queries travel over [UDP](udp.md) (port 53) or [TCP](tcp.md) for large responses; [mDNS](mdns.md) is the local-network zero-config equivalent; [DHCP](dhcp.md) provisions the DNS server address alongside the IP address.
 
 ## DNS Hierarchy
 
@@ -476,5 +476,12 @@ DNS servers are like helpers who:
 
 - [RFC 1035 - DNS Specification](https://tools.ietf.org/html/rfc1035)
 - [How DNS Works (Comic)](https://howdns.works/)
+## Where this connects
+
+- [UDP](udp.md) / [TCP](tcp.md) — DNS queries use UDP port 53; large responses fall back to TCP
+- [mDNS](mdns.md) — the zero-config local-network equivalent of DNS (`.local` domain)
+- [DHCP](dhcp.md) — provisions the DNS server address alongside the IP address
+- [BGP](bgp_anycast.md) — anycast routing powers the resilience of global DNS resolvers
+
 - [DNS Lookup Tool](https://mxtoolbox.com/DNSLookup.aspx)
 - [DNSSEC Explained](https://dnssec-analyzer.verisignlabs.com/)

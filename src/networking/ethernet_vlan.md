@@ -2,7 +2,7 @@
 
 ## Overview
 
-Ethernet (IEEE 802.3) is the dominant Layer 2 technology for wired LANs. VLANs (Virtual LANs, IEEE 802.1Q) let a single physical Ethernet network be partitioned into multiple logical broadcast domains. Together they form the backbone of every modern data center and office network.
+Ethernet (IEEE 802.3) is the dominant Layer 2 technology for wired LANs. VLANs (Virtual LANs, IEEE 802.1Q) let a single physical Ethernet network be partitioned into multiple logical broadcast domains. Together they form the backbone of every modern data center and office network. [ARP](arp.md) resolves [IP](ip.md) addresses to Ethernet MAC addresses; [MTU/PMTUD](mtu_pmtud.md) is set by the Ethernet link MTU (typically 1500 bytes); see also the [embedded Ethernet](../embedded/ethernet.md) page for MCU-level Ethernet integration.
 
 ## Ethernet Basics
 
@@ -510,5 +510,13 @@ A **VLAN** is like dividing the building into separate companies that share the 
 
 - [IEEE 802.3 - Ethernet](https://standards.ieee.org/standard/802_3-2018.html)
 - [IEEE 802.1Q - VLAN tagging](https://standards.ieee.org/standard/802_1Q-2018.html)
+## Where this connects
+
+- [ARP](arp.md) — maps IP addresses to MAC addresses within an Ethernet broadcast domain
+- [IP](ip.md) — IP packets are encapsulated inside Ethernet frames
+- [MTU/PMTUD](mtu_pmtud.md) — standard Ethernet MTU (1500 bytes) sets the baseline for PMTUD
+- [OSPF/IS-IS](ospf_isis.md) — runs over Ethernet links to establish routing adjacencies
+- [Embedded Ethernet](../embedded/ethernet.md) — MCU-level Ethernet MAC/PHY integration
+
 - [Cisco - Configuring VLANs](https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst3850/software/release/16-1/configuration_guide/vlan/b_161_vlan_3850_cg.html)
 - [Linux bridging documentation](https://wiki.linuxfoundation.org/networking/bridge)

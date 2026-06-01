@@ -2,7 +2,7 @@
 
 ## Overview
 
-UPnP is a set of networking protocols that enables devices on a network to seamlessly discover each other and establish functional network services for data sharing, communications, and entertainment. It allows devices to automatically configure themselves and announce their presence to other devices.
+UPnP is a set of networking protocols that enables devices on a network to seamlessly discover each other and establish functional network services for data sharing, communications, and entertainment. It allows devices to automatically configure themselves and announce their presence using [mDNS](mdns.md)/SSDP. The IGD (Internet Gateway Device) profile uses [NAT-PMP](nat_pmp.md) concepts for port-forward automation; [PCP](pcp.md) is the modern replacement for UPnP port mapping.
 
 ## UPnP Components
 
@@ -705,5 +705,12 @@ Better approach:
 - [UPnP Forum](https://openconnectivity.org/developer/specifications/upnp-resources)
 - [RFC 6970 - UPnP IGD-PCP Interworking](https://tools.ietf.org/html/rfc6970)
 - [UPnP Device Architecture](http://upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v2.0.pdf)
+## Where this connects
+
+- [mDNS](mdns.md) — UPnP uses SSDP (UDP multicast) for discovery, analogous to mDNS
+- [NAT-PMP](nat_pmp.md) — NAT-PMP and PCP are simpler, more secure port-mapping alternatives
+- [PCP](pcp.md) — the modern standardised successor to UPnP IGD port mapping
+- [Firewalls](firewalls.md) — UPnP IGD dynamically modifies firewall/NAT rules; often disabled for security
+
 - [miniupnpc Library](https://miniupnp.tuxfamily.org/)
 - [Security Concerns](https://www.upnp-hacks.org/)

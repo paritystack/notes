@@ -2,7 +2,7 @@
 
 ## Overview
 
-HTTP (HyperText Transfer Protocol) is the foundation of data communication on the web. HTTPS adds encryption for secure communication.
+HTTP (HyperText Transfer Protocol) is the foundation of data communication on the web. HTTPS adds [TLS/SSL](tls_ssl.md) encryption for secure communication. [HTTP/2](http2.md) is the binary successor that multiplexes requests; [HTTP/3](quic.md) runs over QUIC; [WebSocket](websocket.md) upgrades an HTTP connection to a full-duplex channel; all run over [TCP](tcp.md).
 
 ## HTTP Basics
 
@@ -236,5 +236,13 @@ HTTPS adds a sealed envelope so only the right person can read it!
 ## Further Resources
 
 - [MDN HTTP Guide](https://developer.mozilla.org/en-US/docs/Web/HTTP)
+## Where this connects
+
+- [HTTP/2](http2.md) — binary successor that multiplexes requests over a single TCP connection
+- [QUIC](quic.md) — HTTP/3 runs HTTP semantics over QUIC instead of TCP
+- [TLS/SSL](tls_ssl.md) — HTTPS = HTTP over TLS; required for HTTP/2 in browsers
+- [WebSocket](websocket.md) — upgrades an HTTP/1.1 connection to full-duplex
+- [gRPC](grpc.md) — uses HTTP/2 as transport for RPC calls
+
 - [HTTP Status Codes](https://httpstat.us/)
 - [REST API Best Practices](https://restfulapi.net/)

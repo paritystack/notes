@@ -2,7 +2,7 @@
 
 ## Overview
 
-SSH is a cryptographic network protocol for secure remote login, command execution, and arbitrary tunneled traffic over an untrusted network. It replaced the insecure `telnet`, `rlogin`, and `rsh` protocols in the late 1990s and is now the universal tool for server administration. SSH runs over TCP port 22 by default.
+SSH is a cryptographic network protocol for secure remote login, command execution, and arbitrary tunneled traffic over an untrusted network. It replaced the insecure `telnet`, `rlogin`, and `rsh` protocols in the late 1990s and is now the universal tool for server administration. SSH runs over [TCP](tcp.md) port 22 by default. [TLS/SSL](tls_ssl.md) serves a similar authentication/encryption role for web traffic; [firewalls](firewalls.md) typically allow port 22 as a controlled access point.
 
 ## What SSH Provides
 
@@ -577,5 +577,12 @@ The truck has three guards: one checks the **destination address** (host key —
 - [RFC 4251 - SSH Protocol Architecture](https://tools.ietf.org/html/rfc4251)
 - [RFC 4253 - SSH Transport Layer](https://tools.ietf.org/html/rfc4253)
 - [OpenSSH Manual](https://man.openbsd.org/ssh)
+## Where this connects
+
+- [TCP](tcp.md) — SSH runs over TCP (port 22) for reliable ordered delivery
+- [TLS/SSL](tls_ssl.md) — both serve authentication and encryption; TLS is for HTTP, SSH for shell/SFTP
+- [Firewalls](firewalls.md) — SSH port 22 is a key firewall rule; jump hosts reduce attack surface
+- [IPsec](ipsec.md) — alternative tunnel approach for site-to-site connectivity
+
 - [SSH Mastery (book) by Michael W. Lucas](https://mwl.io/nonfiction/networking#ssh)
 - [Mozilla SSH guidelines](https://infosec.mozilla.org/guidelines/openssh.html)

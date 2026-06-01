@@ -2,7 +2,7 @@
 
 ## Overview
 
-UART is one of the most commonly used serial communication protocols in embedded systems. Unlike SPI and I2C, UART is asynchronous - meaning it doesn't require a shared clock signal between devices. This makes it simple, robust, and perfect for point-to-point communication between two devices.
+UART is one of the most commonly used serial communication protocols in embedded systems. Unlike [SPI](spi.md) and [I2C](i2c.md), UART is asynchronous — meaning it doesn't require a shared clock signal between devices. This makes it simple, robust, and perfect for point-to-point communication between two devices. For multi-node industrial buses see [CAN](can.md); UART TX/RX lines are routed through [GPIO](gpio.md) alternate-function pins and often the first tool for [debugging](debugging.md) embedded firmware.
 
 ## Key Features
 
@@ -469,6 +469,15 @@ Imagine you and your friend are in different rooms and want to talk using two ca
 The cool thing? Both of you can talk and listen at the same time because you have two strings (wires)!
 
 The tricky part? You MUST both agree to talk at the same speed (baud rate) before starting, because there's no way to say "slow down!" once you've begun.
+
+## Where this connects
+
+- [SPI](spi.md) — synchronous, higher-speed multi-device alternative
+- [I2C](i2c.md) — synchronous, multi-master two-wire alternative
+- [CAN](can.md) — multi-node bus with built-in arbitration for automotive/industrial networks
+- [GPIO](gpio.md) — UART TX/RX pins are configured via GPIO alternate-function registers
+- [Interrupts](interrupts.md) — UART receive is almost always interrupt-driven or DMA-driven to avoid polling
+- [Debugging](debugging.md) — UART is the primary debug output channel on most embedded targets
 
 ## Further Resources
 

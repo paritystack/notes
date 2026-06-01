@@ -2,6 +2,8 @@
 
 Multi-cloud deployment strategies, patterns, and best practices for AWS, GCP, and Azure.
 
+Cloud deployments are orchestrated by [Kubernetes](kubernetes.md), provisioned by [Terraform](terraform.md), built on top of [infrastructure](infrastructure.md) primitives (VPC, subnets, IAM), and shipped via [CI/CD](cicd.md) pipelines that build [Docker](docker.md) images.
+
 ## Cloud Platforms Overview
 
 | Feature | AWS | GCP | Azure |
@@ -862,3 +864,11 @@ aws globalaccelerator create-endpoint-group \
 - [AWS Well-Architected](https://aws.amazon.com/architecture/well-architected/)
 - [GCP Best Practices](https://cloud.google.com/architecture/best-practices)
 - [Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/)
+
+## Where this connects
+
+- [Terraform](terraform.md) — provisions the cloud resources (EKS clusters, VPCs, RDS) that deployments target
+- [Kubernetes](kubernetes.md) — the primary deployment target for containerised workloads in the cloud
+- [Docker](docker.md) — the image format used by all major cloud container services
+- [Infrastructure](infrastructure.md) — VPCs, subnets, and load balancers that underpin cloud deployments
+- [CI/CD](cicd.md) — automates the build, test, and deploy pipeline that pushes to the cloud

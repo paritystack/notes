@@ -2,7 +2,7 @@
 
 ## Overview
 
-NAT-PMP (NAT Port Mapping Protocol) is a network protocol for establishing port forwarding rules in a NAT gateway automatically. It provides a simple, lightweight mechanism for applications to request port mappings without manual configuration. NAT-PMP was developed by Apple and later standardized as RFC 6886.
+NAT-PMP (NAT Port Mapping Protocol) is a network protocol for establishing port forwarding rules in a NAT gateway automatically. It provides a simple, lightweight mechanism for applications to request port mappings without manual configuration. NAT-PMP was developed by Apple and later standardized as RFC 6886. [PCP](pcp.md) is its successor with richer features; [UPnP](upnp.md) IGD is the competing standard; [STUN](stun.md) is used to discover the external IP that NAT-PMP then forwards ports through.
 
 ## Key Characteristics
 
@@ -1008,5 +1008,12 @@ Benefits:
 - [NAT Port Mapping Protocol](https://en.wikipedia.org/wiki/NAT_Port_Mapping_Protocol)
 
 ### Apple Documentation
+## Where this connects
+
+- [PCP](pcp.md) — NAT-PMP's richer successor; RFC 6887; backwards-compatible gateway support
+- [UPnP](upnp.md) — the competing standard; more complex and less secure
+- [STUN](stun.md) — discovers the external IP address that NAT-PMP then forwards ports for
+- [UDP](udp.md) — NAT-PMP control messages use UDP port 5351
+
 - [NAT-PMP on macOS](https://developer.apple.com/library/archive/qa/qa1458/_index.html)
 - Bonjour implementation includes NAT-PMP

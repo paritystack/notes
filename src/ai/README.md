@@ -117,6 +117,12 @@ The open standard for connecting AI assistants to external systems:
 - [Inference Optimization](./inference_optimization.md) — KV cache, continuous batching, PagedAttention, speculative decoding, FlashAttention
 - [Structured Outputs](./structured_outputs.md) — JSON mode, constrained/grammar-guided decoding, Instructor/Outlines
 
+### RAG & Retrieval
+
+- [Embeddings & Reranking](./embeddings.md) — bi- vs cross-encoders, MTEB, rerankers, hybrid search
+- [GraphRAG](./graphrag.md) — knowledge-graph retrieval, community summaries, local vs global search
+- [Chunking & Ingestion](./chunking_strategies.md) — parsing, chunk sizing, contextual retrieval, metadata
+
 ## Key AI Concepts
 
 ### Large Language Models (LLMs)

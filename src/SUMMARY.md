@@ -286,6 +286,9 @@
     - [Local Inference](ai/local_inference.md)
     - [Inference Optimization](ai/inference_optimization.md)
     - [Structured Outputs](ai/structured_outputs.md)
+    - [Embeddings & Reranking](ai/embeddings.md)
+    - [GraphRAG](ai/graphrag.md)
+    - [Chunking & Ingestion](ai/chunking_strategies.md)
 
 - [Cloud](cloud/README.md)
     - [Setup](cloud/setup.md)

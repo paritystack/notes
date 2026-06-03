@@ -475,7 +475,7 @@ class BinarySearchTree:
 - B-Tree
 - Heap
 
-See: [Trees documentation in algorithms](../algorithms/trees.md)
+See: [Trees documentation](trees.md)
 
 ### 7. Graphs
 
@@ -545,7 +545,7 @@ class GraphMatrix:
 - Cyclic/Acyclic
 - Connected/Disconnected
 
-See: [Graphs](graphs.md) | [Graph algorithms](../algorithms/graphs.md)
+See: [Graphs](graphs.md) | [Graph algorithms](../algorithms/graph_algorithms.md)
 
 ### 8. Specialized Structures
 
@@ -902,8 +902,8 @@ Explore detailed guides for specific data structures:
 Related algorithm topics:
 - [Sorting Algorithms](../algorithms/sorting.md)
 - [Searching Algorithms](../algorithms/searching.md)
-- [Tree Algorithms](../algorithms/trees.md)
-- [Graph Algorithms](../algorithms/graphs.md)
+- [Trees](trees.md)
+- [Graph Algorithms](../algorithms/graph_algorithms.md)
 
 ## Best Practices
 

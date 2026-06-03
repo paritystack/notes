@@ -649,7 +649,7 @@ adb -e shell  # Emulator
 - [Official ADB Documentation](https://developer.android.com/studio/command-line/adb)
 - [ADB Shell Commands](https://adbshell.com/)
 - [Android Internals](internals.md)
-- [Development Guide](development.md)
+- [Development Guide](platform_dev.md)
 
 ## Quick Reference Card
 

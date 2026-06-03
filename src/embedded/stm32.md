@@ -846,7 +846,7 @@ int _write(int file, char *ptr, int len) {
 
 ## See Also
 
-- [ARM Cortex-M Architecture](arm.md)
+- [Instruction Set Architecture](isa.md)
 - [GPIO Programming](gpio.md)
 - [UART Communication](uart.md)
 - [SPI Protocol](spi.md)

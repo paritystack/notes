@@ -1296,8 +1296,8 @@ CRDTs are the secret sauce that makes all these work without everyone having to 
 
 ### Related Topics
 
-- [Vector Clocks](./vector_clocks.md) - Causality tracking
-- [Distributed Systems](../systems/distributed_systems.md) - Context for CRDT usage
+- Vector Clocks - Causality tracking
+- [Distributed Systems](../system_design/distributed_systems.md) - Context for CRDT usage
 - [Hash Tables](./hash_tables.md) - Often used in CRDT implementations
 - [Merkle Trees](./trees.md) - Efficient state synchronization
 
@@ -1309,4 +1309,4 @@ CRDTs are the secret sauce that makes all these work without everyone having to 
 ---
 
 **Last Updated**: 2025-01-22
-**Related**: [Distributed Systems](../systems/distributed_systems.md), [Consensus Algorithms](../algorithms/consensus.md), [Vector Clocks](./vector_clocks.md)
+**Related**: [Distributed Systems](../system_design/distributed_systems.md), [Consensus Algorithms](../algorithms/raft.md), Vector Clocks

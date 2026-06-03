@@ -1726,7 +1726,7 @@ dmesg | grep -i bluetooth
 
 ### Related Topics
 
-- [Bluetooth Classic](./bluetooth.md)
+- Bluetooth Classic
 - [Linux Networking](../linux/networking.md)
-- [IoT Protocols](./iot.md)
-- [Wireless Communication](./wireless.md)
+- [IoT Protocols](../networking/iot_protocols.md)
+- Wireless Communication

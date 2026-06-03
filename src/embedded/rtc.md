@@ -852,4 +852,4 @@ if (Wire.endTransmission() == 0) {
 - [Arduino Programming](arduino.md)
 - [STM32 HAL](stm32.md)
 - [AVR Programming](avr.md)
-- [Data Logging](data_logging.md)
+- Data Logging

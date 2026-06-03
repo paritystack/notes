@@ -497,7 +497,7 @@ dependencies {
 
 - [Android Internals](internals.md) - Understanding Android architecture
 - [ADB Commands](adb.md) - Android Debug Bridge reference
-- [Development Guide](development.md) - Detailed development workflow
+- [Development Guide](platform_dev.md) - Detailed development workflow
 - [Android Binder](binder.md) - Inter-process communication mechanism
 
 ## Common Issues
@@ -521,7 +521,7 @@ dependencies {
 
 ## Next Steps
 
-1. Complete the [Android Development Guide](development.md)
+1. Complete the [Android Development Guide](platform_dev.md)
 2. Learn [ADB commands](adb.md) for debugging
 3. Study [Android Internals](internals.md) for deeper understanding
 4. Build sample projects to practice

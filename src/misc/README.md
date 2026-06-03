@@ -8,7 +8,7 @@ Essential mathematical and statistical concepts with intuitive explanations for 
 
 This section contains foundational quantitative knowledge that underpins computer science, data science, engineering, and scientific computing:
 
-### 📐 [Mathematics](math.md)
+### 📐 [Mathematics](../maths/calculus.md)
 Comprehensive calculus guide with deep intuitive explanations covering:
 - **Limits and Continuity** - Foundations of analysis
 - **Derivatives** - Measuring instantaneous change
@@ -26,7 +26,7 @@ Comprehensive calculus guide with deep intuitive explanations covering:
 - "Why it works" insights
 - Common misconceptions addressed
 
-### 📊 [Statistics](statistics.md)
+### 📊 [Statistics](../maths/statistics.md)
 Practical statistics guide focused on real-world applications:
 - **Descriptive Statistics** - Mean, median, mode, when to use each
 - **Percentiles & Quantiles** - p50, p90, p95, p99 deeply explained
@@ -159,39 +159,39 @@ Complete data visualization guide for Python:
 ### For Software Engineers
 
 **Start with Statistics**:
-1. [Percentiles](statistics.md#percentiles-and-quantiles) - Critical for performance monitoring
-2. [Descriptive Statistics](statistics.md#descriptive-statistics) - Mean vs median
-3. [Probability Basics](statistics.md#probability-basics) - Understanding randomness
-4. [Real-World Applications](statistics.md#real-world-applications) - SRE/DevOps examples
+1. [Percentiles](../maths/statistics.md#percentiles-and-quantiles) - Critical for performance monitoring
+2. [Descriptive Statistics](../maths/statistics.md#descriptive-statistics) - Mean vs median
+3. [Probability Basics](../maths/statistics.md#probability-basics) - Understanding randomness
+4. [Real-World Applications](../maths/statistics.md#real-world-applications) - SRE/DevOps examples
 
 **Then Mathematics**:
-1. [Derivatives](math.md#derivatives) - For understanding optimization
-2. [Integration](math.md#integration) - For accumulation problems
-3. [Limits](math.md#limits-and-continuity) - Foundational concepts
+1. [Derivatives](../maths/calculus.md#derivatives) - For understanding optimization
+2. [Integration](../maths/calculus.md#integration) - For accumulation problems
+3. [Limits](../maths/calculus.md#limits-and-continuity) - Foundational concepts
 
 ### For Data Scientists
 
 **Start with Both**:
-1. [Statistics - Inference](statistics.md#statistical-inference) - Hypothesis testing
-2. [Statistics - Correlation](statistics.md#correlation-and-regression) - Relationships
-3. [Mathematics - Multivariable Calculus](math.md#multivariable-calculus) - Gradients
-4. [Mathematics - Optimization](math.md#applications-of-derivatives) - Finding extrema
+1. [Statistics - Inference](../maths/statistics.md#statistical-inference) - Hypothesis testing
+2. [Statistics - Correlation](../maths/statistics.md#correlation-and-regression) - Relationships
+3. [Mathematics - Multivariable Calculus](../maths/calculus.md#multivariable-calculus) - Gradients
+4. [Mathematics - Optimization](../maths/calculus.md#applications-of-derivatives) - Finding extrema
 
 ### For Machine Learning Engineers
 
 **Focused Path**:
-1. [Multivariable Calculus](math.md#multivariable-calculus) - Gradients for backpropagation
-2. [Probability Distributions](statistics.md#probability-distributions) - Understanding data
-3. [Optimization](math.md#applications-of-derivatives) - Gradient descent
-4. [Statistical Inference](statistics.md#statistical-inference) - Model evaluation
+1. [Multivariable Calculus](../maths/calculus.md#multivariable-calculus) - Gradients for backpropagation
+2. [Probability Distributions](../maths/statistics.md#probability-distributions) - Understanding data
+3. [Optimization](../maths/calculus.md#applications-of-derivatives) - Gradient descent
+4. [Statistical Inference](../maths/statistics.md#statistical-inference) - Model evaluation
 
 ### For System Reliability Engineers
 
 **Performance-Focused Path**:
-1. [Percentiles](statistics.md#percentiles-and-quantiles) - p99 latency monitoring
-2. [Distributions](statistics.md#probability-distributions) - Long-tail behavior
-3. [Reliability Applications](statistics.md#real-world-applications) - MTBF, availability
-4. [Probability](statistics.md#probability-basics) - Failure rates
+1. [Percentiles](../maths/statistics.md#percentiles-and-quantiles) - p99 latency monitoring
+2. [Distributions](../maths/statistics.md#probability-distributions) - Long-tail behavior
+3. [Reliability Applications](../maths/statistics.md#real-world-applications) - MTBF, availability
+4. [Probability](../maths/statistics.md#probability-basics) - Failure rates
 
 ---
 
@@ -218,7 +218,7 @@ Complete data visualization guide for Python:
 - **Calculus**: Continuous change, optimization, modeling dynamics
 - **Statistics**: Data analysis, uncertainty, making decisions from samples
 
-**Q: Why are percentiles emphasized in statistics.md?**
+**Q: Why are percentiles emphasized in the statistics guide?**
 - In software systems, averages hide the worst-case experience
 - p99 latency affects thousands of users at scale
 - SLAs should use percentiles, not averages

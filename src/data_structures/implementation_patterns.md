@@ -1624,7 +1624,7 @@ def test_numeric_edges():
 ## Related Topics
 
 - [Complexity Guide](complexity_guide.md) - Understanding algorithm complexity
-- [Data Structures README](README.md) - Overview of all data structures
+- [Data Structures README](index.html) - Overview of all data structures
 - [Linked Lists](linked_lists.md), [Trees](trees.md), [Arrays](arrays.md) - Specific implementations
 
 Remember: Patterns are tools, not rules. Understand why they work, and you'll know when to use them!

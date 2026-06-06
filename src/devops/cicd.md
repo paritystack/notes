@@ -5,7 +5,7 @@
 **CI (Continuous Integration)**: Automatically test code on every commit
 **CD (Continuous Deployment)**: Automatically deploy to production
 
-CI/CD pipelines build and push [Docker](docker.md) images, deploy to [Kubernetes](kubernetes.md), and are implemented in platforms like [GitHub Actions](github-actions.md). The test stage integrates with the [testing](../testing/README.md) layer.
+CI/CD pipelines build and push [Docker](docker.md) images, deploy to [Kubernetes](kubernetes.md), and are implemented in platforms like [GitHub Actions](github-actions.md). The test stage integrates with the [testing](../testing/index.html) layer.
 
 ## Pipeline Stages
 

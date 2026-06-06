@@ -8,7 +8,7 @@ programs, services, and storage — every API call, message queue, cache entry, 
 relies on it. It cuts across [type systems](type_systems.md) (mapping types to wire formats)
 and [metaprogramming](metaprogramming.md) (reflection/codegen generate the (de)serializers),
 and it underpins much of the [networking](../networking/grpc.md) and
-[databases](../databases/README.md) sections.
+[databases](../databases/index.html) sections.
 
 ## Text vs binary formats
 

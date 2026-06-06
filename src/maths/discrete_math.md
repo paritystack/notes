@@ -5,8 +5,8 @@
 Discrete mathematics is the study of countable, distinct structures — sets, logic,
 counting, integers, and graphs — as opposed to the continuous world of
 [calculus](calculus.md). It is the native language of computer science: it underlies
-[algorithms](../algorithms/README.md) and their correctness proofs,
-[data structures](../data_structures/README.md), [databases](../databases/README.md)
+[algorithms](../algorithms/index.html) and their correctness proofs,
+[data structures](../data_structures/index.html), [databases](../databases/index.html)
 (relational algebra is set theory), [cryptography](../security/encryption.md) (number
 theory), and digital logic.
 

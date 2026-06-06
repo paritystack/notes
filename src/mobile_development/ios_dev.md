@@ -2830,7 +2830,7 @@ pod update
 
 ## Related Resources
 
-- [Mobile Development Overview](README.md)
+- [Mobile Development Overview](index.html)
 - [Flutter Development](flutter.md)
 - [React Native Development](react_native.md)
 - [Official Swift Documentation](https://swift.org/documentation/)

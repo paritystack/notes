@@ -1317,7 +1317,7 @@ O(n²)       # Quadratic     - 2D matrix
 
 ## Related Topics
 
-- [Data Structures README](README.md) - Overview of all structures
+- [Data Structures README](index.html) - Overview of all structures
 - [Implementation Patterns](implementation_patterns.md) - Common coding patterns
 - [Arrays](arrays.md), [Trees](trees.md), [Graphs](graphs.md) - Specific data structures
 

@@ -756,4 +756,4 @@ sudo apt install usbutils
 - [STM32 USB](stm32.md)
 - [Arduino USB HID](arduino.md)
 - [Communication Protocols](../protocols/)
-- [Embedded Systems Overview](README.md)
+- [Embedded Systems Overview](index.html)

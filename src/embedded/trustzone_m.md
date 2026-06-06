@@ -301,4 +301,4 @@ APIs:                 PSA (Platform Security Architecture)
 - [Secure Boot](secure_boot.md) — TZ-M typically hosts the secure-boot verifier
 - [Bootloaders](bootloaders.md) — boot transition to NS
 - [HardFault Debugging](hardfault_debugging.md) — SecureFault is separate
-- [Security](../security/README.md) — TLS, crypto algorithms used by the secure partition
+- [Security](../security/index.html) — TLS, crypto algorithms used by the secure partition

@@ -1103,6 +1103,6 @@ void loop() {
 ## See Also
 
 - [Arduino Programming](arduino.md)
-- [WiFi Projects](../wifi/README.md)
+- [WiFi Projects](../wifi/index.html)
 - [MQTT Protocol](../networking/iot_protocols.md)
 - [BLE Communication](ble.md)

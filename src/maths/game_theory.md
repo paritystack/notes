@@ -12,7 +12,7 @@ expected payoff), and shows up in adversarial ML
 ([GANs](../machine_learning/deep_learning.md) and multi-agent
 [reinforcement learning](../machine_learning/reinforcement_learning.md)), the minimax
 search behind [game-playing algorithms](../algorithms/dynamic_programming.md), auctions,
-and [markets](../finance/README.md).
+and [markets](../finance/index.html).
 
 ```
 A game needs three things:
@@ -109,7 +109,7 @@ dominates it. Equilibria are stable, not necessarily good.
   equilibria; self-play (AlphaZero) is repeated zero-sum.
 - **Algorithms** — [minimax / alpha-beta](../algorithms/dynamic_programming.md) game-tree
   search.
-- **Finance & markets** — bidding, [market](../finance/README.md) microstructure, and
+- **Finance & markets** — bidding, [market](../finance/index.html) microstructure, and
   strategic trading are equilibrium problems.
 - **Probability** — mixed strategies and expected payoffs are [probability](probability.md)
   in action.

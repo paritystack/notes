@@ -5,9 +5,9 @@
 Probability is the mathematics of uncertainty — it assigns numbers between 0 and 1 to
 events and gives consistent rules for combining them. It is the engine underneath
 [Statistics](statistics.md) (which reasons *backwards* from data to the process that
-produced it), all of [machine learning](../machine_learning/README.md) (likelihoods,
+produced it), all of [machine learning](../machine_learning/index.html) (likelihoods,
 loss functions, sampling), [information theory](information_theory.md) (entropy is an
-expectation), and randomized [algorithms](../algorithms/README.md). Where statistics
+expectation), and randomized [algorithms](../algorithms/index.html). Where statistics
 asks "what does this data tell me about the world?", probability asks "given a model of
 the world, what data should I expect?"
 

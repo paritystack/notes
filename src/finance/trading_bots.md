@@ -201,7 +201,7 @@ class AlpacaBroker(Broker):
 | **Stop** | Auto-exit on adverse move | Gaps through your stop |
 | **Stop-limit** | Stop + price floor | May not fill in a fast drop |
 
-See [General Finance → Market Orders](README.md) for the full taxonomy and durations (DAY, GTC, IOC, FOK).
+See [General Finance → Market Orders](index.html) for the full taxonomy and durations (DAY, GTC, IOC, FOK).
 
 ### Tracking fills & reconciliation
 

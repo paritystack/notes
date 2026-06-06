@@ -890,7 +890,7 @@ android {
 
 ## Related Resources
 
-- [Android Overview](README.md)
+- [Android Overview](index.html)
 - [Android Internals](../android/internals.md)
 - [ADB Commands](../android/adb.md)
 - [Official Android Documentation](https://developer.android.com/)

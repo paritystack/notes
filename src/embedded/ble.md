@@ -367,7 +367,7 @@ After many test pair/unpair cycles, NVS fills up. Stack runs out of bond storage
 
 ## See Also
 
-- [WiFi](../wifi/README.md) — coexists with BLE on 2.4 GHz
+- [WiFi](../wifi/index.html) — coexists with BLE on 2.4 GHz
 - [Power Management](power_management.md) — sleep between connection events
-- [Security](../security/README.md) — TLS analog: pairing + bonding
+- [Security](../security/index.html) — TLS analog: pairing + bonding
 - [IoT Protocols](../networking/iot_protocols.md) — application-layer protocols often layered over BLE

@@ -1949,7 +1949,7 @@ These variants of `printf` and `scanf` provide flexibility for different input a
 - [Rust](rust.md) / [Zig](zig.md) — modern systems languages explicitly designed to keep C's control while removing its footguns.
 - [Compilers](compilers.md) — C maps closely to machine code; undefined behavior is what lets the optimizer be aggressive.
 - [Error handling](error_handling.md) — return codes and `errno`, the pattern result types react against.
-- [Pointers ↔ data structures](../data_structures/README.md) — manual pointer manipulation underlies linked lists, trees, and buffers.
+- [Pointers ↔ data structures](../data_structures/index.html) — manual pointer manipulation underlies linked lists, trees, and buffers.
 
 ## Pitfalls
 

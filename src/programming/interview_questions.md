@@ -3,9 +3,9 @@
 ## Overview
 
 A guide to technical interview preparation: a problem-solving framework, the
-[data structures](../data_structures/README.md) and [algorithm](../algorithms/README.md)
+[data structures](../data_structures/index.html) and [algorithm](../algorithms/index.html)
 patterns interviewers probe, [dynamic programming](../algorithms/dynamic_programming.md),
-[system design](../system_design/README.md) basics, behavioral questions, and language tips.
+[system design](../system_design/index.html) basics, behavioral questions, and language tips.
 It is the applied, "can you use it under pressure" companion to the reference material in those
 sections — this page is about recognising which pattern a problem wants and communicating the
 solution, not re-deriving the theory. Language-specific idioms here point back to
@@ -2618,12 +2618,12 @@ Good luck with your interviews!
 
 ## Where this connects
 
-- [Data structures](../data_structures/README.md) — arrays, hash tables, trees, graphs, heaps:
+- [Data structures](../data_structures/index.html) — arrays, hash tables, trees, graphs, heaps:
   the toolkit nearly every question draws on.
-- [Algorithms](../algorithms/README.md) — the pattern catalogue (two pointers, sliding window,
+- [Algorithms](../algorithms/index.html) — the pattern catalogue (two pointers, sliding window,
   binary search, BFS/DFS, [dynamic programming](../algorithms/dynamic_programming.md)) and
   [Big-O](../algorithms/big_o.md) analysis you'll be expected to reason about.
-- [System design](../system_design/README.md) — the design-round counterpart for senior
+- [System design](../system_design/index.html) — the design-round counterpart for senior
   interviews.
 - [Python](python.md) / [Java](java.md) / [C++](cpp.md) — language idioms that make solutions
   concise; know your standard library.

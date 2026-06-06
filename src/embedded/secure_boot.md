@@ -309,4 +309,4 @@ Shipping RDP Level 2 with no escape hatch is a one-way door. If you ship buggy k
 - [Bootloaders](bootloaders.md) — the bootloader that runs the verify
 - [TrustZone-M](trustzone_m.md) — hardware isolation for the bootloader
 - [OTA Updates](ota_updates.md) — delivering signed images
-- [Security](../security/README.md) — TLS, certificates, key management
+- [Security](../security/index.html) — TLS, certificates, key management

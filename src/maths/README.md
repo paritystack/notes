@@ -6,11 +6,11 @@ note favours intuition first, then the machinery, then where it shows up in prac
 ## Foundations
 
 - **[Discrete Mathematics](discrete_math.md)** — sets, logic, combinatorics, number
-  theory, recurrences, and graph theory. The language under [algorithms](../algorithms/README.md),
-  [data structures](../data_structures/README.md), and [cryptography](../security/encryption.md).
+  theory, recurrences, and graph theory. The language under [algorithms](../algorithms/index.html),
+  [data structures](../data_structures/index.html), and [cryptography](../security/encryption.md).
 - **[Probability](probability.md)** — random variables, distributions, expectation,
   Bayes' theorem, and Markov chains. The basis of [statistics](statistics.md) and all of
-  [machine learning](../machine_learning/README.md).
+  [machine learning](../machine_learning/index.html).
 - **[Statistics](statistics.md)** — descriptive statistics, distributions, inference,
   hypothesis testing, correlation, and regression.
 - **[Stochastic Processes](stochastic_processes.md)** — random walks, Poisson processes,

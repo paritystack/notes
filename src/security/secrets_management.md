@@ -8,7 +8,7 @@ management is the discipline of getting those secrets to the right workload, at 
 time, without ever committing them to source control, baking them into images, or
 splattering them across logs. It is the operational sibling of [key management](key_management.md)
 (which focuses on cryptographic keys specifically) and a core enabler of
-[zero trust](zero_trust.md), [DevOps](../devops/README.md) pipelines, and [cloud](../cloud/README.md)
+[zero trust](zero_trust.md), [DevOps](../devops/index.html) pipelines, and [cloud](../cloud/index.html)
 deployments.
 
 ```
@@ -116,7 +116,7 @@ If a secret leaks → ROTATE it; deleting the commit is NOT enough (git history,
   envelope encryption.
 - **[DevOps / CI-CD](../devops/cicd.md)** — pipelines must fetch secrets securely, never
   print them; see GitOps and [Kubernetes](../devops/kubernetes.md).
-- **[Cloud](../cloud/README.md)** — IAM roles and workload identity as secret-zero.
+- **[Cloud](../cloud/index.html)** — IAM roles and workload identity as secret-zero.
 - **[Supply chain security](supply_chain_security.md)** — leaked CI tokens are a top
   supply-chain attack vector.
 - **[Zero trust](zero_trust.md)** — short-lived, per-workload credentials over static

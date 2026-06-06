@@ -12,7 +12,7 @@ the right primitive is a real-time decision: the wrong one reintroduces
 [priority inversion](priority_inversion.md), races, or deadlock, and changes a task's
 blocking behavior in [response-time analysis](scheduling.md).
 
-These are the concepts the [RTOS overview](README.md) lists under "Inter-Task
+These are the concepts the [RTOS overview](index.html) lists under "Inter-Task
 Communication"; for the non-real-time treatment of the same ideas see
 [Concurrency](../programming/concurrency.md).
 

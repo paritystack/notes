@@ -127,7 +127,7 @@ Check every public function's parameters and **every return value** — especial
 - [Memory Management](memory_management.md) — the "no dynamic allocation" MISRA rule and stack-overflow defenses.
 - [Interrupts](interrupts.md) — `volatile`, atomicity, and ISR-shared-data rules.
 - [Startup Code](startup_code.md) — the `.bss`-zeroing assumption defensive code relies on.
-- [Testing](../testing/README.md) — unit tests, static analysis, and HIL rigs that enforce the standard in CI.
+- [Testing](../testing/index.html) — unit tests, static analysis, and HIL rigs that enforce the standard in CI.
 
 ## Pitfalls
 
@@ -145,4 +145,4 @@ Check every public function's parameters and **every return value** — especial
 - [Debugging](debugging.md) — finding bugs that slipped through
 - [HardFault Debugging](hardfault_debugging.md) — fault handlers and crash logging
 - [Watchdog](watchdog.md) — recovery of last resort
-- [Testing](../testing/README.md) — CI enforcement of the standard
+- [Testing](../testing/index.html) — CI enforcement of the standard

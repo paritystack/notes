@@ -1,6 +1,6 @@
 # Big O Notation
 
-Big O notation is a mathematical concept used to describe the performance or complexity of an algorithm. Specifically, it characterizes algorithms in terms of their time or space requirements in relation to the size of the input data. Understanding Big O notation is crucial for evaluating the efficiency of algorithms and making informed decisions about which algorithm to use in a given situation. Big O uses limit analysis from [calculus](../maths/calculus.md); a [complexity cheatsheet](complexity_cheatsheet.md) gives a quick reference for common algorithms; and [sorting](sorting.md) and [data structures](../data_structures/README.md) are the domains where these complexities matter most.
+Big O notation is a mathematical concept used to describe the performance or complexity of an algorithm. Specifically, it characterizes algorithms in terms of their time or space requirements in relation to the size of the input data. Understanding Big O notation is crucial for evaluating the efficiency of algorithms and making informed decisions about which algorithm to use in a given situation. Big O uses limit analysis from [calculus](../maths/calculus.md); a [complexity cheatsheet](complexity_cheatsheet.md) gives a quick reference for common algorithms; and [sorting](sorting.md) and [data structures](../data_structures/index.html) are the domains where these complexities matter most.
 
 ## Key Concepts
 

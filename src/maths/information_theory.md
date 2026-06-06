@@ -5,7 +5,7 @@
 Information theory, founded by Claude Shannon in 1948, quantifies *information*,
 *uncertainty*, and the limits of compression and communication. It is built on
 [probability](probability.md) — every quantity here is an expectation of a log-
-probability — and it underpins [machine learning](../machine_learning/README.md) loss
+probability — and it underpins [machine learning](../machine_learning/index.html) loss
 functions (cross-entropy is *the* classification loss), data compression, error-correcting
 codes, and the security intuition behind [hashing](../security/hashing.md) and
 [encryption](../security/encryption.md).
@@ -117,7 +117,7 @@ Channel coding  : add structured redundancy → survive noise      (Hamming, Ree
 ```
 
 Error-correcting codes (Reed–Solomon, LDPC) are how CDs, QR codes, deep-space links, RAID,
-and 5G tolerate corruption — directly relevant to [embedded](../embedded/README.md) and
+and 5G tolerate corruption — directly relevant to [embedded](../embedded/index.html) and
 storage.
 
 ## Where this shows up

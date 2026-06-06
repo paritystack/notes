@@ -8,9 +8,9 @@ and the machine — where real numbers become finite floats, and exact operation
 rounded ones — is where correctness silently breaks. This note covers how computers
 represent numbers, how error grows, and the core algorithms for roots, linear systems,
 integrals, and ODEs. It underpins [optimization](optimization.md),
-[machine learning](../machine_learning/README.md) (every training step is numerical
+[machine learning](../machine_learning/index.html) (every training step is numerical
 linear algebra), [scientific computing](../misc/computer_graphics.md), and DSP on
-[embedded](../embedded/README.md) hardware.
+[embedded](../embedded/index.html) hardware.
 
 ## Floating point (IEEE 754)
 
@@ -159,7 +159,7 @@ wastes work and accumulates rounding error.
   concerns. See [optimization](optimization.md), [quantization](../machine_learning/quantization.md).
 - **Graphics & simulation** — ODE/PDE solvers, linear systems.
 - **Embedded/DSP** — fixed-point vs floating-point trade-offs on
-  [microcontrollers](../embedded/README.md).
+  [microcontrollers](../embedded/index.html).
 - **Finance** — Monte Carlo pricing, numerical PDE solvers for derivatives.
 
 ## Pitfalls

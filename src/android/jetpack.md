@@ -1706,7 +1706,7 @@ fun RefreshableScreen(viewModel: MyViewModel = hiltViewModel()) {
 - [Architecture Guide](https://developer.android.com/topic/architecture)
 
 ### Related Notes
-- [Android README](README.md) - Android overview and quick start
+- [Android README](index.html) - Android overview and quick start
 - [Android Internals](internals.md) - Deep dive into Android internals
 - [ADB Reference](adb.md) - Android Debug Bridge commands
 

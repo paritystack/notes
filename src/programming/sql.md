@@ -2,7 +2,7 @@
 
 ## Overview
 
-SQL is a domain-specific language used for managing and manipulating relational databases. It's the standard language for relational database management systems (RDBMS). It is the mainstream [declarative](paradigms.md) language — you describe *what* result you want and the query planner decides *how* to compute it. The deeper engine concepts behind these queries (indexes, query planning, MVCC, the write-ahead log) live in [database internals](../databases/database_internals.md) and the broader [databases](../databases/README.md) section. Scripts and applications reach it from languages like [Python](python.md), [Java](java.md), and [Bash](bash.md).
+SQL is a domain-specific language used for managing and manipulating relational databases. It's the standard language for relational database management systems (RDBMS). It is the mainstream [declarative](paradigms.md) language — you describe *what* result you want and the query planner decides *how* to compute it. The deeper engine concepts behind these queries (indexes, query planning, MVCC, the write-ahead log) live in [database internals](../databases/database_internals.md) and the broader [databases](../databases/index.html) section. Scripts and applications reach it from languages like [Python](python.md), [Java](java.md), and [Bash](bash.md).
 
 **Key Concepts:**
 - Declarative language (what, not how)
@@ -1082,7 +1082,7 @@ sqlite3 database.db
 
 ## Where this connects
 
-- [Databases](../databases/README.md) — the section covering relational and non-relational stores, indexing, and transactions in depth.
+- [Databases](../databases/index.html) — the section covering relational and non-relational stores, indexing, and transactions in depth.
 - [Database internals](../databases/database_internals.md) — B-trees, query planning, MVCC, and the WAL that execute the SQL on this page.
 - [Paradigms](paradigms.md) — SQL is the canonical declarative/query language; set-based thinking over imperative loops.
 - [Python](python.md) / [Java](java.md) — application code talks to SQL via drivers and ORMs (SQLAlchemy, Hibernate).

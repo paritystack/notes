@@ -64,6 +64,20 @@ WiFi is a family of wireless network protocols based on the IEEE 802.11 standard
   - Comparison with OFDM
   - Performance benefits in dense environments
 
+- **[Modulation](modulation.md)** - Analog and digital modulation from first principles
+  - AM, FM, PM intuition and trade-offs
+  - ASK, FSK, PSK, QAM — how bits map to symbols
+  - Why OFDM beats single-carrier at high data rates
+
+- **[RF & Spectrum](rf_spectrum.md)** - Signal propagation, modulation, noise, antennas, and regulatory domains
+  - EM spectrum and Wi-Fi band placement
+  - QAM modulation and MCS selection
+  - Path loss, multipath fading, and propagation impairments
+  - SNR, noise floor, RSSI, and interference types
+  - MIMO, antenna gain, and polarization
+  - Channel bonding (20/40/80/160 MHz)
+  - DFS, TPC, and regulatory domain constraints
+
 ## WiFi Architecture
 
 ### Network Components

@@ -235,6 +235,8 @@
     - [QoS Management](wifi/qos_management.md)
     - [Eap](wifi/eap.md)
     - [Ofdma](wifi/ofdma.md)
+    - [RF & Spectrum](wifi/rf_spectrum.md)
+    - [Modulation](wifi/modulation.md)
 
 - [Machine Learning](machine_learning/README.md)
     - [Deep Learning](machine_learning/deep_learning.md)

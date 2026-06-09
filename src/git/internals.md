@@ -549,6 +549,11 @@ git rev-parse --short HEAD  # Short SHA-1
 git rev-parse main          # Resolve branch to commit
 git rev-parse HEAD~3        # Three commits before HEAD
 
+# name-rev: Find symbolic name for a commit (inverse of rev-parse)
+git name-rev abc123            # Nearest branch/tag name
+git name-rev --tags abc123     # Tags only
+git name-rev --stdin           # Read SHAs from stdin
+
 # ls-tree: List tree contents
 git ls-tree HEAD            # Root tree
 git ls-tree -r HEAD         # Recursive
@@ -590,6 +595,13 @@ git symbolic-ref HEAD refs/heads/main
 # for-each-ref: Iterate over refs
 git for-each-ref refs/heads/
 git for-each-ref --format='%(refname)' refs/tags/
+
+# show-ref: List all refs with SHAs (simpler than for-each-ref for scripting)
+git show-ref                          # All refs
+git show-ref --heads                  # Branches only
+git show-ref --tags                   # Tags only
+git show-ref refs/heads/main          # Specific ref
+git show-ref --verify refs/heads/main # Verify ref exists
 ```
 
 #### Index Manipulation
@@ -610,6 +622,12 @@ git ls-files --others         # Untracked files
 # read-tree: Read tree into index
 git read-tree HEAD            # Reset index to HEAD
 git read-tree --prefix=sub/ HEAD  # Read into subdirectory
+
+# checkout-index: Copy files from index to working tree
+git checkout-index -a              # All tracked files
+git checkout-index file.txt        # Specific file
+git checkout-index -f file.txt     # Force overwrite
+git checkout-index --prefix=out/ -a  # Extract to directory
 ```
 
 #### Comparison and Diffing
@@ -921,6 +939,25 @@ git update-ref refs/heads/new-feature HEAD
 echo $(git rev-parse HEAD) > .git/refs/heads/new-feature
 ```
 
+### Reference Packing
+
+Loose refs in `.git/refs/heads/` and `.git/refs/tags/` can be packed into a single `.git/packed-refs` file for efficiency:
+
+```bash
+# pack-refs: Pack loose refs into .git/packed-refs
+git pack-refs --all      # Pack all refs
+git pack-refs --prune    # Pack and delete loose files (default with --all)
+
+# View packed refs
+cat .git/packed-refs
+# Output:
+# # pack-refs with: peeled fully-peeled
+# a3f2b1c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0 refs/heads/main
+# b4e3c2d1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7 refs/heads/feature
+```
+
+Packed refs are especially useful in bare repositories and after cleanup operations.
+
 ### Switching Branches
 
 ```bash
@@ -1068,6 +1105,54 @@ git branch -vv
 git pull   # Knows to pull from origin/main
 git push   # Knows to push to origin/main
 ```
+
+## Transport Plumbing
+
+The commands behind `git fetch` and `git push` are transport plumbing commands that handle the network layer.
+
+### Upload and Receive Packs
+
+These commands run on the remote to serve or accept data:
+
+```bash
+# upload-pack: Serve objects for git fetch (runs on remote)
+git upload-pack /path/to/repo
+
+# receive-pack: Accept pushed objects (runs on remote)
+git receive-pack /path/to/repo
+
+# send-pack: Push objects to remote (runs locally, initiates push)
+git send-pack origin refs/heads/main
+```
+
+When you run `git fetch` or `git push`, Git calls `upload-pack` (on the remote to download) or `receive-pack` (on the remote to upload).
+
+### Git Bundle
+
+Bundle creates a portable archive of objects and refs for offline transfer or backup:
+
+```bash
+# bundle: Create portable archive for offline transfer
+git bundle create repo.bundle --all          # Bundle everything
+git bundle create repo.bundle main           # Bundle one branch
+git bundle create repo.bundle HEAD~10..HEAD  # Bundle recent commits only
+
+# Inspect bundle
+git bundle verify repo.bundle               # Verify bundle integrity
+git bundle list-heads repo.bundle           # List refs in bundle
+
+# Clone from bundle
+git clone repo.bundle new-repo
+
+# Fetch from bundle into existing repo
+git fetch repo.bundle main:main
+```
+
+Bundles are useful for:
+- Creating backups without `.git/` internals
+- Transferring large repositories over unreliable connections
+- Sharing code with people who don't have network access
+- Incremental backups (bundle only new commits)
 
 ## Pack Files and Storage Optimization
 

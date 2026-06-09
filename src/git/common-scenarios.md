@@ -26,7 +26,7 @@ git checkout -- .
 - Only affects your working directory, not staged or committed changes
 - Use `git diff` first to see what you're about to lose
 
-**Learn more:** See the "Undoing Changes" section in [README.md](README.md#undoing-changes)
+**Learn more:** See the "Undoing Changes" section in [README.md](index.html#undoing-changes)
 
 ---
 
@@ -51,7 +51,7 @@ git reset HEAD
 - The file remains modified in your working directory — only the staging area is affected
 - If you want to discard the changes entirely, run `git restore file.txt` after unstaging
 
-**Learn more:** See the "Staging Area" section in [README.md](README.md#staging-area)
+**Learn more:** See the "Staging Area" section in [README.md](index.html#staging-area)
 
 ---
 
@@ -76,12 +76,12 @@ git commit -m "Second part"
 - `git rebase -i HEAD~1` (if you want to edit the commit message instead)
 
 **Gotchas:**
-- `--soft` keeps changes in working directory
-- `--mixed` (default) keeps changes but unstages them
+- `--soft` keeps changes **staged** (in the index)
+- `--mixed` (default) keeps changes but **unstages** them (moves to working directory)
 - `--hard` **discards changes permanently** — be careful!
 - This only works safely on unpushed commits
 
-**Learn more:** See the "Commits" section in [README.md](README.md#commits)
+**Learn more:** See the "Commits" section in [README.md](index.html#commits)
 
 ---
 
@@ -111,7 +111,7 @@ git push origin branch-name
 - `git reset --hard` + force push rewrites history — only do this on feature branches
 - If multiple people are on the branch, force push will break their local repos
 
-**Learn more:** See the "Commits" section in [README.md](README.md#commits)
+**Learn more:** See the "Commits" section in [README.md](index.html#commits)
 
 ---
 
@@ -164,20 +164,23 @@ git commit -m "Remove file.txt from tracking"
 
 **For sensitive data already pushed:**
 ```bash
-# Use git filter-branch (rewrites entire history)
-git filter-branch --tree-filter 'rm -f secrets.txt' HEAD
+# Recommended: git filter-repo (modern, fast — install separately)
+git filter-repo --invert-paths --path secrets.txt
 
-# Or use BFG Repo-Cleaner (faster and easier)
+# Or use BFG Repo-Cleaner (also fast and easy)
 bfg --delete-files secrets.txt
+
+# Legacy: git filter-branch (built-in but slow and discouraged)
+git filter-branch --tree-filter 'rm -f secrets.txt' HEAD
 ```
 
 **Gotchas:**
 - `git rm --cached` removes from Git but keeps the file locally — use this for `.gitignore` fixes
-- `git filter-branch` rewrites all history — affects everyone on the repo
+- `git filter-branch` rewrites all history — affects everyone on the repo; Git now discourages it in favor of `git filter-repo`
 - For sensitive data, consider it **compromised** even after removal (check git log)
 - Push with `--force-with-lease` after rewriting history
 
-**Learn more:** See the "Troubleshooting" section in [README.md](README.md#troubleshooting)
+**Learn more:** See the "Troubleshooting" section in [README.md](index.html#troubleshooting)
 
 ---
 
@@ -246,7 +249,7 @@ git log -- file.txt
 - `--oneline` is great for quick scanning but hides details
 - Use `git log -p` to see actual code changes (can be verbose)
 
-**Learn more:** See the "Viewing History" section in [README.md](README.md#viewing-history)
+**Learn more:** See the "Viewing History" section in [README.md](index.html#viewing-history)
 
 ---
 
@@ -308,7 +311,7 @@ git bisect reset
 - It's a binary search, so much faster than manually checking commits
 - Don't forget `git bisect reset` or you'll stay in bisect mode
 
-**Learn more:** See the "Bisect" section in [README.md](README.md#bisect)
+**Learn more:** See the "Bisect" section in [README.md](index.html#bisect)
 
 ---
 
@@ -451,11 +454,11 @@ git switch -c new-branch
 ```
 
 **Gotchas:**
-- Can only switch if your working directory is clean (no uncommitted changes)
-- If you have uncommitted changes, either commit or stash them first
+- You can switch with uncommitted changes — Git carries them over — *unless* they'd be overwritten by files that differ between the branches
+- If the switch is blocked ("local changes would be overwritten"), commit or stash them first
 - `git switch -` toggles between current and previous branch (useful for switching back)
 
-**Learn more:** See the "Branches" section in [README.md](README.md#branches)
+**Learn more:** See the "Branches" section in [README.md](index.html#branches)
 
 ---
 
@@ -532,7 +535,7 @@ git merge --no-ff feature/my-feature
 - Use `--no-ff` if you want a merge commit for visibility
 - Fast-forward merge is simpler but loses feature branch history
 
-**Learn more:** See the "Merging" section in [README.md](README.md#merging)
+**Learn more:** See the "Merging" section in [README.md](index.html#merging)
 
 ---
 
@@ -584,7 +587,7 @@ git checkout --theirs file.txt  # Keep their changes
 - After resolving all files, run tests before committing
 - `git mergetool` can help if many conflicts, but manual editing is often clearer
 
-**Learn more:** See the "Handling Merge Conflicts" section in [README.md](README.md#handling-merge-conflicts)
+**Learn more:** See the "Handling Merge Conflicts" section in [README.md](index.html#handling-merge-conflicts)
 
 ---
 
@@ -626,7 +629,7 @@ git rebase -i origin/main
 - Conflicts may occur during rebase — resolve with `git rebase --continue`
 - Use `git rebase --abort` if something goes wrong
 
-**Learn more:** See the "Rebasing" section in [README.md](README.md#rebasing)
+**Learn more:** See the "Rebasing" section in [README.md](index.html#rebasing)
 
 ---
 
@@ -685,7 +688,7 @@ git push --tags
 - `--force` and `--force-with-lease` should be avoided on shared branches
 - Check that you're pushing to the correct remote (`origin` is typical)
 
-**Learn more:** See the "Pushing" section in [README.md](README.md#pushing)
+**Learn more:** See the "Pushing" section in [README.md](index.html#pushing)
 
 ---
 
@@ -721,7 +724,7 @@ git merge origin/branch-name
 - Always pull before pushing to avoid conflicts
 - Fetching alone doesn't merge — use it to review before pulling
 
-**Learn more:** See the "Fetching and Pulling" section in [README.md](README.md#fetching-and-pulling)
+**Learn more:** See the "Fetching and Pulling" section in [README.md](index.html#fetching-and-pulling)
 
 ---
 
@@ -756,7 +759,7 @@ git push --force-with-lease origin feature/my-feature
 - Feature branches may need rebase if they conflict with upstream changes
 - Keep your fork updated before creating pull requests
 
-**Learn more:** See the "Syncing Fork with Upstream" section in [README.md](README.md#syncing-fork-with-upstream)
+**Learn more:** See the "Syncing Fork with Upstream" section in [README.md](index.html#syncing-fork-with-upstream)
 
 ---
 
@@ -794,7 +797,7 @@ git pull origin feature/shared-feature
 - Use meaningful commit messages so others understand changes
 - Consider pair programming for complex sections
 
-**Learn more:** See the "Collaborating on a Branch" section in [README.md](README.md#collaborating-on-a-branch)
+**Learn more:** See the "Collaborating on a Branch" section in [README.md](index.html#collaborating-on-a-branch)
 
 ---
 
@@ -880,8 +883,11 @@ git cherry-pick commit-hash
 # Cherry-pick multiple commits
 git cherry-pick commit1 commit2
 
-# Cherry-pick a range
+# Cherry-pick a range (note: commit1..commit3 EXCLUDES commit1)
 git cherry-pick commit1..commit3
+
+# Cherry-pick a range INCLUDING the first commit
+git cherry-pick commit1^..commit3
 
 # Cherry-pick without committing (for review)
 git cherry-pick -n commit-hash
@@ -902,7 +908,7 @@ git cherry-pick --continue  # After resolving conflicts
 - Use sparingly — if you need many commits, consider merge instead
 - Conflicts may occur if the commit depends on other commits
 
-**Learn more:** See the "Cherry-Pick" section in [README.md](README.md#cherry-pick)
+**Learn more:** See the "Cherry-Pick" section in [README.md](index.html#cherry-pick)
 
 ---
 
@@ -947,7 +953,7 @@ git stash branch feature/from-stash
 - Stashes can accumulate — clean them up periodically
 - Merge conflicts can occur when applying stash if code has changed
 
-**Learn more:** See the "Stashing" section in [README.md](README.md#stashing)
+**Learn more:** See the "Stashing" section in [README.md](index.html#stashing)
 
 ---
 
@@ -983,7 +989,7 @@ git reflog | grep "branch-name"
 - Reflog is local only — won't help if remote branch is deleted
 - If remote branch exists, easier to re-clone from remote
 
-**Learn more:** See the "Recovering from Mistakes" section in [README.md](README.md#recovering-from-mistakes)
+**Learn more:** See the "Recovering from Mistakes" section in [README.md](index.html#recovering-from-mistakes)
 
 ---
 
@@ -1017,7 +1023,7 @@ git reset --hard origin/branch-name
 - This is why `--force-with-lease` is safer than `--force`
 - Communicate with team immediately if force push affects shared branch
 
-**Learn more:** See the "Recovering from Mistakes" section in [README.md](README.md#recovering-from-mistakes)
+**Learn more:** See the "Recovering from Mistakes" section in [README.md](index.html#recovering-from-mistakes)
 
 ---
 
@@ -1161,7 +1167,7 @@ git switch --detach v1.0.0
 - Deleting tags locally doesn't delete from remote
 - Tags typically don't change — avoid retagging same version
 
-**Learn more:** See the "Tags" section in [README.md](README.md#tags)
+**Learn more:** See the "Tags" section in [README.md](index.html#tags)
 
 ---
 

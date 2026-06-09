@@ -5,6 +5,7 @@
 --------------------------------
 
 - [Git](git/README.md)
+    - [Git Common Scenarios](git/common-scenarios.md)
     - [Git Cheatsheet](git/cheatsheet.md)
     - [Git Commands](git/commands.md)
     - [Git Internals](git/internals.md)

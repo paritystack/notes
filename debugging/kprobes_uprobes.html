@@ -1,0 +1,605 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Kprobes &amp; Uprobes - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-ceabb9c6.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-74e6305e.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="kprobes--uprobes"><a class="header" href="#kprobes--uprobes">Kprobes &amp; Uprobes</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Kprobes and uprobes are Linux’s <strong>dynamic instrumentation</strong> mechanism: they let you
+insert a probe at <em>almost any</em> instruction address at runtime — a kernel function for
+a <strong>kprobe</strong>, a userspace function for a <strong>uprobe</strong> — without recompiling, restarting,
+or rebooting anything. When execution hits the probed address, the kernel diverts to
+your handler, runs it, then resumes. The <code>*ret*</code> variants (<strong>kretprobe</strong> / <strong>uretprobe</strong>)
+fire on function <em>return</em> instead, which is how you capture return values and measure
+per-call latency.</p>
+<p>This is a different trade-off from the neighbours. Static <a href="linux_kernel.html">tracepoints and
+ftrace</a> are stable and cheap but only exist where a kernel developer
+put them; <a href="perf_profiling.html">perf</a> <em>samples</em> the stack periodically (great for “where
+is time going”, blind to rare events); dynamic probes hit <em>every</em> call to a <em>specific</em>
+function you name. The probes themselves are just the attach point — the programmable
+engine that usually <em>consumes</em> them is <a href="../linux/ebpf.html">eBPF</a>. The interactive cousin
+is a debugger <a href="gdb.html">breakpoint</a>: same trap mechanism, but a probe doesn’t stop the
+world, it runs a handler and keeps going.</p>
+<pre><code>                entry                         return
+  kprobe   ───►  ●  do_sys_openat2(...)         kretprobe ──► ◐  (sees retval/fd)
+  uprobe   ───►  ●  ./demo:compute(int x)       uretprobe ──► ◐  (sees retval)
+
+  mechanism: the kernel replaces the target instruction with a breakpoint trap
+             (int3 / brk). on trap → run handler → single-step original insn → resume.
+             optimised kprobes use a jmp instead of int3 where safe (lower overhead).
+</code></pre>
+<h2 id="how-it-works-under-the-hood"><a class="header" href="#how-it-works-under-the-hood">How it works under the hood</a></h2>
+<p><strong>Kprobe.</strong> When you register a probe, the kernel saves the original instruction at the
+target address, then overwrites it with a breakpoint (<code>int3</code> on x86, <code>brk</code> on arm64).
+Execution flow:</p>
+<pre><code>  hit address → CPU traps → kprobe pre_handler runs (your code)
+              → kernel single-steps the SAVED copy of the original instruction
+              → kprobe post_handler runs (optional)
+              → execution resumes at address+len, as if nothing happened
+
+  jump-optimised path (when the surrounding insns are safe to relocate):
+  hit address → jmp trampoline → handler → jmp back   (no trap, ~no overhead)
+</code></pre>
+<p>Two cheaper variants are chosen automatically when possible:</p>
+<ul>
+<li><strong>Optimized (jump) kprobes</strong> replace the <code>int3</code> with a <code>jmp</code> to a trampoline, avoiding
+the expensive trap. Controlled by <code>/proc/sys/debug/kprobes-optimization</code> (1 = on).</li>
+<li><strong>ftrace-based kprobes</strong>: a probe placed on a function’s entry reuses the <code>fentry</code>
+nop that the compiler already emitted for ftrace, so no instruction needs patching.</li>
+</ul>
+<p>A handful of functions can’t be probed — the trap/handler code itself, and anything
+marked <code>__kprobes</code>/<code>nokprobe_inline</code>. They’re listed in
+<code>/sys/kernel/debug/kprobes/blacklist</code>.</p>
+<p><strong>Uprobe.</strong> A uprobe is keyed by <strong>(inode, file-offset)</strong>, not a process. The kernel
+installs the breakpoint copy-on-write into the page cache page backing that offset, so
+<em>every</em> process that maps the file hits it; the probe is refcounted and removed when the
+last user detaches. Because a uprobe handler may take a <strong>page fault</strong> (the user page can
+be swapped out), uprobe handlers are allowed to sleep — which is also why they can safely
+read user memory that a kprobe can’t.</p>
+<h2 id="the-three-front-ends"><a class="header" href="#the-three-front-ends">The three front-ends</a></h2>
+<p>You rarely poke the probe machinery by hand. Three layers sit on top, from lowest to
+highest level:</p>
+<pre><code>raw tracefs   /sys/kernel/debug/tracing/{kprobe,uprobe}_events   no tools, always there
+perf probe    perf probe --add ... ; perf record / perf trace    symbol + variable resolution
+bpftrace      kprobe:fn { ... }  uprobe:/bin/x:fn { ... }         one-liners, maps, histograms
+</code></pre>
+<p><strong>Default to <code>bpftrace</code></strong> — it resolves symbols, reads arguments by name, and aggregates
+in-kernel. Reach for raw tracefs only on a stripped-down box with no tooling, and for
+<code>perf probe</code> when you want probe events that integrate with <code>perf record</code>/<code>perf trace</code>.</p>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt install bpftrace linux-tools-common linux-tools-generic
+</code></pre>
+<p>Probing the kernel needs root (or <code>CAP_BPF</code>+<code>CAP_PERFMON</code>).</p>
+<h2 id="step-by-step-kprobe-on-a-kernel-function"><a class="header" href="#step-by-step-kprobe-on-a-kernel-function">Step-by-step: kprobe on a kernel function</a></h2>
+<p><strong>Goal:</strong> print every file opened on the system, with PID, command, and filename, by
+probing <code>do_sys_openat2</code> (the function behind the <code>openat</code>/<code>openat2</code> syscalls).</p>
+<h3 id="method-a--raw-tracefs-no-tools"><a class="header" href="#method-a--raw-tracefs-no-tools">Method A — raw tracefs (no tools)</a></h3>
+<pre><code class="language-bash"># 1. Move to the tracing filesystem
+cd /sys/kernel/debug/tracing      # (mount -t tracefs none /sys/kernel/tracing if absent)
+
+# 2. Confirm the symbol exists and is probe-able
+grep ' do_sys_openat2$' /proc/kallsyms
+grep do_sys_openat2 /sys/kernel/debug/kprobes/blacklist   # empty == allowed
+
+# 3. Register a kprobe named "myopen". On x86-64 the 2nd arg (struct open_how is 3rd;
+#    the filename pointer is in the open_flags path) — fetch the filename from %si.
+echo 'p:myopen do_sys_openat2 fname=+0(%si):string' &gt; kprobe_events
+
+# 4. Enable it
+echo 1 &gt; events/kprobes/myopen/enable
+
+# 5. Watch live output (Ctrl-C to stop)
+cat trace_pipe
+#   bash-2417  [003] .... 91234.5: myopen: (do_sys_openat2+0x0/0x...) fname="/etc/ld.so.cache"
+
+# 6. Clean up — disable, then remove the probe definition
+echo 0 &gt; events/kprobes/myopen/enable
+echo '-:myopen' &gt;&gt; kprobe_events     # or: echo &gt; kprobe_events  (clears all)
+</code></pre>
+<p>The fetch syntax <code>+OFFSET(REGISTER):TYPE</code> reads memory: <code>+0(%si):string</code> dereferences
+the pointer in <code>%si</code> and reads a NUL-terminated string. See <em>Reading argument values</em>
+below for the register order.</p>
+<h3 id="method-b--bpftrace-one-liner-same-result-one-line"><a class="header" href="#method-b--bpftrace-one-liner-same-result-one-line">Method B — bpftrace one-liner (same result, one line)</a></h3>
+<pre><code class="language-bash">sudo bpftrace -e '
+  kprobe:do_sys_openat2 {
+    printf("%-6d %-16s %s\n", pid, comm, str(((struct open_how *)0, arg1)));
+  }'
+</code></pre>
+<p>In practice you’d just use bpftrace’s built-in <code>tracepoint</code> for opens, but the kprobe
+form generalises to <em>any</em> function with no tracepoint. The simplest possible probe:</p>
+<pre><code class="language-bash"># Count how many times each process calls vfs_read, print on Ctrl-C
+sudo bpftrace -e 'kprobe:vfs_read { @[comm] = count(); }'
+</code></pre>
+<h3 id="kretprobe--return-values-and-latency"><a class="header" href="#kretprobe--return-values-and-latency">kretprobe — return values and latency</a></h3>
+<p>A kretprobe fires on return, so it can see <code>retval</code>. Pair an entry kprobe (timestamp into
+a map keyed by thread id) with a kretprobe (read the timestamp, subtract) to get a
+<strong>latency histogram</strong> — entirely in-kernel, no per-event userspace cost:</p>
+<pre><code class="language-bash">sudo bpftrace -e '
+  kprobe:vfs_read       { @start[tid] = nsecs; }
+  kretprobe:vfs_read /@start[tid]/ {
+    @ns = hist(nsecs - @start[tid]);   # log2 histogram of latency
+    delete(@start[tid]);
+  }'
+</code></pre>
+<pre><code>@ns:
+[1K, 2K)    1042 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[2K, 4K)     318 |@@@@@@@@@@@@@@@@                                  |
+[4K, 8K)      57 |@@                                                |
+</code></pre>
+<h2 id="step-by-step-uprobe-on-a-userspace-function"><a class="header" href="#step-by-step-uprobe-on-a-userspace-function">Step-by-step: uprobe on a userspace function</a></h2>
+<p>Uprobes attach to a function inside a binary or shared library <em>file</em>; the probe then
+fires for <strong>every process</strong> that maps and runs that file.</p>
+<pre><code class="language-c">// demo.c — build with: gcc -O0 -g -o demo demo.c
+#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int compute(int x) {        // -O0 keeps it a real, non-inlined symbol
+    return x * x + 1;
+}
+
+int main(void) {
+    for (int i = 0; ; i++) {
+        printf("%d\n", compute(i));
+        sleep(1);
+    }
+}
+</code></pre>
+<pre><code class="language-bash">gcc -O0 -g -o demo demo.c
+./demo &amp;                       # leave it running in another terminal
+
+# Confirm the symbol is present (a stripped binary has none → nothing to probe)
+nm -C ./demo | grep ' compute'        # ...... T compute
+</code></pre>
+<h3 id="trace-arguments-and-return-value-with-bpftrace"><a class="header" href="#trace-arguments-and-return-value-with-bpftrace">Trace arguments and return value with bpftrace</a></h3>
+<pre><code class="language-bash"># Entry: arg0 is compute()'s first parameter
+sudo bpftrace -e 'uprobe:./demo:compute { printf("compute(%d)\n", arg0); }'
+
+# Return: retval is what compute() returned
+sudo bpftrace -e 'uretprobe:./demo:compute { printf("  -&gt; %d\n", retval); }'
+</code></pre>
+<pre><code>compute(7)
+  -&gt; 50
+</code></pre>
+<p>bpftrace resolves the symbol to a file offset for you and handles <strong>PIE/ASLR</strong> — for a
+position-independent executable the load address differs every run, but the probe is
+defined by file offset, so it just works. With the raw interface you’d write the offset
+yourself (<code>echo 'p:c /path/demo:0x1149' &gt; uprobe_events</code>).</p>
+<h3 id="library-uprobe--across-the-whole-system"><a class="header" href="#library-uprobe--across-the-whole-system">Library uprobe — across the whole system</a></h3>
+<p>Probe a function in a shared library to observe every caller. Here, the distribution of
+<code>malloc</code> request sizes in libc:</p>
+<pre><code class="language-bash">sudo bpftrace -e '
+  uprobe:/lib/x86_64-linux-gnu/libc.so.6:malloc { @bytes = hist(arg0); }'
+# (find the exact path with: ldd ./demo | grep libc)
+</code></pre>
+<h3 id="usdt--stable-userspace-probes"><a class="header" href="#usdt--stable-userspace-probes">USDT — stable userspace probes</a></h3>
+<p>Raw uprobes break when a function is renamed, inlined, or its signature changes. <strong>USDT</strong>
+(Userland Statically Defined Tracing) probes are markers the <em>author</em> compiles into the
+binary (via <code>&lt;sys/sdt.h&gt;</code>), giving a stable name/argument contract — the userspace
+analogue of kernel tracepoints. PostgreSQL, the JVM, libc, and Node.js ship them:</p>
+<pre><code class="language-bash">sudo bpftrace -e 'usdt:/usr/lib/.../libc.so.6:libc:memory_sbrk_more { printf("sbrk\n"); }'
+sudo bpftrace -l 'usdt:./mybin:*'      # list a binary's USDT probes
+</code></pre>
+<h2 id="filtering-context--stack-traces"><a class="header" href="#filtering-context--stack-traces">Filtering, context &amp; stack traces</a></h2>
+<p>A probe that fires on <em>every</em> call is rarely what you want. bpftrace <strong>predicates</strong>
+(the <code>/.../</code> between the probe and the action block) gate the handler, and a set of
+built-ins give you the calling context for free:</p>
+<pre><code class="language-bash"># Only when a specific PID opens a large file
+sudo bpftrace -e 'kprobe:vfs_read /pid == 1234 &amp;&amp; arg2 &gt; 4096/ { printf("big read\n"); }'
+
+# Only the nginx workers
+sudo bpftrace -e 'uprobe:./demo:compute /comm == "demo"/ { printf("%d\n", arg0); }'
+</code></pre>
+<pre><code>context built-ins:  pid tid comm uid cpu nsecs elapsed     str(ptr)  ntop(addr)
+</code></pre>
+<p>The real power move is <strong>capturing the call stack</strong> at the probe — answering <em>“who
+actually calls this function?”</em> without source diving. Aggregate by stack so identical
+paths collapse into a count:</p>
+<pre><code class="language-bash"># Which kernel call paths reach tcp_sendmsg, ranked by frequency
+sudo bpftrace -e 'kprobe:tcp_sendmsg { @[kstack] = count(); }'
+
+# Userspace stacks into malloc for one process
+sudo bpftrace -e 'uprobe:/lib/x86_64-linux-gnu/libc.so.6:malloc /pid == 1234/ { @[ustack] = count(); }'
+</code></pre>
+<pre><code>@[
+    tcp_sendmsg+1
+    sock_sendmsg+48
+    __sys_sendto+238
+    __x64_sys_sendto+37
+]: 914
+</code></pre>
+<p>Combine a predicate with a stack to grab the stack <strong>only on the interesting path</strong> — e.g.
+the error case (see the case study below). <code>kstack</code>/<code>ustack</code> accept a depth argument
+(<code>kstack(5)</code>) to keep output short.</p>
+<h2 id="perf-probe"><a class="header" href="#perf-probe">perf probe</a></h2>
+<p><code>perf probe</code> registers kprobe/uprobe events that integrate with <code>perf record</code>/<code>perf trace</code>,
+and it can resolve source-level variable names when debug info is present.</p>
+<pre><code class="language-bash"># Kernel: add a probe that captures the filename variable by name
+sudo perf probe --add 'do_sys_openat2 filename:string'
+sudo perf record -e probe:do_sys_openat2 -a -- sleep 5
+sudo perf script                                   # decode the captured events
+
+# Userspace: -x points at the binary/library
+sudo perf probe -x ./demo --add 'compute x'
+sudo perf trace -e probe_demo:compute ./demo
+
+# List and clean up
+sudo perf probe --list
+sudo perf probe --del '*'                          # remove all perf-created probes
+</code></pre>
+<h2 id="the-kernel-c-api-register_kprobe"><a class="header" href="#the-kernel-c-api-register_kprobe">The kernel C API (register_kprobe)</a></h2>
+<p>Everything above is built on a small in-kernel API. You only reach for it directly when
+writing kernel code (a module) rather than tracing — but it’s worth seeing, because it’s
+the foundation bpftrace/eBPF, ftrace, and perf all sit on.</p>
+<pre><code class="language-c">#include &lt;linux/kprobes.h&gt;
+#include &lt;linux/module.h&gt;
+
+static struct kprobe kp = { .symbol_name = "do_sys_openat2" };
+
+/* runs at function entry; pt_regs holds the args (see register table below) */
+static int handler_pre(struct kprobe *p, struct pt_regs *regs) {
+    pr_info("openat2 by %s, dfd=%ld\n", current-&gt;comm, (long)regs-&gt;di);
+    return 0;
+}
+
+static int __init mod_init(void) {
+    kp.pre_handler = handler_pre;       /* .post_handler / .fault_handler also exist */
+    return register_kprobe(&amp;kp);
+}
+static void __exit mod_exit(void) { unregister_kprobe(&amp;kp); }
+
+module_init(mod_init);
+module_exit(mod_exit);
+MODULE_LICENSE("GPL");
+</code></pre>
+<p>For return probes, <code>struct kretprobe</code> wraps a kprobe with a <code>.handler</code> (runs on return,
+sees <code>regs_return_value(regs)</code>) and an optional <code>.entry_handler</code>. Its <code>.maxactive</code> field
+caps how many calls can be <strong>in flight</strong> simultaneously — each needs a slot to stash the
+real return address. If more threads are inside the function than <code>maxactive</code>, those
+returns are <strong>missed silently</strong> (<code>nmissed</code> counts them); size it to your concurrency, or
+leave 0 for a sensible default.</p>
+<pre><code class="language-c">static struct kretprobe krp = {
+    .kp.symbol_name = "vfs_read",
+    .handler        = ret_handler,
+    .maxactive      = 64,            /* up to 64 concurrent vfs_read() calls tracked */
+};
+register_kretprobe(&amp;krp);
+</code></pre>
+<p>In almost all debugging situations you should use bpftrace or an <a href="../linux/ebpf.html">eBPF</a>
+program instead — same probes, no module to compile and load, and the verifier keeps you
+from crashing the kernel.</p>
+<h2 id="reading-argument-values"><a class="header" href="#reading-argument-values">Reading argument values</a></h2>
+<p>How you name function arguments depends on the front-end, but they all ultimately read
+the same CPU registers (per the SysV x86-64 calling convention):</p>
+<pre><code>arg #     1     2     3     4     5     6        return value
+x86-64   rdi   rsi   rdx   rcx   r8    r9        rax
+arm64     x0    x1    x2    x3    x4    x5        x0
+
+bpftrace:  arg0 arg1 arg2 ...            retval
+eBPF C:    PT_REGS_PARM1(ctx) ...        PT_REGS_RC(ctx)
+raw tracefs: +0(%di):u64  +0(%si):string  (REGISTER + offset + type)
+</code></pre>
+<p>Scalars and pointers are easy. Reading a <strong>struct field</strong> (e.g. a field inside a <code>struct sock *</code>) needs the kernel’s type layout: in bpftrace just cast (<code>((struct sock *)arg0)-&gt;...</code>),
+and in raw eBPF use CO-RE/BTF so it stays portable across kernel versions — see
+<a href="../linux/ebpf.html">eBPF → CO-RE</a>.</p>
+<h2 id="ready-made-tools-you-may-not-need-to-write-anything"><a class="header" href="#ready-made-tools-you-may-not-need-to-write-anything">Ready-made tools (you may not need to write anything)</a></h2>
+<p>Before writing a script, check whether a packaged tool already does it. The <strong>BCC</strong> and
+<strong>bpftrace</strong> projects ship dozens of tools that are just curated kprobe/uprobe programs
+(<code>apt install bpfcc-tools bpftrace</code>; bpftrace’s versions live in
+<code>/usr/share/bpftrace/tools/</code>):</p>
+<pre><code class="language-bash">funccount  'vfs_*'                 # count calls to every vfs_* function
+funclatency -u vfs_read            # latency histogram (µs) of one function
+funcslower  vfs_read 10000         # log calls to vfs_read slower than 10ms
+stackcount  -P tcp_sendmsg         # tally the stacks reaching a function (per process)
+trace 'do_sys_openat2 "%s", arg2'  # printf-style ad-hoc tracing, one line
+argdist -C 'p::vfs_read():u32:arg2'# distribution of the size argument
+</code></pre>
+<p>Plus the snoop family — <code>opensnoop</code>, <code>execsnoop</code>, <code>biosnoop</code>, <code>tcpconnect</code>, <code>bashreadline</code>
+— each a small uprobe/kprobe tool you can also read as a worked example. For production,
+prefer the compiled <strong>libbpf-tools</strong> versions over the Python BCC ones (no runtime LLVM
+dependency — see the <a href="../linux/ebpf.html">eBPF tooling note</a>).</p>
+<h2 id="multi-attach-wildcards-fprobe-fentryfexit"><a class="header" href="#multi-attach-wildcards-fprobe-fentryfexit">Multi-attach: wildcards, fprobe, fentry/fexit</a></h2>
+<p>Naming one function is the common case, but you can attach broadly — at a cost:</p>
+<pre><code>kprobe:tcp_*        bpftrace expands the glob and registers ONE kprobe per match
+                    → flexible, but N traps = N× overhead; slow to attach thousands
+fprobe (multi-kprobe) one attach point covering thousands of functions, ftrace-backed
+                    → far cheaper mass attach; used by `funccount`-style mass tracing
+fentry / fexit      BPF trampoline at the function's ftrace site (BTF kernels, 5.5+)
+                    → lowest overhead, TYPED args/retval (no pt_regs decode) — preferred
+                      where available; the modern replacement for k(ret)probes
+</code></pre>
+<p>Rule of thumb: a handful of functions → kprobe is fine; <em>“every <code>tcp_*</code>”</em> → reach for a
+multi-attach mechanism; a single hot function on a BTF kernel → use <strong>fentry/fexit</strong>
+(documented in <a href="../linux/ebpf.html">eBPF</a>).</p>
+<h2 id="worked-case-study-an-intermittent-error"><a class="header" href="#worked-case-study-an-intermittent-error">Worked case study: an intermittent error</a></h2>
+<p><strong>Symptom:</strong> an application occasionally fails with <code>EIO</code>, but the logs don’t say which
+syscall or kernel path produced it. <code>errno 5 == EIO</code>, so kernel functions return <code>-5</code>.</p>
+<pre><code class="language-bash"># 1. Which read/write path is returning -EIO? Filter a kretprobe on the error value.
+sudo bpftrace -e 'kretprobe:vfs_read,kretprobe:vfs_write /retval == -5/ {
+    printf("%s -EIO from %s (pid %d)\n", probe, comm, pid);
+}'
+#   kretprobe:vfs_read -EIO from myapp (pid 4821)
+
+# 2. WHO called it? Capture the kernel stack, but only on the failing path.
+sudo bpftrace -e 'kretprobe:vfs_read /retval == -5/ { @[kstack] = count(); }'
+#   @[
+#       vfs_read+...
+#       ksys_read+...
+#       __x64_sys_read+...
+#   ]: 3
+
+# 3. Confirm WHAT was being read — grab the entry args for the same pid.
+sudo bpftrace -e 'kprobe:vfs_read /pid == 4821/ {
+    printf("fd-backed file, count=%d\n", arg2);
+}'
+</code></pre>
+<p>From three short probes you’ve gone from “an EIO somewhere” to the exact function, its
+caller chain, and the offending call’s arguments — no kernel rebuild, no restart. The same
+pattern (predicate on <code>retval</code> → stack → entry args) localises most “it fails sometimes”
+bugs.</p>
+<h2 id="pitfalls"><a class="header" href="#pitfalls">Pitfalls</a></h2>
+<pre><code>- Inlined / optimised-away functions have no symbol to probe — build the target with -g,
+  and remember -O2 may inline static helpers or drop a frame pointer entirely.
+- -O2 also reshuffles/elides arguments: arg0 may not be the source's first parameter.
+  Verify against the disassembly (objdump -d) or prefer a -O0 build for the demo.
+- Some kernel functions are un-probeable: anything marked __kprobes/notrace, or listed in
+  /sys/kernel/debug/kprobes/blacklist (probing them would recurse into the probe machinery).
+- Probes have real overhead on hot paths — a kprobe on a function called millions of
+  times/sec will hurt. Aggregate in-kernel (count()/hist()) instead of printing per event.
+- A uprobe fires for EVERY process that maps the file; filter by pid if you mean one.
+- Stripped binaries / libraries have no symbols — supply the raw file offset, or install
+  the -dbg/-debuginfo package (same symbol problem as perf, see perf_profiling.md).
+- Needs privilege: root, or CAP_BPF+CAP_PERFMON; kernel.perf_event_paranoid and
+  kernel.kptr_restrict can block unprivileged use.
+- Stale probes survive your script: a crashed run can leave entries in kprobe_events /
+  uprobe_events. Clear them (echo &gt; .../kprobe_events) so they stop firing.
+- kretprobe maxactive is finite: if more threads are inside the function than there are
+  slots, those returns are missed SILENTLY (check nmissed) — raise maxactive for hot fns.
+- Wildcard probes (kprobe:tcp_*) can attach to thousands of functions: slow to register
+  and a real overhead spike. Scope the glob, or use a multi-attach mechanism (fprobe).
+- USDT probes guarded by a semaphore won't fire unless something has enabled the probe;
+  attach via the proper USDT path (bpftrace/perf handle the semaphore refcount for you).
+- Ambiguous symbols: a name with multiple addresses (static funcs, or inlined copies)
+  needs disambiguation by address/file — perf probe and bpftrace will warn.
+</code></pre>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="linux_kernel.html">Linux Kernel Debugging</a> — ftrace and static tracepoints: the stable,
+fixed-location counterpart to dynamic probes</li>
+<li><a href="perf_profiling.html">perf &amp; Flame Graphs</a> — sampling vs probing; <code>perf probe</code> lives here</li>
+<li><a href="../linux/ebpf.html">eBPF</a> — the programmable engine that consumes kprobes/uprobes;
+fentry/fexit are the modern, lower-overhead replacement for k(ret)probes on BTF kernels</li>
+<li><a href="tools.html">Binary Analysis Tools</a> — strace/ltrace trace at the syscall/library boundary
+without naming internal functions</li>
+<li><a href="gdb.html">GDB</a> — breakpoints: the same trap mechanism, but interactive and stop-the-world</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../debugging/linux_kernel.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../maths/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../debugging/linux_kernel.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../maths/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

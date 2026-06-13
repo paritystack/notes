@@ -182,3 +182,4 @@ When ERC is clean:
 - [Circuits](circuits.md) — series/parallel rules determine how you wire the LED driver
 - [Diodes](diodes.md) — LED forward voltage and current calculations drive R1's value
 - [Resistance & Ohm's Law](resistance.md) — R1 = (VCC − V_f) / I_f; the formula is here
+- [Schematic Symbol Reference](symbols.md) — what each symbol you place from the library means

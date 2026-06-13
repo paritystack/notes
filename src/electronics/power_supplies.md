@@ -157,6 +157,7 @@ See [Capacitors](capacitors.md) and [ADC](../embedded/adc.md) for why these are 
 
 ## Where this connects
 
+- [Transformers](transformers.md) — step down mains and isolate the output before rectification
 - [Diodes](diodes.md) — rectifier bridges, freewheeling diodes in buck/boost
 - [Capacitors](capacitors.md) — bulk smoothing, output filtering, decoupling
 - [Inductors](inductors.md) — energy storage element in every switching converter

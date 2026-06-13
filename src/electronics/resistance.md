@@ -65,10 +65,10 @@ Resistor body:
 | Black | 0 | ×1 |
 | Brown | 1 | ×10 |
 | Red | 2 | ×100 |
-| Orange | 3 | ×1 000 |
-| Yellow | 4 | ×10 000 |
-| Green | 5 | ×100 000 |
-| Blue | 6 | ×1 000 000 |
+| Orange | 3 | ×1,000 |
+| Yellow | 4 | ×10,000 |
+| Green | 5 | ×100,000 |
+| Blue | 6 | ×1,000,000 |
 | Violet | 7 | — |
 | Gray | 8 | — |
 | White | 9 | — |

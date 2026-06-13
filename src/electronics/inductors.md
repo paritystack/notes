@@ -107,6 +107,10 @@ This is opposite to capacitors — inductors block high frequencies, pass low on
 E = ½ × L × I²
 
 Energy in Joules, L in Henries, I in Amperes.
+
+Example: a 100 µH inductor carrying 2 A stores
+  E = ½ × (100×10⁻⁶) × 2² = 200 µJ
+With 10 Ω series resistance the current settles in τ = L/R = 100µH / 10Ω = 10 µs.
 ```
 
 When current is interrupted suddenly (switch opens), this stored energy has nowhere to go. The inductor produces a large voltage spike to maintain the current — the **flyback voltage**. This can be hundreds of volts even from a small inductor with a low supply voltage, and it destroys transistors and other components if not handled.
@@ -147,4 +151,6 @@ A **flyback diode** (freewheeling diode) is placed across an inductive load (mot
 - [Filters](filters.md) — LC filters combine inductors and capacitors for sharper frequency response
 - [Power Supplies](power_supplies.md) — buck and boost converters use inductors to transfer energy efficiently
 - [Diodes](diodes.md) — flyback diodes protect switches from inductive voltage spikes
+- [Transformers](transformers.md) — two inductors coupled on a shared magnetic core
+- [Switches, Relays & Electromechanical](switches_relays.md) — relay and solenoid coils are inductive loads
 - [Motor Control](../embedded/motor_control.md) — motors are inductive loads; back-EMF is the flyback phenomenon

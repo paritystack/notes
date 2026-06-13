@@ -138,6 +138,29 @@ This diode:
 | Cost (for power) | Lower | Lower for BJT at low current |
 | Common use | Digital logic, power | Audio amp, low-cost switch |
 
+## How It Works
+
+The gate is a metal plate over the silicon, separated by a thin insulating oxide —
+no conductive path, just a capacitor. Raising the gate above the threshold voltage
+attracts carriers to the surface and *inverts* a sliver of silicon into a
+conducting **channel** that bridges source and drain. More gate voltage deepens the
+channel and lowers its resistance.
+
+```
+  N-channel MOSFET cross-section:
+
+  Gate (+V)
+  ═══════════   ← metal
+  ▒▒▒▒▒▒▒▒▒▒▒   ← thin oxide (insulator → no gate current)
+  n+ [···channel···] n+    ← induced electron channel
+        p  substrate        (exists only when V_GS > V_th)
+  Source              Drain
+```
+
+Because the gate is insulated, holding the MOSFET on costs *no* steady current —
+only the brief charge to fill the gate capacitance when switching. This is why
+CMOS [logic](logic_gates.md) draws power almost solely during transitions.
+
 ## Pitfalls
 
 - **Using standard V_th MOSFET with 3.3 V logic** — a MOSFET rated "fully on at 10 V gate" will only be half-on at 3.3 V: it passes some current but with high R_DS(on) → lots of heat. Always use a "logic-level" MOSFET for direct GPIO drive.
@@ -148,6 +171,7 @@ This diode:
 ## Where this connects
 
 - [BJT Transistors](transistors_bjt.md) — current-controlled alternative; understand both to choose correctly
+- [Switches, Relays & Electromechanical](switches_relays.md) — low-side coil driver and load switching
 - [Power & Energy](power.md) — P = I² × R_DS(on) determines heat; heatsinking follows from this
 - [Power Supplies](power_supplies.md) — MOSFET switches do the switching in buck/boost converters
 - [Diodes](diodes.md) — body diode; also Schottky diodes used alongside MOSFETs

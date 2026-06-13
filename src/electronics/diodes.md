@@ -137,6 +137,28 @@ An LED is a diode that emits light when current flows forward through it. The cu
 
 Without the resistor, the LED will draw maximum current and burn out in seconds.
 
+## How It Works
+
+At the junction, electrons from the N-side diffuse across and fill holes on the
+P-side, leaving behind charged atoms that build a **depletion region** — a thin
+zone with no free carriers and a built-in electric field that opposes further
+diffusion. That field is the barrier (~0.7 V for silicon).
+
+```
+  Forward bias (anode +):          Reverse bias (anode −):
+
+  applied field cancels barrier    applied field reinforces barrier
+  depletion region NARROWS         depletion region WIDENS
+  P + + |·| − − N                  P + +  |·····|  − − N
+  carriers flood across → current  carriers pulled apart → no current
+```
+
+Pushing the P-side positive narrows the depletion region until carriers flood
+across and current flows. Reverse voltage widens it, choking the flow to a tiny
+leakage current — until the field grows strong enough to rip carriers loose
+(breakdown). The forward drop stays near-constant because current depends
+*exponentially* on voltage: a huge change in current barely moves V_f.
+
 ## Pitfalls
 
 - **Connecting a diode backwards** — no current flows, circuit doesn't work. Double-check the cathode stripe (the marked end on the component body).
@@ -152,3 +174,5 @@ Without the resistor, the LED will draw maximum current and burn out in seconds.
 - [Power Supplies](power_supplies.md) — rectifier bridges, Schottky diodes in switching supplies
 - [BJT Transistors](transistors_bjt.md) — built from two P-N junctions; understanding diodes makes BJT operation clear
 - [MOSFET Transistors](transistors_mosfet.md) — MOSFETs have a built-in body diode with important consequences
+- [Switches, Relays & Electromechanical](switches_relays.md) — the flyback diode that protects a relay/motor driver
+- [Transformers](transformers.md) — the secondary feeds a rectifier bridge to make DC

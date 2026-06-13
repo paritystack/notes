@@ -135,6 +135,28 @@ In the active region, small variations in base current produce large, proportion
   Voltage gain ≈ −RC / RE   (negative = signal inverted)
 ```
 
+## How It Works
+
+A BJT is two P-N junctions sharing a very thin, lightly-doped middle layer (the
+base). Forward-biasing the base-emitter junction injects a flood of carriers from
+the emitter into the base. Because the base is so thin, most of them don't
+recombine — they sweep straight on into the reverse-biased collector, pulled
+across by its field.
+
+```
+  Carrier flow in an NPN:
+
+  Emitter (n++) ──▶ thin Base (p) ──▶ Collector (n)
+     ●●●●●──────────▶ · · · ──────────▶ ●●●●   (collected)
+                       ↑ a few recombine here = base current
+
+  β = carriers collected / carriers that recombine in the base
+```
+
+That is why a tiny base current commands a large collector current: it only has to
+replace the few carriers lost to recombination. The thinner and cleaner the base,
+the higher β — and the reason BJTs amplify at all.
+
 ## Pitfalls
 
 - **Forgetting the base resistor** — connecting a GPIO directly to the base without a resistor means the GPIO must supply large base current. This damages the GPIO. Always put a resistor in series with the base.
@@ -146,6 +168,7 @@ In the active region, small variations in base current produce large, proportion
 
 - [Diodes](diodes.md) — a BJT is two P-N junctions; VBE ≈ 0.7 V is the diode forward voltage
 - [MOSFET Transistors](transistors_mosfet.md) — voltage-controlled alternative; preferred in most modern digital circuits
+- [Switches, Relays & Electromechanical](switches_relays.md) — driving a relay coil or load from a logic pin
 - [Power & Energy](power.md) — P = VCE × IC is heat dissipated in the transistor; must stay within ratings
 - [GPIO](../embedded/gpio.md) — GPIO current limits make BJT switching necessary for larger loads
 - [Motor Control](../embedded/motor_control.md) — H-bridges for bidirectional motor control use four transistors

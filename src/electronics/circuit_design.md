@@ -175,4 +175,5 @@ Always use a ground plane on B.Cu of a 2-layer board — route signals on F.Cu, 
 - [KiCad Schematic](kicad_schematic.md) — hands-on walkthrough of schematic capture in KiCad
 - [KiCad PCB](kicad_pcb.md) — hands-on walkthrough of PCB layout, Gerber export, and ordering
 - [Power Supplies](power_supplies.md) — power rail design (decoupling, regulation) maps directly to PCB power plane decisions
+- [Schematic Symbol Reference](symbols.md) — the component symbols every schematic is drawn from
 - [Signal Integrity](../embedded/signal_integrity.md) — high-speed traces require controlled impedance, which starts with PCB stackup choices

@@ -199,3 +199,4 @@ A multimeter shows a *number*. An oscilloscope shows a *graph* of voltage vs tim
 - [Circuits](circuits.md) — schematic reading is prerequisite to knowing where to probe
 - [Filters](filters.md) — oscilloscope verifies filter cutoff frequency in practice
 - [Power Supplies](power_supplies.md) — oscilloscope reveals switching ripple and load transients
+- [Reading a Datasheet](datasheets.md) — verify a real part against its specified ratings

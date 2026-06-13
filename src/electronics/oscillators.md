@@ -66,6 +66,14 @@ The cap charges through R1+R2 and discharges through R2, ping-ponging between
   T_low   = 0.693 · R2 · C
 ```
 
+Worked example — blink an LED near 1 Hz:
+
+```
+  Pick C = 10 µF, R1 = 1 kΩ, R2 = 47 kΩ
+  f    = 1.44 / ((1k + 2·47k) · 10µF) = 1.44 / 0.95 ≈ 1.5 Hz
+  Duty = (R1 + R2) / (R1 + 2·R2) = 48 / 95 ≈ 51%
+```
+
 #### Monostable Mode (one-shot pulse)
 
 A trigger produces a *single* output pulse of a fixed length, then the circuit
@@ -129,5 +137,7 @@ See [Timers](../embedded/timers.md) and the clock trees in MCU datasheets.
 - [Op-Amps](op_amps.md) — comparator and Schmitt-trigger oscillators
 - [AC Signals & Impedance](ac_signals.md) — frequency, period, and waveform shape
 - [Filters](filters.md) — turning a square wave into a sine, or selecting a harmonic
+- [Switches, Relays & Electromechanical](switches_relays.md) — a 555 monostable debounces a button into one clean pulse
 - [Timers](../embedded/timers.md) — MCUs generate precise timing in hardware instead
+- [Clock Systems](../embedded/clock_systems.md) — a crystal sets the master clock that on-chip timers divide down
 - [PWM](../embedded/pwm.md) — a variable-duty square wave drives motors, LEDs, and DACs

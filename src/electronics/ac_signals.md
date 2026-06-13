@@ -139,5 +139,6 @@ circuits.
 - [Filters](filters.md) — reactance vs frequency is exactly what makes a filter selective
 - [Power & Energy](power.md) — AC power calculations use RMS values
 - [Power Supplies](power_supplies.md) — rectifying and smoothing AC into DC
+- [Transformers](transformers.md) — only changing (AC) signals couple across the core; turns ratio scales V and impedance
 - [Op-Amps](op_amps.md) — active filters and AC amplifiers work in this domain
 - [ADC](../embedded/adc.md) — sampling an AC signal requires understanding its frequency content

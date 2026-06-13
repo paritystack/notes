@@ -184,3 +184,4 @@ Chain 8 of these together (with carry propagation) and you have an 8-bit adder �
 - [BJT Transistors](transistors_bjt.md) — older TTL logic used BJTs
 - [Processor Design](../embedded/processor_design.md) — combining gates builds adders, multiplexers, and ultimately CPUs
 - [ISA](../embedded/isa.md) — instruction set architecture describes what operations the gates implement
+- [Switches, Relays & Electromechanical](switches_relays.md) — an SR latch from two NAND/NOR gates debounces a switch in hardware

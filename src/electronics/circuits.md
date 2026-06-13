@@ -122,6 +122,38 @@ Real circuits are combinations. The approach:
           I through R3 = 6V/3Ω = 2A  ✓ (1+2=3 total)
 ```
 
+### Thévenin & Norton Equivalents
+
+No matter how many sources and resistors a *linear* circuit contains, everything
+behind any two terminals can be replaced by **one source and one resistor**. This
+is the single most useful simplification in circuit analysis — it lets you reason
+about a complex network as if it were a battery with an internal resistance.
+
+```
+  Any linear two-terminal network:
+
+   Thévenin form              Norton form
+   (voltage source)           (current source)
+
+      ┌──[Rth]──● A             ●A
+      │                         │
+    (Vth)                  (In) ⊕  ∥ [Rn]
+      │                         │
+      └─────────● B             ●B
+
+   Vth = open-circuit voltage at A-B   (measure with nothing connected)
+   Rth = resistance seen from A-B      (sources off: V-sources shorted,
+                                        I-sources opened)
+   In  = short-circuit current A→B     and   Rn = Rth
+
+   Convert between them:  Vth = In × Rth
+```
+
+Why it matters: once you know Vth and Rth, the current into *any* load `R_L` is just
+`I = Vth / (Rth + R_L)` — a one-line voltage divider instead of re-solving the whole
+network. Rth is also exactly the **output impedance** of a [power supply](power_supplies.md)
+or [sensor](sensors.md) stage, which is why a source "sags" under load.
+
 ### Short Circuit and Open Circuit
 
 ```
@@ -158,3 +190,4 @@ For hand analysis, two systematic techniques are:
 - [Inductors](inductors.md) — RL circuits; inductor current follows an exponential as the loop energises
 - [Filters](filters.md) — filter circuits are analysed with KVL/KCL in frequency domain
 - [Power & Energy](power.md) — power is summed across all branches using node voltages
+- [Sensors & Transducers](sensors.md) — Thévenin resistance is the output impedance that loads a sensor

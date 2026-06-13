@@ -137,6 +137,35 @@ One of the most useful resistor circuits:
 
 Used to scale voltages down — for example, to measure a 12 V signal with a 3.3 V [ADC](../embedded/adc.md) input.
 
+### Potentiometers & Variable Resistors
+
+A **potentiometer** ("pot") is a resistor with a movable wiper that taps off any
+point along its resistive track — a voltage divider you can turn with a knob.
+
+```
+  Full track between A and B (e.g. 10 kΩ);
+  wiper W slides along it:
+
+   A ●━━━━━━━━━━━━━━● B
+            ▲
+            W (wiper)
+
+  Wiper at top    → Vout = Vin   (W = A)
+  Wiper at middle → Vout = Vin/2
+  Wiper at bottom → Vout = 0     (W = B)
+
+  Used as a 3-terminal divider: volume knobs, set-points, calibration trims.
+  Wire only 2 terminals (one end + wiper) and it becomes a 2-terminal
+  variable resistor (a "rheostat") for adjusting current.
+```
+
+- **Linear taper** — resistance changes evenly with rotation (set-points, position sensing).
+- **Logarithmic (audio) taper** — matches how ears perceive loudness, used for volume.
+- **Trimmer** — a tiny screwdriver-adjusted pot set once during calibration.
+
+A pot used for [position sensing](sensors.md) is just a divider whose ratio reports
+the shaft angle.
+
 ## How It Works
 
 Resistance arises from electrons colliding with the atoms of the material as they drift through. Each collision transfers kinetic energy from the electron to the atom, making it vibrate faster — that's heat. Materials with a tight, regular crystal lattice (like pure copper) have few collisions — low resistance. Materials with a disordered structure or many impurities have more collisions — high resistance.
@@ -163,3 +192,4 @@ Metal conductor (low R):            Resistive material (high R):
 - [Capacitors](capacitors.md) — RC circuits (resistor + capacitor) set timing constants
 - [Filters](filters.md) — RC networks are the simplest filters
 - [GPIO](../embedded/gpio.md) — pull-up and pull-down resistors set logic levels on digital pins
+- [Sensors & Transducers](sensors.md) — potentiometers and resistive sensors are read with voltage dividers

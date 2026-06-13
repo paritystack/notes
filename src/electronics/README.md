@@ -15,16 +15,19 @@ Follow the pages in this order — each one uses concepts from those above it.
 | 3 | [Resistance & Ohm's Law](resistance.md) | What *fights* the flow, and V=IR |
 | 4 | [Power & Energy](power.md) | How much work the flow does |
 | 5 | [Circuits](circuits.md) | Series/parallel paths, Kirchhoff's laws |
-| 6 | [Capacitors](capacitors.md) | Storing charge like a tiny battery |
-| 7 | [Inductors](inductors.md) | Storing energy in a magnetic field |
-| 8 | [Diodes](diodes.md) | One-way valves for current |
-| 9 | [BJT Transistors](transistors_bjt.md) | Current-controlled switches and amplifiers |
-| 10 | [MOSFET Transistors](transistors_mosfet.md) | Voltage-controlled switches |
-| 11 | [Op-Amps](op_amps.md) | Amplifying differences |
-| 12 | [Logic Gates](logic_gates.md) | The building blocks of digital logic |
-| 13 | [Filters](filters.md) | Frequency-selective circuits |
-| 14 | [Power Supplies](power_supplies.md) | Converting and regulating voltage |
-| 15 | [Prototyping & Test Equipment](prototyping.md) | Building and measuring real circuits |
+| 6 | [AC Signals & Impedance](ac_signals.md) | Sine waves, RMS, reactance, impedance |
+| 7 | [Capacitors](capacitors.md) | Storing charge like a tiny battery |
+| 8 | [Inductors](inductors.md) | Storing energy in a magnetic field |
+| 9 | [Diodes](diodes.md) | One-way valves for current |
+| 10 | [BJT Transistors](transistors_bjt.md) | Current-controlled switches and amplifiers |
+| 11 | [MOSFET Transistors](transistors_mosfet.md) | Voltage-controlled switches |
+| 12 | [Op-Amps](op_amps.md) | Amplifying differences |
+| 13 | [Logic Gates](logic_gates.md) | The building blocks of digital logic |
+| 14 | [Filters](filters.md) | Frequency-selective circuits |
+| 15 | [Oscillators & the 555 Timer](oscillators.md) | Circuits that generate their own signal |
+| 16 | [Power Supplies](power_supplies.md) | Converting and regulating voltage |
+| 17 | [Sensors & Transducers](sensors.md) | Turning the physical world into a voltage |
+| 18 | [Prototyping & Test Equipment](prototyping.md) | Building and measuring real circuits |
 
 ## PCB Design
 

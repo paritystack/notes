@@ -15,6 +15,7 @@ This directory contains guides for debugging software at various levels.
 - **[Reverse Engineering](reverse_engineering.md)** - Ghidra, radare2, IDA; analysing binaries without source
 - **[Debugging Methodology](debugging_methodology.md)** - Systematic approach, git bisect, delta debugging
 - **[Linux Kernel](linux_kernel.md)** - Kernel-level debugging techniques
+- **[Kprobes & Uprobes](kprobes_uprobes.md)** - Dynamic probing of kernel/userspace functions, step by step
 
 ## Common Debugging Workflow
 

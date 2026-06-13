@@ -1,0 +1,41 @@
+# Electronics
+
+Electronics is the study of how to control the flow of electric charge to make useful things happen — from a blinking LED to a smartphone processor. Every digital device you use runs on the principles here.
+
+This section starts from absolute zero. No prior knowledge assumed. Every concept builds on the previous one, and every explanation starts with an intuition or analogy before going near a formula.
+
+## Learning path
+
+Follow the pages in this order — each one uses concepts from those above it.
+
+| Step | Topic | What you learn |
+|------|-------|---------------|
+| 1 | [Charge & Current](charge_current.md) | What electricity actually *is* |
+| 2 | [Voltage](voltage.md) | What *pushes* the electricity |
+| 3 | [Resistance & Ohm's Law](resistance.md) | What *fights* the flow, and V=IR |
+| 4 | [Power & Energy](power.md) | How much work the flow does |
+| 5 | [Circuits](circuits.md) | Series/parallel paths, Kirchhoff's laws |
+| 6 | [Capacitors](capacitors.md) | Storing charge like a tiny battery |
+| 7 | [Inductors](inductors.md) | Storing energy in a magnetic field |
+| 8 | [Diodes](diodes.md) | One-way valves for current |
+| 9 | [BJT Transistors](transistors_bjt.md) | Current-controlled switches and amplifiers |
+| 10 | [MOSFET Transistors](transistors_mosfet.md) | Voltage-controlled switches |
+| 11 | [Op-Amps](op_amps.md) | Amplifying differences |
+| 12 | [Logic Gates](logic_gates.md) | The building blocks of digital logic |
+| 13 | [Filters](filters.md) | Frequency-selective circuits |
+| 14 | [Power Supplies](power_supplies.md) | Converting and regulating voltage |
+| 15 | [Prototyping & Test Equipment](prototyping.md) | Building and measuring real circuits |
+
+## PCB Design
+
+Once you can build and measure circuits on a breadboard, the next step is designing a permanent PCB.
+
+| Topic | What you learn |
+|-------|---------------|
+| [Circuit Design](circuit_design.md) | Schematics, PCB layers, trace rules, design-for-manufacture — tool-agnostic concepts |
+| [KiCad Schematic](kicad_schematic.md) | Capturing your circuit in KiCad's schematic editor (eeschema) |
+| [KiCad PCB](kicad_pcb.md) | Laying out the board, routing traces, Gerber export, and ordering from JLCPCB |
+
+## How this section connects to the rest of the book
+
+Once you understand these fundamentals, the [Embedded](../embedded/README.md) section will make far more sense — concepts like [ADC](../embedded/adc.md), [PWM](../embedded/pwm.md), [Power Management](../embedded/power_management.md), and [Signal Integrity](../embedded/signal_integrity.md) all build directly on what is here.

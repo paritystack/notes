@@ -18,16 +18,19 @@ Follow the pages in this order — each one uses concepts from those above it.
 | 6 | [AC Signals & Impedance](ac_signals.md) | Sine waves, RMS, reactance, impedance |
 | 7 | [Capacitors](capacitors.md) | Storing charge like a tiny battery |
 | 8 | [Inductors](inductors.md) | Storing energy in a magnetic field |
-| 9 | [Diodes](diodes.md) | One-way valves for current |
-| 10 | [BJT Transistors](transistors_bjt.md) | Current-controlled switches and amplifiers |
-| 11 | [MOSFET Transistors](transistors_mosfet.md) | Voltage-controlled switches |
-| 12 | [Op-Amps](op_amps.md) | Amplifying differences |
-| 13 | [Logic Gates](logic_gates.md) | The building blocks of digital logic |
-| 14 | [Filters](filters.md) | Frequency-selective circuits |
-| 15 | [Oscillators & the 555 Timer](oscillators.md) | Circuits that generate their own signal |
-| 16 | [Power Supplies](power_supplies.md) | Converting and regulating voltage |
-| 17 | [Sensors & Transducers](sensors.md) | Turning the physical world into a voltage |
-| 18 | [Prototyping & Test Equipment](prototyping.md) | Building and measuring real circuits |
+| 9 | [Transformers](transformers.md) | Changing AC voltage and isolating circuits |
+| 10 | [Diodes](diodes.md) | One-way valves for current |
+| 11 | [BJT Transistors](transistors_bjt.md) | Current-controlled switches and amplifiers |
+| 12 | [MOSFET Transistors](transistors_mosfet.md) | Voltage-controlled switches |
+| 13 | [Switches, Relays & Electromechanical](switches_relays.md) | Making and breaking connections; driving coils |
+| 14 | [Op-Amps](op_amps.md) | Amplifying differences |
+| 15 | [Logic Gates](logic_gates.md) | The building blocks of digital logic |
+| 16 | [Filters](filters.md) | Frequency-selective circuits |
+| 17 | [Oscillators & the 555 Timer](oscillators.md) | Circuits that generate their own signal |
+| 18 | [Power Supplies](power_supplies.md) | Converting and regulating voltage |
+| 19 | [Sensors & Transducers](sensors.md) | Turning the physical world into a voltage |
+| 20 | [Prototyping & Test Equipment](prototyping.md) | Building and measuring real circuits |
+| 21 | [Reading a Datasheet](datasheets.md) | Decoding a component's ratings and limits |
 
 ## PCB Design
 
@@ -38,6 +41,7 @@ Once you can build and measure circuits on a breadboard, the next step is design
 | [Circuit Design](circuit_design.md) | Schematics, PCB layers, trace rules, design-for-manufacture — tool-agnostic concepts |
 | [KiCad Schematic](kicad_schematic.md) | Capturing your circuit in KiCad's schematic editor (eeschema) |
 | [KiCad PCB](kicad_pcb.md) | Laying out the board, routing traces, Gerber export, and ordering from JLCPCB |
+| [Schematic Symbol Reference](symbols.md) | A one-page lookup of every component symbol used in this section |
 
 ## How this section connects to the rest of the book
 

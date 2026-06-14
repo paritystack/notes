@@ -956,7 +956,8 @@ for vertex, dist in sorted(distances.items()):
 
 dist, path = g.get_shortest_path('A', 'E')
 print(f"\nShortest path A -> E: {path} (distance: {dist})")
-# Output: ['A', 'C', 'B', 'D', 'E'] (distance: 10)
+# Output: ['A', 'B', 'D', 'E'] (distance: 11)
+# (edges are directed; the only routes to E are via C->E, C->D->E, or B->D->E)
 ```
 
 **JavaScript:**
@@ -4931,7 +4932,7 @@ def find_min_height_trees(n, edges):
     return leaves
 
 # Test
-edges = [[0,1],[0,2],[0,3],[3,4],[4,5]]
+edges = [[0,3],[1,3],[2,3],[4,3],[5,4]]
 print(find_min_height_trees(6, edges))  # Output: [3, 4]
 ```
 

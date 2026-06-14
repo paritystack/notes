@@ -2559,7 +2559,7 @@ Real-Time Transport Protocol
     Payload type: Opus (96)
     Sequence number: 1234
     Timestamp: 48000
-    Synchronization Source identifier: 0xABCD1234 (2882400052)
+    Synchronization Source identifier: 0xABCD1234 (2882343476)
     Payload: 40 bytes
 ```
 

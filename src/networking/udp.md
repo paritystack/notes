@@ -44,7 +44,7 @@ UDP is a connectionless transport layer protocol that provides fast, unreliable 
 ### Example UDP Header
 
 ```
-Source Port: 53210 (0xCFCA)
+Source Port: 53210 (0xCFDA)
 Destination Port: 53 (0x0035) - DNS
 Length: 512 bytes
 Checksum: 0x1A2B
@@ -52,7 +52,7 @@ Checksum: 0x1A2B
 
 **Hexadecimal representation:**
 ```
-CF CA 00 35 02 00 1A 2B
+CF DA 00 35 02 00 1A 2B
 [... 504 bytes of data ...]
 ```
 

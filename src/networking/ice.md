@@ -251,7 +251,7 @@ Example Calculations:
 
 Host candidate:
 (2^24 × 126) + (2^8 × 65535) + (256 - 1)
-= 2113667071
+= 2130706431
 
 Srflx candidate:
 (2^24 × 100) + (2^8 × 65535) + (256 - 1)
@@ -267,7 +267,7 @@ Relay candidate:
 ```
 Sorted by priority (high to low):
 
-1. host (LAN)           Priority: 2113667071
+1. host (LAN)           Priority: 2130706431
    - Try first
    - Works if same network
    - Lowest latency

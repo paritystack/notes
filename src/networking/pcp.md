@@ -777,8 +777,8 @@ client.createMapping(8080, 8080, 6, 3600)
 ```
 Methods to find PCP server:
 
-1. DHCP Option
-   - Option 128 (DHCPv4)
+1. DHCP Option (RFC 7291)
+   - Option 158 (DHCPv4)
    - Option 86 (DHCPv6)
    - Contains PCP server IP address
 

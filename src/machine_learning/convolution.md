@@ -469,7 +469,7 @@ MAC = Multiply-Accumulate (counted as 2 ops)
 Input: 224×224×3
 Conv: 64 filters, 7×7, stride 2, padding 3
 Output: 112×112×64
-FLOPs = 112 × 112 × 7 × 7 × 3 × 64 × 2 ≈ 118M
+FLOPs = 112 × 112 × 7 × 7 × 3 × 64 × 2 ≈ 236M   (≈118M multiply-accumulates)
 ```
 
 ### Memory Requirements

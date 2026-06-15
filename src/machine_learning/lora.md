@@ -75,8 +75,8 @@ LoRA leverages the hypothesis that the update matrix ΔW has a low "intrinsic ra
 
 Where:
 - Rank r is chosen such that r << min(d,k)
-- B is initialized with random Gaussian
-- A is initialized to zero (ensuring ΔW = 0 at start)
+- A is initialized with random Gaussian
+- B is initialized to zero (ensuring ΔW = 0 at start)
 
 ### Forward Pass
 
@@ -331,7 +331,7 @@ lora_config = LoraConfig(
 # Apply LoRA
 model = get_peft_model(model, lora_config)
 model.print_trainable_parameters()
-# Output: trainable params: 4,194,304 || all params: 6,742,609,920 || trainable%: 0.06%
+# Output: trainable params: 8,388,608 || all params: 6,746,804,224 || trainable%: 0.12%
 
 # Train normally
 # ... training loop ...

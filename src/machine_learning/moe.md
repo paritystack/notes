@@ -1225,7 +1225,7 @@ config = {
 }
 ```
 
-### 4. Soft MoE (Meta, 2023)
+### 4. Soft MoE (Google DeepMind, 2023)
 
 **Key Innovation**: No routing; instead, use learned slot attention.
 

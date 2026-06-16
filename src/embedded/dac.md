@@ -288,7 +288,7 @@ void setup() {
   pinMode(pwmPin, OUTPUT);
 
   // Increase PWM frequency for smoother output
-  // Default: 490 Hz for pins 5,6 and 980 Hz for others
+  // Default: 980 Hz for pins 5,6 and 490 Hz for others
   // Setting for pin 9 and 10:
   TCCR1B = TCCR1B & 0b11111000 | 0x01;  // 31.25 kHz
 }

@@ -119,10 +119,10 @@ CAN FD extends classical CAN with:
 
 | DLC | Data Bytes | DLC | Data Bytes |
 |-----|------------|-----|------------|
-| 0-8 | 0-8 (same) | 12  | 48 |
-| 9   | 12         | 13  | 64 |
-| 10  | 16         | 14  | Reserved |
-| 11  | 24         | 15  | Reserved |
+| 0-8 | 0-8 (same) | 12  | 24 |
+| 9   | 12         | 13  | 32 |
+| 10  | 16         | 14  | 48 |
+| 11  | 20         | 15  | 64 |
 
 **Example CAN FD Advantages:**
 ```

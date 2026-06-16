@@ -445,8 +445,8 @@ delay(10);
 - Most microcontrollers use this
 
 ### RS-232 UART (Legacy)
-- **Logic HIGH (Space)**: -3V to -15V
-- **Logic LOW (Mark)**: +3V to +15V
+- **Logic HIGH (Mark)**: -3V to -15V
+- **Logic LOW (Space)**: +3V to +15V
 - Requires level shifter (MAX232, MAX3232)
 - Longer cable runs possible
 

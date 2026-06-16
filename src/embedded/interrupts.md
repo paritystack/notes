@@ -132,10 +132,11 @@ ISR(INT1_vect) { }           // 0x0004: External Interrupt 1
 ISR(PCINT0_vect) { }         // 0x0006: Pin Change Interrupt 0
 ISR(PCINT1_vect) { }         // 0x0008: Pin Change Interrupt 1
 ISR(PCINT2_vect) { }         // 0x000A: Pin Change Interrupt 2
-ISR(TIMER2_COMPA_vect) { }   // 0x000C: Timer2 Compare Match A
-ISR(TIMER2_COMPB_vect) { }   // 0x000E: Timer2 Compare Match B
-ISR(TIMER2_OVF_vect) { }     // 0x0010: Timer2 Overflow
-ISR(TIMER1_CAPT_vect) { }    // 0x0012: Timer1 Capture
+ISR(WDT_vect) { }            // 0x000C: Watchdog Time-out
+ISR(TIMER2_COMPA_vect) { }   // 0x000E: Timer2 Compare Match A
+ISR(TIMER2_COMPB_vect) { }   // 0x0010: Timer2 Compare Match B
+ISR(TIMER2_OVF_vect) { }     // 0x0012: Timer2 Overflow
+ISR(TIMER1_CAPT_vect) { }    // 0x0014: Timer1 Capture
 ISR(USART_RX_vect) { }       // etc.
 ```
 

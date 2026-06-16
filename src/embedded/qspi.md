@@ -27,7 +27,7 @@ QSPI commands are described by a triple like **1-4-4** or **4-4-4**, meaning (in
 | Octal (1-8-8 / 8-8-8) | 8 | ~8× | "OPI", high-end MCUs |
 | DDR/DTR | ×2 edges | ×2 again | Data on both clock edges |
 
-A 4-4-4 DDR octal flash at 100 MHz moves ~200 MB/s — fast enough that the on-chip [cache](cache_tcm.md) hides most of the latency for XIP code.
+An 8-8-8 DDR octal flash at 100 MHz moves ~200 MB/s — fast enough that the on-chip [cache](cache_tcm.md) hides most of the latency for XIP code.
 
 ## A Read Transaction
 

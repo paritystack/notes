@@ -32,8 +32,8 @@ sudo sysctl -w kernel.core_pattern=/tmp/core-%e-%p-%t
 # %s - signal number
 # %h - hostname
 
-# Or use systemd-coredump
-sudo sysctl -w kernel.core_pattern=|/lib/systemd/systemd-coredump %P %u %g %s %t %c %h
+# Or use systemd-coredump (quote the value — the leading | is a shell pipe otherwise)
+sudo sysctl -w "kernel.core_pattern=|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h"
 ```
 
 ## Generate Test Core Dump
@@ -130,17 +130,17 @@ gdb -batch -ex "thread apply all bt" ./program core > all_threads.txt
 ## Core Dump with Containers
 
 ```bash
-# Docker - enable core dumps
+# Docker - enable core dumps (sets the core ulimit for the container)
 docker run --ulimit core=-1 myimage
-
-# Kubernetes - configure pod
-spec:
-  containers:
-  - name: myapp
-    resources:
-      limits:
-        core: "-1"
 ```
+
+`kernel.core_pattern` is a single global kernel setting, not namespaced — so the
+pattern that decides *where* a container's core lands is the **host node's**, and it
+must be configured on the host, not in the pod spec. Kubernetes has no `core`
+resource limit; raise the core ulimit at the container-runtime level instead (e.g.
+the containerd/CRI `default_ulimits`, or a privileged init container running
+`ulimit -c unlimited`). With `kernel.core_pattern` piping to systemd-coredump,
+crashes are captured on the host and retrieved with `coredumpctl`.
 
 ## Best Practices
 

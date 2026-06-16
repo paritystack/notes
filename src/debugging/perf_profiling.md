@@ -97,7 +97,7 @@ perf list                            # all available events on this CPU
 perf mem record / perf mem report    # memory load/store latency
 perf c2c                             # cache-line false sharing between cores
 perf annotate <symbol>               # per-instruction hotspots in disassembly
-perf probe --add 'do_sys_open filename:string'   # add a dynamic kprobe
+perf probe --add 'do_sys_openat2 filename:string'   # add a dynamic kprobe
 ```
 
 ## Pitfalls
@@ -105,7 +105,8 @@ perf probe --add 'do_sys_open filename:string'   # add a dynamic kprobe
 ```
 - Broken/short stacks → rebuild with -fno-omit-frame-pointer, or use --call-graph dwarf/lbr.
 - Missing symbols → install -dbg/-debuginfo packages; strip removes them (see tools.md).
-- perf_event_paranoid sysctl blocks unprivileged profiling: sysctl kernel.perf_event_paranoid=1.
+- perf_event_paranoid sysctl restricts unprivileged profiling — to allow more, LOWER it
+  (e.g. sysctl kernel.perf_event_paranoid=-1, or =1 for kernel profiling); higher = stricter.
 - Sampling can miss short, infrequent functions — raise -F or use a tracer instead.
 - Profiling a debug (-O0) build optimises the wrong thing; profile -O2 with -g.
 - In containers/VMs, hardware PMU counters may be unavailable — fall back to software events.

@@ -85,8 +85,8 @@ addr2line -e vmlinux -f -i 0xffffffffc0123456
 # Install
 sudo apt install systemtap
 
-# Simple script
-stap -e 'probe kernel.function("sys_open") { println("open called") }'
+# Simple script (sys_open no longer exists on modern kernels; use a current symbol)
+stap -e 'probe kernel.function("vfs_read") { println("read called") }'
 
 # Trace system calls
 stap -e 'probe syscall.* { printf("%s\n", name) }'

@@ -231,7 +231,7 @@ ETFs use the "in-kind creation/redemption" mechanism to flush out low-basis lots
 
 ### Backdoor Roth
 
-For high earners above Roth IRA income limits ($240k single / $240k MFJ 2024):
+For high earners above Roth IRA income limits (MAGI phase-out ends $161k single / $240k MFJ, 2024):
 
 1. Contribute non-deductible $7,000 to Traditional IRA
 2. Immediately convert to Roth IRA
@@ -282,7 +282,7 @@ The order in which you draw down accounts in retirement dramatically affects lif
 - Starting age 73 (SECURE 2.0 Act)
 - Forces taxable income from Trad IRA/401k
 - Avoid pushing into higher brackets — convert to Roth before RMDs hit
-- Use **Qualified Charitable Distributions (QCDs)** up to $100k/year from IRA directly to charity — counts for RMD without adding to income
+- Use **Qualified Charitable Distributions (QCDs)** up to $105k/year (2024, inflation-indexed) from IRA directly to charity — counts for RMD without adding to income
 
 ```python
 def rmd_amount(account_balance, age, table='uniform'):

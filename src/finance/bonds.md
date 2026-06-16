@@ -303,7 +303,7 @@ def credit_spread(corporate_yield, treasury_yield):
     Credit Spread = Corporate Yield - Treasury Yield
     Compensation for credit risk
     """
-    return (corporate_yield - treasury_yield) * 100  # in basis points
+    return (corporate_yield - treasury_yield) * 10000  # in basis points (1% = 100bp)
 
 # Example
 corp_yield = 0.055  # 5.5%

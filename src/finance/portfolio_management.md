@@ -878,6 +878,6 @@ Remember: Portfolio management is a continuous process, not a one-time event. Re
 ## Where this connects
 
 - [ETFs](etfs.md) — ETFs are the primary vehicle for building a diversified portfolio
-- [Risk management](../finance/general.md) — position sizing and drawdown control are portfolio management fundamentals
+- [Risk management](risk_management.md) — position sizing and drawdown control are portfolio management fundamentals
 - [Tax strategies](tax_strategies.md) — tax-loss harvesting and account location are portfolio management decisions
 - [Behavioral finance](behavioral_finance.md) — behavioral biases are the primary reason investors underperform

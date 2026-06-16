@@ -702,7 +702,7 @@ scenarios = [
     {'name': 'CRL/delay', 'probability': 0.30, 'value': 35},
     {'name': 'rejection', 'probability': 0.10, 'value': 15},
 ]
-# Expected value: $58.50
+# Expected value: 0.6*80 + 0.3*35 + 0.1*15 = $60.00
 ```
 
 Useful for biotech, M&A targets ([[event_driven]]), and distressed situations.

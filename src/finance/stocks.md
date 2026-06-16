@@ -652,7 +652,9 @@ print("\n" + "=" * 60)
 print(f"Final Portfolio Value: ${final_value:,.0f}")
 print(f"Final Annual Income: ${final_income:,.0f}")
 print(f"Total Return: {total_return:.1f}%")
-print(f"Annualized Return: {(total_return / years):.1f}%")
+# Annualized return is the compound (geometric) rate, NOT total_return / years
+cagr = ((final_value / initial_investment) ** (1 / years) - 1) * 100
+print(f"Annualized Return (CAGR): {cagr:.1f}%")
 ```
 
 ### 7. Sector Rotation Strategy

@@ -550,7 +550,7 @@ E.g., to retire at 65 needing $80k/year, with 5% real return:
 ### Roth Conversion Ladder
 
 Classic early-retirement tactic:
-- Year N: convert tradiitional to Roth (taxable in year of conversion)
+- Year N: convert traditional to Roth (taxable in year of conversion)
 - Year N+5: withdraw converted amount tax + penalty-free
 - Repeat annually to build a 5-year-out pipeline
 

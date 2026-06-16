@@ -208,7 +208,7 @@ See [[interest_rates]] for more on duration mechanics.
 - Senior housing (recovering from COVID)
 - Medical office (stable)
 - Life sciences (Boston, SF biotech demand cyclical)
-- Top names: WELL, VTR, HCP
+- Top names: WELL, VTR, DOC (Healthpeak, formerly HCP/PEAK)
 
 ### Self-Storage
 

@@ -232,7 +232,8 @@ Biotech and pharma stocks make binary moves on:
 
 ## Activist Investing (Following 13D Filings)
 
-Investors crossing 5% ownership must file a 13D within 10 days. Activist filings often pop the stock 5–15%.
+Investors crossing 5% ownership must file a 13D within 5 business days (shortened from 10
+calendar days by the SEC effective February 2024). Activist filings often pop the stock 5–15%.
 
 ### Trade
 

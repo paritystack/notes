@@ -303,6 +303,10 @@ Speed (Mbps)
 - **[Secure Boot](secure_boot.md)**: Chain of trust, signed images, RDP, anti-rollback
 - **[TrustZone-M](trustzone_m.md)**: Armv8-M hardware isolation, SAU, NSC, PSA, TF-M
 
+## Languages
+
+- **[Embedded Rust (no_std)](embedded_rust.md)**: no_std, PAC/HAL/BSP crates, ownership for hardware, RTIC & Embassy, probe-rs/defmt
+
 ## Code Quality
 
 - **[MISRA C & Defensive Firmware](coding_standards.md)**: coding standards, static analysis, volatile/UB pitfalls, assertions

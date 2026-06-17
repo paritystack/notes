@@ -153,6 +153,10 @@ Documentation=https://example.com/docs
 After=network-online.target postgresql.service
 Wants=network-online.target
 Requires=postgresql.service
+# Start rate limiting belongs in [Unit] (StartLimitInterval is an
+# alias for StartLimitIntervalSec); placing it in [Service] is ignored.
+StartLimitIntervalSec=10min
+StartLimitBurst=5
 
 [Service]
 Type=notify
@@ -174,8 +178,6 @@ ExecStop=/bin/kill -TERM $MAINPID
 # Restart policy
 Restart=on-failure
 RestartSec=5s
-StartLimitInterval=10min
-StartLimitBurst=5
 
 # Security
 PrivateTmp=true
@@ -634,12 +636,14 @@ systemctl show service_name
 After=network-online.target
 Wants=network-online.target
 
-# 2. Set restart policy
+# 2. Set restart policy ([Service]) and start-limit ([Unit])
+[Unit]
+StartLimitIntervalSec=10min
+StartLimitBurst=5
+
 [Service]
 Restart=on-failure
 RestartSec=5s
-StartLimitInterval=10min
-StartLimitBurst=5
 
 # 3. Use specific user
 [Service]

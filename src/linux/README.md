@@ -8,21 +8,21 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 2. [Kernel Architecture](./kernel.md) - Linux kernel internals and development
 3. [Memory Management](./memory_management.md) - Virtual memory, paging, allocators, reclaim, and OOM
 4. [Kernel Development Patterns](./kernel_patterns.md) - Common patterns and best practices for kernel development
-4. [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless subsystem frameworks for WiFi drivers
-5. [Driver Development](./driver_development.md) - Linux driver model and device driver development
-6. [Device Tree](./device_tree.md) - Hardware description using Device Tree
-7. [Cross Compilation](./cross_compilation.md) - Building for different architectures
-8. [Networking](./networking.md) - Network configuration and troubleshooting
-9. [Netfilter](./netfilter.md) - Packet filtering framework
-10. [iptables](./iptables.md) - Firewall configuration
-11. [Traffic Control (tc)](./tc.md) - Network traffic management
-12. [WireGuard](./wireguard.md) - Modern VPN protocol and configuration
-13. [systemd](./systemd.md) - Service management and init system
-14. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
-15. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
-16. [Netlink](./netlink.md) - Kernel-userspace communication interface
-17. [eBPF](./ebpf.md) - Extended Berkeley Packet Filter for kernel programmability
-18. [Control Groups (cgroups)](./cgroups.md) - Resource limiting, accounting, and isolation for process groups
+5. [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless subsystem frameworks for WiFi drivers
+6. [Driver Development](./driver_development.md) - Linux driver model and device driver development
+7. [Device Tree](./device_tree.md) - Hardware description using Device Tree
+8. [Cross Compilation](./cross_compilation.md) - Building for different architectures
+9. [Networking](./networking.md) - Network configuration and troubleshooting
+10. [Netfilter](./netfilter.md) - Packet filtering framework
+11. [iptables](./iptables.md) - Firewall configuration
+12. [Traffic Control (tc)](./tc.md) - Network traffic management
+13. [WireGuard](./wireguard.md) - Modern VPN protocol and configuration
+14. [systemd](./systemd.md) - Service management and init system
+15. [sysctl](./sysctl.md) - Kernel parameter tuning at runtime
+16. [sysfs](./sysfs.md) - Kernel/hardware information filesystem
+17. [Netlink](./netlink.md) - Kernel-userspace communication interface
+18. [eBPF](./ebpf.md) - Extended Berkeley Packet Filter for kernel programmability
+19. [Control Groups (cgroups)](./cgroups.md) - Resource limiting, accounting, and isolation for process groups
 
 ## Overview
 

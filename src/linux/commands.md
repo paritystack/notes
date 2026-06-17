@@ -1312,6 +1312,17 @@ command &> file            # Redirect both (shorthand)
 command < file             # Read from file
 command << EOF             # Here document
 multiline input
+EOF
+command <<< "string"       # Here string
+```
+
+### Examples
+
+```bash
+# Combine redirection with pipes
+grep ERROR app.log | tee errors.txt | wc -l   # Save and count
+sort data.txt | uniq -c | sort -rn > report.txt
+```
 
 ## Where this connects
 

@@ -285,7 +285,7 @@ Variables available in rules:
 | `$parent` | Parent device path | Parent device |
 | `$name` | Device name (after NAME) | Custom name |
 | `$links` | Space-separated symlinks | All symlinks |
-| `$root` | udev runtime directory | `/run/udev` |
+| `$root` or `%r` | udev device directory | `/dev` |
 | `$sys` | sysfs mount point | `/sys` |
 | `$tempnode` | Temporary device node | For testing |
 | `%%` | Literal `%` | `%` |

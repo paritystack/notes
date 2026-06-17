@@ -337,11 +337,11 @@ ip netns identify PID
 # Monitor namespace events
 ip netns monitor
 
-# Attach network namespace to name
+# Attach network namespace to name (names the netns of process PID)
 ip netns attach NAME PID
 
-# Set namespace for process
-ip netns set PID NAME
+# Assign a numeric namespace ID (NSID) to a named netns
+ip netns set NAME NETNSID
 ```
 
 ### lsns Command
@@ -1334,7 +1334,7 @@ time ip netns add test && ip netns delete test
 | `lsns` | List namespaces |
 | `clone()` | Create process with namespaces |
 | `setns()` | Join namespace |
-| `unshare()` | Leave namespace |
+| `unshare()` | Move caller into new namespace(s) |
 
 ### System Call Flags
 | Flag | Namespace Type |

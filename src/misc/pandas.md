@@ -1281,8 +1281,10 @@ df.resample('D').ohlc()
 # Simple moving average
 df['MA_7'] = df['value'].rolling(window=7).mean()
 
-# Multiple aggregations
-df['rolling_stats'] = df['value'].rolling(window=7).agg(['mean', 'std', 'min', 'max'])
+# Multiple aggregations (returns a DataFrame, so assign to multiple columns)
+df[['roll_mean', 'roll_std', 'roll_min', 'roll_max']] = (
+    df['value'].rolling(window=7).agg(['mean', 'std', 'min', 'max'])
+)
 
 # Centered window
 df['MA_centered'] = df['value'].rolling(window=7, center=True).mean()
@@ -1400,8 +1402,12 @@ df['text'].str.replace('old', 'new', case=False)
 df['text'].str.replace(r'\d+', '', regex=True)  # Remove all digits
 df['text'].str.replace(r'\s+', ' ', regex=True)  # Normalize whitespace
 
-# Multiple replacements
-df['text'].str.replace({'old1': 'new1', 'old2': 'new2'})
+# Multiple substring replacements (chain .str.replace calls)
+df['text'].str.replace('old1', 'new1').str.replace('old2', 'new2')
+
+# Whole-value mapping (note: .replace, NOT .str.replace — a dict is not
+# accepted by .str.replace and matches entire cell values, not substrings)
+df['text'].replace({'old1': 'new1', 'old2': 'new2'})
 ```
 
 ### String Extraction

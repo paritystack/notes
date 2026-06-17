@@ -183,7 +183,7 @@ Stages:
 
 ## Account Model
 
-Unlike Ethereum's account-based model, Solana uses an **account model** where everything is an account.
+Solana uses an **account model** where everything is an account. Unlike Ethereum, where a contract bundles its code and state together, Solana strictly separates executable code (programs) from the data they operate on (accounts).
 
 ### Account Structure
 

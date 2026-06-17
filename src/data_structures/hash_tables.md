@@ -601,10 +601,10 @@ common = set1 & set2  # {2, 3}
 ```python
 def two_sum(arr, target):
     seen = {}
-    for num in arr:
+    for i, num in enumerate(arr):
         if target - num in seen:
-            return [seen[target - num], arr.index(num)]
-        seen[num] = arr.index(num)
+            return [seen[target - num], i]
+        seen[num] = i  # store index; handles duplicates correctly
     return []
 ```
 
@@ -617,7 +617,7 @@ def has_duplicates(arr):
 ### Group Anagrams
 ```python
 def group_anagrams(strs):
-    """Group strings that are anagrams: O(n*k) where k=avg string length"""
+    """Group strings that are anagrams: O(n*k log k) where k=avg string length (sorting each key)"""
     anagrams = {}
     for s in strs:
         # Sort string as key (or use char count tuple)

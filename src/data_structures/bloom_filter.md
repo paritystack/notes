@@ -608,9 +608,9 @@ print(calculate_bloom_parameters(1_000_000, 0.001))
 
 ```
 Doubling the bit array size (m):
-- Reduces false positive rate by ~50%
+- With k re-optimized, p ≈ 0.6185^(m/n), so doubling m/n **squares** the false positive rate (e.g. 1% → ~0.01%)
 - Increases memory by 2x
-- Requires more hash functions
+- Requires more hash functions (optimal k = (m/n)·ln2 also doubles)
 
 Doubling hash functions (k):
 - More computation per operation

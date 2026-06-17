@@ -386,7 +386,7 @@ text = "banana"
 pattern = "ana"
 sa = [5, 3, 1, 0, 4, 2]
 positions = pattern_matching(text, pattern, sa)
-print(f"Pattern '{pattern}' found at positions: {positions}")  # [1, 3]
+print(f"Pattern '{pattern}' found at positions: {positions}")  # [3, 1] (suffix-array order; positions 1 and 3)
 ```
 
 #### 2. Longest Repeated Substring

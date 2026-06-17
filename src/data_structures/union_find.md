@@ -981,6 +981,12 @@ class PersistentUnionFind:
         self.rank = [0] * n
         self.history = []  # Stack of (x, old_parent, old_rank, y, old_rank_y)
 
+    def find(self, x):
+        # No path compression: keeps rollback cheap and correct
+        while self.parent[x] != x:
+            x = self.parent[x]
+        return x
+
     def union(self, x, y):
         root_x = self.find(x)
         root_y = self.find(y)

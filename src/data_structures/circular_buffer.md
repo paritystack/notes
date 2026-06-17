@@ -684,22 +684,19 @@ class SensorDataBuffer:
         self.sample_count += 1
 
     def get_recent_readings(self, n: int):
-        """Get n most recent readings."""
-        readings = []
-        temp_buffer = []
-
-        # Extract readings
+        """Get the n most recent readings (newest last), without mutating the buffer."""
         count = min(n, len(self.buffer))
-        for _ in range(count):
-            reading = self.buffer.dequeue()
-            readings.append(reading)
-            temp_buffer.append(reading)
+        if count == 0:
+            return []
 
-        # Restore buffer
-        for reading in temp_buffer:
-            self.buffer.enqueue(reading)
+        # Walk the buffer in chronological order (oldest -> newest)
+        ordered = []
+        idx = self.buffer.head
+        for _ in range(len(self.buffer)):
+            ordered.append(self.buffer.buffer[idx])
+            idx = (idx + 1) % self.buffer.capacity
 
-        return readings
+        return ordered[-count:]  # n most recent
 
     def calculate_moving_average(self, window: int) -> float:
         """Calculate moving average over window."""

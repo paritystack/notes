@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tree traversal algorithms visit all nodes in a [tree](trees.md) structure in a specific order. [Heaps](heaps.md) are complete binary trees backed by [arrays](arrays.md); [tries](tries.md) are character-keyed trees; [segment trees](segment_trees.md) and [Fenwick trees](fenwick_tree.md) answer range queries; [graphs](graphs.md) generalize trees by allowing cycles. Traversal order — pre/in/post-order for DFS, level-order for BFS — determines many tree-based algorithms.
+Tree traversal algorithms visit all nodes in a tree structure in a specific order. [Heaps](heaps.md) are complete binary trees backed by [arrays](arrays.md); [tries](tries.md) are character-keyed trees; [segment trees](segment_trees.md) and [Fenwick trees](fenwick_tree.md) answer range queries; [graphs](graphs.md) generalize trees by allowing cycles. Traversal order — pre/in/post-order for DFS, level-order for BFS — determines many tree-based algorithms.
 
 Tree traversal algorithms are methods used to visit all the nodes in a tree data structure in a specific order. These algorithms are essential for various operations on trees, such as searching, sorting, and manipulating data. There are several types of tree traversal algorithms, each with its own use cases and characteristics.
 
@@ -905,7 +905,8 @@ def deserialize(data):
 def build_tree_from_inorder_preorder(preorder, inorder):
     """
     Construct binary tree from preorder and inorder traversals.
-    Time: $O(n)$, Space: $O(n)$
+    Time: $O(n^2)$ worst case (inorder.index + list slicing each call);
+          O(n) achievable with an index hashmap. Space: $O(n)$.
     """
     if not preorder or not inorder:
         return None

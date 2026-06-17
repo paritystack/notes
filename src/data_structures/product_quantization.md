@@ -424,10 +424,12 @@ class IVFPQ:
                 continue
             residual_q = q - self.coarse_centroids[c]
             codes = np.array([e[1] for e in entries], dtype=np.uint8)
+            # adc(residual_q, code) already estimates the full ‖q - v‖²
+            # since residual_q = q - c and the code encodes v - c.
+            # Do NOT add d2_coarse[c] — that would double-count the coarse term.
             dists = self.pq.adc(residual_q, codes)
             for (vid, _), d in zip(entries, dists):
-                # add d2_coarse to make it a global distance estimate
-                best.append((float(d + d2_coarse[c]), vid))
+                best.append((float(d), vid))
 
         best.sort()
         return best[:k]
@@ -555,9 +557,9 @@ Real numbers vary heavily with embedding type. SIFT-1B is "easy"; OpenAI-ada-002
    - `nprobe = 1` gives terrible recall — many true neighbors are in adjacent clusters.
    - Start `nprobe = √nlist`; tune for recall target.
 
-5. **Forgetting to add residual when scoring**
-   - Encoded codes represent residuals from coarse centroids. Final distance estimate must include the coarse contribution (or you'll rank cross-cluster comparisons wrong).
-   - In our implementation: `best.append((d + d2_coarse[c], vid))`.
+5. **Computing the residual query against the wrong centroid (or double-counting it)**
+   - Codes encode `v - c` (the residual from the cluster's coarse centroid `c`). At query time you must use `residual_q = q - c` for *that* cluster, so `adc(residual_q, code)` already estimates the full `‖q - v‖²`.
+   - Do **not** also add `‖q - c‖²` — that double-counts the coarse term and corrupts cross-cluster ranking. In our implementation: `best.append((float(d), vid))`.
 
 6. **Comparing SDC and ADC numbers as if they're the same**
    - SDC has more error than ADC. A benchmark using SDC underestimates achievable recall.

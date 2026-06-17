@@ -156,7 +156,7 @@ No feedback. Output swings hard to + or − rail depending on which input is hig
 
 ## Where this connects
 
-- [Resistors & Ohm's Law](resistance.md) — gain is set by resistor ratios
+- [Resistance & Ohm's Law](resistance.md) — gain is set by resistor ratios
 - [Filters](filters.md) — active filters use op-amps to achieve sharp roll-off without inductors
 - [Capacitors](capacitors.md) — integrator and differentiator circuits use a capacitor as the feedback element
 - [Power Supplies](power_supplies.md) — op-amps are the error amplifier inside linear regulators

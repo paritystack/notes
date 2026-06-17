@@ -752,7 +752,7 @@ def append_entries(prev_log_index, prev_log_term, entries):
 ### Debugging Tips
 
 **Check these invariants during testing:**
-- `commitIndex ≤ lastApplied ≤ len(log)` at all times
+- `lastApplied ≤ commitIndex ≤ len(log)` at all times (entries are applied only after being committed)
 - At most one server thinks it's leader in a given term
 - All servers' `currentTerm` values are non-decreasing
 - If entry is committed, it appears in all future leaders' logs

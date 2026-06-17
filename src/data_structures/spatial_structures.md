@@ -1213,18 +1213,20 @@ class RTree:
 
         # Find child requiring minimum enlargement
         best_child = None
+        best_child_mbr = None
         best_enlargement = float('inf')
 
         for entry in node.entries:
             enlargement = entry.mbr.enlargement(mbr)
 
-            if enlargement < best_enlargement:
+            if (enlargement < best_enlargement or
+                    (enlargement == best_enlargement and
+                     best_child_mbr is not None and
+                     entry.mbr.area() < best_child_mbr.area())):
+                # Strictly less, or tie broken by smaller area
                 best_enlargement = enlargement
                 best_child = entry.child_or_obj
-            elif enlargement == best_enlargement:
-                # Tie-break: choose smaller area
-                if entry.mbr.area() < best_child_mbr.area():
-                    best_child = entry.child_or_obj
+                best_child_mbr = entry.mbr
 
         return self._choose_leaf(best_child, mbr)
 

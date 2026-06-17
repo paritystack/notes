@@ -168,10 +168,11 @@ cat /sys/devices/system/cpu/cpu0/topology/thread_siblings_list # HT siblings
 cat /sys/devices/system/cpu/cpu1/online
 echo 0 | sudo tee /sys/devices/system/cpu/cpu1/online  # Disable CPU1
 
-# Cache information
+# Cache information (index0=L1d, index1=L1i, index2=L2, index3=L3 on typical x86)
 ls /sys/devices/system/cpu/cpu0/cache/
-cat /sys/devices/system/cpu/cpu0/cache/index0/size     # L1 cache
-cat /sys/devices/system/cpu/cpu0/cache/index2/size     # L3 cache
+cat /sys/devices/system/cpu/cpu0/cache/index0/size     # L1 data cache
+cat /sys/devices/system/cpu/cpu0/cache/index0/level    # confirm the level
+cat /sys/devices/system/cpu/cpu0/cache/index3/size     # L3 cache (if present)
 ```
 
 ### GPU/Graphics Devices
@@ -420,8 +421,8 @@ cat /sys/kernel/cmdline
 # Kernel debugging
 ls /sys/kernel/debug/     # Requires debugfs mount and root access
 
-# Kernel configuration (if CONFIG_IKCONFIG enabled)
-zcat /sys/kernel/config.gz
+# Kernel configuration (if CONFIG_IKCONFIG_PROC enabled, it lives under /proc)
+zcat /proc/config.gz
 
 # Kexec (kernel crash dumps)
 ls /sys/kernel/kexec_crash_loaded

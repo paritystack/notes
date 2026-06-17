@@ -201,7 +201,7 @@ class AlpacaBroker(Broker):
 | **Stop** | Auto-exit on adverse move | Gaps through your stop |
 | **Stop-limit** | Stop + price floor | May not fill in a fast drop |
 
-See [General Finance → Market Orders](index.html) for the full taxonomy and durations (DAY, GTC, IOC, FOK).
+Order durations control how long an unfilled order rests before it is canceled: **DAY** (expires at session close), **GTC** (good-till-canceled), **IOC** (immediate-or-cancel — fill what you can now, cancel the rest), and **FOK** (fill-or-kill — fill the whole order immediately or cancel it).
 
 ### Tracking fills & reconciliation
 

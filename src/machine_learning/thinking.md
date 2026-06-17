@@ -1143,7 +1143,7 @@ def tree_of_thoughts_example():
     │  └─ "Calculate discriminant b^2-4ac" (value: 0.93)
     ├─ Thought 2: "Try factoring" (value: 0.7)
     │  ├─ "Look for factors of 3 and -2" (value: 0.6)
-    │  └─ "Try (3x-1)(x+2)=0" (value: 0.5)  # Wrong, pruned
+    │  └─ "Try (3x+1)(x-2)=0" (value: 0.5)  # Wrong (expands to 3x²-5x-2), pruned
     └─ Thought 3: "Complete the square" (value: 0.6)
 
     Best path selected: Quadratic formula route (highest values)

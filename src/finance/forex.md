@@ -723,9 +723,9 @@ def major_forex_news_events():
         },
         'ECB Meeting': {
             'country': 'Eurozone',
-            'when': 'Monthly, 7:45am ET',
+            'when': '8 times per year (every 6 weeks), ~8:15am ET decision',
             'impact': 'HIGH - moves EUR pairs',
-            'advice': 'Watch Draghi/Lagarde press conference'
+            'advice': 'Watch Lagarde press conference 30 min after decision'
         },
         'CPI (Inflation)': {
             'country': 'All major economies',

@@ -1192,7 +1192,8 @@ def quick_sort(arr):
     Best case: O(n log n) - balanced partitions
     Average case: O(n log n) - random pivots
     Worst case: O(n²) - already sorted with bad pivot
-    Space: O(log n) - recursion depth
+    Space: O(n) - this version allocates new lists each call
+           (an in-place quicksort is O(log n) for the recursion stack)
     """
     if len(arr) <= 1:
         return arr

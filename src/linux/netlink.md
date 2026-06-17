@@ -104,8 +104,8 @@ graph TB
 
 - **Linux 2.0 (1996)**: Initial netlink implementation for routing
 - **Linux 2.2 (1999)**: Expanded to support multiple protocols
-- **Linux 2.4 (2001)**: Generic netlink introduced
-- **Linux 2.6 (2003)**: Major expansion, nl80211 for wireless
+- **Linux 2.6.15 (2006)**: Generic netlink (genetlink) introduced
+- **Linux 2.6.22 (2007)**: nl80211 for wireless configuration
 - **Linux 3.x (2011+)**: Continued expansion, netlink used for most kernel-user communication
 - **Modern Linux**: Primary interface for network configuration, replacing ioctl
 

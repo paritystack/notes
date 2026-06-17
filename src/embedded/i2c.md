@@ -324,7 +324,7 @@ I2C supports multiple masters on the same bus through **arbitration**:
 Master A transmits: 1 0 1 0 1 1 0
 Master B transmits: 1 0 1 0 0 1 1
                             ↑
-Master B loses (wrote 0, stays on bus)
+Master B wins (wrote 0, stays on bus)
 Master A loses (wrote 1, saw 0, backs off)
 Master B continues as bus master
 ```

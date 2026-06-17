@@ -526,7 +526,7 @@ def boyer_moore(text, pattern):
 # Example usage
 text = "ABAAABCDABCDABCDE"
 pattern = "ABCD"
-print(boyer_moore(text, pattern))  # Output: [5, 9]
+print(boyer_moore(text, pattern))  # Output: [4, 8, 12]
 ```
 
 **Bad Character Rule Example:**
@@ -1720,7 +1720,9 @@ def all_common_substrings(text1, text2):
 text1 = "ABABC"
 text2 = "BABCA"
 print(all_common_substrings(text1, text2))
-# {'A', 'B', 'AB', 'BA', 'ABC', 'BAB'}
+# {'A', 'B', 'AB', 'BA', 'BAB', 'BABC'}
+# Note: this records only the maximal common substring ending at each (i, j) cell,
+# so it does not enumerate every common substring (e.g. 'ABC' is common but not listed).
 ```
 
 **Complexity Analysis:**
@@ -1904,7 +1906,7 @@ def shortest_common_supersequence(text1, text2):
     return ''.join(result)
 
 # Examples
-print(lcs_of_three("ABCD", "ACBD", "ABAD"))  # 2 ("AB" or "AD")
+print(lcs_of_three("ABCD", "ACBD", "ABAD"))  # 3 ("ABD")
 print(shortest_common_supersequence("abac", "cab"))  # "cabac"
 ```
 
@@ -2644,10 +2646,11 @@ for pattern_idx, positions in results.items():
     pattern = patterns[pattern_idx]
     print(f"'{pattern}': {positions}")
 
-# Output:
-# 'she': [0, 14]
-# 'he': [1, 15, 27]
+# Output (order may vary):
+# 'she': [0, 13]
+# 'he': [1, 10, 14, 24]
 # 'hers': [10]
+# ('his' does not occur in the text)
 ```
 
 **Failure Link Visualization:**
@@ -2741,7 +2744,7 @@ def censor_words(text, banned_words, replacement='*'):
 text = "She sells seashells by the seashore"
 words = ["she", "sea", "shore"]
 print(find_all_word_occurrences(text, words))
-# {'She': [0], 'sea': [10, 27], 'shore': [30]}
+# {'she': [0, 13], 'sea': [10, 27], 'shore': [30]}
 
 text = "This is a badword and another badword here"
 banned = ["badword", "another"]

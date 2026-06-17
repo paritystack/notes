@@ -239,7 +239,7 @@ def backtest_strategy(df, initial_capital=100000):
 ## Regulations and Compliance
 
 ### Pattern Day Trader Rule (US)
-- >4 day trades in 5 days with margin account
+- 4 or more day trades in 5 business days with margin account
 - Requires $25,000 minimum
 - Applies to margin accounts
 

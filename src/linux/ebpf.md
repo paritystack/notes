@@ -2,7 +2,7 @@
 
 ## Overview
 
-eBPF is a programmable in-kernel virtual machine for packet processing, tracing, and security. It attaches at XDP/TC hooks in [networking](networking.md) (bypassing [netfilter](netfilter.md) for maximum performance), at kprobes/tracepoints for tracing, and uses [netlink](netlink.md) for program loading. eBPF maps share data between kernel programs and userspace as an alternative to [sysfs](sysfs.md). [Kernel patterns](kernel_patterns.md) like RCU locking govern safe map access.
+eBPF is a programmable in-kernel virtual machine for packet processing, tracing, and security. It attaches at XDP/TC hooks in [networking](networking.md) (bypassing [netfilter](netfilter.md) for maximum performance), and at kprobes/tracepoints for tracing. Programs and maps are loaded through the `bpf()` syscall; [netlink](netlink.md) (rtnetlink) is used to *attach* XDP/TC programs to interfaces. eBPF maps share data between kernel programs and userspace as an alternative to [sysfs](sysfs.md). [Kernel patterns](kernel_patterns.md) like RCU locking govern safe map access.
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -1480,5 +1480,5 @@ cat /sys/kernel/debug/tracing/trace_pipe
 - [Networking](networking.md) — eBPF XDP/TC programs attach to the Linux network stack for packet processing
 - [Netfilter](netfilter.md) — eBPF bypasses Netfilter at XDP for maximum performance
 - [Kernel patterns](kernel_patterns.md) — RCU locking and spinlocks govern safe eBPF map access
-- [Netlink](netlink.md) — eBPF programs communicate via the BPF syscall; maps via generic netlink
+- [Netlink](netlink.md) — programs and maps load via the `bpf()` syscall; netlink (rtnetlink) attaches XDP/TC programs to interfaces
 - [sysfs](sysfs.md) — eBPF maps are an alternative to sysfs for kernel-userspace data sharing

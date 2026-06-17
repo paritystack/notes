@@ -883,21 +883,43 @@ Explore detailed guides for specific data structures:
 6. [Trees](trees.md) - Binary trees, BST, AVL, traversals
 7. [Heaps](heaps.md) - Min heaps, max heaps, priority queues
 8. [Tries](tries.md) - Prefix trees, autocomplete, string matching
-9. [Segment Trees](segment_trees.md) - Range queries and updates with lazy propagation
+9. [Advanced Trees](advanced_trees.md) - Splay trees, treaps, AVL vs Red-Black, B+ trees
+
+### Range Query Structures
+10. [Segment Trees](segment_trees.md) - Range queries and updates with lazy propagation
+11. [Fenwick Tree (BIT)](fenwick_tree.md) - Prefix sums with point updates in O(log n)
+12. [Sparse Table](sparse_table.md) - O(1) range min/max/GCD on static arrays
 
 ### Graph and Set Structures
-10. [Graphs](graphs.md) - Graph representations, traversal, algorithms
-11. [Union-Find](union_find.md) - Disjoint set union for connectivity and grouping
+13. [Graphs](graphs.md) - Graph representations, traversal, algorithms
+14. [Union-Find](union_find.md) - Disjoint set union for connectivity and grouping
 
-### Specialized Structures
-12. [LRU Cache](lru_cache.md) - Least Recently Used cache with O(1) operations
-13. [Bloom Filter](bloom_filter.md) - Space-efficient probabilistic set membership testing
+### Linear & Specialized Structures
+15. [Circular Buffer](circular_buffer.md) - Fixed-size ring buffer for streaming/producer-consumer
+16. [LRU Cache](lru_cache.md) - Least Recently Used cache with O(1) operations
+17. [Skip Lists](skip_lists.md) - Probabilistic ordered structure, O(log n) search
+18. [Persistent Structures](persistent_structures.md) - Immutable, versioned structures via structural sharing
+19. [CRDTs](crdt.md) - Conflict-free replicated data types for distributed systems
+
+### String Structures
+20. [Suffix Arrays & Trees](suffix_arrays.md) - Substring search, LCP, longest repeated substring
+
+### Spatial Structures
+21. [Spatial Structures](spatial_structures.md) - Quadtrees, octrees, k-d trees, R-trees
+
+### Probabilistic Structures
+22. [Probabilistic Structures](probabilistic.md) - Overview: Bloom, HyperLogLog, Count-Min, T-Digest
+23. [Bloom Filter](bloom_filter.md) - Space-efficient probabilistic set membership testing
+24. [MinHash & LSH](minhash_lsh.md) - Jaccard similarity estimation and sub-linear similar-set retrieval
 
 ### AI/ML & Search Structures
-14. [HNSW](hnsw.md) - Hierarchical Navigable Small World graphs for approximate nearest neighbor search
-15. [Inverted Index](inverted_index.md) - Term dictionary, posting lists, compression, and top-K retrieval for keyword search
-16. [Product Quantization](product_quantization.md) - Vector compression and IVF-based ANN at billion-scale
-17. [MinHash & LSH](minhash_lsh.md) - Jaccard similarity estimation and sub-linear similar-set retrieval
+25. [HNSW](hnsw.md) - Hierarchical Navigable Small World graphs for approximate nearest neighbor search
+26. [Inverted Index](inverted_index.md) - Term dictionary, posting lists, compression, and top-K retrieval for keyword search
+27. [Product Quantization](product_quantization.md) - Vector compression and IVF-based ANN at billion-scale
+
+### Reference
+28. [Complexity Guide](complexity_guide.md) - Asymptotic notation, amortized analysis, Master theorem
+29. [Implementation Patterns](implementation_patterns.md) - Sentinels, dummy heads, two-pointer techniques, pitfalls
 
 Related algorithm topics:
 - [Sorting Algorithms](../algorithms/sorting.md)

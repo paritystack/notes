@@ -457,6 +457,7 @@
     - [NFC & RFID](embedded/nfc_rfid.md)
     - [802.15.4 & Low-Power Mesh](embedded/ieee_802154.md)
     - [MISRA C & Defensive Firmware](embedded/coding_standards.md)
+    - [Embedded Rust (no_std)](embedded/embedded_rust.md)
     - [Embedded Unit Testing](embedded/embedded_testing.md)
     - [Functional Safety](embedded/functional_safety.md)
     - [Debugging](embedded/debugging.md)

@@ -515,9 +515,9 @@ uart0: serial@44e09000 {
 	interrupts = <0 72 4>;  /* SPI, IRQ 72, level-high */
 };
 
-/* Shared interrupt */
+/* Multiple named interrupts (one specifier per name) */
 device@0 {
-	interrupts = <0 50 4>;
+	interrupts = <0 50 4>, <0 51 4>, <0 52 4>;
 	interrupt-names = "tx", "rx", "error";
 };
 ```

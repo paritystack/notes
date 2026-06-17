@@ -159,7 +159,7 @@ Filter gain is usually expressed in dB:
 
 ## Where this connects
 
-- [Resistors & Ohm's Law](resistance.md) — R sets the filter's time constant along with C
+- [Resistance & Ohm's Law](resistance.md) — R sets the filter's time constant along with C
 - [Capacitors](capacitors.md) — capacitive reactance is what makes RC filters frequency-selective
 - [Inductors](inductors.md) — inductive reactance enables LC filters
 - [Op-Amps](op_amps.md) — active filter stages use op-amps for gain and buffering

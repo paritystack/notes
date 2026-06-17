@@ -33,7 +33,7 @@ The fundamental power circuit. Four switches let current flow either direction �
         +V                       Drive table (Q1..Q4):
     ┌────┴────┐                   Forward : Q1+Q4 on
    Q1        Q3                   Reverse : Q2+Q3 on
-    │    M    │                   Brake   : Q3+Q4 on (short motor)
+    │    M    │                   Brake   : Q2+Q4 on (short motor low-side)
    Q2        Q4                   Coast   : all off
     └────┬────┘                   ⚠ Q1+Q2 on = SHOOT-THROUGH (dead short)
         GND

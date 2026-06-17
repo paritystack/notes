@@ -239,10 +239,12 @@ Pick the similarity threshold `t` (e.g., 0.8 for near-dup detection). Then:
 - Larger `r`: steeper s-curve at the threshold (sharper cutoff)
 - More `b`: more chances to match (higher recall, more false candidates)
 
-For `t = 0.8`:
-- `k = 128, b = 32, r = 4` → threshold ≈ 0.56 (too low — many false candidates)
-- `k = 128, b = 16, r = 8` → threshold ≈ 0.84 (close to target)
-- `k = 128, b = 8, r = 16` → threshold ≈ 0.92 (above target — false negatives)
+For `t = 0.8`, using `t ≈ (1/b)^(1/r)`:
+- `k = 128, b = 32, r = 4` → threshold ≈ 0.42 (too low — many false candidates)
+- `k = 128, b = 16, r = 8` → threshold ≈ 0.71 (closest of these to target)
+- `k = 128, b = 8, r = 16` → threshold ≈ 0.88 (above target — false negatives)
+
+(To actually center the s-curve on 0.8 with k=128, `b=8, r=16` is the nearest divisor pair; finer control needs a larger k.)
 
 Practical recipe: solve for `(b, r)` given desired threshold and acceptable error rates. `datasketch.MinHashLSH` has a built-in optimizer.
 

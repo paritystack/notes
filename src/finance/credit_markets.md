@@ -162,7 +162,9 @@ def cds_pnl_on_credit_event(notional, recovery_rate=0.40, premium_paid_to_date=0
 
 CDS spreads often more accurate than bond spreads (more liquid, less affected by repo and balance sheet constraints).
 
-A single-name CDS at 500bp implies ~5% annual default probability (assuming 40% recovery).
+A single-name CDS at 500bp implies ~8.3% annual default probability assuming 40% recovery
+(credit triangle: PD ≈ spread / (1 − recovery) = 0.05 / 0.6). It would imply ~5% only at
+zero recovery.
 
 ### Famous CDS Events
 

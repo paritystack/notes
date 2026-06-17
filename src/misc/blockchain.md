@@ -313,7 +313,8 @@ Attempt 173947: hash(data + 173947) = 0000a3... (valid!)
 - More centralized
 - Cartel formation risk
 
-**Used By:** EOS, Tron, Cosmos
+**Used By:** EOS, Tron, BitShares, Steem
+(Note: Cosmos uses bonded Proof of Stake with Tendermint BFT, not DPoS)
 
 ### 4. Practical Byzantine Fault Tolerance (PBFT)
 
@@ -911,7 +912,8 @@ async function main() {
   const [deployer] = await ethers.getSigners();
 
   console.log("Deploying contracts with:", deployer.address);
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+  // ethers v6: balance is fetched via the provider, not the signer
+  console.log("Account balance:", (await ethers.provider.getBalance(deployer.address)).toString());
 
   const MyToken = await ethers.getContractFactory("MyToken");
   const myToken = await MyToken.deploy(1000000);

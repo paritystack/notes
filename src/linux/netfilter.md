@@ -163,7 +163,7 @@ Understanding packet flow through netfilter is crucial for effective rule creati
 +---------------+                     |                   |
 |table: mangle  |                     v                   v
 |chain: OUTPUT  |            +------------------+   +-------------+
-+------+--------+            | table: filter    |   | table:filter|
++------+--------+            | table: mangle    |   | table:filter|
        |                     | chain: FORWARD   |   | chain: INPUT|
        v                     +--------+---------+   +------+------+
 +---------------+                     |                    |
@@ -172,7 +172,7 @@ Understanding packet flow through netfilter is crucial for effective rule creati
 +------+--------+                     |
        |                              v
        v                     +-------------------+
-+---------------+            | table: mangle     |
++---------------+            | table: filter     |
 |table: mangle  |            | chain: FORWARD    |
 |chain:POSTROUTE|            +--------+----------+
 +------+--------+                     |
@@ -201,7 +201,7 @@ Understanding packet flow through netfilter is crucial for effective rule creati
 - Incoming packets: Raw PREROUTING → Mangle PREROUTING → NAT PREROUTING → Routing Decision
 - To local process: Filter INPUT → Local Process
 - From local process: Raw OUTPUT → Mangle OUTPUT → NAT OUTPUT → Filter OUTPUT → Routing
-- Forwarded: Filter FORWARD → Mangle FORWARD
+- Forwarded: Mangle FORWARD → Filter FORWARD
 - All outgoing: NAT POSTROUTING → Mangle POSTROUTING → Network
 
 ## Basic Operations

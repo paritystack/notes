@@ -66,7 +66,7 @@ gdb --args ./program arg1 arg2
 
 # Attach to running process
 gdb -p <pid>
-gdb attach <pid>
+gdb ./program <pid>          # attach to running PID, with symbols from ./program
 
 # Analyze core dump
 gdb ./program core
@@ -301,11 +301,11 @@ end
 ### GDB Dashboard
 
 ```bash
-# Install GDB Dashboard
-wget -P ~ https://git.io/.gdbinit
+# Install GDB Dashboard (cyrus-and/gdb-dashboard; the old git.io links are dead)
+wget -O ~/.gdbinit https://raw.githubusercontent.com/cyrus-and/gdb-dashboard/master/.gdbinit
 
 # Or with curl
-curl -sSL https://git.io/.gdbinit > ~/.gdbinit
+curl -sSL https://raw.githubusercontent.com/cyrus-and/gdb-dashboard/master/.gdbinit > ~/.gdbinit
 
 # Customization in ~/.gdbinit.d/init
 ```
@@ -469,10 +469,10 @@ end
 ### Logging
 
 ```gdb
-# Enable logging
-(gdb) set logging on          # Logs to gdb.txt
-(gdb) set logging file mylog.txt
+# Enable logging (set the file first, then enable)
+(gdb) set logging file mylog.txt   # default is gdb.txt
 (gdb) set logging overwrite on
+(gdb) set logging enabled on        # newer GDB; "set logging on" is the deprecated spelling
 
 # Log and display
 (gdb) set logging redirect off
@@ -524,8 +524,8 @@ gcc -g -O2 -fno-inline program.c -o program
 # 3. Use volatile for critical variables
 volatile int debug_var;
 
-# In GDB, skip inlined functions
-(gdb) skip -rfu ^std::
+# In GDB, skip stepping into functions matching a regex (e.g. all of std::)
+(gdb) skip -rfunction ^std::
 ```
 
 ## Integration with Other Tools

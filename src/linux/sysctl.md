@@ -336,8 +336,9 @@ sysctl -a
 sudo sysctl -w net.ipv4.ip_forward=1       # Test immediately
 # If it works, add to config file
 
-# Validate configuration file syntax
-sudo sysctl -p /etc/sysctl.d/99-custom.conf --dry-run
+# Preview which keys a file would set without changing values
+# (sysctl has no --dry-run; -N prints only the parameter names)
+sudo sysctl -Np /etc/sysctl.d/99-custom.conf
 
 # Monitor kernel messages for errors
 sudo dmesg | tail -20

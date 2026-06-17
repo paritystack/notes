@@ -1087,13 +1087,14 @@ class BankersQueue:
 
     def _maintain_invariant(self):
         if len(self.rear) > len(self.front):
-            # Rotate: move rear to front (reversed)
+            # rear is stored newest-first (enqueue prepends), so reverse it
+            # to oldest-first before appending to front.
             self.front = self.front + list(reversed(self.rear))
             self.rear = []
 
     def enqueue(self, x):
-        """O(1) amortized"""
-        return BankersQueue(self.front, self.rear + [x])
+        """O(1) amortized. Prepend to rear so rear stays newest-first."""
+        return BankersQueue(self.front, [x] + self.rear)
 
     def dequeue(self):
         """O(1) amortized"""

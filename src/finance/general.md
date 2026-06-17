@@ -10,7 +10,7 @@ $$
 
 Where:
 - \\( R_p \\) is the return of the portfolio
-- \( R_f \) is the risk-free rate (usually the return of a benchmark like the S&P 500)
+- \( R_f \) is the risk-free rate (the return on a risk-free asset, e.g. the yield on a short-term U.S. Treasury bill — *not* a risky benchmark like the S&P 500)
 - \( \sigma_p \) is the standard deviation of the portfolio's returns
 
 ## Calculating Standard Deviation of Returns
@@ -109,13 +109,15 @@ In this scenario, the Sharpe Ratio is 1.25, indicating that the portfolio genera
 The Kelly Criterion is a formula used to determine the optimal size of a series of bets. It calculates the ratio of edge over odds, helping to maximize the growth of capital over time. The formula is expressed as \(k\), where \(p\) and \(q\) are the probabilities of winning and losing, respectively.
 
 $$
-k = \frac{p - q}{o}
+k = \frac{b \cdot p - q}{b}
 $$
 
 Where:
 - \(p\) is the probability of winning
-- \(q\) is the probability of losing
-- \(o\) is the odds of the bet
+- \(q\) is the probability of losing (\(q = 1 - p\))
+- \(b\) is the net odds received on the bet (you win \(b\) per 1 unit staked; "b-to-1")
+
+Note the numerator is the **edge** \(b p - q\) (expected profit per unit), not simply \(p - q\). Equivalently, \(k = p - q/b\).
 
 ### Sample Scenario
 
@@ -188,16 +190,16 @@ Understanding and calculating the odds of a bet is essential for making informed
 Using the Kelly Criterion formula:
 
 $$
-k = \frac{p - q}{o}
+k = \frac{b \cdot p - q}{b}
 $$
 
-Substituting the values:
+Substituting the values (\(b = 2\), \(p = 0.60\), \(q = 0.40\)):
 
 $$
-k = \frac{0.60 - 0.40}{2} = \frac{0.20}{2} = 0.10
+k = \frac{2 \cdot 0.60 - 0.40}{2} = \frac{1.20 - 0.40}{2} = \frac{0.80}{2} = 0.40
 $$
 
-In this scenario, the Kelly Criterion suggests betting 10% of your bankroll. For example, with a $1000 bankroll, you should bet $100.
+In this scenario, the Kelly Criterion suggests betting 40% of your bankroll. For example, with a $1000 bankroll, you should bet $400. (Many practitioners scale this down — e.g. "half Kelly" — to reduce volatility.)
 
 
 ## Intuition of the Kelly Criterion
@@ -216,21 +218,21 @@ The Kelly Criterion is a mathematical formula used to determine the optimal size
 
 ### Example Scenario
 
-Consider a scenario where you have a 60% chance of winning a bet (probability \( p = 0.60 \)) and a 40% chance of losing (probability \( q = 0.40 \)). The odds offered are 2:1 (decimal odds of 2.0).
+Consider a scenario where you have a 60% chance of winning a bet (probability \( p = 0.60 \)) and a 40% chance of losing (probability \( q = 0.40 \)). The odds offered are 2:1 (i.e. \( b = 2 \), decimal odds of 3.0).
 
 Using the Kelly Criterion formula:
 
 $$
-k = \frac{p - q}{o}
+k = \frac{b \cdot p - q}{b}
 $$
 
-Substituting the values:
+Substituting the values (\(b = 2\), \(p = 0.60\), \(q = 0.40\)):
 
 $$
-k = \frac{0.60 - 0.40}{2} = \frac{0.20}{2} = 0.10
+k = \frac{2 \cdot 0.60 - 0.40}{2} = \frac{1.20 - 0.40}{2} = \frac{0.80}{2} = 0.40
 $$
 
-In this scenario, the Kelly Criterion suggests betting 10% of your bankroll. For example, with a $1000 bankroll, you should bet $100.
+In this scenario, the Kelly Criterion suggests betting 40% of your bankroll. For example, with a $1000 bankroll, you should bet $400. (Many practitioners scale this down — e.g. "half Kelly" — to reduce volatility.)
 
 ### Advantages of the Kelly Criterion
 

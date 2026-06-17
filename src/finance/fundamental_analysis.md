@@ -560,9 +560,10 @@ Let's perform a comprehensive fundamental analysis of a hypothetical company:
 # Case Study: TechCorp Inc.
 
 # Company Overview
+# NOTE: all figures below are in millions of dollars
 company_name = "TechCorp Inc."
 sector = "Technology - Software"
-market_cap = 10_000_000_000  # $10 billion
+market_cap = 10_000  # $10 billion (in millions, = $50 × 200M shares)
 
 # Income Statement (in millions)
 revenue = 2000

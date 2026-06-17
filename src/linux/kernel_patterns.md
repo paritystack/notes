@@ -253,7 +253,7 @@ struct my_object {
 static struct kobj_type my_ktype = {
 	.release = my_release,
 	.sysfs_ops = &my_sysfs_ops,
-	.default_attrs = my_attrs,
+	.default_groups = my_groups,  /* default_attrs was removed in ~5.2; use attribute_group ** */
 };
 
 /* Create object */

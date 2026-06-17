@@ -374,11 +374,9 @@ class Trie:
         Args:
             word: String to insert
         """
-        if not word:
-            return
-
         node = self.root
 
+        # Empty string: the root itself marks the (empty) word.
         # Traverse or create nodes for each character
         for char in word:
             if char not in node.children:
@@ -792,10 +790,10 @@ def test_trie():
     trie.insert("")
     assert trie.search("")
 
-    # Test 9: Case sensitivity
+    # Test 9: Case sensitivity (uppercase and lowercase are distinct words)
     trie.insert("Hello")
     assert trie.search("Hello")
-    assert not trie.search("hello") == trie.search("Hello")  # Different words
+    assert trie.search("hello")  # lowercase still present, stored separately
 
     print("All tests passed!")
 

@@ -2314,7 +2314,7 @@ fu = FirstUnique()
 for num in [1, 2, 1, 3, 2, 4]:
     fu.add(num)
     print(f"Added {num}, first unique: {fu.get_first_unique()}")
-# Output: 1, 2, 2, 3, 3, 3
+# Output (first unique after each add): 1, 1, 2, 2, 3, 3
 ```
 
 ### Pattern 4: Generate Binary Numbers

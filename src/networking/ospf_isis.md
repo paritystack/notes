@@ -410,7 +410,7 @@ isis
 
 # Capture
 sudo tcpdump -i eth0 -nn proto ospf
-sudo tcpdump -i eth0 -nn 'ether host 09:00:2b:00:00:14 or 09:00:2b:00:00:15'  # IS-IS multicast
+sudo tcpdump -i eth0 -nn 'ether host 01:80:c2:00:00:14 or 01:80:c2:00:00:15'  # IS-IS L1/L2 multicast
 ```
 
 ## ELI10

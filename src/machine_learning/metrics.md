@@ -95,7 +95,7 @@ y_true = np.array([22.5, 23.1, 21.8, 24.2, 22.9])  # Actual temperature (°C)
 y_pred = np.array([22.3, 25.0, 21.9, 24.0, 22.8])  # Predicted temperature
 
 mse = mean_squared_error(y_true, y_pred)
-print(f"MSE: {mse:.4f} °C²")  # Output: MSE: 0.7240 °C²
+print(f"MSE: {mse:.4f} °C²")  # Output: MSE: 0.7420 °C²
 
 # Manual implementation
 mse_manual = np.mean((y_true - y_pred) ** 2)
@@ -139,7 +139,7 @@ y_true = np.array([150.2, 152.5, 148.9, 153.1, 151.0])
 y_pred = np.array([149.5, 153.0, 149.2, 152.8, 151.5])
 
 rmse = np.sqrt(mean_squared_error(y_true, y_pred))
-print(f"RMSE: ${rmse:.2f}")  # Output: RMSE: $0.52
+print(f"RMSE: ${rmse:.2f}")  # Output: RMSE: $0.48
 
 # Alternative using sklearn
 rmse_sklearn = mean_squared_error(y_true, y_pred, squared=False)
@@ -188,7 +188,7 @@ y_true = np.array([85, 92, 78, 95, 88, 76, 91, 83])
 y_pred = np.array([84, 90, 80, 94, 87, 78, 89, 85])
 
 r2 = r2_score(y_true, y_pred)
-print(f"R² Score: {r2:.4f}")  # Output: R² Score: 0.8869
+print(f"R² Score: {r2:.4f}")  # Output: R² Score: 0.9281
 print(f"Variance explained: {r2*100:.2f}%")
 
 # Manual implementation
@@ -333,7 +333,7 @@ y_true = np.array([1000, 5000, 500, 10000, 2500])  # Actual sales
 y_pred = np.array([1100, 4800, 550, 9500, 2400])   # Predicted sales
 
 mape = mean_absolute_percentage_error(y_true, y_pred)
-print(f"MAPE: {mape:.2f}%")  # Output: MAPE: ~6.40%
+print(f"MAPE: {mape:.2f}%")  # Output: MAPE: ~6.60%
 
 # Compare with MAE (not scale-independent)
 mae = np.mean(np.abs(y_true - y_pred))
@@ -2052,7 +2052,7 @@ NLP metrics evaluate generated text quality, measuring how well machine-generate
 **Mathematical Formula:**
 ```
 Perplexity = exp(-1/N × Σ log P(w_i | context))
-           = 2^(-entropy)
+           = 2^(entropy)   where entropy = -1/N × Σ log₂ P(w_i | context)
 
 where:
 N = number of tokens

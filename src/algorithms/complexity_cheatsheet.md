@@ -41,7 +41,7 @@
 | **Segment Tree** | O(log n) | O(log n) | O(n) | N/A | O(n) | Range queries |
 | **Fenwick Tree** | O(log n) | O(log n) | O(n) | N/A | O(n) | Prefix sums |
 | **Trie** | O(L) | O(L) | O(L) | O(L) | O(ALPHABET*N*L) | L = key length |
-| **Suffix Tree** | O(L) | O(L) | O(n) | N/A | O(n²) | String matching |
+| **Suffix Tree** | O(L) | O(L) | O(n) | N/A | O(n) | String matching |
 | **Suffix Array** | O(log n) | O(log n) | O(n log n) | N/A | O(n) | Space-efficient |
 
 ### Heaps
@@ -63,7 +63,7 @@
 | | Find | O(α(n))* | | |
 | **Bloom Filter** | Insert | O(k) | O(m) | Membership test |
 | | Search | O(k) | | |
-| **Skip List** | Search | O(log n)* | O(n log n)* | Sorted data |
+| **Skip List** | Search | O(log n)* | O(n)* | Sorted data |
 | | Insert | O(log n)* | | |
 | **Treap** | Search | O(log n)* | O(n) | BST + Heap |
 | | Insert | O(log n)* | | |

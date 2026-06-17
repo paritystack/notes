@@ -181,13 +181,14 @@ git checkout -b styhead origin/styhead
 
 **Yocto Release Codenames:**
 
-| Release | Version | Codename | Release Date | Status |
-|---------|---------|----------|--------------|--------|
-| 5.1     | Styhead | Latest   | Apr 2024     | Current |
-| 5.0     | Scarthgap | LTS    | Apr 2024     | LTS |
-| 4.3     | Nanbield |         | Oct 2023     | Stable |
-| 4.2     | Mickledore | LTS   | Apr 2023     | LTS |
-| 4.0     | Kirkstone | LTS    | May 2022     | LTS |
+| Version | Codename   | Release Date | Status |
+|---------|------------|--------------|--------|
+| 5.1     | Styhead    | Nov 2024     | Stable (non-LTS) |
+| 5.0     | Scarthgap  | Apr 2024     | LTS (4 years) |
+| 4.3     | Nanbield   | Nov 2023     | EOL (non-LTS) |
+| 4.2     | Mickledore | Apr 2023     | EOL (non-LTS) |
+| 4.0     | Kirkstone  | May 2022     | LTS |
+| 3.1     | Dunfell    | Apr 2020     | LTS |
 
 ### First Build
 

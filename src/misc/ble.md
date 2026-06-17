@@ -1265,6 +1265,7 @@ if __name__ == "__main__":
 Scan for iBeacons and parse their data
 """
 import asyncio
+import struct
 from bleak import BleakScanner
 
 def parse_ibeacon(manufacturer_data):
@@ -1273,11 +1274,12 @@ def parse_ibeacon(manufacturer_data):
     for company_id, data in manufacturer_data.items():
         if company_id == 0x004C and len(data) >= 23:
             if data[0:2] == bytes([0x02, 0x15]):
-                # iBeacon format:
-                # 0-15: UUID (16 bytes)
-                # 16-17: Major (2 bytes)
-                # 18-19: Minor (2 bytes)
-                # 20: TX Power (1 byte, signed)
+                # iBeacon manufacturer data layout (offsets into `data`):
+                # 0-1:   iBeacon prefix (0x02 0x15)
+                # 2-17:  UUID (16 bytes)
+                # 18-19: Major (2 bytes)
+                # 20-21: Minor (2 bytes)
+                # 22:    TX Power (1 byte, signed)
 
                 uuid = data[2:18].hex()
                 uuid_formatted = f"{uuid[0:8]}-{uuid[8:12]}-{uuid[12:16]}-{uuid[16:20]}-{uuid[20:32]}"
@@ -1329,7 +1331,6 @@ async def main():
     await scanner.stop()
 
 if __name__ == "__main__":
-    import struct
     asyncio.run(main())
 ```
 

@@ -100,8 +100,8 @@ cd /sys/kernel/debug/tracing      # (mount -t tracefs none /sys/kernel/tracing i
 grep ' do_sys_openat2$' /proc/kallsyms
 grep do_sys_openat2 /sys/kernel/debug/kprobes/blacklist   # empty == allowed
 
-# 3. Register a kprobe named "myopen". On x86-64 the 2nd arg (struct open_how is 3rd;
-#    the filename pointer is in the open_flags path) — fetch the filename from %si.
+# 3. Register a kprobe named "myopen". do_sys_openat2(dfd, filename, how): the
+#    filename is the 2nd arg, so it's in %si on x86-64 — fetch it as a string.
 echo 'p:myopen do_sys_openat2 fname=+0(%si):string' > kprobe_events
 
 # 4. Enable it
@@ -125,7 +125,7 @@ below for the register order.
 ```bash
 sudo bpftrace -e '
   kprobe:do_sys_openat2 {
-    printf("%-6d %-16s %s\n", pid, comm, str(((struct open_how *)0, arg1)));
+    printf("%-6d %-16s %s\n", pid, comm, str(arg1));   // arg1 = filename
   }'
 ```
 

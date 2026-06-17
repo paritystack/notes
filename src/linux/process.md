@@ -990,7 +990,7 @@ if (pid < 0) {
 - ✅ Stack (copied)
 - ✅ Heap (copied)
 - ✅ Data/BSS (copied)
-- ✅ File descriptors (shared)
+- ✅ File descriptors (fd table copied; the copies refer to the same open file descriptions, so they share offset/flags)
 - ✅ Signal handlers (copied)
 - ❌ PID (different)
 - ❌ PPID (different)
@@ -1795,20 +1795,22 @@ nsenter -t <pid> -a  # All namespaces
 Limit/prioritize resources:
 
 ```bash
-# v1 location
+# v1 location (per-controller subdirectories under /sys/fs/cgroup/<controller>)
 ls /sys/fs/cgroup/
 
-# v2 location
-ls /sys/fs/cgroup/unified/
+# v2 unified hierarchy mounts directly at /sys/fs/cgroup (default on modern distros)
+# (in legacy "hybrid" mode v2 appears at /sys/fs/cgroup/unified/)
+stat -fc %T /sys/fs/cgroup        # cgroup2fs => v2
 
-# Create cgroup
+# --- cgroup v1 example ---
 mkdir /sys/fs/cgroup/memory/mygroup
-
-# Set memory limit (100 MB)
-echo 104857600 > /sys/fs/cgroup/memory/mygroup/memory.limit_in_bytes
-
-# Add process to cgroup
+echo 104857600 > /sys/fs/cgroup/memory/mygroup/memory.limit_in_bytes  # 100 MB
 echo $$ > /sys/fs/cgroup/memory/mygroup/cgroup.procs
+
+# --- cgroup v2 equivalent (see cgroups.md) ---
+# mkdir /sys/fs/cgroup/mygroup
+# echo 104857600 > /sys/fs/cgroup/mygroup/memory.max
+# echo $$ > /sys/fs/cgroup/mygroup/cgroup.procs
 
 # View cgroup of process
 cat /proc/$$/cgroup

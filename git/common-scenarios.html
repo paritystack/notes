@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
+            window.path_to_searchindex_js = "../searchindex-68aed8e1.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-7b877116.js"></script>
+        <script src="../toc-54208b8b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -710,6 +710,55 @@ git rebase -i origin/main
 <li>Use <code>git rebase --abort</code> if something goes wrong</li>
 </ul>
 <p><strong>Learn more:</strong> See the “Rebasing” section in <a href="index.html#rebasing">README.md</a></p>
+<hr>
+<h3 id="how-do-i-propagate-a-change-through-a-stack-of-dependent-branches"><a class="header" href="#how-do-i-propagate-a-change-through-a-stack-of-dependent-branches">How do I propagate a change through a stack of dependent branches?</a></h3>
+<p><strong>Use case:</strong> You have <em>stacked</em> branches where each is based on the previous one — <code>n1 → n2 → n3</code>. You change <code>n1</code> (amend its commit or add a new one), and now <code>n2</code> has to be rebased onto the updated <code>n1</code>, and then <code>n3</code> onto the updated <code>n2</code>. Doing them one at a time is tedious.</p>
+<p><strong>Solution (Git 2.38+):</strong> Let <code>--update-refs</code> rebase the whole chain at once and move every intermediate branch ref for you.</p>
+<pre><code class="language-bash"># The n1 change is already committed/amended. From the tip of the stack:
+git switch n3
+git rebase --update-refs n1
+</code></pre>
+<p>This replays <code>n2</code>’s and <code>n3</code>’s commits onto the new <code>n1</code> in a single rebase, and <code>--update-refs</code> repoints the <code>n2</code> branch automatically — no per-branch rebase needed.</p>
+<p>Make it the default so plain rebases keep your stacks intact:</p>
+<pre><code class="language-bash">git config --global rebase.updateRefs true
+# now `git rebase n1` updates intermediate refs too
+</code></pre>
+<p><strong>Even better — make <em>and</em> propagate the edit in one rebase.</strong> If you haven’t changed <code>n1</code> yet, edit it from inside a single interactive rebase over the whole stack; all three refs move when it finishes:</p>
+<pre><code class="language-bash">git switch n3
+git rebase -i --update-refs main      # 'main' = the base the stack sits on
+# mark n1's commit as 'edit', make your change, then:
+git rebase --continue
+# n1, n2, n3 are all updated and consistent
+</code></pre>
+<p><strong>Alternatives:</strong></p>
+<pre><code class="language-bash"># Manual, step-by-step (works on older Git, no --update-refs):
+git switch n2 &amp;&amp; git rebase n1
+git switch n3 &amp;&amp; git rebase n2
+
+# Tools purpose-built for stacks if you do this often:
+#   git-machete, git-branchless, Graphite (gt), Stacked Git (StGit)
+</code></pre>
+<p><strong>If conflicts occur:</strong> the rebase pauses at each conflicting commit exactly like a normal rebase — resolve, <code>git add</code>, <code>git rebase --continue</code>. The branch refs (<code>n2</code>, <code>n3</code>) are <strong>not</strong> moved until the rebase finishes cleanly, so:</p>
+<pre><code class="language-bash">git rebase --update-refs n1
+# ... pauses on a conflict ...
+# edit the files, remove conflict markers
+git add resolved-file.txt
+git rebase --continue          # repeat for each conflicting commit
+# refs n2, n3 update only when the whole rebase completes
+git rebase --abort             # bail out anytime — nothing moved, stack untouched
+</code></pre>
+<p><strong>Avoid resolving the same conflict twice</strong> — turn on <code>rerere</code> so Git records each resolution and replays it automatically when the same conflict reappears later in the stack (or in a future rebase):</p>
+<pre><code class="language-bash">git config --global rerere.enabled true
+</code></pre>
+<p><strong>Gotchas:</strong></p>
+<ul>
+<li><strong>Avoid <code>git rebase -X ours n1</code> as a shortcut here.</strong> <code>-X ours</code> is a <em>merge-strategy option</em>, not “use n1 and move on” — it silently resolves <strong>every</strong> conflicting hunk in favor of one side and discards the other, with no prompt. On a stack this can quietly drop the very <code>n1</code> change you’re trying to propagate (or your <code>n2</code>/<code>n3</code> work). You only get away with it when there happen to be no conflicts; the moment there are, it loses changes. Rebase normally and resolve conflicts deliberately instead.</li>
+<li>Resolving conflicts in one whole-stack rebase is generally <strong>less</strong> work than rebasing <code>n2</code> then <code>n3</code> separately — you touch each conflicting commit once rather than re-hitting the same conflict on every branch (and <code>rerere</code> removes even that repetition).</li>
+<li><code>--update-refs</code> requires Git <strong>2.38+</strong>.</li>
+<li>It only moves refs pointing at commits <strong>within the rebased range</strong> — branches outside the replayed commits aren’t touched.</li>
+<li>If the branches are already pushed, the whole stack moved, so force-push each one with <code>--force-with-lease</code> (push <code>n1 n2 n3</code>).</li>
+<li>Rewriting history breaks anyone else based on these branches — keep stacks to your own work.</li>
+</ul>
 <hr>
 <h3 id="how-do-i-rename-a-branch"><a class="header" href="#how-do-i-rename-a-branch">How do I rename a branch?</a></h3>
 <p><strong>Use case:</strong> You named a branch incorrectly or want to follow a naming convention.</p>

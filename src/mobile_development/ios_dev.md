@@ -41,8 +41,8 @@ xcrun simctl list devices
 # List available device types
 xcrun simctl list devicetypes
 
-# Create new simulator
-xcrun simctl create "iPhone 15 Pro" "iPhone 15 Pro" "iOS17.0"
+# Create new simulator (runtime name must match `xcrun simctl list runtimes`)
+xcrun simctl create "iPhone 15 Pro" "iPhone 15 Pro" "iOS 17.0"
 
 # Boot simulator
 xcrun simctl boot "iPhone 15 Pro"

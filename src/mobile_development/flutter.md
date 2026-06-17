@@ -561,7 +561,7 @@ class CounterScreen extends ConsumerWidget {
         child: Text('$counter'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPress: () {
+        onPressed: () {
           ref.read(counterProvider.notifier).state++;
         },
         child: Icon(Icons.add),

@@ -700,8 +700,10 @@ val id = arguments?.getInt("ARG_ID")
 
 <!-- Usage in code -->
 val welcome = getString(R.string.welcome_message, "John")
-val count = getString(R.string.items_count, 5)
-val plural = resources.getQuantityString(R.plurals.number_of_items, count, count)
+val itemCount = 5
+val countMessage = getString(R.string.items_count, itemCount)
+// getQuantityString needs an Int quantity, not the formatted String
+val plural = resources.getQuantityString(R.plurals.number_of_items, itemCount, itemCount)
 ```
 
 ### Colors
@@ -890,7 +892,7 @@ android {
 
 ## Related Resources
 
-- [Android Overview](index.html)
+- [Android Overview](../android/index.html)
 - [Android Internals](../android/internals.md)
 - [ADB Commands](../android/adb.md)
 - [Official Android Documentation](https://developer.android.com/)

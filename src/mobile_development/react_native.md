@@ -56,8 +56,9 @@ brew install watchman
 ### Create New Project
 
 ```bash
-# Using React Native CLI
-npx react-native init MyApp
+# Using React Native Community CLI
+# (the old `react-native init` command has been removed)
+npx @react-native-community/cli@latest init MyApp
 cd MyApp
 
 # Using Expo (recommended for beginners)

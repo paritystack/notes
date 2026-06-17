@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ed043ce.js";
+            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-10d57104.js"></script>
+        <script src="../toc-7b877116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -203,8 +203,8 @@ sudo sysctl -w kernel.core_pattern=/tmp/core-%e-%p-%t
 # %s - signal number
 # %h - hostname
 
-# Or use systemd-coredump
-sudo sysctl -w kernel.core_pattern=|/lib/systemd/systemd-coredump %P %u %g %s %t %c %h
+# Or use systemd-coredump (quote the value — the leading | is a shell pipe otherwise)
+sudo sysctl -w "kernel.core_pattern=|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h"
 </code></pre>
 <h2 id="generate-test-core-dump"><a class="header" href="#generate-test-core-dump">Generate Test Core Dump</a></h2>
 <pre><code class="language-bash"># From running process
@@ -283,17 +283,16 @@ gdb -batch -ex "bt" ./program core &gt; backtrace.txt
 gdb -batch -ex "thread apply all bt" ./program core &gt; all_threads.txt
 </code></pre>
 <h2 id="core-dump-with-containers"><a class="header" href="#core-dump-with-containers">Core Dump with Containers</a></h2>
-<pre><code class="language-bash"># Docker - enable core dumps
+<pre><code class="language-bash"># Docker - enable core dumps (sets the core ulimit for the container)
 docker run --ulimit core=-1 myimage
-
-# Kubernetes - configure pod
-spec:
-  containers:
-  - name: myapp
-    resources:
-      limits:
-        core: "-1"
 </code></pre>
+<p><code>kernel.core_pattern</code> is a single global kernel setting, not namespaced — so the
+pattern that decides <em>where</em> a container’s core lands is the <strong>host node’s</strong>, and it
+must be configured on the host, not in the pod spec. Kubernetes has no <code>core</code>
+resource limit; raise the core ulimit at the container-runtime level instead (e.g.
+the containerd/CRI <code>default_ulimits</code>, or a privileged init container running
+<code>ulimit -c unlimited</code>). With <code>kernel.core_pattern</code> piping to systemd-coredump,
+crashes are captured on the host and retrieved with <code>coredumpctl</code>.</p>
 <h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
 <ol>
 <li>Always compile with debug symbols: <code>gcc -g</code></li>

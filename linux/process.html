@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ed043ce.js";
+            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-10d57104.js"></script>
+        <script src="../toc-7b877116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -995,7 +995,7 @@ if (pid &lt; 0) {
 <li>✅ Stack (copied)</li>
 <li>✅ Heap (copied)</li>
 <li>✅ Data/BSS (copied)</li>
-<li>✅ File descriptors (shared)</li>
+<li>✅ File descriptors (fd table copied; the copies refer to the same open file descriptions, so they share offset/flags)</li>
 <li>✅ Signal handlers (copied)</li>
 <li>❌ PID (different)</li>
 <li>❌ PPID (different)</li>
@@ -1671,20 +1671,22 @@ nsenter -t &lt;pid&gt; -a  # All namespaces
 </code></pre>
 <h3 id="control-groups-cgroups"><a class="header" href="#control-groups-cgroups">Control Groups (cgroups)</a></h3>
 <p>Limit/prioritize resources:</p>
-<pre><code class="language-bash"># v1 location
+<pre><code class="language-bash"># v1 location (per-controller subdirectories under /sys/fs/cgroup/&lt;controller&gt;)
 ls /sys/fs/cgroup/
 
-# v2 location
-ls /sys/fs/cgroup/unified/
+# v2 unified hierarchy mounts directly at /sys/fs/cgroup (default on modern distros)
+# (in legacy "hybrid" mode v2 appears at /sys/fs/cgroup/unified/)
+stat -fc %T /sys/fs/cgroup        # cgroup2fs =&gt; v2
 
-# Create cgroup
+# --- cgroup v1 example ---
 mkdir /sys/fs/cgroup/memory/mygroup
-
-# Set memory limit (100 MB)
-echo 104857600 &gt; /sys/fs/cgroup/memory/mygroup/memory.limit_in_bytes
-
-# Add process to cgroup
+echo 104857600 &gt; /sys/fs/cgroup/memory/mygroup/memory.limit_in_bytes  # 100 MB
 echo $$ &gt; /sys/fs/cgroup/memory/mygroup/cgroup.procs
+
+# --- cgroup v2 equivalent (see cgroups.md) ---
+# mkdir /sys/fs/cgroup/mygroup
+# echo 104857600 &gt; /sys/fs/cgroup/mygroup/memory.max
+# echo $$ &gt; /sys/fs/cgroup/mygroup/cgroup.procs
 
 # View cgroup of process
 cat /proc/$$/cgroup

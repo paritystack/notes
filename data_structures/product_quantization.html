@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ed043ce.js";
+            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-10d57104.js"></script>
+        <script src="../toc-7b877116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -542,10 +542,12 @@ class IVFPQ:
                 continue
             residual_q = q - self.coarse_centroids[c]
             codes = np.array([e[1] for e in entries], dtype=np.uint8)
+            # adc(residual_q, code) already estimates the full ‖q - v‖²
+            # since residual_q = q - c and the code encodes v - c.
+            # Do NOT add d2_coarse[c] — that would double-count the coarse term.
             dists = self.pq.adc(residual_q, codes)
             for (vid, _), d in zip(entries, dists):
-                # add d2_coarse to make it a global distance estimate
-                best.append((float(d + d2_coarse[c]), vid))
+                best.append((float(d), vid))
 
         best.sort()
         return best[:k]
@@ -700,10 +702,10 @@ for dist, vid in hits:
 </ul>
 </li>
 <li>
-<p><strong>Forgetting to add residual when scoring</strong></p>
+<p><strong>Computing the residual query against the wrong centroid (or double-counting it)</strong></p>
 <ul>
-<li>Encoded codes represent residuals from coarse centroids. Final distance estimate must include the coarse contribution (or you’ll rank cross-cluster comparisons wrong).</li>
-<li>In our implementation: <code>best.append((d + d2_coarse[c], vid))</code>.</li>
+<li>Codes encode <code>v - c</code> (the residual from the cluster’s coarse centroid <code>c</code>). At query time you must use <code>residual_q = q - c</code> for <em>that</em> cluster, so <code>adc(residual_q, code)</code> already estimates the full <code>‖q - v‖²</code>.</li>
+<li>Do <strong>not</strong> also add <code>‖q - c‖²</code> — that double-counts the coarse term and corrupts cross-cluster ranking. In our implementation: <code>best.append((float(d), vid))</code>.</li>
 </ul>
 </li>
 <li>

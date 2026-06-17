@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ed043ce.js";
+            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-10d57104.js"></script>
+        <script src="../toc-7b877116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -246,12 +246,13 @@ perf record -e sched:sched_switch -g -a -- sleep 5   # scheduling/off-CPU analys
 perf mem record / perf mem report    # memory load/store latency
 perf c2c                             # cache-line false sharing between cores
 perf annotate &lt;symbol&gt;               # per-instruction hotspots in disassembly
-perf probe --add 'do_sys_open filename:string'   # add a dynamic kprobe
+perf probe --add 'do_sys_openat2 filename:string'   # add a dynamic kprobe
 </code></pre>
 <h2 id="pitfalls"><a class="header" href="#pitfalls">Pitfalls</a></h2>
 <pre><code>- Broken/short stacks → rebuild with -fno-omit-frame-pointer, or use --call-graph dwarf/lbr.
 - Missing symbols → install -dbg/-debuginfo packages; strip removes them (see tools.md).
-- perf_event_paranoid sysctl blocks unprivileged profiling: sysctl kernel.perf_event_paranoid=1.
+- perf_event_paranoid sysctl restricts unprivileged profiling — to allow more, LOWER it
+  (e.g. sysctl kernel.perf_event_paranoid=-1, or =1 for kernel profiling); higher = stricter.
 - Sampling can miss short, infrequent functions — raise -F or use a tracer instead.
 - Profiling a debug (-O0) build optimises the wrong thing; profile -O2 with -g.
 - In containers/VMs, hardware PMU counters may be unavailable — fall back to software events.

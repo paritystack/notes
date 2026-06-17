@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ed043ce.js";
+            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-10d57104.js"></script>
+        <script src="../toc-7b877116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -468,7 +468,8 @@ class ORSet:
     Add-wins semantics: concurrent adds beat removes
     """
     def __init__(self):
-        self.elements = {}  # {element: {unique_tag, ...}}
+        self.elements = {}       # {element: {unique_tag, ...}}  (add-set)
+        self.tombstones = set()  # removed tags (so merges don't resurrect them)
 
     def add(self, element):
         """Add element with unique tag - $O(1)$"""
@@ -479,23 +480,31 @@ class ORSet:
         self.elements[element].add(unique_tag)
         return unique_tag
 
+    def _live_tags(self, element):
+        """Tags for element that have not been tombstoned."""
+        return self.elements.get(element, set()) - self.tombstones
+
     def remove(self, element):
-        """Remove element by removing all observed tags - $O(k)$"""
+        """Remove element by tombstoning all *observed* tags - $O(k)$.
+        Tombstoning (not clearing) is what makes removes survive a later
+        merge with a replica that still holds the old tag. Concurrent adds
+        create fresh, non-tombstoned tags, so add-wins still holds.
+        """
         if element in self.elements:
-            # Remove all currently observed tags
-            self.elements[element].clear()
+            self.tombstones |= self.elements[element]
 
     def contains(self, element):
-        """Check if element exists - $O(1)$"""
-        return element in self.elements and len(self.elements[element]) &gt; 0
+        """Check if element exists - $O(k)$"""
+        return len(self._live_tags(element)) &gt; 0
 
     def merge(self, other):
         """Merge with another ORSet - $O(m \cdot k)$"""
         result = ORSet()
+        result.tombstones = self.tombstones | other.tombstones
         all_elements = set(self.elements.keys()) | set(other.elements.keys())
 
         for element in all_elements:
-            # Union of all tags for each element
+            # Union of all tags for each element (live and tombstoned)
             tags = self.elements.get(element, set()) | other.elements.get(element, set())
             if tags:
                 result.elements[element] = tags
@@ -503,8 +512,8 @@ class ORSet:
         return result
 
     def get_elements(self):
-        """Get all elements in set - $O(m)$"""
-        return {elem for elem, tags in self.elements.items() if tags}
+        """Get all elements in set - $O(m \cdot k)$"""
+        return {elem for elem in self.elements if self._live_tags(elem)}
 
     def __repr__(self):
         return f"ORSet({self.get_elements()})"
@@ -783,12 +792,16 @@ print(merged.to_string())  # Both "Hello" and "World" characters preserved
 
     def garbage_collect(self, cutoff_timestamp):
         """
-        Remove tombstones older than cutoff - $O(m)$
+        Drop elements with no live tags and discard their tombstoned tags - $O(m)$
         Requires causal stability: all replicas have seen operations before cutoff
         """
         for element in list(self.elements.keys()):
-            if not self.elements[element]:  # Empty tag set
+            live = self.elements[element] - self.tombstones
+            if not live:  # All tags removed
+                self.tombstones -= self.elements[element]
                 del self.elements[element]
+            else:
+                self.elements[element] = live
 </code></pre>
 <h3 id="vector-clock-implementation"><a class="header" href="#vector-clock-implementation">Vector Clock Implementation</a></h3>
 <pre><code class="language-python">class VectorClock:

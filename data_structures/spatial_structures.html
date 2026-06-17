@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ed043ce.js";
+            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-10d57104.js"></script>
+        <script src="../toc-7b877116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -1292,18 +1292,20 @@ class RTree:
 
         # Find child requiring minimum enlargement
         best_child = None
+        best_child_mbr = None
         best_enlargement = float('inf')
 
         for entry in node.entries:
             enlargement = entry.mbr.enlargement(mbr)
 
-            if enlargement &lt; best_enlargement:
+            if (enlargement &lt; best_enlargement or
+                    (enlargement == best_enlargement and
+                     best_child_mbr is not None and
+                     entry.mbr.area() &lt; best_child_mbr.area())):
+                # Strictly less, or tie broken by smaller area
                 best_enlargement = enlargement
                 best_child = entry.child_or_obj
-            elif enlargement == best_enlargement:
-                # Tie-break: choose smaller area
-                if entry.mbr.area() &lt; best_child_mbr.area():
-                    best_child = entry.child_or_obj
+                best_child_mbr = entry.mbr
 
         return self._choose_leaf(best_child, mbr)
 

@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ed043ce.js";
+            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-10d57104.js"></script>
+        <script src="../toc-7b877116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -254,8 +254,8 @@ cd /sys/kernel/debug/tracing      # (mount -t tracefs none /sys/kernel/tracing i
 grep ' do_sys_openat2$' /proc/kallsyms
 grep do_sys_openat2 /sys/kernel/debug/kprobes/blacklist   # empty == allowed
 
-# 3. Register a kprobe named "myopen". On x86-64 the 2nd arg (struct open_how is 3rd;
-#    the filename pointer is in the open_flags path) — fetch the filename from %si.
+# 3. Register a kprobe named "myopen". do_sys_openat2(dfd, filename, how): the
+#    filename is the 2nd arg, so it's in %si on x86-64 — fetch it as a string.
 echo 'p:myopen do_sys_openat2 fname=+0(%si):string' &gt; kprobe_events
 
 # 4. Enable it
@@ -275,7 +275,7 @@ below for the register order.</p>
 <h3 id="method-b--bpftrace-one-liner-same-result-one-line"><a class="header" href="#method-b--bpftrace-one-liner-same-result-one-line">Method B — bpftrace one-liner (same result, one line)</a></h3>
 <pre><code class="language-bash">sudo bpftrace -e '
   kprobe:do_sys_openat2 {
-    printf("%-6d %-16s %s\n", pid, comm, str(((struct open_how *)0, arg1)));
+    printf("%-6d %-16s %s\n", pid, comm, str(arg1));   // arg1 = filename
   }'
 </code></pre>
 <p>In practice you’d just use bpftrace’s built-in <code>tracepoint</code> for opens, but the kprobe

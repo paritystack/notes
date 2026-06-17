@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ed043ce.js";
+            window.path_to_searchindex_js = "../searchindex-69fe68f7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-10d57104.js"></script>
+        <script src="../toc-7b877116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -832,22 +832,19 @@ cons_thread.join()
         self.sample_count += 1
 
     def get_recent_readings(self, n: int):
-        """Get n most recent readings."""
-        readings = []
-        temp_buffer = []
-
-        # Extract readings
+        """Get the n most recent readings (newest last), without mutating the buffer."""
         count = min(n, len(self.buffer))
-        for _ in range(count):
-            reading = self.buffer.dequeue()
-            readings.append(reading)
-            temp_buffer.append(reading)
+        if count == 0:
+            return []
 
-        # Restore buffer
-        for reading in temp_buffer:
-            self.buffer.enqueue(reading)
+        # Walk the buffer in chronological order (oldest -&gt; newest)
+        ordered = []
+        idx = self.buffer.head
+        for _ in range(len(self.buffer)):
+            ordered.append(self.buffer.buffer[idx])
+            idx = (idx + 1) % self.buffer.capacity
 
-        return readings
+        return ordered[-count:]  # n most recent
 
     def calculate_moving_average(self, window: int) -&gt; float:
         """Calculate moving average over window."""

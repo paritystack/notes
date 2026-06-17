@@ -653,6 +653,13 @@
     - [Uboot](misc/uboot.md)
     - [Ubuntu](misc/ubuntu.md)
     - [Solana](misc/solana.md)
+    - [Getting Things Done (GTD)](misc/gtd.md)
+    - [The Pomodoro Technique](misc/pomodoro.md)
+    - [Kanban](misc/kanban.md)
+    - [Eisenhower Matrix](misc/eisenhower.md)
+    - [Deep Work](misc/deep_work.md)
+    - [Zettelkasten](misc/zettelkasten.md)
+    - [Scrum](misc/scrum.md)
 
 - [RTOS](rtos/README.md)
     - [FreeRTOS](rtos/freertos.md)

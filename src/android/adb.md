@@ -2,9 +2,35 @@
 
 ## Overview
 
-Android Debug Bridge (ADB) is a versatile command-line tool that lets you communicate with an Android device. ADB facilitates a variety of device actions, such as installing and debugging apps, and it provides access to a Unix shell that you can use to run various commands on a device.
+Android Debug Bridge (ADB) is the command-line tool that drives a device or emulator from a
+host: installing/debugging apps, pushing/pulling files, and dropping into a Unix shell. It's
+the entry point for almost everything in this section — `adb shell dumpsys` inspects the
+services in [SystemServer & Core Services](system_server.md), `adb logcat` and `dumpsys
+gfxinfo` chase the jank described in [Graphics Stack](graphics_stack.md) and
+[Performance & Profiling](performance_profiling.md), `adb install`/`pm` exercise the packages
+from [APK/AAB Packaging & Signing](app_signing.md), and `adb reboot bootloader` is the gateway
+to [Verified Boot & OTA](verified_boot_ota.md). It ships in the **SDK Platform Tools** package.
 
-ADB is included in the Android SDK Platform Tools package and can be used with physical devices connected via USB or with emulators.
+### Architecture: client, server, daemon
+
+ADB is a three-part system. The command you type is a **client**; it talks to a **server**
+(a background process on your host, default TCP port **5037**) which multiplexes connections to
+the **`adbd`** daemon running on each device/emulator.
+
+```text
+   host                                   device / emulator
+ ┌───────────────────────────┐          ┌────────────────────────┐
+ │ adb (client, your shell)  │          │  adbd  (daemon)         │
+ │        │                  │          │    │                   │
+ │        ▼                  │  USB or  │    ▼                   │
+ │ adb server  ──────────────┼── TCP ───┼─▶ shell / pm / am /    │
+ │ (localhost:5037)          │          │    dumpsys / file sync  │
+ └───────────────────────────┘          └────────────────────────┘
+```
+
+The first `adb` command silently starts the server. `adbd` runs as the `shell` user on
+production builds (limited privileges) and only as `root` on `userdebug`/`eng` builds via
+`adb root` — which is why some commands below note "requires root".
 
 ## Installation
 
@@ -133,24 +159,28 @@ adb shell cat /proc/meminfo
 
 ## App Management
 
+`pm` (package manager) and `am` (activity manager) are shells over the system services of the
+same name — see [SystemServer & Core Services](system_server.md). Signing/packaging details for
+the APKs you install are in [APK/AAB Packaging & Signing](app_signing.md).
+
 ### Installing and Uninstalling Apps
 ```bash
 # Install APK
 adb install app.apk
 
-# Install APK to specific location
-adb install -s /sdcard/app.apk
-
-# Reinstall existing app (keep data)
+# Reinstall existing app, keeping its data
 adb install -r app.apk
 
-# Install APK to SD card
-adb install -s app.apk
+# Allow downgrade to a lower versionCode (debuggable builds)
+adb install -d app.apk
+
+# Install a split-APK set (one app, multiple APKs — e.g. an app bundle's output)
+adb install-multiple base.apk config.arm64.apk config.xxhdpi.apk
 
 # Uninstall app
 adb uninstall com.example.app
 
-# Uninstall app but keep data
+# Uninstall app but keep data and cache
 adb uninstall -k com.example.app
 ```
 
@@ -190,8 +220,8 @@ adb shell am start -n com.example.app/.MainActivity
 # Start activity with data
 adb shell am start -a android.intent.action.VIEW -d "https://example.com"
 
-# Start service
-adb shell am startservice com.example.app/.MyService
+# Start a service (use start-foreground-service on Android 8+ for background-start limits)
+adb shell am start-service com.example.app/.MyService
 
 # Broadcast intent
 adb shell am broadcast -a android.intent.action.BOOT_COMPLETED
@@ -253,6 +283,10 @@ adb shell find /sdcard -name "*.txt"
 ```
 
 ## Logging and Debugging
+
+Logcat is the first stop for crashes and ANRs; pair it with `dumpsys gfxinfo` and Perfetto for
+frame/jank analysis (see [Performance & Profiling](performance_profiling.md) and
+[Graphics Stack](graphics_stack.md)).
 
 ### Logcat
 ```bash
@@ -378,7 +412,7 @@ adb reboot
 # Reboot to recovery mode
 adb reboot recovery
 
-# Reboot to bootloader
+# Reboot to bootloader (fastboot — flashing, unlocking; see Verified Boot & OTA)
 adb reboot bootloader
 
 # Shutdown device (requires root)
@@ -439,9 +473,17 @@ adb shell settings put global animator_duration_scale 0
 ## Advanced Commands
 
 ### Dumpsys
+
+`dumpsys` calls the `dump()` method of a registered Binder service over IPC (see
+[Binder](binder.md)); `adb shell dumpsys -l` lists every service you can dump. It's the single
+most useful framework-diagnostic command.
+
 ```bash
-# Get system information
+# Get system information (all services — very large)
 adb shell dumpsys
+
+# List every dumpable service
+adb shell dumpsys -l
 
 # Battery information
 adb shell dumpsys battery
@@ -494,8 +536,13 @@ adb shell netstat
 ```
 
 ### Database Operations
+
+`run-as <pkg>` runs a command as the app's UID, the only way to reach an app's private
+`/data/data/<pkg>` sandbox without root — and it only works on **debuggable** builds (see the
+sandbox model in [App Security](app_security.md)).
+
 ```bash
-# Access app database (requires root or debuggable app)
+# Access app database (requires root or a debuggable app)
 adb shell run-as com.example.app
 
 # Navigate to database directory
@@ -509,6 +556,9 @@ adb shell "run-as com.example.app sqlite3 databases/mydb.db 'SELECT * FROM users
 ```
 
 ## Testing and Automation
+
+These are the low-level drivers behind instrumented testing; for the Espresso/UI Automator/
+Macrobenchmark layers that build on them, see [Android Testing](testing_android.md).
 
 ### Monkey Testing
 ```bash
@@ -644,12 +694,13 @@ adb -e shell  # Emulator
 - Use secure, trusted computers for ADB connections
 - Never share bug reports publicly without reviewing contents first
 
-## References
+## Resources
 
-- [Official ADB Documentation](https://developer.android.com/studio/command-line/adb)
-- [ADB Shell Commands](https://adbshell.com/)
-- [Android Internals](internals.md)
-- [Development Guide](platform_dev.md)
+- [ADB — Android Developers](https://developer.android.com/tools/adb)
+- [`am` / `pm` / Activity Manager shell](https://developer.android.com/tools/adb#am)
+- [dumpsys](https://developer.android.com/tools/dumpsys)
+- [logcat command-line tool](https://developer.android.com/tools/logcat)
+- [SDK Platform Tools release notes](https://developer.android.com/tools/releases/platform-tools)
 
 ## Quick Reference Card
 
@@ -683,3 +734,16 @@ adb shell screenrecord /sdcard/v.mp4 # Record screen
 adb reboot                    # Reboot device
 adb shell dumpsys battery     # Battery info
 ```
+
+### Related Files
+
+- [SystemServer & Core Services](system_server.md) — the services behind `dumpsys`, `pm`, `am`
+- [Binder](binder.md) — the IPC `dumpsys`/`service` calls travel over
+- [Performance & Profiling](performance_profiling.md) — logcat, `gfxinfo`, Perfetto workflows
+- [Graphics Stack](graphics_stack.md) — diagnosing jank with `dumpsys gfxinfo`/`SurfaceFlinger`
+- [APK/AAB Packaging & Signing](app_signing.md) — what `adb install`/`pm` deploy
+- [App Security](app_security.md) — the app sandbox `run-as` reaches into
+- [Android Testing](testing_android.md) — Monkey/UI Automator and the test layers above them
+- [Verified Boot & OTA](verified_boot_ota.md) — `adb reboot bootloader`/recovery and flashing
+- [Platform Dev](platform_dev.md) — building AOSP and flashing devices
+- [Android Internals](internals.md) — the architecture these commands inspect

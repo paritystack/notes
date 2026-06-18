@@ -2155,6 +2155,7 @@ int main() {
 
 ## Where this connects
 
+- [Process Internals (Kernel)](process_internals.md) — the kernel-side view: `task_struct`, `copy_process`, the scheduler, and context switching
 - [Memory management](memory_management.md) — each process has a virtual address space with heap, stack, mmap regions
 - [Namespace](namespace.md) — namespaces isolate process-visible kernel resources (PID, mount, net)
 - [systemd](systemd.md) — systemd manages process groups, tracks them via cgroups, handles service lifecycle

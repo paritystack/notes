@@ -355,6 +355,9 @@ TestSetPageLocked(page);
 
 ## Locking and Synchronization
 
+> See [Synchronization](synchronization.md) for the full treatment — the sleeping-vs-atomic
+> rule, spinlock/mutex/semaphore semantics, IRQ/BH variants, and a primitive-selection table.
+
 ### Spinlock Pattern
 
 ```c
@@ -1088,6 +1091,9 @@ cancel_delayed_work_sync(&my_delayed_work);
 ```
 
 ### Timers
+
+> See [Kernel Timers](kernel_timers.md) for the full treatment — timekeeping units,
+> busy-wait vs sleeping delays, the timer wheel, hrtimers, and timed `delayed_work`.
 
 ```c
 #include <linux/timer.h>

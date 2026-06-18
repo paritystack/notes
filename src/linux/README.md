@@ -23,6 +23,9 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 17. [Netlink](./netlink.md) - Kernel-userspace communication interface
 18. [eBPF](./ebpf.md) - Extended Berkeley Packet Filter for kernel programmability
 19. [Control Groups (cgroups)](./cgroups.md) - Resource limiting, accounting, and isolation for process groups
+20. [Process Internals (Kernel)](./process_internals.md) - How the kernel represents and schedules processes (task_struct, fork/exec, scheduler, context switch)
+21. [Kernel Timers](./kernel_timers.md) - Timekeeping, delays, timer_list, hrtimers, and delayed work for kernel programming
+22. [Synchronization](./synchronization.md) - Spinlocks, mutexes, semaphores, and rw locks: choosing and using kernel locks
 
 ## Overview
 
@@ -41,8 +44,11 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 
 ### For Developers
 - [Kernel Architecture](./kernel.md) - Understand Linux internals
+- [Process Internals (Kernel)](./process_internals.md) - task_struct, scheduling, fork/exec, and context switching
 - [Memory Management](./memory_management.md) - Virtual memory, paging, allocators, and reclaim
 - [Kernel Development Patterns](./kernel_patterns.md) - Coding patterns and best practices
+- [Kernel Timers](./kernel_timers.md) - Delays, timers, hrtimers, and timed deferred work
+- [Synchronization](./synchronization.md) - Spinlocks, mutexes, semaphores, and rw locks
 - [Driver Development](./driver_development.md) - Linux driver model and device drivers
 - [Device Tree](./device_tree.md) - Hardware description and parsing
 - [Control Groups (cgroups)](./cgroups.md) - Resource control for containers and services

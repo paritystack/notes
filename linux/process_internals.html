@@ -1,0 +1,551 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Process Internals (Kernel) - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-69bbd6a5.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-d057db31.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="linux-kernel-process-internals"><a class="header" href="#linux-kernel-process-internals">Linux Kernel Process Internals</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>This page describes how the <strong>kernel itself</strong> represents and manages processes —
+the data structures, creation/teardown paths, and the scheduler — as opposed to
+the userspace-facing view in <a href="process.html">Process Management</a> (PIDs, memory layout,
+IPC, <code>/proc</code>, tooling). It complements <a href="kernel.html">Kernel Architecture</a>, draws on
+<a href="memory_management.html">Memory Management</a> for address spaces, and connects to
+<a href="namespace.html">Namespaces</a> and <a href="cgroups.html">cgroups</a>, which slice and bound what a
+process can see and consume.</p>
+<p>The core idea: to the Linux kernel there is no separate “process” and “thread” type.
+Every schedulable entity is a <code>struct task_struct</code> (a <em>task</em>). What userspace calls a
+multi-threaded process is just a group of tasks that share a thread group ID (<code>tgid</code>)
+and resources like the address space and open files. The kernel-source touch points
+referenced below are stable enough to navigate a recent tree (v6.x):
+<code>include/linux/sched.h</code>, <code>kernel/fork.c</code>, <code>kernel/exit.c</code>, <code>kernel/exec.c</code>, and
+<code>kernel/sched/</code>.</p>
+<pre><code>            userspace "process"  ==  thread group  ==  one tgid
+            ┌───────────────────────────────────────────────┐
+            │ task A (tgid=A, pid=A)  ← "main thread"        │
+            │ task B (tgid=A, pid=B)  ← pthread              │  shared: mm, files,
+            │ task C (tgid=A, pid=C)  ← pthread              │  signal handlers, ...
+            └───────────────────────────────────────────────┘
+   getpid() returns tgid;  gettid() returns the per-task pid.
+</code></pre>
+<h2 id="the-process-descriptor-task_struct"><a class="header" href="#the-process-descriptor-task_struct">The Process Descriptor: <code>task_struct</code></a></h2>
+<p>Every task is described by a <code>struct task_struct</code> defined in <code>include/linux/sched.h</code>.
+It is large (kilobytes) because it aggregates everything the kernel needs to know
+about a task. The fields cluster into a few groups:</p>
+<pre><code class="language-c">struct task_struct {
+    /* state &amp; scheduling */
+    unsigned int        __state;        /* TASK_RUNNING, etc. */
+    int                 prio, static_prio, normal_prio;
+    const struct sched_class *sched_class;
+    struct sched_entity se;             /* CFS/EEVDF bookkeeping */
+    unsigned int        policy;         /* SCHED_NORMAL, SCHED_FIFO, ... */
+
+    /* identity */
+    pid_t               pid;            /* per-task id (== TID) */
+    pid_t               tgid;           /* thread-group id (== userspace PID) */
+    struct pid          *thread_pid;
+
+    /* relationships */
+    struct task_struct __rcu *real_parent;
+    struct task_struct __rcu *parent;
+    struct list_head    children;       /* list of my children */
+    struct list_head    sibling;        /* link in parent-&gt;children */
+    struct task_struct  *group_leader;
+
+    /* resources (shared across a thread group) */
+    struct mm_struct    *mm;            /* address space; NULL for kthreads */
+    struct mm_struct    *active_mm;     /* borrowed mm while running */
+    struct fs_struct    *fs;            /* cwd, root */
+    struct files_struct *files;         /* open file table */
+    struct signal_struct *signal;       /* shared signal state */
+    struct sighand_struct *sighand;
+
+    /* credentials &amp; isolation */
+    const struct cred __rcu *cred;      /* uid/gid/capabilities */
+    struct nsproxy      *nsproxy;       /* pid/net/mnt/... namespaces */
+
+    void                *stack;         /* kernel stack for this task */
+    /* ... hundreds more fields ... */
+};
+</code></pre>
+<p>Key distinctions:</p>
+<ul>
+<li><strong><code>pid</code> vs <code>tgid</code>.</strong> The <code>pid</code> field is the kernel’s per-task identifier — what
+<code>gettid(2)</code> returns. The <code>tgid</code> is the thread-group id and is what userspace <code>getpid(2)</code>
+returns. For a single-threaded process <code>pid == tgid</code>. The <code>group_leader</code> points at the
+task whose <code>pid == tgid</code>.</li>
+<li><strong><code>mm</code> vs <code>active_mm</code>.</strong> <code>mm</code> is the task’s own address space (<code>struct mm_struct</code>).
+Kernel threads have <code>mm == NULL</code> because they have no userspace; while running they
+<em>borrow</em> the previous task’s page tables via <code>active_mm</code> (lazy TLB — see context switch).</li>
+<li><strong>Shared resource pointers.</strong> Threads in the same group share <code>mm</code>, <code>files</code>, <code>signal</code>,
+and <code>sighand</code> (these are the resources <code>clone()</code> was asked to share via <code>CLONE_*</code>).</li>
+</ul>
+<h2 id="thread_info-the-kernel-stack-and-current"><a class="header" href="#thread_info-the-kernel-stack-and-current"><code>thread_info</code>, the Kernel Stack, and <code>current</code></a></h2>
+<p>Each task has its own <strong>kernel stack</strong> (typically 8 KiB or 16 KiB, <code>THREAD_SIZE</code>,
+config-dependent) used whenever the task runs in kernel mode (syscalls, traps, interrupts
+on its behalf). Historically a small <code>struct thread_info</code> lived at the base of that stack,
+letting the kernel find the current task by masking the stack pointer. On modern arches
+with <code>CONFIG_THREAD_INFO_IN_TASK</code>, <code>thread_info</code> is embedded in <code>task_struct</code> instead, and
+<code>current</code> is read from a per-CPU variable (e.g. <code>pcpu_hot.current_task</code> on x86-64).</p>
+<pre><code>   high addr ┌──────────────────────────┐
+             │   kernel stack (grows ↓)  │   THREAD_SIZE (e.g. 16 KiB)
+             │            ...            │
+             │   [ guard page ]          │  VMAP_STACK: unmapped → overflow faults
+   low  addr └──────────────────────────┘
+   current ──► task_struct { ..., thread_info, *stack, ... }
+</code></pre>
+<p><code>current</code> is a macro yielding the running task’s <code>task_struct *</code>. With
+<code>CONFIG_VMAP_STACK</code>, kernel stacks are vmalloc’d with a guard page so a stack overflow
+faults cleanly instead of silently corrupting the neighbouring <code>task_struct</code> or another
+task’s data. See <a href="memory_management.html">Memory Management</a> for the vmalloc area.</p>
+<h2 id="pids-and-the-process-tree"><a class="header" href="#pids-and-the-process-tree">PIDs and the Process Tree</a></h2>
+<p>A numeric PID is backed by a <code>struct pid</code> (<code>include/linux/pid.h</code>) that can map to several
+numbers at once — one per <a href="namespace.html">PID namespace</a> it is visible in. Lookups go
+through an IDR per namespace rather than the old global hash table.</p>
+<p>Two tasks anchor the tree:</p>
+<ul>
+<li><strong>PID 0 — the idle task</strong> (<code>swapper</code>), one per CPU, run when nothing else is runnable.</li>
+<li><strong>PID 1 — <code>init</code></strong> (e.g. <a href="systemd.html">systemd</a>), the first userspace task; it adopts
+orphaned children so they can be reaped.</li>
+</ul>
+<pre><code>           [0] swapper (idle, per-CPU)
+                  │
+           [1] init / systemd ──────────────┐
+            ├── [930]  sshd                  │ real_parent / children / sibling
+            │     └── [1450] bash            │ form the tree
+            │            └── [1600] vim
+            └── [410]  NetworkManager
+</code></pre>
+<p>Relationships are walked via <code>real_parent</code>, the <code>children</code> list, and the <code>sibling</code> link.
+<code>real_parent</code> is the task that created it; <code>parent</code> may differ when a tracer (e.g. a
+debugger using <code>ptrace</code>) is attached.</p>
+<h2 id="process-states"><a class="header" href="#process-states">Process States</a></h2>
+<p><code>__state</code> (plus <code>exit_state</code> for the dying phase) tracks where a task is in its lifecycle
+(<code>include/linux/sched.h</code>):</p>
+<pre><code class="language-c">TASK_RUNNING            /* runnable: on a runqueue or currently running */
+TASK_INTERRUPTIBLE      /* sleeping; wakes on event OR signal      (ps: S) */
+TASK_UNINTERRUPTIBLE    /* sleeping; wakes only on event           (ps: D) */
+TASK_KILLABLE           /* uninterruptible but fatal signals wake it */
+TASK_IDLE               /* uninterruptible sleep, not counted in load avg */
+__TASK_STOPPED          /* stopped by SIGSTOP/SIGTSTP              (ps: T) */
+__TASK_TRACED           /* stopped under a tracer                  (ps: t) */
+/* exit_state: */
+EXIT_ZOMBIE             /* dead, awaiting reap by parent           (ps: Z) */
+EXIT_DEAD               /* being removed (transient) */
+</code></pre>
+<pre><code>                wake_up()                  schedule()/preempt
+   (new) ──► TASK_RUNNING ◄───────────────────────────────┐
+              │  ▲   │ pick_next_task → on CPU             │
+              │  │   └─────────────────────────────────────┘
+   block on   │  │ event arrives / signal
+   event ─────▼  │
+        TASK_(UN)INTERRUPTIBLE
+              │ do_exit()
+              ▼
+         EXIT_ZOMBIE ── parent wait() ──► EXIT_DEAD ──► freed
+</code></pre>
+<p><code>TASK_UNINTERRUPTIBLE</code> (the <strong>D</strong> state) cannot be killed — a task stuck there (often on
+broken I/O or NFS) is immune even to <code>SIGKILL</code>, which is why such hangs are notorious.
+<code>TASK_KILLABLE</code> was introduced to get the same “don’t wake on ordinary signals” behaviour
+while still allowing fatal signals.</p>
+<h2 id="creation-fork--vfork--clone--copy_process"><a class="header" href="#creation-fork--vfork--clone--copy_process">Creation: <code>fork</code> / <code>vfork</code> / <code>clone</code> → <code>copy_process()</code></a></h2>
+<p><code>fork(2)</code>, <code>vfork(2)</code>, and <code>clone(2)</code> are thin wrappers; in the kernel they all funnel
+through <code>kernel_clone()</code> → <code>copy_process()</code> in <code>kernel/fork.c</code>. The behavioural differences
+are entirely a matter of which <code>CLONE_*</code> flags are passed:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Flag</th><th>Effect when set</th></tr>
+</thead>
+<tbody>
+<tr><td><code>CLONE_VM</code></td><td>Share the address space (<code>mm</code>) — makes a thread</td></tr>
+<tr><td><code>CLONE_FILES</code></td><td>Share the open-file table</td></tr>
+<tr><td><code>CLONE_FS</code></td><td>Share cwd/root</td></tr>
+<tr><td><code>CLONE_SIGHAND</code></td><td>Share signal handlers</td></tr>
+<tr><td><code>CLONE_THREAD</code></td><td>Same thread group (same <code>tgid</code>)</td></tr>
+<tr><td><code>CLONE_NEWPID</code> …</td><td>Create new <a href="namespace.html">namespaces</a></td></tr>
+</tbody>
+</table>
+</div>
+<pre><code>   pthread_create  →  clone(CLONE_VM|CLONE_FILES|CLONE_FS|
+                            CLONE_SIGHAND|CLONE_THREAD, ...)
+   fork            →  clone(SIGCHLD)            (copy everything, COW the mm)
+   vfork           →  clone(CLONE_VM|CLONE_VFORK)  (share mm, parent blocks)
+</code></pre>
+<p><code>copy_process()</code> does the heavy lifting:</p>
+<ol>
+<li><code>dup_task_struct()</code> allocates a new <code>task_struct</code> and a fresh kernel stack, copying the
+parent’s descriptor.</li>
+<li>Each resource is either <strong>shared</strong> (refcount bumped) or <strong>copied</strong>, per the flags:
+<code>copy_mm</code>, <code>copy_files</code>, <code>copy_fs</code>, <code>copy_sighand</code>, <code>copy_signal</code>, <code>copy_namespaces</code>, …</li>
+<li>For a real <code>fork</code>, <code>copy_mm</code> does <strong>not</strong> duplicate physical pages. It clones the VMA
+layout and marks shared pages read-only so the first write triggers a
+<strong>copy-on-write</strong> fault — see COW in <a href="memory_management.html">Memory Management</a>.</li>
+<li>A new <code>struct pid</code> is allocated and the task is wired into the tree, then made runnable
+via <code>wake_up_new_task()</code>.</li>
+</ol>
+<p><strong>Kernel threads</strong> are tasks with no userspace (<code>mm == NULL</code>). They are created with
+<code>kthread_create()</code> / <code>kthread_run()</code>; the helper <code>kthreadd</code> (PID 2) is their common
+ancestor. They run only in kernel mode and are visible in <code>ps</code> with bracketed names
+(e.g. <code>[kworker/0:1]</code>).</p>
+<h2 id="execve-internals"><a class="header" href="#execve-internals"><code>execve()</code> Internals</a></h2>
+<p><code>fork</code> and <code>exec</code> are deliberately separate. <code>execve(2)</code> (<code>kernel/exec.c</code>, via
+<code>do_execveat_common</code> → <code>bprm_execve</code>) <strong>replaces the program</strong> running inside an <em>existing</em>
+<code>task_struct</code> — the PID, parent relationship, and (mostly) open files survive; only the
+program image changes:</p>
+<ol>
+<li>Build a <code>struct linux_binprm</code> and pull argv/envp into a fresh, temporary stack.</li>
+<li><code>search_binary_handler()</code> asks each registered <strong>binfmt</strong> (e.g. <code>binfmt_elf</code>,
+<code>binfmt_script</code> for <code>#!</code>, <code>binfmt_misc</code>) to claim the file.</li>
+<li>The chosen handler calls <code>begin_new_exec()</code>, which tears down the old address space and
+installs a brand-new <code>mm_struct</code>, then maps the ELF segments and the interpreter
+(<code>ld.so</code>) and sets the initial register state / entry point.</li>
+<li>On success, control returns to userspace at the new program’s entry; on failure the
+caller’s old image is (where possible) left intact.</li>
+</ol>
+<p>This is why the classic shell pattern is <code>fork()</code> in the parent, then <code>execve()</code> in the
+child — see the userspace examples in <a href="process.html">Process Management</a>.</p>
+<h2 id="termination-and-reaping"><a class="header" href="#termination-and-reaping">Termination and Reaping</a></h2>
+<p>Exit flows through <code>do_exit()</code> in <code>kernel/exit.c</code> (group exits and fatal signals go via
+<code>do_group_exit()</code> so all threads in the group die together):</p>
+<ol>
+<li>Release resources: drop references to <code>mm</code>, <code>files</code>, <code>fs</code>, signal state, etc.</li>
+<li>Notify the parent with <code>SIGCHLD</code> and set <code>exit_state = EXIT_ZOMBIE</code>. The task is now a
+<strong>zombie</strong>: nearly everything is freed, but the <code>task_struct</code> lingers so the parent can
+read the exit status.</li>
+<li>The parent calls a <code>wait(2)</code>-family syscall; <code>wait_task_zombie()</code> collects <code>rusage</code>/exit
+code and <code>release_task()</code> finally frees the descriptor (<code>EXIT_DEAD</code>).</li>
+<li>If the parent dies first, the children are <strong>reparented</strong> — to the nearest process marked
+as a <em>child subreaper</em> (<code>PR_SET_CHILD_SUBREAPER</code>) or otherwise to init (PID 1), which
+reaps them.</li>
+</ol>
+<pre><code>   child do_exit() ──► EXIT_ZOMBIE ──┐
+                                      │ SIGCHLD to parent
+   parent wait()  ◄──────────────────┘
+        └─► wait_task_zombie() → release_task() → struct freed (EXIT_DEAD)
+</code></pre>
+<p>A parent that never reaps leaks <strong>zombies</strong> (they hold a PID slot but no other resources);
+a parent that dies leaves <strong>orphans</strong>, which init reaps automatically.</p>
+<h2 id="scheduling"><a class="header" href="#scheduling">Scheduling</a></h2>
+<p>The scheduler decides which runnable task each CPU runs next. It is organised as a stack of
+<strong>scheduler classes</strong> in priority order (<code>kernel/sched/</code>); the highest class with a runnable
+task wins:</p>
+<pre><code>   stop_sched_class   (migration/CPU-stop — highest)
+   dl_sched_class     (SCHED_DEADLINE — EDF)
+   rt_sched_class     (SCHED_FIFO / SCHED_RR — fixed priority)
+   fair_sched_class   (SCHED_NORMAL/BATCH/IDLE — EEVDF, the default)
+   idle_sched_class   (the per-CPU idle task — lowest)
+</code></pre>
+<p>Each CPU owns a <code>struct rq</code> (runqueue) holding the runnable tasks for that CPU. The fair
+class historically used <strong>CFS</strong>, which ordered tasks by <code>vruntime</code> (accumulated runtime
+weighted by nice) in a red-black tree and always picked the smallest. Since <strong>v6.6</strong> the
+fair class uses <strong>EEVDF</strong> (Earliest Eligible Virtual Deadline First), which adds a per-task
+<em>lag</em> and <em>virtual deadline</em> so latency-sensitive tasks (e.g. interactive) get serviced
+sooner while long-run fairness is preserved. (Much online material still describes plain
+CFS; on a current kernel the picker is EEVDF.)</p>
+<pre><code>   CPU0 rq                         CPU1 rq
+   ┌───────────────┐               ┌───────────────┐
+   │ rt:  [vim]    │               │ rt:  ∅        │
+   │ fair (EEVDF): │               │ fair (EEVDF): │
+   │   bash, cc1   │  load balance │   make, sshd  │
+   │ idle: swapper │ ◄───────────► │ idle: swapper │
+   └───────────────┘               └───────────────┘
+</code></pre>
+<p>The entry point is <code>schedule()</code> → <code>__schedule()</code> → <code>pick_next_task()</code>, which walks the
+classes and calls the winner’s <code>pick_next_task</code>. A switch happens on:</p>
+<ul>
+<li><strong>Voluntary</strong> scheduling — a task blocks (sleeps on I/O, a lock, a wait queue) and calls
+<code>schedule()</code> itself.</li>
+<li><strong>Preemption</strong> — a higher-priority task becomes runnable, or the timer tick decides the
+current task has run long enough (<code>TIF_NEED_RESCHED</code> is set and acted on at the next safe
+point). <code>CONFIG_PREEMPT_*</code> controls whether the kernel can be preempted while running in
+kernel mode.</li>
+</ul>
+<p><code>nice</code> (−20..19) maps to a CPU <strong>weight</strong>: lower nice → more weight → larger share. Realtime
+policies (<code>SCHED_FIFO</code>/<code>SCHED_RR</code>) always outrank normal tasks; <code>chrt</code> sets them.</p>
+<h2 id="context-switch"><a class="header" href="#context-switch">Context Switch</a></h2>
+<p>Once <code>pick_next_task()</code> selects the next task, <code>context_switch()</code> (<code>kernel/sched/core.c</code>)
+swaps the CPU from <code>prev</code> to <code>next</code> in two steps:</p>
+<ol>
+<li><strong><code>switch_mm()</code></strong> — install <code>next</code>’s page tables (load <code>CR3</code> on x86, swap TTBR on ARM)
+and handle TLB/ASID bookkeeping. If <code>next</code> is a <strong>kernel thread</strong> (<code>mm == NULL</code>) the
+kernel performs a <strong>lazy TLB switch</strong>: it keeps <code>prev</code>’s page tables active and records
+them in <code>next-&gt;active_mm</code>, avoiding a pointless TLB flush since kernel threads never touch
+userspace addresses.</li>
+<li><strong><code>switch_to()</code></strong> — an arch-specific routine that saves <code>prev</code>’s callee-saved registers
+and kernel stack pointer and restores <code>next</code>’s, so execution resumes inside <code>next</code> exactly
+where it last left <code>__schedule()</code>.</li>
+</ol>
+<pre><code>   __schedule()
+      ├─ pick_next_task() ─► next
+      └─ context_switch(prev, next)
+            ├─ switch_mm(prev-&gt;mm, next-&gt;mm)   # address space (or lazy/active_mm)
+            └─ switch_to(prev, next)           # registers + kernel stack
+                  └─► now running as `next`
+</code></pre>
+<p>After the switch, <code>current</code> points at <code>next</code>, and userspace (if any) resumes on <code>next</code>’s
+restored register state. This pairs with <a href="memory_management.html">Memory Management</a>: the
+address-space swap is what makes each process see its own virtual memory.</p>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="process.html">Process Management</a> — the userspace counterpart: PIDs/PGIDs, memory layout,
+the <code>fork</code>/<code>exec</code>/<code>wait</code> API, IPC, <code>/proc</code>, and process tooling.</li>
+<li><a href="kernel.html">Kernel Architecture</a> — where the scheduler and process subsystem sit among the
+kernel’s components.</li>
+<li><a href="memory_management.html">Memory Management</a> — <code>mm_struct</code>, page tables, COW, and the vmalloc
+area backing kernel stacks.</li>
+<li><a href="namespace.html">Namespaces</a> — <code>nsproxy</code>/<code>struct pid</code> give each PID namespace its own view of
+the process tree (init at PID 1 inside the namespace).</li>
+<li><a href="cgroups.html">cgroups</a> — bound and account the CPU/memory a group of tasks may use; the
+scheduler honours cgroup CPU weights and quotas.</li>
+<li><a href="systemd.html">systemd</a> — PID 1 in practice: it reaps orphans and supervises service tasks.</li>
+<li><a href="kernel_patterns.html">Kernel Development Patterns</a> — wait queues, completions, and work
+queues are how kernel code sleeps tasks and wakes them.</li>
+</ul>
+<h2 id="pitfalls"><a class="header" href="#pitfalls">Pitfalls</a></h2>
+<ul>
+<li><strong>D-state hangs.</strong> A task in <code>TASK_UNINTERRUPTIBLE</code> ignores every signal, including
+<code>SIGKILL</code>; <code>kill -9</code> can’t clear an NFS/I/O wedge. Find them with <code>ps -eo pid,stat,comm | awk '$2 ~ /D/'</code>
+and check <code>/proc/&lt;pid&gt;/stack</code>.</li>
+<li><strong>Zombie leaks.</strong> A long-lived parent that never <code>wait()</code>s accumulates zombies that pin PID
+slots. Reap children (handle <code>SIGCHLD</code>) or let them be reparented to init.</li>
+<li><strong><code>mm</code> vs <code>active_mm</code>.</strong> Kernel threads have <code>mm == NULL</code> and borrow <code>active_mm</code>. Code that
+blindly dereferences <code>current-&gt;mm</code> from kernel-thread context will fault — check for NULL.</li>
+<li><strong>Stack overflow.</strong> The kernel stack is small (8–16 KiB). Deep recursion or large on-stack
+buffers overflow it; without <code>CONFIG_VMAP_STACK</code> guard pages this silently corrupts
+adjacent memory rather than faulting.</li>
+<li><strong><code>pid</code> vs <code>tgid</code> confusion.</strong> <code>getpid()</code> returns <code>tgid</code>; <code>gettid()</code> returns the kernel
+<code>pid</code>. Logging the wrong one makes multi-threaded traces impossible to follow.</li>
+<li><strong>Stale scheduler docs.</strong> Material describing CFS’s red-black tree and <code>vruntime</code>-only
+selection predates v6.6; current kernels schedule the fair class with <strong>EEVDF</strong>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../linux/process.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../linux/wireguard.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../linux/process.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../linux/wireguard.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

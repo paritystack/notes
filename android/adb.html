@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-68aed8e1.js";
+            window.path_to_searchindex_js = "../searchindex-69bbd6a5.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-54208b8b.js"></script>
+        <script src="../toc-d057db31.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,8 +178,29 @@
                     <main>
                         <h1 id="android-debug-bridge-adb"><a class="header" href="#android-debug-bridge-adb">Android Debug Bridge (ADB)</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>Android Debug Bridge (ADB) is a versatile command-line tool that lets you communicate with an Android device. ADB facilitates a variety of device actions, such as installing and debugging apps, and it provides access to a Unix shell that you can use to run various commands on a device.</p>
-<p>ADB is included in the Android SDK Platform Tools package and can be used with physical devices connected via USB or with emulators.</p>
+<p>Android Debug Bridge (ADB) is the command-line tool that drives a device or emulator from a
+host: installing/debugging apps, pushing/pulling files, and dropping into a Unix shell. It’s
+the entry point for almost everything in this section — <code>adb shell dumpsys</code> inspects the
+services in <a href="system_server.html">SystemServer &amp; Core Services</a>, <code>adb logcat</code> and <code>dumpsys gfxinfo</code> chase the jank described in <a href="graphics_stack.html">Graphics Stack</a> and
+<a href="performance_profiling.html">Performance &amp; Profiling</a>, <code>adb install</code>/<code>pm</code> exercise the packages
+from <a href="app_signing.html">APK/AAB Packaging &amp; Signing</a>, and <code>adb reboot bootloader</code> is the gateway
+to <a href="verified_boot_ota.html">Verified Boot &amp; OTA</a>. It ships in the <strong>SDK Platform Tools</strong> package.</p>
+<h3 id="architecture-client-server-daemon"><a class="header" href="#architecture-client-server-daemon">Architecture: client, server, daemon</a></h3>
+<p>ADB is a three-part system. The command you type is a <strong>client</strong>; it talks to a <strong>server</strong>
+(a background process on your host, default TCP port <strong>5037</strong>) which multiplexes connections to
+the <strong><code>adbd</code></strong> daemon running on each device/emulator.</p>
+<pre><code class="language-text">   host                                   device / emulator
+ ┌───────────────────────────┐          ┌────────────────────────┐
+ │ adb (client, your shell)  │          │  adbd  (daemon)         │
+ │        │                  │          │    │                   │
+ │        ▼                  │  USB or  │    ▼                   │
+ │ adb server  ──────────────┼── TCP ───┼─▶ shell / pm / am /    │
+ │ (localhost:5037)          │          │    dumpsys / file sync  │
+ └───────────────────────────┘          └────────────────────────┘
+</code></pre>
+<p>The first <code>adb</code> command silently starts the server. <code>adbd</code> runs as the <code>shell</code> user on
+production builds (limited privileges) and only as <code>root</code> on <code>userdebug</code>/<code>eng</code> builds via
+<code>adb root</code> — which is why some commands below note “requires root”.</p>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <h3 id="linuxmac"><a class="header" href="#linuxmac">Linux/Mac</a></h3>
 <pre><code class="language-bash"># Install via Android SDK Platform Tools
@@ -292,23 +313,26 @@ adb shell cat /proc/cpuinfo
 adb shell cat /proc/meminfo
 </code></pre>
 <h2 id="app-management"><a class="header" href="#app-management">App Management</a></h2>
+<p><code>pm</code> (package manager) and <code>am</code> (activity manager) are shells over the system services of the
+same name — see <a href="system_server.html">SystemServer &amp; Core Services</a>. Signing/packaging details for
+the APKs you install are in <a href="app_signing.html">APK/AAB Packaging &amp; Signing</a>.</p>
 <h3 id="installing-and-uninstalling-apps"><a class="header" href="#installing-and-uninstalling-apps">Installing and Uninstalling Apps</a></h3>
 <pre><code class="language-bash"># Install APK
 adb install app.apk
 
-# Install APK to specific location
-adb install -s /sdcard/app.apk
-
-# Reinstall existing app (keep data)
+# Reinstall existing app, keeping its data
 adb install -r app.apk
 
-# Install APK to SD card
-adb install -s app.apk
+# Allow downgrade to a lower versionCode (debuggable builds)
+adb install -d app.apk
+
+# Install a split-APK set (one app, multiple APKs — e.g. an app bundle's output)
+adb install-multiple base.apk config.arm64.apk config.xxhdpi.apk
 
 # Uninstall app
 adb uninstall com.example.app
 
-# Uninstall app but keep data
+# Uninstall app but keep data and cache
 adb uninstall -k com.example.app
 </code></pre>
 <h3 id="package-information"><a class="header" href="#package-information">Package Information</a></h3>
@@ -344,8 +368,8 @@ adb shell am start -n com.example.app/.MainActivity
 # Start activity with data
 adb shell am start -a android.intent.action.VIEW -d "https://example.com"
 
-# Start service
-adb shell am startservice com.example.app/.MyService
+# Start a service (use start-foreground-service on Android 8+ for background-start limits)
+adb shell am start-service com.example.app/.MyService
 
 # Broadcast intent
 adb shell am broadcast -a android.intent.action.BOOT_COMPLETED
@@ -401,6 +425,9 @@ adb shell cat /sdcard/file.txt
 adb shell find /sdcard -name "*.txt"
 </code></pre>
 <h2 id="logging-and-debugging"><a class="header" href="#logging-and-debugging">Logging and Debugging</a></h2>
+<p>Logcat is the first stop for crashes and ANRs; pair it with <code>dumpsys gfxinfo</code> and Perfetto for
+frame/jank analysis (see <a href="performance_profiling.html">Performance &amp; Profiling</a> and
+<a href="graphics_stack.html">Graphics Stack</a>).</p>
 <h3 id="logcat"><a class="header" href="#logcat">Logcat</a></h3>
 <pre><code class="language-bash"># View all logs
 adb logcat
@@ -514,7 +541,7 @@ adb reboot
 # Reboot to recovery mode
 adb reboot recovery
 
-# Reboot to bootloader
+# Reboot to bootloader (fastboot — flashing, unlocking; see Verified Boot &amp; OTA)
 adb reboot bootloader
 
 # Shutdown device (requires root)
@@ -569,8 +596,14 @@ adb shell settings put global animator_duration_scale 0
 </code></pre>
 <h2 id="advanced-commands"><a class="header" href="#advanced-commands">Advanced Commands</a></h2>
 <h3 id="dumpsys"><a class="header" href="#dumpsys">Dumpsys</a></h3>
-<pre><code class="language-bash"># Get system information
+<p><code>dumpsys</code> calls the <code>dump()</code> method of a registered Binder service over IPC (see
+<a href="binder.html">Binder</a>); <code>adb shell dumpsys -l</code> lists every service you can dump. It’s the single
+most useful framework-diagnostic command.</p>
+<pre><code class="language-bash"># Get system information (all services — very large)
 adb shell dumpsys
+
+# List every dumpable service
+adb shell dumpsys -l
 
 # Battery information
 adb shell dumpsys battery
@@ -620,7 +653,10 @@ adb shell df
 adb shell netstat
 </code></pre>
 <h3 id="database-operations"><a class="header" href="#database-operations">Database Operations</a></h3>
-<pre><code class="language-bash"># Access app database (requires root or debuggable app)
+<p><code>run-as &lt;pkg&gt;</code> runs a command as the app’s UID, the only way to reach an app’s private
+<code>/data/data/&lt;pkg&gt;</code> sandbox without root — and it only works on <strong>debuggable</strong> builds (see the
+sandbox model in <a href="app_security.html">App Security</a>).</p>
+<pre><code class="language-bash"># Access app database (requires root or a debuggable app)
 adb shell run-as com.example.app
 
 # Navigate to database directory
@@ -633,6 +669,8 @@ adb exec-out run-as com.example.app cat databases/mydb.db &gt; mydb.db
 adb shell "run-as com.example.app sqlite3 databases/mydb.db 'SELECT * FROM users;'"
 </code></pre>
 <h2 id="testing-and-automation"><a class="header" href="#testing-and-automation">Testing and Automation</a></h2>
+<p>These are the low-level drivers behind instrumented testing; for the Espresso/UI Automator/
+Macrobenchmark layers that build on them, see <a href="testing_android.html">Android Testing</a>.</p>
 <h3 id="monkey-testing"><a class="header" href="#monkey-testing">Monkey Testing</a></h3>
 <pre><code class="language-bash"># Generate random events
 adb shell monkey -p com.example.app 1000
@@ -748,12 +786,13 @@ adb -e shell  # Emulator
 <li>Use secure, trusted computers for ADB connections</li>
 <li>Never share bug reports publicly without reviewing contents first</li>
 </ul>
-<h2 id="references"><a class="header" href="#references">References</a></h2>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
 <ul>
-<li><a href="https://developer.android.com/studio/command-line/adb">Official ADB Documentation</a></li>
-<li><a href="https://adbshell.com/">ADB Shell Commands</a></li>
-<li><a href="internals.html">Android Internals</a></li>
-<li><a href="platform_dev.html">Development Guide</a></li>
+<li><a href="https://developer.android.com/tools/adb">ADB — Android Developers</a></li>
+<li><a href="https://developer.android.com/tools/adb#am"><code>am</code> / <code>pm</code> / Activity Manager shell</a></li>
+<li><a href="https://developer.android.com/tools/dumpsys">dumpsys</a></li>
+<li><a href="https://developer.android.com/tools/logcat">logcat command-line tool</a></li>
+<li><a href="https://developer.android.com/tools/releases/platform-tools">SDK Platform Tools release notes</a></li>
 </ul>
 <h2 id="quick-reference-card"><a class="header" href="#quick-reference-card">Quick Reference Card</a></h2>
 <pre><code class="language-bash"># Connection
@@ -785,6 +824,19 @@ adb shell screenrecord /sdcard/v.mp4 # Record screen
 adb reboot                    # Reboot device
 adb shell dumpsys battery     # Battery info
 </code></pre>
+<h3 id="related-files"><a class="header" href="#related-files">Related Files</a></h3>
+<ul>
+<li><a href="system_server.html">SystemServer &amp; Core Services</a> — the services behind <code>dumpsys</code>, <code>pm</code>, <code>am</code></li>
+<li><a href="binder.html">Binder</a> — the IPC <code>dumpsys</code>/<code>service</code> calls travel over</li>
+<li><a href="performance_profiling.html">Performance &amp; Profiling</a> — logcat, <code>gfxinfo</code>, Perfetto workflows</li>
+<li><a href="graphics_stack.html">Graphics Stack</a> — diagnosing jank with <code>dumpsys gfxinfo</code>/<code>SurfaceFlinger</code></li>
+<li><a href="app_signing.html">APK/AAB Packaging &amp; Signing</a> — what <code>adb install</code>/<code>pm</code> deploy</li>
+<li><a href="app_security.html">App Security</a> — the app sandbox <code>run-as</code> reaches into</li>
+<li><a href="testing_android.html">Android Testing</a> — Monkey/UI Automator and the test layers above them</li>
+<li><a href="verified_boot_ota.html">Verified Boot &amp; OTA</a> — <code>adb reboot bootloader</code>/recovery and flashing</li>
+<li><a href="platform_dev.html">Platform Dev</a> — building AOSP and flashing devices</li>
+<li><a href="internals.html">Android Internals</a> — the architecture these commands inspect</li>
+</ul>
 
                     </main>
 

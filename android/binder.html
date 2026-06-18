@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-68aed8e1.js";
+            window.path_to_searchindex_js = "../searchindex-69bbd6a5.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-54208b8b.js"></script>
+        <script src="../toc-d057db31.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,24 +177,103 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="android-binder"><a class="header" href="#android-binder">Android Binder</a></h1>
-<p>Binder is Android’s inter-process communication (IPC) mechanism. It’s a custom implementation allowing processes to communicate efficiently and securely.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>Binder enables:</p>
+<p>Binder is Android’s primary inter-process communication (IPC) mechanism: an
+<strong>object-oriented, kernel-mediated RPC system</strong> that lets a process invoke methods on an
+object living in another process as if it were local. Almost every framework call an app
+makes — <code>startActivity</code>, <code>getSystemService</code>, querying packages, talking to a HAL — is a
+Binder transaction under the hood. It is the connective tissue of the
+<a href="internals.html">Android Internals</a> stack: apps talk to
+<a href="system_server.html">SystemServer &amp; Core Services</a> over Binder, processes forked by
+<a href="zygote_startup.html">Zygote &amp; App Startup</a> join a Binder thread pool at startup, and
+<a href="treble_hal.html">Project Treble &amp; HALs</a> expose vendor hardware through stable AIDL/HIDL
+Binder interfaces. Native code reaches the same driver through <code>libbinder</code> (see
+<a href="ndk_jni.html">NDK &amp; JNI</a>).</p>
+<p>Why a custom mechanism instead of pipes, sockets, or System V IPC?</p>
 <ul>
-<li>Cross-process method invocation</li>
-<li>Object reference passing</li>
-<li>Security via UID/PID checking</li>
-<li>Death notification</li>
+<li><strong>One copy, not two.</strong> A normal socket copies data user → kernel → user. Binder copies
+the payload once, from the sender’s buffer directly into a region the receiver has
+<code>mmap</code>ed, then hands the receiver a pointer.</li>
+<li><strong>Kernel-guaranteed identity.</strong> The driver stamps each transaction with the caller’s
+real UID/PID. The receiver can trust it — a malicious app cannot forge who it claims to
+be. This is the foundation of Android’s permission model.</li>
+<li><strong>Object semantics.</strong> Binder passes <em>object references</em> across process boundaries with
+automatic reference counting and <strong>death notifications</strong>, not just bytes.</li>
 </ul>
 <h2 id="architecture"><a class="header" href="#architecture">Architecture</a></h2>
-<pre><code>Client Process          Binder Driver         Server Process
-    │                        │                       │
-    │──Service Request──────&gt;│                       │
-    │                        │──Forward Request────&gt;│
-    │                        │&lt;──Response───────────│
-    │&lt;──Return Result────────│                       │
+<p>A client holds a <strong>proxy</strong>; the real object (a <strong>stub</strong> / <code>Bn...</code>) lives in the server. The
+kernel <code>/dev/binder</code> driver routes transactions between them and translates object handles
+across the boundary.</p>
+<pre><code class="language-text">   Client process                 kernel                 Server process
+ ┌────────────────┐                                    ┌────────────────┐
+ │ IFoo proxy     │                                    │ IFoo.Stub      │
+ │  (BpBinder)    │                                    │  (BBinder)     │
+ │    .doThing()  │                                    │  onTransact()  │
+ └──────┬─────────┘                                    └──────▲─────────┘
+        │ Parcel + code                                       │
+        ▼                                                     │
+   ioctl(BINDER_WRITE_READ)  ──►  ┌──────────────┐  ──►  binder thread
+                                  │ binder driver │       wakes, reads
+   reply ◄───────────────────────│  /dev/binder  │◄──── writes reply
+                                  └──────────────┘
+                            single copy into receiver's mmap'd buffer
 </code></pre>
-<h2 id="aidl-android-interface-definition-language"><a class="header" href="#aidl-android-interface-definition-language">AIDL (Android Interface Definition Language)</a></h2>
+<p>Marshalling: the proxy packs arguments into a <strong>Parcel</strong>, issues a <code>BINDER_WRITE_READ</code>
+ioctl with a transaction <em>code</em> (which method) and the target handle. The driver copies the
+Parcel once into the server’s mapped transaction buffer and wakes a server binder thread,
+which unpacks the Parcel, dispatches on the code in <code>onTransact()</code>, and writes a reply
+Parcel back the same way.</p>
+<h2 id="the-binder-driver"><a class="header" href="#the-binder-driver">The Binder driver</a></h2>
+<p><code>/dev/binder</code> is a character device backed by a kernel module
+(<code>CONFIG_ANDROID_BINDER_IPC=y</code>; modern devices also expose <code>/dev/hwbinder</code> for HALs and
+<code>/dev/vndbinder</code> for vendor-to-vendor traffic). Each process <code>mmap</code>s a region the driver
+uses as its receive buffer — that mapping is what makes the single-copy transfer possible.</p>
+<p>All traffic flows through one multiplexing ioctl:</p>
+<pre><code class="language-c">BINDER_WRITE_READ       // write outgoing + read incoming transactions (the hot path)
+BINDER_SET_MAX_THREADS  // cap the binder thread pool
+BINDER_SET_CONTEXT_MGR  // claim handle 0 — only servicemanager does this
+BINDER_VERSION          // driver/protocol version check
+</code></pre>
+<p>The transaction payload the driver moves looks roughly like:</p>
+<pre><code class="language-c">struct binder_transaction_data {
+    union { __u32 handle; binder_uintptr_t ptr; } target; // who to call
+    binder_uintptr_t cookie;
+    __u32 code;            // which method (the transaction code)
+    __u32 flags;           // e.g. TF_ONE_WAY
+    pid_t sender_pid;      // \  filled in by the kernel —
+    uid_t sender_euid;     // /  the caller cannot fake these
+    binder_size_t data_size;
+    binder_size_t offsets_size;   // where embedded binder/FD objects live
+    union { struct { binder_uintptr_t buffer, offsets; } ptr; __u8 buf[8]; } data;
+};
+</code></pre>
+<p>The <code>offsets</code> array tells the driver which positions in the buffer hold <em>special</em> objects
+(binder references or file descriptors) so it can translate handles and duplicate FDs into
+the receiving process. Each process’s transaction buffer is <strong>~1 MB and shared across all
+in-flight transactions</strong> — exceed it and the call fails (see Pitfalls).</p>
+<pre><code class="language-bash">adb shell cat /sys/kernel/debug/binder/stats         # transaction counts, errors
+adb shell cat /sys/kernel/debug/binder/transactions  # in-flight transactions
+</code></pre>
+<h2 id="servicemanager--the-context-manager"><a class="header" href="#servicemanager--the-context-manager">ServiceManager — the context manager</a></h2>
+<p>Binder transactions target a numeric <em>handle</em>, but clients want services by <em>name</em>.
+<strong><code>servicemanager</code></strong> is the registry that bridges the two. It is the first process to open
+<code>/dev/binder</code> and claims the well-known <strong>handle 0</strong> via <code>BINDER_SET_CONTEXT_MGR</code>; everyone
+can reach handle 0 without a prior introduction.</p>
+<pre><code class="language-text">system_server:  ServiceManager.addService("activity", amsBinder)
+app:            IBinder b = ServiceManager.getService("activity")
+                IActivityManager am = IActivityManager.Stub.asInterface(b)
+                am.startActivity(...)        // Binder txn → system_server
+</code></pre>
+<p>App developers rarely touch <code>ServiceManager</code> directly — <code>Context.getSystemService()</code> returns
+a manager object that already wraps the right proxy. The full service catalog and the
+services hosted in <code>system_server</code> are covered in
+<a href="system_server.html">SystemServer &amp; Core Services</a>.</p>
+<pre><code class="language-bash">adb shell service list                 # every Binder service registered with servicemanager
+adb shell dumpsys activity processes   # callers + state for a given service
+</code></pre>
+<h2 id="aidl-interface-to-stub-and-proxy"><a class="header" href="#aidl-interface-to-stub-and-proxy">AIDL: interface to Stub and Proxy</a></h2>
+<p>You almost never write Binder marshalling by hand. You declare an interface in <strong>AIDL</strong>
+(Android Interface Definition Language) and the build generates the proxy and stub.</p>
 <pre><code class="language-java">// ICalculator.aidl
 package com.example;
 
@@ -203,53 +282,194 @@ interface ICalculator {
     int subtract(int a, int b);
 }
 </code></pre>
-<h2 id="service-implementation"><a class="header" href="#service-implementation">Service Implementation</a></h2>
-<pre><code class="language-java">// CalculatorService.java
-public class CalculatorService extends Service {
+<p>Server side — implement the generated <code>Stub</code> and return it from <code>onBind</code>:</p>
+<pre><code class="language-java">public class CalculatorService extends Service {
     private final ICalculator.Stub binder = new ICalculator.Stub() {
-        @Override
-        public int add(int a, int b) {
-            return a + b;
-        }
-
-        @Override
-        public int subtract(int a, int b) {
-            return a - b;
-        }
+        @Override public int add(int a, int b)      { return a + b; }
+        @Override public int subtract(int a, int b) { return a - b; }
     };
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
+    @Override public IBinder onBind(Intent intent) { return binder; }
+}
+</code></pre>
+<p>Client side — bind, then turn the raw <code>IBinder</code> into a typed proxy with <code>asInterface</code>:</p>
+<pre><code class="language-java">ServiceConnection connection = new ServiceConnection() {
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        ICalculator calc = ICalculator.Stub.asInterface(service);
+        int result = calc.add(5, 3);   // 8 — a Binder transaction across processes
+    }
+    public void onServiceDisconnected(ComponentName name) { /* clean up */ }
+};
+bindService(intent, connection, Context.BIND_AUTO_CREATE);
+</code></pre>
+<p>What AIDL generates is the boilerplate the architecture diagram described — a <code>Stub</code> that
+dispatches on the transaction code, and a <code>Proxy</code> that marshals into a Parcel:</p>
+<pre><code class="language-java">// Server: Stub.onTransact() runs on a binder thread
+public boolean onTransact(int code, Parcel data, Parcel reply, int flags) {
+    switch (code) {
+        case TRANSACTION_add:
+            int a = data.readInt(), b = data.readInt();
+            reply.writeNoException();
+            reply.writeInt(this.add(a, b));
+            return true;
+    }
+    return super.onTransact(code, data, reply, flags);
+}
+
+// Client: Proxy marshals args, blocks on transact(), unmarshals the reply
+public int add(int a, int b) throws RemoteException {
+    Parcel data = Parcel.obtain(), reply = Parcel.obtain();
+    try {
+        data.writeInt(a); data.writeInt(b);
+        mRemote.transact(TRANSACTION_add, data, reply, 0);
+        reply.readException();
+        return reply.readInt();
+    } finally { reply.recycle(); data.recycle(); }
+}
+</code></pre>
+<p>If the remote process is gone the <code>transact</code> throws <code>RemoteException</code> (specifically
+<code>DeadObjectException</code>) — every cross-process call can fail and callers must handle it.</p>
+<h2 id="parcels-and-marshalling"><a class="header" href="#parcels-and-marshalling">Parcels and marshalling</a></h2>
+<p>A <strong>Parcel</strong> is the serialization container Binder moves. It is <em>not</em> general-purpose
+storage — its byte layout is tied to the live transaction (it can carry live handles), so
+never persist a Parcel to disk or across versions. A Parcel can hold:</p>
+<ul>
+<li>primitives, <code>String</code>/<code>CharSequence</code>, arrays and lists;</li>
+<li><code>Parcelable</code> objects (you implement <code>writeToParcel</code>/<code>CREATOR</code>);</li>
+<li><strong>Binder references</strong> via <code>writeStrongBinder()</code> / <code>readStrongBinder()</code> — this is how you
+pass a callback object back to a server;</li>
+<li><strong>file descriptors</strong> via <code>ParcelFileDescriptor</code> — the driver <code>dup()</code>s the FD into the
+receiving process. This is the escape hatch for large data: instead of stuffing megabytes
+into a Parcel, pass an FD to ashmem/a pipe/a file.</li>
+</ul>
+<p><code>Parcelable</code> (Binder-oriented, fast) is preferred over Java <code>Serializable</code> (reflection-based,
+slow) for anything that crosses a Binder boundary.</p>
+<h2 id="threads-and-the-binder-thread-pool"><a class="header" href="#threads-and-the-binder-thread-pool">Threads and the binder thread pool</a></h2>
+<p>Each process serving Binder calls runs a <strong>thread pool</strong>; the kernel hands an incoming
+transaction to an idle binder thread and spawns more on demand up to the cap.</p>
+<pre><code class="language-cpp">ProcessState::self()-&gt;setThreadPoolMaxThreads(15); // default cap is 15 (+ the main thread)
+ProcessState::self()-&gt;startThreadPool();
+IPCThreadState::self()-&gt;joinThreadPool();          // donate the calling thread too
+</code></pre>
+<p>Consequences worth internalizing:</p>
+<ul>
+<li><strong>A synchronous Binder call blocks the calling thread</strong> until the reply arrives. Never make
+one from the UI/main thread to a service that might be slow.</li>
+<li><strong>Calls are re-entrant.</strong> If A calls B and B calls back into A on the same logical chain,
+the driver preserves the thread of control, so nested transactions don’t deadlock against
+themselves.</li>
+<li><strong>The pool is finite.</strong> If every binder thread in a service is blocked (e.g. on a lock held
+by a stuck thread), new callers queue and eventually time out. In <code>system_server</code> this is
+exactly what the Watchdog watches for — see <a href="system_server.html">SystemServer &amp; Core Services</a>.</li>
+</ul>
+<h2 id="synchronous-calls-vs-oneway"><a class="header" href="#synchronous-calls-vs-oneway">Synchronous calls vs <code>oneway</code></a></h2>
+<p>By default a transaction is synchronous: the caller blocks for a reply. Mark an AIDL method
+(or whole interface) <code>oneway</code> to make it <strong>fire-and-forget</strong>:</p>
+<pre><code class="language-java">interface IEvents {
+    oneway void onChanged(int what);   // returns immediately, no reply, cannot return a value
+}
+</code></pre>
+<p><code>oneway</code> calls return as soon as the kernel queues them. They are useful for callbacks and
+notifications, but note the trade-offs: no return value or exception propagation, and
+<strong>ordering is only guaranteed per-destination-object</strong>, not globally. <code>oneway</code> traffic also
+draws from a smaller per-process async buffer (roughly half the transaction buffer), so a
+flood of one-way calls can still hit <code>TransactionTooLargeException</code>.</p>
+<h2 id="security-model"><a class="header" href="#security-model">Security model</a></h2>
+<p>Because the kernel stamps every transaction with the caller’s identity, the <em>server</em> enforces
+access at the boundary — this is where Android’s permission checks actually live.</p>
+<pre><code class="language-java">public void doPrivileged() {
+    int uid = Binder.getCallingUid();   // kernel-guaranteed; cannot be spoofed
+    int pid = Binder.getCallingPid();
+
+    // throws SecurityException if the caller lacks the permission
+    mContext.enforceCallingPermission(
+        android.Manifest.permission.WRITE_SECURE_SETTINGS, "need WRITE_SECURE_SETTINGS");
+
+    // When the service must do work as ITSELF (not the caller), drop the caller identity:
+    long token = Binder.clearCallingIdentity();
+    try {
+        accessSystemOnlyResource();     // now runs under the service's UID
+    } finally {
+        Binder.restoreCallingIdentity(token);  // ALWAYS restore in finally
     }
 }
 </code></pre>
-<h2 id="client-usage"><a class="header" href="#client-usage">Client Usage</a></h2>
-<pre><code class="language-java">// Client code
-ServiceConnection connection = new ServiceConnection() {
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        ICalculator calculator = ICalculator.Stub.asInterface(service);
-        int result = calculator.add(5, 3);  // Result: 8
-    }
-
-    public void onServiceDisconnected(ComponentName name) {
-        // Handle disconnection
-    }
+<p>On top of UID checks, <strong>SELinux</strong> governs which domains may even talk to which over Binder —
+a transaction needs the <code>binder { call transfer }</code> permission between the two SELinux types,
+independent of any framework permission. See <a href="selinux_android.html">SELinux on Android</a> and the
+app-facing view in <a href="app_security.html">App Security</a>.</p>
+<h2 id="reference-counting-and-death-recipients"><a class="header" href="#reference-counting-and-death-recipients">Reference counting and death recipients</a></h2>
+<p>Binder maintains <strong>strong and weak reference counts</strong> on objects across processes, so a server
+object stays alive as long as some other process holds a proxy to it, and is reclaimed when
+the last reference drops. To learn when the <em>remote</em> end disappears, register a
+<strong>death recipient</strong>:</p>
+<pre><code class="language-java">IBinder remote = service.asBinder();
+IBinder.DeathRecipient recipient = () -&gt; {
+    // remote process died — drop caches, unbind, attempt reconnect
+    remote.unlinkToDeath(this, 0);
+    reconnect();
 };
-
-bindService(intent, connection, Context.BIND_AUTO_CREATE);
+remote.linkToDeath(recipient, 0);
 </code></pre>
-<h2 id="key-features"><a class="header" href="#key-features">Key Features</a></h2>
+<p>This is the standard way a server cleans up per-client state when a client crashes (and vice
+versa) without polling. Forgetting to <code>linkToDeath</code> (or to <code>unlinkToDeath</code>) is a common source
+of leaked callbacks and stale state.</p>
+<h2 id="aidl-vs-hidl-vs-stable-aidl"><a class="header" href="#aidl-vs-hidl-vs-stable-aidl">AIDL vs HIDL vs stable AIDL</a></h2>
+<p>The app-facing AIDL above is <strong>unstable</strong> — both sides are built together from the same
+<code>.aidl</code>. Framework-to-vendor boundaries need a <em>stable</em>, versioned ABI:</p>
 <ul>
-<li><strong>Security</strong>: Permission checking at IPC boundaries</li>
-<li><strong>Reference Counting</strong>: Automatic resource management</li>
-<li><strong>Death Recipients</strong>: Notification when remote process dies</li>
-<li><strong>Asynchronous</strong>: Non-blocking calls with oneway keyword</li>
+<li><strong>HIDL</strong> (HAL Interface Definition Language) was introduced with
+<a href="treble_hal.html">Project Treble &amp; HALs</a> to decouple the vendor image from the framework. It
+runs over <code>/dev/hwbinder</code>. It is now <strong>deprecated</strong>.</li>
+<li><strong>Stable AIDL</strong> is the modern replacement: the same AIDL language with versioning,
+<code>@VintfStability</code>, and frozen interface snapshots, used for new HALs and for
+<a href="mainline_apex.html">Project Mainline &amp; APEX</a> module boundaries.</li>
 </ul>
-<p>Binder is fundamental to Android’s architecture, enabling system services and app communication.</p>
+<p>The transport is still Binder in every case — only the stability/versioning contract differs.</p>
+<h2 id="debugging-binder"><a class="header" href="#debugging-binder">Debugging Binder</a></h2>
+<pre><code class="language-bash">adb shell service list                       # registered services + their interfaces
+adb shell dumpsys &lt;service&gt;                  # service-specific state (first diagnostic step)
+adb shell cat /sys/kernel/debug/binder/stats # per-process transaction &amp; error counters
+adb shell cat /sys/kernel/debug/binder/transactions
+adb logcat | grep -i TransactionTooLarge     # oversized Parcels
+adb logcat | grep -i DeadObjectException     # calling into a dead process
+</code></pre>
+<p><code>dumpsys</code> itself is a Binder call — each service implements <code>dump()</code> and writes its state over
+a passed-in FD, which is why it works uniformly across the whole framework.</p>
 <h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
 <ul>
-<li><a href="internals.html">Android internals</a> — Binder is the core IPC mechanism in Android’s architecture</li>
+<li><a href="internals.html">Android Internals</a> — Binder is the central IPC mechanism of the whole stack.</li>
+<li><a href="system_server.html">SystemServer &amp; Core Services</a> — every system service is reached over Binder
+via <code>servicemanager</code>; the Watchdog guards against binder-thread starvation.</li>
+<li><a href="zygote_startup.html">Zygote &amp; App Startup</a> — forked app processes join a binder thread pool
+during startup.</li>
+<li><a href="treble_hal.html">Project Treble &amp; HALs</a> / <a href="mainline_apex.html">Project Mainline &amp; APEX</a> —
+HIDL and stable AIDL define versioned Binder interfaces across the framework/vendor boundary.</li>
+<li><a href="ndk_jni.html">NDK &amp; JNI</a> — native code uses the same driver through <code>libbinder</code>.</li>
+<li><a href="selinux_android.html">SELinux on Android</a> / <a href="app_security.html">App Security</a> — the
+<code>binder</code> SELinux class and UID-based permission checks enforced at transactions.</li>
+<li><a href="performance_profiling.html">Performance &amp; Profiling</a> — synchronous Binder calls are a common
+source of main-thread jank.</li>
+</ul>
+<h2 id="pitfalls"><a class="header" href="#pitfalls">Pitfalls</a></h2>
+<ul>
+<li><strong><code>TransactionTooLargeException</code>.</strong> The ~1 MB transaction buffer is <strong>shared across all
+in-flight calls in the process</strong>, not per call — a payload far smaller than 1 MB can still
+fail under concurrency. Pass large data via <code>ParcelFileDescriptor</code>/ashmem, not in the Parcel.</li>
+<li><strong>Blocking the main thread.</strong> A synchronous Binder call waits for the remote process. From
+the UI thread this causes jank or ANRs; do IPC off the main thread.</li>
+<li><strong>Exhausting the thread pool.</strong> If service binder threads block on a contended lock, callers
+queue and time out. Keep transaction handlers fast and non-blocking.</li>
+<li><strong>Forgetting <code>clearCallingIdentity</code>.</strong> Accessing a system-only resource while still carrying
+the caller’s identity throws <code>SecurityException</code>; always pair clear/restore in a <code>finally</code>.</li>
+<li><strong>Leaking remote references / skipping <code>linkToDeath</code>.</strong> Without death notifications a server
+accumulates dead clients’ callbacks and state; without <code>unlinkToDeath</code> you leak recipients.</li>
+<li><strong>Assuming <code>oneway</code> ordering.</strong> One-way calls preserve order only per target object, never
+return errors, and draw from a smaller async buffer.</li>
+<li><strong>Persisting or reusing a Parcel.</strong> Its layout is transaction-specific and may hold live
+handles — marshal fresh each time; never write one to disk.</li>
+<li><strong>Ignoring <code>RemoteException</code>/<code>DeadObjectException</code>.</strong> Any cross-process call can fail because
+the peer died; every proxy call needs a failure path.</li>
 </ul>
 
                     </main>

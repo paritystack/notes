@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-69bbd6a5.js";
+            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -201,9 +201,9 @@
 <li><a href="#common-pitfalls">Common Pitfalls</a></li>
 <li><a href="#related-topics">Related Topics</a></li>
 </ul>
-<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
 <p><strong>Product Quantization (PQ)</strong> is a vector compression technique that allows you to store and search billion-scale high-dimensional vector collections in a fraction of the memory of raw vectors, with controllable accuracy loss. Combined with the <strong>Inverted File Index (IVF)</strong> for partitioning, it forms the basis of FAISS’s most popular indexes (<code>IVF*,PQ*</code>) and powers vector search at Facebook, Spotify, Pinterest, and most large-scale ANN deployments where raw vector storage isn’t viable.</p>
-<p>Where [[hnsw]] gives you near-perfect recall in exchange for high memory (vectors + graph), PQ+IVF gives you 10-100× memory reduction at the cost of some recall — the appropriate tradeoff when N exceeds ~10M and you can’t afford to store full vectors in RAM.</p>
+<p>Where <a href="hnsw.html">HNSW</a> gives you near-perfect recall in exchange for high memory (vectors + graph), PQ+IVF gives you 10-100× memory reduction at the cost of some recall — the appropriate tradeoff when N exceeds ~10M and you can’t afford to store full vectors in RAM.</p>
 <h3 id="what-pq-buys-you"><a class="header" href="#what-pq-buys-you">What PQ Buys You</a></h3>
 <div class="table-wrapper">
 <table>
@@ -336,7 +336,7 @@ coarse_centroids = coarse_quantizer.cluster_centers_   # shape (nlist, d)
 <li>Assign each DB vector to its closest coarse centroid:
 <pre><code>inverted_lists[i] = [v ∈ DB : argmin_c dist(v, c) == i]
 </code></pre>
-This is “inverted” in the same sense as an [[inverted-index]] — for each cluster (≈ “term”), store the list of vectors (≈ “docs”) that belong to it.</li>
+This is “inverted” in the same sense as an <a href="inverted_index.html">inverted index</a> — for each cluster (≈ “term”), store the list of vectors (≈ “docs”) that belong to it.</li>
 </ol>
 <h3 id="query"><a class="header" href="#query">Query</a></h3>
 <p>At search time:</p>
@@ -592,7 +592,7 @@ for dist, vid in hits:
 </div>
 <p>For <code>N = 10^9, d = 768, m = 16, nlist = 4096, nprobe = 32</code>:</p>
 <ul>
-<li>Memory: ~16 GB for codes + ~12 MB for coarse centroids + ~1.6 MB for PQ codebooks ≈ <strong>16 GB</strong></li>
+<li>Memory: ~16 GB for codes + ~12 MB for coarse centroids + ~0.8 MB for PQ codebooks ≈ <strong>16 GB</strong></li>
 <li>Query: <code>768 × 4096 + 32 × ~244K × 16 = 3M + 125M = ~128M ops</code>, vs <code>768 × 10^9 = 770 G</code> brute force. <strong>6000× speedup</strong>.</li>
 </ul>
 <h2 id="memory-and-recall-tradeoffs"><a class="header" href="#memory-and-recall-tradeoffs">Memory and Recall Tradeoffs</a></h2>
@@ -647,7 +647,7 @@ for dist, vid in hits:
 <li>Lower recall (~0.85-0.95) is acceptable</li>
 <li>Batch updates rather than streaming (PQ training requires retraining for distribution shifts)</li>
 </ul>
-<h3 id="choose-hnsw-when-hnsw"><a class="header" href="#choose-hnsw-when-hnsw">Choose HNSW when ([[hnsw]]):</a></h3>
+<h3 id="choose-hnsw-when-hnsw"><a class="header" href="#choose-hnsw-when-hnsw">Choose HNSW when (<a href="hnsw.html">HNSW</a>):</a></h3>
 <ul>
 <li>10K – 100M vectors fit in RAM</li>
 <li>Recall ≥ 0.95 required</li>
@@ -743,11 +743,11 @@ for dist, vid in hits:
 </ol>
 <h2 id="related-topics"><a class="header" href="#related-topics">Related Topics</a></h2>
 <ul>
-<li>[[hnsw]] — the in-memory alternative; often combined with PQ for memory-constrained graph indexes</li>
-<li>[[minhash-lsh]] — hash-based ANN for set similarity (not vector L2)</li>
-<li>[[inverted-index]] — the keyword counterpart; hybrid retrieval combines both</li>
-<li>[[probabilistic]] — sketches (HLL, CMS) share the “lossy compression for queries” philosophy</li>
-<li>[[spatial-structures]] — low-dim alternatives (k-d, ball trees)</li>
+<li><a href="hnsw.html">HNSW</a> — the in-memory alternative; often combined with PQ for memory-constrained graph indexes</li>
+<li><a href="minhash_lsh.html">MinHash/LSH</a> — hash-based ANN for set similarity (not vector L2)</li>
+<li><a href="inverted_index.html">inverted index</a> — the keyword counterpart; hybrid retrieval combines both</li>
+<li><a href="probabilistic.html">probabilistic structures</a> — sketches (HLL, CMS) share the “lossy compression for queries” philosophy</li>
+<li><a href="spatial_structures.html">spatial structures</a> — low-dim alternatives (k-d, ball trees)</li>
 </ul>
 <p>External:</p>
 <ul>

@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-69bbd6a5.js";
+            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -440,11 +440,12 @@ a binding table is built (MAC → IP → port → VLAN).
 <p>Relays normally add option 82; switches should drop option 82 on untrusted ports to prevent spoofing.</p>
 <h2 id="dhcp-lease-process-edge-cases"><a class="header" href="#dhcp-lease-process-edge-cases">DHCP Lease Process Edge Cases</a></h2>
 <h3 id="client-returning-to-same-network"><a class="header" href="#client-returning-to-same-network">Client Returning to Same Network</a></h3>
-<p>Client remembers its previous IP and starts at REBINDING state:</p>
-<pre><code>DHCPREQUEST (with previous IP in options)
+<p>Client remembers its previous IP and starts in the INIT-REBOOT state (broadcasting a DHCPREQUEST with the previous address in the Requested IP option):</p>
+<pre><code>DHCPREQUEST (with previous IP in Requested IP Address option)
   → if available: DHCPACK
-  → if taken: DHCPNAK, restart from INIT
+  → if taken/wrong subnet: DHCPNAK, restart from INIT
 </code></pre>
+<p>(REBINDING is a different state — it happens after T2 when renewing an active lease, not on reboot.)</p>
 <h3 id="address-conflict-detection"><a class="header" href="#address-conflict-detection">Address Conflict Detection</a></h3>
 <p>After receiving DHCPACK, client sends an ARP probe for the assigned IP. If someone replies, client sends DHCPDECLINE and restarts.</p>
 <h3 id="lease-expiry-while-disconnected"><a class="header" href="#lease-expiry-while-disconnected">Lease Expiry While Disconnected</a></h3>

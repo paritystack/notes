@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-69bbd6a5.js";
+            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -742,7 +742,7 @@ TOOL: MyVoIPApp 1.0
 <h3 id="rtcp-bandwidth-management"><a class="header" href="#rtcp-bandwidth-management">RTCP Bandwidth Management</a></h3>
 <p><strong>Rules</strong> (to prevent RTCP from overwhelming network):</p>
 <ol>
-<li><strong>RTCP bandwidth d 5% of RTP bandwidth</strong></li>
+<li><strong>RTCP bandwidth ≤ 5% of RTP bandwidth</strong></li>
 <li><strong>Senders get 25% of RTCP bandwidth</strong></li>
 <li><strong>Receivers share remaining 75%</strong></li>
 <li><strong>Minimum interval between reports: 5 seconds</strong></li>
@@ -778,7 +778,7 @@ TOOL: MyVoIPApp 1.0
 RTP bandwidth = 256 kbps
 RTCP bandwidth = 5% = 12.8 kbps
 
-Average RTCP report interval H 5-10 seconds
+Average RTCP report interval ≈ 5-10 seconds
 </code></pre>
 <hr>
 <h2 id="payload-types-and-codecs"><a class="header" href="#payload-types-and-codecs">Payload Types and Codecs</a></h2>
@@ -1378,7 +1378,7 @@ Receiver arrival times (with jitter):
   t=61ms:  Packet 3 arrives (21ms delay)
   t=95ms:  Packet 4 arrives (35ms delay)
 
-Without buffering  choppy audio/video
+Without buffering → choppy audio/video
 </code></pre>
 <h3 id="the-solution-jitter-buffer"><a class="header" href="#the-solution-jitter-buffer">The Solution: Jitter Buffer</a></h3>
 <p>A jitter buffer absorbs timing variations by:</p>
@@ -1638,10 +1638,10 @@ def recover_lost_packet(good_packet, fec_packet):
   Packet 3 (FEC = P1 XOR P2)
 
 Receive scenario:
-   Packet 1 received
-   Packet 2 lost
-   Packet 3 (FEC) received
-   Recover P2 = P1 XOR FEC
+  ✓ Packet 1 received
+  ✗ Packet 2 lost
+  ✓ Packet 3 (FEC) received
+  → Recover P2 = P1 XOR FEC
 </code></pre>
 <p><strong>Overhead</strong>: 33% for this scheme (1 FEC per 2 data packets)</p>
 <h4 id="opus-in-band-fec"><a class="header" href="#opus-in-band-fec">Opus In-Band FEC</a></h4>
@@ -1831,9 +1831,9 @@ result = parse_audio_level_extension(ext_data)
 <p>SRTP doesn’t use keys directly. Instead:</p>
 <pre><code>Master Key (128 or 256 bits)
 Master Salt (112 bits)
-    
+    ↓
 Key Derivation Function (KDF)
-    
+    ↓
 Encryption Key, Auth Key, Salting Key
 </code></pre>
 <p><strong>Separate keys for:</strong></p>
@@ -1974,21 +1974,21 @@ a=fmtp:97 profile-level-id=42e01f      # H.264 profile
 <h3 id="webrtc"><a class="header" href="#webrtc">WebRTC</a></h3>
 <p><strong>WebRTC</strong> is the biggest user of RTP today. Architecture:</p>
 <pre><code>Application (JavaScript)
-        
+        ↓
    WebRTC API
-        
-                 
-  Signaling       (SDP offer/answer)
-                 $
-  ICE             (NAT traversal)
-                 $
-  DTLS            (Key exchange)
-                 $
-  SRTP/SRTCP      (Media transport)  RTP here
-                 $
-  SCTP            (Data channels)
-                 
-        
+        ↓
+┌──────────────────┐
+│  Signaling       │ (SDP offer/answer)
+├──────────────────┤
+│  ICE             │ (NAT traversal)
+├──────────────────┤
+│  DTLS            │ (Key exchange)
+├──────────────────┤
+│  SRTP/SRTCP      │ (Media transport) ← RTP here
+├──────────────────┤
+│  SCTP            │ (Data channels)
+└──────────────────┘
+        ↓
       UDP
 </code></pre>
 <p><strong>RTP in WebRTC:</strong></p>
@@ -2086,10 +2086,10 @@ a=rtpmap:111 opus/48000/2
   |
   | RTP to 239.1.2.3:5004
   |
-    &gt; Receiver 1
-    &gt; Receiver 2
-    &gt; Receiver 3
-    &gt; Receiver N
+  ├──&gt; Receiver 1
+  ├──&gt; Receiver 2
+  ├──&gt; Receiver 3
+  └──&gt; Receiver N
 </code></pre>
 <p><strong>Challenges:</strong></p>
 <ul>
@@ -2150,11 +2150,11 @@ def send_voip_audio(sender, audio_stream):
 <p><strong>Architecture:</strong></p>
 <pre><code>Streamer                             Viewer
   Camera                               Display
-                                        
+    ↓                                    ↑
   H.264 Encoder                    H.264 Decoder
-                                        
+    ↓                                    ↑
   RTP Packetizer                  RTP Depacketizer
-                                        
+    ↓                                    ↑
   |=========== RTP/UDP/IP =============|
 </code></pre>
 <p><strong>Typical Setup:</strong></p>
@@ -2331,8 +2331,8 @@ jitter_buffer = JitterBuffer(
   SSRC 3: 360p  @ 0.3 Mbps  (low)
 
 SFU routes appropriate stream to each receiver:
-  Desktop with good connection  high
-  Mobile with poor connection   low
+  Desktop with good connection → high
+  Mobile with poor connection  → low
 </code></pre>
 <p><strong>SDP Signaling:</strong></p>
 <pre><code>m=video 9 UDP/TLS/RTP/SAVPF 96
@@ -2345,13 +2345,13 @@ a=ssrc:33333333 cname:user@host
 <h3 id="svc-scalable-video-coding"><a class="header" href="#svc-scalable-video-coding">SVC (Scalable Video Coding)</a></h3>
 <p><strong>SVC</strong>: Single encoded stream with multiple quality layers.</p>
 <pre><code>Base layer: 360p
-Enhancement layer 1: +360p  720p
-Enhancement layer 2: +720p  1080p
+Enhancement layer 1: +360p → 720p
+Enhancement layer 2: +720p → 1080p
 
 Receiver can decode:
-  - Base only  360p
-  - Base + EL1  720p
-  - Base + EL1 + EL2  1080p
+  - Base only → 360p
+  - Base + EL1 → 720p
+  - Base + EL1 + EL2 → 1080p
 </code></pre>
 <p><strong>Advantages over Simulcast:</strong></p>
 <ul>
@@ -2384,11 +2384,11 @@ Output:
 <p><strong>Use case</strong>: Audio conferencing with many participants.</p>
 <h3 id="rtp-translator"><a class="header" href="#rtp-translator">RTP Translator</a></h3>
 <p><strong>Translator</strong>: Forwards RTP packets between networks.</p>
-<pre><code>Internal Network    Translator    External Network
+<pre><code>Internal Network  ←→  Translator  ←→  External Network
 
 Functions:
 - NAT traversal
-- Protocol conversion (RTP  RTP/RTCP mux)
+- Protocol conversion (RTP ↔ RTP/RTCP mux)
 - Transcoding (optional)
 </code></pre>
 <h3 id="bandwidth-estimation"><a class="header" href="#bandwidth-estimation">Bandwidth Estimation</a></h3>
@@ -2460,7 +2460,7 @@ def create_rtcp_sr(rtp_timestamp, ntp_time):
 Video SR: NTP=12345.500, RTP=90000
 
 Both streams aligned to same NTP time
- Perfect lip-sync
+→ Perfect lip-sync
 </code></pre>
 <hr>
 <h2 id="monitoring-and-debugging"><a class="header" href="#monitoring-and-debugging">Monitoring and Debugging</a></h2>
@@ -2481,8 +2481,8 @@ rtp.seq &gt; 1000 &amp;&amp; rtp.seq &lt; 1100  # Sequence range
 </code></pre>
 <p><strong>RTP Stream Analysis:</strong></p>
 <ol>
-<li><strong>Telephony</strong>  <strong>RTP</strong>  <strong>RTP Streams</strong></li>
-<li>Select stream  <strong>Analyze</strong></li>
+<li><strong>Telephony</strong> → <strong>RTP</strong> → <strong>RTP Streams</strong></li>
+<li>Select stream → <strong>Analyze</strong></li>
 </ol>
 <p><strong>Metrics shown:</strong></p>
 <ul>
@@ -2495,8 +2495,8 @@ rtp.seq &gt; 1000 &amp;&amp; rtp.seq &lt; 1100  # Sequence range
 </ul>
 <p><strong>Stream Player:</strong></p>
 <ol>
-<li><strong>Telephony</strong>  <strong>RTP</strong>  <strong>RTP Streams</strong></li>
-<li>Select audio stream  <strong>Play Streams</strong></li>
+<li><strong>Telephony</strong> → <strong>RTP</strong> → <strong>RTP Streams</strong></li>
+<li>Select audio stream → <strong>Play Streams</strong></li>
 <li>Listen to decoded audio</li>
 </ol>
 <p><strong>Packet Details:</strong></p>
@@ -2518,8 +2518,8 @@ rtp.seq &gt; 1000 &amp;&amp; rtp.seq &lt; 1100  # Sequence range
 tcpdump -i eth0 'udp[1] &amp; 1 == 0 &amp;&amp; udp[8] &amp; 0xC0 == 0x80'
 
 # Explanation:
-# udp[1] &amp; 1 == 0    Even destination port
-# udp[8] &amp; 0xC0 == 0x80    RTP version 2
+# udp[1] &amp; 1 == 0   → Even destination port
+# udp[8] &amp; 0xC0 == 0x80   → RTP version 2
 </code></pre>
 <h4 id="ffmpeg-with-rtp"><a class="header" href="#ffmpeg-with-rtp">ffmpeg with RTP</a></h4>
 <p><strong>Send video via RTP:</strong></p>
@@ -3162,8 +3162,8 @@ vlc rtp://@:5004
 <p><strong>RTCP = Quality Reports</strong></p>
 <ul>
 <li>Like a report card for the delivery service</li>
-<li>“10% of trucks were late”  send trucks slower</li>
-<li>“Everything arrived on time”  can send more trucks</li>
+<li>“10% of trucks were late” → send trucks slower</li>
+<li>“Everything arrived on time” → can send more trucks</li>
 </ul>
 </li>
 <li>
@@ -3183,9 +3183,9 @@ vlc rtp://@:5004
 </ul>
 <p><strong>Real-world examples:</strong></p>
 <ul>
-<li><strong>Zoom/Teams calls</strong>: Your voice  RTP  Friend’s computer</li>
-<li><strong>YouTube Live</strong>: Streamer  RTP  YouTube  You</li>
-<li><strong>Online gaming voice chat</strong>: Your mic  RTP  Other players</li>
+<li><strong>Zoom/Teams calls</strong>: Your voice → RTP → Friend’s computer</li>
+<li><strong>YouTube Live</strong>: Streamer → RTP → YouTube → You</li>
+<li><strong>Online gaming voice chat</strong>: Your mic → RTP → Other players</li>
 </ul>
 <hr>
 <h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>

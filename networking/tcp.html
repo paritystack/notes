@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-69bbd6a5.js";
+            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -501,12 +501,11 @@ Benefits:
 - Allows ACKs to piggyback on response data
 - Typical delay: 40-500ms (usually 200ms)
 </code></pre>
-<pre><code class="language-bash"># Linux - Configure delayed ACK
-# Disable delayed ACK (not recommended)
-sudo sysctl -w net.ipv4.tcp_delack_seg=1
-
-# Default behavior (ACK every 2nd segment or after timeout)
-sudo sysctl -w net.ipv4.tcp_delack_seg=2
+<pre><code class="language-bash"># Linux has no sysctl to tune delayed ACK directly (tcp_delack_seg
+# exists only in some Android/Qualcomm kernels, not mainline).
+# Control it per-socket instead:
+#   setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, 1)  # disable delayed ACK (one-shot)
+# The kernel re-enables delayed ACK automatically; set TCP_QUICKACK again as needed.
 </code></pre>
 <h3 id="silly-window-syndrome"><a class="header" href="#silly-window-syndrome">Silly Window Syndrome</a></h3>
 <p>Problem when sender or receiver creates tiny segments:</p>
@@ -2526,29 +2525,11 @@ async def quic_client():
 # Run
 asyncio.run(quic_client())
 </code></pre>
-<p><strong>Node.js with node-quic:</strong></p>
-<pre><code class="language-javascript">const { createQuicSocket } = require('net');
-
-// Create QUIC socket
-const socket = createQuicSocket({ endpoint: { port: 0 } });
-
-// Connect to server
-const client = socket.connect({
-  address: 'quic.example.com',
-  port: 443,
-  alpn: 'h3',  // HTTP/3
-});
-
-// Handle stream
-client.on('stream', (stream) =&gt; {
-  stream.on('data', (data) =&gt; {
-    console.log(`Received: ${data.length} bytes`);
-  });
-});
-
-// Create stream and send request
-const stream = client.openStream();
-stream.write('GET / HTTP/3\r\nHost: example.com\r\n\r\n');
+<p><strong>Node.js:</strong></p>
+<pre><code class="language-javascript">// Node's experimental built-in QUIC (createQuicSocket) was removed before
+// stabilizing. Use a userspace library instead, e.g. the WebTransport/HTTP3
+// bindings from @fails-components/webtransport, or call into a native
+// QUIC stack. There is no stable core `node:quic` API as of Node 22.
 </code></pre>
 <h3 id="connection-migration-example"><a class="header" href="#connection-migration-example">Connection Migration Example</a></h3>
 <pre><code class="language-python">import asyncio

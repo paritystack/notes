@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-69bbd6a5.js";
+            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -206,7 +206,7 @@
 <li><a href="#interview-patterns">Interview Patterns</a></li>
 <li><a href="#advanced-topics">Advanced Topics</a></li>
 </ul>
-<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
 <p>A <strong>Segment Tree</strong> is a tree data structure used for storing information about array intervals (segments). It allows efficient querying and updating of array ranges.</p>
 <h3 id="why-segment-trees"><a class="header" href="#why-segment-trees">Why Segment Trees?</a></h3>
 <p>Segment trees excel at problems requiring:</p>
@@ -441,7 +441,7 @@ Changed nodes: [1], [0-1], [0-3]
 </li>
 </ol>
 <p><strong>Visual Example</strong>:</p>
-<pre><code>Range update: Add 10 to [1, 3]
+<pre><code>Range update: Add 10 to [2, 3]   (fully covers the [2-3] node)
 
 Before:
         [0-3]: 16
@@ -449,16 +449,19 @@ Before:
    [0-1]: 4    [2-3]: 12
 
 After (with lazy):
-        [0-3]: 16, lazy=0
+        [0-3]: 36
         /              \
-   [0-1]: 4          [2-3]: 12
-   lazy=10           lazy=10
+   [0-1]: 4          [2-3]: 32, lazy=10
 
-When querying [1, 1]:
-- Visit [0-1], see lazy=10
-- Apply: [0-1] = 4 + 10*2 = 24
-- Push to children: [0].lazy=10, [1].lazy=10
-- Clear [0-1].lazy = 0
+[2-3] spans 2 elements, so its own sum is updated immediately
+(12 + 10*2 = 32); the lazy=10 is held for its children. [0-1] is
+untouched because indices 0 and 1 are outside [2, 3].
+
+When querying [2, 2]:
+- Visit [2-3], see lazy=10
+- Push to children: [2].lazy=10, [3].lazy=10
+- Clear [2-3].lazy = 0
+- Recurse into [2]: apply its lazy -&gt; 5 + 10 = 15
 </code></pre>
 <h3 id="time-complexity-with-lazy-propagation"><a class="header" href="#time-complexity-with-lazy-propagation">Time Complexity with Lazy Propagation</a></h3>
 <ul>

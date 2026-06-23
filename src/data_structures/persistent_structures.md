@@ -21,7 +21,7 @@ Persistent data structures preserve all historical versions on modification via 
 - [Common Problems](#common-problems)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 A **persistent data structure** preserves all previous versions of itself when modified. Unlike ephemeral (regular) data structures that destroy old versions on updates, persistent structures allow access to any historical version.
 

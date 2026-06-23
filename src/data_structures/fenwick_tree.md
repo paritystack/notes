@@ -26,7 +26,7 @@ A Fenwick tree (BIT) supports prefix sum queries and point updates in O(log n) w
 - [Interview Patterns](#interview-patterns)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 A **Fenwick Tree** (also called **Binary Indexed Tree** or **BIT**) is a data structure that efficiently supports prefix sum queries and point updates on an array. Invented by Peter Fenwick in 1994, it provides an elegant and space-efficient alternative to segment trees for certain range query problems.
 

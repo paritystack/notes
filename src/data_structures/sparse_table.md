@@ -24,7 +24,7 @@ A sparse table answers range minimum/maximum queries in O(1) after O(n log n) pr
 - [Interview Patterns](#interview-patterns)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 A **Sparse Table** is a data structure that answers **static range queries** in O(1) time after O(n log n) preprocessing. It's particularly efficient for **idempotent operations** like minimum, maximum, GCD, and LCM.
 

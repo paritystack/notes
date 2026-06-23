@@ -3842,12 +3842,14 @@ class MaxFlow:
         # Capacity matrix: capacity[u][v] = capacity of edge u -> v
         self.capacity = [[0] * vertices for _ in range(vertices)]
         self.graph = defaultdict(list)  # Adjacency list for faster iteration
+        self.original_edges = set()     # Forward edges of the original graph
 
     def add_edge(self, u, v, capacity):
         """Add directed edge with capacity."""
         self.capacity[u][v] = capacity
         self.graph[u].append(v)
         self.graph[v].append(u)  # Add reverse edge for residual graph
+        self.original_edges.add((u, v))
 
     def bfs_find_path(self, source, sink, parent):
         """

@@ -24,7 +24,7 @@ Segment trees answer range queries (sum, min, max) with O(log n) update and quer
 - [Interview Patterns](#interview-patterns)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 A **Segment Tree** is a tree data structure used for storing information about array intervals (segments). It allows efficient querying and updating of array ranges.
 
@@ -265,7 +265,7 @@ lazy = [0] * (4 * n)  # Lazy propagation array
 
 **Visual Example**:
 ```
-Range update: Add 10 to [1, 3]
+Range update: Add 10 to [2, 3]   (fully covers the [2-3] node)
 
 Before:
         [0-3]: 16
@@ -273,16 +273,19 @@ Before:
    [0-1]: 4    [2-3]: 12
 
 After (with lazy):
-        [0-3]: 16, lazy=0
+        [0-3]: 36
         /              \
-   [0-1]: 4          [2-3]: 12
-   lazy=10           lazy=10
+   [0-1]: 4          [2-3]: 32, lazy=10
 
-When querying [1, 1]:
-- Visit [0-1], see lazy=10
-- Apply: [0-1] = 4 + 10*2 = 24
-- Push to children: [0].lazy=10, [1].lazy=10
-- Clear [0-1].lazy = 0
+[2-3] spans 2 elements, so its own sum is updated immediately
+(12 + 10*2 = 32); the lazy=10 is held for its children. [0-1] is
+untouched because indices 0 and 1 are outside [2, 3].
+
+When querying [2, 2]:
+- Visit [2-3], see lazy=10
+- Push to children: [2].lazy=10, [3].lazy=10
+- Clear [2-3].lazy = 0
+- Recurse into [2]: apply its lazy -> 5 + 10 = 15
 ```
 
 ### Time Complexity with Lazy Propagation

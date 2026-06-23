@@ -418,7 +418,7 @@ class HashTable:
 
     def insert(self, key, value):
         hash_index = self.hash_function(key)
-        # Linear probing for collisions
+        # Separate chaining for collisions
         for item in self.table[hash_index]:
             if item[0] == key:
                 item[1] = value

@@ -20,7 +20,7 @@ Suffix arrays provide sorted [array](arrays.md) access to all suffixes of a stri
 - [Common Problems](#common-problems)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 **Suffix arrays** and **suffix trees** are powerful data structures for string processing. They enable efficient solutions to problems like pattern matching, longest repeated substring, and string compression.
 
@@ -288,12 +288,12 @@ def build_lcp_array(s, sa):
 
     k = 0  # Length of current LCP
     for i in range(n):
-        if rank[i] == n - 1:
+        if rank[i] == 0:
             k = 0
             continue
 
-        # Compare suffix starting at i with next suffix in sorted order
-        j = sa[rank[i] + 1]
+        # Compare suffix starting at i with the previous suffix in sorted order
+        j = sa[rank[i] - 1]
 
         # Extend LCP
         while i + k < n and j + k < n and s[i + k] == s[j + k]:
@@ -805,11 +805,11 @@ def build_lcp(s, sa):
 
     k = 0
     for i in range(n):
-        if rank[i] == n - 1:
+        if rank[i] == 0:
             k = 0
             continue
 
-        j = sa[rank[i] + 1]
+        j = sa[rank[i] - 1]
         while i+k < n and j+k < n and s[i+k] == s[j+k]:
             k += 1
 
@@ -942,12 +942,12 @@ function buildLCP(s, sa) {
 
     let k = 0;
     for (let i = 0; i < n; i++) {
-        if (rank[i] === n - 1) {
+        if (rank[i] === 0) {
             k = 0;
             continue;
         }
 
-        const j = sa[rank[i] + 1];
+        const j = sa[rank[i] - 1];
         while (i + k < n && j + k < n && s[i + k] === s[j + k]) {
             k++;
         }

@@ -272,14 +272,15 @@ Sorted by priority (high to low):
    - Works if same network
    - Lowest latency
 
-2. srflx (NAT)          Priority: 1694498815
-   - Try second
+2. prflx (Discovered)   Priority: 1862270975
+   - Higher type-preference (110) than srflx
+   - Learned during connectivity checks
+   - Alternative path
+
+3. srflx (NAT)          Priority: 1694498815
    - Works through NAT
    - Good latency
-
-3. prflx (Discovered)   Priority: 1862270975
-   - Try if discovered
-   - Alternative path
+   - The common internet case
 
 4. relay (TURN)         Priority: 16777215
    - Try last

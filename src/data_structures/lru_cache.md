@@ -3,7 +3,6 @@
 ## Overview
 
 An LRU (Least Recently Used) cache combines a [hash table](hash_tables.md) for O(1) lookup with a doubly [linked list](linked_lists.md) for O(1) eviction order. [Persistent structures](persistent_structures.md) offer functional immutable cache variants. This pattern appears in OS page replacement, CPU caches, and database buffer pools.
- (Least Recently Used Cache)
 
 ## Table of Contents
 - [Overview](#overview)
@@ -26,7 +25,7 @@ An LRU (Least Recently Used) cache combines a [hash table](hash_tables.md) for O
 - [Interview Patterns](#interview-patterns)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 An **LRU (Least Recently Used) Cache** is a data structure that stores a limited number of items and automatically evicts the least recently used item when the cache reaches capacity. It's one of the most common cache eviction policies.
 

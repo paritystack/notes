@@ -851,17 +851,17 @@ Bucket 3: [0.6, 0.8) → []
 Bucket 4: [0.8, 1.0] → []
 ```
 
-**Step 2: Distribute elements**
-- 0.78 → index = 10 * 0.78 = 7 → bucket[3]
-- 0.17 → index = 10 * 0.17 = 1 → bucket[0]
-- 0.39 → index = 10 * 0.39 = 3 → bucket[1]
-- 0.26 → index = 10 * 0.26 = 2 → bucket[1]
-- 0.72 → index = 10 * 0.72 = 7 → bucket[3]
-- 0.94 → index = 10 * 0.94 = 9 → bucket[4]
-- 0.21 → index = 10 * 0.21 = 2 → bucket[1]
-- 0.12 → index = 10 * 0.12 = 1 → bucket[0]
-- 0.23 → index = 10 * 0.23 = 2 → bucket[1]
-- 0.68 → index = 10 * 0.68 = 6 → bucket[3]
+**Step 2: Distribute elements** (5 buckets, so index = int(5 * value))
+- 0.78 → index = int(5 * 0.78) = 3 → bucket[3]
+- 0.17 → index = int(5 * 0.17) = 0 → bucket[0]
+- 0.39 → index = int(5 * 0.39) = 1 → bucket[1]
+- 0.26 → index = int(5 * 0.26) = 1 → bucket[1]
+- 0.72 → index = int(5 * 0.72) = 3 → bucket[3]
+- 0.94 → index = int(5 * 0.94) = 4 → bucket[4]
+- 0.21 → index = int(5 * 0.21) = 1 → bucket[1]
+- 0.12 → index = int(5 * 0.12) = 0 → bucket[0]
+- 0.23 → index = int(5 * 0.23) = 1 → bucket[1]
+- 0.68 → index = int(5 * 0.68) = 3 → bucket[3]
 
 ```
 Bucket 0: [0.17, 0.12]

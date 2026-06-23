@@ -1651,8 +1651,8 @@ print(f"LCS length: {length}, substring: '{substring}'")  # 4, "BABC"
 **DP Table Visualization:**
 
 ```
-text1 = "ABABC"
-text2 = "BABCA"
+text1 = "ABABC"  (rows)
+text2 = "BABCA"  (cols)
 
     ""  B  A  B  C  A
 ""   0  0  0  0  0  0
@@ -1662,30 +1662,14 @@ A    0  0  2  0  0  1
 B    0  1  0  3  0  0
 C    0  0  0  0  4  0
 
-Maximum value: 4 at position (4,3)
-Substring: "BABC" (but there's an error above - let me recalculate)
+Maximum value: 4, at row "C" (i=5), col "C" (j=4).
+Trace the chain that builds it:
+  dp[2][1]: text1[1]='B' == text2[0]='B' -> dp[1][0] + 1 = 1
+  dp[3][2]: text1[2]='A' == text2[1]='A' -> dp[2][1] + 1 = 2
+  dp[4][3]: text1[3]='B' == text2[2]='B' -> dp[3][2] + 1 = 3
+  dp[5][4]: text1[4]='C' == text2[3]='C' -> dp[4][3] + 1 = 4
 
-Actually for "ABABC" and "BABCA":
-text1 = "ABABC"
-text2 = "BABCA"
-
-    ""  B  A  B  C  A
-""   0  0  0  0  0  0
-A    0  0  1  0  0  1
-B    0  1  0  2  0  0
-A    0  0  2  0  0  1
-B    0  1  0  3  0  0
-C    0  0  0  0  4  0
-
-Max = 4? Let me trace:
-At (4,3): text1[3]='B', text2[2]='B' match, dp[4][3] = dp[3][2] + 1
-dp[3][2]: text1[2]='A', text2[1]='A' match, dp[3][2] = dp[2][1] + 1
-dp[2][1]: text1[1]='B', text2[0]='B' match, dp[2][1] = dp[1][0] + 1
-dp[1][0] = 0 (base)
-
-So dp[4][3] = 3, giving "BAB"
-
-Let me recalculate the whole table:
+end_pos = 5, so substring = text1[5-4:5] = text1[1:5] = "BABC".
 ```
 
 **All Common Substrings:**
@@ -2186,7 +2170,7 @@ def hamming_distance_oneliner(str1, str2):
 # Example
 str1 = "karolin"
 str2 = "kathrin"
-print(hamming_distance(str1, str2))  # 3 (positions 1, 4, 5 differ)
+print(hamming_distance(str1, str2))  # 3 (positions 2, 3, 4 differ)
 ```
 
 **Hamming Distance for Binary Strings:**
@@ -3145,21 +3129,24 @@ class SpellChecker:
         word_lower = word.lower()
         suggestions = []
 
-        # BFS through trie to find similar words
-        def dfs(node, current_word, distance):
-            if distance > max_distance:
+        # Any word within edit distance d can be at most len(word)+d long,
+        # so prune branches once the current prefix exceeds that length.
+        max_len = len(word_lower) + max_distance
+
+        # DFS through trie, scoring complete words by actual edit distance
+        def dfs(node, current_word):
+            if len(current_word) > max_len:
                 return
 
-            if node.is_end_of_word:
-                if current_word != word_lower:
-                    dist, _ = edit_distance(word_lower, current_word)
-                    if dist <= max_distance:
-                        suggestions.append((current_word, dist))
+            if node.is_end_of_word and current_word != word_lower:
+                dist, _ = edit_distance(word_lower, current_word)
+                if dist <= max_distance:
+                    suggestions.append((current_word, dist))
 
             for char, child in node.children.items():
-                dfs(child, current_word + char, distance + 1)
+                dfs(child, current_word + char)
 
-        dfs(self.trie.root, "", 0)
+        dfs(self.trie.root, "")
 
         # Sort by distance, then alphabetically
         suggestions.sort(key=lambda x: (x[1], x[0]))

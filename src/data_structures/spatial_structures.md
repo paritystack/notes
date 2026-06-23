@@ -16,7 +16,7 @@ Spatial data structures (KD-trees, R-trees, ball trees, quadtrees) partition spa
 - [Common Problems](#common-problems)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 **Spatial data structures** are specialized structures designed for efficiently storing and querying multi-dimensional data. They enable fast range queries, nearest neighbor searches, and collision detection in 2D, 3D, and higher-dimensional spaces.
 
@@ -570,18 +570,20 @@ class Octree:
         x, y, z = self.boundary.x, self.boundary.y, self.boundary.z
         s = self.boundary.size / 2  # Half of current size
 
-        # Create 8 octants
+        # Create 8 octants. `s` is each child's half-width, so child centers
+        # are offset from the parent center by exactly `s` (not s/2) to tile
+        # the parent cube without gaps or overlap.
         # Top layer (y+)
-        self.children[0] = Octree(Cube(x - s/2, y + s/2, z - s/2, s), self.capacity)  # TNW
-        self.children[1] = Octree(Cube(x + s/2, y + s/2, z - s/2, s), self.capacity)  # TNE
-        self.children[2] = Octree(Cube(x - s/2, y + s/2, z + s/2, s), self.capacity)  # TSW
-        self.children[3] = Octree(Cube(x + s/2, y + s/2, z + s/2, s), self.capacity)  # TSE
+        self.children[0] = Octree(Cube(x - s, y + s, z - s, s), self.capacity)  # TNW
+        self.children[1] = Octree(Cube(x + s, y + s, z - s, s), self.capacity)  # TNE
+        self.children[2] = Octree(Cube(x - s, y + s, z + s, s), self.capacity)  # TSW
+        self.children[3] = Octree(Cube(x + s, y + s, z + s, s), self.capacity)  # TSE
 
         # Bottom layer (y-)
-        self.children[4] = Octree(Cube(x - s/2, y - s/2, z - s/2, s), self.capacity)  # BNW
-        self.children[5] = Octree(Cube(x + s/2, y - s/2, z - s/2, s), self.capacity)  # BNE
-        self.children[6] = Octree(Cube(x - s/2, y - s/2, z + s/2, s), self.capacity)  # BSW
-        self.children[7] = Octree(Cube(x + s/2, y - s/2, z + s/2, s), self.capacity)  # BSE
+        self.children[4] = Octree(Cube(x - s, y - s, z - s, s), self.capacity)  # BNW
+        self.children[5] = Octree(Cube(x + s, y - s, z - s, s), self.capacity)  # BNE
+        self.children[6] = Octree(Cube(x - s, y - s, z + s, s), self.capacity)  # BSW
+        self.children[7] = Octree(Cube(x + s, y - s, z + s, s), self.capacity)  # BSE
 
         self.divided = True
 

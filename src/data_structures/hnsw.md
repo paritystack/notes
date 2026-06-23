@@ -74,8 +74,8 @@ ANN methods aim for **recall ≥ 0.95** at 10–100× the QPS of brute force.
 
 Major ANN families:
 - **Tree-based:** Annoy (random projection trees), Spotify
-- **Hashing-based:** LSH (locality-sensitive hashing) — see [[minhash-lsh]]
-- **Quantization-based:** PQ, OPQ, ScaNN — see [[product-quantization]]
+- **Hashing-based:** LSH (locality-sensitive hashing) — see [MinHash/LSH](minhash_lsh.md)
+- **Quantization-based:** PQ, OPQ, ScaNN — see [product quantization](product_quantization.md)
 - **Graph-based:** HNSW, NSG, DiskANN — *this document*
 
 Graph-based methods consistently lead recall-vs-latency benchmarks on dense embeddings (ann-benchmarks.com).
@@ -705,10 +705,10 @@ When the dataset exceeds RAM, in-memory HNSW fails. Options:
 
 ### Consider alternatives when:
 - **Brute force**: N < 10K, or recall must be exactly 1.0
-- **IVF-PQ** ([[product-quantization]]): N > 100M, RAM-limited, lower recall tolerable
+- **IVF-PQ** ([product quantization](product_quantization.md)): N > 100M, RAM-limited, lower recall tolerable
 - **DiskANN**: billion-scale, single-machine, tight memory budget
-- **LSH** ([[minhash-lsh]]): set similarity (Jaccard), not vector L2
-- **k-d tree**: dimensions < 20 — see [[spatial-structures]]
+- **LSH** ([MinHash/LSH](minhash_lsh.md)): set similarity (Jaccard), not vector L2
+- **k-d tree**: dimensions < 20 — see [spatial structures](spatial_structures.md)
 - **ScaNN**: very-high-recall regime with anisotropic loss
 
 ## Tuning Guide
@@ -773,11 +773,11 @@ When the dataset exceeds RAM, in-memory HNSW fails. Options:
 
 ## Related Topics
 
-- [[product-quantization]] — vector compression and IVF-based ANN; often combined with HNSW
-- [[minhash-lsh]] — hash-based ANN for set similarity (Jaccard)
-- [[spatial-structures]] — k-d trees, R-trees for low-dim spatial search
-- [[skip-lists]] — direct conceptual ancestor of HNSW's layered structure
-- [[inverted-index]] — keyword search; often hybridized with HNSW for dense+sparse retrieval
+- [product quantization](product_quantization.md) — vector compression and IVF-based ANN; often combined with HNSW
+- [MinHash/LSH](minhash_lsh.md) — hash-based ANN for set similarity (Jaccard)
+- [spatial structures](spatial_structures.md) — k-d trees, R-trees for low-dim spatial search
+- [skip lists](skip_lists.md) — direct conceptual ancestor of HNSW's layered structure
+- [inverted index](inverted_index.md) — keyword search; often hybridized with HNSW for dense+sparse retrieval
 
 External:
 - `ai/vector_databases.md` — application-level view of vector DBs that use HNSW

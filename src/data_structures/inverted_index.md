@@ -756,11 +756,11 @@ This two-phase pattern (top-K-per-shard, then fetch) is universal.
 - Documents have natural tokenization (words, code identifiers, log fields)
 - You need boolean / phrase / proximity queries
 - Top-K relevance ranking matters (BM25, custom scoring)
-- Hybrid retrieval: combine with dense ([[hnsw]]) for "best of both"
+- Hybrid retrieval: combine with dense ([HNSW](hnsw.md)) for "best of both"
 
 ### Don't use an inverted index for:
-- Pure semantic similarity (use [[hnsw]] / [[product-quantization]])
-- Substring search on non-tokenizable data (use [[suffix-arrays]] or n-gram index)
+- Pure semantic similarity (use [HNSW](hnsw.md) / [product quantization](product_quantization.md))
+- Substring search on non-tokenizable data (use [suffix arrays](suffix_arrays.md) or n-gram index)
 - Range / numeric / point lookups (use B-trees, range structures, columnar stores)
 - Fuzzy matching where edit distance is the primary signal (use BK-trees or Levenshtein automata over the term dictionary)
 
@@ -815,13 +815,13 @@ The two signals are complementary: BM25 catches exact-term matches (proper nouns
 
 ## Related Topics
 
-- [[hnsw]] — dense vector ANN; hybridized with inverted index for modern search
-- [[suffix-arrays]] — substring search when terms aren't word-bounded
-- [[tries]] — alternative to FST for in-memory term dictionaries
-- [[advanced-trees]] — LSM-tree pattern underlies Lucene segment management
-- [[probabilistic]] — Bloom filters used in inverted indexes for negative lookups
-- [[bloom-filter]] — block-level skip optimization
-- [[minhash-lsh]] — set/near-dup search at scale (complementary to inverted index for dedup)
+- [HNSW](hnsw.md) — dense vector ANN; hybridized with inverted index for modern search
+- [suffix arrays](suffix_arrays.md) — substring search when terms aren't word-bounded
+- [tries](tries.md) — alternative to FST for in-memory term dictionaries
+- [advanced trees](advanced_trees.md) — LSM-tree pattern underlies Lucene segment management
+- [probabilistic structures](probabilistic.md) — Bloom filters used in inverted indexes for negative lookups
+- [Bloom filter](bloom_filter.md) — block-level skip optimization
+- [MinHash/LSH](minhash_lsh.md) — set/near-dup search at scale (complementary to inverted index for dedup)
 
 External:
 - `algorithms/string_algorithms.md` — tokenization, stemming, and text-processing algorithms

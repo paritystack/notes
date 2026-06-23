@@ -26,7 +26,7 @@ Union-find (DSU) maintains a collection of disjoint sets with near-O(1) union an
 - [Interview Patterns](#interview-patterns)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 Union-Find (also called Disjoint Set Union or DSU) is a data structure that efficiently tracks a partition of a set into disjoint (non-overlapping) subsets. It provides near-constant-time operations to:
 - Add new sets
@@ -979,7 +979,7 @@ class PersistentUnionFind:
     def __init__(self, n):
         self.parent = list(range(n))
         self.rank = [0] * n
-        self.history = []  # Stack of (x, old_parent, old_rank, y, old_rank_y)
+        self.history = []  # Stack of (child_root, old_parent, parent_root, old_parent_rank)
 
     def find(self, x):
         # No path compression: keeps rollback cheap and correct

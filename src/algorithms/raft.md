@@ -876,8 +876,9 @@ class RaftNode:
         self.log = []  # List of (term, command) tuples
 
         # Volatile state on all servers
-        self.commit_index = 0
-        self.last_applied = 0
+        # Log is 0-indexed here, so -1 means "nothing committed/applied yet".
+        self.commit_index = -1
+        self.last_applied = -1
 
         # Volatile state on leaders (reinitialized after election)
         self.next_index = {}   # For each server, index of next log entry to send

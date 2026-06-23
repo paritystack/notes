@@ -29,7 +29,7 @@ Peer A (behind NAT) wants to connect to Peer B
 Peer A knows only: 192.168.1.10 (private IP)
 Peer B needs: 203.0.113.5:54321 (public IP:port)
 
-Peer A can't tell Peer B how to reach it L
+Peer A can't tell Peer B how to reach it
 ```
 
 ### With STUN
@@ -38,7 +38,7 @@ Peer A can't tell Peer B how to reach it L
 Peer A queries STUN server
 STUN server responds: "I see you as 203.0.113.5:54321"
 Peer A tells Peer B: "Connect to 203.0.113.5:54321"
-Peer B connects successfully 
+Peer B connects successfully
 ```
 
 ## STUN Architecture

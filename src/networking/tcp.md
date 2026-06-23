@@ -365,12 +365,11 @@ Benefits:
 ```
 
 ```bash
-# Linux - Configure delayed ACK
-# Disable delayed ACK (not recommended)
-sudo sysctl -w net.ipv4.tcp_delack_seg=1
-
-# Default behavior (ACK every 2nd segment or after timeout)
-sudo sysctl -w net.ipv4.tcp_delack_seg=2
+# Linux has no sysctl to tune delayed ACK directly (tcp_delack_seg
+# exists only in some Android/Qualcomm kernels, not mainline).
+# Control it per-socket instead:
+#   setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, 1)  # disable delayed ACK (one-shot)
+# The kernel re-enables delayed ACK automatically; set TCP_QUICKACK again as needed.
 ```
 
 ### Silly Window Syndrome
@@ -2652,30 +2651,12 @@ async def quic_client():
 asyncio.run(quic_client())
 ```
 
-**Node.js with node-quic:**
+**Node.js:**
 ```javascript
-const { createQuicSocket } = require('net');
-
-// Create QUIC socket
-const socket = createQuicSocket({ endpoint: { port: 0 } });
-
-// Connect to server
-const client = socket.connect({
-  address: 'quic.example.com',
-  port: 443,
-  alpn: 'h3',  // HTTP/3
-});
-
-// Handle stream
-client.on('stream', (stream) => {
-  stream.on('data', (data) => {
-    console.log(`Received: ${data.length} bytes`);
-  });
-});
-
-// Create stream and send request
-const stream = client.openStream();
-stream.write('GET / HTTP/3\r\nHost: example.com\r\n\r\n');
+// Node's experimental built-in QUIC (createQuicSocket) was removed before
+// stabilizing. Use a userspace library instead, e.g. the WebTransport/HTTP3
+// bindings from @fails-components/webtransport, or call into a native
+// QUIC stack. There is no stable core `node:quic` API as of Node 22.
 ```
 
 ### Connection Migration Example

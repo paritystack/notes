@@ -659,7 +659,7 @@ def sliding_window_template(nums, k, operation='max'):
 - LeetCode 85: Maximal Rectangle
 - LeetCode 907: Sum of Subarray Minimums
 - LeetCode 1425: Constrained Subsequence Sum
-- LeetCode 1425: Shortest Subarray with Sum at Least K
+- LeetCode 862: Shortest Subarray with Sum at Least K
 
 ## Resources
 

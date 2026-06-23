@@ -24,11 +24,11 @@ Product quantization (PQ) compresses high-dimensional vectors into compact codes
 - [Common Pitfalls](#common-pitfalls)
 - [Related Topics](#related-topics)
 
-## Overview
+## Introduction
 
 **Product Quantization (PQ)** is a vector compression technique that allows you to store and search billion-scale high-dimensional vector collections in a fraction of the memory of raw vectors, with controllable accuracy loss. Combined with the **Inverted File Index (IVF)** for partitioning, it forms the basis of FAISS's most popular indexes (`IVF*,PQ*`) and powers vector search at Facebook, Spotify, Pinterest, and most large-scale ANN deployments where raw vector storage isn't viable.
 
-Where [[hnsw]] gives you near-perfect recall in exchange for high memory (vectors + graph), PQ+IVF gives you 10-100× memory reduction at the cost of some recall — the appropriate tradeoff when N exceeds ~10M and you can't afford to store full vectors in RAM.
+Where [HNSW](hnsw.md) gives you near-perfect recall in exchange for high memory (vectors + graph), PQ+IVF gives you 10-100× memory reduction at the cost of some recall — the appropriate tradeoff when N exceeds ~10M and you can't afford to store full vectors in RAM.
 
 ### What PQ Buys You
 
@@ -194,7 +194,7 @@ PQ accelerates distance computation but doesn't reduce the number of comparisons
    ```
    inverted_lists[i] = [v ∈ DB : argmin_c dist(v, c) == i]
    ```
-   This is "inverted" in the same sense as an [[inverted-index]] — for each cluster (≈ "term"), store the list of vectors (≈ "docs") that belong to it.
+   This is "inverted" in the same sense as an [inverted index](inverted_index.md) — for each cluster (≈ "term"), store the list of vectors (≈ "docs") that belong to it.
 
 ### Query
 
@@ -473,7 +473,7 @@ For production, use FAISS. The above is for understanding; FAISS adds SIMD, GPU 
 | Storage per vec | m bytes |
 
 For `N = 10^9, d = 768, m = 16, nlist = 4096, nprobe = 32`:
-- Memory: ~16 GB for codes + ~12 MB for coarse centroids + ~1.6 MB for PQ codebooks ≈ **16 GB**
+- Memory: ~16 GB for codes + ~12 MB for coarse centroids + ~0.8 MB for PQ codebooks ≈ **16 GB**
 - Query: `768 × 4096 + 32 × ~244K × 16 = 3M + 125M = ~128M ops`, vs `768 × 10^9 = 770 G` brute force. **6000× speedup**.
 
 ## Memory and Recall Tradeoffs
@@ -519,7 +519,7 @@ Real numbers vary heavily with embedding type. SIFT-1B is "easy"; OpenAI-ada-002
 - Lower recall (~0.85-0.95) is acceptable
 - Batch updates rather than streaming (PQ training requires retraining for distribution shifts)
 
-### Choose HNSW when ([[hnsw]]):
+### Choose HNSW when ([HNSW](hnsw.md)):
 - 10K – 100M vectors fit in RAM
 - Recall ≥ 0.95 required
 - Streaming inserts common
@@ -580,11 +580,11 @@ Real numbers vary heavily with embedding type. SIFT-1B is "easy"; OpenAI-ada-002
 
 ## Related Topics
 
-- [[hnsw]] — the in-memory alternative; often combined with PQ for memory-constrained graph indexes
-- [[minhash-lsh]] — hash-based ANN for set similarity (not vector L2)
-- [[inverted-index]] — the keyword counterpart; hybrid retrieval combines both
-- [[probabilistic]] — sketches (HLL, CMS) share the "lossy compression for queries" philosophy
-- [[spatial-structures]] — low-dim alternatives (k-d, ball trees)
+- [HNSW](hnsw.md) — the in-memory alternative; often combined with PQ for memory-constrained graph indexes
+- [MinHash/LSH](minhash_lsh.md) — hash-based ANN for set similarity (not vector L2)
+- [inverted index](inverted_index.md) — the keyword counterpart; hybrid retrieval combines both
+- [probabilistic structures](probabilistic.md) — sketches (HLL, CMS) share the "lossy compression for queries" philosophy
+- [spatial structures](spatial_structures.md) — low-dim alternatives (k-d, ball trees)
 
 External:
 - `ai/vector_databases.md` — application-level discussion of vector databases that use PQ/IVF

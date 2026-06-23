@@ -285,17 +285,15 @@ import netifaces
 gws = netifaces.gateways()
 gateway = gws['default'][netifaces.AF_INET][0]
 
-Method 2: DHCP Option
-- DHCP Option 120 (NAT-PMP Gateway)
-- Rarely used in practice
-
-Method 3: Multicast (Legacy)
-- Send to 224.0.0.1 (all hosts)
-- Gateway responds
-- Not recommended
+Method 2: Manual configuration
+- User/admin specifies the gateway explicitly
+- For unusual topologies where the default gateway isn't the NAT device
 
 Best Practice:
-Always try default gateway first
+Always try the default gateway first. NAT-PMP (RFC 6886) has no
+multicast-discovery or DHCP-option mechanism of its own — the gateway is
+assumed to be the host's default router. (Its successor PCP does define a
+DHCP option, RFC 7291.)
 ```
 
 ## Client Implementation

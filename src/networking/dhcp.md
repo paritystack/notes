@@ -328,13 +328,15 @@ Relays normally add option 82; switches should drop option 82 on untrusted ports
 
 ### Client Returning to Same Network
 
-Client remembers its previous IP and starts at REBINDING state:
+Client remembers its previous IP and starts in the INIT-REBOOT state (broadcasting a DHCPREQUEST with the previous address in the Requested IP option):
 
 ```
-DHCPREQUEST (with previous IP in options)
+DHCPREQUEST (with previous IP in Requested IP Address option)
   → if available: DHCPACK
-  → if taken: DHCPNAK, restart from INIT
+  → if taken/wrong subnet: DHCPNAK, restart from INIT
 ```
+
+(REBINDING is a different state — it happens after T2 when renewing an active lease, not on reboot.)
 
 ### Address Conflict Detection
 

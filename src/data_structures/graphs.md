@@ -2088,11 +2088,11 @@ graph = {
     'B': ['C', 'D'],
     'C': ['E'],
     'D': ['E'],
-    'E': ['B']  # Cycle: B→D→E→B
+    'E': ['B']  # Cycles through B: B→C→E→B and B→D→E→B
 }
 
 cycle = find_cycle_directed(graph)
-print(cycle)  # ['B', 'D', 'E', 'B']
+print(cycle)  # ['B', 'C', 'E', 'B']  (DFS explores C before D, so it reports that cycle)
 ```
 
 ## Connected Components

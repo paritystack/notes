@@ -5,7 +5,7 @@
 A bloom filter is a space-efficient probabilistic data structure for set membership queries. Uses [hashing techniques](../algorithms/hashing_techniques.md) (multiple hash functions) over a bit [array](arrays.md). Compare with [hash tables](hash_tables.md) (exact membership, more memory) and other [probabilistic structures](probabilistic.md) like HyperLogLog (cardinality) and [MinHash/LSH](minhash_lsh.md) (similarity).
 
 
-## Overview
+## Introduction
 
 A **Bloom filter** is a space-efficient probabilistic data structure designed to test whether an element is a member of a set. Invented by Burton Howard Bloom in 1970, it trades perfect accuracy for significant space savings, making it invaluable in scenarios where memory is constrained and occasional false positives are acceptable.
 
@@ -274,7 +274,7 @@ class BloomFilter:
     def _optimal_hash_count(self, m, n):
         """Calculate optimal number of hash functions"""
         k = (m / n) * math.log(2)
-        return int(k)
+        return max(1, round(k))  # round to nearest; at least one hash function
 
     def _hash(self, item, seed):
         """Generate hash for item with given seed"""

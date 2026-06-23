@@ -127,7 +127,7 @@ QUIC connections identified by **Connection ID**, not IP tuple:
 **TCP Connection**: `(Source IP, Source Port, Dest IP, Dest Port)`
 - Change any element → connection breaks
 
-**QUIC Connection**: `Connection ID` (64-bit unique identifier)
+**QUIC Connection**: `Connection ID` (variable length, 0–20 bytes in QUIC v1)
 - IP address change → connection survives
 - Port change → connection survives
 - Switch WiFi to cellular → connection continues seamlessly

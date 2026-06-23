@@ -16,7 +16,7 @@ IPv6 (Internet Protocol version 6) is the most recent version of the Internet Pr
 | **Fragmentation** | Source host only (not by routers) |
 | **Broadcast** | No (replaced by multicast) |
 | **Configuration** | SLAAC (Stateless Auto-Config) or DHCPv6 |
-| **IPSec** | Mandatory (built-in security) |
+| **IPSec** | Recommended, not mandatory (RFC 6434 relaxed MUST→SHOULD) |
 | **Address Resolution** | NDP (Neighbor Discovery Protocol) instead of ARP |
 
 ## IPv6 Advantages Over IPv4
@@ -38,7 +38,7 @@ IPv6 (Internet Protocol version 6) is the most recent version of the Internet Pr
    - Plug-and-play networking
 
 4. Built-in Security
-   - IPSec mandatory
+   - IPSec support recommended (originally mandated, relaxed to SHOULD by RFC 6434)
    - Authentication and encryption
    - Better privacy features
 
@@ -296,7 +296,7 @@ Packet delivered to nearest one (by routing metric)
 Use cases:
 - Load balancing
 - Service discovery
-- Root DNS servers (6 of 13 use anycast)
+- Root DNS servers (all 13 letters use anycast, hundreds of instances worldwide)
 
 Same format as unicast (no special prefix)
 Designated as anycast during configuration
@@ -1229,7 +1229,7 @@ Use case: IPv6-only networks accessing IPv4 internet
 | **Fragmentation** | Routers and source | Source only |
 | **Broadcast** | Yes | No (multicast) |
 | **Multicast** | Optional | Built-in |
-| **IPSec** | Optional | Mandatory |
+| **IPSec** | Optional | Recommended (SHOULD, not mandatory) |
 | **Address resolution** | ARP | NDP |
 | **Auto-configuration** | DHCP | SLAAC or DHCPv6 |
 | **NAT** | Common | Not needed |
@@ -1305,8 +1305,8 @@ IPv4:
 - Like adding locks to old houses
 
 IPv6:
-- Security built-in (IPSec mandatory)
-- Like new houses with locks included
+- Security designed in from the start (IPSec support recommended)
+- Like new houses built ready for locks
 ```
 
 ### Link-Local Addresses

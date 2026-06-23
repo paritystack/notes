@@ -588,13 +588,13 @@ OSI Layer          Protocol Examples
 ```
 OSI Model              TCP/IP Model
 -----------------------------------------
-7 - Application  
-6 - Presentation   → Application
-5 - Session      
-4 - Transport       → Transport
-3 - Network         → Internet
-2 - Data Link    
-1 - Physical       → Network Access
+7 - Application   \
+6 - Presentation   >---> Application
+5 - Session       /
+4 - Transport     ----> Transport
+3 - Network       ----> Internet
+2 - Data Link     \
+1 - Physical       >--> Network Access
 ```
 
 ## Benefits of Layered Approach

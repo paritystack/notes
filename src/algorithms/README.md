@@ -139,7 +139,7 @@ Solve problems related to graph structures.
 - Kruskal's Algorithm
 - Prim's Algorithm
 
-See: [Graph Algorithms](../data_structures/graphs.md)
+See: [Graph Algorithms](graph_algorithms.md)
 
 ### 4. Tree Algorithms
 

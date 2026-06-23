@@ -838,8 +838,9 @@ show ip nat statistics
    - Makes troubleshooting harder
 
 5. Limited by port numbers
-   - 65,535 ports per public IP
-   - In practice, ~4000 concurrent connections
+   - ~64,000 usable ports per public IP (per protocol)
+   - In practice tens of thousands of concurrent flows; the limit is
+     per (public IP, protocol) and per-destination, so it rarely bites
 ```
 
 ## ICMP (Internet Control Message Protocol)

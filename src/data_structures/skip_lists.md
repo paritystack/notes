@@ -25,7 +25,7 @@ A skip list is a randomized [linked list](linked_lists.md) with express lanes en
 - [Interview Patterns](#interview-patterns)
 - [Advanced Topics](#advanced-topics)
 
-## Overview
+## Introduction
 
 A **Skip List** is a probabilistic data structure that allows O(log n) search, insertion, and deletion operations on an ordered sequence of elements. Invented by William Pugh in 1990, it provides an elegant alternative to balanced binary search trees using randomization instead of complex balancing rules.
 

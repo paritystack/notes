@@ -26,13 +26,13 @@ MinHash estimates Jaccard similarity between sets; LSH groups similar items into
 - [Common Pitfalls](#common-pitfalls)
 - [Related Topics](#related-topics)
 
-## Overview
+## Introduction
 
 **MinHash** is a probabilistic data structure that estimates the **Jaccard similarity** between two sets in O(1) time, using fixed-size signatures (a few KB) regardless of original set size. **Locality-Sensitive Hashing (LSH)** uses MinHash signatures to build a sub-linear-time index for "find all pairs of sets with Jaccard similarity above a threshold."
 
 Together, they solve at web scale: near-duplicate detection (Google's web-page dedup), document similarity for search/recommendation, training-data deduplication for LLMs (huge in 2023-2026 — required for GPT-4, Llama, Claude training pipelines), plagiarism detection, entity resolution, and genomics k-mer comparison.
 
-For dense vectors (embeddings), see [[hnsw]] / [[product-quantization]]. MinHash is the right tool when your data is naturally **set-shaped**: tokens, n-grams, shingles, k-mers, item interactions, feature membership.
+For dense vectors (embeddings), see [HNSW](hnsw.md) / [product quantization](product_quantization.md). MinHash is the right tool when your data is naturally **set-shaped**: tokens, n-grams, shingles, k-mers, item interactions, feature membership.
 
 ### Why It Matters
 
@@ -533,7 +533,7 @@ The LSH framework generalizes — anywhere you have a hash family that maps simi
 | Inner product | Asymmetric LSH (Shrivastava & Li) | Augment vectors with norms |
 | Edit distance | Embedding into Hamming via shingling | Approximate |
 
-For dense vectors and inner-product / cosine, modern graph-based ANN ([[hnsw]]) typically outperforms LSH on recall-vs-latency. LSH remains popular for:
+For dense vectors and inner-product / cosine, modern graph-based ANN ([HNSW](hnsw.md)) typically outperforms LSH on recall-vs-latency. LSH remains popular for:
 - Theoretical analyzability (PAC-style guarantees)
 - Streaming / online settings (LSH naturally supports inserts)
 - Hardware-friendly bit operations (SimHash, Hamming-LSH on GPU/FPGA)
@@ -620,12 +620,12 @@ For dense vectors and inner-product / cosine, modern graph-based ANN ([[hnsw]]) 
 
 ## Related Topics
 
-- [[hnsw]] — dense-vector ANN; the right tool for embeddings, MinHash for sets
-- [[product-quantization]] — vector compression; complements HNSW for memory-bound dense ANN
-- [[bloom-filter]] — probabilistic set membership (different goal: "does x belong to S?")
-- [[probabilistic]] — sketches family overview (HLL, CMS, T-Digest, MinHash)
-- [[inverted-index]] — keyword search; complementary for hybrid retrieval / dedup pipelines
-- [[hash-tables]] — universal hashing background that MinHash relies on
+- [HNSW](hnsw.md) — dense-vector ANN; the right tool for embeddings, MinHash for sets
+- [product quantization](product_quantization.md) — vector compression; complements HNSW for memory-bound dense ANN
+- [Bloom filter](bloom_filter.md) — probabilistic set membership (different goal: "does x belong to S?")
+- [probabilistic structures](probabilistic.md) — sketches family overview (HLL, CMS, T-Digest, MinHash)
+- [inverted index](inverted_index.md) — keyword search; complementary for hybrid retrieval / dedup pipelines
+- [hash tables](hash_tables.md) — universal hashing background that MinHash relies on
 
 External:
 - `algorithms/hashing_techniques.md` — universal hashing, perfect hashing

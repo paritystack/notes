@@ -16,7 +16,7 @@ IP (Internet Protocol) is the network layer protocol responsible for addressing 
 | **Fragmentation** | By routers | Source only |
 | **Broadcast** | Yes | No (uses multicast) |
 | **Configuration** | Manual or DHCP | SLAAC or DHCPv6 |
-| **IPSec** | Optional | Mandatory |
+| **IPSec** | Optional | Recommended (SHOULD, not mandatory) |
 
 ## IPv4 Packet Format
 

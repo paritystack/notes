@@ -580,7 +580,7 @@ Indicates participant is leaving:
 
 **Rules** (to prevent RTCP from overwhelming network):
 
-1. **RTCP bandwidth d 5% of RTP bandwidth**
+1. **RTCP bandwidth ≤ 5% of RTP bandwidth**
 2. **Senders get 25% of RTCP bandwidth**
 3. **Receivers share remaining 75%**
 4. **Minimum interval between reports: 5 seconds**
@@ -620,7 +620,7 @@ def rtcp_interval(members, senders, rtcp_bw, we_sent):
 RTP bandwidth = 256 kbps
 RTCP bandwidth = 5% = 12.8 kbps
 
-Average RTCP report interval H 5-10 seconds
+Average RTCP report interval ≈ 5-10 seconds
 ```
 
 ---
@@ -1238,7 +1238,7 @@ Receiver arrival times (with jitter):
   t=61ms:  Packet 3 arrives (21ms delay)
   t=95ms:  Packet 4 arrives (35ms delay)
 
-Without buffering  choppy audio/video
+Without buffering → choppy audio/video
 ```
 
 ### The Solution: Jitter Buffer
@@ -1557,10 +1557,10 @@ Send:
   Packet 3 (FEC = P1 XOR P2)
 
 Receive scenario:
-   Packet 1 received
-   Packet 2 lost
-   Packet 3 (FEC) received
-   Recover P2 = P1 XOR FEC
+  ✓ Packet 1 received
+  ✗ Packet 2 lost
+  ✓ Packet 3 (FEC) received
+  → Recover P2 = P1 XOR FEC
 ```
 
 **Overhead**: 33% for this scheme (1 FEC per 2 data packets)
@@ -1796,9 +1796,9 @@ SRTP doesn't use keys directly. Instead:
 ```
 Master Key (128 or 256 bits)
 Master Salt (112 bits)
-    
+    ↓
 Key Derivation Function (KDF)
-    
+    ↓
 Encryption Key, Auth Key, Salting Key
 ```
 
@@ -1960,21 +1960,21 @@ a=fmtp:97 profile-level-id=42e01f      # H.264 profile
 
 ```
 Application (JavaScript)
-        
+        ↓
    WebRTC API
-        
-                 
-  Signaling       (SDP offer/answer)
-                 $
-  ICE             (NAT traversal)
-                 $
-  DTLS            (Key exchange)
-                 $
-  SRTP/SRTCP      (Media transport)  RTP here
-                 $
-  SCTP            (Data channels)
-                 
-        
+        ↓
+┌──────────────────┐
+│  Signaling       │ (SDP offer/answer)
+├──────────────────┤
+│  ICE             │ (NAT traversal)
+├──────────────────┤
+│  DTLS            │ (Key exchange)
+├──────────────────┤
+│  SRTP/SRTCP      │ (Media transport) ← RTP here
+├──────────────────┤
+│  SCTP            │ (Data channels)
+└──────────────────┘
+        ↓
       UDP
 ```
 
@@ -2088,10 +2088,10 @@ Sender
   |
   | RTP to 239.1.2.3:5004
   |
-    > Receiver 1
-    > Receiver 2
-    > Receiver 3
-    > Receiver N
+  ├──> Receiver 1
+  ├──> Receiver 2
+  ├──> Receiver 3
+  └──> Receiver N
 ```
 
 **Challenges:**
@@ -2159,11 +2159,11 @@ def send_voip_audio(sender, audio_stream):
 ```
 Streamer                             Viewer
   Camera                               Display
-                                        
+    ↓                                    ↑
   H.264 Encoder                    H.264 Decoder
-                                        
+    ↓                                    ↑
   RTP Packetizer                  RTP Depacketizer
-                                        
+    ↓                                    ↑
   |=========== RTP/UDP/IP =============|
 ```
 
@@ -2357,8 +2357,8 @@ Encoder produces 3 streams:
   SSRC 3: 360p  @ 0.3 Mbps  (low)
 
 SFU routes appropriate stream to each receiver:
-  Desktop with good connection  high
-  Mobile with poor connection   low
+  Desktop with good connection → high
+  Mobile with poor connection  → low
 ```
 
 **SDP Signaling:**
@@ -2377,13 +2377,13 @@ a=ssrc:33333333 cname:user@host
 
 ```
 Base layer: 360p
-Enhancement layer 1: +360p  720p
-Enhancement layer 2: +720p  1080p
+Enhancement layer 1: +360p → 720p
+Enhancement layer 2: +720p → 1080p
 
 Receiver can decode:
-  - Base only  360p
-  - Base + EL1  720p
-  - Base + EL1 + EL2  1080p
+  - Base only → 360p
+  - Base + EL1 → 720p
+  - Base + EL1 + EL2 → 1080p
 ```
 
 **Advantages over Simulcast:**
@@ -2423,11 +2423,11 @@ Output:
 **Translator**: Forwards RTP packets between networks.
 
 ```
-Internal Network    Translator    External Network
+Internal Network  ←→  Translator  ←→  External Network
 
 Functions:
 - NAT traversal
-- Protocol conversion (RTP  RTP/RTCP mux)
+- Protocol conversion (RTP ↔ RTP/RTCP mux)
 - Transcoding (optional)
 ```
 
@@ -2504,7 +2504,7 @@ Audio SR: NTP=12345.500, RTP=48000
 Video SR: NTP=12345.500, RTP=90000
 
 Both streams aligned to same NTP time
- Perfect lip-sync
+→ Perfect lip-sync
 ```
 
 ---
@@ -2532,8 +2532,8 @@ rtp.seq > 1000 && rtp.seq < 1100  # Sequence range
 ```
 
 **RTP Stream Analysis:**
-1. **Telephony**  **RTP**  **RTP Streams**
-2. Select stream  **Analyze**
+1. **Telephony** → **RTP** → **RTP Streams**
+2. Select stream → **Analyze**
 
 **Metrics shown:**
 - Packet count
@@ -2544,8 +2544,8 @@ rtp.seq > 1000 && rtp.seq < 1100  # Sequence range
 - Clock drift
 
 **Stream Player:**
-1. **Telephony**  **RTP**  **RTP Streams**
-2. Select audio stream  **Play Streams**
+1. **Telephony** → **RTP** → **RTP Streams**
+2. Select audio stream → **Play Streams**
 3. Listen to decoded audio
 
 **Packet Details:**
@@ -2572,8 +2572,8 @@ Real-Time Transport Protocol
 tcpdump -i eth0 'udp[1] & 1 == 0 && udp[8] & 0xC0 == 0x80'
 
 # Explanation:
-# udp[1] & 1 == 0    Even destination port
-# udp[8] & 0xC0 == 0x80    RTP version 2
+# udp[1] & 1 == 0   → Even destination port
+# udp[8] & 0xC0 == 0x80   → RTP version 2
 ```
 
 #### ffmpeg with RTP
@@ -3222,8 +3222,8 @@ Imagine you're watching a live sports game on TV.
 
 5. **RTCP = Quality Reports**
    - Like a report card for the delivery service
-   - "10% of trucks were late"  send trucks slower
-   - "Everything arrived on time"  can send more trucks
+   - "10% of trucks were late" → send trucks slower
+   - "Everything arrived on time" → can send more trucks
 
 6. **SRTP = Locked Trucks**
    - Regular RTP = open trucks (anyone can see inside)
@@ -3236,9 +3236,9 @@ Imagine you're watching a live sports game on TV.
 - Better for live events, calls, and real-time stuff
 
 **Real-world examples:**
-- **Zoom/Teams calls**: Your voice  RTP  Friend's computer
-- **YouTube Live**: Streamer  RTP  YouTube  You
-- **Online gaming voice chat**: Your mic  RTP  Other players
+- **Zoom/Teams calls**: Your voice → RTP → Friend's computer
+- **YouTube Live**: Streamer → RTP → YouTube → You
+- **Online gaming voice chat**: Your mic → RTP → Other players
 
 ---
 

@@ -1118,6 +1118,7 @@ Transformers are like super-smart assistants that help computers understand and 
 
 ## Where this connects
 
+- [Attention](attention.md) — the efficiency/scaling deep-dive: MHA/MQA/GQA, KV cache, FlashAttention
 - [Neural networks](neural_networks.md) — transformers are a specific neural architecture (self-attention + FFN)
 - [Deep learning](deep_learning.md) — transformers are the dominant deep learning architecture for sequence tasks
 - [../ai/transformers_architecture](../ai/transformers_architecture.md) — detailed transformer architecture breakdown

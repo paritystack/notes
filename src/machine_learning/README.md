@@ -17,14 +17,15 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 11. [NumPy](./numpy.md) - Foundational numerical computing for ML implementations
 12. [Quantization](./quantization.md) - Model compression, INT8/INT4 quantization, GPTQ, AWQ
 13. [Transformers](./transformers.md) - Attention mechanisms, BERT, GPT architectures
-14. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
-15. [LoRA](./lora.md) - Low-Rank Adaptation for efficient fine-tuning
-16. [Unsloth](./unsloth.md) - 2× faster, low-VRAM LoRA/QLoRA fine-tuning
-17. [CUDA](./cuda.md) - GPU programming, parallel computing, and optimization techniques
-18. [Optimizers](./optimizers.md) - SGD, Adam/AdamW, LR schedules, gradient clipping
-19. [Knowledge Distillation](./knowledge_distillation.md) - Teacher→student compression, soft targets, temperature
-20. [Loss Functions](./loss_functions.md) - Cross-entropy, MSE, focal, contrastive, label smoothing
-21. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+14. [Attention](./attention.md) - MHA/MQA/GQA, KV cache, FlashAttention IO-aware kernels
+15. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
+16. [LoRA](./lora.md) - Low-Rank Adaptation for efficient fine-tuning
+17. [Unsloth](./unsloth.md) - 2× faster, low-VRAM LoRA/QLoRA fine-tuning
+18. [CUDA](./cuda.md) - GPU programming, parallel computing, and optimization techniques
+19. [Optimizers](./optimizers.md) - SGD, Adam/AdamW, LR schedules, gradient clipping
+20. [Knowledge Distillation](./knowledge_distillation.md) - Teacher→student compression, soft targets, temperature
+21. [Loss Functions](./loss_functions.md) - Cross-entropy, MSE, focal, contrastive, label smoothing
+22. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

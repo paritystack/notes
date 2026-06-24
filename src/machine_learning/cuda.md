@@ -1461,4 +1461,5 @@ This guide covers the essential aspects of CUDA programming. For specific applic
 - [Deep learning](deep_learning.md) — the workloads CUDA accelerates
 - [Quantization](quantization.md) — lower-precision GPU math
 - [Convolution](convolution.md) — a canonical GPU-bound operation
+- [Attention](attention.md) — FlashAttention, the flagship IO-aware kernel exploiting the SRAM/HBM hierarchy
 - [Inference optimization](../ai/inference_optimization.md) — serving models fast on GPUs

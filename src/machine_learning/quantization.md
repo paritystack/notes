@@ -2056,5 +2056,6 @@ Quantization transforms impractical models into deployable solutions, making AI 
 
 - [Neural networks](neural_networks.md) — quantization reduces the precision of neural network weights
 - [LoRA](lora.md) — QLoRA combines quantization with LoRA for memory-efficient fine-tuning
+- [Attention](attention.md) — KV-cache quantization, often the first thing to compress at long context
 - [../ai/vllm](../ai/vllm.md) — vLLM uses quantization (AWQ, GPTQ) for efficient LLM inference
 - [../ai/llms](../ai/llms.md) — quantized models enable LLMs to run on consumer hardware

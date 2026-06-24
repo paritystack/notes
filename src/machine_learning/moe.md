@@ -1936,5 +1936,6 @@ for i, expert in enumerate(experts):
 - [Transformers](transformers.md) — where MoE layers replace dense FFNs
 - [Deep learning](deep_learning.md), [Neural networks](neural_networks.md) — the architecture context
 - [Quantization](quantization.md) — compressing large sparse models
+- [Attention](attention.md) — the other major lever for scaling transformer compute and memory
 - [Inference optimization](../ai/inference_optimization.md) — serving MoE efficiently
 - [DeepSeek R1](../ai/deepseek_r1.md) — a prominent MoE model

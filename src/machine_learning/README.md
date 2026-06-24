@@ -22,7 +22,9 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 16. [Unsloth](./unsloth.md) - 2× faster, low-VRAM LoRA/QLoRA fine-tuning
 17. [CUDA](./cuda.md) - GPU programming, parallel computing, and optimization techniques
 18. [Optimizers](./optimizers.md) - SGD, Adam/AdamW, LR schedules, gradient clipping
-19. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+19. [Knowledge Distillation](./knowledge_distillation.md) - Teacher→student compression, soft targets, temperature
+20. [Loss Functions](./loss_functions.md) - Cross-entropy, MSE, focal, contrastive, label smoothing
+21. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

@@ -268,6 +268,8 @@
     - [Jax](machine_learning/jax.md)
     - [Convolution](machine_learning/convolution.md)
     - [Optimizers](machine_learning/optimizers.md)
+    - [Knowledge Distillation](machine_learning/knowledge_distillation.md)
+    - [Loss Functions](machine_learning/loss_functions.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)

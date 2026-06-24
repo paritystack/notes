@@ -226,7 +226,8 @@ Beyond supervised targets, whole model families are defined by their loss. Brief
 ## Regularization Terms in the Loss
 
 The training objective is often `data loss + λ · regularizer`. The regularizer doesn't look
-at the labels — it constrains the weights themselves:
+at the labels — it constrains the weights themselves (see the
+[regularization & generalization](regularization.md) hub for the full toolbox):
 
 ```
 L_total = L_data(ŷ, y)  +  λ · Ω(w)

@@ -167,7 +167,8 @@ opt = torch.optim.AdamW(model.parameters(), lr=3e-4,
 ## Weight Decay vs. L2 Regularization
 
 These are identical for plain SGD but **diverge** for adaptive optimizers — the subtlety
-AdamW exists to fix.
+AdamW exists to fix. (For the broader regularization toolbox, see the
+[regularization & generalization](regularization.md) hub.)
 
 - **L2 regularization** adds `λ·‖w‖²` to the *loss*, so the penalty term `2λw` flows
   through the adaptive denominator `√v̂`. Parameters with large historical gradients get

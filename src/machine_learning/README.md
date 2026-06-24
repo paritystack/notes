@@ -33,14 +33,15 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 22. [Optimizers](./optimizers.md) - SGD, Adam/AdamW, LR schedules, gradient clipping
 23. [Knowledge Distillation](./knowledge_distillation.md) - Teacher→student compression, soft targets, temperature
 24. [Loss Functions](./loss_functions.md) - Cross-entropy, MSE, focal, contrastive, label smoothing
-25. [Normalization](./normalization.md) - BatchNorm, LayerNorm, RMSNorm, GroupNorm, pre/post-LN
-26. [State Space Models](./state_space_models.md) - S4/Mamba selective SSMs, sub-quadratic sequence modeling
-27. [Positional Encodings](./positional_encoding.md) - Sinusoidal, RoPE, ALiBi, relative biases, length extrapolation
-28. [Tokenization & Embeddings](./tokenization.md) - BPE, WordPiece, Unigram/SentencePiece, embedding tables, weight tying
-29. [LLM Decoding & Sampling](./decoding_sampling.md) - Greedy, beam, temperature, top-k/p, min-p, speculative decoding
-30. [RLHF & Preference Optimization](./rlhf.md) - SFT, reward modeling, PPO, DPO, GRPO/RLVR
-31. [Distributed Training & Parallelism](./distributed_training.md) - DDP, ZeRO/FSDP, tensor/pipeline/sequence parallelism, mixed precision
-32. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+25. [Regularization & Generalization](./regularization.md) - Dropout, weight decay, label smoothing, early stopping, double descent, grokking
+26. [Normalization](./normalization.md) - BatchNorm, LayerNorm, RMSNorm, GroupNorm, pre/post-LN
+27. [State Space Models](./state_space_models.md) - S4/Mamba selective SSMs, sub-quadratic sequence modeling
+28. [Positional Encodings](./positional_encoding.md) - Sinusoidal, RoPE, ALiBi, relative biases, length extrapolation
+29. [Tokenization & Embeddings](./tokenization.md) - BPE, WordPiece, Unigram/SentencePiece, embedding tables, weight tying
+30. [LLM Decoding & Sampling](./decoding_sampling.md) - Greedy, beam, temperature, top-k/p, min-p, speculative decoding
+31. [RLHF & Preference Optimization](./rlhf.md) - SFT, reward modeling, PPO, DPO, GRPO/RLVR
+32. [Distributed Training & Parallelism](./distributed_training.md) - DDP, ZeRO/FSDP, tensor/pipeline/sequence parallelism, mixed precision
+33. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 
@@ -439,6 +440,8 @@ This section covers model internals and training mechanics. Its hubs are
   generalizes [convolution](convolution.md) and [attention](attention.md) to arbitrary connectivity
 - [Diffusion models](diffusion_models.md) — iterative denoising generative models; the
   internals behind the applied [Stable Diffusion](../ai/stable_diffusion.md) stack
+- [Regularization & generalization](regularization.md) — the hub for dropout, weight decay,
+  early stopping, and the modern generalization story (double descent, grokking)
 - [AI](../ai/README.md) — applied LLM/GenAI systems (RAG, agents, serving, prompting) that
   build on the models trained here
 - [Maths · Optimization](../maths/optimization.md) — the gradient-descent and convex-optimization

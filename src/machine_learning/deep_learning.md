@@ -351,6 +351,9 @@ for epoch in range(num_epochs):
 
 ## Regularization
 
+> The full toolbox and the generalization story (double descent, grokking, implicit SGD
+> regularization) live on the [regularization & generalization](regularization.md) hub page.
+
 ### Dropout
 
 ```python

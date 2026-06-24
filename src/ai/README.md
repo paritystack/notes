@@ -2,6 +2,11 @@
 
 A comprehensive guide to modern AI technologies, tools, and best practices.
 
+> **Scope:** Applied LLM/GenAI systems and tooling — RAG, vector DBs, prompting, agents,
+> MCP/tools, serving (vLLM, local inference), LLMOps/eval/security, model families, and
+> image/audio tools. For model *internals*, architectures, and training, see the
+> [Machine Learning](../machine_learning/README.md) section.
+
 ## Overview
 
 This directory contains documentation on various AI topics, focusing on practical applications, implementation guides, and best practices for working with modern AI systems.

@@ -88,4 +88,6 @@ The Decoder has two differences:
 
 - [LLMs](llms.md) — LLMs are transformer-based; architecture choices (RoPE, SwiGLU, GQA) directly affect LLM design
 - [../machine_learning/transformers](../machine_learning/transformers.md) — the ML-focused transformer reference with training details
+- [../machine_learning/attention](../machine_learning/attention.md) — MHA/MQA/GQA, KV cache, and FlashAttention internals
+- [../machine_learning/positional_encoding](../machine_learning/positional_encoding.md) — sinusoidal, RoPE, and ALiBi in depth
 - [Prompt engineering](prompt_engineering.md) — understanding context windows and attention helps write better prompts

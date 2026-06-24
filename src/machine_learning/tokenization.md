@@ -260,4 +260,6 @@ models tie; some very large ones untie to give the output head independent capac
 - [Hugging Face](hugging_face.md) — `AutoTokenizer`, fast tokenizers, and chat templates
 - [Neural networks](neural_networks.md) — `nn.Embedding` as a learned lookup layer
 - [RAG](../ai/rag.md) — contrast with sentence/document embedding models for retrieval
+- [Embeddings & reranking](../ai/embeddings.md) — retrieval embedding models built on these
+  same embedding tables
 - [PyTorch](pytorch.md) — `nn.Embedding` and weight-tying implementation

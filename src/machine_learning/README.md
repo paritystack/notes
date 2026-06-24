@@ -2,6 +2,11 @@
 
 A comprehensive guide to machine learning concepts, algorithms, and implementations.
 
+> **Scope:** Model internals and training mechanics — architectures, attention, optimizers,
+> losses, normalization, quantization, fine-tuning, distributed training, plus the numerical
+> and framework layer (NumPy, PyTorch, JAX, CUDA). For *applied* LLM/GenAI systems (RAG,
+> agents, serving, prompting, image/audio tools), see the [AI](../ai/README.md) section.
+
 ## Table of Contents
 
 1. [Supervised Learning](./supervised_learning.md) - Classification, regression, and supervised algorithms

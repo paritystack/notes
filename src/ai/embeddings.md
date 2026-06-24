@@ -87,6 +87,8 @@ After cheap vector retrieval, a reranker reorders the shortlist. Options:
 - [GraphRAG](graphrag.md) — embeddings still power entity/community matching there.
 - [Transformers architecture](transformers_architecture.md) — encoder models produce the
   vectors.
+- [../machine_learning/tokenization](../machine_learning/tokenization.md) — the input-side
+  embedding tables and weight-tying beneath these retrieval embedding models.
 
 ## Pitfalls
 

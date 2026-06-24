@@ -777,7 +777,7 @@ def check_certificate_expiry(hostname, port=443):
             # Parse expiration date
             expires = datetime.strptime(
                 cert['notAfter'],
-                '%b %d %H:%M:%S %Y %GMT'
+                '%b %d %H:%M:%S %Y %Z'
             )
 
             days_remaining = (expires - datetime.now()).days

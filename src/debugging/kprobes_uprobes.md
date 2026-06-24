@@ -101,8 +101,9 @@ grep ' do_sys_openat2$' /proc/kallsyms
 grep do_sys_openat2 /sys/kernel/debug/kprobes/blacklist   # empty == allowed
 
 # 3. Register a kprobe named "myopen". do_sys_openat2(dfd, filename, how): the
-#    filename is the 2nd arg, so it's in %si on x86-64 — fetch it as a string.
-echo 'p:myopen do_sys_openat2 fname=+0(%si):string' > kprobe_events
+#    filename is the 2nd arg, so it's in %si on x86-64. It's a USER pointer, so
+#    fetch it with :ustring (plain :string would do a kernel-space read and fail).
+echo 'p:myopen do_sys_openat2 fname=+0(%si):ustring' > kprobe_events
 
 # 4. Enable it
 echo 1 > events/kprobes/myopen/enable
@@ -116,9 +117,10 @@ echo 0 > events/kprobes/myopen/enable
 echo '-:myopen' >> kprobe_events     # or: echo > kprobe_events  (clears all)
 ```
 
-The fetch syntax `+OFFSET(REGISTER):TYPE` reads memory: `+0(%si):string` dereferences
-the pointer in `%si` and reads a NUL-terminated string. See *Reading argument values*
-below for the register order.
+The fetch syntax `+OFFSET(REGISTER):TYPE` reads memory: `+0(%si):ustring` dereferences
+the pointer in `%si` and reads a NUL-terminated string from user space (`:string` is the
+equivalent for kernel-space pointers). See *Reading argument values* below for the
+register order.
 
 ### Method B — bpftrace one-liner (same result, one line)
 

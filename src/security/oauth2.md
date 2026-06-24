@@ -268,14 +268,16 @@ app.get('/callback', async (req, res) => {
   }
 
   try {
-    // Exchange code for token
-    const tokenResponse = await axios.post(TOKEN_URL, {
+    // Exchange code for token. The token endpoint expects
+    // application/x-www-form-urlencoded, so use URLSearchParams — a plain
+    // object would be sent as JSON by axios and rejected.
+    const tokenResponse = await axios.post(TOKEN_URL, new URLSearchParams({
       grant_type: 'authorization_code',
       code,
       redirect_uri: REDIRECT_URI,
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
-    });
+    }));
 
     const { access_token, refresh_token } = tokenResponse.data;
 
@@ -319,12 +321,12 @@ app.get('/refresh', async (req, res) => {
   const { refresh_token } = req.session;
 
   try {
-    const tokenResponse = await axios.post(TOKEN_URL, {
+    const tokenResponse = await axios.post(TOKEN_URL, new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token,
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
-    });
+    }));
 
     req.session.access_token = tokenResponse.data.access_token;
 
@@ -347,12 +349,14 @@ const axios = require('axios');
 async function getAccessToken() {
   const response = await axios.post(
     'https://authorization-server.com/token',
-    {
+    // URLSearchParams serializes to form-urlencoded; passing a plain object
+    // here would be sent as JSON despite the header.
+    new URLSearchParams({
       grant_type: 'client_credentials',
       client_id: process.env.CLIENT_ID,
       client_secret: process.env.CLIENT_SECRET,
       scope: 'api:read api:write',
-    },
+    }),
     {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

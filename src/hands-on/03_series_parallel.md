@@ -22,7 +22,7 @@ meter.
 From **Stage A** of the [shopping list](README.md):
 
 - Breadboard, jumpers, multimeter, 5 V source (Nano 5V pin)
-- Three resistors of known value — e.g. 1 kΩ, 2.2 kΩ, 1 kΩ
+- Two resistors of known, different value — e.g. 1 kΩ and 2.2 kΩ
 
 ## The build — series
 

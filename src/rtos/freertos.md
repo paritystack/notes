@@ -762,19 +762,18 @@ void vGoodISR(void) {
 ```c
 #define configUSE_TRACE_FACILITY 1
 
-// Task switched in
-void vApplicationTaskSwitchedInHook(void) {
-    TaskHandle_t xHandle = xTaskGetCurrentTaskHandle();
-    char *pcTaskName = pcTaskGetName(xHandle);
-    printf("Switched to: %s\n", pcTaskName);
-}
+// Context-switch tracing uses the trace hook MACROS (defined in
+// FreeRTOSConfig.h), NOT application hook functions. They run inside the
+// scheduler with pxCurrentTCB pointing at the task being switched in/out.
+#define traceTASK_SWITCHED_IN()   /* inspect pxCurrentTCB->pcTaskName here */
+#define traceTASK_SWITCHED_OUT()  /* e.g. accumulate per-task runtime */
 
-// Tick hook (called every tick)
+// Tick hook (called every tick; requires configUSE_TICK_HOOK 1)
 void vApplicationTickHook(void) {
     // Lightweight monitoring only
 }
 
-// Idle hook (called by idle task)
+// Idle hook (called by idle task; requires configUSE_IDLE_HOOK 1)
 void vApplicationIdleHook(void) {
     // Background processing, watchdog feeding
 }

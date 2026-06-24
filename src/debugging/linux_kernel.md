@@ -101,8 +101,8 @@ echo function > current_tracer
 echo 1 > tracing_on
 cat trace
 
-# Trace specific function
-echo sys_open > set_ftrace_filter
+# Trace specific function (sys_open no longer exists on modern kernels — use a current symbol)
+echo vfs_read > set_ftrace_filter
 echo function > current_tracer
 
 # Disable

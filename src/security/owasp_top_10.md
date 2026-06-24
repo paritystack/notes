@@ -29,7 +29,7 @@ Previously "Sensitive Data Exposure". Focuses on failures related to cryptograph
 
 *   **The Attack:**
     *   Storing passwords in plain text or Base64.
-    *   Using weak hasing algorithms (MD5, SHA1).
+    *   Using weak hashing algorithms (MD5, SHA1).
     *   Transmitting data over HTTP instead of HTTPS.
 *   **Mitigation:**
     *   Use **Argon2id** or **bcrypt** for passwords.

@@ -267,7 +267,7 @@ gdb ./program core
 # Python example
 (gdb) python
 > for i in range(5):
->     gdb.execute("print $i++")
+>     gdb.execute("print %d" % i)
 > end
 ```
 

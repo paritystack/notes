@@ -400,6 +400,14 @@ static const struct file_operations my_fops = {
 
 Random access storage devices.
 
+> **Heads up — legacy API.** The request-function example below
+> (`blk_init_queue()` / `blk_fetch_request()` / `__blk_end_request_all()` /
+> `alloc_disk()` / `blk_cleanup_queue()`) uses the *request-based legacy block
+> layer*, which was **removed in Linux 5.0** (`alloc_disk()` went in 5.15,
+> `blk_cleanup_queue()` in 5.18). It is kept here only to illustrate the old
+> model — for any current kernel use the **blk-mq** example in
+> [Modern Block Layer (blk-mq)](#modern-block-layer-blk-mq) below.
+
 ```c
 #include <linux/blkdev.h>
 #include <linux/genhd.h>
@@ -608,8 +616,8 @@ static int create_net_device(struct device *parent)
 	/* Set MAC address */
 	eth_hw_addr_random(dev);
 
-	/* Setup NAPI */
-	netif_napi_add(dev, &priv->napi, my_net_poll, 64);
+	/* Setup NAPI (kernel < 6.1 took a trailing weight arg, e.g. ..., 64) */
+	netif_napi_add(dev, &priv->napi, my_net_poll);
 
 	SET_NETDEV_DEV(dev, parent);
 
@@ -732,8 +740,8 @@ static int __init chardev_init(void)
 		return ret;
 	}
 
-	/* Create class */
-	my_class = class_create(THIS_MODULE, CLASS_NAME);
+	/* Create class (kernel < 6.4: class_create(THIS_MODULE, CLASS_NAME)) */
+	my_class = class_create(CLASS_NAME);
 	if (IS_ERR(my_class)) {
 		cdev_del(&my_cdev);
 		unregister_chrdev_region(dev, 1);
@@ -905,8 +913,9 @@ struct my_i2c_dev {
 	struct device *dev;
 };
 
-static int my_i2c_probe(struct i2c_client *client,
-			const struct i2c_device_id *id)
+/* Single-arg probe since kernel 6.3; older kernels used
+ * my_i2c_probe(struct i2c_client *client, const struct i2c_device_id *id) */
+static int my_i2c_probe(struct i2c_client *client)
 {
 	struct my_i2c_dev *priv;
 	u8 buf[2];
@@ -944,10 +953,10 @@ static int my_i2c_probe(struct i2c_client *client,
 	return 0;
 }
 
-static int my_i2c_remove(struct i2c_client *client)
+/* .remove returns void since kernel 6.1 (older kernels returned int) */
+static void my_i2c_remove(struct i2c_client *client)
 {
 	dev_info(&client->dev, "I2C device removed\n");
-	return 0;
 }
 
 static const struct i2c_device_id my_i2c_ids[] = {
@@ -1265,42 +1274,43 @@ static int create_blkmq_device(struct my_blk_dev *dev)
 	dev->tag_set.queue_depth = 128;
 	dev->tag_set.numa_node = NUMA_NO_NODE;
 	dev->tag_set.cmd_size = 0;
-	dev->tag_set.flags = BLK_MQ_F_SHOULD_MERGE;
+	dev->tag_set.flags = 0;		/* BLK_MQ_F_SHOULD_MERGE was the default; removed in 6.12 */
 	dev->tag_set.driver_data = dev;
 
 	ret = blk_mq_alloc_tag_set(&dev->tag_set);
 	if (ret)
 		return ret;
 
-	/* Allocate queue */
-	dev->queue = blk_mq_init_queue(&dev->tag_set);
-	if (IS_ERR(dev->queue)) {
+	/* Allocate the gendisk and its blk-mq queue together (kernel 5.15+) */
+	dev->disk = blk_mq_alloc_disk(&dev->tag_set, dev);
+	if (IS_ERR(dev->disk)) {
+		ret = PTR_ERR(dev->disk);
 		blk_mq_free_tag_set(&dev->tag_set);
-		return PTR_ERR(dev->queue);
+		return ret;
 	}
-
-	dev->queue->queuedata = dev;
-
-	/* Allocate disk */
-	dev->disk = alloc_disk(1);
-	if (!dev->disk) {
-		blk_cleanup_queue(dev->queue);
-		blk_mq_free_tag_set(&dev->tag_set);
-		return -ENOMEM;
-	}
+	dev->queue = dev->disk->queue;	/* queue is owned by the disk now */
 
 	dev->disk->major = MY_MAJOR;
 	dev->disk->first_minor = 0;
+	dev->disk->minors = 1;
 	dev->disk->fops = &my_bdev_ops;
-	dev->disk->queue = dev->queue;
 	dev->disk->private_data = dev;
 	snprintf(dev->disk->disk_name, 32, "myblkmq");
 	set_capacity(dev->disk, dev->size / SECTOR_SIZE);
 
-	add_disk(dev->disk);
+	/* add_disk() can fail since 5.15 — always check the return value */
+	ret = add_disk(dev->disk);
+	if (ret) {
+		put_disk(dev->disk);	/* drops the queue too */
+		blk_mq_free_tag_set(&dev->tag_set);
+		return ret;
+	}
 
 	return 0;
 }
+
+/* Teardown: del_gendisk() + put_disk() + blk_mq_free_tag_set()
+ * (there is no blk_cleanup_queue() on modern kernels). */
 ```
 
 ---

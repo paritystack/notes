@@ -48,7 +48,7 @@ This directory contains guides for real-time operating systems used in embedded 
 
 | Feature | FreeRTOS | ThreadX | Zephyr | RT-Linux (PREEMPT_RT) |
 |---------|----------|---------|--------|-----------------------|
-| License | MIT | MIT (since 2019) | Apache 2.0 | GPLv2 |
+| License | MIT | MIT (since 2023) | Apache 2.0 | GPLv2 |
 | Footprint | Very small | Small | Small–medium | Full OS |
 | Scheduling | Preemptive | Preemptive | Preemptive + cooperative | Preemptive (SCHED_FIFO/RR/DEADLINE) |
 | Priority levels | Configurable | 32 levels | Configurable (coop + preempt) | 1–99 (RT) |

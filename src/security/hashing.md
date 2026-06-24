@@ -29,7 +29,7 @@ hash(m1) = hash(m2)
 Small change in input drastically changes output:
 ```
 hash("hello")  = 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
-hash("helloX") = 9c70933a77f8d8d1eb5ba43c8f8c8b2e6f4c8e8a5b9e1b161e5c1fa7425e7304
+hash("helloX") = ccf919f6f106ed1e8deb93053de7e5403124048f2bb836464f5a55290aa5d6a6
 ```
 
 ## Common Hash Functions

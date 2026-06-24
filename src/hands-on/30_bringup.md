@@ -24,11 +24,12 @@ Arduino as ISP), and your firmware from the earlier rungs.
 
 ## The build
 
-1. **Burn the bootloader / set fuses.** A blank ATmega328 runs the internal 8 MHz oscillator
-   and has no bootloader. Use *Arduino as ISP* (or a dedicated programmer) to set the
-   [fuses](../embedded/avr.md) for your clock choice (external 16 MHz crystal *or* internal
-   8 MHz — must match [rung 27](27_kicad_schematic_capstone.md)) and burn a bootloader if you
-   want serial uploads.
+1. **Burn the bootloader / set fuses.** A factory-fresh ATmega328 runs its internal 8 MHz
+   RC oscillator divided by 8 (the `CKDIV8` fuse) — so an effective **1 MHz** — and has no
+   bootloader. Use *Arduino as ISP* (or a dedicated programmer) to set the
+   [fuses](../embedded/avr.md) for your clock choice (8 MHz internal RC *or* an 8 MHz
+   crystal on the 3.3 V rail — must match [rung 27](27_kicad_schematic_capstone.md);
+   16 MHz is out of spec at 3.3 V) and burn a bootloader if you want serial uploads.
 2. **Smallest possible first program — blink** an LED on a spare pin. If it blinks, power,
    clock, and programming all work. (If not, debug *those* before anything else.)
 3. **Bring up serial:** print "hello" over [UART](../embedded/uart.md) via the USB-serial

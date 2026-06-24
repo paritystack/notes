@@ -251,7 +251,9 @@ network:
     eth0:
       addresses:
         - 192.168.1.100/24
-      gateway4: 192.168.1.1
+      routes:
+        - to: default
+          via: 192.168.1.1   # 'gateway4:' is deprecated; use a default route
       nameservers:
         addresses: [8.8.8.8, 8.8.4.4]
 

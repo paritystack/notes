@@ -291,20 +291,21 @@ Variables available in rules:
 | `%%` | Literal `%` | `%` |
 | `$$` | Literal `$` | `$` |
 
-### String Modifiers
+### Handling Special Characters
 
-Modify substitution values:
+udev has **no** `/basename`, `/dirname`, or `/replace{}` substitution operators.
+To build links from values that may contain spaces or other unsafe characters, use
+the pre-escaped `*_ENC` properties that blkid/udev already provide (unsafe bytes are
+rendered as `\x20`, etc.):
 
 ```bash
-# Get last component of path
-SYMLINK+="disk/by-path/$env{ID_PATH}/basename"
-
-# Get all but last component
-PROGRAM="/bin/echo $env{ID_PATH}/dirname"
-
-# Replace characters
-SYMLINK+="disk/by-label/$env{ID_FS_LABEL}/replace{' ', '_'}"
+# Use the blkid-escaped label/uuid rather than the raw value
+SYMLINK+="disk/by-label/$env{ID_FS_LABEL_ENC}"
+SYMLINK+="disk/by-uuid/$env{ID_FS_UUID_ENC}"
 ```
+
+For anything more involved (extracting a path component, custom rewriting), call a
+helper with `PROGRAM=` / `IMPORT{program}=` and match on `$result` (`%c`).
 
 ### Rule Processing Flow
 

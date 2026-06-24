@@ -83,6 +83,7 @@ in [rung 19](19_logic_analyzer_i2c.md). One bus can host the sensor *and* the
 - **Wrong address** — `0x76` vs `0x77` depends on an address pin; scan to be sure, then pass the right one to `begin()`.
 - **SDA/SCL swapped** — A4 = SDA, A5 = SCL on the Nano. Swapped = silent failure.
 - **Logic-level mismatch** — a strict 3.3 V sensor on a 5 V bus may need a level shifter; many breakouts are tolerant — check the [datasheet](../electronics/datasheets.md).
+- **A "BME280" that's really a BMP280** — cheap boards are often mislabelled. The BMP280 has *no humidity* sensor, so `readHumidity()` returns nonsense (often 0 or a constant). If humidity never moves when you breathe on it, check the marking — the BMP280's address is the same 0x76/0x77, so the scanner won't tell them apart.
 
 ## Where this connects
 

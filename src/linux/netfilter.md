@@ -624,7 +624,7 @@ iptables -A OUTPUT -p tcp -m string --string "password=" --algo kmp -j REJECT
 
 **Algorithms**:
 - `bm`: Boyer-Moore (faster for longer strings)
-- `kmp`: Knuth-Pratt-Morris (better for multiple pattern matching)
+- `kmp`: Knuth-Morris-Pratt (efficient for patterns with repeated substrings)
 
 ### Time-Based Rules
 

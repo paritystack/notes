@@ -138,7 +138,8 @@ STAGE D · Seeing signals                                   ~$130
   LiPo cell(s) + holder                                     $10
 
 STAGE E · Capstone PCB                                      ~$30
-  ATmega328P-PU (DIP-28)  x3  + 16 MHz crystals + caps      $15
+  ATmega328P-PU (DIP-28)  x3  + 8 MHz crystals + caps       $15
+    (8 MHz suits the 3.3 V rail; 16 MHz only if you run it at 5 V)
   USB-to-serial adapter (CP2102 / FTDI)                      $6
   Custom PCB from JLCPCB (5 boards + shipping)               $7
   ESP32 dev module (optional WiFi)                           $6

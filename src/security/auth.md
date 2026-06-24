@@ -1323,7 +1323,7 @@ OAuth 2.0 is an **authorization** framework that enables applications to obtain 
 
 ```javascript
 // 1. Authorization Code Flow (most secure, for server-side apps)
-const authUrl = `${AUTHORIZATION_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=read write&state=${STATE}`;
+const authUrl = `${AUTHORIZATION_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=read%20write&state=${STATE}`;
 
 // 2. Client Credentials Flow (for machine-to-machine)
 const tokenResponse = await fetch(TOKEN_URL, {
@@ -3013,15 +3013,18 @@ const crypto = require('crypto');
 
 // Constant-time string comparison
 function timingSafeEqual(a, b) {
-  if (a.length !== b.length) {
-    // Still compare to prevent timing leak
-    b = a;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+
+  // crypto.timingSafeEqual throws if lengths differ, so guard first.
+  // Different lengths always mean "not equal" — but still do a comparison
+  // against a same-length buffer so the timing doesn't leak the length.
+  if (bufA.length !== bufB.length) {
+    crypto.timingSafeEqual(bufA, bufA);
+    return false;
   }
 
-  return crypto.timingSafeEqual(
-    Buffer.from(a),
-    Buffer.from(b)
-  );
+  return crypto.timingSafeEqual(bufA, bufB);
 }
 
 // Constant-time user lookup and password check

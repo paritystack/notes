@@ -1196,7 +1196,7 @@ objcopy --add-gnu-debuglink=program.debug program
 
 # Convert formats
 objcopy -O binary input.elf output.bin
-objcopy -I binary -O elf64-x86-64 data.bin data.o
+objcopy -I binary -O elf64-x86-64 -B i386:x86-64 data.bin data.o   # -B sets the target arch
 
 # Extract section
 objcopy -O binary --only-section=.text binary text.bin

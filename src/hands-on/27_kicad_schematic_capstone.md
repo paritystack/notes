@@ -16,7 +16,8 @@ an electrical blueprint, checked by the tool, ready to become a [PCB](28_kicad_p
         ├── VCC, AVCC
         │
    reset ─[10k]─ 3V3,  + ISP header
-   XTAL1/2 ─ 16MHz crystal + 2×22pF (or use internal 8MHz osc, no crystal)
+   XTAL1/2 ─ 8MHz crystal + 2×22pF  (on a 3V3 rail use ≤8MHz; internal
+             8MHz osc needs no crystal. 16MHz needs ~5V — see below)
         │
    PC4/PC5 ─ SDA/SCL ─ BME280 + OLED   (your I2C bus)
    header: RX/TX/DTR ─ for USB-serial programming
@@ -36,8 +37,12 @@ the [sensor](17_i2c_sensor.md). No hardware this rung — it's all CAD.
    header.
 2. **Add the chip's support circuitry the Nano gave you for free:**
    - A **100 nF decoupling cap** beside each VCC/AVCC pin (and one bulk cap on the rail).
-   - A **16 MHz crystal + two 22 pF caps** on XTAL1/XTAL2 — *or* skip it and run the
-     internal 8 MHz oscillator (fewer parts, less accuracy).
+   - A **clock source** on XTAL1/XTAL2. On this **3.3 V rail use 8 MHz** — either an
+     8 MHz crystal + two 22 pF caps, or skip the crystal and run the internal 8 MHz RC
+     oscillator (fewer parts, less accuracy). **Do not run 16 MHz at 3.3 V:** the
+     ATmega328P is only rated to ~13 MHz at 3.3 V (10 MHz @ 2.7 V → 20 MHz @ 4.5 V on
+     the datasheet's speed-grade chart), so 16 MHz needs ~3.8 V minimum — it's why the
+     3.3 V Arduino Pro Mini runs at 8 MHz. Reserve 16 MHz for a 5 V rail.
    - A **10 kΩ pull-up on RESET** ([rung 06](06_button_pullup.md) logic) plus a reset button.
    - A **programming header** (ISP, or RX/TX/DTR for the [bootloader](29_order_assemble.md) route).
 3. **Wire the nets:** power rails, I²C ([PC4=SDA, PC5=SCL](17_i2c_sensor.md)), and label nets

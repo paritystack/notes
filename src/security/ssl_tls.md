@@ -75,7 +75,7 @@ Cipher Suites:
   - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
   - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
   - TLS_RSA_WITH_AES_128_CBC_SHA256
-Random: [28 bytes client random]
+Random: [32 bytes client random]
 Session ID: [empty for new session]
 Extensions:
   - server_name: example.com
@@ -90,7 +90,7 @@ Server → Client:
 
 TLS Version: 1.2
 Cipher Suite: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-Random: [28 bytes server random]
+Random: [32 bytes server random]
 Session ID: [32 bytes for session resumption]
 Extensions:
   - renegotiation_info
@@ -596,16 +596,22 @@ import socket
 
 def test_tls_version(hostname, port=443):
     """Test TLS versions supported by server"""
+    # The PROTOCOL_TLSvX constants are deprecated/removed in modern Python;
+    # pin each test by setting min == max version on a default context instead.
     versions = {
-        'TLS 1.0': ssl.PROTOCOL_TLSv1,
-        'TLS 1.1': ssl.PROTOCOL_TLSv1_1,
-        'TLS 1.2': ssl.PROTOCOL_TLSv1_2,
-        'TLS 1.3': ssl.PROTOCOL_TLS,  # Tries highest available
+        'TLS 1.0': ssl.TLSVersion.TLSv1,
+        'TLS 1.1': ssl.TLSVersion.TLSv1_1,
+        'TLS 1.2': ssl.TLSVersion.TLSv1_2,
+        'TLS 1.3': ssl.TLSVersion.TLSv1_3,
     }
-    
-    for version_name, protocol in versions.items():
+
+    for version_name, tls_version in versions.items():
         try:
-            context = ssl.SSLContext(protocol)
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+            context.minimum_version = tls_version
+            context.maximum_version = tls_version
             with socket.create_connection((hostname, port), timeout=5) as sock:
                 with context.wrap_socket(sock, server_hostname=hostname) as ssock:
                     print(f"✓ {version_name}: Supported (cipher: {ssock.cipher()[0]})")
@@ -664,9 +670,10 @@ ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:...';
 **Attack**: Exploits TLS compression
 
 **Mitigation**:
-```nginx
-# Disable TLS compression (usually disabled by default)
-ssl_compression off;
+```
+# TLS-level compression is disabled by default in modern OpenSSL (since 1.0.1)
+# and nginx has no directive to enable it — keep OpenSSL up to date.
+# Also avoid HTTP-level compression of secrets reflected in responses (BREACH).
 ```
 
 ### 4. Heartbleed

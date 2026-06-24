@@ -467,9 +467,9 @@ tx_thread_sleep(100);
 ULONG version = tx_kernel_version_get();
 // Returns format: 0x06010000 for version 6.1
 
-// Get system state
-TX_THREAD *thread;
-ULONG state = tx_thread_identify();  // Returns current thread
+// Identify the currently executing thread (returns a TX_THREAD *, or
+// TX_NULL if called outside thread context)
+TX_THREAD *current = tx_thread_identify();
 
 // Performance information
 ULONG resumptions, suspensions, solicited_preemptions;

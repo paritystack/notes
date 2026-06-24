@@ -758,8 +758,8 @@ static int __init my_init(void)
 	if (ret < 0)
 		goto unregister_chrdev;
 
-	/* Create device class */
-	my_class = class_create(THIS_MODULE, "myclass");
+	/* Create device class (kernel < 6.4: class_create(THIS_MODULE, "myclass")) */
+	my_class = class_create("myclass");
 	if (IS_ERR(my_class)) {
 		ret = PTR_ERR(my_class);
 		goto del_cdev;

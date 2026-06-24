@@ -27,7 +27,8 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 21. [Loss Functions](./loss_functions.md) - Cross-entropy, MSE, focal, contrastive, label smoothing
 22. [Normalization](./normalization.md) - BatchNorm, LayerNorm, RMSNorm, GroupNorm, pre/post-LN
 23. [State Space Models](./state_space_models.md) - S4/Mamba selective SSMs, sub-quadratic sequence modeling
-24. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+24. [Positional Encodings](./positional_encoding.md) - Sinusoidal, RoPE, ALiBi, relative biases, length extrapolation
+25. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

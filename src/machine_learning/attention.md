@@ -258,6 +258,8 @@ approximate schemes only pay off at extreme context lengths.
 
 - [Transformers](transformers.md) — the core attention derivation and full multi-head
   implementation this page builds on
+- [Positional encodings](positional_encoding.md) — RoPE is applied to Q/K before the cache
+  write; where the position-indexing pitfall here originates
 - [Neural networks](neural_networks.md) — attention as a differentiable layer in the stack
 - [CUDA](cuda.md) — the SRAM/HBM memory hierarchy and tiled-matmul pattern FlashAttention
   exploits

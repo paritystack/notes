@@ -131,3 +131,11 @@ you the exact one that was open — described as simply as possible.
 - [Hypothesis docs](https://hypothesis.readthedocs.io/)
 - [fast-check docs](https://fast-check.dev/)
 - [Choosing properties for property-based testing - F# for Fun and Profit](https://fsharpforfunandprofit.com/posts/property-based-testing-2/)
+
+## Where this connects
+
+- [Unit testing](unit_testing.md) — the example-based tests PBT complements
+- [TDD](tdd.md) — properties as executable specifications
+- [Mutation testing](mutation_testing.md) — both expose weak test suites
+- [Test data](test_data.md) — generators versus hand-built fixtures
+- [Security testing](security_testing.md) — fuzzing as randomized-input testing

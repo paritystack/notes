@@ -137,3 +137,11 @@ detail you care about — "this one's a kid" — and the rest is filled in for y
 - [factory_boy docs](https://factoryboy.readthedocs.io/)
 - [Faker (Python)](https://faker.readthedocs.io/) · [@faker-js/faker](https://fakerjs.dev/)
 - [Fishery](https://github.com/thoughtbot/fishery)
+
+## Where this connects
+
+- [Mocking](mocking.md) — stubs versus real data
+- [Integration testing](integration.md) — seeding databases for integration tests
+- [Property-based testing](property_based_testing.md) — generated versus hand-built data
+- [E2E testing](e2e_testing.md) — fixtures for full-stack runs
+- [CI/CD test automation](ci_testing.md) — provisioning data in pipelines

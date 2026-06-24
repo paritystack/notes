@@ -176,3 +176,10 @@ and [heuristic search](../algorithms/heuristic_search.md).
 - **Ignoring conditioning** — unscaled features make first-order methods crawl.
 - **Local minima vs saddle points** — in high dimensions, saddles dominate; momentum and
   noise help escape them.
+
+## Where this connects
+
+- [Linear algebra](linear_algebra.md), [Calculus](calculus.md) — gradients and Hessians
+- [Numerical methods](numerical_methods.md) — iterative solvers
+- [Game theory](game_theory.md) — equilibria as optimization
+- [Deep learning](../machine_learning/deep_learning.md) — gradient descent in practice

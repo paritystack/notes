@@ -289,3 +289,12 @@ Never start building without a plan!
 
 - [TDD by Example - Kent Beck](https://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530)
 - [What is TDD](https://testdriven.io/blog/what-is-tdd/)
+
+## Where this connects
+
+- [Unit testing](unit_testing.md) — the fast tests TDD writes first
+- [BDD with Gherkin](bdd_gherkin.md) — a behaviour-focused extension of TDD
+- [Mocking](mocking.md) — isolating the unit under test
+- [Test smells](test_smells.md) — keeping TDD tests maintainable
+- [Mutation testing](mutation_testing.md), [Coverage](coverage.md) — measuring suite quality
+- [CI/CD test automation](ci_testing.md) — running the suite on every change

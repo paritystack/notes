@@ -146,3 +146,12 @@ until it passes its gate.
 - [GitHub Actions docs](https://docs.github.com/en/actions)
 - [pytest-xdist](https://pytest-xdist.readthedocs.io/) · [Jest CI guide](https://jestjs.io/docs/cli)
 - [Google Testing Blog: Flaky Tests](https://testing.googleblog.com/2016/05/flaky-tests-at-google-and-how-we.html)
+
+## Where this connects
+
+- [TDD](tdd.md) — the fast tests that gate every commit
+- [Coverage](coverage.md), [Mutation testing](mutation_testing.md) — quality gates in the pipeline
+- [E2E testing](e2e_testing.md), [Performance testing](performance_testing.md) — slower pipeline stages
+- [Test data](test_data.md) — provisioning data in CI
+- [Security testing](security_testing.md) — SAST/DAST stages
+- [Code quality](code_quality.md) — linting and static-analysis gates

@@ -107,3 +107,12 @@ that never beeps at all (asserts nothing) — and you stop trusting it.
 
 - [xUnit Test Patterns - Gerard Meszaros (test smells catalogue)](http://xunitpatterns.com/Test%20Smells.html)
 - [Martin Fowler: Test Smells & Refactoring](https://martinfowler.com/)
+
+## Where this connects
+
+- [TDD](tdd.md) — the discipline that keeps tests clean
+- [Unit testing](unit_testing.md) — where most smells appear
+- [Mocking](mocking.md) — over-mocking as a common smell
+- [Coverage](coverage.md) — coverage gaming versus real assertions
+- [Code quality](code_quality.md) — the production-code parallel
+- [Mutation testing](mutation_testing.md) — detecting assertion-free tests

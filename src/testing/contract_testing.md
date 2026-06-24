@@ -109,3 +109,12 @@ their promise on paper, the real meeting will work.
 - [Pact docs](https://docs.pact.io/)
 - [Pact Broker](https://docs.pact.io/pact_broker)
 - [Martin Fowler: Contract Tests](https://martinfowler.com/bliki/ContractTest.html)
+
+## Where this connects
+
+- [Integration testing](integration.md) — broader cross-service testing
+- [E2E testing](e2e_testing.md) — the full-stack alternative to contracts
+- [Mocking](mocking.md) — stubbing providers in consumer tests
+- [CI/CD test automation](ci_testing.md) — verifying contracts in pipelines
+- [API design](../web_development/api_design.md) — the contracts being tested
+- [Microservices](../system_design/microservices.md) — why contracts matter

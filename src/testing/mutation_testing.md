@@ -103,3 +103,11 @@ the alarm stays silent, that room isn't really protected.
 - [mutmut docs](https://mutmut.readthedocs.io/)
 - [Stryker Mutator](https://stryker-mutator.io/)
 - [Pitest](https://pitest.org/)
+
+## Where this connects
+
+- [Coverage](coverage.md) — the metric mutation testing improves on
+- [Unit testing](unit_testing.md) — the suite mutants probe
+- [TDD](tdd.md) — tests written to kill real bugs (and mutants)
+- [Property-based testing](property_based_testing.md) — another way to expose weak assertions
+- [CI/CD test automation](ci_testing.md) — running mutation analysis in CI

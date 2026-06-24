@@ -120,3 +120,10 @@ is exactly an operation that commutes through the encryption map — a frontier 
 - **Assuming commutativity** — matrix and permutation groups are non-abelian; `ab ≠ ba`.
 - **Fields need prime-power size** — there is no field with 6 elements; `ℤₙ` is a field
   only when `n` is prime.
+
+## Where this connects
+
+- [Discrete math](discrete_math.md) — the foundations groups/rings build on
+- [Linear algebra](linear_algebra.md) — vector spaces as algebraic structures
+- [Information theory](information_theory.md) — finite fields in coding theory
+- [Encryption](../security/encryption.md) — the group theory behind ECC/RSA

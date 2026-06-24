@@ -115,3 +115,11 @@ sure you didn't leave a key under the mat.
 - [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
 - [Bandit](https://bandit.readthedocs.io/) · [Semgrep](https://semgrep.dev/) · [OWASP ZAP](https://www.zaproxy.org/)
 - [gitleaks](https://github.com/gitleaks/gitleaks) · [OSV-Scanner](https://google.github.io/osv-scanner/)
+
+## Where this connects
+
+- [OWASP Top 10](../security/owasp_top_10.md) — the vulnerability classes to test for
+- [Threat modeling](../security/threat_modeling.md) — deciding what to test
+- [Property-based testing](property_based_testing.md) — fuzzing as randomized input testing
+- [API security](../security/api_security.md) — testing service endpoints
+- [CI/CD test automation](ci_testing.md) — SAST/DAST in the pipeline

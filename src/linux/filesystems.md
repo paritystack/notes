@@ -1,6 +1,6 @@
 # Linux Filesystems
 
-Comprehensive guide to Linux filesystem types, operations, and patterns. Covers traditional filesystems (ext4, XFS, Btrfs, ZFS), special filesystems (procfs, sysfs), and modern container storage with OverlayFS.
+Comprehensive guide to Linux filesystem types, operations, and patterns. Covers traditional filesystems (ext4, XFS, Btrfs, ZFS), special filesystems (procfs, [sysfs](sysfs.md)), and modern container storage with OverlayFS — all sitting under the [kernel](kernel.md)'s VFS layer and the [page cache](memory_management.md).
 
 ## Table of Contents
 
@@ -3067,3 +3067,12 @@ mount -t overlay overlay -o lowerdir=/lower,upperdir=/upper,workdir=/work /merge
 | tmpfs | Excellent | Excellent | Excellent | Excellent | Excellent |
 
 Note: Performance varies greatly based on hardware, configuration, and workload. These are general characteristics.
+
+## Where this connects
+
+- [Kernel architecture](kernel.md) — the VFS layer above filesystems
+- [sysfs](sysfs.md), [udev](udev.md) — special filesystems and device nodes
+- [Virtualization](virtualization.md) — OverlayFS for container images
+- [Memory management](memory_management.md) — the page cache
+- [Yocto](yocto.md) — building root filesystems
+- [Flash filesystems](../embedded/flash_filesystems.md) — the MCU-side counterpart

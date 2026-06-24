@@ -175,3 +175,10 @@ circuits, and processor [ISA](../embedded/isa.md) design.
 - **Off-by-one in induction** — forgetting or misstating the base case.
 - **0! = 1 and C(n,0) = 1** — empty-product conventions that trip up counting.
 - **Modular division** — you multiply by the modular *inverse*, not ordinary division.
+
+## Where this connects
+
+- [Abstract algebra](abstract_algebra.md) — groups, rings, and fields
+- [Probability](probability.md) — counting and combinatorics
+- [Information theory](information_theory.md) — entropy over discrete alphabets
+- [Graph algorithms](../algorithms/graph_algorithms.md) — applied discrete structures

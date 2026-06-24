@@ -3800,3 +3800,11 @@ semanage fcontext -l -C
 semanage port -l -C
 semanage boolean -l -C
 ```
+
+## Where this connects
+
+- [SELinux on Android](../android/selinux_android.md) — Android's use of the same mechanism
+- [Namespaces](namespace.md), [cgroups](cgroups.md) — other kernel isolation mechanisms
+- [systemd](systemd.md) — labels and transitions for services
+- [Process internals](process_internals.md) — domains attached to processes
+- [Zero trust](../security/zero_trust.md) — MAC as defense-in-depth

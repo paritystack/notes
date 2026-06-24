@@ -153,3 +153,11 @@ those exact written steps to prove the cake comes out right.
 - [pytest-bdd](https://pytest-bdd.readthedocs.io/)
 - [Cucumber docs](https://cucumber.io/docs/cucumber/)
 - [Gherkin reference](https://cucumber.io/docs/gherkin/reference/)
+
+## Where this connects
+
+- [TDD](tdd.md) — BDD extends the red-green-refactor cycle with behaviour specs
+- [Unit testing](unit_testing.md), [Integration testing](integration.md) — the layers scenarios drive
+- [E2E testing](e2e_testing.md) — acceptance scenarios often run end-to-end
+- [Test data](test_data.md) — fixtures behind Given steps
+- [CI/CD test automation](ci_testing.md) — running scenarios on every change

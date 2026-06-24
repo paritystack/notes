@@ -205,3 +205,10 @@ The discrete-time chain here is the probabilistic cousin of the continuous dynam
 - **Confusing P(A|B) with P(B|A)** — the prosecutor's fallacy.
 - **Assuming independence** to multiply probabilities when variables are correlated —
   the cause of underestimated tail risk in [finance](../finance/risk_management.md).
+
+## Where this connects
+
+- [Statistics](statistics.md) — inference built on probability
+- [Stochastic processes](stochastic_processes.md) — probability evolving over time
+- [Information theory](information_theory.md) — entropy and mutual information
+- [Supervised learning](../machine_learning/supervised_learning.md) — probabilistic models and loss functions

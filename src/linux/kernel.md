@@ -1,6 +1,6 @@
 # Linux Kernel Architecture
 
-A comprehensive guide to Linux kernel internals, architecture, system calls, modules, compilation, and debugging.
+A comprehensive guide to Linux kernel internals, architecture, system calls, modules, compilation, and debugging. It ties together [process](process_internals.md) scheduling, [memory management](memory_management.md), [filesystems](filesystems.md) (VFS), [driver development](driver_development.md), and modern hooks like [eBPF](ebpf.md).
 
 ## Table of Contents
 
@@ -1696,3 +1696,12 @@ module_exit(template_exit);
 ---
 
 This guide covers the fundamentals of Linux kernel architecture and development. The kernel is vast and constantly evolving, so continuous learning and experimentation are essential!
+
+## Where this connects
+
+- [Process internals](process_internals.md), [Process](process.md) — scheduling and the task model
+- [Memory management](memory_management.md) — virtual memory and the page cache
+- [Driver development](driver_development.md) — kernel modules and the device model
+- [Filesystems](filesystems.md) — the VFS subsystem
+- [Synchronization](synchronization.md) — locking inside the kernel
+- [eBPF](ebpf.md) — programmable kernel hooks

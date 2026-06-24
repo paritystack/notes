@@ -688,3 +688,11 @@ WantedBy=multi-user.target
 ```
 
 By using `tc`, administrators can fine-tune network performance, improve reliability, and ensure that critical applications have the necessary resources to function optimally.
+
+## Where this connects
+
+- [netfilter](netfilter.md), [nftables](nftables.md), [iptables](iptables.md) — packet classification and filtering
+- [QoS & traffic shaping](../networking/qos_traffic_shaping.md) — the QoS concepts tc implements
+- [eBPF](ebpf.md) — modern classifiers and qdiscs
+- [networking](networking.md) — the broader Linux network stack
+- [netlink](netlink.md) — the API tc uses to talk to the kernel

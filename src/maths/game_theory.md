@@ -124,3 +124,10 @@ dominates it. Equilibria are stable, not necessarily good.
   when opponents are irrational or make errors.
 - **Ignoring repetition** — one-shot analysis misses cooperation that repeated
   interaction sustains.
+
+## Where this connects
+
+- [Probability](probability.md) — mixed strategies and expected payoffs
+- [Optimization](optimization.md) — equilibria as optimization problems
+- [Statistics](statistics.md) — estimating opponent behaviour
+- [Deep reinforcement learning](../machine_learning/deep_reinforcement_learning.md) — self-play and multi-agent games

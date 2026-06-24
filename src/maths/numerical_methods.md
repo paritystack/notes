@@ -171,3 +171,10 @@ wastes work and accumulates rounding error.
   (e.g. `log(0)`, `0/0`, `sqrt(−x)`).
 - **Ignoring conditioning** — a "correct" algorithm still returns garbage on an
   ill-conditioned problem.
+
+## Where this connects
+
+- [Linear algebra](linear_algebra.md) — solving linear systems numerically
+- [Calculus](calculus.md) — differentiation and integration, discretized
+- [Optimization](optimization.md) — iterative solvers and convergence
+- [Mathematical algorithms](../algorithms/mathematical_algorithms.md) — numerical routines in code

@@ -471,3 +471,11 @@ systemd-cgtop -d 2            # refresh every 2s
 ### Books
 - "Linux Kernel Development" — Robert Love
 - "The Linux Programming Interface" — Michael Kerrisk (process groups, namespaces, resource limits)
+
+## Where this connects
+
+- [Namespaces](namespace.md) — the other half of container isolation
+- [systemd](systemd.md) — drives cgroup delegation on modern systems
+- [Process internals](process_internals.md) — what cgroups account and limit
+- [Virtualization](virtualization.md), [Container networking](../networking/container_networking.md) — containers built on cgroups + namespaces
+- [Memory management](memory_management.md) — the memory controller's accounting

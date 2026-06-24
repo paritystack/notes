@@ -1323,3 +1323,11 @@ CRDTs are the secret sauce that makes all these work without everyone having to 
 
 **Last Updated**: 2025-01-22
 **Related**: [Distributed Systems](../system_design/distributed_systems.md), [Consensus Algorithms](../algorithms/raft.md), Vector Clocks
+
+## Where this connects
+
+- [Persistent structures](persistent_structures.md) — versioned, immutable data underpinning histories
+- [Distributed consensus](../system_design/distributed_consensus.md) — the coordination CRDTs avoid
+- [Raft](../algorithms/raft.md) — a consensus protocol CRDTs deliberately sidestep
+- [Distributed systems](../system_design/distributed_systems.md) — the eventual-consistency setting
+- [Hash tables](hash_tables.md) — the local maps/sets CRDTs wrap

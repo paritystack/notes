@@ -2130,3 +2130,11 @@ logread | grep -i fail
 - Downloads: https://downloads.openwrt.org/
 - Forum: https://forum.openwrt.org/
 - Source Code: https://git.openwrt.org/
+
+## Where this connects
+
+- [Yocto](yocto.md) — another embedded-Linux build system
+- [Cross compilation](cross_compilation.md) — building for router targets
+- [netfilter](netfilter.md), [nftables](nftables.md), [tc](tc.md) — the networking/firewall stack OpenWRT configures
+- [cfg80211/mac80211](cfg80211_mac80211.md) — the Wi-Fi stack on routers
+- [Firewalls](../networking/firewalls.md) — concepts behind OpenWRT firewalling

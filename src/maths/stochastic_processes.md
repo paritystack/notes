@@ -137,3 +137,10 @@ calculus, where `(dW)² = dt` — a twist on ordinary [calculus](calculus.md).
   given enough time; "I'm due for a win" is the gambler's fallacy.
 - **Treating Brownian paths as smooth** — they're nowhere differentiable; ordinary
   calculus chain rules don't apply (hence Itô's lemma).
+
+## Where this connects
+
+- [Probability](probability.md) — the foundation of random processes
+- [Statistics](statistics.md) — estimating process parameters
+- [Optimization](optimization.md) — stochastic optimization methods
+- [Deep reinforcement learning](../machine_learning/deep_reinforcement_learning.md) — Markov decision processes

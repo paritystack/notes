@@ -161,3 +161,11 @@ freq │ ▓▓░░  ░░▓▓        a "chirp" sweeping
   above `N/2` are the negative (mirror) frequencies of a real signal.
 - **Assuming linearity/time-invariance** — convolution-based reasoning only holds for LTI
   systems; saturating or time-varying systems break it.
+
+## Where this connects
+
+- [Linear algebra](linear_algebra.md) — transforms as linear operators
+- [Calculus](calculus.md) — Fourier and Laplace foundations
+- [Information theory](information_theory.md) — sampling and channel capacity
+- [Convolution (ML)](../machine_learning/convolution.md) — the same operation in neural nets
+- [DSP](../embedded/dsp.md) — signal processing on MCUs

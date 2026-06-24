@@ -137,3 +137,10 @@ storage.
   mode-covering vs mode-seeking behaviour in ML.
 - **Entropy ≠ value** — high entropy means unpredictable, not useful or meaningful.
 - **Estimating entropy from few samples** — biased low; needs care for large alphabets.
+
+## Where this connects
+
+- [Probability](probability.md) — entropy is defined over distributions
+- [Statistics](statistics.md) — estimation and divergence measures
+- [Signal processing](signal_processing.md) — channel capacity and sampling
+- [Deep learning](../machine_learning/deep_learning.md) — cross-entropy and KL divergence

@@ -3871,3 +3871,12 @@ bitbake myapp
 - See [Device Tree](device_tree.md) for device tree integration
 - See [Driver Development](driver_development.md) for kernel module recipes
 - See [Kernel](kernel.md) for kernel concepts
+
+## Where this connects
+
+- [OpenWRT](openwrt.md) — an alternative embedded-Linux distro builder
+- [Cross compilation](cross_compilation.md) — the toolchains Yocto generates
+- [Kernel architecture](kernel.md) — kernel recipes and config
+- [device_tree](device_tree.md) — BSP hardware description
+- [Embedded build systems](../embedded/build_systems.md) — embedded builds broadly
+- [filesystems](filesystems.md) — root filesystem image types

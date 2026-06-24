@@ -753,3 +753,11 @@ print("\n" + "=" * 60)
 ---
 
 *Note: This guide is for educational purposes only and does not constitute financial advice. Always conduct thorough research and consider consulting with financial professionals before making investment decisions.*
+
+## Where this connects
+
+- [Valuation](valuation.md) — turning fundamentals into a price target
+- [Stocks](stocks.md) — the assets most often analyzed
+- [Technical analysis](technical_analysis.md) — the chart-based counterpart
+- [Macroeconomics](macroeconomics.md), [Interest rates](interest_rates.md) — the top-down backdrop
+- [Behavioral finance](behavioral_finance.md) — why price can diverge from value

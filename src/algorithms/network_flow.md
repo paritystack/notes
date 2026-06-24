@@ -211,3 +211,11 @@ textbooks costs `O(V²)` per BFS and blows up on large sparse networks.
 - [[graph_algorithms]] — runnable Edmonds-Karp, min-cut, and Dinic's code.
 - CLRS, *Introduction to Algorithms*, Ch. 26 "Maximum Flow".
 - Competitive Programming literature on Dinic's and push-relabel for the fastest variants.
+
+## Where this connects
+
+- [Graph algorithms](graph_algorithms.md) — the broader graph toolkit
+- [Graphs (data structure)](../data_structures/graphs.md) — flow networks as weighted graphs
+- [Greedy algorithms](greedy_algorithms.md) — augmenting-path intuition
+- [Dynamic programming](dynamic_programming.md) — related optimization techniques
+- [Bipartite matching](graph_algorithms.md) — a classic max-flow application

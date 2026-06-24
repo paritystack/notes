@@ -969,3 +969,11 @@ for timeframe, items in checklist.items():
 8. Review and adjust regularly
 
 Remember: In investing, it's not about how much you make, but how much you don't lose. Effective risk management allows you to stay in the game long enough to benefit from compounding returns.
+
+## Where this connects
+
+- [Portfolio management](portfolio_management.md) — applying risk limits to allocations
+- [Derivatives](derivatives.md), [Options](options.md) — hedging instruments
+- [Volatility trading](volatility_trading.md) — trading risk itself
+- [Stochastic processes](../maths/stochastic_processes.md) — the math behind VaR and option pricing
+- [Algorithmic trading](algorithmic_trading.md) — encoding risk rules into systems

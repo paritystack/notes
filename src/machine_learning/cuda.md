@@ -1,6 +1,6 @@
 # CUDA Programming
 
-CUDA (Compute Unified Device Architecture) is NVIDIA's parallel computing platform and programming model that enables dramatic increases in computing performance by harnessing the power of Graphics Processing Units (GPUs).
+CUDA (Compute Unified Device Architecture) is NVIDIA's parallel computing platform and programming model that enables dramatic increases in computing performance by harnessing the power of Graphics Processing Units (GPUs). It is the layer beneath [PyTorch](pytorch.md) and [JAX](jax.md), accelerating [deep learning](deep_learning.md) workloads and [inference](../ai/inference_optimization.md).
 
 ## Table of Contents
 
@@ -1454,3 +1454,11 @@ atomicAdd(&double_addr, double_val);  // sm_60+
   - Coursera: GPU Programming Specialization
 
 This guide covers the essential aspects of CUDA programming. For specific applications in machine learning, refer to the [PyTorch](./pytorch.md), [Deep Learning](./deep_learning.md), and [Quantization](./quantization.md) documentation.
+
+## Where this connects
+
+- [PyTorch](pytorch.md), [JAX](jax.md) — frameworks built on CUDA kernels
+- [Deep learning](deep_learning.md) — the workloads CUDA accelerates
+- [Quantization](quantization.md) — lower-precision GPU math
+- [Convolution](convolution.md) — a canonical GPU-bound operation
+- [Inference optimization](../ai/inference_optimization.md) — serving models fast on GPUs

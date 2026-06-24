@@ -84,3 +84,11 @@ In real apps, you rarely search *just* vectors. You ask: *"Find closest document
 ## 6. Conclusion
 
 Vector Databases are the long-term memory of AI applications. Choosing the right one depends on your scale (10k vs 100M vectors), latency requirements, and whether you need complex metadata filtering.
+
+## Where this connects
+
+- [Embeddings](embeddings.md) — the vectors these databases index
+- [RAG](rag.md) — the retrieval step vector DBs power
+- [HNSW](../data_structures/hnsw.md) — the graph index most vector DBs use
+- [Product quantization](../data_structures/product_quantization.md), [MinHash/LSH](../data_structures/minhash_lsh.md) — compression and ANN techniques
+- [Inverted index](../data_structures/inverted_index.md) — the keyword-search counterpart for hybrid search

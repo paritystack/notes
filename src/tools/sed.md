@@ -1,6 +1,6 @@
 # sed
 
-sed (Stream Editor) is a powerful text processing utility that performs editing operations on text streams and files. It reads input line by line, applies commands, and outputs the result. sed is particularly useful for automated text transformations, search and replace operations, and text filtering.
+sed (Stream Editor) is a powerful text processing utility that performs editing operations on text streams and files. It reads input line by line, applies commands, and outputs the result. sed is particularly useful for automated text transformations, search and replace operations, and text filtering — often paired with [grep](grep.md)/[ripgrep](ripgrep.md) for matching, [awk](awk.md) for field work, and [find](find.md) to select files.
 
 ## Overview
 
@@ -1083,3 +1083,10 @@ echo "test" | sed '/pattern/!d'
 ```
 
 sed is an essential tool for text processing and manipulation. Master these patterns and techniques to efficiently handle automated text transformations, configuration management, and data processing tasks.
+
+## Where this connects
+
+- [awk](awk.md) — the field-oriented companion for structured text
+- [grep](grep.md), [ripgrep](ripgrep.md) — searching before you transform
+- [find](find.md) — locating files to feed into sed
+- [vim](vim.md) — the same regex/substitution ideas in an editor

@@ -1,6 +1,6 @@
 # Graph Algorithms
 
-Graph algorithms are fundamental techniques for solving problems that involve relationships and connections between entities. From social networks to GPS navigation, from task scheduling to network optimization, graph algorithms power many of the systems we interact with daily.
+Graph algorithms are fundamental techniques for solving problems that involve relationships and connections between entities. From social networks to GPS navigation, from task scheduling to network optimization, graph algorithms power many of the systems we interact with daily. They operate on the [graph data structure](../data_structures/graphs.md) and underpin specialized techniques like [network flow](network_flow.md) and [union-find](union_find.md).
 
 ## Table of Contents
 
@@ -5136,3 +5136,11 @@ This comprehensive guide covered:
 ---
 
 **Total Lines**: This guide contains over 3,500 lines of comprehensive content covering graph algorithms with implementations in Python, JavaScript, and C++, complexity analysis, real-world applications, and interview problems.
+
+## Where this connects
+
+- [Graphs (data structure)](../data_structures/graphs.md) — the representation these algorithms traverse
+- [Network flow](network_flow.md) — max-flow/min-cut on graphs
+- [Strongly connected components](strongly_connected_components.md), [LCA](lca.md) — specialized graph queries
+- [Union-Find](union_find.md) — the DSU behind Kruskal and connectivity
+- [Dynamic programming](dynamic_programming.md) — DP on DAGs and shortest paths

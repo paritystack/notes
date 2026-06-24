@@ -3767,3 +3767,11 @@ print(is_subsequence("abc", "ahbgdc"))  # True
 - **Manacher's**: Find palindromes in linear time (racecar!)
 
 Remember: Choose the right algorithm for your problem - faster isn't always better if it's too complex!
+
+## Where this connects
+
+- [Tries](../data_structures/tries.md), [Suffix arrays](../data_structures/suffix_arrays.md) — the structures behind fast string queries
+- [Hashing techniques](hashing_techniques.md) — Rabin-Karp and rolling hashes
+- [Two pointers](two_pointers.md), [Sliding window](sliding_window.md) — substring scanning patterns
+- [Dynamic programming](dynamic_programming.md) — edit distance and LCS
+- [Inverted index](../data_structures/inverted_index.md) — full-text search built on these

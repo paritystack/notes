@@ -459,3 +459,11 @@ Educational content only — **not financial advice**. ~90%+ of retail algo trad
 ---
 
 See also: [Algorithmic Trading](algorithmic_trading.md) (strategy & backtesting theory), [Technical Analysis](technical_analysis.md) (indicators), [Risk Management](risk_management.md) (position sizing & limits), [Crypto](crypto.md), [Stocks](stocks.md).
+
+## Where this connects
+
+- [Algorithmic trading](algorithmic_trading.md) — the strategy/theory companion to this build guide
+- [Risk management](risk_management.md) — guardrails before going live
+- [Technical analysis](technical_analysis.md), [Momentum & trend](momentum_trend.md) — signals bots act on
+- [Crypto](crypto.md), [Forex](forex.md) — common 24/7 markets for bots
+- [Event-driven](event_driven.md) — architecting reaction to market events

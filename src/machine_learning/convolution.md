@@ -808,3 +808,11 @@ The field continues to evolve with new architectures, attention mechanisms, and 
 - **Books**:
   - Goodfellow et al. - "Deep Learning" (Chapter 9: Convolutional Networks)
   - Zhang et al. - "Dive into Deep Learning"
+
+## Where this connects
+
+- [Neural networks](neural_networks.md), [Deep learning](deep_learning.md) — where convolutions live in CNNs
+- [Signal processing](../maths/signal_processing.md) — convolution as a signal operation
+- [PyTorch](pytorch.md) — implementing conv layers
+- [CUDA](cuda.md) — GPU kernels that make convolutions fast
+- [Quantization](quantization.md) — compressing conv-heavy models

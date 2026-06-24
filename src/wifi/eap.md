@@ -2214,3 +2214,11 @@ Session-Timeout = 28800  # 8 hours
 **Last Updated**: 2025
 **Maintainer**: Network Documentation Team
 **Related Topics**: [WiFi Security](security.md) | [802.11r Roaming](roaming.md) | [hostapd](../tools/hostapd.md) | [wpa_supplicant](../tools/wpa_supplicant.md)
+
+## Where this connects
+
+- [802.1X / NAC](../networking/nac_8021x.md) — the port-based access control EAP runs inside
+- [WiFi security](security.md) — WPA2/WPA3-Enterprise built on EAP
+- [TLS/SSL](../networking/tls_ssl.md) — the handshake reused by EAP-TLS/PEAP
+- [Authentication](../security/auth.md) — the broader identity-verification context
+- [Certificates](../security/certificates.md) — client/server certs for EAP-TLS

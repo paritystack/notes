@@ -1062,3 +1062,11 @@ stock.generate_report()
 ---
 
 *Note: This guide is for educational purposes only and does not constitute financial advice. Stock investing involves risk, including potential loss of principal. Always conduct thorough research and consider consulting with financial professionals before making investment decisions.*
+
+## Where this connects
+
+- [Fundamental analysis](fundamental_analysis.md), [Valuation](valuation.md) — deciding what a share is worth
+- [Technical analysis](technical_analysis.md) — chart-based timing
+- [ETFs](etfs.md), [Portfolio management](portfolio_management.md) — diversified ways to hold equities
+- [Risk management](risk_management.md) — controlling downside
+- [Market cycles](market_cycles.md) — the macro backdrop for equities

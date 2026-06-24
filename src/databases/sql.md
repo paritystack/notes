@@ -992,3 +992,12 @@ Joins are how you combine drawers from different filing cabinets ("for each cust
 - [Modern SQL](https://modern-sql.com/) — what's in recent SQL standards
 - [Explain Plans (Postgres)](https://www.postgresql.org/docs/current/sql-explain.html)
 - [SQL:2016 standard overview](https://en.wikipedia.org/wiki/SQL:2016)
+
+## Where this connects
+
+- [Query optimization](query_optimization.md) — how the planner executes your SQL
+- [Indexing](indexing.md) — what makes `WHERE`/`JOIN` fast
+- [Database internals](database_internals.md) — storage and execution beneath SQL
+- [Postgres](postgres.md), [MySQL](mysql.md), [SQLite](sqlite.md) — concrete dialects
+- [ACID vs BASE](acid_vs_base.md) — transactional guarantees behind SQL
+- [NoSQL](nosql.md) — the non-relational alternative

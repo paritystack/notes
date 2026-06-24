@@ -390,3 +390,11 @@ The protocol is governed openly via the spec repo at `github.com/modelcontextpro
 MCP turns "AI integration" from a bespoke engineering project into a config file. Build a server once; every compliant host can use it. The architectural discipline — client/server isolation, capability negotiation, host-mediated security — is what makes that reuse safe.
 
 For most engineers, the practical takeaway is: **before writing a custom tool inside your AI app, check if an MCP server already does the job.** The ecosystem has crossed the threshold where the answer is usually yes. When it isn't, writing a small server in Python takes an afternoon and pays back across every AI tool you use.
+
+## Where this connects
+
+- [Claude Code CLI](cli.md) — a primary MCP client
+- [Tool use](tool_use.md) — MCP standardizes how tools are exposed to models
+- [Agent frameworks](agent_frameworks.md), [Multi-agent systems](multi_agent_systems.md) — consumers of MCP servers
+- [RAG](rag.md) — MCP resources as a retrieval source
+- [LLM security](llm_security.md) — trust boundaries when connecting servers

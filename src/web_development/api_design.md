@@ -4000,3 +4000,11 @@ Warning: 299 - "This endpoint is deprecated"
 - [RESTful API Design](https://restfulapi.net/)
 - [HTTP Status Codes](https://httpstat.us/)
 - [OpenAPI Specification](https://swagger.io/specification/)
+
+## Where this connects
+
+- [REST APIs](rest_apis.md), [GraphQL](graphql.md), [gRPC](grpc.md) — the major API styles
+- [Web security](web_security.md), [API security](../security/api_security.md) — securing the surface you design
+- [RPC](../system_design/rpc.md) — remote-call semantics behind APIs
+- [HTTP](../networking/http.md), [HTTP/2](../networking/http2.md) — the transport APIs ride on
+- [Contract testing](../testing/contract_testing.md) — verifying API contracts

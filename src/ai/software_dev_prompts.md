@@ -1,6 +1,6 @@
 # Software Development Prompts
 
-A comprehensive guide to effective prompts for software development tasks using AI assistants.
+A comprehensive guide to effective prompts for software development tasks using AI assistants. It applies the principles in [prompt engineering](prompt_engineering.md) to coding, and pairs with the [Claude Code CLI](cli.md) and [coding agents](coding_agents.md) that run these prompts.
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -3119,3 +3119,11 @@ Remember: AI is a powerful tool for accelerating development, but human judgment
 ---
 
 *This documentation is designed to be practical and immediately useful. Use these patterns as starting points and adapt them to your specific needs, tech stack, and development workflow.*
+
+## Where this connects
+
+- [Prompt engineering](prompt_engineering.md) — the general principles behind these recipes
+- [Claude Code CLI](cli.md) — running these prompts in an agentic coding workflow
+- [Coding agents](coding_agents.md) — autonomous agents that use such prompts
+- [Tool use](tool_use.md) — letting the model run commands and edits
+- [Structured outputs](structured_outputs.md) — constraining responses to a schema

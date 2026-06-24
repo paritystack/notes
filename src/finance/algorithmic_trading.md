@@ -356,3 +356,11 @@ def backtest_strategy(df, initial_capital=100000):
 Remember: If it sounds too good to be true, it is. Algorithmic trading can be profitable but requires skill, discipline, capital, and realistic expectations. Start small, test thoroughly, and prepare for losses while learning.
 
 See also: [Technical Analysis](technical_analysis.md), [Risk Management](risk_management.md)
+
+## Where this connects
+
+- [Trading bots](trading_bots.md) — the code-first companion that wires strategies to a broker
+- [Technical analysis](technical_analysis.md), [Momentum & trend](momentum_trend.md) — common signal sources
+- [Risk management](risk_management.md) — position sizing and drawdown control
+- [Pairs & mean reversion](pairs_mean_reversion.md), [Event-driven](event_driven.md) — strategy families
+- [Reinforcement learning](../machine_learning/reinforcement_learning.md) — learned trading policies

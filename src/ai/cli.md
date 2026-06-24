@@ -330,3 +330,11 @@ See [Skills](./skills.md) for the deeper skill-vs-tool-vs-subagent breakdown.
 Claude Code's leverage doesn't come from any single feature — it comes from composing simple primitives under one model: **tools** for atomic capabilities, **skills** for repeatable recipes, **subagents** for context-isolated delegation, **hooks** for guaranteed automation, **MCP** for external systems. The recent direction of the product has been to shrink the built-in surface and lean harder on this customization layer.
 
 The most productive sessions look the same regardless of project: a tight `CLAUDE.md`, plan mode for non-trivial work, `Explore` subagents to keep the parent context clean, hooks to enforce the rules the model would otherwise forget, and a few well-scoped project skills that capture the team's actual workflow. Get those right and Claude Code stops feeling like an autocomplete and starts feeling like a junior engineer who already knows the codebase.
+
+## Where this connects
+
+- [MCP](mcp.md) — the protocol the CLI uses to add tools and context
+- [Coding agents](coding_agents.md) — the broader category Claude Code belongs to
+- [Agent frameworks](agent_frameworks.md) — alternative ways to build agents
+- [Tool use](tool_use.md) — how the agent calls tools
+- [Prompt engineering](prompt_engineering.md), [Software dev prompts](software_dev_prompts.md) — driving it effectively

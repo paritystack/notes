@@ -1731,3 +1731,11 @@ dmesg | grep -i bluetooth
 - [Linux Networking](../linux/networking.md)
 - [IoT Protocols](../networking/iot_protocols.md)
 - Wireless Communication
+
+## Where this connects
+
+- [BLE (embedded)](../embedded/ble.md) — the firmware-side deep dive on the same protocol
+- [IEEE 802.15.4](../embedded/ieee_802154.md) — Zigbee/Thread, the mesh alternative
+- [NFC/RFID](../embedded/nfc_rfid.md) — even-shorter-range wireless
+- [LoRa](../embedded/lora.md) — long-range, low-power sibling
+- [Power management](../embedded/power_management.md) — the low-power budgets BLE targets

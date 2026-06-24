@@ -1930,3 +1930,11 @@ for i, expert in enumerate(experts):
 
 **Last Updated**: 2024
 **Version**: 1.0
+
+## Where this connects
+
+- [Transformers](transformers.md) — where MoE layers replace dense FFNs
+- [Deep learning](deep_learning.md), [Neural networks](neural_networks.md) — the architecture context
+- [Quantization](quantization.md) — compressing large sparse models
+- [Inference optimization](../ai/inference_optimization.md) — serving MoE efficiently
+- [DeepSeek R1](../ai/deepseek_r1.md) — a prominent MoE model

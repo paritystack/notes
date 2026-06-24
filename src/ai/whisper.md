@@ -1,6 +1,6 @@
 # Whisper - OpenAI Speech Recognition
 
-Complete guide to OpenAI's Whisper, a robust automatic speech recognition (ASR) system trained on 680,000 hours of multilingual data.
+Complete guide to OpenAI's Whisper, a robust automatic speech recognition (ASR) system trained on 680,000 hours of multilingual data. Whisper is a [transformer](transformers_architecture.md) encoder-decoder; this page covers running it via [local inference](local_inference.md) and speeding it up with [inference optimization](inference_optimization.md).
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -2334,3 +2334,11 @@ Whisper represents a breakthrough in automatic speech recognition, offering:
    - Cost vs performance
 
 Whisper has democratized speech recognition, making state-of-the-art ASR accessible to everyone. Whether building a voice assistant, transcription service, or accessibility tool, Whisper provides the foundation for robust speech-to-text applications.
+
+## Where this connects
+
+- [LLMs](llms.md) — the transformer family Whisper's encoder/decoder belongs to
+- [Transformers architecture](transformers_architecture.md) — the attention model under the hood
+- [Local inference](local_inference.md) — running Whisper on-device
+- [Inference optimization](inference_optimization.md) — speeding up ASR (faster-whisper, quantization)
+- [Hugging Face](../machine_learning/hugging_face.md) — pretrained Whisper checkpoints

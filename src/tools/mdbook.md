@@ -708,3 +708,10 @@ mdbook serve -p 3001
 | `mdbook watch` | Watch for changes |
 
 mdBook is an excellent tool for creating beautiful, fast, and maintainable documentation, perfect for technical books, tutorials, API documentation, and user guides.
+
+## Where this connects
+
+- This very knowledge base is built with mdBook
+- [vim](vim.md) — editing the Markdown sources
+- [grep](grep.md), [ripgrep](ripgrep.md) — searching across book sources
+- [make](make.md), [ninja](ninja.md) — wiring mdBook builds into a pipeline

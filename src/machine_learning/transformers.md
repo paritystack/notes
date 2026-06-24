@@ -1120,6 +1120,9 @@ Transformers are like super-smart assistants that help computers understand and 
 
 - [Attention](attention.md) — the efficiency/scaling deep-dive: MHA/MQA/GQA, KV cache, FlashAttention
 - [Positional encodings](positional_encoding.md) — beyond the sinusoidal scheme here: RoPE, ALiBi, relative biases, length extrapolation
+- [Tokenization & embeddings](tokenization.md) — how text becomes the token IDs and embedding vectors fed in
+- [LLM decoding & sampling](decoding_sampling.md) — how the output logits become generated text
+- [RLHF & preference optimization](rlhf.md) — aligning a pretrained transformer into an assistant
 - [Neural networks](neural_networks.md) — transformers are a specific neural architecture (self-attention + FFN)
 - [Deep learning](deep_learning.md) — transformers are the dominant deep learning architecture for sequence tasks
 - [State space models](state_space_models.md) — S4/Mamba, the sub-quadratic alternative often hybridized with attention

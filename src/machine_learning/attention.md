@@ -260,6 +260,8 @@ approximate schemes only pay off at extreme context lengths.
   implementation this page builds on
 - [Positional encodings](positional_encoding.md) — RoPE is applied to Q/K before the cache
   write; where the position-indexing pitfall here originates
+- [LLM decoding & sampling](decoding_sampling.md) — bandwidth-bound decoding (which the KV
+  cache enables) is what speculative decoding attacks
 - [Neural networks](neural_networks.md) — attention as a differentiable layer in the stack
 - [CUDA](cuda.md) — the SRAM/HBM memory hierarchy and tiled-matmul pattern FlashAttention
   exploits

@@ -28,7 +28,10 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 22. [Normalization](./normalization.md) - BatchNorm, LayerNorm, RMSNorm, GroupNorm, pre/post-LN
 23. [State Space Models](./state_space_models.md) - S4/Mamba selective SSMs, sub-quadratic sequence modeling
 24. [Positional Encodings](./positional_encoding.md) - Sinusoidal, RoPE, ALiBi, relative biases, length extrapolation
-25. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+25. [Tokenization & Embeddings](./tokenization.md) - BPE, WordPiece, Unigram/SentencePiece, embedding tables, weight tying
+26. [LLM Decoding & Sampling](./decoding_sampling.md) - Greedy, beam, temperature, top-k/p, min-p, speculative decoding
+27. [RLHF & Preference Optimization](./rlhf.md) - SFT, reward modeling, PPO, DPO, GRPO/RLVR
+28. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

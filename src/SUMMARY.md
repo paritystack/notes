@@ -274,6 +274,9 @@
     - [Normalization](machine_learning/normalization.md)
     - [State Space Models](machine_learning/state_space_models.md)
     - [Positional Encoding](machine_learning/positional_encoding.md)
+    - [Tokenization & Embeddings](machine_learning/tokenization.md)
+    - [LLM Decoding & Sampling](machine_learning/decoding_sampling.md)
+    - [RLHF & Preference Optimization](machine_learning/rlhf.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)

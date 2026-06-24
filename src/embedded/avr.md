@@ -1,6 +1,6 @@
 # AVR Microcontrollers
 
-Comprehensive guide to AVR microcontroller programming with register-level control and bare-metal development.
+Comprehensive guide to AVR microcontroller programming with register-level control and bare-metal development. AVR is the chip family behind classic [Arduino](arduino.md) boards; this page works at the register level with [GPIO](gpio.md), [timers](timers.md), [interrupts](interrupts.md), and the [UART](uart.md)/[SPI](spi.md)/[I2C](i2c.md) peripherals.
 
 ## Table of Contents
 
@@ -956,3 +956,11 @@ avrdude -c arduino -p atmega328p -U lfuse:w:0xFF:m -U hfuse:w:0xDE:m -U efuse:w:
 - [SPI Protocol](spi.md)
 - [I2C Protocol](i2c.md)
 - [Timers and PWM](timers.md)
+
+## Where this connects
+
+- [Arduino](arduino.md) — the framework that popularised AVR
+- [GPIO](gpio.md), [Timers](timers.md), [ADC](adc.md), [PWM](pwm.md) — AVR peripherals at the register level
+- [Interrupts](interrupts.md) — AVR's vector table and ISR model
+- [UART](uart.md), [SPI](spi.md), [I2C](i2c.md) — AVR serial peripherals
+- [ISA](isa.md) — the AVR instruction set and Harvard architecture

@@ -439,3 +439,12 @@ For light debugging, TUI beats VSCode. For heavy debugging, VSCode wins.
 - [HardFault Debugging](hardfault_debugging.md) — what to do once GDB stops you
 - [RTT/Semihosting](rtt_semihosting.md) — logging that pairs with debugging
 - [Debugging](debugging.md) — broader strategies
+
+## Where this connects
+
+- [JTAG/SWD](jtag_swd.md) — the wire protocols GDB drives via a probe
+- [RTT, semihosting & SWO](rtt_semihosting.md) — alternative debug I/O channels
+- [HardFault debugging](hardfault_debugging.md) — post-mortem analysis in GDB
+- [Debugging](debugging.md) — broader embedded debugging techniques
+- [CMSIS](cmsis.md) — SVD/register views GDB uses
+- [Startup code](startup_code.md) — what to step through before main()

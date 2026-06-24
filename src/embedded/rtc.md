@@ -1,6 +1,6 @@
 # Real-Time Clock (RTC) Modules
 
-Comprehensive guide to RTC modules including DS1307, DS3231, and implementation examples.
+Comprehensive guide to RTC modules including DS1307, DS3231, and implementation examples. External RTC chips hang off the [I2C](i2c.md) bus, run from a low-speed [clock](clock_systems.md) crystal, keep time through deep sleep via the [power-management](power_management.md) backup domain, and raise alarm [interrupts](interrupts.md) to wake the MCU.
 
 ## Table of Contents
 
@@ -853,3 +853,11 @@ if (Wire.endTransmission() == 0) {
 - [STM32 HAL](stm32.md)
 - [AVR Programming](avr.md)
 - Data Logging
+
+## Where this connects
+
+- [Clock systems](clock_systems.md) — the low-speed oscillator domain RTCs use
+- [I2C](i2c.md) — the bus for external RTC chips (DS1307/DS3231)
+- [Power management](power_management.md) — RTC keeps time in deep sleep / backup domain
+- [Interrupts](interrupts.md) — alarm and wake-up interrupts
+- [Sensors](sensors.md) — timestamping sensor logs

@@ -321,3 +321,11 @@ For a "never bricks" device:
 - [Linker Scripts](linker_scripts.md)
 - [Interrupts](interrupts.md) — vector table mechanics
 - [Watchdog](watchdog.md) — rollback trigger on hung apps
+
+## Where this connects
+
+- [Secure boot](secure_boot.md) — adds signature verification to the boot chain
+- [OTA updates](ota_updates.md) — how new images reach the bootloader
+- [Startup code](startup_code.md), [Linker scripts](linker_scripts.md) — vector tables and memory layout it manages
+- [Flash filesystems](flash_filesystems.md) — image storage and A/B slots
+- [USB](usb.md) — DFU as a bootloader transport

@@ -363,3 +363,12 @@ __attribute__((naked)) void HardFault_Handler(void) {
 - [Linker Scripts](linker_scripts.md) — stack placement, .ramfunc
 - [JTAG/SWD](jtag_swd.md) — attaching a debugger to inspect SCB live
 - [Watchdog](watchdog.md) — recovery when crash dump fails
+
+## Where this connects
+
+- [GDB for embedded](gdb_embedded.md) — inspect the stacked frame after a fault
+- [JTAG/SWD](jtag_swd.md) — halt the core to read fault registers
+- [Interrupts](interrupts.md) — the exception entry/return faults build on
+- [MPU](mpu.md) — catches bad accesses as memory-management faults
+- [RTT/semihosting](rtt_semihosting.md) — emit fault dumps without a UART
+- [Memory management](memory_management.md) — stack overflows and bad pointers

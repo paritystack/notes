@@ -364,3 +364,11 @@ Forgetting `volatile` on a struct field in a custom CMSIS-Device header makes th
 - [Interrupts](interrupts.md) — NVIC API and intrinsics
 - [Build Systems](build_systems.md) — incorporating CMSIS into Make/CMake
 - [HardFault Debugging](hardfault_debugging.md) — SCB/CFSR via CMSIS
+
+## Where this connects
+
+- [Startup code](startup_code.md), [Linker scripts](linker_scripts.md) — the vendor startup/linker pieces CMSIS ships
+- [Interrupts](interrupts.md) — the NVIC_* helpers live in CMSIS
+- [ISA](isa.md), [Processor design](processor_design.md) — the Cortex-M cores CMSIS abstracts
+- [DSP](dsp.md) — CMSIS-DSP provides optimised math kernels
+- [Build systems](build_systems.md) — how CMSIS headers enter your build

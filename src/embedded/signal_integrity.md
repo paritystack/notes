@@ -281,3 +281,11 @@ A 5 kHz PWM driving an analog input radiates the fundamental and harmonics every
 - [Power Management](power_management.md) — supply transients during sleep wake
 - [I2C](i2c.md), [SPI](spi.md), [UART](uart.md) — protocols affected by SI
 - [ADC](adc.md) — noisy reads from layout issues
+
+## Where this connects
+
+- [SPI](spi.md), [I2C](i2c.md) — buses whose intermittent failures are often SI problems
+- [Clock systems](clock_systems.md) — crystal and clock-edge integrity
+- [ADC](adc.md), [DAC](dac.md) — analog paths corrupted by coupled noise
+- [Sensors](sensors.md) — analog front-ends sensitive to layout
+- [Power management](power_management.md) — decoupling and rail-noise concerns

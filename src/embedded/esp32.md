@@ -1,6 +1,6 @@
 # ESP32
 
-Comprehensive guide to ESP32 microcontroller development with WiFi and Bluetooth capabilities.
+Comprehensive guide to ESP32 microcontroller development with WiFi and Bluetooth capabilities. It is commonly programmed with the [Arduino](arduino.md) framework or ESP-IDF (which runs on [FreeRTOS](../rtos/freertos.md)), exposes both [Wi-Fi](../wifi/basics.md) and [BLE](ble.md) radios, and relies on [OTA updates](ota_updates.md) and [power management](power_management.md) for connected, battery-powered designs.
 
 ## Table of Contents
 
@@ -1106,3 +1106,12 @@ void loop() {
 - [WiFi Projects](../wifi/index.html)
 - [MQTT Protocol](../networking/iot_protocols.md)
 - [BLE Communication](ble.md)
+
+## Where this connects
+
+- [Arduino](arduino.md) — the most common framework used to program the ESP32
+- [BLE](ble.md) — one of the ESP32's two built-in radios
+- [Wi-Fi basics](../wifi/basics.md) — the 802.11 stack behind the ESP32's headline feature
+- [FreeRTOS](../rtos/freertos.md) — ESP-IDF ships FreeRTOS as its scheduler
+- [OTA updates](ota_updates.md) — partition-based OTA is core to ESP-IDF
+- [Power management](power_management.md) — deep-sleep modes for battery ESP32 designs

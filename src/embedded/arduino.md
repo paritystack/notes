@@ -1,6 +1,6 @@
 # Arduino Programming
 
-Complete guide to Arduino development, from basics to advanced projects.
+Complete guide to Arduino development, from basics to advanced projects. The Arduino API wraps the underlying [AVR](avr.md) (and [ESP32](esp32.md)) peripherals — [GPIO](gpio.md), [PWM](pwm.md), [ADC](adc.md), and the [I2C](i2c.md)/[SPI](spi.md)/[UART](uart.md) buses — so beginners can drive [sensors](sensors.md) without touching registers.
 
 ## Table of Contents
 
@@ -1190,3 +1190,11 @@ float distance = duration * 0.0343 / 2;
 - [UART](uart.md) - Serial communication details
 - [SPI](spi.md) - SPI protocol
 - [I2C](i2c.md) - I2C protocol
+
+## Where this connects
+
+- [AVR microcontrollers](avr.md) — the classic chips behind the Uno/Nano
+- [ESP32](esp32.md) — Wi-Fi/BLE boards programmed with the Arduino framework
+- [GPIO](gpio.md), [PWM](pwm.md), [ADC](adc.md) — the peripherals the Arduino API wraps
+- [I2C](i2c.md), [SPI](spi.md), [UART](uart.md) — the buses behind Wire/SPI/Serial
+- [Sensors](sensors.md) — common Arduino project inputs

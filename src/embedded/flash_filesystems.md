@@ -292,3 +292,12 @@ Yanking a SD card while writing corrupts arbitrary sectors due to in-card FTL be
 - [Bootloaders](bootloaders.md) — storing OTA images
 - [OTA Updates](ota_updates.md) — downloading firmware to flash
 - [SDIO](sdio.md) — SD card hardware interface
+
+## Where this connects
+
+- [QSPI](qspi.md) — external NOR flash these filesystems often target
+- [Memory management](memory_management.md) — the underlying flash storage model
+- [OTA updates](ota_updates.md) — image storage and rollback slots
+- [Bootloaders](bootloaders.md) — read images the filesystem stores
+- [Power management](power_management.md) — power-loss safety during writes
+- [Build systems](build_systems.md) — generating and packing filesystem images

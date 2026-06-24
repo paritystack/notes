@@ -310,3 +310,12 @@ monitor mww 0x40020014 0x1234   # poke a peripheral register
 - [Debugging](debugging.md) — broader debugging strategies
 - [HardFault Debugging](hardfault_debugging.md) — using the debugger after a fault
 - [Interrupts](interrupts.md) — vector table relocation and debug
+
+## Where this connects
+
+- [GDB for embedded](gdb_embedded.md) — the debugger driven over these wires
+- [RTT, semihosting & SWO](rtt_semihosting.md) — debug I/O that rides the same probe
+- [HardFault debugging](hardfault_debugging.md) — what you inspect once halted via SWD
+- [CMSIS](cmsis.md) — CMSIS-DAP standardises the probe protocol
+- [Bootloaders](bootloaders.md) — alternative path when no probe is present
+- [TrustZone-M](trustzone_m.md) — debug authentication gates access to secure state

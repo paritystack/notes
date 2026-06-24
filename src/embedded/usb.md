@@ -1,6 +1,6 @@
 # USB Protocol
 
-Comprehensive guide to USB protocol, device classes, and embedded implementation.
+Comprehensive guide to USB protocol, device classes, and embedded implementation. On MCUs, USB transfers are typically offloaded with [DMA](dma.md), used for firmware delivery via [bootloaders](bootloaders.md) (DFU) and [OTA updates](ota_updates.md), and sit alongside other high-speed serial links like [SDIO](sdio.md) and [QSPI](qspi.md).
 
 ## Table of Contents
 
@@ -757,3 +757,12 @@ sudo apt install usbutils
 - [Arduino USB HID](arduino.md)
 - [Communication Protocols](../protocols/)
 - [Embedded Systems Overview](index.html)
+
+## Where this connects
+
+- [DMA](dma.md) — moves USB packet payloads without CPU copies
+- [UART](uart.md) — the simpler serial link USB-CDC emulates
+- [Bootloaders](bootloaders.md) — USB DFU for field firmware updates
+- [OTA updates](ota_updates.md) — USB as one transport for firmware delivery
+- [SDIO](sdio.md), [QSPI](qspi.md) — neighbouring high-speed serial interfaces
+- [CMSIS](cmsis.md) — vendor USB stacks build on the CMSIS register layer

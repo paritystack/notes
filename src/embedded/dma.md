@@ -356,3 +356,11 @@ Forgetting to clear the TC flag → ISR re-enters immediately on exit. Same trap
 - [Interrupts](interrupts.md) — DMA completion handlers
 - [ADC](adc.md), [SPI](spi.md), [UART](uart.md) — common DMA consumers
 - [Power Management](power_management.md) — sleeping during DMA transfers
+
+## Where this connects
+
+- [Interrupts](interrupts.md) — DMA completion and half-transfer IRQs
+- [ADC](adc.md), [SPI](spi.md), [UART](uart.md), [I2S](i2s.md) — peripherals commonly paired with DMA
+- [Cache & TCM](cache_tcm.md) — coherency pitfalls when DMA meets caches
+- [Memory management](memory_management.md) — buffer placement and alignment
+- [Power management](power_management.md) — DMA lets the CPU sleep during transfers

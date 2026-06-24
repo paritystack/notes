@@ -1,6 +1,6 @@
 # STM32 Microcontrollers
 
-Comprehensive guide to STM32 development using HAL, CubeMX, and bare-metal programming.
+Comprehensive guide to STM32 development using HAL, CubeMX, and bare-metal programming. STM32 HAL sits on top of [CMSIS](cmsis.md); typical bring-up configures the [clock tree](clock_systems.md) (RCC/PLL), wires up [DMA](dma.md) and [interrupts](interrupts.md), and is debugged over [SWD](jtag_swd.md) with [GDB](gdb_embedded.md).
 
 ## Table of Contents
 
@@ -852,3 +852,12 @@ int _write(int file, char *ptr, int len) {
 - [SPI Protocol](spi.md)
 - [I2C Protocol](i2c.md)
 - [FreeRTOS](../rtos/freertos.md)
+
+## Where this connects
+
+- [CMSIS](cmsis.md) — the register layer under STM32 HAL
+- [Clock systems](clock_systems.md) — RCC/PLL setup on STM32
+- [DMA](dma.md), [Interrupts](interrupts.md), [GPIO](gpio.md) — core STM32 peripherals
+- [JTAG/SWD](jtag_swd.md), [GDB for embedded](gdb_embedded.md) — ST-Link debugging
+- [Bootloaders](bootloaders.md) — the STM32 system bootloader / DFU
+- [Startup code](startup_code.md), [Linker scripts](linker_scripts.md) — STM32 project scaffolding

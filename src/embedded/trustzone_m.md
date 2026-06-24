@@ -302,3 +302,12 @@ APIs:                 PSA (Platform Security Architecture)
 - [Bootloaders](bootloaders.md) — boot transition to NS
 - [HardFault Debugging](hardfault_debugging.md) — SecureFault is separate
 - [Security](../security/index.html) — TLS, crypto algorithms used by the secure partition
+
+## Where this connects
+
+- [Secure boot](secure_boot.md) — establishes the root of trust TZ-M then protects
+- [MPU](mpu.md) — memory protection that complements the secure/non-secure split
+- [Bootloaders](bootloaders.md) — the secure bootloader runs in the Secure state
+- [CMSIS](cmsis.md) — defines the secure/non-secure attribution APIs
+- [Interrupts](interrupts.md) — NVIC targeting and banking across security states
+- [JTAG/SWD](jtag_swd.md) — debug authentication for secure firmware

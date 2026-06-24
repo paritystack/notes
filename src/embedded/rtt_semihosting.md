@@ -271,3 +271,12 @@ HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
 - [JTAG/SWD](jtag_swd.md) — CoreSight, ITM block
 - [HardFault Debugging](hardfault_debugging.md) — RTT survives faults
 - [Interrupts](interrupts.md) — DWT, CYCCNT, vector table
+
+## Where this connects
+
+- [GDB for embedded](gdb_embedded.md) — the host side that reads RTT/semihosting
+- [JTAG/SWD](jtag_swd.md) — the probe transport SWO/RTT ride on
+- [HardFault debugging](hardfault_debugging.md) — emit crash dumps without a UART
+- [UART](uart.md) — the traditional printf path RTT replaces
+- [Debugging](debugging.md) — the broader debugging toolbox
+- [CMSIS](cmsis.md) — ITM/SWO registers defined in CMSIS

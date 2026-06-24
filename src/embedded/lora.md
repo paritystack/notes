@@ -286,3 +286,12 @@ Customers expect "real-time updates" over LoRaWAN. With Class A you can only pus
 - [SPI](spi.md) — typical LoRa chip interface
 - [BLE](ble.md) — short-range alternative
 - [IoT Protocols](../networking/iot_protocols.md) — MQTT often layered above LoRaWAN at the application
+
+## Where this connects
+
+- [BLE](ble.md) — the short-range low-power sibling protocol
+- [IEEE 802.15.4](ieee_802154.md) — Zigbee/Thread, another low-power wireless option
+- [Power management](power_management.md) — duty-cycling for multi-year battery life
+- [Sensors](sensors.md) — typical LoRaWAN end-device payloads
+- [Signal integrity](signal_integrity.md) — sub-GHz antenna and RF layout
+- [Modbus](modbus.md) — industrial field data often bridged onto LoRaWAN

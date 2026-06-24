@@ -348,3 +348,12 @@ Nordic?                        → NCS (west)
 - [Linker Scripts](linker_scripts.md) — controls output layout
 - [Bootloaders](bootloaders.md) — separate build for the bootloader image
 - [GDB Embedded](gdb_embedded.md) — using the build output to debug
+
+## Where this connects
+
+- [Linker scripts](linker_scripts.md) — placing code/data across flash and RAM
+- [Startup code](startup_code.md) — what the toolchain links before main()
+- [CMSIS](cmsis.md) — vendor headers and startup the build pulls in
+- [Embedded Rust](embedded_rust.md) — cargo/probe-rs as an alternative toolchain
+- [Coding standards](coding_standards.md) — warnings and MISRA the build enforces
+- [Embedded testing](embedded_testing.md) — host and on-target test builds

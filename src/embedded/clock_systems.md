@@ -304,3 +304,12 @@ if (!timeout) { fall_back_to_lsi(); }
 - [Timers](timers.md) — derive PWM/IC/OC frequencies from PCLK
 - [RTC](rtc.md) — LSE-based timekeeping
 - [Linker Scripts](linker_scripts.md) — Reset_Handler / SystemInit ordering
+
+## Where this connects
+
+- [Timers](timers.md), [PWM](pwm.md) — peripherals clocked from the tree you configure
+- [Startup code](startup_code.md) — where clock init usually happens before main()
+- [Power management](power_management.md) — clock gating and low-power clock sources
+- [RTC](rtc.md) — the low-speed clock domain that keeps time
+- [Signal integrity](signal_integrity.md) — crystal layout and clock-edge concerns
+- [RTT/SWO](rtt_semihosting.md) — SWO output timing depends on the core clock

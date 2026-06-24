@@ -310,3 +310,12 @@ Shipping RDP Level 2 with no escape hatch is a one-way door. If you ship buggy k
 - [TrustZone-M](trustzone_m.md) — hardware isolation for the bootloader
 - [OTA Updates](ota_updates.md) — delivering signed images
 - [Security](../security/index.html) — TLS, certificates, key management
+
+## Where this connects
+
+- [Bootloaders](bootloaders.md) — the stage that performs signature verification
+- [TrustZone-M](trustzone_m.md) — hardware isolation for keys and verification logic
+- [OTA updates](ota_updates.md) — signed images delivered to the field
+- [Encryption](../security/encryption.md) — the hashes and ciphers underneath
+- [Digital signatures](../security/digital_signatures.md) — how firmware authenticity is proven
+- [JTAG/SWD](jtag_swd.md) — debug ports that must be locked in production

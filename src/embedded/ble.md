@@ -2,7 +2,7 @@
 
 ## Overview
 
-BLE is a low-power short-range wireless protocol designed for sending small amounts of data (sensor readings, button events, control commands) from coin-cell-powered devices. It is a **completely different protocol** from Classic Bluetooth — they share a brand and a 2.4 GHz radio but nothing else.
+BLE is a low-power short-range wireless protocol designed for sending small amounts of data (sensor readings, button events, control commands) from coin-cell-powered devices. It pairs naturally with low-power [sensors](sensors.md) and aggressive [power management](power_management.md), and competes with [IEEE 802.15.4](ieee_802154.md) (Zigbee/Thread) and [LoRa](lora.md) for low-power wireless. It is a **completely different protocol** from Classic Bluetooth — they share a brand and a 2.4 GHz radio but nothing else.
 
 ```
                        ┌─────────────────────┐
@@ -371,3 +371,12 @@ After many test pair/unpair cycles, NVS fills up. Stack runs out of bond storage
 - [Power Management](power_management.md) — sleep between connection events
 - [Security](../security/index.html) — TLS analog: pairing + bonding
 - [IoT Protocols](../networking/iot_protocols.md) — application-layer protocols often layered over BLE
+
+## Where this connects
+
+- [LoRa & LoRaWAN](lora.md) — the long-range, low-rate sibling for similar low-power use cases
+- [IEEE 802.15.4](ieee_802154.md) — Zigbee/Thread, the 2.4 GHz mesh alternative
+- [NFC/RFID](nfc_rfid.md) — even-shorter-range wireless for tap/pairing interactions
+- [Sensors](sensors.md) — the data sources BLE peripherals usually advertise
+- [Power management](power_management.md) — sleep modes and coin-cell budgeting that make BLE viable
+- [Signal integrity](signal_integrity.md) — antenna matching and 2.4 GHz layout concerns

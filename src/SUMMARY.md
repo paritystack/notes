@@ -277,6 +277,7 @@
     - [Tokenization & Embeddings](machine_learning/tokenization.md)
     - [LLM Decoding & Sampling](machine_learning/decoding_sampling.md)
     - [RLHF & Preference Optimization](machine_learning/rlhf.md)
+    - [Distributed Training](machine_learning/distributed_training.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)

@@ -31,7 +31,8 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 25. [Tokenization & Embeddings](./tokenization.md) - BPE, WordPiece, Unigram/SentencePiece, embedding tables, weight tying
 26. [LLM Decoding & Sampling](./decoding_sampling.md) - Greedy, beam, temperature, top-k/p, min-p, speculative decoding
 27. [RLHF & Preference Optimization](./rlhf.md) - SFT, reward modeling, PPO, DPO, GRPO/RLVR
-28. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+28. [Distributed Training & Parallelism](./distributed_training.md) - DDP, ZeRO/FSDP, tensor/pipeline/sequence parallelism, mixed precision
+29. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

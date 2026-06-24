@@ -271,6 +271,8 @@
     - [Optimizers](machine_learning/optimizers.md)
     - [Knowledge Distillation](machine_learning/knowledge_distillation.md)
     - [Loss Functions](machine_learning/loss_functions.md)
+    - [Normalization](machine_learning/normalization.md)
+    - [State Space Models](machine_learning/state_space_models.md)
 
 - [AI](ai/README.md)
     - [Generative AI](ai/generative_ai.md)

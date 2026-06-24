@@ -327,6 +327,7 @@ for i, (x, y) in enumerate(loader):
 - [Neural networks](neural_networks.md), [Deep learning](deep_learning.md) — the training
   loop optimizers drive
 - [Loss functions](loss_functions.md) — the objective whose gradient the optimizer consumes
+- [Normalization](normalization.md) — pre/post-norm interacts with warmup; norm params excluded from weight decay
 - [PyTorch](pytorch.md) `torch.optim`, [JAX](jax.md) / Optax — the implementations
 - [Convolution](convolution.md) — where SGD+momentum still shines
 - [Transformers](transformers.md) — where AdamW + warmup + cosine became standard

@@ -263,6 +263,8 @@ approximate schemes only pay off at extreme context lengths.
   exploits
 - [Quantization](quantization.md) — int8/int4 KV-cache compression
 - [Mixture-of-Experts](moe.md) — the other major lever for scaling transformer compute
+- [State space models](state_space_models.md) — Mamba's sub-quadratic alternative that avoids
+  the O(n²) cost and the growing KV cache
 - [PyTorch](pytorch.md) — `F.scaled_dot_product_attention` and its flash backends
 - [vLLM](../ai/vllm.md) — PagedAttention and high-throughput serving
 - [Inference optimization](../ai/inference_optimization.md),

@@ -25,7 +25,9 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 19. [Optimizers](./optimizers.md) - SGD, Adam/AdamW, LR schedules, gradient clipping
 20. [Knowledge Distillation](./knowledge_distillation.md) - Teacher→student compression, soft targets, temperature
 21. [Loss Functions](./loss_functions.md) - Cross-entropy, MSE, focal, contrastive, label smoothing
-22. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+22. [Normalization](./normalization.md) - BatchNorm, LayerNorm, RMSNorm, GroupNorm, pre/post-LN
+23. [State Space Models](./state_space_models.md) - S4/Mamba selective SSMs, sub-quadratic sequence modeling
+24. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The OSI Model is a conceptual framework that standardizes network communication into 7 layers. Each layer has specific responsibilities and communicates with the layers directly above and below it.
+The OSI Model is a conceptual framework that standardizes network communication into 7 layers. Each layer has specific responsibilities and communicates with the layers directly above and below it. In practice the internet runs on the leaner [TCP/IP Model](tcp_ip_model.md), but the OSI layers remain the shared vocabulary for talking about [Ethernet](ethernet_vlan.md) and [ARP](arp.md) (L2), [IP](ip.md) (L3), [TCP](tcp.md)/[UDP](udp.md) (L4), and [TLS](tls_ssl.md) plus application protocols like [HTTP](http.md) and [DNS](dns.md) (L5–7).
 
 ## The 7 Layers
 
@@ -660,6 +660,15 @@ The OSI Model is like sending a letter through the mail:
 - Roads, trucks, planes
 
 Each layer does its job without worrying about the others!
+
+## Where this connects
+
+- [TCP/IP Model](tcp_ip_model.md) — the 4-layer model the internet actually uses
+- [Ethernet/VLAN](ethernet_vlan.md), [ARP](arp.md) — Layer 1/2 framing and address resolution
+- [IP](ip.md), [IPv4](ipv4.md), [IPv6](ipv6.md) — Layer 3 logical addressing and routing
+- [TCP](tcp.md), [UDP](udp.md) — Layer 4 transport, ports, and multiplexing
+- [TLS/SSL](tls_ssl.md) — the encryption that the Presentation layer abstracts
+- [HTTP](http.md), [DNS](dns.md), [DHCP](dhcp.md) — Layer 7 application protocols
 
 ## Further Resources
 

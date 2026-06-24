@@ -2,7 +2,7 @@
 
 ## Overview
 
-WireGuard is a modern VPN protocol designed for simplicity, performance, and security. Created by Jason Donenfeld and merged into the Linux kernel (v5.6, 2020), it's a deliberate rewrite that replaces the complexity of IPsec/OpenVPN with a minimal, opinionated design: ~4,000 lines of kernel code vs hundreds of thousands for alternatives.
+WireGuard is a modern VPN protocol designed for simplicity, performance, and security. Created by Jason Donenfeld and merged into the Linux kernel (v5.6, 2020), it's a deliberate rewrite that replaces the complexity of [IPsec](ipsec.md)/OpenVPN with a minimal, opinionated design: ~4,000 lines of kernel code vs hundreds of thousands for alternatives. It runs over [UDP](udp.md), uses the same modern AEAD crypto family as [TLS 1.3](tls_ssl.md), and leans on the kernel's [IP](ip.md) routing to decide which peer handles which destination.
 
 ```
 WireGuard's core idea:
@@ -473,6 +473,15 @@ WireGuard is the no-nonsense VPN. Think of each computer as a person with a uniq
 There's no "let's negotiate which cipher to use" — everyone uses the same envelope style. There's no "let me prove I am who I say I am via a 14-step ritual" — your nameplate IS your identity. If you switch from Wi-Fi to cell, your nameplate is still you, so the conversation just continues.
 
 The only address book each person carries is **"this person's nameplate handles letters for these street addresses"** (AllowedIPs). That's literally all the configuration.
+
+## Where this connects
+
+- [IPsec](ipsec.md) — the older, heavier VPN stack WireGuard set out to replace
+- [TLS/SSL](tls_ssl.md) — shares the ChaCha20-Poly1305 / Curve25519 crypto, different handshake
+- [UDP](udp.md) — WireGuard's stateless transport; `PersistentKeepalive` keeps NAT mappings alive
+- [IP](ip.md) / [IPv6](ipv6.md) — cryptokey routing maps `AllowedIPs` onto L3 forwarding
+- [MTU/PMTUD](mtu_pmtud.md) — tunnel overhead forces a lower inner MTU
+- [STUN](stun.md) — the NAT-traversal trick that mesh control planes (Tailscale) use to connect peers
 
 ## Further Resources
 

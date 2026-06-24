@@ -2,7 +2,7 @@
 
 ## Overview
 
-Containers (Docker, Kubernetes pods, systemd-nspawn, LXC) share a host kernel but get isolated network stacks via **Linux network namespaces**. Pieces like `veth` pairs, bridges, iptables, and routing tables are composed to give each container the illusion of having its own NIC. The same primitives also power Kubernetes networking via **CNI** plugins (Calico, Cilium, Flannel, Weave, etc.).
+Containers (Docker, Kubernetes pods, systemd-nspawn, LXC) share a host kernel but get isolated network stacks via **Linux [network namespaces](../linux/namespace.md)**. Pieces like `veth` pairs, bridges, [iptables](../linux/iptables.md), and routing tables are composed to give each container the illusion of having its own NIC. The same primitives also power Kubernetes networking via **CNI** plugins (Calico, Cilium, Flannel, Weave, etc.), often using [overlay encapsulation](overlay_networks.md) and increasingly [eBPF](../linux/ebpf.md) instead of iptables.
 
 This note covers what's actually happening underneath, so you can debug why your pod can't reach the database.
 
@@ -536,6 +536,15 @@ A **bridge** is the hallway with many doors leading off it — every apartment c
 In **Kubernetes**, each **pod** is one apartment, possibly with several roommates (containers) sharing the same mailbox and TV. A **service** is the building's front desk: any letter to "the engineering team" gets routed to whichever specific apartment of that team is least busy.
 
 A **CNI plugin** is the building manager who decides how the doors and hallways are wired up. Different building managers (Flannel, Calico, Cilium) have very different opinions about whether to dig tunnels between buildings (overlays) or post signs at every street corner (BGP routes).
+
+## Where this connects
+
+- [Linux namespaces](../linux/namespace.md) — the network namespace primitive every container builds on
+- [iptables](../linux/iptables.md), [eBPF](../linux/ebpf.md) — the two engines behind kube-proxy and CNI dataplanes
+- [Overlay networks](overlay_networks.md) — VXLAN/Geneve/IP-in-IP for pod-to-pod across nodes
+- [BGP & Anycast](bgp_anycast.md) — route-distribution mode (Calico/Cilium BGP) instead of overlays
+- [Firewalls](firewalls.md) — NetworkPolicy is a CNI-enforced L3/L4 firewall
+- [Microservices](../system_design/microservices.md), [Load balancing](../system_design/load_balancing.md) — Services/Ingress that ride on this plumbing
 
 ## Further Resources
 

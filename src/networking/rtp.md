@@ -28,7 +28,7 @@
 
 ## Overview
 
-**RTP (Real-Time Transport Protocol)** is a network protocol designed for delivering audio and video over IP networks in real-time. Defined in RFC 3550, RTP provides end-to-end delivery services for data with real-time characteristics, such as interactive audio and video.
+**RTP (Real-Time Transport Protocol)** is a network protocol designed for delivering audio and video over IP networks in real-time. Defined in RFC 3550, RTP provides end-to-end delivery services for data with real-time characteristics, such as interactive audio and video. RTP runs on top of [UDP](udp.md) (not [TCP](tcp.md)) for low latency, is set up by signaling like [SIP/VoIP](sip_voip.md) and carried inside [WebRTC](webrtc.md) (which uses [STUN](stun.md)/[TURN](turn.md)/[ICE](ice.md) to traverse NATs), and relies on [NTP](ntp_ptp.md) timelines for audio/video synchronization.
 
 ### What is RTP?
 
@@ -3241,6 +3241,15 @@ Imagine you're watching a live sports game on TV.
 - **Online gaming voice chat**: Your mic → RTP → Other players
 
 ---
+
+## Where this connects
+
+- [UDP](udp.md) — RTP's unreliable, low-latency transport substrate
+- [WebRTC](webrtc.md) — carries RTP (as SRTP) for browser-to-browser media
+- [SIP/VoIP](sip_voip.md) — signaling that negotiates and sets up RTP sessions
+- [STUN](stun.md), [TURN](turn.md), [ICE](ice.md) — NAT traversal that gets RTP flowing peer-to-peer
+- [NTP/PTP](ntp_ptp.md) — the wall-clock timeline RTCP uses for lip-sync
+- [QUIC](quic.md) — an alternative low-latency transport explored for media delivery
 
 ## Further Resources
 

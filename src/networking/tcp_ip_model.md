@@ -2,7 +2,7 @@
 
 ## Overview
 
-The TCP/IP Model (also called Internet Protocol Suite) is a practical, 4-layer networking model that describes how data is transmitted over the internet. Unlike the OSI Model, which is theoretical, TCP/IP is the actual model used in modern networks.
+The TCP/IP Model (also called Internet Protocol Suite) is a practical, 4-layer networking model that describes how data is transmitted over the internet. Unlike the [OSI Model](osi_model.md), which is theoretical, TCP/IP is the actual model used in modern networks. Its layers map onto concrete protocols documented elsewhere in this section: [Ethernet/VLAN](ethernet_vlan.md) and [ARP](arp.md) at network access, [IP](ip.md) at the internet layer, [TCP](tcp.md) and [UDP](udp.md) at transport, and application protocols like [HTTP](http.md), [DNS](dns.md), and [DHCP](dhcp.md) on top.
 
 ## TCP/IP vs OSI Model
 
@@ -676,6 +676,15 @@ TCP/IP is how computers talk to each other on the internet:
 7. Your browser shows the page
 
 Each layer does its job without worrying about the others!
+
+## Where this connects
+
+- [OSI Model](osi_model.md) — the 7-layer theoretical model TCP/IP's 4 layers collapse
+- [IP](ip.md) / [IPv4](ipv4.md) / [IPv6](ipv6.md) — the addressing and routing of the internet layer
+- [TCP](tcp.md) / [UDP](udp.md) — the transport-layer protocols and their trade-offs
+- [DNS](dns.md), [DHCP](dhcp.md) — application-layer plumbing that bootstraps connectivity
+- [TLS/SSL](tls_ssl.md), [IPsec](ipsec.md) — security layered onto transport and internet layers
+- [QUIC](quic.md) — HTTP/3's transport, blurring the transport/application boundary over UDP
 
 ## Further Resources
 

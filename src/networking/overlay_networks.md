@@ -4,7 +4,7 @@
 
 An **overlay network** is a virtual network built on top of an existing (underlay) network. Packets from the overlay are wrapped in extra headers (encapsulated) and sent across the underlay, where intermediate routers just see "normal" packets. At the destination, the wrapper is stripped and the inner packet is delivered as if the two endpoints were on the same LAN.
 
-Overlays let you build virtual L2 or L3 networks that span physical boundaries — across racks, data centers, clouds — without renumbering or coordinating with the underlying network.
+Overlays let you build virtual L2 or L3 networks that span physical boundaries — across racks, data centers, clouds — without renumbering or coordinating with the underlying network. They sit on top of plain [IP](ip.md)/[UDP](udp.md), often replace per-tenant [VLANs](ethernet_vlan.md), use [BGP](bgp_anycast.md) (EVPN) for their control plane, and underpin [container networking](container_networking.md) in Kubernetes CNIs.
 
 ```
 Tenant view:      VM1 ─────────────── VM2     (same "L2")
@@ -479,6 +479,15 @@ That outer envelope is **encapsulation**.
 - **Geneve** = a manila folder with a tag *and* slots for extra sticky notes (TLV options) that future post offices might want to read.
 
 The neat part: the postal trucks in between don't care what's inside — they just route the outer envelope. So you can build private "departments" that span any number of cities (overlay networks across data centers), and the postal system (underlay) doesn't have to know about them.
+
+## Where this connects
+
+- [Container networking](container_networking.md) — Kubernetes CNIs (Flannel, Cilium) build pod networks on VXLAN/Geneve
+- [Ethernet/VLAN](ethernet_vlan.md) — overlays escape the 4094-VLAN limit by tunnelling L2 over L3
+- [IP](ip.md) / [UDP](udp.md) — the boring underlay that carries the encapsulated frames
+- [BGP & Anycast](bgp_anycast.md) — EVPN distributes MAC/IP-to-VTEP mappings without flooding
+- [IPsec](ipsec.md), [WireGuard](wireguard.md) — encryption layered over plaintext overlays
+- [MTU/PMTUD](mtu_pmtud.md) — encapsulation overhead forces a lower inner MTU
 
 ## Further Resources
 

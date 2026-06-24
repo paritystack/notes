@@ -419,6 +419,9 @@ Key Contributions:
 
 ## Self-Supervised Learning
 
+> See [self-supervised learning](self_supervised_learning.md) for how these methods work and
+> relate (contrastive / non-contrastive / masked / multimodal).
+
 ### SimCLR (2020)
 **A Simple Framework for Contrastive Learning of Visual Representations**
 - Authors: Ting Chen et al. (Google)

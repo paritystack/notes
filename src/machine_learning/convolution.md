@@ -605,7 +605,9 @@ Apply convolutions to sequential data.
 
 ### 7. Graph Neural Networks
 
-Graph convolutions operate on graph-structured data.
+Graph convolutions operate on graph-structured data. See
+[graph neural networks](graph_neural_networks.md) for the full treatment (message passing,
+GCN/GraphSAGE/GAT, pooling, over-smoothing).
 
 **Spectral methods**: Convolution in spectral domain
 **Spatial methods**: Aggregate neighbor features

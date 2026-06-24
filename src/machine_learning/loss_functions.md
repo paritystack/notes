@@ -199,7 +199,8 @@ face/speaker verification.
   `d(a, p) + margin < d(a, n)`. Effectiveness hinges on **hard-negative mining**.
 - **InfoNCE / NT-Xent** — the contrastive-learning workhorse (SimCLR, CLIP): treat the
   matching pair as the positive among a batch of negatives and apply cross-entropy over
-  cosine similarities scaled by a temperature. Self-supervised pretraining at scale.
+  cosine similarities scaled by a temperature. Self-supervised pretraining at scale — see
+  [self-supervised learning](self_supervised_learning.md) for how this objective trains encoders.
 
 ```
 triplet:   d(anchor, positive)  +  margin   <   d(anchor, negative)
@@ -216,7 +217,7 @@ Beyond supervised targets, whole model families are defined by their loss. Brief
 - **VAE / ELBO** — maximize the evidence lower bound = reconstruction term + a
   `KL(q ‖ prior)` regularizer that keeps the latent space well-behaved.
 - **Diffusion** — train a network to predict the noise added at a random timestep; the loss
-  is a simple MSE between true and predicted noise (see `../ai/stable_diffusion.md`).
+  is a simple MSE between true and predicted noise (see [diffusion models](diffusion_models.md)).
 - **Policy gradient / PPO** — maximize expected reward; PPO clips the probability ratio to
   bound each update. See [reinforcement learning](reinforcement_learning.md) and
   [deep reinforcement learning](deep_reinforcement_learning.md). RLHF reuses this machinery

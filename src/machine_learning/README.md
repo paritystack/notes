@@ -14,30 +14,33 @@ A comprehensive guide to machine learning concepts, algorithms, and implementati
 3. [Reinforcement Learning](./reinforcement_learning.md) - RL concepts, Q-learning, and policy gradients
 4. [Deep Learning](./deep_learning.md) - Neural networks, CNNs, RNNs, and training techniques
 5. [Neural Networks](./neural_networks.md) - Architecture, backpropagation, activation functions
-6. [Deep Reinforcement Learning](./deep_reinforcement_learning.md) - DQN, A3C, PPO, and advanced RL
-7. [Generative Models](./generative_models.md) - GANs, VAEs, and flow-based models
-8. [Deep Generative Models](./deep_generative_models.md) - Advanced generative architectures
-9. [Transfer Learning](./transfer_learning.md) - Pre-training, fine-tuning, and domain adaptation
-10. [PyTorch](./pytorch.md) - Deep learning framework, tensors, autograd, training
-11. [NumPy](./numpy.md) - Foundational numerical computing for ML implementations
-12. [Quantization](./quantization.md) - Model compression, INT8/INT4 quantization, GPTQ, AWQ
-13. [Transformers](./transformers.md) - Attention mechanisms, BERT, GPT architectures
-14. [Attention](./attention.md) - MHA/MQA/GQA, KV cache, FlashAttention IO-aware kernels
-15. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
-16. [LoRA](./lora.md) - Low-Rank Adaptation for efficient fine-tuning
-17. [Unsloth](./unsloth.md) - 2× faster, low-VRAM LoRA/QLoRA fine-tuning
-18. [CUDA](./cuda.md) - GPU programming, parallel computing, and optimization techniques
-19. [Optimizers](./optimizers.md) - SGD, Adam/AdamW, LR schedules, gradient clipping
-20. [Knowledge Distillation](./knowledge_distillation.md) - Teacher→student compression, soft targets, temperature
-21. [Loss Functions](./loss_functions.md) - Cross-entropy, MSE, focal, contrastive, label smoothing
-22. [Normalization](./normalization.md) - BatchNorm, LayerNorm, RMSNorm, GroupNorm, pre/post-LN
-23. [State Space Models](./state_space_models.md) - S4/Mamba selective SSMs, sub-quadratic sequence modeling
-24. [Positional Encodings](./positional_encoding.md) - Sinusoidal, RoPE, ALiBi, relative biases, length extrapolation
-25. [Tokenization & Embeddings](./tokenization.md) - BPE, WordPiece, Unigram/SentencePiece, embedding tables, weight tying
-26. [LLM Decoding & Sampling](./decoding_sampling.md) - Greedy, beam, temperature, top-k/p, min-p, speculative decoding
-27. [RLHF & Preference Optimization](./rlhf.md) - SFT, reward modeling, PPO, DPO, GRPO/RLVR
-28. [Distributed Training & Parallelism](./distributed_training.md) - DDP, ZeRO/FSDP, tensor/pipeline/sequence parallelism, mixed precision
-29. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
+6. [Graph Neural Networks](./graph_neural_networks.md) - Message passing, GCN/GraphSAGE/GAT, pooling, over-smoothing
+7. [Deep Reinforcement Learning](./deep_reinforcement_learning.md) - DQN, A3C, PPO, and advanced RL
+8. [Generative Models](./generative_models.md) - GANs, VAEs, and flow-based models
+9. [Deep Generative Models](./deep_generative_models.md) - Advanced generative architectures
+10. [Diffusion Models](./diffusion_models.md) - Forward/reverse process, DDPM/DDIM, classifier-free guidance, latent diffusion, DiT
+11. [Transfer Learning](./transfer_learning.md) - Pre-training, fine-tuning, and domain adaptation
+12. [Self-Supervised Learning](./self_supervised_learning.md) - Contrastive (SimCLR/MoCo), non-contrastive (BYOL/DINO), masked (MAE/BERT), CLIP
+13. [PyTorch](./pytorch.md) - Deep learning framework, tensors, autograd, training
+14. [NumPy](./numpy.md) - Foundational numerical computing for ML implementations
+15. [Quantization](./quantization.md) - Model compression, INT8/INT4 quantization, GPTQ, AWQ
+16. [Transformers](./transformers.md) - Attention mechanisms, BERT, GPT architectures
+17. [Attention](./attention.md) - MHA/MQA/GQA, KV cache, FlashAttention IO-aware kernels
+18. [Hugging Face](./hugging_face.md) - Transformers library, models, and datasets
+19. [LoRA](./lora.md) - Low-Rank Adaptation for efficient fine-tuning
+20. [Unsloth](./unsloth.md) - 2× faster, low-VRAM LoRA/QLoRA fine-tuning
+21. [CUDA](./cuda.md) - GPU programming, parallel computing, and optimization techniques
+22. [Optimizers](./optimizers.md) - SGD, Adam/AdamW, LR schedules, gradient clipping
+23. [Knowledge Distillation](./knowledge_distillation.md) - Teacher→student compression, soft targets, temperature
+24. [Loss Functions](./loss_functions.md) - Cross-entropy, MSE, focal, contrastive, label smoothing
+25. [Normalization](./normalization.md) - BatchNorm, LayerNorm, RMSNorm, GroupNorm, pre/post-LN
+26. [State Space Models](./state_space_models.md) - S4/Mamba selective SSMs, sub-quadratic sequence modeling
+27. [Positional Encodings](./positional_encoding.md) - Sinusoidal, RoPE, ALiBi, relative biases, length extrapolation
+28. [Tokenization & Embeddings](./tokenization.md) - BPE, WordPiece, Unigram/SentencePiece, embedding tables, weight tying
+29. [LLM Decoding & Sampling](./decoding_sampling.md) - Greedy, beam, temperature, top-k/p, min-p, speculative decoding
+30. [RLHF & Preference Optimization](./rlhf.md) - SFT, reward modeling, PPO, DPO, GRPO/RLVR
+31. [Distributed Training & Parallelism](./distributed_training.md) - DDP, ZeRO/FSDP, tensor/pipeline/sequence parallelism, mixed precision
+32. [Interesting Papers](./interesting_papers.md) - Key ML papers and summaries
 
 ## Overview
 
@@ -430,6 +433,12 @@ This section covers model internals and training mechanics. Its hubs are
 ([PyTorch](pytorch.md), [JAX](jax.md), [CUDA](cuda.md)). See also the
 [Interesting papers](interesting_papers.md) catalog.
 
+- [Self-supervised learning](self_supervised_learning.md) — the pretraining paradigm
+  (contrastive, masked, CLIP) that produces the encoders [transfer learning](transfer_learning.md) adapts
+- [Graph neural networks](graph_neural_networks.md) — message passing on graph-structured data;
+  generalizes [convolution](convolution.md) and [attention](attention.md) to arbitrary connectivity
+- [Diffusion models](diffusion_models.md) — iterative denoising generative models; the
+  internals behind the applied [Stable Diffusion](../ai/stable_diffusion.md) stack
 - [AI](../ai/README.md) — applied LLM/GenAI systems (RAG, agents, serving, prompting) that
   build on the models trained here
 - [Maths · Optimization](../maths/optimization.md) — the gradient-descent and convex-optimization

@@ -29,6 +29,10 @@ Transfer learning leverages knowledge from pre-trained models to solve new tasks
 
 ### Self-Supervised Pre-training
 
+> For the full paradigm — contrastive (SimCLR/MoCo), non-contrastive (BYOL/DINO), masked
+> (MAE/BERT), and CLIP — see [self-supervised learning](self_supervised_learning.md). The
+> SimCLR example below is the contrastive case.
+
 ```python
 import torch
 import torch.nn as nn

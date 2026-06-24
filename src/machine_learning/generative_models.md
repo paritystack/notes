@@ -759,7 +759,9 @@ class EnergyBasedModel(nn.Module):
 
 ## Diffusion Models
 
-Gradually add noise then learn to denoise.
+Gradually add noise then learn to denoise. See [diffusion models](diffusion_models.md) for the
+conceptual deep-dive (forward/reverse process, objective, DDIM, classifier-free guidance,
+latent diffusion, DiT).
 
 ### DDPM (Denoising Diffusion Probabilistic Models)
 

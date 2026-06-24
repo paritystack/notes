@@ -249,6 +249,9 @@ class VisionTransformerGenerator(nn.Module):
 
 ## Diffusion Models
 
+> Conceptual deep-dive (forward/reverse process, training objective, DDIM sampling,
+> classifier-free guidance, latent diffusion, DiT): see [diffusion models](diffusion_models.md).
+
 ### Improved DDPM
 
 ```python

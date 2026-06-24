@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
+            window.path_to_searchindex_js = "../searchindex-fc9d6ad4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -178,12 +178,12 @@
                     <main>
                         <h1 id="encryption"><a class="header" href="#encryption">Encryption</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>Encryption converts readable data (plaintext) into unreadable data (ciphertext) using mathematical algorithms and keys. Only those with the correct key can decrypt it.</p>
+<p>Encryption converts readable data (plaintext) into unreadable data (ciphertext) using mathematical algorithms and keys. Only those with the correct key can decrypt it. It’s the foundation under <a href="ssl_tls.html">TLS/SSL</a>, pairs with <a href="hashing.html">hashing</a> and <a href="hmac.html">HMAC</a> for integrity, depends on sound <a href="key_management.html">key management</a>, and is being re-thought for the quantum era in <a href="post_quantum_crypto.html">post-quantum crypto</a>. Note: passwords are <em>hashed</em>, not encrypted — see <a href="hashing.html">hashing</a>.</p>
 <h2 id="types-of-encryption"><a class="header" href="#types-of-encryption">Types of Encryption</a></h2>
 <h3 id="symmetric-encryption"><a class="header" href="#symmetric-encryption">Symmetric Encryption</a></h3>
 <p>Same key encrypts and decrypts:</p>
-<pre><code>Plaintext + Key  [Encrypt] &gt; Ciphertext
-Ciphertext + Key  [Decrypt] &gt; Plaintext
+<pre><code>Plaintext + Key --[Encrypt]--&gt; Ciphertext
+Ciphertext + Key --[Decrypt]--&gt; Plaintext
 </code></pre>
 <p><strong>Algorithms</strong>:</p>
 <ul>
@@ -197,8 +197,8 @@ Ciphertext + Key  [Decrypt] &gt; Plaintext
 <p><strong>When to use</strong>: Database encryption, file encryption, internal communication</p>
 <h3 id="asymmetric-encryption"><a class="header" href="#asymmetric-encryption">Asymmetric Encryption</a></h3>
 <p>Different keys for encryption/decryption:</p>
-<pre><code>Plaintext + Public Key  [Encrypt] &gt; Ciphertext
-Ciphertext + Private Key  [Decrypt] &gt; Plaintext
+<pre><code>Plaintext + Public Key --[Encrypt]--&gt; Ciphertext
+Ciphertext + Private Key --[Decrypt]--&gt; Plaintext
 </code></pre>
 <p><strong>Algorithms</strong>:</p>
 <ul>
@@ -252,8 +252,8 @@ ECC-256: ~128-bit symmetric equivalent
 <h3 id="initialization-vector-iv"><a class="header" href="#initialization-vector-iv">Initialization Vector (IV)</a></h3>
 <p>Random value ensuring same plaintext produces different ciphertext:</p>
 <pre><code>Plaintext: "Hello"
-IV1 + Key  [AES-CBC] &gt; "xK#$%"
-IV2 + Key  [AES-CBC] &gt; "mN&amp;*@"  (different!)
+IV1 + Key --[AES-CBC]--&gt; "xK#$%"
+IV2 + Key --[AES-CBC]--&gt; "mN&amp;*@"  (different!)
 </code></pre>
 <h2 id="code-examples"><a class="header" href="#code-examples">Code Examples</a></h2>
 <h3 id="python---symmetric-aes"><a class="header" href="#python---symmetric-aes">Python - Symmetric (AES)</a></h3>
@@ -568,9 +568,9 @@ AES-256: Still secure against quantum
 </code></pre>
 <h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
 <h3 id="1-choose-right-algorithm"><a class="header" href="#1-choose-right-algorithm">1. Choose Right Algorithm</a></h3>
-<pre><code> AES-256 for symmetric
- RSA-2048/ECC-256 for asymmetric
- DES, MD5, SHA-1 (deprecated)
+<pre><code>✅ AES-256 for symmetric
+✅ RSA-2048/ECC-256 for asymmetric
+❌ DES, MD5, SHA-1 (deprecated)
 </code></pre>
 <h3 id="2-secure-key-storage"><a class="header" href="#2-secure-key-storage">2. Secure Key Storage</a></h3>
 <pre><code class="language-python"># Bad: Hardcoded key
@@ -1232,6 +1232,16 @@ def restore_encrypted_backup(backup_path, restore_dir, password):
 <li>Asymmetric slower but solves key-sharing problem</li>
 <li>Use asymmetric to exchange a symmetric key</li>
 <li>Then use fast symmetric key for actual data</li>
+</ul>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="hashing.html">Hashing</a> — one-way functions for passwords and integrity (don’t encrypt passwords)</li>
+<li><a href="hmac.html">HMAC</a> — symmetric-key message authentication built on hashes</li>
+<li><a href="digital_signatures.html">Digital signatures</a> — asymmetric keys proving authenticity, not confidentiality</li>
+<li><a href="certificates.html">Certificates</a>, <a href="ssl_tls.html">SSL/TLS</a> — how public keys are trusted and exchanged on the wire</li>
+<li><a href="key_management.html">Key management</a>, <a href="secrets_management.html">Secrets management</a> — generating, storing, and rotating keys (KMS/HSM/Vault)</li>
+<li><a href="post_quantum_crypto.html">Post-quantum crypto</a> — Kyber/Dilithium replacing RSA/ECC against quantum attacks</li>
+<li><a href="../networking/ipsec.html">IPsec</a>, <a href="../networking/wireguard.html">WireGuard</a> — encryption applied to network tunnels</li>
 </ul>
 <h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
 <ul>

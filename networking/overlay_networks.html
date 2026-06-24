@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
+            window.path_to_searchindex_js = "../searchindex-fc9d6ad4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -179,7 +179,7 @@
                         <h1 id="overlay-networks-vxlan-gre-geneve"><a class="header" href="#overlay-networks-vxlan-gre-geneve">Overlay Networks (VXLAN, GRE, Geneve)</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <p>An <strong>overlay network</strong> is a virtual network built on top of an existing (underlay) network. Packets from the overlay are wrapped in extra headers (encapsulated) and sent across the underlay, where intermediate routers just see “normal” packets. At the destination, the wrapper is stripped and the inner packet is delivered as if the two endpoints were on the same LAN.</p>
-<p>Overlays let you build virtual L2 or L3 networks that span physical boundaries — across racks, data centers, clouds — without renumbering or coordinating with the underlying network.</p>
+<p>Overlays let you build virtual L2 or L3 networks that span physical boundaries — across racks, data centers, clouds — without renumbering or coordinating with the underlying network. They sit on top of plain <a href="ip.html">IP</a>/<a href="udp.html">UDP</a>, often replace per-tenant <a href="ethernet_vlan.html">VLANs</a>, use <a href="bgp_anycast.html">BGP</a> (EVPN) for their control plane, and underpin <a href="container_networking.html">container networking</a> in Kubernetes CNIs.</p>
 <pre><code>Tenant view:      VM1 ─────────────── VM2     (same "L2")
                     \                 /
                      \   overlay     /
@@ -550,6 +550,15 @@ Diagnosis: tcpdump on underlay, see flood frames
 <li><strong>Geneve</strong> = a manila folder with a tag <em>and</em> slots for extra sticky notes (TLV options) that future post offices might want to read.</li>
 </ul>
 <p>The neat part: the postal trucks in between don’t care what’s inside — they just route the outer envelope. So you can build private “departments” that span any number of cities (overlay networks across data centers), and the postal system (underlay) doesn’t have to know about them.</p>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="container_networking.html">Container networking</a> — Kubernetes CNIs (Flannel, Cilium) build pod networks on VXLAN/Geneve</li>
+<li><a href="ethernet_vlan.html">Ethernet/VLAN</a> — overlays escape the 4094-VLAN limit by tunnelling L2 over L3</li>
+<li><a href="ip.html">IP</a> / <a href="udp.html">UDP</a> — the boring underlay that carries the encapsulated frames</li>
+<li><a href="bgp_anycast.html">BGP &amp; Anycast</a> — EVPN distributes MAC/IP-to-VTEP mappings without flooding</li>
+<li><a href="ipsec.html">IPsec</a>, <a href="wireguard.html">WireGuard</a> — encryption layered over plaintext overlays</li>
+<li><a href="mtu_pmtud.html">MTU/PMTUD</a> — encapsulation overhead forces a lower inner MTU</li>
+</ul>
 <h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
 <ul>
 <li><a href="https://tools.ietf.org/html/rfc7348">RFC 7348 - VXLAN</a></li>

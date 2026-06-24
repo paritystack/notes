@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
+            window.path_to_searchindex_js = "../searchindex-fc9d6ad4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -178,7 +178,7 @@
                     <main>
                         <h1 id="container-networking"><a class="header" href="#container-networking">Container Networking</a></h1>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
-<p>Containers (Docker, Kubernetes pods, systemd-nspawn, LXC) share a host kernel but get isolated network stacks via <strong>Linux network namespaces</strong>. Pieces like <code>veth</code> pairs, bridges, iptables, and routing tables are composed to give each container the illusion of having its own NIC. The same primitives also power Kubernetes networking via <strong>CNI</strong> plugins (Calico, Cilium, Flannel, Weave, etc.).</p>
+<p>Containers (Docker, Kubernetes pods, systemd-nspawn, LXC) share a host kernel but get isolated network stacks via <strong>Linux <a href="../linux/namespace.html">network namespaces</a></strong>. Pieces like <code>veth</code> pairs, bridges, <a href="../linux/iptables.html">iptables</a>, and routing tables are composed to give each container the illusion of having its own NIC. The same primitives also power Kubernetes networking via <strong>CNI</strong> plugins (Calico, Cilium, Flannel, Weave, etc.), often using <a href="overlay_networks.html">overlay encapsulation</a> and increasingly <a href="../linux/ebpf.html">eBPF</a> instead of iptables.</p>
 <p>This note covers what’s actually happening underneath, so you can debug why your pod can’t reach the database.</p>
 <h2 id="linux-network-namespaces"><a class="header" href="#linux-network-namespaces">Linux Network Namespaces</a></h2>
 <p>A network namespace is an isolated copy of the kernel network stack: its own interfaces, IP addresses, routing table, ARP cache, firewall rules, and sockets.</p>
@@ -587,6 +587,15 @@ sudo ip netns exec nsa ping 8.8.8.8          # works (NAT'd out)
 <p>A <strong>bridge</strong> is the hallway with many doors leading off it — every apartment connected to that hallway can visit every other one.</p>
 <p>In <strong>Kubernetes</strong>, each <strong>pod</strong> is one apartment, possibly with several roommates (containers) sharing the same mailbox and TV. A <strong>service</strong> is the building’s front desk: any letter to “the engineering team” gets routed to whichever specific apartment of that team is least busy.</p>
 <p>A <strong>CNI plugin</strong> is the building manager who decides how the doors and hallways are wired up. Different building managers (Flannel, Calico, Cilium) have very different opinions about whether to dig tunnels between buildings (overlays) or post signs at every street corner (BGP routes).</p>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="../linux/namespace.html">Linux namespaces</a> — the network namespace primitive every container builds on</li>
+<li><a href="../linux/iptables.html">iptables</a>, <a href="../linux/ebpf.html">eBPF</a> — the two engines behind kube-proxy and CNI dataplanes</li>
+<li><a href="overlay_networks.html">Overlay networks</a> — VXLAN/Geneve/IP-in-IP for pod-to-pod across nodes</li>
+<li><a href="bgp_anycast.html">BGP &amp; Anycast</a> — route-distribution mode (Calico/Cilium BGP) instead of overlays</li>
+<li><a href="firewalls.html">Firewalls</a> — NetworkPolicy is a CNI-enforced L3/L4 firewall</li>
+<li><a href="../system_design/microservices.html">Microservices</a>, <a href="../system_design/load_balancing.html">Load balancing</a> — Services/Ingress that ride on this plumbing</li>
+</ul>
 <h2 id="further-resources"><a class="header" href="#further-resources">Further Resources</a></h2>
 <ul>
 <li><a href="https://man7.org/linux/man-pages/man7/namespaces.7.html">Linux network namespaces (man 7 namespaces)</a></li>

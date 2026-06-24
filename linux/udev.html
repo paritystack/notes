@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
+            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -463,17 +463,17 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", \
 </tbody>
 </table>
 </div>
-<h3 id="string-modifiers"><a class="header" href="#string-modifiers">String Modifiers</a></h3>
-<p>Modify substitution values:</p>
-<pre><code class="language-bash"># Get last component of path
-SYMLINK+="disk/by-path/$env{ID_PATH}/basename"
-
-# Get all but last component
-PROGRAM="/bin/echo $env{ID_PATH}/dirname"
-
-# Replace characters
-SYMLINK+="disk/by-label/$env{ID_FS_LABEL}/replace{' ', '_'}"
+<h3 id="handling-special-characters"><a class="header" href="#handling-special-characters">Handling Special Characters</a></h3>
+<p>udev has <strong>no</strong> <code>/basename</code>, <code>/dirname</code>, or <code>/replace{}</code> substitution operators.
+To build links from values that may contain spaces or other unsafe characters, use
+the pre-escaped <code>*_ENC</code> properties that blkid/udev already provide (unsafe bytes are
+rendered as <code>\x20</code>, etc.):</p>
+<pre><code class="language-bash"># Use the blkid-escaped label/uuid rather than the raw value
+SYMLINK+="disk/by-label/$env{ID_FS_LABEL_ENC}"
+SYMLINK+="disk/by-uuid/$env{ID_FS_UUID_ENC}"
 </code></pre>
+<p>For anything more involved (extracting a path component, custom rewriting), call a
+helper with <code>PROGRAM=</code> / <code>IMPORT{program}=</code> and match on <code>$result</code> (<code>%c</code>).</p>
 <h3 id="rule-processing-flow"><a class="header" href="#rule-processing-flow">Rule Processing Flow</a></h3>
 <ol>
 <li><strong>Event received</strong>: udevd receives uevent from kernel</li>

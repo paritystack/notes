@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
+            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -834,19 +834,18 @@ void vGoodISR(void) {
 <h3 id="trace-hooks"><a class="header" href="#trace-hooks">Trace Hooks</a></h3>
 <pre><code class="language-c">#define configUSE_TRACE_FACILITY 1
 
-// Task switched in
-void vApplicationTaskSwitchedInHook(void) {
-    TaskHandle_t xHandle = xTaskGetCurrentTaskHandle();
-    char *pcTaskName = pcTaskGetName(xHandle);
-    printf("Switched to: %s\n", pcTaskName);
-}
+// Context-switch tracing uses the trace hook MACROS (defined in
+// FreeRTOSConfig.h), NOT application hook functions. They run inside the
+// scheduler with pxCurrentTCB pointing at the task being switched in/out.
+#define traceTASK_SWITCHED_IN()   /* inspect pxCurrentTCB-&gt;pcTaskName here */
+#define traceTASK_SWITCHED_OUT()  /* e.g. accumulate per-task runtime */
 
-// Tick hook (called every tick)
+// Tick hook (called every tick; requires configUSE_TICK_HOOK 1)
 void vApplicationTickHook(void) {
     // Lightweight monitoring only
 }
 
-// Idle hook (called by idle task)
+// Idle hook (called by idle task; requires configUSE_IDLE_HOOK 1)
 void vApplicationIdleHook(void) {
     // Background processing, watchdog feeding
 }

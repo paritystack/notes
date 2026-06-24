@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
+            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -1377,7 +1377,7 @@ async function authenticateAPIKey(req, res, next) {
 <p>OAuth 2.0 is an <strong>authorization</strong> framework that enables applications to obtain limited access to user accounts. It delegates user authentication to the service hosting the account and authorizes third-party applications.</p>
 <p><strong>Key OAuth 2.0 Flows:</strong></p>
 <pre><code class="language-javascript">// 1. Authorization Code Flow (most secure, for server-side apps)
-const authUrl = `${AUTHORIZATION_URL}?response_type=code&amp;client_id=${CLIENT_ID}&amp;redirect_uri=${REDIRECT_URI}&amp;scope=read write&amp;state=${STATE}`;
+const authUrl = `${AUTHORIZATION_URL}?response_type=code&amp;client_id=${CLIENT_ID}&amp;redirect_uri=${REDIRECT_URI}&amp;scope=read%20write&amp;state=${STATE}`;
 
 // 2. Client Credentials Flow (for machine-to-machine)
 const tokenResponse = await fetch(TOKEN_URL, {
@@ -2945,15 +2945,18 @@ app.post('/login', async (req, res) =&gt; {
 
 // Constant-time string comparison
 function timingSafeEqual(a, b) {
-  if (a.length !== b.length) {
-    // Still compare to prevent timing leak
-    b = a;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+
+  // crypto.timingSafeEqual throws if lengths differ, so guard first.
+  // Different lengths always mean "not equal" — but still do a comparison
+  // against a same-length buffer so the timing doesn't leak the length.
+  if (bufA.length !== bufB.length) {
+    crypto.timingSafeEqual(bufA, bufA);
+    return false;
   }
 
-  return crypto.timingSafeEqual(
-    Buffer.from(a),
-    Buffer.from(b)
-  );
+  return crypto.timingSafeEqual(bufA, bufB);
 }
 
 // Constant-time user lookup and password check

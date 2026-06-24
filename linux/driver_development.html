@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
+            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -543,6 +543,15 @@ static const struct file_operations my_fops = {
 </code></pre>
 <h3 id="block-devices"><a class="header" href="#block-devices">Block Devices</a></h3>
 <p>Random access storage devices.</p>
+<blockquote>
+<p><strong>Heads up — legacy API.</strong> The request-function example below
+(<code>blk_init_queue()</code> / <code>blk_fetch_request()</code> / <code>__blk_end_request_all()</code> /
+<code>alloc_disk()</code> / <code>blk_cleanup_queue()</code>) uses the <em>request-based legacy block
+layer</em>, which was <strong>removed in Linux 5.0</strong> (<code>alloc_disk()</code> went in 5.15,
+<code>blk_cleanup_queue()</code> in 5.18). It is kept here only to illustrate the old
+model — for any current kernel use the <strong>blk-mq</strong> example in
+<a href="#modern-block-layer-blk-mq">Modern Block Layer (blk-mq)</a> below.</p>
+</blockquote>
 <pre><code class="language-c">#include &lt;linux/blkdev.h&gt;
 #include &lt;linux/genhd.h&gt;
 
@@ -747,8 +756,8 @@ static int create_net_device(struct device *parent)
 	/* Set MAC address */
 	eth_hw_addr_random(dev);
 
-	/* Setup NAPI */
-	netif_napi_add(dev, &amp;priv-&gt;napi, my_net_poll, 64);
+	/* Setup NAPI (kernel &lt; 6.1 took a trailing weight arg, e.g. ..., 64) */
+	netif_napi_add(dev, &amp;priv-&gt;napi, my_net_poll);
 
 	SET_NETDEV_DEV(dev, parent);
 
@@ -866,8 +875,8 @@ static int __init chardev_init(void)
 		return ret;
 	}
 
-	/* Create class */
-	my_class = class_create(THIS_MODULE, CLASS_NAME);
+	/* Create class (kernel &lt; 6.4: class_create(THIS_MODULE, CLASS_NAME)) */
+	my_class = class_create(CLASS_NAME);
 	if (IS_ERR(my_class)) {
 		cdev_del(&amp;my_cdev);
 		unregister_chrdev_region(dev, 1);
@@ -1029,8 +1038,9 @@ struct my_i2c_dev {
 	struct device *dev;
 };
 
-static int my_i2c_probe(struct i2c_client *client,
-			const struct i2c_device_id *id)
+/* Single-arg probe since kernel 6.3; older kernels used
+ * my_i2c_probe(struct i2c_client *client, const struct i2c_device_id *id) */
+static int my_i2c_probe(struct i2c_client *client)
 {
 	struct my_i2c_dev *priv;
 	u8 buf[2];
@@ -1068,10 +1078,10 @@ static int my_i2c_probe(struct i2c_client *client,
 	return 0;
 }
 
-static int my_i2c_remove(struct i2c_client *client)
+/* .remove returns void since kernel 6.1 (older kernels returned int) */
+static void my_i2c_remove(struct i2c_client *client)
 {
 	dev_info(&amp;client-&gt;dev, "I2C device removed\n");
-	return 0;
 }
 
 static const struct i2c_device_id my_i2c_ids[] = {
@@ -1377,42 +1387,43 @@ static int create_blkmq_device(struct my_blk_dev *dev)
 	dev-&gt;tag_set.queue_depth = 128;
 	dev-&gt;tag_set.numa_node = NUMA_NO_NODE;
 	dev-&gt;tag_set.cmd_size = 0;
-	dev-&gt;tag_set.flags = BLK_MQ_F_SHOULD_MERGE;
+	dev-&gt;tag_set.flags = 0;		/* BLK_MQ_F_SHOULD_MERGE was the default; removed in 6.12 */
 	dev-&gt;tag_set.driver_data = dev;
 
 	ret = blk_mq_alloc_tag_set(&amp;dev-&gt;tag_set);
 	if (ret)
 		return ret;
 
-	/* Allocate queue */
-	dev-&gt;queue = blk_mq_init_queue(&amp;dev-&gt;tag_set);
-	if (IS_ERR(dev-&gt;queue)) {
+	/* Allocate the gendisk and its blk-mq queue together (kernel 5.15+) */
+	dev-&gt;disk = blk_mq_alloc_disk(&amp;dev-&gt;tag_set, dev);
+	if (IS_ERR(dev-&gt;disk)) {
+		ret = PTR_ERR(dev-&gt;disk);
 		blk_mq_free_tag_set(&amp;dev-&gt;tag_set);
-		return PTR_ERR(dev-&gt;queue);
+		return ret;
 	}
-
-	dev-&gt;queue-&gt;queuedata = dev;
-
-	/* Allocate disk */
-	dev-&gt;disk = alloc_disk(1);
-	if (!dev-&gt;disk) {
-		blk_cleanup_queue(dev-&gt;queue);
-		blk_mq_free_tag_set(&amp;dev-&gt;tag_set);
-		return -ENOMEM;
-	}
+	dev-&gt;queue = dev-&gt;disk-&gt;queue;	/* queue is owned by the disk now */
 
 	dev-&gt;disk-&gt;major = MY_MAJOR;
 	dev-&gt;disk-&gt;first_minor = 0;
+	dev-&gt;disk-&gt;minors = 1;
 	dev-&gt;disk-&gt;fops = &amp;my_bdev_ops;
-	dev-&gt;disk-&gt;queue = dev-&gt;queue;
 	dev-&gt;disk-&gt;private_data = dev;
 	snprintf(dev-&gt;disk-&gt;disk_name, 32, "myblkmq");
 	set_capacity(dev-&gt;disk, dev-&gt;size / SECTOR_SIZE);
 
-	add_disk(dev-&gt;disk);
+	/* add_disk() can fail since 5.15 — always check the return value */
+	ret = add_disk(dev-&gt;disk);
+	if (ret) {
+		put_disk(dev-&gt;disk);	/* drops the queue too */
+		blk_mq_free_tag_set(&amp;dev-&gt;tag_set);
+		return ret;
+	}
 
 	return 0;
 }
+
+/* Teardown: del_gendisk() + put_disk() + blk_mq_free_tag_set()
+ * (there is no blk_cleanup_queue() on modern kernels). */
 </code></pre>
 <hr>
 <h2 id="network-device-drivers"><a class="header" href="#network-device-drivers">Network Device Drivers</a></h2>

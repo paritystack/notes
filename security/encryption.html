@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
+            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -230,10 +230,10 @@ Post-quantum alternatives:
 <h3 id="key-size"><a class="header" href="#key-size">Key Size</a></h3>
 <pre><code>More bits = More security but slower
 
-AES-128: 2^128 possible keys (feasible to break with quantum)
-AES-256: 2^256 possible keys (quantum-resistant)
-RSA-2048: H112-bit symmetric equivalent
-ECC-256: H256-bit symmetric equivalent
+AES-128: 2^128 possible keys (Grover's algorithm weakens this to ~2^64 of work — prefer 256)
+AES-256: 2^256 possible keys (~2^128 under Grover — quantum-resistant)
+RSA-2048: ~112-bit symmetric equivalent
+ECC-256: ~128-bit symmetric equivalent
 </code></pre>
 <h3 id="modes-of-operation-symmetric"><a class="header" href="#modes-of-operation-symmetric">Modes of Operation (Symmetric)</a></h3>
 <div class="table-wrapper">
@@ -242,7 +242,7 @@ ECC-256: H256-bit symmetric equivalent
 <tr><th>Mode</th><th>Use</th><th>Properties</th></tr>
 </thead>
 <tbody>
-<tr><td><strong>ECB</strong></td><td>L Never</td><td>Reveals patterns</td></tr>
+<tr><td><strong>ECB</strong></td><td>❌ Never</td><td>Reveals patterns</td></tr>
 <tr><td><strong>CBC</strong></td><td>File encryption</td><td>Needs IV, not parallel</td></tr>
 <tr><td><strong>CTR</strong></td><td>Streaming</td><td>Parallelizable</td></tr>
 <tr><td><strong>GCM</strong></td><td>Authenticated encryption</td><td>Authentication built-in</td></tr>
@@ -284,13 +284,21 @@ public_key = private_key.public_key()
 # Encrypt with public key
 ciphertext = public_key.encrypt(
     b"Secret",
-    padding.OAEP(hashing=hashes.SHA256())
+    padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None
+    )
 )
 
 # Decrypt with private key
 plaintext = private_key.decrypt(
     ciphertext,
-    padding.OAEP(hashing=hashes.SHA256())
+    padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None
+    )
 )
 </code></pre>
 <h3 id="javascript---aes-encryption"><a class="header" href="#javascript---aes-encryption">JavaScript - AES Encryption</a></h3>
@@ -462,6 +470,7 @@ public class AESEncryption {
 <pre><code class="language-python">from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding as sym_padding
 import os
 
 def hybrid_encrypt(plaintext: bytes, recipient_public_key):
@@ -469,10 +478,14 @@ def hybrid_encrypt(plaintext: bytes, recipient_public_key):
     symmetric_key = os.urandom(32)  # AES-256 key
     iv = os.urandom(16)
 
+    # CBC needs the input padded to the block size (16 bytes)
+    padder = sym_padding.PKCS7(128).padder()
+    padded = padder.update(plaintext) + padder.finalize()
+
     # Encrypt data with symmetric key (fast)
     cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
     encryptor = cipher.encryptor()
-    ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+    ciphertext = encryptor.update(padded) + encryptor.finalize()
 
     # Encrypt symmetric key with public key (small data)
     encrypted_key = recipient_public_key.encrypt(
@@ -507,7 +520,11 @@ def hybrid_decrypt(encrypted_data: bytes, private_key):
     # Decrypt data
     cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
     decryptor = cipher.decryptor()
-    plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+    padded = decryptor.update(ciphertext) + decryptor.finalize()
+
+    # Strip the PKCS7 padding added during encryption
+    unpadder = sym_padding.PKCS7(128).unpadder()
+    plaintext = unpadder.update(padded) + unpadder.finalize()
 
     return plaintext
 </code></pre>
@@ -525,7 +542,7 @@ def hybrid_decrypt(encrypted_data: bytes, private_key):
 <tr><td><strong>ECC</strong></td><td>Asymmetric</td><td>Medium</td><td>Excellent</td><td>HTTPS, signatures</td></tr>
 <tr><td><strong>Ed25519</strong></td><td>Asymmetric</td><td>Fast</td><td>Excellent</td><td>Digital signatures</td></tr>
 <tr><td><strong>CRYSTALS-Kyber</strong></td><td>Post-quantum</td><td>Medium</td><td>Quantum-resistant</td><td>Future-proof KEM</td></tr>
-<tr><td><strong>DES</strong></td><td>Symmetric</td><td>Fast</td><td>L Broken</td><td>Legacy only</td></tr>
+<tr><td><strong>DES</strong></td><td>Symmetric</td><td>Fast</td><td>❌ Broken</td><td>Legacy only</td></tr>
 </tbody>
 </table>
 </div>
@@ -1003,12 +1020,16 @@ decrypt_file('secret.pdf.encrypted', 'secret_decrypted.pdf', key)
 </code></pre>
 <p><strong>Large file encryption</strong> (streaming):</p>
 <pre><code class="language-python">from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding as sym_padding
 import os
 
 def encrypt_large_file(input_path, output_path, key):
     iv = os.urandom(16)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
     encryptor = cipher.encryptor()
+    # PKCS7 padding is reversible; null-padding the last chunk would corrupt
+    # files that legitimately end in 0x00 bytes.
+    padder = sym_padding.PKCS7(128).padder()
 
     with open(input_path, 'rb') as infile, open(output_path, 'wb') as outfile:
         # Write IV first
@@ -1019,14 +1040,10 @@ def encrypt_large_file(input_path, output_path, key):
             chunk = infile.read(64 * 1024)  # 64KB chunks
             if not chunk:
                 break
-            # Pad last chunk if needed
-            if len(chunk) % 16 != 0:
-                chunk += b'\0' * (16 - len(chunk) % 16)
+            outfile.write(encryptor.update(padder.update(chunk)))
 
-            encrypted_chunk = encryptor.update(chunk)
-            outfile.write(encrypted_chunk)
-
-        outfile.write(encryptor.finalize())
+        # Flush the final (padded) block
+        outfile.write(encryptor.update(padder.finalize()) + encryptor.finalize())
 </code></pre>
 <h3 id="5-secure-api-communication"><a class="header" href="#5-secure-api-communication">5. Secure API Communication</a></h3>
 <p><strong>API Key Encryption</strong>:</p>

@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ea00086a.js";
+            window.path_to_searchindex_js = "../searchindex-0c95e582.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d057db31.js"></script>
@@ -255,8 +255,9 @@ grep ' do_sys_openat2$' /proc/kallsyms
 grep do_sys_openat2 /sys/kernel/debug/kprobes/blacklist   # empty == allowed
 
 # 3. Register a kprobe named "myopen". do_sys_openat2(dfd, filename, how): the
-#    filename is the 2nd arg, so it's in %si on x86-64 — fetch it as a string.
-echo 'p:myopen do_sys_openat2 fname=+0(%si):string' &gt; kprobe_events
+#    filename is the 2nd arg, so it's in %si on x86-64. It's a USER pointer, so
+#    fetch it with :ustring (plain :string would do a kernel-space read and fail).
+echo 'p:myopen do_sys_openat2 fname=+0(%si):ustring' &gt; kprobe_events
 
 # 4. Enable it
 echo 1 &gt; events/kprobes/myopen/enable
@@ -269,9 +270,10 @@ cat trace_pipe
 echo 0 &gt; events/kprobes/myopen/enable
 echo '-:myopen' &gt;&gt; kprobe_events     # or: echo &gt; kprobe_events  (clears all)
 </code></pre>
-<p>The fetch syntax <code>+OFFSET(REGISTER):TYPE</code> reads memory: <code>+0(%si):string</code> dereferences
-the pointer in <code>%si</code> and reads a NUL-terminated string. See <em>Reading argument values</em>
-below for the register order.</p>
+<p>The fetch syntax <code>+OFFSET(REGISTER):TYPE</code> reads memory: <code>+0(%si):ustring</code> dereferences
+the pointer in <code>%si</code> and reads a NUL-terminated string from user space (<code>:string</code> is the
+equivalent for kernel-space pointers). See <em>Reading argument values</em> below for the
+register order.</p>
 <h3 id="method-b--bpftrace-one-liner-same-result-one-line"><a class="header" href="#method-b--bpftrace-one-liner-same-result-one-line">Method B — bpftrace one-liner (same result, one line)</a></h3>
 <pre><code class="language-bash">sudo bpftrace -e '
   kprobe:do_sys_openat2 {

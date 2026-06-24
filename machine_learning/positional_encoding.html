@@ -1,0 +1,474 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Positional Encoding - My Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-526b515e.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-3f9abbeb.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="positional-encodings"><a class="header" href="#positional-encodings">Positional Encodings</a></h1>
+<p>How transformers recover the notion of <em>order</em> that attention throws away — from the original sinusoidal scheme through relative biases to RoPE, the rotary default behind every modern open LLM, plus the tricks that stretch a model past its trained context length.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#why-attention-needs-position">Why Attention Needs Position</a></li>
+<li><a href="#sinusoidal-absolute">Sinusoidal (Absolute)</a></li>
+<li><a href="#learned-absolute-embeddings">Learned Absolute Embeddings</a></li>
+<li><a href="#relative-position-encodings">Relative Position Encodings</a></li>
+<li><a href="#rope-rotary-position-embedding">RoPE: Rotary Position Embedding</a></li>
+<li><a href="#alibi">ALiBi</a></li>
+<li><a href="#context-length-extrapolation">Context-Length Extrapolation</a></li>
+<li><a href="#comparison">Comparison</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#where-this-connects">Where this connects</a></li>
+</ol>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>The <a href="attention.html">attention</a> operation at the core of every <a href="transformers.html">transformer</a>
+is <strong>permutation-invariant</strong>: <code>softmax(Q·Kᵀ / √d)·V</code> treats its inputs as a <em>set</em>, not a
+sequence. Shuffle the tokens and the outputs shuffle identically — the math contains no
+notion of which token came first. Since “the dog bit the man” and “the man bit the dog”
+must mean different things, position has to be injected explicitly. That injection is the
+<strong>positional encoding</strong>, and the design space splits into two families:</p>
+<pre><code>  absolute  → give each token a signal that encodes its index i
+              (added to the embedding, or baked into Q/K)
+
+  relative  → bias the attention between tokens by their distance (i − j),
+              never by the absolute indices themselves
+</code></pre>
+<p>Relative schemes generalize better — what matters for language is usually <em>how far apart</em>
+two tokens are, not their absolute slot — and the field has converged on relative behavior.
+The historical arc runs <strong>sinusoidal → learned absolute → relative biases / ALiBi → RoPE</strong>,
+with RoPE (rotary) now the default in LLaMA, Mistral, Qwen, and Gemma. Models that process
+sequences recurrently — RNNs and <a href="state_space_models.html">state space models</a> — get order
+<em>for free</em> from their step-by-step state update and need no positional encoding at all;
+this page is about the transformer’s problem specifically.</p>
+<h2 id="why-attention-needs-position"><a class="header" href="#why-attention-needs-position">Why Attention Needs Position</a></h2>
+<p>Take the attention output for query position <code>i</code>. It is a weighted sum over <em>all</em> key/value
+positions, and the weights depend only on the <strong>content</strong> of <code>Q_i</code> and each <code>K_j</code> — never
+on <code>i</code> or <code>j</code>:</p>
+<pre><code>permute the input tokens with any permutation π:
+
+   x'  = π(x)                  → Q', K', V' are π-permutations of Q, K, V
+   out' = Attention(Q',K',V')  = π( Attention(Q,K,V) )
+
+the output just permutes the same way — order carries no information
+</code></pre>
+<p>Contrast this with the architectures that don’t need a positional encoding:</p>
+<pre><code>  RNN / LSTM   order from the sequential hidden-state recurrence h_t = f(h_{t-1}, x_t)
+  CNN          order from the fixed spatial layout of the kernel window
+  SSM (Mamba)  order from the recurrent state scan — see state_space_models.md
+  Transformer  NO inherent order → must add a positional encoding
+</code></pre>
+<p>So the encoder/decoder stack adds position information <em>before or inside</em> attention. The
+rest of this page is the menu of how.</p>
+<h2 id="sinusoidal-absolute"><a class="header" href="#sinusoidal-absolute">Sinusoidal (Absolute)</a></h2>
+<p>The original “Attention Is All You Need” Transformer added a fixed, non-learned signal to
+each token embedding: a vector of sines and cosines at <strong>geometrically spaced
+frequencies</strong>, so each dimension oscillates at a different wavelength.</p>
+<pre><code>PE(pos, 2k)   = sin( pos / 10000^(2k/d) )
+PE(pos, 2k+1) = cos( pos / 10000^(2k/d) )
+
+  dim 0,1   ── fast oscillation  (short wavelength) → fine position
+  dim 2,3   ── slower …
+  dim d-2,d-1 ─ very slow        (long wavelength)  → coarse position
+
+think of a binary clock in continuous form: each frequency is one "bit"
+of the position, together they pin down pos uniquely
+</code></pre>
+<p>The trick is that a fixed linear map can shift any encoding from <code>pos</code> to <code>pos + k</code>
+(rotating each sin/cos pair), so the model can learn to attend by <em>relative</em> offset even
+though the encoding itself is absolute. It also needs <strong>no parameters</strong> and can — in
+principle — produce encodings for positions longer than any seen in training, giving it a
+weak form of extrapolation. The full implementation (the <code>PositionalEncoding</code> module) is
+already worked out on the <a href="transformers.html">transformers</a> page; this page won’t re-paste it.</p>
+<h2 id="learned-absolute-embeddings"><a class="header" href="#learned-absolute-embeddings">Learned Absolute Embeddings</a></h2>
+<p>The simplest alternative: skip the math and just <strong>learn</strong> one embedding vector per
+position, exactly like a token embedding, then add it to the token embedding at the input.</p>
+<pre><code class="language-python">import torch.nn as nn
+
+tok_emb = nn.Embedding(vocab_size, d_model)
+pos_emb = nn.Embedding(max_len,    d_model)   # one learned vector per position
+
+x = tok_emb(tokens) + pos_emb(torch.arange(seq_len))   # add, then feed the stack
+</code></pre>
+<p>This is what BERT and GPT-2 use. It’s trivial and works well <em>within</em> the trained range,
+but it has a hard ceiling: there is no embedding for <code>pos ≥ max_len</code>, so the model
+<strong>cannot run on sequences longer than it was trained on</strong> without adding and retraining
+new rows. No extrapolation, and the position table costs <code>max_len × d_model</code> parameters.</p>
+<h2 id="relative-position-encodings"><a class="header" href="#relative-position-encodings">Relative Position Encodings</a></h2>
+<p>The conceptual shift: encode the <strong>distance</strong> <code>i − j</code> between a query and key rather than
+their absolute indices. This matches the intuition that grammar and meaning depend on
+relative offsets, and it naturally generalizes to unseen lengths.</p>
+<ul>
+<li><strong>Shaw et al. (2018)</strong> — add a learned vector keyed by the clipped relative distance into
+the key (and value) of the attention score.</li>
+<li><strong>Transformer-XL</strong> — reparameterize the score into content and position terms so a
+relative signal can span across cached segments, enabling longer effective context.</li>
+<li><strong>T5 relative bias</strong> — the cleanest variant: a <strong>learned scalar</strong> per <em>bucketed</em> distance,
+added directly to the attention logits before softmax. Buckets are fine for nearby
+positions and coarse (logarithmic) for far ones, and the bias is shared across layers.</li>
+</ul>
+<pre><code>score(i, j) = Q_i · K_jᵀ / √d  +  b[ bucket(i − j) ]
+                                   ▲
+                          learned scalar, per head, indexed by relative distance
+</code></pre>
+<p>Because the bias is a function of distance only, a T5 model handles longer sequences
+gracefully — distant buckets it never saw simply saturate rather than break.</p>
+<h2 id="rope-rotary-position-embedding"><a class="header" href="#rope-rotary-position-embedding">RoPE: Rotary Position Embedding</a></h2>
+<p>RoPE is the modern default. Instead of <em>adding</em> a position signal, it <strong>rotates</strong> the query
+and key vectors by an angle proportional to their position, in 2-D subspaces. The key
+property: after rotation, the dot product <code>Q_i · K_j</code> depends only on the <strong>relative offset
+<code>i − j</code></strong> — you get relative behavior with an absolute, parameter-free operation applied
+right inside attention.</p>
+<pre><code>split each head's d-dim vector into d/2 pairs; rotate pair k by angle  pos · θ_k
+
+   [x0]      [cos mθ   −sin mθ] [x0]          θ_k = base^(−2k/d),  base = 10000
+   [x1]  →   [sin mθ    cos mθ] [x1]          m = position index
+
+   pair 0 (k=0): rotates fast      ── fine-grained position
+   pair d/2-1:   rotates slowly    ── coarse position
+        (same geometric frequency ladder as the sinusoidal scheme)
+
+dot product of two rotated vectors at positions i and j
+   = function of (i − j) only   ← this is why RoPE is "relative"
+</code></pre>
+<pre><code class="language-python">import torch
+
+def apply_rope(x, pos, base=10000.0):
+    # x: (..., seq, d_head) with d_head even; pos: (seq,) position indices
+    d = x.shape[-1]
+    theta = base ** (-torch.arange(0, d, 2, dtype=torch.float) / d)   # (d/2,)
+    ang = pos[:, None] * theta[None, :]                                # (seq, d/2)
+    cos, sin = ang.cos(), ang.sin()
+    x1, x2 = x[..., 0::2], x[..., 1::2]                                # even / odd dims
+    return torch.stack([x1 * cos - x2 * sin,
+                        x1 * sin + x2 * cos], dim=-1).flatten(-2)
+</code></pre>
+<p>Why it won for decoder LLMs (LLaMA, Mistral, Qwen, Gemma):</p>
+<ul>
+<li><strong>Relative</strong> behavior without a learned bias table — pure geometry.</li>
+<li><strong>No extra parameters</strong> and negligible compute (a per-element rotate).</li>
+<li>Applied to <strong>Q and K only</strong> (not V), <em>after</em> the projection and <em>before</em> the score, so it
+drops cleanly into multi-head attention and the <a href="attention.html">KV cache</a> — you cache the
+already-rotated keys.</li>
+<li>Extends to long context via frequency scaling (next section), which is much of why it
+displaced learned absolute embeddings.</li>
+</ul>
+<h2 id="alibi"><a class="header" href="#alibi">ALiBi</a></h2>
+<p>ALiBi (Attention with Linear Biases) goes further and uses <strong>no positional embedding at
+all</strong>. It adds a static, head-specific penalty to the attention logits that grows linearly
+with distance — nearer tokens are favored, farther ones discounted:</p>
+<pre><code>score(i, j) = Q_i · K_jᵀ / √d  −  m_h · (i − j)        (for j ≤ i, causal)
+                                   ▲
+                          fixed per-head slope (a geometric sequence over heads),
+                          NOT learned, NOT added to the embedding
+</code></pre>
+<p>Different heads get different slopes <code>m_h</code>, so some attend locally and others globally. With
+nothing to “run out of,” ALiBi extrapolates to far longer sequences than it trained on — its
+headline feature — at essentially zero cost and complexity. Used by BLOOM and MPT.</p>
+<h2 id="context-length-extrapolation"><a class="header" href="#context-length-extrapolation">Context-Length Extrapolation</a></h2>
+<p>The practical headache: a model trained at 4K tokens must often serve 32K+. Absolute and
+learned schemes simply break past <code>max_len</code>; RoPE degrades because positions imply rotation
+angles far outside the trained range. Two RoPE-specific fixes dominate:</p>
+<pre><code>Position Interpolation (PI)   squeeze positions into the trained range:
+   pos' = pos · (L_train / L_target)     → angles stay in-distribution
+   needs a short fine-tune; simple, effective
+
+NTK-aware / YaRN              scale the RoPE base θ instead of the positions,
+   stretching low frequencies (long-range) more than high (local),
+   preserving fine resolution; YaRN adds a temperature/attention-scale tweak
+   → best quality, the common choice for long-context releases
+</code></pre>
+<p>These are typically applied with a brief long-context fine-tune (often a parameter-efficient
+<a href="lora.html">LoRA</a> adapter) so the model adapts to the rescaled positions. ALiBi, by contrast,
+needs none of this — its linear bias extrapolates by construction.</p>
+<h2 id="comparison"><a class="header" href="#comparison">Comparison</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Scheme</th><th>Type</th><th>Where applied</th><th>Learned params</th><th>Extrapolation</th><th>Used by</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Sinusoidal</strong></td><td>absolute</td><td>added to input embedding</td><td>none</td><td>weak</td><td>original Transformer</td></tr>
+<tr><td><strong>Learned absolute</strong></td><td>absolute</td><td>added to input embedding</td><td><code>max_len·d</code></td><td><strong>none</strong> (hard cap)</td><td>BERT, GPT-2</td></tr>
+<tr><td><strong>T5 relative bias</strong></td><td>relative</td><td>added to logits</td><td>small (per bucket/head)</td><td>good</td><td>T5</td></tr>
+<tr><td><strong>RoPE</strong></td><td>relative</td><td>rotates Q, K</td><td>none</td><td>good (with PI/YaRN)</td><td>LLaMA, Mistral, Qwen, Gemma</td></tr>
+<tr><td><strong>ALiBi</strong></td><td>relative</td><td>linear penalty on logits</td><td>none</td><td><strong>strong</strong></td><td>BLOOM, MPT</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ul>
+<li><strong>Default to RoPE for a new decoder LLM</strong> — relative behavior, no parameters, cache-
+friendly, and a well-trodden path to long context via YaRN/PI.</li>
+<li><strong>Reach for ALiBi when length extrapolation is the priority</strong> and you want zero added
+machinery — it stretches well past the trained range with no fine-tune.</li>
+<li><strong>Keep the RoPE base θ identical between training and inference.</strong> It’s part of the model
+definition, not a free knob.</li>
+<li><strong>Apply RoPE after the Q/K projection and before writing the KV cache</strong> — store the
+<em>rotated</em> keys so cached and fresh tokens share one position convention.</li>
+<li><strong>For long-context adaptation, scale RoPE (PI/YaRN) plus a short fine-tune</strong> rather than
+training from scratch; a <a href="lora.html">LoRA</a> adapter is often enough.</li>
+<li><strong>Don’t add a positional encoding to a <a href="state_space_models.html">state space model</a></strong> — the
+recurrence already carries order.</li>
+</ul>
+<h2 id="common-pitfalls"><a class="header" href="#common-pitfalls">Common Pitfalls</a></h2>
+<ul>
+<li><strong>Mismatched RoPE base θ between training and serving</strong> — a silent, severe quality
+collapse; the keys and queries rotate by inconsistent angles. Pin θ to the checkpoint.</li>
+<li><strong>Wrong position index with a KV cache</strong> — during incremental decoding the new token’s
+position must continue from the <strong>cache length</strong>, not reset to 0. This mirrors the causal-
+mask pitfall on the <a href="attention.html">attention</a> page: get the offset wrong and the rotation
+(or absolute index) is applied to the wrong slot.</li>
+<li><strong>Exceeding a learned-embedding <code>max_len</code></strong> — there is no row for it; the lookup errors or
+(worse) wraps. Learned absolute encodings cannot extrapolate, full stop.</li>
+<li><strong>Rotating V with RoPE</strong> — RoPE applies to <strong>Q and K only</strong>; the value vectors are not
+rotated. Rotating V corrupts the mixed output.</li>
+<li><strong>Assuming sinusoidal/RoPE “just works” at 4× context</strong> — angles drift out of the trained
+distribution and quality degrades; apply PI/YaRN and a short fine-tune first.</li>
+<li><strong>Double-counting position</strong> — adding learned absolute embeddings <em>and</em> RoPE, or T5 bias
+<em>and</em> sinusoidal, usually hurts; pick one scheme.</li>
+</ul>
+<h2 id="where-this-connects"><a class="header" href="#where-this-connects">Where this connects</a></h2>
+<ul>
+<li><a href="attention.html">Attention</a> — where RoPE is applied (Q/K, pre-cache) and the KV-cache
+position-indexing pitfall this page mirrors</li>
+<li><a href="transformers.html">Transformers</a> — the “why position matters” intro and the full
+sinusoidal <code>PositionalEncoding</code> implementation</li>
+<li><a href="state_space_models.html">State space models</a> — order comes from the recurrent scan, so no
+positional encoding is needed</li>
+<li><a href="lora.html">LoRA</a> — long-context fine-tuning to adapt a model to PI/YaRN-rescaled positions</li>
+<li><a href="neural_networks.html">Neural networks</a> — embeddings as the input layer the position signal
+is added to</li>
+<li><a href="pytorch.html">PyTorch</a> — <code>nn.Embedding</code> for learned/absolute encodings and the rotate ops
+behind RoPE</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../machine_learning/state_space_models.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../machine_learning/tokenization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../machine_learning/state_space_models.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../machine_learning/tokenization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

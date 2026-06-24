@@ -1387,4 +1387,6 @@ FFmpeg is an incredibly powerful tool with nearly limitless capabilities for aud
 
 ## Where this connects
 
-- [curl](curl.md) — curl handles HTTP transport; ffmpeg processes the media streams
+- [curl](curl.md) — HTTP transport; ffmpeg processes the media it fetches
+- [wget](wget.md) — downloading/mirroring media files for processing
+- [Whisper](../ai/whisper.md) — ffmpeg often preprocesses audio before ASR

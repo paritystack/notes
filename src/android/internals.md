@@ -1648,4 +1648,9 @@ This deep technical knowledge empowers developers to create optimized, secure, a
 
 ## Where this connects
 
-- [Android Binder](binder.md) — Binder IPC is the central communication mechanism in Android internals
+- [Android Binder](binder.md) — the central IPC mechanism in Android internals
+- [SystemServer & core services](system_server.md) — the framework services that run the OS
+- [Zygote & app startup](zygote_startup.md) — how every app process is born
+- [ART & Dalvik runtime](art_runtime.md) — the managed runtime executing app code
+- [Platform development](platform_dev.md) — building/modifying AOSP itself
+- [adb](adb.md) — inspecting these internals on a device

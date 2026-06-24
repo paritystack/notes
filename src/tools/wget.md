@@ -669,3 +669,5 @@ wget is a versatile tool for reliable file downloads, website mirroring, and aut
 ## Where this connects
 
 - [curl](curl.md) — curl for API testing; wget for file downloads and site mirroring
+- [HTTP](../networking/http.md) — the protocol both clients speak
+- [ffmpeg](ffmpeg.md) — process media that wget downloads

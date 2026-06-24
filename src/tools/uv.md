@@ -1153,4 +1153,6 @@ uv represents the future of Python package management, combining the speed of Ru
 
 ## Where this connects
 
-- [../machine_learning/pytorch](../machine_learning/pytorch.md) — uv is the fast package manager for installing PyTorch and ML dependencies
+- [Python](../programming/python.md) — uv manages Python versions, venvs and dependencies
+- [PyTorch](../machine_learning/pytorch.md), [JAX](../machine_learning/jax.md) — heavy ML deps uv installs fast
+- [Local inference](../ai/local_inference.md) — spinning up reproducible LLM environments

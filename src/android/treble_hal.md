@@ -162,3 +162,12 @@ drivers — the kernel analog of the framework/vendor split.
 - [Binder](binder.md) — Binder/AIDL IPC underlying HALs
 - [Platform Dev](platform_dev.md) — building AOSP and the partition images
 - [SELinux on Android](selinux_android.md) — policy for vendor services
+
+## Where this connects
+
+- [Mainline & APEX](mainline_apex.md) — modular updates Treble enabled
+- [Platform development](platform_dev.md) — implementing HALs in AOSP
+- [Binder](binder.md) — HIDL/AIDL HALs ride over Binder
+- [Internals](internals.md) — the system/vendor architecture
+- [SELinux on Android](selinux_android.md) — policy across the split
+- [Verified boot & OTA](verified_boot_ota.md) — partition layout and updates

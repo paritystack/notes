@@ -139,3 +139,12 @@ adb shell dumpsys rollback           # rollback availability/history
 - [Verified Boot & OTA](verified_boot_ota.md) — signing/rollback principles for system images
 - [ART & Dalvik Runtime](art_runtime.md) — now itself an APEX (Mainline) module
 - [APK/AAB Packaging & Signing](app_signing.md) — app-level packaging counterpart
+
+## Where this connects
+
+- [Treble & HALs](treble_hal.md) — the modularization Mainline extends
+- [Platform development](platform_dev.md) — building APEX modules in AOSP
+- [Verified boot & OTA](verified_boot_ota.md) — how updates are delivered and verified
+- [App signing](app_signing.md) — APEX modules are signed
+- [ART & Dalvik runtime](art_runtime.md) — ART ships as a Mainline module
+- [SELinux on Android](selinux_android.md) — policy for modular components

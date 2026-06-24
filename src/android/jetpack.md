@@ -2,7 +2,7 @@
 
 ## Overview
 
-Android Jetpack is a suite of libraries, tools, and architectural guidance designed to help developers build high-quality Android apps more easily. It provides solutions for common development challenges like lifecycle management, background processing, navigation, database management, and UI construction.
+Android Jetpack is a suite of libraries, tools, and architectural guidance designed to help developers build high-quality Android apps more easily. It provides solutions for common development challenges like lifecycle management, [background processing](background_work.md), [navigation](navigation.md), database management, and UI construction, and encodes the patterns described in [app architecture](app_architecture.md).
 
 Jetpack libraries are unbundled from the Android platform, meaning they can be updated independently of the OS version. They're built on modern design principles like separation of concerns, testability, and reduced boilerplate. All Jetpack components work together seamlessly while remaining individually adoptable.
 
@@ -1713,3 +1713,12 @@ fun RefreshableScreen(viewModel: MyViewModel = hiltViewModel()) {
 ### Sample Projects
 - [Now in Android](https://github.com/android/nowinandroid) - Official Google sample
 - [Compose Samples](https://github.com/android/compose-samples) - Compose examples
+
+## Where this connects
+
+- [App architecture](app_architecture.md) — the guidance Jetpack libraries implement
+- [Navigation](navigation.md) — the Navigation component
+- [Coroutines & Flow](coroutines_flow.md) — lifecycle-aware async
+- [Background execution](background_work.md) — WorkManager
+- [Android testing](testing_android.md) — AndroidX test libraries
+- [Gradle deep dive](gradle_android.md) — how Jetpack deps are added

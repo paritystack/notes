@@ -220,3 +220,12 @@ Debug with **LLDB** via Android Studio (native/dual debugger), and analyze leaks
 - [ART & Dalvik Runtime](art_runtime.md) — the managed runtime JNI bridges to
 - [Project Treble & HALs](treble_hal.md) — native HAL development
 - [APK/AAB Packaging & Signing](app_signing.md) — per-ABI native lib packaging
+
+## Where this connects
+
+- [ART & Dalvik runtime](art_runtime.md) — the managed side JNI bridges to
+- [Gradle deep dive](gradle_android.md) — building native code in the app
+- [App security](app_security.md) — native attack surface and hardening
+- [Performance & profiling](performance_profiling.md) — native profiling and ABIs
+- [Graphics stack](graphics_stack.md) — native rendering via JNI
+- [ISA](../embedded/isa.md) — the architectures/ABIs native code targets

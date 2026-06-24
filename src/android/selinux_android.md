@@ -205,3 +205,12 @@ require recompiling vendor policy (the policy analog of the [VINTF](treble_hal.m
 - [Project Treble & HALs](treble_hal.md) — platform/vendor policy split
 - [Platform Dev](platform_dev.md) — building AOSP and `system/sepolicy`
 - [SystemServer & Core Services](system_server.md) — services whose domains policy confines
+
+## Where this connects
+
+- [SELinux (Linux)](../linux/selinux.md) — the upstream mechanism Android builds on
+- [App security](app_security.md) — the app sandbox SELinux enforces
+- [Platform development](platform_dev.md) — writing sepolicy in AOSP
+- [Treble & HALs](treble_hal.md) — policy across the vendor/system boundary
+- [Verified boot & OTA](verified_boot_ota.md) — the integrity SELinux assumes
+- [System server](system_server.md) — domains for system services

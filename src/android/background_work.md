@@ -195,3 +195,12 @@ requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
 - [Performance & Profiling](performance_profiling.md) — battery profiling
 - [SystemServer & Core Services](system_server.md) — AlarmManager/JobScheduler services
 - [Jetpack](jetpack.md) — WorkManager is part of Jetpack
+
+## Where this connects
+
+- [Coroutines & Flow](coroutines_flow.md) — structured concurrency for background tasks
+- [App architecture](app_architecture.md) — where background work belongs
+- [System server](system_server.md) — JobScheduler/AlarmManager live here
+- [Performance & profiling](performance_profiling.md) — battery and wakeup costs
+- [Zygote & app startup](zygote_startup.md) — process lifecycle and death
+- [Jetpack](jetpack.md) — WorkManager as the recommended API

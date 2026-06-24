@@ -194,3 +194,12 @@ val manager = IntegrityManagerFactory.create(context)
 - [SELinux on Android](selinux_android.md) — platform MAC backing the sandbox
 - [Verified Boot & OTA](verified_boot_ota.md) — device-level integrity
 - [Android Internals](internals.md) — UID sandbox & permission model
+
+## Where this connects
+
+- [App signing](app_signing.md) — signature identity and key protection
+- [SELinux on Android](selinux_android.md) — the MAC sandbox apps run inside
+- [Verified boot & OTA](verified_boot_ota.md) — platform integrity beneath the app
+- [Encryption](../security/encryption.md), [Auth](../security/auth.md) — crypto and identity primitives
+- [OWASP Top 10](../security/owasp_top_10.md) — the mobile threat landscape
+- [NDK & JNI](ndk_jni.md) — native code attack surface

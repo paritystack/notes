@@ -183,3 +183,12 @@ adb shell getprop pm.dexopt.bg-dexopt        # filter used by background dexopt
 - [Android Internals](internals.md) — boot, memory, process model
 - [Zygote & App Startup](zygote_startup.md) — how the runtime is shared and forked
 - [SystemServer & Core Services](system_server.md) — the system_server runs on ART too
+
+## Where this connects
+
+- [Zygote & app startup](zygote_startup.md) — forks the preloaded ART runtime
+- [NDK & JNI](ndk_jni.md) — the native/managed boundary ART crosses
+- [System server](system_server.md) — a long-lived ART process hosting services
+- [Performance & profiling](performance_profiling.md) — AOT/JIT and GC tuning
+- [Internals](internals.md) — where ART sits in the platform
+- [Mainline & APEX](mainline_apex.md) — ART ships as a Mainline module

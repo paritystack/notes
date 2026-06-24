@@ -233,3 +233,12 @@ android {
 - [App Architecture](app_architecture.md) — designing layers for testability
 - [Android Gradle Deep Dive](gradle_android.md) — test tasks & managed devices
 - [Performance & Profiling](performance_profiling.md) — Macrobenchmark performance tests
+
+## Where this connects
+
+- [App architecture](app_architecture.md) — testable design
+- [Coroutines & Flow](coroutines_flow.md) — testing async code
+- [Jetpack](jetpack.md) — AndroidX test libraries
+- [Gradle deep dive](gradle_android.md) — test tasks and variants
+- [adb](adb.md) — running instrumented tests on devices
+- [Performance & profiling](performance_profiling.md) — benchmark/macrobenchmark

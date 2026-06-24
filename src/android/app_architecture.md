@@ -194,3 +194,12 @@ Feature modules depend on `:core:*`, not on each other; communicate via navigati
 - [Jetpack](jetpack.md) — ViewModel, Room, Hilt building blocks
 - [Navigation](navigation.md) — moving between feature screens
 - [Android Testing](testing_android.md) — testing each layer in isolation
+
+## Where this connects
+
+- [Jetpack](jetpack.md) — ViewModel/Room/Lifecycle libraries architecture builds on
+- [Navigation](navigation.md) — moving between destinations within the structure
+- [Coroutines & Flow](coroutines_flow.md) — async data layers in modern architecture
+- [Background execution](background_work.md) — where long-running work belongs
+- [Android testing](testing_android.md) — what good architecture makes testable
+- [Performance & profiling](performance_profiling.md) — keeping the main thread responsive

@@ -167,3 +167,12 @@ adb sideload ota_package.zip
 - [Project Treble & HALs](treble_hal.md) — partitions and the system/vendor split
 - [APK/AAB Packaging & Signing](app_signing.md) — app-level (not system) signing
 - [SELinux on Android](selinux_android.md) — complementary runtime protection
+
+## Where this connects
+
+- [App signing](app_signing.md) — the signing concepts extended to whole images
+- [Mainline & APEX](mainline_apex.md) — updatable signed modules
+- [Treble & HALs](treble_hal.md) — A/B partitions and the vendor split
+- [Platform development](platform_dev.md) — building and signing system images
+- [Secure boot](../embedded/secure_boot.md) — the same chain-of-trust idea on MCUs
+- [SELinux on Android](selinux_android.md) — runtime integrity after boot

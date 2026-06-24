@@ -182,3 +182,12 @@ adb shell dumpsys package com.example.app | grep -A2 -i signing
 - [Verified Boot & OTA](verified_boot_ota.md) — system image signing (different from app signing)
 - [Project Mainline & APEX](mainline_apex.md) — packaging of modular system components
 - [ART & Dalvik Runtime](art_runtime.md) — DEX/baseline profile that ships inside the package
+
+## Where this connects
+
+- [App security](app_security.md) — why signing identity matters
+- [Gradle deep dive](gradle_android.md) — signing config in the build
+- [Verified boot & OTA](verified_boot_ota.md) — platform-level signature chains
+- [Digital signatures](../security/digital_signatures.md), [Certificates](../security/certificates.md) — the crypto under APK signing
+- [adb](adb.md) — installing debug-signed builds
+- [Mainline & APEX](mainline_apex.md) — signed modular OS components

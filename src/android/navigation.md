@@ -184,3 +184,11 @@ In Compose, drive selection from the `NavController`'s current destination; in V
 - [App Architecture](app_architecture.md) — navigation events, scoped ViewModels
 - [Jetpack](jetpack.md) — Compose & lifecycle building blocks
 - [App Security](app_security.md) — verifying App Links / handling untrusted deep links
+
+## Where this connects
+
+- [App architecture](app_architecture.md) — navigation as part of UI structure
+- [Jetpack](jetpack.md) — the Navigation component and Safe Args
+- [Coroutines & Flow](coroutines_flow.md) — async loads on destination change
+- [Performance & profiling](performance_profiling.md) — deep links and startup destinations
+- [Android testing](testing_android.md) — testing navigation graphs

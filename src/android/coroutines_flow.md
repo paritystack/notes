@@ -208,3 +208,12 @@ val items: StateFlow<List<Item>> = repo.observeItems()
 - [Jetpack](jetpack.md) — ViewModel, lifecycle scopes
 - [Android Testing](testing_android.md) — testing coroutines/Flow (Turbine, `runTest`)
 - [Background Work](background_work.md) — coroutines vs WorkManager for deferred work
+
+## Where this connects
+
+- [App architecture](app_architecture.md) — coroutines power the data and UI layers
+- [Background execution](background_work.md) — running async work off the main thread
+- [Jetpack](jetpack.md) — lifecycle-aware coroutine scopes
+- [Android testing](testing_android.md) — testing suspend functions and flows
+- [Navigation](navigation.md) — async loads between destinations
+- [Performance & profiling](performance_profiling.md) — main-thread responsiveness

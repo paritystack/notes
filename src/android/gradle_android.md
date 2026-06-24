@@ -227,3 +227,12 @@ Other wins:
 - [Performance & Profiling](performance_profiling.md) — R8 shrinking & app size
 - [App Architecture](app_architecture.md) — modularization that shapes the build graph
 - [Android Testing](testing_android.md) — test tasks/configurations
+
+## Where this connects
+
+- [App signing](app_signing.md) — signing configs and build variants
+- [Android testing](testing_android.md) — test tasks and source sets
+- [NDK & JNI](ndk_jni.md) — native builds via externalNativeBuild
+- [Jetpack](jetpack.md) — dependencies and annotation processors
+- [Platform development](platform_dev.md) — Soong/Make vs Gradle in AOSP
+- [Performance & profiling](performance_profiling.md) — build speed and R8/ProGuard

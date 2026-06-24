@@ -2,7 +2,7 @@
 
 ## Overview
 
-Android platform development involves building, modifying, and customizing the Android operating system itself (AOSP - Android Open Source Project), as opposed to developing applications that run on Android. This includes working with framework code, system services, HAL implementations, and the Linux kernel.
+Android platform development involves building, modifying, and customizing the Android operating system itself (AOSP - Android Open Source Project), as opposed to developing applications that run on Android. This includes working with framework code, [system services](system_server.md), [HAL implementations](treble_hal.md), and the Linux kernel — usually checked out and built from [AOSP source via repo](../git/repo.md).
 
 ### Platform Development vs App Development
 
@@ -1373,3 +1373,12 @@ jgrep [pattern]               # Search Java files
 ---
 
 **Last Updated**: 2025-11-14
+
+## Where this connects
+
+- [Internals](internals.md) — the framework/HAL architecture you modify
+- [Treble & HALs](treble_hal.md) — the vendor/system split
+- [Mainline & APEX](mainline_apex.md) — updatable modules
+- [SELinux on Android](selinux_android.md) — platform security policy
+- [Verified boot & OTA](verified_boot_ota.md) — building and signing system images
+- [repo](../git/repo.md) — the multi-repo tool for AOSP source

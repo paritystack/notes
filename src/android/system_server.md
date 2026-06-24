@@ -156,3 +156,12 @@ adb logcat | grep -iE "watchdog|system_server.*crash|FATAL EXCEPTION in system"
 - [Zygote & App Startup](zygote_startup.md) — how processes are forked on AMS's request
 - [Graphics Stack](graphics_stack.md) — WMS/SurfaceFlinger relationship
 - [Android Internals](internals.md) — overall architecture
+
+## Where this connects
+
+- [Zygote & app startup](zygote_startup.md) — system_server is forked from Zygote
+- [Binder](binder.md) — the IPC its services expose
+- [ART & Dalvik runtime](art_runtime.md) — the runtime hosting these services
+- [Internals](internals.md) — where system_server sits
+- [Background execution](background_work.md) — JobScheduler/AlarmManager services
+- [Graphics stack](graphics_stack.md) — WindowManager and SurfaceFlinger

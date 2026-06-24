@@ -163,3 +163,12 @@ adb shell perfetto -o /data/misc/perfetto-traces/trace -t 10s sched gfx view
 - [SystemServer & Core Services](system_server.md) — WindowManager feeds SurfaceFlinger
 - [ART & Dalvik Runtime](art_runtime.md) — GC pauses as a jank source
 - [Jetpack](jetpack.md) — Compose rendering builds on this stack
+
+## Where this connects
+
+- [Performance & profiling](performance_profiling.md) — jank, frame pacing, and Choreographer
+- [ART & Dalvik runtime](art_runtime.md) — the UI thread and rendering
+- [System server](system_server.md) — SurfaceFlinger and WindowManager
+- [NDK & JNI](ndk_jni.md) — native rendering (Vulkan/OpenGL) paths
+- [Internals](internals.md) — where the graphics stack sits
+- [Jetpack](jetpack.md) — Compose rendering

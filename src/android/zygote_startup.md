@@ -162,3 +162,12 @@ For deeper, frame-level analysis use **Perfetto** / system tracing and Jetpack
 - [ART & Dalvik Runtime](art_runtime.md) — the runtime Zygote preloads
 - [SystemServer & Core Services](system_server.md) — AMS orchestrates process starts
 - [Android Internals](internals.md) — boot process and process model
+
+## Where this connects
+
+- [System server](system_server.md) — also forked from Zygote
+- [ART & Dalvik runtime](art_runtime.md) — the preloaded runtime Zygote shares
+- [Performance & profiling](performance_profiling.md) — startup latency
+- [Background execution](background_work.md) — process lifecycle and death
+- [Internals](internals.md) — boot-sequence context
+- [Binder](binder.md) — IPC a new app process immediately uses

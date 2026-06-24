@@ -747,3 +747,12 @@ adb shell dumpsys battery     # Battery info
 - [Verified Boot & OTA](verified_boot_ota.md) — `adb reboot bootloader`/recovery and flashing
 - [Platform Dev](platform_dev.md) — building AOSP and flashing devices
 - [Android Internals](internals.md) — the architecture these commands inspect
+
+## Where this connects
+
+- [Performance & profiling](performance_profiling.md) — adb drives systrace/perfetto captures
+- [Android testing](testing_android.md) — instrumented tests run over adb
+- [App signing](app_signing.md) — `adb install` of debuggable builds
+- [Platform development](platform_dev.md) — `adb shell` into AOSP builds
+- [ART & Dalvik runtime](art_runtime.md) — runtime inspection commands
+- [Internals](internals.md) — the system services adb reaches

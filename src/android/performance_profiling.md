@@ -183,3 +183,12 @@ adb shell dumpsys batterystats --charged com.example.app > stats.txt
 - [ART & Dalvik Runtime](art_runtime.md) — GC, AOT/baseline profiles
 - [Zygote & App Startup](zygote_startup.md) — launch states and startup cost
 - [Background Work](background_work.md) — battery-friendly background execution
+
+## Where this connects
+
+- [Graphics stack](graphics_stack.md) — frame pacing and jank
+- [ART & Dalvik runtime](art_runtime.md) — GC, AOT/JIT, and startup
+- [Zygote & app startup](zygote_startup.md) — cold/warm start cost
+- [Background execution](background_work.md) — battery and wakeups
+- [adb](adb.md) — perfetto/systrace capture over adb
+- [Coroutines & Flow](coroutines_flow.md) — main-thread responsiveness

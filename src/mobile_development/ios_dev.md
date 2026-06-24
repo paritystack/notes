@@ -2833,6 +2833,7 @@ pod update
 - [Mobile Development Overview](index.html)
 - [Flutter Development](flutter.md)
 - [React Native Development](react_native.md)
+- [Android development](android_dev.md) — the platform counterpart
 - [Official Swift Documentation](https://swift.org/documentation/)
 - [Apple Developer Documentation](https://developer.apple.com/documentation/)
 - [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)

@@ -912,3 +912,6 @@ Ansible simplifies IT automation with its agentless architecture and simple YAML
 
 - [../devops/infrastructure](../devops/infrastructure.md) — Ansible and Terraform complement each other for infrastructure automation
 - [../devops/cicd](../devops/cicd.md) — Ansible playbooks are often triggered from CI/CD pipelines
+- [SSH](../networking/ssh.md) — the agentless transport Ansible drives nodes over
+- [systemd](../linux/systemd.md) — services Ansible commonly manages
+- [Docker](docker.md) — provisioning and deploying containers

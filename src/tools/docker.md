@@ -629,3 +629,5 @@ Docker simplifies application deployment and ensures consistency across developm
 
 - [../devops/docker](../devops/docker.md) — the detailed Docker operational reference
 - [../devops/kubernetes](../devops/kubernetes.md) — Kubernetes orchestrates Docker containers
+- [Linux namespaces](../linux/namespace.md), [cgroups](../linux/cgroups.md) — the kernel primitives containers are built on
+- [Container networking](../networking/container_networking.md) — how containers get their network stacks

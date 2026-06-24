@@ -651,3 +651,4 @@ ctags is an essential tool for code navigation, enabling developers to efficient
 
 - [vim](vim.md) — vim uses ctags files (tags) for jump-to-definition navigation
 - [cscope](cscope.md) — cscope complements ctags with cross-reference and call-graph search
+- [grep](grep.md), [ripgrep](ripgrep.md) — text search when a tags index is unavailable

@@ -1571,3 +1571,5 @@ Remember: With great power (plumbing commands) comes great responsibility. Alway
 
 - [Commands](commands.md) — plumbing commands (cat-file, hash-object) expose the internals
 - [Cheatsheet](cheatsheet.md) — the high-level commands that build on the object model
+- [Common scenarios](common-scenarios.md) — everyday operations explained via the object model
+- [repo](repo.md) — multi-repo tooling layered on standard Git internals

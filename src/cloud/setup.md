@@ -38,3 +38,5 @@ sudo swapon /swapfile
 
 - [AWS](aws.md) — AWS GPU instance setup is covered in setup.md
 - [Google Cloud](google_cloud.md) — GCP GPU instances as an alternative
+- [CUDA](../machine_learning/cuda.md) — the GPU programming these instances are provisioned for
+- [Docker](../tools/docker.md) — containerizing workloads on cloud instances

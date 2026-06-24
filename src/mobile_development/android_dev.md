@@ -895,4 +895,7 @@ android {
 - [Android Overview](../android/index.html)
 - [Android Internals](../android/internals.md)
 - [ADB Commands](../android/adb.md)
+- [App architecture](../android/app_architecture.md) — recommended app structure (MVVM, layers)
+- [Jetpack](../android/jetpack.md) — the libraries behind modern Android apps
+- [Android testing](../android/testing_android.md) — unit and instrumented testing
 - [Official Android Documentation](https://developer.android.com/)

@@ -1222,3 +1222,6 @@ AWK is an incredibly powerful tool for text processing. Master these patterns an
 
 - [grep](grep.md) — grep filters lines; awk processes and transforms them
 - [../linux/commands](../linux/commands.md) — awk is one of the essential Linux text processing commands
+- [sed](sed.md) — the stream editor for line-oriented substitutions
+- [grep](grep.md), [ripgrep](ripgrep.md) — match first, then awk to extract fields
+- [find](find.md) — select the files you pipe into awk

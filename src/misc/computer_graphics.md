@@ -1988,3 +1988,6 @@ Computer graphics is a vast and evolving field combining mathematics, physics, c
 
 - [../maths/linear_algebra](../maths/linear_algebra.md) — 3D transformations, projection, and lighting all use linear algebra
 - [../maths/calculus](../maths/calculus.md) — ray marching, implicit surfaces, and animation curves use calculus
+- [CUDA](../machine_learning/cuda.md) — GPU programming behind real-time rendering
+- [Numerical methods](../maths/numerical_methods.md) — solvers for physics and shading
+- [Display & graphics (embedded)](../embedded/display_graphics.md) — driving pixels on small displays

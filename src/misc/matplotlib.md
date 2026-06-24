@@ -2106,3 +2106,4 @@ Matplotlib is incredibly powerful and flexible. Key takeaways:
 
 - [../misc/pandas](pandas.md) — pandas DataFrame.plot() wraps matplotlib for quick EDA charts
 - [../machine_learning/numpy](../machine_learning/numpy.md) — matplotlib visualizes NumPy arrays
+- [Statistics](../maths/statistics.md) — the distributions and summaries these plots show

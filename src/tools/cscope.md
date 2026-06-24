@@ -531,3 +531,4 @@ cscope is an essential tool for navigating large C codebases, providing fast sym
 
 - [ctags](ctags.md) — ctags provides jump-to-definition; cscope adds caller/callee search for C code
 - [vim](vim.md) — cscope integrates with vim for in-editor symbol navigation
+- [ripgrep](ripgrep.md) — fast plain-text search as a lighter alternative

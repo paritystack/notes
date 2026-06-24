@@ -961,3 +961,4 @@ android {
 
 - [React Native](react_native.md) — the JavaScript/React alternative to Flutter for cross-platform mobile
 - [../web_development/react](../web_development/react.md) — React Native shares the React component model; Flutter uses Dart
+- [Android development](android_dev.md), [iOS development](ios_dev.md) — the native platforms Flutter compiles to

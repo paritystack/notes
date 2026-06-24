@@ -1123,5 +1123,7 @@ Raft is used in production by many distributed systems:
 
 ## Where this connects
 
-- [Strongly connected components](strongly_connected_components.md) — graph reachability concepts underpin distributed system reasoning
-- [Dynamic programming](dynamic_programming.md) — leader election and log replication can be modeled as state machine problems
+- [Distributed consensus](../system_design/distributed_consensus.md) — the problem Raft solves (alongside Paxos)
+- [Distributed systems](../system_design/distributed_systems.md) — replication, failure models, and quorums
+- [Replication & sharding](../databases/replication_sharding.md) — Raft underpins replicated databases (etcd, CockroachDB)
+- [CRDTs](../data_structures/crdt.md) — the coordination-free alternative to consensus

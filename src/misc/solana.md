@@ -1524,3 +1524,5 @@ token::transfer(cpi_ctx, amount)?;            // Then CPI
 
 - [Blockchain](blockchain.md) — Solana is a specific high-performance blockchain implementation
 - [../security/digital_signatures](../security/digital_signatures.md) — Solana transactions use Ed25519 digital signatures
+- [Crypto (finance)](../finance/crypto.md) — the markets and tokens Solana hosts
+- [Hashing](../security/hashing.md) — Proof-of-History relies on a sequential hash chain

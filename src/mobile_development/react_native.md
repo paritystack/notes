@@ -877,3 +877,4 @@ cd android
 
 - [Flutter](flutter.md) — the Dart/Google alternative to React Native for cross-platform mobile
 - [../web_development/react](../web_development/react.md) — React Native extends React's component model to native mobile UI
+- [Android development](android_dev.md), [iOS development](ios_dev.md) — the native platforms it targets

@@ -754,4 +754,5 @@ def predict(request: TextRequest):
 - [Transformers](transformers.md) — Hugging Face is the standard library for pre-trained transformer models
 - [PyTorch](pytorch.md) — Hugging Face models are PyTorch modules with a unified training/inference API
 - [LoRA](lora.md) — Hugging Face PEFT library is the standard LoRA implementation
+- [Unsloth](unsloth.md) — wraps Transformers/PEFT/TRL for faster fine-tuning and Hub export
 - [../ai/fine_tuning](../ai/fine_tuning.md) — Hugging Face Trainer handles the fine-tuning loop

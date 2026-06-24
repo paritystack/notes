@@ -334,4 +334,5 @@ for i, (x, y) in enumerate(loader):
 - [Quantization](quantization.md), [Unsloth](unsloth.md), [LoRA](lora.md) — 8-bit and
   memory-efficient optimizer states for large-model fine-tuning
 - [Hugging Face](hugging_face.md) — `Trainer` scheduler/optimizer configuration
+- [Distributed training](distributed_training.md) — ZeRO/FSDP shard the optimizer state across devices
 - [Fine-tuning](../ai/fine_tuning.md) — choosing LR, schedule, and weight decay in practice

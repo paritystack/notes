@@ -263,6 +263,8 @@ approximate schemes only pay off at extreme context lengths.
 - [LLM decoding & sampling](decoding_sampling.md) — bandwidth-bound decoding (which the KV
   cache enables) is what speculative decoding attacks
 - [Neural networks](neural_networks.md) — attention as a differentiable layer in the stack
+- [Tokenization & embeddings](tokenization.md) — sequence length in tokens is what drives the O(n²) cost
+- [Normalization](normalization.md) — the LayerNorm/RMSNorm wrapping each attention sub-block
 - [CUDA](cuda.md) — the SRAM/HBM memory hierarchy and tiled-matmul pattern FlashAttention
   exploits
 - [Quantization](quantization.md) — int8/int4 KV-cache compression

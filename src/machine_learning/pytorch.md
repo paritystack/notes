@@ -766,3 +766,10 @@ It's like learning to cook - you follow the recipe, taste the result, adjust ing
 - [JAX](jax.md) — the main alternative; JAX is functional and XLA-compiled, PyTorch is imperative
 - [NumPy](numpy.md) — PyTorch tensors are compatible with NumPy arrays; common to interop
 - [Hugging Face](hugging_face.md) — Hugging Face models are PyTorch (or JAX) models with a unified API
+- [CUDA](cuda.md) — the GPU layer PyTorch tensors and kernels run on
+- [Attention](attention.md) — `F.scaled_dot_product_attention` and the flash backends
+- [Optimizers](optimizers.md) — `torch.optim` (SGD, AdamW) and LR schedulers
+- [Quantization](quantization.md) — `torch.quantization`, dynamic/static/QAT flows
+- [LoRA](lora.md) — parameter-efficient fine-tuning via the PEFT library on PyTorch modules
+- [Distributed training](distributed_training.md) — `torch.distributed`, DDP, and FSDP
+- [Fine-tuning](../ai/fine_tuning.md) — the applied LLM fine-tuning workflow built on PyTorch

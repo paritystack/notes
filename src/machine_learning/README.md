@@ -422,3 +422,23 @@ def data_generator(file_path):
         yield chunk
 ```
 
+## Where this connects
+
+This section covers model internals and training mechanics. Its hubs are
+[Neural networks](neural_networks.md), [Deep learning](deep_learning.md),
+[Transformers](transformers.md), and the framework layer
+([PyTorch](pytorch.md), [JAX](jax.md), [CUDA](cuda.md)). See also the
+[Interesting papers](interesting_papers.md) catalog.
+
+- [AI](../ai/README.md) — applied LLM/GenAI systems (RAG, agents, serving, prompting) that
+  build on the models trained here
+- [Maths · Optimization](../maths/optimization.md) — the gradient-descent and convex-optimization
+  theory behind [optimizers](optimizers.md)
+- [Maths · Probability](../maths/probability.md) and
+  [Information theory](../maths/information_theory.md) — the foundations of
+  [loss functions](loss_functions.md) and generative modeling
+- [Maths · Linear algebra](../maths/linear_algebra.md) — the matrix machinery underlying every
+  layer, attention, and quantization scheme
+- [Embedded · CUDA-adjacent](../embedded/README.md) — edge deployment, where
+  [quantization](quantization.md) lets models run on constrained hardware
+

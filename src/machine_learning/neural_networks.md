@@ -1385,3 +1385,8 @@ Total ≈ 2-3× Model Size for training (Adam, FP16)
 - [Transformers](transformers.md) — the dominant neural architecture for NLP and vision
 - [PyTorch](pytorch.md) — the primary framework for building and training neural networks
 - [Metrics](metrics.md) — loss functions and evaluation metrics guide neural network training
+- [Convolution](convolution.md) — the convolutional layer for grid-structured (image) data
+- [Attention](attention.md) — the self-attention layer at the heart of transformers
+- [Optimizers](optimizers.md) — SGD/Adam and schedules that drive the training loop
+- [Loss functions](loss_functions.md) — the objective backprop differentiates through the network
+- [Normalization](normalization.md) — BatchNorm/LayerNorm layers that stabilize training

@@ -1064,3 +1064,4 @@ class UCBBandit:
 - [Deep reinforcement learning](deep_reinforcement_learning.md) — combines RL with deep neural networks for high-dimensional state spaces
 - [Supervised learning](supervised_learning.md) — RL contrast: no labeled data, rewards come from environment
 - [Neural networks](neural_networks.md) — deep RL uses neural networks as function approximators
+- [RLHF & preference optimization](rlhf.md) — RL applied to align LLMs from human/AI preferences

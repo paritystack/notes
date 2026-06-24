@@ -2012,4 +2012,5 @@ The field continues to evolve rapidly with models like OpenAI's o1 demonstrating
 - [Deep learning](deep_learning.md) — neural network basics referenced in thinking.md
 - [Neural networks](neural_networks.md) — the architectural foundations of thinking/reasoning models
 - [Transformers](transformers.md) — the architecture underlying modern reasoning-capable LLMs
+- [RLHF & preference optimization](rlhf.md) — RLVR/GRPO is how chain-of-thought reasoning models are trained
 - [../ai/llms](../ai/llms.md) — LLMs are the practical thinking models

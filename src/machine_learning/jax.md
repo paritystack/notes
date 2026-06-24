@@ -1213,3 +1213,5 @@ result = f(jnp.ones(10))  # Fast!
 - [PyTorch](pytorch.md) — the main alternative; PyTorch is imperative/eager, JAX is functional and XLA-compiled
 - [NumPy](numpy.md) — JAX provides a NumPy-compatible API (jnp) for hardware-accelerated computation
 - [Deep learning](deep_learning.md) — JAX is used for deep learning research via Flax/Haiku/Equinox
+- [CUDA](cuda.md) — JAX compiles to GPU/TPU via XLA, the layer beneath the `jnp` API
+- [Distributed training](distributed_training.md) — `pmap`/`shard_map` and `pjit` express sharding declaratively

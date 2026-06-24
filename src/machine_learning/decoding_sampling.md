@@ -243,4 +243,5 @@ content.
 - [Local inference](../ai/local_inference.md) — sampling parameters exposed by local runtimes
 - [RLHF & preference optimization](rlhf.md) — preference tuning shifts the very distribution
   decoding samples from
+- [Thinking](thinking.md) — reasoning models spend test-time compute on the tokens decoding emits
 - [Hugging Face](hugging_face.md) — `model.generate(...)` and its `GenerationConfig`

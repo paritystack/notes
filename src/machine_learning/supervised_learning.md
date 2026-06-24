@@ -1313,3 +1313,4 @@ print(f"Best parameters: {grid_search.best_params_}")
 - [Metrics](metrics.md) — precision, recall, F1, AUC — the metrics that evaluate supervised models
 - [Unsupervised learning](unsupervised_learning.md) — the counterpart; learning without labels
 - [Transfer learning](transfer_learning.md) — supervised fine-tuning of pre-trained models
+- [RLHF & preference optimization](rlhf.md) — SFT is supervised next-token training, the first stage of alignment

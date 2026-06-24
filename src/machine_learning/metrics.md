@@ -3622,3 +3622,5 @@ Always combine multiple metrics and visualizations to get a complete picture of 
 - [Supervised learning](supervised_learning.md) — metrics evaluate how well supervised models generalize
 - [Deep learning](deep_learning.md) — loss functions (cross-entropy, MSE) are the training-time metrics
 - [Gradient boosting](gradient_boosting.md) — XGBoost/LightGBM optimize a user-specified loss/metric
+- [Loss functions](loss_functions.md) — the training-time objective whose evaluation-time counterpart these metrics are
+- [RLHF & preference optimization](rlhf.md) — reward-model accuracy and win-rate are the alignment metrics

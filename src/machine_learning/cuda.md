@@ -1462,4 +1462,5 @@ This guide covers the essential aspects of CUDA programming. For specific applic
 - [Quantization](quantization.md) — lower-precision GPU math
 - [Convolution](convolution.md) — a canonical GPU-bound operation
 - [Attention](attention.md) — FlashAttention, the flagship IO-aware kernel exploiting the SRAM/HBM hierarchy
+- [Distributed training](distributed_training.md) — the NCCL collectives (all-reduce, all-gather, reduce-scatter) that scale training across GPUs
 - [Inference optimization](../ai/inference_optimization.md) — serving models fast on GPUs

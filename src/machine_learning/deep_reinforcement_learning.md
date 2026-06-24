@@ -1058,3 +1058,4 @@ class TD3Agent(DDPGAgent):
 - [Reinforcement learning](reinforcement_learning.md) — the base RL framework that deep RL extends with neural function approximators
 - [Deep learning](deep_learning.md) — the neural network techniques applied to RL
 - [Neural networks](neural_networks.md) — policy networks and value networks are standard DNNs
+- [RLHF & preference optimization](rlhf.md) — PPO/GRPO policy gradients applied to LLM alignment

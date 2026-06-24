@@ -2056,6 +2056,10 @@ Quantization transforms impractical models into deployable solutions, making AI 
 
 - [Neural networks](neural_networks.md) — quantization reduces the precision of neural network weights
 - [LoRA](lora.md) — QLoRA combines quantization with LoRA for memory-efficient fine-tuning
+- [Unsloth](unsloth.md) — loads 4-bit NF4 base weights for fast QLoRA fine-tuning
+- [Knowledge distillation](knowledge_distillation.md) — the sibling compression technique; "distill then quantize" is a standard pipeline
 - [Attention](attention.md) — KV-cache quantization, often the first thing to compress at long context
+- [Distributed training](distributed_training.md) — lower precision is an orthogonal way to shrink the memory budget; mixed precision lives here
+- [PyTorch](pytorch.md) — `torch.quantization` and `bitsandbytes` implement the flows above
 - [../ai/vllm](../ai/vllm.md) — vLLM uses quantization (AWQ, GPTQ) for efficient LLM inference
 - [../ai/llms](../ai/llms.md) — quantized models enable LLMs to run on consumer hardware

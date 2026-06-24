@@ -1937,5 +1937,6 @@ for i, expert in enumerate(experts):
 - [Deep learning](deep_learning.md), [Neural networks](neural_networks.md) — the architecture context
 - [Quantization](quantization.md) — compressing large sparse models
 - [Attention](attention.md) — the other major lever for scaling transformer compute and memory
+- [Distributed training](distributed_training.md) — expert parallelism shards experts across devices, a fourth parallel axis
 - [Inference optimization](../ai/inference_optimization.md) — serving MoE efficiently
 - [DeepSeek R1](../ai/deepseek_r1.md) — a prominent MoE model

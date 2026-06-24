@@ -101,3 +101,5 @@ preds = bst.predict(dtrain)
 - [Supervised learning](supervised_learning.md) — gradient boosting is a supervised ensemble learning method
 - [Metrics](metrics.md) — XGBoost/LightGBM optimize a loss; metrics evaluate the result
 - [Neural networks](neural_networks.md) — the deep learning alternative; gradient boosting wins on tabular data
+- [Loss functions](loss_functions.md) — boosting fits each tree to the gradient of a differentiable loss
+- [Supervised learning](supervised_learning.md) — the broader paradigm boosting belongs to

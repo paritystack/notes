@@ -965,3 +965,8 @@ for epoch in range(num_epochs):
 - [Transformers](transformers.md) — the dominant deep learning architecture for sequence tasks
 - [PyTorch](pytorch.md) — the primary framework for deep learning research and production
 - [Transfer learning](transfer_learning.md) — fine-tuning pre-trained deep models is the standard practice
+- [Convolution](convolution.md) — CNNs, the workhorse for vision
+- [Attention](attention.md) — the mechanism behind modern sequence models
+- [Optimizers](optimizers.md), [Loss functions](loss_functions.md), [Normalization](normalization.md) — the core training-mechanics trio
+- [State space models](state_space_models.md) — the sub-quadratic sequence-modeling alternative
+- [CUDA](cuda.md) — the GPU compute that makes deep learning tractable

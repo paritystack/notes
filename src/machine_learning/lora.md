@@ -1581,4 +1581,9 @@ LoRA has become the de facto standard for fine-tuning large language models, ena
 - [Transfer learning](transfer_learning.md) — LoRA is a parameter-efficient method for fine-tuning pre-trained models
 - [../ai/fine_tuning](../ai/fine_tuning.md) — LoRA is the dominant fine-tuning technique for LLMs
 - [Quantization](quantization.md) — QLoRA combines LoRA with quantization for memory-efficient training
+- [Unsloth](unsloth.md) — 2× faster, low-VRAM LoRA/QLoRA with the same adapter workflow
+- [Knowledge distillation](knowledge_distillation.md) — a sibling efficiency technique that composes with LoRA
+- [RLHF & preference optimization](rlhf.md) — SFT and DPO are usually run parameter-efficiently with LoRA
+- [Hugging Face](hugging_face.md) — the PEFT library is the standard LoRA implementation
+- [Neural networks](neural_networks.md) — the adapter matrices inject into the network's linear layers
 - [PyTorch](pytorch.md) — LoRA is implemented in PyTorch via PEFT library

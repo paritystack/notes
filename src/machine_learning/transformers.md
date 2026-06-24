@@ -1126,6 +1126,8 @@ Transformers are like super-smart assistants that help computers understand and 
 - [Neural networks](neural_networks.md) — transformers are a specific neural architecture (self-attention + FFN)
 - [Deep learning](deep_learning.md) — transformers are the dominant deep learning architecture for sequence tasks
 - [State space models](state_space_models.md) — S4/Mamba, the sub-quadratic alternative often hybridized with attention
+- [Mixture-of-Experts](moe.md) — sparse MoE layers replace the dense FFN to scale parameters
+- [Normalization](normalization.md) — LayerNorm/RMSNorm in the residual block; the pre-norm default
 - [../ai/transformers_architecture](../ai/transformers_architecture.md) — detailed transformer architecture breakdown
 - [PyTorch](pytorch.md) — transformers are trained and implemented in PyTorch
 - [Hugging Face](hugging_face.md) — the standard library for pre-trained transformer models

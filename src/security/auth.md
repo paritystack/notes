@@ -1,6 +1,6 @@
 # Authentication
 
-Authentication is the process of verifying the identity of a user, system, or entity. It answers the question "Who are you?" and is fundamental to security in modern applications.
+Authentication is the process of verifying the identity of a user, system, or entity. It answers the question "Who are you?" and is fundamental to security in modern applications. It leans on [hashing](hashing.md) for password storage, [JWT](jwt.md) for stateless tokens, [OAuth 2.0 / OIDC](oauth2.md) for delegated identity, and [certificates](certificates.md) for mTLS — and it's distinct from *authorization* ("what can you do?"), which is the core of the [zero-trust](zero_trust.md) model.
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -3046,6 +3046,17 @@ async function authenticateUser(username, password) {
 ```
 
 ---
+
+## Where this connects
+
+- [Hashing](hashing.md) — Argon2/bcrypt for password storage; never encrypt passwords
+- [JWT](jwt.md) — the stateless bearer tokens issued after login
+- [OAuth 2.0 & OIDC](oauth2.md) — delegated authorization and federated identity
+- [Certificates](certificates.md), [SSL/TLS](ssl_tls.md) — mTLS / client-certificate authentication
+- [API security](api_security.md) — applying these methods to service endpoints
+- [Zero trust](zero_trust.md) — "never trust, always verify" authorization posture
+- [OWASP Top 10](owasp_top_10.md) — the auth failures (broken access control, ID&A) to defend against
+- [Web sessions & cookies](../web_development/web_security.md) — where session/CSRF defenses live
 
 ## Resources
 

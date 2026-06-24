@@ -1,6 +1,6 @@
 # Common Git Scenarios & Questions
 
-A practical Q&A guide for developers working with Git. Organized by task and includes solutions, alternatives, and common pitfalls.
+A practical Q&A guide for developers working with Git. Organized by task and includes solutions, alternatives, and common pitfalls. For the command reference see [Git commands](commands.md) and the [cheatsheet](cheatsheet.md); for *why* these commands behave as they do, see [Git internals](internals.md).
 
 ## Undoing Changes
 
@@ -1260,4 +1260,13 @@ git show commit-hash
 - Use quotes if searching for code with special characters
 - Can be slow on large repos with long history
 - Search is case-sensitive by default
+
+## Where this connects
+
+- [Git commands](commands.md) — the full command reference behind these recipes
+- [Git cheatsheet](cheatsheet.md) — quick lookup of the same operations
+- [Git internals](internals.md) — objects, refs, and the index that explain *why* undo works
+- [Git config](git_config.md) — aliases and settings that smooth these workflows
+- [GitHub](github.md) — PR/remote workflows layered on top of these local operations
+- [repo](repo.md) — running these scenarios across many repositories at AOSP scale
 

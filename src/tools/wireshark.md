@@ -33,7 +33,7 @@ Wireshark was originally developed as Ethereal by Gerald Combs in 1998. The proj
 - Network security analysis and forensics
 - Educational purposes and learning
 - Quality assurance and testing
-- Malware analysis and reverse engineering
+- Malware analysis and [reverse engineering](../debugging/reverse_engineering.md)
 - VoIP call quality analysis
 - Application performance monitoring
 - Compliance validation and auditing

@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-cb350cc2.js";
+            window.path_to_searchindex_js = "../searchindex-477c4296.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-476d89b0.js"></script>
+        <script src="../toc-a6b94de8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -181,8 +181,9 @@
 <p>Android testing spans fast <strong>local unit tests</strong> (run on the JVM, no device) and slower
 <strong>instrumented tests</strong> (run on a device/emulator with the Android framework). A healthy suite
 follows the <strong>testing pyramid</strong>: many fast unit tests, fewer integration tests, and a small set
-of end-to-end UI tests. This doc covers JUnit/MockK unit tests, coroutine/Flow testing,
-Espresso and Compose UI tests, Robolectric, and where each fits.</p>
+of end-to-end UI tests. This page is the <strong>hub</strong> — it covers the pyramid, where each test type
+runs, CI, and best practices. Each framework has its own deep-dive page (see
+<a href="#frameworks-deep-dives">Frameworks</a> below).</p>
 <p>Builds on <a href="coroutines_flow.html">Coroutines &amp; Flow</a>, <a href="app_architecture.html">App Architecture</a>
 (testable layers), and runs via tasks from <a href="gradle_android.html">Android Gradle Deep Dive</a>.</p>
 <h2 id="test-types--where-they-run"><a class="header" href="#test-types--where-they-run">Test Types &amp; Where They Run</a></h2>
@@ -202,136 +203,25 @@ Espresso and Compose UI tests, Robolectric, and where each fits.</p>
 <pre><code class="language-bash">./gradlew testDebugUnitTest        # local + Robolectric
 ./gradlew connectedAndroidTest     # instrumented (needs device/emulator)
 </code></pre>
-<h2 id="unit-tests-junit"><a class="header" href="#unit-tests-junit">Unit Tests (JUnit)</a></h2>
-<p>Pure logic — ViewModels, use cases, repositories with fakes. Keep Android types out of these
-classes (see <a href="app_architecture.html">App Architecture</a>) so they’re JVM-testable.</p>
-<pre><code class="language-kotlin">class PriceCalculatorTest {
-    private val calc = PriceCalculator()
-
-    @Test fun appliesDiscount() {
-        assertEquals(90.0, calc.withDiscount(100.0, 0.1), 0.001)
-    }
-}
-</code></pre>
-<h3 id="test-doubles-fakes-vs-mocks"><a class="header" href="#test-doubles-fakes-vs-mocks">Test doubles: fakes vs mocks</a></h3>
-<ul>
-<li><strong>Fake</strong>: a working lightweight implementation (e.g. in-memory repository) — preferred for
-most tests; more robust to refactors.</li>
-<li><strong>Mock</strong>: a stand-in with programmed responses/verifications — good for interaction
-verification and hard-to-fake collaborators.</li>
-</ul>
-<p><strong>MockK</strong> is the idiomatic Kotlin mocking library:</p>
-<pre><code class="language-kotlin">@Test fun loadsUser() = runTest {
-    val repo = mockk&lt;UserRepository&gt;()
-    coEvery { repo.getUser(1) } returns User(1, "Ada")
-
-    val vm = UserViewModel(repo)
-    vm.load(1)
-
-    assertEquals("Ada", vm.state.value.name)
-    coVerify { repo.getUser(1) }
-}
-</code></pre>
-<h2 id="testing-coroutines--flow"><a class="header" href="#testing-coroutines--flow">Testing Coroutines &amp; Flow</a></h2>
-<p>Use <code>kotlinx-coroutines-test</code>: <code>runTest</code> provides a virtual-time scheduler so delays are skipped
-deterministically. <strong>Inject dispatchers</strong> so tests can substitute a <code>TestDispatcher</code>.</p>
-<pre><code class="language-kotlin">@Test fun emitsLoadingThenSuccess() = runTest {
-    val vm = SearchViewModel(FakeRepo(), testDispatcher)
-    vm.search("a")
-    advanceUntilIdle()
-    assertTrue(vm.state.value is UiState.Success)
-}
-</code></pre>
-<h3 id="turbine-for-flow-assertions"><a class="header" href="#turbine-for-flow-assertions">Turbine for Flow assertions</a></h3>
-<pre><code class="language-kotlin">@Test fun stateTransitions() = runTest {
-    vm.state.test {                       // Turbine
-        assertEquals(UiState.Loading, awaitItem())
-        vm.search("a")
-        assertTrue(awaitItem() is UiState.Success)
-        cancelAndConsumeRemainingEvents()
-    }
-}
-</code></pre>
-<p>A common helper is a <strong>MainDispatcherRule</strong> that swaps <code>Dispatchers.Main</code> for a test dispatcher
-(needed because <code>viewModelScope</code> uses <code>Dispatchers.Main</code>).</p>
-<pre><code class="language-kotlin">class MainDispatcherRule(private val d: TestDispatcher = StandardTestDispatcher()) : TestWatcher() {
-    override fun starting(desc: Description) = Dispatchers.setMain(d)
-    override fun finished(desc: Description) = Dispatchers.resetMain()
-}
-</code></pre>
-<h2 id="robolectric"><a class="header" href="#robolectric">Robolectric</a></h2>
-<p>Runs Android-dependent code (Context, resources, SharedPreferences) on the <strong>JVM</strong> without an
-emulator — fast feedback for code that touches the framework lightly.</p>
-<pre><code class="language-kotlin">@RunWith(AndroidJUnit4::class)
-@Config(sdk = [34])
-class FormatterTest {
-    @Test fun usesResources() {
-        val ctx = ApplicationProvider.getApplicationContext&lt;Context&gt;()
-        assertEquals("Hello", ctx.getString(R.string.greeting))
-    }
-}
-</code></pre>
-<h2 id="instrumented-tests-view-ui--espresso"><a class="header" href="#instrumented-tests-view-ui--espresso">Instrumented Tests (View UI) — Espresso</a></h2>
-<p>Espresso drives real UI on a device/emulator: find a view, perform an action, check state.</p>
-<pre><code class="language-kotlin">@RunWith(AndroidJUnit4::class)
-class LoginUiTest {
-    @get:Rule val rule = ActivityScenarioRule(LoginActivity::class.java)
-
-    @Test fun submitShowsError() {
-        onView(withId(R.id.email)).perform(typeText("bad"), closeSoftKeyboard())
-        onView(withId(R.id.submit)).perform(click())
-        onView(withId(R.id.error)).check(matches(isDisplayed()))
-    }
-}
-</code></pre>
-<p>For navigating across apps/system UI, use <strong>UI Automator</strong>.</p>
-<h2 id="compose-ui-testing"><a class="header" href="#compose-ui-testing">Compose UI Testing</a></h2>
-<p>Compose has its own semantics-based testing API via a compose test rule.</p>
-<pre><code class="language-kotlin">@RunWith(AndroidJUnit4::class)
-class CounterTest {
-    @get:Rule val composeRule = createComposeRule()
-
-    @Test fun incrementsCount() {
-        composeRule.setContent { Counter() }
-        composeRule.onNodeWithText("Count: 0").assertIsDisplayed()
-        composeRule.onNodeWithText("Increment").performClick()
-        composeRule.onNodeWithText("Count: 1").assertIsDisplayed()
-    }
-}
-</code></pre>
-<p>Add <code>testTag(...)</code> modifiers and query with <code>onNodeWithTag</code> for stable selectors. Use
-<code>createAndroidComposeRule&lt;Activity&gt;()</code> when you need a real Activity.</p>
-<h2 id="hilt--test-doubles"><a class="header" href="#hilt--test-doubles">Hilt &amp; Test Doubles</a></h2>
-<p>For DI-based apps, <strong>Hilt testing</strong> lets you replace modules with fakes:</p>
-<pre><code class="language-kotlin">@HiltAndroidTest
-@UninstallModules(NetworkModule::class)
-class FeedTest {
-    @get:Rule val hiltRule = HiltAndroidRule(this)
-    // provide a fake NetworkModule via @TestInstallIn / @BindValue
-}
-</code></pre>
-<h2 id="other-useful-tools"><a class="header" href="#other-useful-tools">Other Useful Tools</a></h2>
+<h2 id="frameworks-deep-dives"><a class="header" href="#frameworks-deep-dives">Frameworks (deep dives)</a></h2>
+<p>Each framework has its own page; this hub links them by where they sit on the pyramid.</p>
 <div class="table-wrapper">
 <table>
 <thead>
-<tr><th>Tool</th><th>Purpose</th></tr>
+<tr><th>Page</th><th>Covers</th><th>Runs on</th></tr>
 </thead>
 <tbody>
-<tr><td><strong>Truth</strong></td><td>Fluent assertions (<code>assertThat(x).isEqualTo(y)</code>)</td></tr>
-<tr><td><strong>Turbine</strong></td><td>Testing Kotlin Flows</td></tr>
-<tr><td><strong>MockWebServer</strong></td><td>Stub HTTP responses for Retrofit/OkHttp tests</td></tr>
-<tr><td><strong>Espresso-Intents</strong></td><td>Verify/stub outgoing Intents</td></tr>
-<tr><td><strong>Macrobenchmark</strong></td><td>Startup/jank performance tests (see <a href="performance_profiling.html">Performance</a>)</td></tr>
-<tr><td><strong>Screenshot testing</strong> (Paparazzi / Roborazzi / Compose Preview Screenshot)</td><td>Catch UI regressions</td></tr>
+<tr><td><a href="testing_junit_mockk.html">JUnit, MockK &amp; Truth</a></td><td>Unit-test toolkit: JUnit, MockK mocking, Truth assertions, MockWebServer</td><td>JVM</td></tr>
+<tr><td><a href="testing_coroutines.html">Testing Coroutines &amp; Flow</a></td><td><code>runTest</code>/virtual time, <code>TestDispatcher</code>, <code>MainDispatcherRule</code>, Turbine</td><td>JVM</td></tr>
+<tr><td><a href="testing_robolectric.html">Robolectric</a></td><td>Android framework (Context/resources) simulated on the JVM</td><td>JVM</td></tr>
+<tr><td><a href="testing_espresso.html">Espresso &amp; UI Automator</a></td><td>View UI, Espresso-Intents, cross-app UI Automator, Hilt instrumented</td><td>Device/emulator</td></tr>
+<tr><td><a href="testing_compose.html">Compose UI Testing</a></td><td>Semantics-tree finders/actions/assertions, <code>testTag</code>, sync</td><td>Device/emulator</td></tr>
+<tr><td><a href="testing_screenshot.html">Screenshot &amp; Snapshot Testing</a></td><td>Paparazzi / Roborazzi / Compose Preview Screenshot golden diffs</td><td>JVM</td></tr>
 </tbody>
 </table>
 </div>
-<pre><code class="language-kotlin">// MockWebServer
-val server = MockWebServer()
-server.enqueue(MockResponse().setBody("""{"id":1,"name":"Ada"}"""))
-server.start()
-val api = retrofit(server.url("/")).create(Api::class.java)
-</code></pre>
+<p>For startup/jank performance tests, see <strong>Macrobenchmark</strong> on
+<a href="performance_profiling.html">Performance &amp; Profiling</a>.</p>
 <h2 id="ci"><a class="header" href="#ci">CI</a></h2>
 <p>Run <code>testDebugUnitTest</code> (+ Robolectric) on every push (fast), and instrumented/UI tests on
 emulators less frequently (e.g. Gradle Managed Devices or Firebase Test Lab). See
@@ -393,7 +283,7 @@ android {
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../data_structures/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../android/testing_junit_mockk.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -407,7 +297,7 @@ android {
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../data_structures/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../android/testing_junit_mockk.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

@@ -765,3 +765,4 @@ See also: [[fundamental_analysis]], [[stocks]], [[reits]], [[private_markets]], 
 - [Interest rates](interest_rates.md) — the discount rate in DCF models is driven by interest rates
 - [Credit markets](credit_markets.md) — credit analysis uses valuation to assess debt capacity
 - [Portfolio management](portfolio_management.md) — valuation determines whether assets are cheap or expensive relative to fundamentals
+- [Corporate finance](corporate_finance.md) — the issuer-side decisions (capital structure, budgeting, M&A) that the cost of capital and DCF feed

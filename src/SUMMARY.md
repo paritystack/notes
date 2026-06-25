@@ -509,6 +509,7 @@
     - [Portfolio Management](finance/portfolio_management.md)
     - [Risk Management](finance/risk_management.md)
     - [Valuation](finance/valuation.md)
+    - [Corporate Finance](finance/corporate_finance.md)
     - [Macroeconomics](finance/macroeconomics.md)
     - [Interest Rates](finance/interest_rates.md)
     - [Market Cycles](finance/market_cycles.md)

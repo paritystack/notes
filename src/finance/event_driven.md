@@ -377,3 +377,4 @@ def short_straddle_pnl(premium_collected, underlying_move, stock_price,
 - [Volatility trading](volatility_trading.md) — earnings IV crush combines event-driven and volatility trading
 - [Options](options.md) — event catalysts create option strategies (straddles, spreads)
 - [Credit markets](credit_markets.md) — credit events (distressed, restructuring) are a key event-driven category
+- [Corporate finance](corporate_finance.md) — the issuer-side rationale behind the M&A, buybacks, and spin-offs traded here

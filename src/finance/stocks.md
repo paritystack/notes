@@ -1070,3 +1070,4 @@ stock.generate_report()
 - [ETFs](etfs.md), [Portfolio management](portfolio_management.md) — diversified ways to hold equities
 - [Risk management](risk_management.md) — controlling downside
 - [Market cycles](market_cycles.md) — the macro backdrop for equities
+- [Corporate finance](corporate_finance.md) — the issuer-side view of corporate actions (splits, dividends, buybacks)

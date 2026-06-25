@@ -761,3 +761,4 @@ print("\n" + "=" * 60)
 - [Technical analysis](technical_analysis.md) — the chart-based counterpart
 - [Macroeconomics](macroeconomics.md), [Interest rates](interest_rates.md) — the top-down backdrop
 - [Behavioral finance](behavioral_finance.md) — why price can diverge from value
+- [Corporate finance](corporate_finance.md) — the issuer-side view of the statements, leverage, and payout these ratios measure

@@ -4,7 +4,7 @@ A comprehensive guide to essential tools for analyzing, debugging, and understan
 
 ## Overview
 
-Binary analysis tools help developers understand compiled programs, debug issues, analyze dependencies, and reverse engineer executables. These tools are essential for systems programming, security research, performance analysis, and troubleshooting deployment issues.
+Binary analysis tools help developers understand compiled programs, debug issues, analyze dependencies, and [reverse engineer](reverse_engineering.md) executables. These tools are essential for systems programming, security research, performance analysis, and troubleshooting deployment issues.
 
 **Categories:**
 - **Disassemblers**: objdump, gdb

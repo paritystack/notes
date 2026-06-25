@@ -27,6 +27,7 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 21. [Kernel Timers](./kernel_timers.md) - Timekeeping, delays, timer_list, hrtimers, and delayed work for kernel programming
 22. [Synchronization](./synchronization.md) - Spinlocks, mutexes, semaphores, and rw locks: choosing and using kernel locks
 23. [Interrupts & Deferred Work](./interrupts.md) - IRQ handling, top/bottom halves, softirqs, tasklets, threaded IRQs, workqueues, and NAPI
+24. [CPU Scheduler](./scheduler.md) - Scheduling classes, CFS→EEVDF, real-time policies, preemption, SMP load balancing, and the cgroup cpu controller
 
 ## Overview
 
@@ -46,6 +47,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 ### For Developers
 - [Kernel Architecture](./kernel.md) - Understand Linux internals
 - [Process Internals (Kernel)](./process_internals.md) - task_struct, scheduling, fork/exec, and context switching
+- [CPU Scheduler](./scheduler.md) - Scheduling classes, CFS→EEVDF, RT policies, preemption, and the cgroup cpu controller
 - [Memory Management](./memory_management.md) - Virtual memory, paging, allocators, and reclaim
 - [Kernel Development Patterns](./kernel_patterns.md) - Coding patterns and best practices
 - [Kernel Timers](./kernel_timers.md) - Delays, timers, hrtimers, and timed deferred work

@@ -78,6 +78,7 @@
     - [Udev](linux/udev.md)
     - [Process](linux/process.md)
     - [Process Internals (Kernel)](linux/process_internals.md)
+    - [CPU Scheduler](linux/scheduler.md)
     - [Wireguard](linux/wireguard.md)
     - [Openwrt](linux/openwrt.md)
     - [Yocto](linux/yocto.md)

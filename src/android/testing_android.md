@@ -5,8 +5,9 @@
 Android testing spans fast **local unit tests** (run on the JVM, no device) and slower
 **instrumented tests** (run on a device/emulator with the Android framework). A healthy suite
 follows the **testing pyramid**: many fast unit tests, fewer integration tests, and a small set
-of end-to-end UI tests. This doc covers JUnit/MockK unit tests, coroutine/Flow testing,
-Espresso and Compose UI tests, Robolectric, and where each fits.
+of end-to-end UI tests. This page is the **hub** — it covers the pyramid, where each test type
+runs, CI, and best practices. Each framework has its own deep-dive page (see
+[Frameworks](#frameworks-deep-dives) below).
 
 Builds on [Coroutines & Flow](coroutines_flow.md), [App Architecture](app_architecture.md)
 (testable layers), and runs via tasks from [Android Gradle Deep Dive](gradle_android.md).
@@ -25,167 +26,21 @@ Builds on [Coroutines & Flow](coroutines_flow.md), [App Architecture](app_archit
 ./gradlew connectedAndroidTest     # instrumented (needs device/emulator)
 ```
 
-## Unit Tests (JUnit)
+## Frameworks (deep dives)
 
-Pure logic — ViewModels, use cases, repositories with fakes. Keep Android types out of these
-classes (see [App Architecture](app_architecture.md)) so they're JVM-testable.
+Each framework has its own page; this hub links them by where they sit on the pyramid.
 
-```kotlin
-class PriceCalculatorTest {
-    private val calc = PriceCalculator()
+| Page | Covers | Runs on |
+|------|--------|---------|
+| [JUnit, MockK & Truth](testing_junit_mockk.md) | Unit-test toolkit: JUnit, MockK mocking, Truth assertions, MockWebServer | JVM |
+| [Testing Coroutines & Flow](testing_coroutines.md) | `runTest`/virtual time, `TestDispatcher`, `MainDispatcherRule`, Turbine | JVM |
+| [Robolectric](testing_robolectric.md) | Android framework (Context/resources) simulated on the JVM | JVM |
+| [Espresso & UI Automator](testing_espresso.md) | View UI, Espresso-Intents, cross-app UI Automator, Hilt instrumented | Device/emulator |
+| [Compose UI Testing](testing_compose.md) | Semantics-tree finders/actions/assertions, `testTag`, sync | Device/emulator |
+| [Screenshot & Snapshot Testing](testing_screenshot.md) | Paparazzi / Roborazzi / Compose Preview Screenshot golden diffs | JVM |
 
-    @Test fun appliesDiscount() {
-        assertEquals(90.0, calc.withDiscount(100.0, 0.1), 0.001)
-    }
-}
-```
-
-### Test doubles: fakes vs mocks
-
-- **Fake**: a working lightweight implementation (e.g. in-memory repository) — preferred for
-  most tests; more robust to refactors.
-- **Mock**: a stand-in with programmed responses/verifications — good for interaction
-  verification and hard-to-fake collaborators.
-
-**MockK** is the idiomatic Kotlin mocking library:
-
-```kotlin
-@Test fun loadsUser() = runTest {
-    val repo = mockk<UserRepository>()
-    coEvery { repo.getUser(1) } returns User(1, "Ada")
-
-    val vm = UserViewModel(repo)
-    vm.load(1)
-
-    assertEquals("Ada", vm.state.value.name)
-    coVerify { repo.getUser(1) }
-}
-```
-
-## Testing Coroutines & Flow
-
-Use `kotlinx-coroutines-test`: `runTest` provides a virtual-time scheduler so delays are skipped
-deterministically. **Inject dispatchers** so tests can substitute a `TestDispatcher`.
-
-```kotlin
-@Test fun emitsLoadingThenSuccess() = runTest {
-    val vm = SearchViewModel(FakeRepo(), testDispatcher)
-    vm.search("a")
-    advanceUntilIdle()
-    assertTrue(vm.state.value is UiState.Success)
-}
-```
-
-### Turbine for Flow assertions
-
-```kotlin
-@Test fun stateTransitions() = runTest {
-    vm.state.test {                       // Turbine
-        assertEquals(UiState.Loading, awaitItem())
-        vm.search("a")
-        assertTrue(awaitItem() is UiState.Success)
-        cancelAndConsumeRemainingEvents()
-    }
-}
-```
-
-A common helper is a **MainDispatcherRule** that swaps `Dispatchers.Main` for a test dispatcher
-(needed because `viewModelScope` uses `Dispatchers.Main`).
-
-```kotlin
-class MainDispatcherRule(private val d: TestDispatcher = StandardTestDispatcher()) : TestWatcher() {
-    override fun starting(desc: Description) = Dispatchers.setMain(d)
-    override fun finished(desc: Description) = Dispatchers.resetMain()
-}
-```
-
-## Robolectric
-
-Runs Android-dependent code (Context, resources, SharedPreferences) on the **JVM** without an
-emulator — fast feedback for code that touches the framework lightly.
-
-```kotlin
-@RunWith(AndroidJUnit4::class)
-@Config(sdk = [34])
-class FormatterTest {
-    @Test fun usesResources() {
-        val ctx = ApplicationProvider.getApplicationContext<Context>()
-        assertEquals("Hello", ctx.getString(R.string.greeting))
-    }
-}
-```
-
-## Instrumented Tests (View UI) — Espresso
-
-Espresso drives real UI on a device/emulator: find a view, perform an action, check state.
-
-```kotlin
-@RunWith(AndroidJUnit4::class)
-class LoginUiTest {
-    @get:Rule val rule = ActivityScenarioRule(LoginActivity::class.java)
-
-    @Test fun submitShowsError() {
-        onView(withId(R.id.email)).perform(typeText("bad"), closeSoftKeyboard())
-        onView(withId(R.id.submit)).perform(click())
-        onView(withId(R.id.error)).check(matches(isDisplayed()))
-    }
-}
-```
-
-For navigating across apps/system UI, use **UI Automator**.
-
-## Compose UI Testing
-
-Compose has its own semantics-based testing API via a compose test rule.
-
-```kotlin
-@RunWith(AndroidJUnit4::class)
-class CounterTest {
-    @get:Rule val composeRule = createComposeRule()
-
-    @Test fun incrementsCount() {
-        composeRule.setContent { Counter() }
-        composeRule.onNodeWithText("Count: 0").assertIsDisplayed()
-        composeRule.onNodeWithText("Increment").performClick()
-        composeRule.onNodeWithText("Count: 1").assertIsDisplayed()
-    }
-}
-```
-
-Add `testTag(...)` modifiers and query with `onNodeWithTag` for stable selectors. Use
-`createAndroidComposeRule<Activity>()` when you need a real Activity.
-
-## Hilt & Test Doubles
-
-For DI-based apps, **Hilt testing** lets you replace modules with fakes:
-
-```kotlin
-@HiltAndroidTest
-@UninstallModules(NetworkModule::class)
-class FeedTest {
-    @get:Rule val hiltRule = HiltAndroidRule(this)
-    // provide a fake NetworkModule via @TestInstallIn / @BindValue
-}
-```
-
-## Other Useful Tools
-
-| Tool | Purpose |
-|------|---------|
-| **Truth** | Fluent assertions (`assertThat(x).isEqualTo(y)`) |
-| **Turbine** | Testing Kotlin Flows |
-| **MockWebServer** | Stub HTTP responses for Retrofit/OkHttp tests |
-| **Espresso-Intents** | Verify/stub outgoing Intents |
-| **Macrobenchmark** | Startup/jank performance tests (see [Performance](performance_profiling.md)) |
-| **Screenshot testing** (Paparazzi / Roborazzi / Compose Preview Screenshot) | Catch UI regressions |
-
-```kotlin
-// MockWebServer
-val server = MockWebServer()
-server.enqueue(MockResponse().setBody("""{"id":1,"name":"Ada"}"""))
-server.start()
-val api = retrofit(server.url("/")).create(Api::class.java)
-```
+For startup/jank performance tests, see **Macrobenchmark** on
+[Performance & Profiling](performance_profiling.md).
 
 ## CI
 

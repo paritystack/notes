@@ -73,6 +73,7 @@
     - [sysctl](linux/sysctl.md)
     - [sysfs](linux/sysfs.md)
     - [Filesystems](linux/filesystems.md)
+    - [Block I/O Layer](linux/block_layer.md)
     - [Namespace](linux/namespace.md)
     - [Virtualization](linux/virtualization.md)
     - [Selinux](linux/selinux.md)

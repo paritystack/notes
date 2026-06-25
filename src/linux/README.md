@@ -30,6 +30,7 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 24. [CPU Scheduler](./scheduler.md) - Scheduling classes, CFS→EEVDF, real-time policies, preemption, SMP load balancing, and the cgroup cpu controller
 25. [RCU (Read-Copy-Update)](./rcu.md) - Lock-free read-mostly synchronization: grace periods, publish/subscribe, and SRCU
 26. [Block I/O Layer](./block_layer.md) - The storage stack: bios, blk-mq, I/O schedulers, and device-mapper (LVM, dm-crypt, RAID)
+27. [Inter-Process Communication](./ipc.md) - Pipes, signals, shared memory, semaphores, futexes, eventfd, and Unix-socket fd passing
 
 ## Overview
 
@@ -50,6 +51,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 - [Kernel Architecture](./kernel.md) - Understand Linux internals
 - [Process Internals (Kernel)](./process_internals.md) - task_struct, scheduling, fork/exec, and context switching
 - [CPU Scheduler](./scheduler.md) - Scheduling classes, CFS→EEVDF, RT policies, preemption, and the cgroup cpu controller
+- [Inter-Process Communication](./ipc.md) - Pipes, signals, shared memory, futexes, and Unix-socket fd passing
 - [Memory Management](./memory_management.md) - Virtual memory, paging, allocators, and reclaim
 - [Kernel Development Patterns](./kernel_patterns.md) - Coding patterns and best practices
 - [Kernel Timers](./kernel_timers.md) - Delays, timers, hrtimers, and timed deferred work

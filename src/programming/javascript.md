@@ -961,7 +961,7 @@ const letters = words.flatMap(w => w.split(' '));
 ## Common Libraries/Frameworks
 
 - **React**: UI library
-- **Vue.js**: Progressive framework
+- **[Vue.js](../web_development/vuejs.md)**: Progressive framework
 - **Angular**: Full-featured framework
 - **Express.js**: Web server framework (Node.js)
 - **Lodash**: Utility library

@@ -1441,7 +1441,7 @@ Many problems involve mathematical concepts such as primes, GCD, and modular ari
   }
   ```
 
-### 8. **String Algorithms**
+### 8. **[String Algorithms](../algorithms/string_algorithms.md)**
 
 Handling and processing strings efficiently is vital in many problems.
 

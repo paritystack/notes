@@ -32,6 +32,7 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 26. [Block I/O Layer](./block_layer.md) - The storage stack: bios, blk-mq, I/O schedulers, and device-mapper (LVM, dm-crypt, RAID)
 27. [Inter-Process Communication](./ipc.md) - Pipes, signals, shared memory, semaphores, futexes, eventfd, and Unix-socket fd passing
 28. [ELF, Linking & Loading](./elf_linking.md) - ELF format, static/dynamic linking, ld.so, PLT/GOT, PIE/ASLR, and the vDSO
+29. [Boot Process & initramfs](./boot_process.md) - Firmware → bootloader → kernel → initramfs → PID 1, and boot debugging
 
 ## Overview
 
@@ -45,6 +46,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 ### For System Administrators
 - [Essential Commands](./commands.md) - Master command-line tools
 - [Networking](./networking.md) - Network configuration and diagnostics
+- [Boot Process & initramfs](./boot_process.md) - Firmware, bootloader, initramfs, and PID 1 handoff
 - [iptables](./iptables.md) - Firewall management
 - [WireGuard](./wireguard.md) - VPN setup and management
 

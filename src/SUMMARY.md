@@ -69,6 +69,7 @@
     - [TC](linux/tc.md)
     - [IPTables](linux/iptables.md)
     - [nftables](linux/nftables.md)
+    - [Boot Process & initramfs](linux/boot_process.md)
     - [systemd](linux/systemd.md)
     - [sysctl](linux/sysctl.md)
     - [sysfs](linux/sysfs.md)

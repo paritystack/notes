@@ -34,6 +34,7 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 28. [ELF, Linking & Loading](./elf_linking.md) - ELF format, static/dynamic linking, ld.so, PLT/GOT, PIE/ASLR, and the vDSO
 29. [Boot Process & initramfs](./boot_process.md) - Firmware → bootloader → kernel → initramfs → PID 1, and boot debugging
 30. [Container Runtimes](./container_runtimes.md) - How namespaces + cgroups + seccomp + overlayfs compose into containers (OCI, runc, Docker, Podman)
+31. [journald & Logging](./journald_logging.md) - Kernel ring buffer, systemd-journald, syslog/rsyslog, and logrotate
 
 ## Overview
 
@@ -50,6 +51,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 - [Boot Process & initramfs](./boot_process.md) - Firmware, bootloader, initramfs, and PID 1 handoff
 - [iptables](./iptables.md) - Firewall management
 - [WireGuard](./wireguard.md) - VPN setup and management
+- [journald & Logging](./journald_logging.md) - journald, syslog/rsyslog, and log rotation
 
 ### For Developers
 - [Kernel Architecture](./kernel.md) - Understand Linux internals

@@ -71,6 +71,7 @@
     - [nftables](linux/nftables.md)
     - [Boot Process & initramfs](linux/boot_process.md)
     - [systemd](linux/systemd.md)
+    - [journald & Logging](linux/journald_logging.md)
     - [sysctl](linux/sysctl.md)
     - [sysfs](linux/sysfs.md)
     - [Filesystems](linux/filesystems.md)

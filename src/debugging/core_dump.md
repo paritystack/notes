@@ -156,5 +156,7 @@ Core dumps are invaluable for debugging crashes in production systems.
 ## Where this connects
 
 - [GDB](gdb.md) — gdb is the primary tool for analyzing core dumps
+- [ptrace & debugger internals](ptrace_internals.md) — the same DWARF mapping, applied live instead of post-mortem
+- [kdump, crash & kgdb](kdump_crash.md) — the kernel counterpart: vmcore is to the kernel what a core dump is to a process
 - [Linux kernel debugging](linux_kernel.md) — kernel core dumps (vmcore) use different tools (crash, kdump)
 - [Tools](tools.md) — binary analysis tools (readelf, objdump) help interpret core dumps

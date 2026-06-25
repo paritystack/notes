@@ -114,6 +114,7 @@ lldb
 ## Where this connects
 
 - [GDB](gdb.md) — the GNU counterpart; the map above translates between them
+- [ptrace & debugger internals](ptrace_internals.md) — the syscall under every breakpoint and single-step
 - [Core Dump Analysis](core_dump.md) — `lldb -c core` for post-mortem
 - [rr (Record & Replay)](rr_debugging.md) — reverse debugging (GDB-based; LLDB reverse support is limited)
 - [Binary Analysis Tools](tools.md) — disassembly/symbols LLDB surfaces

@@ -133,6 +133,7 @@ Kernel debugging requires patience and specialized knowledge, but these tools ma
 
 ## Where this connects
 
+- [kdump, crash & kgdb](kdump_crash.md) — the deep dive on crash-dump capture (`kexec`/`makedumpfile`) and analysis (`crash`, kgdb)
 - [GDB](gdb.md) — KGDB enables GDB-style debugging of the running kernel
 - [Core dump](core_dump.md) — vmcore (kernel crash dump) is the kernel equivalent of a process core dump
 - [ftrace & tracefs](ftrace.md) — the built-in tracer in depth: function_graph and latency tracers

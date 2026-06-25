@@ -471,6 +471,8 @@ bugs.
 - [perf & Flame Graphs](perf_profiling.md) — sampling vs probing; `perf probe` lives here
 - [eBPF](../linux/ebpf.md) — the programmable engine that consumes kprobes/uprobes;
   fentry/fexit are the modern, lower-overhead replacement for k(ret)probes on BTF kernels
+- [bpftrace](bpftrace.md) — the awk-like one-liner front-end used throughout this page; the
+  fastest way to attach to a probe by name and aggregate in-kernel
 - [Binary Analysis Tools](tools.md) — strace/ltrace trace at the syscall/library boundary
   without naming internal functions
 - [GDB](gdb.md) — breakpoints: the same trap mechanism, but interactive and stop-the-world

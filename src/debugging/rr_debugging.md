@@ -89,6 +89,7 @@ to an exact point in time.
 ## Where this connects
 
 - [GDB](gdb.md) — rr replays inside GDB; reverse-* commands are GDB's, made fast by rr
+- [ptrace & debugger internals](ptrace_internals.md) — the attach/stop/syscall primitives rr records through (plus seccomp)
 - [LLDB](lldb.md) — alternative debugger (limited reverse support)
 - [Core Dump Analysis](core_dump.md) — post-mortem when you can't record live
 - [Debugging Methodology](debugging_methodology.md) — reverse execution as scientific-method bisection in time

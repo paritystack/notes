@@ -88,7 +88,7 @@ perf record -e sched:sched_switch -g -a -- sleep 5   # scheduling/off-CPU analys
 ```
 
 For off-CPU and latency analysis, [eBPF](../linux/ebpf.md) tools (`offcputime`,
-`bpftrace`) are usually better than raw perf tracepoints.
+[`bpftrace`](bpftrace.md)) are usually better than raw perf tracepoints.
 
 ## Other perf subcommands
 

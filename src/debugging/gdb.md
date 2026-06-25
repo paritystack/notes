@@ -643,6 +643,8 @@ GDB is an indispensable tool for debugging compiled programs, offering powerful 
 
 ## Where this connects
 
+- [ptrace & debugger internals](ptrace_internals.md) — the kernel primitive every breakpoint, watchpoint, and single-step is built on
 - [Core dump](core_dump.md) — GDB analyzes core dump files for post-mortem debugging
 - [Linux kernel debugging](linux_kernel.md) — KGDB extends GDB to kernel debugging over serial/network
+- [kdump, crash & kgdb](kdump_crash.md) — `crash` reuses GDB's disassembler; KGDB is GDB over a serial line
 - [Tools](tools.md) — GDB works alongside binary analysis tools (strace, ltrace, objdump)

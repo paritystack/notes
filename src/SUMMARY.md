@@ -677,6 +677,9 @@
     - [Linux Kernel Debugging](debugging/linux_kernel.md)
     - [Kprobes & Uprobes](debugging/kprobes_uprobes.md)
     - [ftrace & tracefs](debugging/ftrace.md)
+    - [ptrace & Debugger Internals](debugging/ptrace_internals.md)
+    - [bpftrace](debugging/bpftrace.md)
+    - [kdump, crash & kgdb](debugging/kdump_crash.md)
 
 - [Maths](maths/README.md)
     - [Discrete Mathematics](maths/discrete_math.md)

@@ -160,6 +160,8 @@ bpftrace/eBPF when you need to read arguments, filter richly, or aggregate in-ke
   kit (KGDB, kdump, SystemTap); this page is its deep dive.
 - [Kprobes & Uprobes](kprobes_uprobes.md) — dynamic probes register through tracefs
   (`kprobe_events`) and show up as ftrace events; the dynamic counterpart to static tracepoints.
+- [bpftrace](bpftrace.md) — the ergonomic, awk-like front-end on the same tracepoints/kprobes;
+  reach for it when ftrace's fixed output isn't enough but raw eBPF is overkill.
 - [perf & Flame Graphs](perf_profiling.md) — sampling vs exhaustive tracing; perf can also read
   the same tracepoints.
 - [eBPF](../linux/ebpf.md) — the programmable engine on the same attach points (tracepoints,

@@ -1478,5 +1478,6 @@ These tools form the foundation of binary analysis and debugging on Unix-like sy
 ## Where this connects
 
 - [GDB](gdb.md) — GDB is the primary runtime debugger; these tools analyze static binaries
+- [ptrace & debugger internals](ptrace_internals.md) — `strace`/`ltrace` are thin loops over `PTRACE_SYSCALL`
 - [Core dump](core_dump.md) — tools like objdump help interpret symbols in core dump analysis
 - [Linux kernel debugging](linux_kernel.md) — perf and ftrace are kernel-level debugging tools

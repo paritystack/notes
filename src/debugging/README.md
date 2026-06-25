@@ -17,6 +17,9 @@ This directory contains guides for debugging software at various levels.
 - **[Linux Kernel](linux_kernel.md)** - Kernel-level debugging techniques
 - **[Kprobes & Uprobes](kprobes_uprobes.md)** - Dynamic probing of kernel/userspace functions, step by step
 - **[ftrace & tracefs](ftrace.md)** - The built-in kernel tracer: function/function_graph, tracepoints, and latency tracers
+- **[ptrace & Debugger Internals](ptrace_internals.md)** - How gdb/strace/rr work underneath: INT3 breakpoints, hardware watchpoints, single-step
+- **[bpftrace](bpftrace.md)** - awk-like high-level tracing over eBPF; one-liner cookbook for production observability
+- **[kdump, crash & kgdb](kdump_crash.md)** - Kernel crash-dump capture and analysis; the kernel counterpart to core dumps
 
 ## Common Debugging Workflow
 

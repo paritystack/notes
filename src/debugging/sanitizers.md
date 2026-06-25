@@ -132,6 +132,7 @@ optimised build.
 ## Where this connects
 
 - [Valgrind](valgrind.md) — no-recompile alternative; better for uninitialised-memory and 3rd-party code
+- [ptrace & debugger internals](ptrace_internals.md) — the external-tracer approach sanitizers replace with compile-time instrumentation
 - [GDB](gdb.md) — `break __asan_report_error` / `ASAN_OPTIONS=abort_on_error=1` to stop in the debugger
 - [perf & Flame Graphs](perf_profiling.md) — performance once correctness is clean
 - [Concurrency](../programming/concurrency.md) — the races TSan finds

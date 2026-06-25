@@ -65,7 +65,7 @@ A new category focusing on risks related to design flaws. You can't "code" your 
     *   Leaving debug mode enabled in production (Stack traces visible).
     *   Open cloud storage buckets (S3 world-readable).
 *   **Mitigation:**
-    *   Automated configuration hardening (Ansible/Terraform).
+    *   Automated configuration hardening ([Ansible](../tools/ansible.md)/Terraform).
     *   Remove unused features.
 
 ---

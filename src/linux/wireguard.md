@@ -2122,7 +2122,7 @@ done
 
 #### Ansible Playbook
 
-Deploy WireGuard with Ansible:
+Deploy WireGuard with [Ansible](../tools/ansible.md):
 
 ```yaml
 # wireguard-deploy.yml

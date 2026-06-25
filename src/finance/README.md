@@ -639,6 +639,7 @@ Explore detailed guides for specific topics:
 15. [Corporate Finance](corporate_finance.md) - Capital structure, capital budgeting, payout policy, raising capital, M&A
 16. [Algorithmic Trading](algorithmic_trading.md) - Automated trading systems
     - [Building Trading Bots](trading_bots.md) - Hands-on bot engineering: broker APIs, live data, order execution, deployment
+    - [Market Microstructure](market_microstructure.md) - Order books, spread/slippage/impact, execution algos (VWAP/TWAP/IS), dark pools, PFOF, clearing & settlement
 
 ### Portfolio and Risk Management
 17. [Portfolio Management](portfolio_management.md) - Asset allocation and optimization

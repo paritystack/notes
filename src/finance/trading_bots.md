@@ -467,3 +467,4 @@ See also: [Algorithmic Trading](algorithmic_trading.md) (strategy & backtesting 
 - [Technical analysis](technical_analysis.md), [Momentum & trend](momentum_trend.md) — signals bots act on
 - [Crypto](crypto.md), [Forex](forex.md) — common 24/7 markets for bots
 - [Event-driven](event_driven.md) — architecting reaction to market events
+- [Market microstructure](market_microstructure.md) — what order types, routing, and fills mean underneath the broker API

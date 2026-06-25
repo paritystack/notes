@@ -499,6 +499,7 @@
     - [Crypto](finance/crypto.md)
     - [Algorithmic Trading](finance/algorithmic_trading.md)
     - [Building Trading Bots](finance/trading_bots.md)
+    - [Market Microstructure](finance/market_microstructure.md)
     - [Bonds](finance/bonds.md)
     - [Commodities](finance/commodities.md)
     - [Derivatives](finance/derivatives.md)

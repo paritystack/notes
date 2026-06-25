@@ -364,3 +364,4 @@ See also: [Technical Analysis](technical_analysis.md), [Risk Management](risk_ma
 - [Risk management](risk_management.md) — position sizing and drawdown control
 - [Pairs & mean reversion](pairs_mean_reversion.md), [Event-driven](event_driven.md) — strategy families
 - [Reinforcement learning](../machine_learning/reinforcement_learning.md) — learned trading policies
+- [Market microstructure](market_microstructure.md) — the execution costs and order-book mechanics realistic backtests must model

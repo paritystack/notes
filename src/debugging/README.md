@@ -16,6 +16,7 @@ This directory contains guides for debugging software at various levels.
 - **[Debugging Methodology](debugging_methodology.md)** - Systematic approach, git bisect, delta debugging
 - **[Linux Kernel](linux_kernel.md)** - Kernel-level debugging techniques
 - **[Kprobes & Uprobes](kprobes_uprobes.md)** - Dynamic probing of kernel/userspace functions, step by step
+- **[ftrace & tracefs](ftrace.md)** - The built-in kernel tracer: function/function_graph, tracepoints, and latency tracers
 
 ## Common Debugging Workflow
 

@@ -676,6 +676,7 @@
     - [Debugging Methodology](debugging/debugging_methodology.md)
     - [Linux Kernel Debugging](debugging/linux_kernel.md)
     - [Kprobes & Uprobes](debugging/kprobes_uprobes.md)
+    - [ftrace & tracefs](debugging/ftrace.md)
 
 - [Maths](maths/README.md)
     - [Discrete Mathematics](maths/discrete_math.md)

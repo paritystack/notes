@@ -82,6 +82,7 @@
     - [Process Internals (Kernel)](linux/process_internals.md)
     - [CPU Scheduler](linux/scheduler.md)
     - [Inter-Process Communication](linux/ipc.md)
+    - [ELF, Linking & Loading](linux/elf_linking.md)
     - [Wireguard](linux/wireguard.md)
     - [Openwrt](linux/openwrt.md)
     - [Yocto](linux/yocto.md)

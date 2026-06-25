@@ -623,3 +623,4 @@ Most structured products can be replicated with bonds + listed options at lower 
 - [Volatility trading](volatility_trading.md) — derivative volatility surface drives vol trading
 - [Interest rates](interest_rates.md) — interest rate derivatives (swaps, caps, floors) hedge rate risk
 - [Credit markets](credit_markets.md) — credit default swaps (CDS) are credit derivatives
+- [Quantitative finance](quant_finance.md) — the math behind risk-neutral pricing, replication, and the Monte Carlo this page sketches

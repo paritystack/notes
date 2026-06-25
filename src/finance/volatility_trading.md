@@ -416,3 +416,4 @@ Lesson: short vol = picking up pennies in front of a steamroller. Survival requi
 - [Options](options.md) — options are the primary instrument for volatility trading (IV vs RV)
 - [Derivatives](derivatives.md) — VIX futures and variance swaps are volatility derivatives
 - [Event driven](event_driven.md) — earnings IV crush is a volatility trading + event driven strategy
+- [Quantitative finance](quant_finance.md) — local/stochastic-vol models are the math behind the skew and surface

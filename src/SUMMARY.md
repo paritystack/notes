@@ -502,6 +502,7 @@
     - [Bonds](finance/bonds.md)
     - [Commodities](finance/commodities.md)
     - [Derivatives](finance/derivatives.md)
+    - [Quantitative Finance](finance/quant_finance.md)
     - [Etfs](finance/etfs.md)
     - [Financial Planning](finance/financial_planning.md)
     - [Forex](finance/forex.md)

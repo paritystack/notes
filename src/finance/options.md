@@ -338,6 +338,8 @@ since $N(d_2)$ is the risk-neutral probability of finishing ITM. Other **exotics
 - [Stocks](stocks.md) — single-stock options reshape the risk of an equity holding.
 - [Event-driven](event_driven.md) — earnings and catalysts drive IV crush and event-vol
   straddle/spread setups.
+- [Quantitative finance](quant_finance.md) — derives the Black-Scholes PDE/formula and shows
+  the Greeks *are* its partial derivatives.
 
 ## Pitfalls
 

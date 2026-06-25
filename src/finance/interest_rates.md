@@ -389,3 +389,4 @@ Higher U.S. rates → stronger USD → headwind for:
 - [Macroeconomics](macroeconomics.md) — central bank policy drives interest rates
 - [Derivatives](derivatives.md) — interest rate derivatives (swaps, swaptions) hedge rate exposure
 - [REITs](reits.md) — REITs are highly sensitive to interest rate changes
+- [Quantitative finance](quant_finance.md) — short-rate models (Vasicek, CIR, Hull-White) price the curve and rate derivatives

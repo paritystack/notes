@@ -56,6 +56,7 @@
     - [Kernel Development Patterns](linux/kernel_patterns.md)
     - [Kernel Timers](linux/kernel_timers.md)
     - [Synchronization](linux/synchronization.md)
+    - [Interrupts & Deferred Work](linux/interrupts.md)
     - [Driver Development](linux/driver_development.md)
     - [Device Tree](linux/device_tree.md)
     - [Cross Compilation](linux/cross_compilation.md)

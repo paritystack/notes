@@ -2078,3 +2078,4 @@ Linux driver development requires understanding of kernel internals, hardware in
 - [udev](udev.md) — creates /dev device nodes for character/block drivers on probe
 - [Kernel patterns](kernel_patterns.md) — reference counting, locking, completions are the driver idioms
 - [Cross compilation](cross_compilation.md) — out-of-tree kernel modules are cross-compiled for the target
+- [kdump, crash & kgdb](../debugging/kdump_crash.md) — QEMU + kgdb is the day-to-day loop for stepping driver/early-boot code

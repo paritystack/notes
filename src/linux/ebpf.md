@@ -462,6 +462,19 @@ bpf_map_delete_elem(&my_map, &key);
 
 ## Development Tools
 
+### bpftrace
+
+High-level, awk-like tracing language that compiles one-liners and short scripts to eBPF —
+the fastest way to attach to a probe and aggregate in-kernel. See
+[bpftrace](../debugging/bpftrace.md) for the language and cookbook.
+
+**Pros**: Concise, safe, ideal for interactive "what's happening now" investigation
+**Cons**: Not for shipping complex tools — graduate to libbpf/BCC when you outgrow one-liners
+
+```bash
+bpftrace -e 'tracepoint:syscalls:sys_enter_openat { @[comm] = count(); }'
+```
+
 ### BCC (BPF Compiler Collection)
 
 Python/Lua framework for writing eBPF programs.
@@ -1482,3 +1495,4 @@ cat /sys/kernel/debug/tracing/trace_pipe
 - [Kernel patterns](kernel_patterns.md) — RCU locking and spinlocks govern safe eBPF map access
 - [Netlink](netlink.md) — programs and maps load via the `bpf()` syscall; netlink (rtnetlink) attaches XDP/TC programs to interfaces
 - [sysfs](sysfs.md) — eBPF maps are an alternative to sysfs for kernel-userspace data sharing
+- [bpftrace](../debugging/bpftrace.md) — the high-level front-end that compiles to the engine described here

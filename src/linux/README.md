@@ -28,6 +28,7 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 22. [Synchronization](./synchronization.md) - Spinlocks, mutexes, semaphores, and rw locks: choosing and using kernel locks
 23. [Interrupts & Deferred Work](./interrupts.md) - IRQ handling, top/bottom halves, softirqs, tasklets, threaded IRQs, workqueues, and NAPI
 24. [CPU Scheduler](./scheduler.md) - Scheduling classes, CFS→EEVDF, real-time policies, preemption, SMP load balancing, and the cgroup cpu controller
+25. [RCU (Read-Copy-Update)](./rcu.md) - Lock-free read-mostly synchronization: grace periods, publish/subscribe, and SRCU
 
 ## Overview
 
@@ -53,6 +54,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 - [Kernel Timers](./kernel_timers.md) - Delays, timers, hrtimers, and timed deferred work
 - [Synchronization](./synchronization.md) - Spinlocks, mutexes, semaphores, and rw locks
 - [Interrupts & Deferred Work](./interrupts.md) - IRQ handling, bottom halves, workqueues, and NAPI
+- [RCU (Read-Copy-Update)](./rcu.md) - Lock-free read-mostly synchronization and grace periods
 - [Driver Development](./driver_development.md) - Linux driver model and device drivers
 - [Device Tree](./device_tree.md) - Hardware description and parsing
 - [Control Groups (cgroups)](./cgroups.md) - Resource control for containers and services

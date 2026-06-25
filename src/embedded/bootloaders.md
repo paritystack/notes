@@ -230,7 +230,7 @@ Rather than inventing a transport, use a standard:
 
 - **USB DFU** (Device Firmware Upgrade, USB-IF class) — `dfu-util` on the host. Built into STM32 BootROM.
 - **MCUboot** — open-source bootloader for Cortex-M, supports A/B, signed images, encrypted images. Used by Zephyr, Mbed, Pebble.
-- **U-Boot / Coreboot** — heavier, mostly Linux-targeted; not common on bare-metal MCUs.
+- **[U-Boot](../misc/uboot.md) / Coreboot** — heavier, mostly Linux-targeted; not common on bare-metal MCUs.
 - **Vendor:** STM32 supports UART/USB/CAN/I2C DFU via BootROM; ESP32 has esptool over UART; Nordic has nrfutil over UART/BLE.
 
 **MCUboot** is worth knowing — it implements 95% of what a serious bootloader needs (A/B with rollback, image confirmation, signatures, encrypted images) and the design is well-documented.

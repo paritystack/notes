@@ -47,7 +47,7 @@ Unlike an MCU that runs your image straight from the reset vector
   boot medium (SD, eMMC, [QSPI](qspi.md) NOR, [USB](usb.md) recovery).
 - **SPL / first-stage** — small enough to fit in on-chip SRAM; its job is to initialize
   external DRAM, then load the full bootloader.
-- **U-Boot** — the de-facto bootloader: loads the kernel + device tree, can fetch over
+- **[U-Boot](../misc/uboot.md)** — the de-facto bootloader: loads the kernel + device tree, can fetch over
   network, and exposes a shell. The Linux analogue of an MCU [bootloader](bootloaders.md);
   also where A/B and [secure-boot](secure_boot.md) verification typically live.
 - **Kernel** — decompresses, parses the Device Tree, probes drivers, mounts the **root

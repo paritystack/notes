@@ -131,7 +131,7 @@ Bands that widen reveal a stage where work is piling up faster than it leaves.
 ## Kanban vs Scrum
 
 Both are popular agile approaches, but they answer different questions. Kanban optimizes
-*flow*; Scrum organizes work into fixed *sprints*.
+*flow*; [Scrum](scrum.md) organizes work into fixed *sprints*.
 
 ```
 ┌───────────────────┬──────────────────────┬──────────────────────────┐

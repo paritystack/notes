@@ -99,7 +99,7 @@ Digital    Obsidian, org-roam, Logseq, Zettlr, The Archive, Roam Research
 Principle  plain-text + bidirectional links beat any single app
 ```
 
-This very mdBook is a mild relative of the idea: one page per topic, a central index
+This very [mdBook](../tools/mdbook.md) is a mild relative of the idea: one page per topic, a central index
 (`SUMMARY.md`), and liberal relative-path cross-links between pages — the index-and-link
 discipline that makes a knowledge base worth more than its individual files.
 

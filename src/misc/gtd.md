@@ -193,7 +193,7 @@ matters far less than the discipline.
 
 - **PARA** (Projects / Areas / Resources / Archives) — Tiago Forte's organizing scheme for
   digital files; pairs naturally with GTD's Projects and Areas of Responsibility.
-- **Zettelkasten / note-taking** — GTD handles *actions*; a Zettelkasten handles *knowledge*.
+- **[Zettelkasten](zettelkasten.md) / note-taking** — GTD handles *actions*; a Zettelkasten handles *knowledge*.
   Keep reference and ideas out of your action lists and in a notes system.
 - **Eisenhower matrix** (urgent/important) — a prioritization lens for *choosing* among Next
   Actions; GTD is mostly silent on prioritization beyond context/time/energy.

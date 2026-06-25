@@ -150,7 +150,7 @@ Since Android 10/11, apps can't freely roam shared storage. Use:
 
 - **Play Integrity API** (replaces SafetyNet Attestation): server-verifiable signals about
   device/app/account integrity. Verify the token **server-side** — client checks are bypassable.
-- **R8 obfuscation** raises the bar for reverse engineering (not a security boundary by itself).
+- **R8 obfuscation** raises the bar for [reverse engineering](../debugging/reverse_engineering.md) (not a security boundary by itself).
 - Treat rooted/emulator detection as **signal, not guarantee** — a determined attacker controls
   the device.
 

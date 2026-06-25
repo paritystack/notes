@@ -33,6 +33,7 @@ A comprehensive guide to Linux system administration, commands, kernel architect
 27. [Inter-Process Communication](./ipc.md) - Pipes, signals, shared memory, semaphores, futexes, eventfd, and Unix-socket fd passing
 28. [ELF, Linking & Loading](./elf_linking.md) - ELF format, static/dynamic linking, ld.so, PLT/GOT, PIE/ASLR, and the vDSO
 29. [Boot Process & initramfs](./boot_process.md) - Firmware → bootloader → kernel → initramfs → PID 1, and boot debugging
+30. [Container Runtimes](./container_runtimes.md) - How namespaces + cgroups + seccomp + overlayfs compose into containers (OCI, runc, Docker, Podman)
 
 ## Overview
 
@@ -66,6 +67,7 @@ Start with [Essential Commands](./commands.md) to learn the fundamental Linux co
 - [Driver Development](./driver_development.md) - Linux driver model and device drivers
 - [Device Tree](./device_tree.md) - Hardware description and parsing
 - [Control Groups (cgroups)](./cgroups.md) - Resource control for containers and services
+- [Container Runtimes](./container_runtimes.md) - How namespaces, cgroups, seccomp, and overlayfs compose into containers
 - [Cross Compilation](./cross_compilation.md) - Building for embedded systems
 - [cfg80211 & mac80211](./cfg80211_mac80211.md) - Wireless driver development
 - [Essential Commands](./commands.md) - Development and debugging tools

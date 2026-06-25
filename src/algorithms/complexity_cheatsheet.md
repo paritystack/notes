@@ -171,7 +171,7 @@
 | **Push-Relabel** | O(V³) | O(V) | Preflow-push |
 | **Min-Cost Max-Flow** | O(V²E²) | O(V²) | Cost-aware flow |
 
-## String Algorithms
+## [String Algorithms](string_algorithms.md)
 
 | Algorithm | Preprocessing | Matching | Space | Purpose |
 |-----------|---------------|----------|-------|---------|

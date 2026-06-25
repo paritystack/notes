@@ -94,8 +94,8 @@ CD  (pull)  the GitOps agent notices the changed tag and deploys it.
 ## Progressive delivery
 
 GitOps integrates with progressive rollout controllers (Argo Rollouts, Flagger) for canary
-and blue-green deploys driven by metrics — see [feature flags](feature_flags.md) for the
-application-level complement.
+and blue-green deploys driven by metrics — see [deployment strategies](deployment_strategies.md)
+for the mechanics and [feature flags](feature_flags.md) for the application-level complement.
 
 ```
 Canary: shift 5% → 25% → 50% → 100% of traffic, checking SLOs at each step; auto-rollback
@@ -107,6 +107,8 @@ Canary: shift 5% → 25% → 50% → 100% of traffic, checking SLOs at each step
 - **[Kubernetes](kubernetes.md)** — the reconciliation substrate GitOps builds on.
 - **[Helm](helm.md)** / Kustomize — how the desired state is packaged and parameterized.
 - **[CI/CD](cicd.md)** — CI builds & updates tags; GitOps handles CD.
+- **[Deployment strategies](deployment_strategies.md)** — canary/blue-green/rolling mechanics the
+  rollout controllers execute.
 - **[Terraform](terraform.md)** / **[Infrastructure](infrastructure.md)** — declarative IaC,
   the same philosophy for infra.
 - **[Secrets management](../security/secrets_management.md)** — secrets in Git must be

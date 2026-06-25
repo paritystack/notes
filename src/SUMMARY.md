@@ -600,6 +600,7 @@
     - [Github-Actions](devops/github-actions.md)
     - [GitOps](devops/gitops.md)
     - [Feature Flags](devops/feature_flags.md)
+    - [Deployment Strategies](devops/deployment_strategies.md)
     - [Cloud-Deployment](devops/cloud-deployment.md)
     - [Infrastructure](devops/infrastructure.md)
     - [Terraform](devops/terraform.md)

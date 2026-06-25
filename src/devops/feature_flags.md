@@ -51,7 +51,7 @@ Feature flags enable a spectrum of gradual-rollout strategies that limit blast r
 ```
 Dark launch    ship code OFF in prod; turn on for internal users to test with real traffic.
 Canary release enable for a small % of users; watch error rate & latency; expand if healthy,
-               kill if not. (App-level canary; infra-level canary lives in gitops.md.)
+               kill if not. (App-level canary; infra-level canary lives in deployment_strategies.md.)
 Ring deployment internal → beta → 1% → 10% → 100%, each ring a checkpoint.
 Blue-green     two environments; flags/router shift traffic; instant switch back.
 A/B test       split cohorts to compare variants on a business metric.
@@ -103,6 +103,8 @@ Discipline:
 ## Where this connects
 
 - **[CI/CD](cicd.md)** — deploy continuously; flags control release timing.
+- **[Deployment strategies](deployment_strategies.md)** — the infra-level counterpart: canary,
+  blue-green, rolling, shadow at the traffic/instance layer.
 - **[GitOps](gitops.md)** — infra-level canary/blue-green via Argo Rollouts/Flagger.
 - **[SRE](sre.md)** — tie rollouts to SLOs/error budgets; flags as kill switches in incidents.
 - **[Chaos engineering](chaos_engineering.md)** — controlled experiments and blast-radius limits.

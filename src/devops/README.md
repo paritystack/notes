@@ -10,6 +10,7 @@ DevOps practices, tools, and methodologies for continuous integration, delivery,
 - **[GitHub Actions](github-actions.md)**: CI/CD workflows, automation, reusable workflows
 - **[GitOps](gitops.md)**: Git as source of truth, pull-based reconciliation (Argo CD, Flux)
 - **[Feature Flags & Progressive Delivery](feature_flags.md)**: Decoupling deploy from release, canaries, kill switches
+- **[Deployment Strategies](deployment_strategies.md)**: Recreate, rolling, blue-green, canary, shadow — traffic/instance shifting and rollback
 
 ### Containers & Orchestration
 

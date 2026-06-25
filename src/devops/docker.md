@@ -114,6 +114,50 @@ CMD ["node", "dist/server.js"]
 docker build --build-arg NODE_VERSION=20 --build-arg BUILD_ENV=development -t myapp:dev .
 ```
 
+## How Docker Works (Architecture)
+
+A container is not a special kind of object — it is an ordinary Linux process that the
+kernel has wrapped in [namespaces](../linux/namespace.md) (so it sees its own pids, network,
+mounts, hostname, IPC, and optionally users), constrained with [cgroups](../linux/cgroups.md)
+(so its CPU, memory, and I/O are bounded), and handed a private root filesystem. "It works
+on my machine" goes away because the *box the kernel draws around the process* travels with
+the image.
+
+When you type `docker run`, the request flows through several layers — Docker is a *frontend*
+over the same OCI plumbing that Podman and CRI-O use:
+
+```
+docker CLI ──REST──> dockerd ──gRPC──> containerd ──> shim ──> runc ──> [container process]
+                        │                                                 ├ namespaces (pid/net/mnt/uts/ipc/user)
+                        ├ build (BuildKit)                                 ├ cgroups (cpu/mem/io)
+                        └ networking / volumes                             └ overlay2 rootfs (RO layers + RW top)
+```
+
+- **`docker` CLI** — talks to the daemon over a REST API (unix socket `/var/run/docker.sock`).
+- **`dockerd`** — the daemon: image builds (BuildKit), networks, volumes, the API.
+- **`containerd`** — manages the container/image lifecycle and pulls.
+- **`containerd-shim`** — one per container; it stays alive as the container's parent so the
+  container survives a daemon restart, and it reaps the process and reports exit status.
+- **`runc`** — the OCI *runtime*: it does the actual `clone()`/`setns()`/`pivot_root()` and
+  `exec`s your process. See [container runtimes](../linux/container_runtimes.md) for the full
+  picture (OCI, runc, alternative runtimes).
+
+### Images, layers, and the union filesystem
+
+An image is a stack of **content-addressable, read-only layers** (each the diff produced by
+one Dockerfile instruction). At run time an [overlay filesystem](../linux/filesystems.md)
+(`overlay2`, the default storage driver) stacks those read-only layers and adds a thin
+**writable copy-on-write top layer** per container. Two containers from the same image share
+the read-only layers and only diverge where they write — which is why containers start fast
+and images are cheap to ship. `docker history myimage` shows the layers and their sizes.
+
+### OCI specifications
+
+Docker images and runtimes conform to two **Open Container Initiative** specs: the
+*image-spec* (a manifest pointing at the layer blobs) and the *runtime-spec* (a `config.json`
+that `runc` consumes to set up namespaces, cgroups, mounts, and capabilities). Conforming to
+these specs is what lets the same image run under Docker, Podman, or Kubernetes.
+
 ## Docker Commands
 
 ```bash
@@ -1072,6 +1116,77 @@ EXPOSE 8000
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
 ```
 
+## Storage, Logging & Rootless
+
+### Storage Drivers
+
+The storage driver implements the layered, copy-on-write filesystem described in
+[How Docker Works](#how-docker-works-architecture). `overlay2` is the default on modern
+kernels and rarely needs changing.
+
+```bash
+# Which driver is in use, and where data lives
+docker info | grep "Storage Driver"
+ls /var/lib/docker/overlay2   # layer directories (do not edit by hand)
+```
+
+Read-only image layers are shared between containers; each container only allocates space for
+what it writes into its writable top layer. Write-heavy workloads (databases) should use a
+[volume](#volumes) rather than the container's writable layer — both for performance and so
+data survives the container. See [filesystems](../linux/filesystems.md) for how overlay mounts
+work underneath.
+
+### Logging Drivers
+
+By default Docker captures a container's stdout/stderr with the `json-file` driver, which
+**grows without bound** and is a common cause of a full host disk. Cap it, or switch drivers.
+
+```bash
+# Per-container: cap json-file size and rotation
+docker run --log-opt max-size=10m --log-opt max-file=3 myapp
+
+# Send logs to the host journal instead
+docker run --log-driver=journald myapp
+```
+
+```json
+// /etc/docker/daemon.json — set the default for all containers
+{
+  "log-driver": "json-file",
+  "log-opts": { "max-size": "10m", "max-file": "3" }
+}
+```
+
+Other drivers: `local` (efficient binary format), `journald`
+([see journald](../linux/journald_logging.md)), `fluentd`, `awslogs`, `gelf`. For aggregating
+container logs centrally see [logging](logging.md) and [observability](observability.md).
+
+### Rootless Docker
+
+Rootless mode runs **both the daemon and the containers as an unprivileged user**, inside a
+[user namespace](../linux/namespace.md), so a container breakout lands on an unprivileged host
+user rather than root. It pairs with the non-root-*inside*-the-container practice covered under
+[Security Patterns](#running-as-non-root-user).
+
+```bash
+dockerd-rootless-setuptool.sh install
+export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+```
+
+Caveats: binding host ports below 1024 needs extra setup, and some cgroup limits require
+cgroup v2 with delegation enabled.
+
+### Docker Contexts
+
+A *context* points the CLI at a different daemon — handy for managing a remote host over SSH
+without copying TLS certs around.
+
+```bash
+docker context create remote --docker "host=ssh://user@host"
+docker context use remote      # subsequent commands target the remote daemon
+docker context ls
+```
+
 ## Volumes
 
 ### Volume Types
@@ -1854,6 +1969,33 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 VERSION=0.9.0 docker-compose -f docker-compose.prod.yml up -d
 ```
 
+## Pitfalls
+
+- **Your app as PID 1 doesn't reap zombies or forward signals.** The kernel gives PID 1
+  special signal handling; a typical app ignores `SIGTERM` and never reaps exited children.
+  Symptoms: `docker stop` hangs ~10s then `SIGKILL`s, and defunct processes accumulate. Run
+  with `docker run --init` (injects a tiny init) or bundle `tini`. See
+  [process internals](../linux/process_internals.md).
+- **`CMD app` (shell form) ≠ `CMD ["app"]` (exec form).** Shell form runs your process as a
+  child of `/bin/sh -c`, so the shell is PID 1 and *it* receives signals, not your app. Use
+  exec form (JSON array) so your process is PID 1 and handles `SIGTERM` itself.
+- **`ADD` does surprising things.** It auto-extracts local tar archives and can fetch URLs.
+  Prefer `COPY` for plain file copies; reach for `ADD` only when you actually want extraction.
+- **`:latest` is not a pinned version.** It's a mutable tag — builds become non-reproducible
+  and cache invalidation gets unpredictable. Pin a real tag or a digest (`image@sha256:...`).
+- **A missing `.dockerignore` bloats the build and leaks secrets.** Without it the whole
+  context (including `.git` and `.env`) is sent to the daemon and may land in the image. And
+  a secret written into an `ENV` or a layer **persists in the image history even if a later
+  layer deletes it** — use BuildKit's `--mount=type=secret` (see [Build Secrets](#secrets-management)).
+- **Containers run as root by default.** Combined with a writable root filesystem that
+  widens the blast radius of a compromise. Add a non-root `USER` and run `--read-only` with a
+  `tmpfs` for scratch space (see [Security Patterns](#security-patterns)).
+- **`json-file` logging fills the host disk.** The default driver grows unbounded — cap it
+  with `max-size`/`max-file` (see [Logging Drivers](#logging-drivers)).
+- **`--network host` and `--privileged` dissolve isolation.** Host networking shares the host's
+  network namespace (no port mapping, but no isolation either); `--privileged` grants nearly
+  all capabilities and device access. Reach for the narrow tool (`--cap-add`, `-p`) first.
+
 ## ELI10
 
 Docker is like shipping containers for code:
@@ -1875,3 +2017,8 @@ No more "it works on my machine" problems!
 - [CI/CD](cicd.md) — pipelines build and push Docker images on every commit
 - [GitHub Actions](github-actions.md) — the most common platform for Docker build/push workflows
 - [Infrastructure](infrastructure.md) — the cloud VMs or bare-metal hosts that run the Docker daemon
+- [Linux namespaces](../linux/namespace.md) & [cgroups](../linux/cgroups.md) — the kernel primitives a container is built from
+- [Container runtimes](../linux/container_runtimes.md) — the OCI / runc / containerd layer Docker sits on top of
+- [Filesystems](../linux/filesystems.md) — the overlay2 / union mounts behind image layers
+- [Container security](container_security.md) — hardening, scanning, and isolation for the images and containers above
+- [journald logging](../linux/journald_logging.md) — where the `journald` log driver sends container output

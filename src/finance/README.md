@@ -643,28 +643,29 @@ Explore detailed guides for specific topics:
 
 ### Portfolio and Risk Management
 17. [Portfolio Management](portfolio_management.md) - Asset allocation and optimization
-18. [Risk Management](risk_management.md) - Risk measurement and hedging
-19. [Financial Planning](financial_planning.md) - Personal finance and retirement
+18. [Factor Investing](factor_investing.md) - CAPM to Fama-French, the factor zoo, smart beta, premia & crowding
+19. [Risk Management](risk_management.md) - Risk measurement and hedging
+20. [Financial Planning](financial_planning.md) - Personal finance and retirement
 
 ### Macro and Cycles
-20. [Macroeconomics](macroeconomics.md) - GDP, inflation, employment, regimes
-21. [Interest Rates](interest_rates.md) - Yield curve, Fed, duration, real vs nominal
-22. [Market Cycles](market_cycles.md) - Bull/bear, sector rotation, regime detection
+21. [Macroeconomics](macroeconomics.md) - GDP, inflation, employment, regimes
+22. [Interest Rates](interest_rates.md) - Yield curve, Fed, duration, real vs nominal
+23. [Market Cycles](market_cycles.md) - Bull/bear, sector rotation, regime detection
 
 ### Strategy Playbooks
-23. [Pairs Trading & Mean Reversion](pairs_mean_reversion.md) - Cointegration, stat arb, z-score
-24. [Momentum & Trend Following](momentum_trend.md) - Cross-sectional, time-series, CTA
-25. [Event-Driven Trading](event_driven.md) - Earnings, M&A arb, spin-offs, FDA
-26. [Volatility Trading](volatility_trading.md) - VIX, IV crush, variance premium
+24. [Pairs Trading & Mean Reversion](pairs_mean_reversion.md) - Cointegration, stat arb, z-score
+25. [Momentum & Trend Following](momentum_trend.md) - Cross-sectional, time-series, CTA
+26. [Event-Driven Trading](event_driven.md) - Earnings, M&A arb, spin-offs, FDA
+27. [Volatility Trading](volatility_trading.md) - VIX, IV crush, variance premium
 
 ### Tax and New Asset Classes
-27. [Tax Strategies](tax_strategies.md) - TLH, wash sales, asset location, withdrawals
-28. [REITs](reits.md) - Equity vs mortgage, FFO/AFFO, sectors, rate sensitivity
-29. [Private Markets](private_markets.md) - PE, VC, GP/LP structure, J-curve
-30. [Credit Markets](credit_markets.md) - IG vs HY, spreads, CDS, MBS/ABS/CLOs
+28. [Tax Strategies](tax_strategies.md) - TLH, wash sales, asset location, withdrawals
+29. [REITs](reits.md) - Equity vs mortgage, FFO/AFFO, sectors, rate sensitivity
+30. [Private Markets](private_markets.md) - PE, VC, GP/LP structure, J-curve
+31. [Credit Markets](credit_markets.md) - IG vs HY, spreads, CDS, MBS/ABS/CLOs
 
 ### Behavioral & Concepts
-31. [Behavioral Finance](behavioral_finance.md) - Biases, prospect theory, anomalies, sentiment
+32. [Behavioral Finance](behavioral_finance.md) - Biases, prospect theory, anomalies, sentiment
 
 ## Important Disclaimers
 

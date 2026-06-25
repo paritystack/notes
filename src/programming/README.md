@@ -22,9 +22,11 @@ This section contains references and guides for various programming languages.
 - [Programming Paradigms](paradigms.md) - Imperative, declarative, functional, OOP and how they mix
 - [Type Systems](type_systems.md) - Static vs dynamic, inference, nominal vs structural, ADTs, variance
 - [Functional Programming](functional_programming.md) - Pure functions, immutability, closures, composition
+- [Closures & Lexical Scope](closures.md) - Lexical vs dynamic scope, variable capture, upvalues, loop pitfalls
 - [Object-Oriented Concepts](oop_concepts.md) - Encapsulation, polymorphism, composition over inheritance
 - [Generics](generics.md) - Parametric polymorphism, bounds, monomorphization vs erasure, variance
 - [Pattern Matching](pattern_matching.md) - Destructuring, exhaustiveness, sum types
+- [Regular Expressions](regular_expressions.md) - Engines (NFA/DFA vs backtracking), syntax, ReDoS
 - [Error Handling](error_handling.md) - Exceptions vs result types vs error codes, propagation idioms
 - [Asynchronous Programming](async_programming.md) - Event loops, futures/promises, async/await, coroutines
 - [Iterators & Generators](iterators_generators.md) - Iterator protocols, lazy evaluation, pipelines
@@ -33,6 +35,8 @@ This section contains references and guides for various programming languages.
 - [Concurrency](concurrency.md) - Concurrency vs parallelism, synchronization
 - [Memory Management](memory_management.md) - Allocation, ownership, garbage collection
 - [Compilers](compilers.md) - Lexing, parsing, codegen, optimization
+- [Build Systems & Linking](build_systems.md) - Separate compilation, static vs dynamic linking, build orchestration, dependency management
+- [FFI & Language Interop](ffi.md) - Calling conventions, ABI, marshalling, C as lingua franca, bindgen tools
 
 ## Additional Topics
 

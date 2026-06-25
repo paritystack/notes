@@ -87,6 +87,10 @@ standing native suite, and the **JVM** pairs a bytecode interpreter with a profi
   the back end.
 - [Memory management](memory_management.md) — the compiler emits allocation/free or GC barriers
   and (in Rust) enforces ownership during semantic analysis.
+- [Build systems & linking](build_systems.md) — what happens after codegen: symbol resolution,
+  linking object files into an artifact, and orchestrating which units to compile.
+- [Regular expressions](regular_expressions.md) — the lexer specifies tokens as regexes and
+  compiles them to a DFA; regex theory's original home.
 - [Rust](rust.md) / [C++](cpp.md) / [Go](go.md) / [Zig](zig.md) / [Java](java.md) for concrete
   compilation models.
 

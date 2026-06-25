@@ -927,6 +927,8 @@ done
 - [Error handling](error_handling.md) — exit codes, `$?`, `set -euo pipefail`, and `trap` are Bash's only error mechanism.
 - [Paradigms](paradigms.md) — Bash is imperative shell glue; pipelines are a small taste of dataflow composition.
 - [SQL](sql.md) — scripts frequently shell out to `psql`/`mysql`/`sqlite3` to run queries.
+- [Regular expressions](regular_expressions.md) — `grep`/`sed`/`awk` are regex-driven; shell
+  globbing is a separate, simpler pattern language.
 
 ## Pitfalls
 

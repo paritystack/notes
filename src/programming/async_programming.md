@@ -92,6 +92,8 @@ any other (see [error handling](error_handling.md)).
   and coroutines are close cousins.
 - [JavaScript](javascript.md) / [Python](python.md) / [Rust](rust.md) / [Kotlin](kotlin.md)
   pages for concrete runtimes.
+- [Closures & lexical scope](closures.md) — callbacks and coroutines close over the variables
+  they resume with.
 
 ## Pitfalls
 

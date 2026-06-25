@@ -85,6 +85,8 @@ Pure code can't just `throw` or return `null`, so FP encodes those in the type s
 - [Concurrency](concurrency.md) — immutability removes data races; pure functions
   parallelise freely.
 - [Iterators & generators](iterators_generators.md) — lazy functional pipelines.
+- [Closures & lexical scope](closures.md) — the substrate for currying, partial application,
+  and higher-order functions.
 
 ## Pitfalls
 

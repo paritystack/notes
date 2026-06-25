@@ -6950,3 +6950,5 @@ The right choice depends on your performance requirements, development time cons
   threads observe; data races are memory-management bugs.
 - [Compilers](compilers.md) — the compiler emits allocation/free and GC barriers, and (in Rust)
   enforces ownership during semantic analysis.
+- [FFI & language interop](ffi.md) — ownership across a foreign boundary (who frees, GC pinning)
+  is the core interop difficulty.

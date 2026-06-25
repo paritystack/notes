@@ -90,6 +90,8 @@ codegen. It keeps generated code visible and debuggable at the cost of an extra 
 - [Compilers](compilers.md) — macros are syntax-tree transformations; you're scripting a compile phase.
 - [Serialization](serialization.md) — reflection/codegen generate (de)serializers.
 - [Design patterns](design_patterns.md) — reflection underpins DI and proxy-based patterns.
+- [Closures & lexical scope](closures.md) — decorators and DSL builders are closures over the
+  wrapped target.
 
 ## Pitfalls
 

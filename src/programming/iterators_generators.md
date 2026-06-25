@@ -78,6 +78,8 @@ memory and can't handle infinite sources.
   awaited values.
 - [Type systems](type_systems.md) — the iterator trait/interface, generic over element type.
 - [Python](python.md) / [Rust](rust.md) / [JavaScript](javascript.md) for concrete protocols.
+- [Closures & lexical scope](closures.md) — generator state lives in a captured frame resumed
+  across yields.
 
 ## Pitfalls
 

@@ -16,8 +16,8 @@
         <link rel="icon" href="favicon-de23e50b.svg">
         <link rel="shortcut icon" href="favicon-8114d1fc.png">
         <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-0392ca55.css">
-        <link rel="stylesheet" href="css/chrome-fc474251.css">
+        <link rel="stylesheet" href="css/general-e96d0476.css">
+        <link rel="stylesheet" href="css/chrome-d279d366.css">
         <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-5ea8065c.js";
+            window.path_to_searchindex_js = "searchindex-23597fef.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-3689f932.js"></script>
+        <script src="toc-3bb8e699.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -387716,6 +387716,7 @@ npm install --save-dev webpack-bundle-analyzer
 <li><strong><a href="#github-actions-1">GitHub Actions</a></strong>: CI/CD workflows, automation, reusable workflows</li>
 <li><strong><a href="#gitops">GitOps</a></strong>: Git as source of truth, pull-based reconciliation (Argo CD, Flux)</li>
 <li><strong><a href="#feature-flags--progressive-delivery">Feature Flags &amp; Progressive Delivery</a></strong>: Decoupling deploy from release, canaries, kill switches</li>
+<li><strong><a href="#deployment-strategies-1">Deployment Strategies</a></strong>: Recreate, rolling, blue-green, canary, shadow — traffic/instance shifting and rollback</li>
 </ul>
 <h3 id="containers--orchestration"><a class="header" href="#containers--orchestration">Containers &amp; Orchestration</a></h3>
 <ul>
@@ -387854,6 +387855,42 @@ CMD ["node", "dist/server.js"]
 <pre><code class="language-bash"># Build with custom arguments
 docker build --build-arg NODE_VERSION=20 --build-arg BUILD_ENV=development -t myapp:dev .
 </code></pre>
+<h2 id="how-docker-works-architecture"><a class="header" href="#how-docker-works-architecture">How Docker Works (Architecture)</a></h2>
+<p>A container is not a special kind of object — it is an ordinary Linux process that the
+kernel has wrapped in <a href="#linux-namespaces">namespaces</a> (so it sees its own pids, network,
+mounts, hostname, IPC, and optionally users), constrained with <a href="#linux-control-groups-cgroups">cgroups</a>
+(so its CPU, memory, and I/O are bounded), and handed a private root filesystem. “It works
+on my machine” goes away because the <em>box the kernel draws around the process</em> travels with
+the image.</p>
+<p>When you type <code>docker run</code>, the request flows through several layers — Docker is a <em>frontend</em>
+over the same OCI plumbing that Podman and CRI-O use:</p>
+<pre><code>docker CLI ──REST──&gt; dockerd ──gRPC──&gt; containerd ──&gt; shim ──&gt; runc ──&gt; [container process]
+                        │                                                 ├ namespaces (pid/net/mnt/uts/ipc/user)
+                        ├ build (BuildKit)                                 ├ cgroups (cpu/mem/io)
+                        └ networking / volumes                             └ overlay2 rootfs (RO layers + RW top)
+</code></pre>
+<ul>
+<li><strong><code>docker</code> CLI</strong> — talks to the daemon over a REST API (unix socket <code>/var/run/docker.sock</code>).</li>
+<li><strong><code>dockerd</code></strong> — the daemon: image builds (BuildKit), networks, volumes, the API.</li>
+<li><strong><code>containerd</code></strong> — manages the container/image lifecycle and pulls.</li>
+<li><strong><code>containerd-shim</code></strong> — one per container; it stays alive as the container’s parent so the
+container survives a daemon restart, and it reaps the process and reports exit status.</li>
+<li><strong><code>runc</code></strong> — the OCI <em>runtime</em>: it does the actual <code>clone()</code>/<code>setns()</code>/<code>pivot_root()</code> and
+<code>exec</code>s your process. See <a href="#container-runtimes">container runtimes</a> for the full
+picture (OCI, runc, alternative runtimes).</li>
+</ul>
+<h3 id="images-layers-and-the-union-filesystem"><a class="header" href="#images-layers-and-the-union-filesystem">Images, layers, and the union filesystem</a></h3>
+<p>An image is a stack of <strong>content-addressable, read-only layers</strong> (each the diff produced by
+one Dockerfile instruction). At run time an <a href="#linux-filesystems">overlay filesystem</a>
+(<code>overlay2</code>, the default storage driver) stacks those read-only layers and adds a thin
+<strong>writable copy-on-write top layer</strong> per container. Two containers from the same image share
+the read-only layers and only diverge where they write — which is why containers start fast
+and images are cheap to ship. <code>docker history myimage</code> shows the layers and their sizes.</p>
+<h3 id="oci-specifications"><a class="header" href="#oci-specifications">OCI specifications</a></h3>
+<p>Docker images and runtimes conform to two <strong>Open Container Initiative</strong> specs: the
+<em>image-spec</em> (a manifest pointing at the layer blobs) and the <em>runtime-spec</em> (a <code>config.json</code>
+that <code>runc</code> consumes to set up namespaces, cgroups, mounts, and capabilities). Conforming to
+these specs is what lets the same image run under Docker, Podman, or Kubernetes.</p>
 <h2 id="docker-commands"><a class="header" href="#docker-commands">Docker Commands</a></h2>
 <pre><code class="language-bash"># Build
 docker build -t myapp:1.0 .
@@ -388613,6 +388650,55 @@ HEALTHCHECK --interval=30s --timeout=3s \
 EXPOSE 8000
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
 </code></pre>
+<h2 id="storage-logging--rootless"><a class="header" href="#storage-logging--rootless">Storage, Logging &amp; Rootless</a></h2>
+<h3 id="storage-drivers"><a class="header" href="#storage-drivers">Storage Drivers</a></h3>
+<p>The storage driver implements the layered, copy-on-write filesystem described in
+<a href="#how-docker-works-architecture">How Docker Works</a>. <code>overlay2</code> is the default on modern
+kernels and rarely needs changing.</p>
+<pre><code class="language-bash"># Which driver is in use, and where data lives
+docker info | grep "Storage Driver"
+ls /var/lib/docker/overlay2   # layer directories (do not edit by hand)
+</code></pre>
+<p>Read-only image layers are shared between containers; each container only allocates space for
+what it writes into its writable top layer. Write-heavy workloads (databases) should use a
+<a href="#volumes-1">volume</a> rather than the container’s writable layer — both for performance and so
+data survives the container. See <a href="#linux-filesystems">filesystems</a> for how overlay mounts
+work underneath.</p>
+<h3 id="logging-drivers"><a class="header" href="#logging-drivers">Logging Drivers</a></h3>
+<p>By default Docker captures a container’s stdout/stderr with the <code>json-file</code> driver, which
+<strong>grows without bound</strong> and is a common cause of a full host disk. Cap it, or switch drivers.</p>
+<pre><code class="language-bash"># Per-container: cap json-file size and rotation
+docker run --log-opt max-size=10m --log-opt max-file=3 myapp
+
+# Send logs to the host journal instead
+docker run --log-driver=journald myapp
+</code></pre>
+<pre><code class="language-json">// /etc/docker/daemon.json — set the default for all containers
+{
+  "log-driver": "json-file",
+  "log-opts": { "max-size": "10m", "max-file": "3" }
+}
+</code></pre>
+<p>Other drivers: <code>local</code> (efficient binary format), <code>journald</code>
+(<a href="#journald--logging">see journald</a>), <code>fluentd</code>, <code>awslogs</code>, <code>gelf</code>. For aggregating
+container logs centrally see <a href="#logging--log-aggregation">logging</a> and <a href="#observability">observability</a>.</p>
+<h3 id="rootless-docker"><a class="header" href="#rootless-docker">Rootless Docker</a></h3>
+<p>Rootless mode runs <strong>both the daemon and the containers as an unprivileged user</strong>, inside a
+<a href="#linux-namespaces">user namespace</a>, so a container breakout lands on an unprivileged host
+user rather than root. It pairs with the non-root-<em>inside</em>-the-container practice covered under
+<a href="#running-as-non-root-user">Security Patterns</a>.</p>
+<pre><code class="language-bash">dockerd-rootless-setuptool.sh install
+export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+</code></pre>
+<p>Caveats: binding host ports below 1024 needs extra setup, and some cgroup limits require
+cgroup v2 with delegation enabled.</p>
+<h3 id="docker-contexts"><a class="header" href="#docker-contexts">Docker Contexts</a></h3>
+<p>A <em>context</em> points the CLI at a different daemon — handy for managing a remote host over SSH
+without copying TLS certs around.</p>
+<pre><code class="language-bash">docker context create remote --docker "host=ssh://user@host"
+docker context use remote      # subsequent commands target the remote daemon
+docker context ls
+</code></pre>
 <h2 id="volumes-1"><a class="header" href="#volumes-1">Volumes</a></h2>
 <h3 id="volume-types-1"><a class="header" href="#volume-types-1">Volume Types</a></h3>
 <p><strong>Named Volumes</strong> (managed by Docker):</p>
@@ -389289,6 +389375,33 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 # Rollback
 VERSION=0.9.0 docker-compose -f docker-compose.prod.yml up -d
 </code></pre>
+<h2 id="pitfalls-181"><a class="header" href="#pitfalls-181">Pitfalls</a></h2>
+<ul>
+<li><strong>Your app as PID 1 doesn’t reap zombies or forward signals.</strong> The kernel gives PID 1
+special signal handling; a typical app ignores <code>SIGTERM</code> and never reaps exited children.
+Symptoms: <code>docker stop</code> hangs ~10s then <code>SIGKILL</code>s, and defunct processes accumulate. Run
+with <code>docker run --init</code> (injects a tiny init) or bundle <code>tini</code>. See
+<a href="#linux-kernel-process-internals">process internals</a>.</li>
+<li><strong><code>CMD app</code> (shell form) ≠ <code>CMD ["app"]</code> (exec form).</strong> Shell form runs your process as a
+child of <code>/bin/sh -c</code>, so the shell is PID 1 and <em>it</em> receives signals, not your app. Use
+exec form (JSON array) so your process is PID 1 and handles <code>SIGTERM</code> itself.</li>
+<li><strong><code>ADD</code> does surprising things.</strong> It auto-extracts local tar archives and can fetch URLs.
+Prefer <code>COPY</code> for plain file copies; reach for <code>ADD</code> only when you actually want extraction.</li>
+<li><strong><code>:latest</code> is not a pinned version.</strong> It’s a mutable tag — builds become non-reproducible
+and cache invalidation gets unpredictable. Pin a real tag or a digest (<code>image@sha256:...</code>).</li>
+<li><strong>A missing <code>.dockerignore</code> bloats the build and leaks secrets.</strong> Without it the whole
+context (including <code>.git</code> and <code>.env</code>) is sent to the daemon and may land in the image. And
+a secret written into an <code>ENV</code> or a layer <strong>persists in the image history even if a later
+layer deletes it</strong> — use BuildKit’s <code>--mount=type=secret</code> (see <a href="#secrets-management-2">Build Secrets</a>).</li>
+<li><strong>Containers run as root by default.</strong> Combined with a writable root filesystem that
+widens the blast radius of a compromise. Add a non-root <code>USER</code> and run <code>--read-only</code> with a
+<code>tmpfs</code> for scratch space (see <a href="#security-patterns-3">Security Patterns</a>).</li>
+<li><strong><code>json-file</code> logging fills the host disk.</strong> The default driver grows unbounded — cap it
+with <code>max-size</code>/<code>max-file</code> (see <a href="#logging-drivers">Logging Drivers</a>).</li>
+<li><strong><code>--network host</code> and <code>--privileged</code> dissolve isolation.</strong> Host networking shares the host’s
+network namespace (no port mapping, but no isolation either); <code>--privileged</code> grants nearly
+all capabilities and device access. Reach for the narrow tool (<code>--cap-add</code>, <code>-p</code>) first.</li>
+</ul>
 <h2 id="eli10-50"><a class="header" href="#eli10-50">ELI10</a></h2>
 <p>Docker is like shipping containers for code:</p>
 <ul>
@@ -389309,6 +389422,11 @@ VERSION=0.9.0 docker-compose -f docker-compose.prod.yml up -d
 <li><a href="#cicd-fundamentals">CI/CD</a> — pipelines build and push Docker images on every commit</li>
 <li><a href="#github-actions-1">GitHub Actions</a> — the most common platform for Docker build/push workflows</li>
 <li><a href="#infrastructure-2">Infrastructure</a> — the cloud VMs or bare-metal hosts that run the Docker daemon</li>
+<li><a href="#linux-namespaces">Linux namespaces</a> &amp; <a href="#linux-control-groups-cgroups">cgroups</a> — the kernel primitives a container is built from</li>
+<li><a href="#container-runtimes">Container runtimes</a> — the OCI / runc / containerd layer Docker sits on top of</li>
+<li><a href="#linux-filesystems">Filesystems</a> — the overlay2 / union mounts behind image layers</li>
+<li><a href="#container-security">Container security</a> — hardening, scanning, and isolation for the images and containers above</li>
+<li><a href="#journald--logging">journald logging</a> — where the <code>journald</code> log driver sends container output</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="kubernetes-1"><a class="header" href="#kubernetes-1">Kubernetes</a></h1>
@@ -389580,7 +389698,7 @@ GitOps agents (Argo CD/Flux) support both natively — see gitops.md.
 <li><strong><a href="#cicd-fundamentals">CI/CD</a></strong> — <code>helm upgrade --install</code> in pipelines.</li>
 <li><strong><a href="#secrets-management-1">Secrets management</a></strong> — keep secrets out of charts.</li>
 </ul>
-<h2 id="pitfalls-181"><a class="header" href="#pitfalls-181">Pitfalls</a></h2>
+<h2 id="pitfalls-182"><a class="header" href="#pitfalls-182">Pitfalls</a></h2>
 <ul>
 <li><strong>YAML indentation in templates</strong> — <code>nindent</code>/whitespace bugs produce invalid manifests;
 <code>helm template</code> to verify before applying.</li>
@@ -389681,7 +389799,7 @@ Modern gateways (Gateway API) and meshes increasingly converge.
 <li><strong><a href="#observability">Observability</a></strong> — golden signals &amp; tracing the mesh emits.</li>
 <li><strong><a href="#load-balancing-5">Load balancing</a></strong> — L7 balancing inside the mesh.</li>
 </ul>
-<h2 id="pitfalls-182"><a class="header" href="#pitfalls-182">Pitfalls</a></h2>
+<h2 id="pitfalls-183"><a class="header" href="#pitfalls-183">Pitfalls</a></h2>
 <ul>
 <li><strong>Adopting a mesh too early</strong> — its complexity outweighs the benefit for a few services.</li>
 <li><strong>Ignoring the sidecar tax</strong> — per-pod CPU/RAM/latency adds up; consider ambient/eBPF modes.</li>
@@ -389775,7 +389893,7 @@ signing, SBOM, scanning.</li>
 <li><strong><a href="#service-mesh">Service mesh</a></strong> — mTLS and authz between containers.</li>
 <li><strong><a href="#selinux-security-enhanced-linux">SELinux</a></strong> — kernel-level mandatory access control.</li>
 </ul>
-<h2 id="pitfalls-183"><a class="header" href="#pitfalls-183">Pitfalls</a></h2>
+<h2 id="pitfalls-184"><a class="header" href="#pitfalls-184">Pitfalls</a></h2>
 <ul>
 <li><strong>Running as root</strong> — the most common and most dangerous default; set a non-root USER.</li>
 <li><strong>Secrets baked into image layers</strong> — persist in history; inject at runtime instead.</li>
@@ -390824,8 +390942,8 @@ CD  (pull)  the GitOps agent notices the changed tag and deploys it.
 </code></pre>
 <h2 id="progressive-delivery"><a class="header" href="#progressive-delivery">Progressive delivery</a></h2>
 <p>GitOps integrates with progressive rollout controllers (Argo Rollouts, Flagger) for canary
-and blue-green deploys driven by metrics — see <a href="#feature-flags--progressive-delivery">feature flags</a> for the
-application-level complement.</p>
+and blue-green deploys driven by metrics — see <a href="#deployment-strategies-1">deployment strategies</a>
+for the mechanics and <a href="#feature-flags--progressive-delivery">feature flags</a> for the application-level complement.</p>
 <pre><code>Canary: shift 5% → 25% → 50% → 100% of traffic, checking SLOs at each step; auto-rollback
         (revert the Git state) if error rate/latency breaches the threshold.
 </code></pre>
@@ -390834,12 +390952,14 @@ application-level complement.</p>
 <li><strong><a href="#kubernetes-1">Kubernetes</a></strong> — the reconciliation substrate GitOps builds on.</li>
 <li><strong><a href="#helm">Helm</a></strong> / Kustomize — how the desired state is packaged and parameterized.</li>
 <li><strong><a href="#cicd-fundamentals">CI/CD</a></strong> — CI builds &amp; updates tags; GitOps handles CD.</li>
+<li><strong><a href="#deployment-strategies-1">Deployment strategies</a></strong> — canary/blue-green/rolling mechanics the
+rollout controllers execute.</li>
 <li><strong><a href="#terraform">Terraform</a></strong> / <strong><a href="#infrastructure-2">Infrastructure</a></strong> — declarative IaC,
 the same philosophy for infra.</li>
 <li><strong><a href="#secrets-management-1">Secrets management</a></strong> — secrets in Git must be
 encrypted (Sealed Secrets / External Secrets / SOPS).</li>
 </ul>
-<h2 id="pitfalls-184"><a class="header" href="#pitfalls-184">Pitfalls</a></h2>
+<h2 id="pitfalls-185"><a class="header" href="#pitfalls-185">Pitfalls</a></h2>
 <ul>
 <li><strong>Plaintext secrets in Git</strong> — never; use Sealed Secrets/External Secrets/SOPS so only
 ciphertext is committed.</li>
@@ -390889,7 +391009,7 @@ Evaluation is cached/streamed to the app so it's fast and works if the service b
 <p>Feature flags enable a spectrum of gradual-rollout strategies that limit blast radius:</p>
 <pre><code>Dark launch    ship code OFF in prod; turn on for internal users to test with real traffic.
 Canary release enable for a small % of users; watch error rate &amp; latency; expand if healthy,
-               kill if not. (App-level canary; infra-level canary lives in gitops.md.)
+               kill if not. (App-level canary; infra-level canary lives in deployment_strategies.md.)
 Ring deployment internal → beta → 1% → 10% → 100%, each ring a checkpoint.
 Blue-green     two environments; flags/router shift traffic; instant switch back.
 A/B test       split cohorts to compare variants on a business metric.
@@ -390928,12 +391048,14 @@ Discipline:
 <h2 id="where-this-connects-546"><a class="header" href="#where-this-connects-546">Where this connects</a></h2>
 <ul>
 <li><strong><a href="#cicd-fundamentals">CI/CD</a></strong> — deploy continuously; flags control release timing.</li>
+<li><strong><a href="#deployment-strategies-1">Deployment strategies</a></strong> — the infra-level counterpart: canary,
+blue-green, rolling, shadow at the traffic/instance layer.</li>
 <li><strong><a href="#gitops">GitOps</a></strong> — infra-level canary/blue-green via Argo Rollouts/Flagger.</li>
 <li><strong><a href="#site-reliability-engineering-sre">SRE</a></strong> — tie rollouts to SLOs/error budgets; flags as kill switches in incidents.</li>
 <li><strong><a href="#chaos-engineering">Chaos engineering</a></strong> — controlled experiments and blast-radius limits.</li>
 <li><strong><a href="#observability">Observability</a></strong> — measure each rollout stage to decide expand/rollback.</li>
 </ul>
-<h2 id="pitfalls-185"><a class="header" href="#pitfalls-185">Pitfalls</a></h2>
+<h2 id="pitfalls-186"><a class="header" href="#pitfalls-186">Pitfalls</a></h2>
 <ul>
 <li><strong>Flag debt</strong> — never removing stale flags; the codebase fills with dead branches and
 untested path combinations.</li>
@@ -390944,6 +391066,147 @@ feature to everyone.</li>
 <li><strong>Unaudited flag changes</strong> — flipping a flag is a prod change; log who/what/when.</li>
 <li><strong>Secrets/logic in flag names</strong> — flags are not access control for security boundaries;
 enforce real authz server-side (see ../security/api_security.md).</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="deployment-strategies-1"><a class="header" href="#deployment-strategies-1">Deployment Strategies</a></h1>
+<h2 id="overview-455"><a class="header" href="#overview-455">Overview</a></h2>
+<p>A deployment strategy is <strong>how a new version of a service replaces the old one</strong> at the
+infrastructure layer — how instances are swapped and how traffic is shifted from <code>v1</code> to <code>v2</code>.
+This is the <em>deployment-level</em> counterpart to the <em>application-level</em> progressive delivery in
+<a href="#feature-flags--progressive-delivery">feature flags</a>: flags decide what a <em>running</em> process exposes to a user;
+deployment strategies decide <em>which process</em> (which version) handles the request at all. The
+two compose — you can canary-deploy <code>v2</code> and <em>also</em> gate a feature inside it behind a flag.</p>
+<p>The strategies live wherever traffic can be steered: a <a href="#kubernetes-1">Kubernetes</a> Deployment
+rolling pods, a load balancer or DNS flipping a target, or a <a href="#service-mesh">service mesh</a>
+weighting routes. Under <a href="#gitops">GitOps</a> the strategy is declared in Git and a controller
+(Argo Rollouts, Flagger) executes it; promotion/rollback decisions are gated on the golden
+signals from <a href="#monitoring--observability">monitoring</a> and tied to <a href="#site-reliability-engineering-sre">SRE</a> error budgets.</p>
+<pre><code>deploy  = a new version is RUNNING in production        ← deployment strategy's job
+release = users actually hit that version / feature     ← traffic shift + feature flag's job
+A strategy controls the deploy→release transition: how fast, how reversible, at what cost.
+</code></pre>
+<h2 id="the-strategies-at-a-glance"><a class="header" href="#the-strategies-at-a-glance">The strategies at a glance</a></h2>
+<pre><code>Strategy     Downtime  Extra capacity   Rollback speed   Blast radius   Versions live at once
+─────────────────────────────────────────────────────────────────────────────────────────────
+Recreate     yes       none             redeploy old     all users      1 (hard cutover)
+Rolling      none      ~1 batch         drain back       grows w/ batch  2 (overlap window)
+Blue-Green   none      2x (full env)    instant flip     all-or-nothing  2 (only 1 serves)
+Canary       none      small (+canary)  drop canary      tiny → growing  2 (weighted split)
+Shadow       none      +mirror env      n/a (no users)   zero (no users) 2 (v2 sees copies)
+</code></pre>
+<p>Pick by what you’re optimizing: Rolling is the cheap default; Blue-Green buys instant
+rollback at double cost; Canary minimizes blast radius at the cost of orchestration; Shadow
+validates with real traffic and zero user risk but can’t catch user-facing bugs.</p>
+<h2 id="recreate--rolling"><a class="header" href="#recreate--rolling">Recreate &amp; Rolling</a></h2>
+<p><strong>Recreate</strong>: stop all <code>v1</code>, then start all <code>v2</code>. Simple, no version overlap (safe for
+incompatible schemas), but incurs <strong>downtime</strong>. Fine for batch jobs or dev; rarely for
+user-facing services.</p>
+<p><strong>Rolling</strong> (the default Kubernetes <code>Deployment</code> behavior): replace pods in batches, gated by
+<strong>readiness probes</strong> so a new pod only takes traffic once healthy.</p>
+<pre><code>maxSurge=25%        how many EXTRA pods above desired count may be created during the roll
+maxUnavailable=25%  how many below desired may be missing at once
+readinessProbe      a pod is added to the Service endpoints only after it passes → no
+                    traffic to a not-yet-warm pod
+
+Roll:  [v1 v1 v1 v1] → add v2, wait ready, drain a v1 → … → [v2 v2 v2 v2]
+</code></pre>
+<p>Because <code>v1</code> and <code>v2</code> serve simultaneously during the roll, <strong>both versions must be
+backward/forward compatible</strong> (API and data) — see schema compatibility below.</p>
+<h2 id="blue-green-1"><a class="header" href="#blue-green-1">Blue-Green</a></h2>
+<p>Run two complete environments. <strong>Blue</strong> serves production; <strong>Green</strong> holds the new version,
+fully deployed and smoke-tested. Cut over by repointing the router (LB target group, DNS,
+or mesh route) all at once. Rollback = flip back to Blue — near-instant.</p>
+<pre><code>        ┌─ Blue  (v1)  ◄── 100% traffic
+router ─┤
+        └─ Green (v2)  ◄── 0%  (warm, tested)
+
+flip:   router → Green ; Blue kept idle as the instant rollback target
+</code></pre>
+<p>Trade-offs: needs <strong>double capacity</strong> during the window, and a hard cutover means a bad
+release hits <em>everyone</em> at once (no gradual exposure — combine with Canary or flags for that).
+The sharp edge is <strong>stateful</strong> cutover: in-flight sessions and especially <strong>database
+migrations</strong> can’t be flipped instantly (the DB is shared) — handle schema changes separately.</p>
+<h2 id="canary-1"><a class="header" href="#canary-1">Canary</a></h2>
+<p>Shift a <strong>small slice</strong> of real traffic to <code>v2</code>, watch its golden signals, then promote in
+steps or auto-rollback on breach.</p>
+<pre><code>       5% ──watch error rate &amp; latency──► 25% ──watch──► 50% ──► 100%
+        │  SLO breach?                                         (promote: v2 becomes baseline)
+        └──────────────── drop canary, route 100% → v1 (auto-rollback)
+</code></pre>
+<p>Where the split happens:</p>
+<ul>
+<li><strong>Mesh / ingress weights</strong> — Istio/Linkerd or an ingress controller route N% of requests.</li>
+<li><strong>Replica ratio</strong> — crude canary via pod counts (9× v1 + 1× v2 ≈ 10%); imprecise.</li>
+<li><strong>Progressive-delivery controllers</strong> — Argo Rollouts / Flagger automate the step-up,
+query Prometheus for the analysis, and roll back automatically. This is the infra-level
+canary that <a href="#gitops">GitOps</a> and <a href="#feature-flags--progressive-delivery">feature flags</a> refer to.</li>
+</ul>
+<p>Contrast with the <strong>application-level canary</strong> in <a href="#feature-flags--progressive-delivery">feature flags</a>: a flag
+exposes a feature to a user cohort <em>inside one running version</em>; a deployment canary routes
+traffic to a <em>different deployed version</em>. Same “limit blast radius” goal, different layer.</p>
+<h2 id="shadow--traffic-mirroring"><a class="header" href="#shadow--traffic-mirroring">Shadow / traffic mirroring</a></h2>
+<p>Send a <strong>copy</strong> of live production traffic to <code>v2</code> while users still get <code>v1</code>’s responses;
+<code>v2</code>’s responses are <strong>discarded</strong>. Validates performance and correctness against real traffic
+shapes with <strong>zero user impact</strong>.</p>
+<pre><code>                ┌─► v1 ──► response to user
+real request ──►┤
+                └─► v2 (mirror) ──► response DISCARDED, but metrics/logs captured
+</code></pre>
+<p>The critical caveat: <strong>side effects</strong>. Mirrored requests must not double-charge, double-send,
+or mutate shared state — <code>v2</code> needs sandboxed/idempotent downstreams (stub the payment gateway,
+use a scratch queue) or you corrupt production. Best for read-heavy or replay-safe paths.</p>
+<h2 id="rollback--health-gating"><a class="header" href="#rollback--health-gating">Rollback &amp; health gating</a></h2>
+<p>Every strategy needs a clear, fast undo:</p>
+<pre><code>Readiness/liveness probes  gate traffic onto healthy pods; restart unhealthy ones.
+Automated analysis         promote/rollback on the golden signals (error rate, latency,
+                           saturation) — see monitoring.md / observability.md.
+GitOps rollback            the declared version lives in Git → `git revert` and the agent
+                           reconciles back. Recovery is a Git operation (see gitops.md).
+Tie to error budgets       a rollout that burns the budget auto-halts — see sre.md.
+</code></pre>
+<p>The rule: <strong>never deploy a strategy without a tested rollback path</strong>. Blue-Green keeps the old
+env warm; Canary drops the canary; Rolling drains new pods back to old.</p>
+<h2 id="the-hard-part-schema--backward-compatibility"><a class="header" href="#the-hard-part-schema--backward-compatibility">The hard part: schema &amp; backward compatibility</a></h2>
+<p>Every zero-downtime strategy runs <code>v1</code> and <code>v2</code> <strong>at the same time</strong>, so they must tolerate
+each other’s data and API. The discipline is <strong>expand/contract</strong> (parallel change):</p>
+<pre><code>Expand    add the new column/field/endpoint — additive, both versions still work.
+Migrate   backfill data; deploy v2 which writes new + reads either.
+Contract  once v1 is fully gone, remove the old column/field in a LATER release.
+
+Never  rename/drop in the same deploy that ships the code needing the new shape —
+       that forces a hard cutover and breaks rollback.
+</code></pre>
+<p>This is why a destructive DB migration can’t ride a Blue-Green flip: the database is shared,
+so schema changes get their own expand/contract sequence decoupled from the app cutover.
+See <a href="#database-design">database design</a>.</p>
+<h2 id="where-this-connects-547"><a class="header" href="#where-this-connects-547">Where this connects</a></h2>
+<ul>
+<li><strong><a href="#feature-flags--progressive-delivery">Feature flags</a></strong> — application-level progressive delivery; composes with
+deployment-level canary/blue-green.</li>
+<li><strong><a href="#gitops">GitOps</a></strong> — declares the strategy in Git; Argo Rollouts/Flagger execute it.</li>
+<li><strong><a href="#kubernetes-1">Kubernetes</a></strong> — the Deployment object provides rolling updates and probes.</li>
+<li><strong><a href="#service-mesh">Service Mesh</a></strong> — weighted routing and mirroring for canary/shadow.</li>
+<li><strong><a href="#monitoring--observability">Monitoring</a></strong> / <strong><a href="#observability">Observability</a></strong> — the signals that gate
+promotion and trigger auto-rollback.</li>
+<li><strong><a href="#site-reliability-engineering-sre">SRE</a></strong> — error budgets decide whether a rollout may continue.</li>
+<li><strong><a href="#cloud-deployment">Cloud Deployment</a></strong> — LB/DNS/target-group mechanics behind the cutover.</li>
+</ul>
+<h2 id="pitfalls-187"><a class="header" href="#pitfalls-187">Pitfalls</a></h2>
+<ul>
+<li><strong>Non-backward-compatible rollouts</strong> — shipping a breaking schema/API in a rolling or
+blue-green deploy; <code>v1</code> and <code>v2</code> overlap and one of them breaks. Use expand/contract.</li>
+<li><strong>Stateful / DB cutover</strong> — treating the database like the app and “flipping” it; migrations
+need their own decoupled sequence.</li>
+<li><strong>No automated rollback</strong> — a manual “someone notices and redeploys” path is too slow; gate
+on golden signals and revert automatically.</li>
+<li><strong>Statistically meaningless canary</strong> — too little traffic (or too short a window) to detect a
+regression; the canary passes by luck.</li>
+<li><strong>Session stickiness ignored</strong> — users bounced between <code>v1</code> and <code>v2</code> mid-session hit
+inconsistent behavior; pin sessions or keep versions compatible.</li>
+<li><strong>Mirrored side effects</strong> — shadow traffic that mutates real downstreams (double charges,
+duplicate emails); sandbox or idempotency-guard <code>v2</code>.</li>
+<li><strong>Double-cost surprise</strong> — blue-green/canary need extra capacity; size and budget for the
+overlap window.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="cloud-deployment"><a class="header" href="#cloud-deployment">Cloud Deployment</a></h1>
@@ -391545,7 +391808,7 @@ az container create \
   --environment-variables NODE_ENV=production \
   --secure-environment-variables DB_PASSWORD=secret123
 </code></pre>
-<h2 id="deployment-strategies-1"><a class="header" href="#deployment-strategies-1">Deployment Strategies</a></h2>
+<h2 id="deployment-strategies-2"><a class="header" href="#deployment-strategies-2">Deployment Strategies</a></h2>
 <h3 id="blue-green-deployment"><a class="header" href="#blue-green-deployment">Blue-Green Deployment</a></h3>
 <h4 id="using-load-balancer"><a class="header" href="#using-load-balancer">Using Load Balancer</a></h4>
 <pre><code class="language-bash"># Deploy green environment
@@ -391750,7 +392013,7 @@ aws globalaccelerator create-endpoint-group \
 <li><a href="https://cloud.google.com/architecture/best-practices">GCP Best Practices</a></li>
 <li><a href="https://learn.microsoft.com/en-us/azure/architecture/">Azure Architecture Center</a></li>
 </ul>
-<h2 id="where-this-connects-547"><a class="header" href="#where-this-connects-547">Where this connects</a></h2>
+<h2 id="where-this-connects-548"><a class="header" href="#where-this-connects-548">Where this connects</a></h2>
 <ul>
 <li><a href="#terraform">Terraform</a> — provisions the cloud resources (EKS clusters, VPCs, RDS) that deployments target</li>
 <li><a href="#kubernetes-1">Kubernetes</a> — the primary deployment target for containerised workloads in the cloud</li>
@@ -392983,7 +393246,7 @@ resource "aws_cloudwatch_log_group" "flow_logs" {
 <li><a href="https://cloud.google.com/architecture">GCP Best Practices</a></li>
 <li><a href="https://12factor.net/">The Twelve-Factor App</a></li>
 </ul>
-<h2 id="where-this-connects-548"><a class="header" href="#where-this-connects-548">Where this connects</a></h2>
+<h2 id="where-this-connects-549"><a class="header" href="#where-this-connects-549">Where this connects</a></h2>
 <ul>
 <li><a href="#terraform">Terraform</a> — Infrastructure as Code that provisions the resources described here</li>
 <li><a href="#cloud-deployment">Cloud Deployment</a> — deployment strategies that run on this infrastructure</li>
@@ -393583,7 +393846,7 @@ terraform apply
 <li><a href="https://registry.terraform.io/">Terraform Registry</a></li>
 <li><a href="https://www.terraform-best-practices.com/">Best Practices</a></li>
 </ul>
-<h2 id="where-this-connects-549"><a class="header" href="#where-this-connects-549">Where this connects</a></h2>
+<h2 id="where-this-connects-550"><a class="header" href="#where-this-connects-550">Where this connects</a></h2>
 <ul>
 <li><a href="#infrastructure-2">Infrastructure</a> — Terraform provisions the VPCs, subnets, and security groups described there</li>
 <li><a href="#kubernetes-1">Kubernetes</a> — EKS/GKE/AKS cluster creation is a common Terraform use case</li>
@@ -394358,7 +394621,7 @@ Info: FYI, no action required
 <li><a href="https://opentelemetry.io/">OpenTelemetry</a></li>
 <li><a href="https://sre.google/sre-book/table-of-contents/">Google SRE Book</a></li>
 </ul>
-<h2 id="where-this-connects-550"><a class="header" href="#where-this-connects-550">Where this connects</a></h2>
+<h2 id="where-this-connects-551"><a class="header" href="#where-this-connects-551">Where this connects</a></h2>
 <ul>
 <li><a href="#observability">Observability</a> — observability extends monitoring: monitoring tracks known metrics, observability explores unknowns</li>
 <li><a href="#site-reliability-engineering-sre">SRE</a> — SLIs and SLOs are defined and tracked via monitoring data</li>
@@ -396329,7 +396592,7 @@ ROI: 18x
 <li><a href="https://github.com/open-telemetry/opentelemetry-demo">OpenTelemetry Demo</a></li>
 <li><a href="https://charity.wtf/">Charity Majors Blog</a></li>
 </ul>
-<h2 id="where-this-connects-551"><a class="header" href="#where-this-connects-551">Where this connects</a></h2>
+<h2 id="where-this-connects-552"><a class="header" href="#where-this-connects-552">Where this connects</a></h2>
 <ul>
 <li><a href="#monitoring--observability">Monitoring</a> — monitoring is the reactive layer; observability is the exploratory layer built on top</li>
 <li><a href="#site-reliability-engineering-sre">SRE</a> — SLO burn-rate alerts and error-budget tracking rely on observability data</li>
@@ -396338,7 +396601,7 @@ ROI: 18x
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="logging--log-aggregation"><a class="header" href="#logging--log-aggregation">Logging &amp; Log Aggregation</a></h1>
-<h2 id="overview-455"><a class="header" href="#overview-455">Overview</a></h2>
+<h2 id="overview-456"><a class="header" href="#overview-456">Overview</a></h2>
 <p>Logs are the timestamped, event-by-event record of what a system did — the first thing you
 reach for when debugging an incident. This note focuses on the <strong>operational logging
 pipeline</strong>: how to emit good logs, ship them off the machine, aggregate them centrally, and
@@ -396414,7 +396677,7 @@ Logs     discrete events with context ("WHY did request X fail")   → debugging
 Traces   one request's path across services ("WHERE is the latency")→ distributed debugging
 Correlate them with a shared trace_id to jump metric → trace → log.
 </code></pre>
-<h2 id="where-this-connects-552"><a class="header" href="#where-this-connects-552">Where this connects</a></h2>
+<h2 id="where-this-connects-553"><a class="header" href="#where-this-connects-553">Where this connects</a></h2>
 <ul>
 <li><strong><a href="#observability">Observability</a></strong> — the three-pillars model; logs are one pillar.</li>
 <li><strong><a href="#monitoring--observability">Monitoring</a></strong> — metrics &amp; Prometheus; alerting on log-derived signals.</li>
@@ -396422,7 +396685,7 @@ Correlate them with a shared trace_id to jump metric → trace → log.
 <li><strong><a href="#site-reliability-engineering-sre">SRE</a></strong> — logs as evidence during incident response.</li>
 <li><strong><a href="#secrets-management-1">Secrets management</a></strong> — never log secrets/PII.</li>
 </ul>
-<h2 id="pitfalls-186"><a class="header" href="#pitfalls-186">Pitfalls</a></h2>
+<h2 id="pitfalls-188"><a class="header" href="#pitfalls-188">Pitfalls</a></h2>
 <ul>
 <li><strong>Unstructured logs</strong> — prose you can’t filter or aggregate; emit JSON.</li>
 <li><strong>Logging secrets/PII</strong> — redact at the source/collector; a top compliance &amp; leak risk.</li>
@@ -396505,7 +396768,7 @@ emit a metric.</li>
 <li><em>“We are too small for Chaos.”</em> -&gt; If you are small, fixing it is cheap. If you wait until you are huge, outages cost millions.</li>
 <li><em>“Chaos Engineering creates outages.”</em> -&gt; Chaos Engineering <em>reveals</em> outages that are already waiting to happen, usually at 3 AM.</li>
 </ul>
-<h2 id="where-this-connects-553"><a class="header" href="#where-this-connects-553">Where this connects</a></h2>
+<h2 id="where-this-connects-554"><a class="header" href="#where-this-connects-554">Where this connects</a></h2>
 <ul>
 <li><a href="#observability">Observability</a> — you cannot run chaos experiments without first being able to measure their impact</li>
 <li><a href="#site-reliability-engineering-sre">SRE</a> — error budgets determine how much chaos experimentation is safe to run in production</li>
@@ -396608,7 +396871,7 @@ emit a metric.</li>
 <li><strong>Errors:</strong> Rate of requests that fail (5xx, explicit failures).</li>
 <li><strong>Saturation:</strong> How “full” the system is (CPU load, memory usage).</li>
 </ol>
-<h2 id="where-this-connects-554"><a class="header" href="#where-this-connects-554">Where this connects</a></h2>
+<h2 id="where-this-connects-555"><a class="header" href="#where-this-connects-555">Where this connects</a></h2>
 <ul>
 <li><a href="#observability">Observability</a> — SRE error-budget tracking and SLO alerting require deep observability</li>
 <li><a href="#monitoring--observability">Monitoring</a> — SLIs are derived from monitoring data; on-call alerting feeds SRE processes</li>
@@ -396694,7 +396957,7 @@ emit a metric.</li>
 <p>Foundations and primers first, then case studies. The case studies cross-link back to primers for depth.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="scalability"><a class="header" href="#scalability">Scalability</a></h1>
-<h2 id="overview-456"><a class="header" href="#overview-456">Overview</a></h2>
+<h2 id="overview-457"><a class="header" href="#overview-457">Overview</a></h2>
 <p>Scalability is the ability to handle increased load by adding more resources.</p>
 <h2 id="vertical-scaling-1"><a class="header" href="#vertical-scaling-1">Vertical Scaling</a></h2>
 <p>Add more power to existing machines:</p>
@@ -396806,7 +397069,7 @@ Read (fast): From replicas
 <li><a href="https://dataintensive.app/">Designing Data-Intensive Applications</a></li>
 <li><a href="https://www.systemdesigninterview.com/">System Design Interview</a></li>
 </ul>
-<h2 id="where-this-connects-555"><a class="header" href="#where-this-connects-555">Where this connects</a></h2>
+<h2 id="where-this-connects-556"><a class="header" href="#where-this-connects-556">Where this connects</a></h2>
 <ul>
 <li><a href="#distributed-systems-1">Distributed systems</a> — scalability trade-offs (CAP, consistency) underpin every scaling decision</li>
 <li><a href="#caching-strategies-4">Caching</a> — the highest-leverage read scalability lever</li>
@@ -396817,7 +397080,7 @@ Read (fast): From replicas
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="caching-strategies-4"><a class="header" href="#caching-strategies-4">Caching Strategies</a></h1>
-<h2 id="overview-457"><a class="header" href="#overview-457">Overview</a></h2>
+<h2 id="overview-458"><a class="header" href="#overview-458">Overview</a></h2>
 <p>Caching stores frequently accessed data in fast memory to reduce latency and database load.</p>
 <h2 id="cache-levels-1"><a class="header" href="#cache-levels-1">Cache Levels</a></h2>
 <pre><code>L1: Browser cache (browser memory)
@@ -396981,7 +397244,7 @@ cache.set(key, value, ex=ttl)
 <li><a href="https://redis.io/docs/">Redis Documentation</a></li>
 <li><a href="https://codeahoy.com/2017/08/11/caching-strategies-and-patterns/">Caching Patterns</a></li>
 </ul>
-<h2 id="where-this-connects-556"><a class="header" href="#where-this-connects-556">Where this connects</a></h2>
+<h2 id="where-this-connects-557"><a class="header" href="#where-this-connects-557">Where this connects</a></h2>
 <ul>
 <li><a href="#databases">Databases</a> — caches sit in front of databases; cache invalidation is the hard problem</li>
 <li><a href="#consistent-hashing-1">Consistent hashing</a> — cache clusters use consistent hashing to distribute keys without full rehashing</li>
@@ -397088,7 +397351,7 @@ class ConsistentHash:
             
         return self.ring[self.sorted_keys[idx]]
 </code></pre>
-<h2 id="where-this-connects-557"><a class="header" href="#where-this-connects-557">Where this connects</a></h2>
+<h2 id="where-this-connects-558"><a class="header" href="#where-this-connects-558">Where this connects</a></h2>
 <ul>
 <li><a href="#databases">Databases</a> — consistent hashing assigns data partitions to database nodes</li>
 <li><a href="#caching-strategies-4">Caching</a> — cache clusters use consistent hashing to distribute keys across nodes</li>
@@ -397098,7 +397361,7 @@ class ConsistentHash:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="rpc-remote-procedure-call"><a class="header" href="#rpc-remote-procedure-call">RPC (Remote Procedure Call)</a></h1>
 <p>RPC is a protocol that allows a program to execute a procedure on another computer as if it were a local procedure call.</p>
-<h2 id="overview-458"><a class="header" href="#overview-458">Overview</a></h2>
+<h2 id="overview-459"><a class="header" href="#overview-459">Overview</a></h2>
 <p>RPC abstracts network communication, making distributed computing appear like local function calls.</p>
 <p><strong>Key Concepts:</strong></p>
 <ul>
@@ -397167,7 +397430,7 @@ message Result {
 <li>Error handling complexity</li>
 </ul>
 <p>RPC simplifies distributed system development by providing procedure call semantics over network communication.</p>
-<h2 id="where-this-connects-558"><a class="header" href="#where-this-connects-558">Where this connects</a></h2>
+<h2 id="where-this-connects-559"><a class="header" href="#where-this-connects-559">Where this connects</a></h2>
 <ul>
 <li><a href="#microservices-architecture">Microservices</a> — RPC (gRPC/REST) is the primary inter-service communication mechanism</li>
 <li><a href="#distributed-systems-1">Distributed systems</a> — RPC is a network call masquerading as a local call; failures require different handling</li>
@@ -397973,7 +398236,7 @@ describe('User Service Contract', () =&gt; {
 <li><a href="https://microservices.io/">Microservices.io</a></li>
 <li><a href="https://martinfowler.com/articles/microservices.html">Martin Fowler’s Blog</a></li>
 </ul>
-<h2 id="where-this-connects-559"><a class="header" href="#where-this-connects-559">Where this connects</a></h2>
+<h2 id="where-this-connects-560"><a class="header" href="#where-this-connects-560">Where this connects</a></h2>
 <ul>
 <li><a href="#message-queues-1">Message queues</a> — async inter-service communication via events (Kafka, RabbitMQ)</li>
 <li><a href="#rpc-remote-procedure-call">RPC</a> — synchronous inter-service communication via gRPC or REST</li>
@@ -397983,7 +398246,7 @@ describe('User Service Contract', () =&gt; {
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="databases"><a class="header" href="#databases">Databases</a></h1>
-<h2 id="overview-459"><a class="header" href="#overview-459">Overview</a></h2>
+<h2 id="overview-460"><a class="header" href="#overview-460">Overview</a></h2>
 <p>Databases are the foundation of most distributed systems, providing persistent storage and data management at scale.</p>
 <h2 id="sql-vs-nosql"><a class="header" href="#sql-vs-nosql">SQL vs NoSQL</a></h2>
 <h3 id="sql-relational-databases"><a class="header" href="#sql-relational-databases">SQL (Relational Databases)</a></h3>
@@ -398435,7 +398698,7 @@ FOR EACH ROW
 <li><a href="https://university.mongodb.com/">MongoDB University</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Database_design">Database Design Patterns</a></li>
 </ul>
-<h2 id="where-this-connects-560"><a class="header" href="#where-this-connects-560">Where this connects</a></h2>
+<h2 id="where-this-connects-561"><a class="header" href="#where-this-connects-561">Where this connects</a></h2>
 <ul>
 <li><a href="#caching-strategies-4">Caching</a> — Redis/Memcached cache database reads to absorb hot reads</li>
 <li><a href="#consistent-hashing-1">Consistent hashing</a> — horizontal sharding uses consistent hashing for partition assignment</li>
@@ -398445,7 +398708,7 @@ FOR EACH ROW
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="design-patterns-3"><a class="header" href="#design-patterns-3">Design Patterns</a></h1>
-<h2 id="overview-460"><a class="header" href="#overview-460">Overview</a></h2>
+<h2 id="overview-461"><a class="header" href="#overview-461">Overview</a></h2>
 <p>Common architectural patterns for building scalable, reliable, and maintainable distributed systems.</p>
 <h2 id="communication-patterns-1"><a class="header" href="#communication-patterns-1">Communication Patterns</a></h2>
 <h3 id="api-gateway-2"><a class="header" href="#api-gateway-2">API Gateway</a></h3>
@@ -399188,7 +399451,7 @@ def get_users():
 <li><a href="https://microservices.io/patterns/data/saga.html">Pattern: Saga</a></li>
 <li><a href="https://martinfowler.com/">Martin Fowler’s Blog</a></li>
 </ul>
-<h2 id="where-this-connects-561"><a class="header" href="#where-this-connects-561">Where this connects</a></h2>
+<h2 id="where-this-connects-562"><a class="header" href="#where-this-connects-562">Where this connects</a></h2>
 <ul>
 <li><a href="#microservices-architecture">Microservices</a> — most patterns (saga, CQRS, event sourcing) are microservices architecture patterns</li>
 <li><a href="#distributed-systems-1">Distributed systems</a> — circuit breaker, bulkhead, and retry patterns address distributed failure modes</li>
@@ -399196,7 +399459,7 @@ def get_users():
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="distributed-consensus"><a class="header" href="#distributed-consensus">Distributed Consensus</a></h1>
-<h2 id="overview-461"><a class="header" href="#overview-461">Overview</a></h2>
+<h2 id="overview-462"><a class="header" href="#overview-462">Overview</a></h2>
 <p>Distributed consensus is the challenge of getting multiple nodes in a distributed system to agree on a shared state, even in the presence of failures.</p>
 <h2 id="the-cap-theorem"><a class="header" href="#the-cap-theorem">The CAP Theorem</a></h2>
 <p>You can only guarantee 2 out of 3:</p>
@@ -399776,7 +400039,7 @@ storage.fence(old_leader_id)
 <li><a href="https://www.ibm.com/topics/cap-theorem">CAP Theorem Explained</a></li>
 <li><a href="https://crdt.tech/">CRDTs: Conflict-free Replicated Data Types</a></li>
 </ul>
-<h2 id="where-this-connects-562"><a class="header" href="#where-this-connects-562">Where this connects</a></h2>
+<h2 id="where-this-connects-563"><a class="header" href="#where-this-connects-563">Where this connects</a></h2>
 <ul>
 <li><a href="#distributed-systems-1">Distributed systems</a> — consensus solves the leader election and log replication problems in distributed systems</li>
 <li><a href="#databases">Databases</a> — distributed databases (etcd, CockroachDB) use consensus algorithms internally</li>
@@ -399784,7 +400047,7 @@ storage.fence(old_leader_id)
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="message-queues-1"><a class="header" href="#message-queues-1">Message Queues</a></h1>
-<h2 id="overview-462"><a class="header" href="#overview-462">Overview</a></h2>
+<h2 id="overview-463"><a class="header" href="#overview-463">Overview</a></h2>
 <p>Message queues enable asynchronous communication between services, decoupling producers from consumers and providing reliability and scalability.</p>
 <h2 id="why-message-queues"><a class="header" href="#why-message-queues">Why Message Queues?</a></h2>
 <h3 id="without-queue-synchronous"><a class="header" href="#without-queue-synchronous">Without Queue (Synchronous)</a></h3>
@@ -400308,7 +400571,7 @@ if metrics['oldest_message_age'] &gt; 3600:
 <li><a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-best-practices.html">AWS SQS Best Practices</a></li>
 <li><a href="https://www.enterpriseintegrationpatterns.com/">Enterprise Integration Patterns</a></li>
 </ul>
-<h2 id="where-this-connects-563"><a class="header" href="#where-this-connects-563">Where this connects</a></h2>
+<h2 id="where-this-connects-564"><a class="header" href="#where-this-connects-564">Where this connects</a></h2>
 <ul>
 <li><a href="#microservices-architecture">Microservices</a> — message queues decouple microservices for async event-driven communication</li>
 <li><a href="#databases">Databases</a> — outbox pattern writes events to DB and queues them reliably</li>
@@ -400318,7 +400581,7 @@ if metrics['oldest_message_age'] &gt; 3600:
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="distributed-systems-1"><a class="header" href="#distributed-systems-1">Distributed Systems</a></h1>
-<h2 id="overview-463"><a class="header" href="#overview-463">Overview</a></h2>
+<h2 id="overview-464"><a class="header" href="#overview-464">Overview</a></h2>
 <p>A distributed system is a collection of independent computers that appear to its users as a single coherent system. These systems work together to achieve a common goal by communicating and coordinating their actions through message passing.</p>
 <h2 id="distributed-systems-fundamentals"><a class="header" href="#distributed-systems-fundamentals">Distributed Systems Fundamentals</a></h2>
 <h3 id="core-challenges"><a class="header" href="#core-challenges">Core Challenges</a></h3>
@@ -403197,7 +403460,7 @@ extend type Product @key(fields: "id") {
 </div>
 <hr>
 <p><em>Note: Distributed systems require careful consideration of requirements, constraints, and trade-offs. There is no one-size-fits-all solution. Choose the right tool and pattern for your specific use case.</em></p>
-<h2 id="where-this-connects-564"><a class="header" href="#where-this-connects-564">Where this connects</a></h2>
+<h2 id="where-this-connects-565"><a class="header" href="#where-this-connects-565">Where this connects</a></h2>
 <ul>
 <li><a href="#distributed-consensus">Distributed consensus</a> — Paxos/Raft solve leader election and log replication inside a distributed system</li>
 <li><a href="#databases">Databases</a> — distributed databases embody the CAP trade-offs discussed here</li>
@@ -407099,7 +407362,7 @@ Request queuing limits
 <li><strong>Design globally</strong>: GSLB for global availability</li>
 </ol>
 <p>Load balancing is not just about distributing traffic—it’s about ensuring your application remains available, performant, and resilient under any conditions.</p>
-<h2 id="where-this-connects-565"><a class="header" href="#where-this-connects-565">Where this connects</a></h2>
+<h2 id="where-this-connects-566"><a class="header" href="#where-this-connects-566">Where this connects</a></h2>
 <ul>
 <li><a href="#scalability">Scalability</a> — load balancing is the traffic distribution component of horizontal scaling</li>
 <li><a href="#rate-limiting-11">Rate limiting</a> — load balancers often enforce rate limits at the edge</li>
@@ -407204,7 +407467,7 @@ return current
 </ul>
 <h2 id="6-conclusion-2"><a class="header" href="#6-conclusion-2">6. Conclusion</a></h2>
 <p>Rate limiting is not just about blocking bots; it’s a fundamental part of system reliability. For most distributed systems, the <strong>Token Bucket</strong> algorithm backed by <strong>Redis Lua scripts</strong> is the industry standard balance of performance and accuracy.</p>
-<h2 id="where-this-connects-566"><a class="header" href="#where-this-connects-566">Where this connects</a></h2>
+<h2 id="where-this-connects-567"><a class="header" href="#where-this-connects-567">Where this connects</a></h2>
 <ul>
 <li><a href="#caching-strategies-4">Caching</a> — Redis backs rate limiting counters; it’s the same infrastructure as caching</li>
 <li><a href="#load-balancing-5">Load balancing</a> — L7 load balancers enforce rate limits before requests reach services</li>
@@ -407427,7 +407690,7 @@ return current
 <li><a href="#design-a-video-streaming-service-youtube--netflix">Design: Video streaming</a> — heavy CDN case study</li>
 <li><a href="#scalability">Scalability</a> — CDN as a horizontal-scaling primitive for reads</li>
 </ul>
-<h2 id="where-this-connects-567"><a class="header" href="#where-this-connects-567">Where this connects</a></h2>
+<h2 id="where-this-connects-568"><a class="header" href="#where-this-connects-568">Where this connects</a></h2>
 <ul>
 <li><a href="#caching-strategies-4">Caching</a> — CDN edge nodes are geographically distributed caches</li>
 <li><a href="#scalability">Scalability</a> — CDN offloads origin servers and reduces global read latency</li>
@@ -407695,7 +407958,7 @@ http_requests_total{method, status, path, user_id}
 <li><a href="#microservices-architecture">Microservices</a> — why observability matters more in microservices</li>
 <li><a href="#distributed-systems-1">Distributed systems</a> — debugging distributed bugs starts with traces</li>
 </ul>
-<h2 id="where-this-connects-568"><a class="header" href="#where-this-connects-568">Where this connects</a></h2>
+<h2 id="where-this-connects-569"><a class="header" href="#where-this-connects-569">Where this connects</a></h2>
 <ul>
 <li><a href="#microservices-architecture">Microservices</a> — distributed tracing connects spans across service boundaries</li>
 <li><a href="#distributed-systems-1">Distributed systems</a> — observability reveals the internal state of a distributed system</li>
@@ -407955,7 +408218,7 @@ Outbound msg rate: 1 msg/user/min × 1 KB = 167 MB/s ≈ 1.3 Gbps
 <li><a href="#load-balancing-5">Load balancing</a> — WS-aware load balancers need sticky sessions</li>
 <li><a href="#design-patterns-3">Design patterns</a> — backpressure, circuit-breaker patterns for realtime systems</li>
 </ul>
-<h2 id="where-this-connects-569"><a class="header" href="#where-this-connects-569">Where this connects</a></h2>
+<h2 id="where-this-connects-570"><a class="header" href="#where-this-connects-570">Where this connects</a></h2>
 <ul>
 <li><a href="#load-balancing-5">Load balancing</a> — WebSocket connections are stateful; load balancers must use sticky routing</li>
 <li><a href="#message-queues-1">Message queues</a> — fan-out via pub/sub or queues delivers messages to multiple WebSocket connections</li>
@@ -408136,7 +408399,7 @@ separate poller: SELECT outbox WHERE status='pending'
 </tbody>
 </table>
 </div>
-<h2 id="pitfalls-187"><a class="header" href="#pitfalls-187">Pitfalls</a></h2>
+<h2 id="pitfalls-189"><a class="header" href="#pitfalls-189">Pitfalls</a></h2>
 <ul>
 <li><strong>Side effects outside the key check.</strong> Make sure dedup happens <em>before</em> charging the card. Race: lock acquired → crash before persist → next retry double-charges.</li>
 <li><strong>Storing the key but not the response.</strong> Second retry succeeds with a different result. Always return <em>the original response body</em>.</li>
@@ -408167,7 +408430,7 @@ separate poller: SELECT outbox WHERE status='pending'
 <li><a href="#distributed-systems-1">Distributed systems</a> — why “exactly-once” is an illusion</li>
 <li><a href="#databases">Databases</a> — unique constraints, transactional outbox</li>
 </ul>
-<h2 id="where-this-connects-570"><a class="header" href="#where-this-connects-570">Where this connects</a></h2>
+<h2 id="where-this-connects-571"><a class="header" href="#where-this-connects-571">Where this connects</a></h2>
 <ul>
 <li><a href="#distributed-systems-1">Distributed systems</a> — retries are mandatory in distributed systems; idempotency makes them safe</li>
 <li><a href="#databases">Databases</a> — unique constraints and transactional outbox are the primary implementation tools</li>
@@ -408364,7 +408627,7 @@ Auto-increment Postgres sequence: ~25K/sec realistic ceiling
 <li>For high write rate, prefer Snowflake’s 8 bytes.</li>
 <li>Mention clock-skew handling if you pick Snowflake.</li>
 </ul>
-<h2 id="pitfalls-188"><a class="header" href="#pitfalls-188">Pitfalls</a></h2>
+<h2 id="pitfalls-190"><a class="header" href="#pitfalls-190">Pitfalls</a></h2>
 <ul>
 <li><strong>Storing UUIDs as strings</strong>: 36 bytes vs 16. Use binary/uuid columns.</li>
 <li><strong>Sorting on UUIDv4</strong>: it’s random — sort by created_at, not the ID.</li>
@@ -408379,7 +408642,7 @@ Auto-increment Postgres sequence: ~25K/sec realistic ceiling
 <li><a href="#consistent-hashing-1">Consistent hashing</a> — sharding by ID prefix</li>
 <li><a href="#design-a-url-shortener-tinyurl--bitly">Design: URL shortener</a> — case study using ID gen heavily</li>
 </ul>
-<h2 id="where-this-connects-571"><a class="header" href="#where-this-connects-571">Where this connects</a></h2>
+<h2 id="where-this-connects-572"><a class="header" href="#where-this-connects-572">Where this connects</a></h2>
 <ul>
 <li><a href="#distributed-systems-1">Distributed systems</a> — ID generation must work without central coordination (distributed context)</li>
 <li><a href="#databases">Databases</a> — ID choice (UUID vs Snowflake) affects database index performance and sharding</li>
@@ -408563,7 +408826,7 @@ timeline_cache (Redis, key = user_id):
 <li><a href="#design-patterns-3">Design patterns</a> — patterns interviewers expect you to name-drop</li>
 <li><a href="#distributed-systems-1">Distributed systems</a> — CAP, consensus, replication background</li>
 </ul>
-<h2 id="where-this-connects-572"><a class="header" href="#where-this-connects-572">Where this connects</a></h2>
+<h2 id="where-this-connects-573"><a class="header" href="#where-this-connects-573">Where this connects</a></h2>
 <ul>
 <li><a href="#estimation-cheatsheet">Estimation cheatsheet</a> — back-of-envelope numbers to use in the requirements phase</li>
 <li><a href="#design-patterns-3">Design patterns</a> — named patterns (circuit breaker, saga, CQRS) to reference in deep dives</li>
@@ -408777,7 +409040,7 @@ Cache (timelines):
 <li><a href="#scalability">Scalability</a> — what to do once you’ve established the load</li>
 <li><a href="#caching-strategies-4">Caching</a> — how to spend the cache budget</li>
 </ul>
-<h2 id="where-this-connects-573"><a class="header" href="#where-this-connects-573">Where this connects</a></h2>
+<h2 id="where-this-connects-574"><a class="header" href="#where-this-connects-574">Where this connects</a></h2>
 <ul>
 <li><a href="#scalability">Scalability</a> — load estimates from this cheatsheet drive the scalability decisions</li>
 <li><a href="#caching-strategies-4">Caching</a> — cache budget calculation uses storage/throughput numbers from this sheet</li>
@@ -408993,7 +409256,7 @@ clicks (optional, write-heavy):
 <li><a href="#content-delivery-networks-cdn-1">CDN</a> — edge caching of redirects</li>
 <li><a href="#databases">Databases</a> — sharding strategies</li>
 </ul>
-<h2 id="where-this-connects-574"><a class="header" href="#where-this-connects-574">Where this connects</a></h2>
+<h2 id="where-this-connects-575"><a class="header" href="#where-this-connects-575">Where this connects</a></h2>
 <ul>
 <li><a href="#distributed-id-generation">ID generation</a> — the short code is a distributed ID; Snowflake or Base62 encoding</li>
 <li><a href="#caching-strategies-4">Caching</a> — hot URLs cached in Redis to avoid DB lookup on redirect</li>
@@ -409214,7 +409477,7 @@ On read:
 <li><a href="#databases">Databases</a> — Cassandra wide-row patterns for feed storage</li>
 <li><a href="#distributed-id-generation">ID generation</a> — Snowflake tweet IDs for time-ordered feeds</li>
 </ul>
-<h2 id="where-this-connects-575"><a class="header" href="#where-this-connects-575">Where this connects</a></h2>
+<h2 id="where-this-connects-576"><a class="header" href="#where-this-connects-576">Where this connects</a></h2>
 <ul>
 <li><a href="#caching-strategies-4">Caching</a> — pre-computed fan-out feeds cached in Redis for read performance</li>
 <li><a href="#message-queues-1">Message queues</a> — async fan-out on post creation via Kafka or similar</li>
@@ -409447,7 +409710,7 @@ Stream missed msgs over WS in order
 <li><a href="#databases">Databases</a> — Cassandra wide rows for message storage</li>
 <li><a href="#idempotency--deduplication">Idempotency</a> — client_msg_id dedup for at-most-once delivery</li>
 </ul>
-<h2 id="where-this-connects-576"><a class="header" href="#where-this-connects-576">Where this connects</a></h2>
+<h2 id="where-this-connects-577"><a class="header" href="#where-this-connects-577">Where this connects</a></h2>
 <ul>
 <li><a href="#websockets--realtime-transports">Websockets/realtime</a> — WebSocket or SSE long-lived connections for push-from-server</li>
 <li><a href="#message-queues-1">Message queues</a> — fan-out to group members via pub/sub</li>
@@ -409699,7 +409962,7 @@ Query nearby for rider request:
 <li><a href="#databases">Databases</a> — Cassandra time-series for location writes, PostGIS for geospatial queries</li>
 <li><a href="#distributed-id-generation">ID generation</a> — Snowflake trip IDs</li>
 </ul>
-<h2 id="where-this-connects-577"><a class="header" href="#where-this-connects-577">Where this connects</a></h2>
+<h2 id="where-this-connects-578"><a class="header" href="#where-this-connects-578">Where this connects</a></h2>
 <ul>
 <li><a href="#databases">Databases</a> — geospatial database for driver location; time-series for location history</li>
 <li><a href="#message-queues-1">Message queues</a> — async matching and trip event propagation</li>
@@ -410010,7 +410273,7 @@ Mitigation: CDN with 99%+ hit rate on segments.
 <li><a href="#databases">Databases</a> — Spanner vs Bigtable choice for metadata</li>
 <li><a href="#design-a-news-feed-twitter--facebook">Design: News feed</a> — recommendation/feed parallels</li>
 </ul>
-<h2 id="where-this-connects-578"><a class="header" href="#where-this-connects-578">Where this connects</a></h2>
+<h2 id="where-this-connects-579"><a class="header" href="#where-this-connects-579">Where this connects</a></h2>
 <ul>
 <li><a href="#content-delivery-networks-cdn-1">CDN</a> — the primary delivery mechanism for video chunks; edge PoPs serve the majority of traffic</li>
 <li><a href="#message-queues-1">Message queues</a> — video upload triggers async transcoding pipeline via Kafka</li>
@@ -410242,7 +410505,7 @@ re-rank suggestions by (global_score + alpha * personalization_score)
 <li><a href="#message-queues-1">Message queues</a> — Kafka log → aggregation pipeline for frequency counting</li>
 <li><a href="#design-a-news-feed-twitter--facebook">Design: News feed</a> — similar two-path (read/write) pattern</li>
 </ul>
-<h2 id="where-this-connects-579"><a class="header" href="#where-this-connects-579">Where this connects</a></h2>
+<h2 id="where-this-connects-580"><a class="header" href="#where-this-connects-580">Where this connects</a></h2>
 <ul>
 <li><a href="#caching-strategies-4">Caching</a> — top-k suggestions are pre-computed and cached at the prefix level</li>
 <li><a href="#databases">Databases</a> — Trie or inverted index stored in Redis or a custom key-value store</li>
@@ -411170,7 +411433,7 @@ cd android
 <li><a href="https://fbflipper.com/">Flipper</a></li>
 <li><a href="https://github.com/infinitered/reactotron">Reactotron</a></li>
 </ul>
-<h2 id="where-this-connects-580"><a class="header" href="#where-this-connects-580">Where this connects</a></h2>
+<h2 id="where-this-connects-581"><a class="header" href="#where-this-connects-581">Where this connects</a></h2>
 <ul>
 <li><a href="#flutter">Flutter</a> — the Dart/Google alternative to React Native for cross-platform mobile</li>
 <li><a href="#react">../web_development/react</a> — React Native extends React’s component model to native mobile UI</li>
@@ -412025,7 +412288,7 @@ flutter build ios --release
 <li><a href="https://dartpad.dev/">DartPad</a> - Online IDE</li>
 <li><a href="https://firebase.flutter.dev/">FlutterFire</a> - Firebase integration</li>
 </ul>
-<h2 id="where-this-connects-581"><a class="header" href="#where-this-connects-581">Where this connects</a></h2>
+<h2 id="where-this-connects-582"><a class="header" href="#where-this-connects-582">Where this connects</a></h2>
 <ul>
 <li><a href="#react-native">React Native</a> — the JavaScript/React alternative to Flutter for cross-platform mobile</li>
 <li><a href="#react">../web_development/react</a> — React Native shares the React component model; Flutter uses Dart</li>
@@ -412033,7 +412296,7 @@ flutter build ios --release
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="android-development-guide"><a class="header" href="#android-development-guide">Android Development Guide</a></h1>
-<h2 id="overview-464"><a class="header" href="#overview-464">Overview</a></h2>
+<h2 id="overview-465"><a class="header" href="#overview-465">Overview</a></h2>
 <p>This guide covers the complete Android development workflow, from setting up Android Studio to building, debugging, and deploying applications. It focuses on practical development practices and tools that every Android developer should know.</p>
 <h2 id="android-studio-setup"><a class="header" href="#android-studio-setup">Android Studio Setup</a></h2>
 <h3 id="installation-42"><a class="header" href="#installation-42">Installation</a></h3>
@@ -412840,7 +413103,7 @@ android {
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="ios-development-guide"><a class="header" href="#ios-development-guide">iOS Development Guide</a></h1>
-<h2 id="overview-465"><a class="header" href="#overview-465">Overview</a></h2>
+<h2 id="overview-466"><a class="header" href="#overview-466">Overview</a></h2>
 <p>This guide covers the complete iOS development workflow, from setting up Xcode to building, debugging, and deploying applications. It focuses on practical development practices and tools that every iOS developer should know, including both UIKit and SwiftUI approaches.</p>
 <h2 id="xcode-setup"><a class="header" href="#xcode-setup">Xcode Setup</a></h2>
 <h3 id="installation-43"><a class="header" href="#installation-43">Installation</a></h3>
@@ -415632,7 +415895,7 @@ test('adds numbers', () =&gt; {
 <p>Explore comprehensive testing strategies, frameworks, and tools to build reliable, high-quality software with confidence.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="unit-testing-1"><a class="header" href="#unit-testing-1">Unit Testing</a></h1>
-<h2 id="overview-466"><a class="header" href="#overview-466">Overview</a></h2>
+<h2 id="overview-467"><a class="header" href="#overview-467">Overview</a></h2>
 <p>Unit testing verifies individual functions or classes work correctly in isolation.</p>
 <h2 id="python---pytest"><a class="header" href="#python---pytest">Python - pytest</a></h2>
 <pre><code class="language-python"># test_calculator.py
@@ -415755,7 +416018,7 @@ with raises(Exception): # Exception
 <li><a href="https://jestjs.io/">Jest Documentation</a></li>
 <li><a href="https://junit.org/junit5/docs/current/user-guide/">JUnit 5 Guide</a></li>
 </ul>
-<h2 id="where-this-connects-582"><a class="header" href="#where-this-connects-582">Where this connects</a></h2>
+<h2 id="where-this-connects-583"><a class="header" href="#where-this-connects-583">Where this connects</a></h2>
 <ul>
 <li><a href="#integration-testing-1">Integration</a> — unit tests test in isolation; integration tests verify components together</li>
 <li><a href="#mocking-3">Mocking</a> — unit tests use mocks to replace external dependencies</li>
@@ -415766,7 +416029,7 @@ with raises(Exception): # Exception
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="integration-testing-1"><a class="header" href="#integration-testing-1">Integration Testing</a></h1>
 <p>Integration testing verifies that different modules or services work together correctly. Unlike unit tests that test individual components in isolation, integration tests validate interactions between components.</p>
-<h2 id="overview-467"><a class="header" href="#overview-467">Overview</a></h2>
+<h2 id="overview-468"><a class="header" href="#overview-468">Overview</a></h2>
 <p>Integration tests validate:</p>
 <ul>
 <li>API endpoints</li>
@@ -415971,7 +416234,7 @@ def test_external_api_integration():
 </table>
 </div>
 <p>Integration tests ensure your system components work together correctly, catching issues that unit tests might miss.</p>
-<h2 id="where-this-connects-583"><a class="header" href="#where-this-connects-583">Where this connects</a></h2>
+<h2 id="where-this-connects-584"><a class="header" href="#where-this-connects-584">Where this connects</a></h2>
 <ul>
 <li><a href="#unit-testing-1">Unit testing</a> — unit tests test in isolation; integration tests test interactions</li>
 <li><a href="#end-to-end-testing">E2E testing</a> — integration tests verify component interactions; E2E tests verify full user workflows</li>
@@ -415980,7 +416243,7 @@ def test_external_api_integration():
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="test-driven-development-tdd"><a class="header" href="#test-driven-development-tdd">Test-Driven Development (TDD)</a></h1>
-<h2 id="overview-468"><a class="header" href="#overview-468">Overview</a></h2>
+<h2 id="overview-469"><a class="header" href="#overview-469">Overview</a></h2>
 <p>TDD: Write tests BEFORE writing code. Red → Green → Refactor cycle.</p>
 <h2 id="red-green-refactor-cycle"><a class="header" href="#red-green-refactor-cycle">Red-Green-Refactor Cycle</a></h2>
 <h3 id="1-red-write-failing-test"><a class="header" href="#1-red-write-failing-test">1. Red: Write Failing Test</a></h3>
@@ -416199,7 +416462,7 @@ test_system_prevents_overdraft()
 <li><a href="https://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530">TDD by Example - Kent Beck</a></li>
 <li><a href="https://testdriven.io/blog/what-is-tdd/">What is TDD</a></li>
 </ul>
-<h2 id="where-this-connects-584"><a class="header" href="#where-this-connects-584">Where this connects</a></h2>
+<h2 id="where-this-connects-585"><a class="header" href="#where-this-connects-585">Where this connects</a></h2>
 <ul>
 <li><a href="#unit-testing-1">Unit testing</a> — the fast tests TDD writes first</li>
 <li><a href="#bdd-with-gherkin">BDD with Gherkin</a> — a behaviour-focused extension of TDD</li>
@@ -416364,7 +416627,7 @@ def test_with_mocker(mocker):
 </table>
 </div>
 <p>pytest is the de facto standard for Python testing with its simple syntax, powerful features, and extensive plugin ecosystem.</p>
-<h2 id="where-this-connects-585"><a class="header" href="#where-this-connects-585">Where this connects</a></h2>
+<h2 id="where-this-connects-586"><a class="header" href="#where-this-connects-586">Where this connects</a></h2>
 <ul>
 <li><a href="#unit-testing-1">Unit testing</a> — pytest is the standard Python unit testing framework</li>
 <li><a href="#integration-testing-1">Integration</a> — pytest fixtures power integration test setup and teardown</li>
@@ -418431,7 +418694,7 @@ npx cypress run --browser chrome      # Specific browser
 <li><a href="https://www.w3.org/WAI/WCAG21/quickref/">Web Accessibility Guidelines</a></li>
 <li><a href="https://martinfowler.com/testing/">Martin Fowler - Testing</a></li>
 </ul>
-<h2 id="where-this-connects-586"><a class="header" href="#where-this-connects-586">Where this connects</a></h2>
+<h2 id="where-this-connects-587"><a class="header" href="#where-this-connects-587">Where this connects</a></h2>
 <ul>
 <li><a href="#integration-testing-1">Integration</a> — integration tests at the component level; E2E at the user workflow level</li>
 <li><a href="#unit-testing-1">Unit testing</a> — the test pyramid: many unit tests, fewer integration, even fewer E2E</li>
@@ -418440,7 +418703,7 @@ npx cypress run --browser chrome      # Specific browser
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="code-quality-2"><a class="header" href="#code-quality-2">Code Quality</a></h1>
 <p>Code quality tools help maintain consistent, readable, and error-free code through linting, formatting, type checking, and static analysis.</p>
-<h2 id="overview-469"><a class="header" href="#overview-469">Overview</a></h2>
+<h2 id="overview-470"><a class="header" href="#overview-470">Overview</a></h2>
 <p><strong>Code Quality Tools:</strong></p>
 <ul>
 <li><strong>Linters</strong>: Find bugs, style issues, and suspicious code</li>
@@ -419226,7 +419489,7 @@ python_files = ["test_*.py"]
 <li><a href="https://www.typescriptlang.org/docs/handbook/intro.html">TypeScript Handbook</a></li>
 <li><a href="https://mypy.readthedocs.io/">mypy Documentation</a></li>
 </ul>
-<h2 id="where-this-connects-587"><a class="header" href="#where-this-connects-587">Where this connects</a></h2>
+<h2 id="where-this-connects-588"><a class="header" href="#where-this-connects-588">Where this connects</a></h2>
 <ul>
 <li><a href="#test-coverage-1">Coverage</a> — test coverage is a code quality metric</li>
 <li><a href="#unit-testing-1">Unit testing</a> — unit tests are the enforcement mechanism for code quality</li>
@@ -419849,7 +420112,7 @@ Function Coverage = (Called Functions / Total Functions) × 100%
 <li><a href="https://about.codecov.io/">Codecov</a></li>
 <li><a href="https://martinfowler.com/bliki/TestCoverage.html">Martin Fowler - Test Coverage</a></li>
 </ul>
-<h2 id="where-this-connects-588"><a class="header" href="#where-this-connects-588">Where this connects</a></h2>
+<h2 id="where-this-connects-589"><a class="header" href="#where-this-connects-589">Where this connects</a></h2>
 <ul>
 <li><a href="#unit-testing-1">Unit testing</a> — coverage measures how much code is exercised by tests</li>
 <li><a href="#code-quality-2">Code quality</a> — coverage is one code quality metric alongside linting and complexity</li>
@@ -420515,7 +420778,7 @@ node --inspect-brk jest          # Debug with DevTools
 <li><a href="https://developer.chrome.com/docs/devtools/">Chrome DevTools</a></li>
 <li><a href="https://code.visualstudio.com/docs/editor/debugging">VS Code Debugging</a></li>
 </ul>
-<h2 id="where-this-connects-589"><a class="header" href="#where-this-connects-589">Where this connects</a></h2>
+<h2 id="where-this-connects-590"><a class="header" href="#where-this-connects-590">Where this connects</a></h2>
 <ul>
 <li><a href="#unit-testing-1">Unit testing</a> — unit test failures are the starting point for debugging</li>
 <li><a href="#integration-testing-1">Integration</a> — integration test failures often reveal environment or contract issues</li>
@@ -421121,7 +421384,7 @@ expect(fn).toHaveBeenCalledWith(args)     // Mock called with args
 <li><a href="https://github.com/sapegin/jest-cheat-sheet">Jest Cheat Sheet</a></li>
 <li><a href="https://kentcdodds.com/blog/common-mistakes-with-react-testing-library">Common Testing Mistakes</a></li>
 </ul>
-<h2 id="where-this-connects-590"><a class="header" href="#where-this-connects-590">Where this connects</a></h2>
+<h2 id="where-this-connects-591"><a class="header" href="#where-this-connects-591">Where this connects</a></h2>
 <ul>
 <li><a href="#unit-testing-1">Unit testing</a> — Jest is the standard JavaScript/TypeScript unit testing framework</li>
 <li><a href="#mocking-3">Mocking</a> — Jest provides built-in mocking with jest.mock(), jest.fn(), and jest.spyOn()</li>
@@ -421875,7 +422138,7 @@ jest.spyOn(obj, 'method');
 <li><a href="https://pytest-mock.readthedocs.io/">pytest-mock</a></li>
 <li><a href="https://martinfowler.com/articles/mocksArentStubs.html">Testing with Mocks</a></li>
 </ul>
-<h2 id="where-this-connects-591"><a class="header" href="#where-this-connects-591">Where this connects</a></h2>
+<h2 id="where-this-connects-592"><a class="header" href="#where-this-connects-592">Where this connects</a></h2>
 <ul>
 <li><a href="#unit-testing-1">Unit testing</a> — mocking isolates the unit under test from its dependencies</li>
 <li><a href="#integration-testing-1">Integration</a> — integration tests deliberately avoid mocks to test real interactions</li>
@@ -422538,7 +422801,7 @@ pytest --benchmark-only
 <li><a href="https://artillery.io/docs/">Artillery Documentation</a></li>
 <li><a href="https://martinfowler.com/articles/practical-test-pyramid.html">Performance Testing Guidance</a></li>
 </ul>
-<h2 id="where-this-connects-592"><a class="header" href="#where-this-connects-592">Where this connects</a></h2>
+<h2 id="where-this-connects-593"><a class="header" href="#where-this-connects-593">Where this connects</a></h2>
 <ul>
 <li><a href="#end-to-end-testing">E2E testing</a> — E2E tests measure correctness; performance tests measure throughput and latency</li>
 <li><a href="#unit-testing-1">Unit testing</a> — the test pyramid: performance tests complement functional tests at a different level</li>
@@ -422546,7 +422809,7 @@ pytest --benchmark-only
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="property-based-testing"><a class="header" href="#property-based-testing">Property-Based Testing</a></h1>
-<h2 id="overview-470"><a class="header" href="#overview-470">Overview</a></h2>
+<h2 id="overview-471"><a class="header" href="#overview-471">Overview</a></h2>
 <p>Example-based tests check specific inputs you thought of. <strong>Property-based
 testing</strong> flips this: you describe a <em>property</em> (an invariant that should hold
 for <strong>all</strong> valid inputs), and the framework generates hundreds of random
@@ -422655,7 +422918,7 @@ you the exact one that was open — described as simply as possible.</p>
 <li><a href="https://fast-check.dev/">fast-check docs</a></li>
 <li><a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">Choosing properties for property-based testing - F# for Fun and Profit</a></li>
 </ul>
-<h2 id="where-this-connects-593"><a class="header" href="#where-this-connects-593">Where this connects</a></h2>
+<h2 id="where-this-connects-594"><a class="header" href="#where-this-connects-594">Where this connects</a></h2>
 <ul>
 <li><a href="#unit-testing-1">Unit testing</a> — the example-based tests PBT complements</li>
 <li><a href="#test-driven-development-tdd">TDD</a> — properties as executable specifications</li>
@@ -422665,7 +422928,7 @@ you the exact one that was open — described as simply as possible.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="mutation-testing"><a class="header" href="#mutation-testing">Mutation Testing</a></h1>
-<h2 id="overview-471"><a class="header" href="#overview-471">Overview</a></h2>
+<h2 id="overview-472"><a class="header" href="#overview-472">Overview</a></h2>
 <p>High code <a href="#test-coverage-1">coverage</a> tells you which lines <em>ran</em> during tests — not
 whether your tests would <em>catch a bug</em> in those lines. A test suite can hit 100%
 coverage while asserting almost nothing.</p>
@@ -422754,7 +423017,7 @@ the alarm stays silent, that room isn’t really protected.</p>
 <li><a href="https://stryker-mutator.io/">Stryker Mutator</a></li>
 <li><a href="https://pitest.org/">Pitest</a></li>
 </ul>
-<h2 id="where-this-connects-594"><a class="header" href="#where-this-connects-594">Where this connects</a></h2>
+<h2 id="where-this-connects-595"><a class="header" href="#where-this-connects-595">Where this connects</a></h2>
 <ul>
 <li><a href="#test-coverage-1">Coverage</a> — the metric mutation testing improves on</li>
 <li><a href="#unit-testing-1">Unit testing</a> — the suite mutants probe</li>
@@ -422764,7 +423027,7 @@ the alarm stays silent, that room isn’t really protected.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="contract-testing"><a class="header" href="#contract-testing">Contract Testing</a></h1>
-<h2 id="overview-472"><a class="header" href="#overview-472">Overview</a></h2>
+<h2 id="overview-473"><a class="header" href="#overview-473">Overview</a></h2>
 <p>When services talk to each other (microservices, a frontend and its API), the
 risk is a <strong>broken integration</strong>: the provider changes a field and every
 consumer breaks in production. Full end-to-end tests across all services catch
@@ -422865,7 +423128,7 @@ their promise on paper, the real meeting will work.</p>
 <li><a href="https://docs.pact.io/pact_broker">Pact Broker</a></li>
 <li><a href="https://martinfowler.com/bliki/ContractTest.html">Martin Fowler: Contract Tests</a></li>
 </ul>
-<h2 id="where-this-connects-595"><a class="header" href="#where-this-connects-595">Where this connects</a></h2>
+<h2 id="where-this-connects-596"><a class="header" href="#where-this-connects-596">Where this connects</a></h2>
 <ul>
 <li><a href="#integration-testing-1">Integration testing</a> — broader cross-service testing</li>
 <li><a href="#end-to-end-testing">E2E testing</a> — the full-stack alternative to contracts</li>
@@ -422876,7 +423139,7 @@ their promise on paper, the real meeting will work.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="bdd-with-gherkin"><a class="header" href="#bdd-with-gherkin">BDD with Gherkin</a></h1>
-<h2 id="overview-473"><a class="header" href="#overview-473">Overview</a></h2>
+<h2 id="overview-474"><a class="header" href="#overview-474">Overview</a></h2>
 <p><strong>Behavior-Driven Development (BDD)</strong> extends <a href="#test-driven-development-tdd">TDD</a> by writing tests in
 language the whole team — including non-developers — can read. Instead of
 asserting on units, you describe <em>behavior</em> from the user’s point of view using
@@ -422984,7 +423247,7 @@ conversation (business + dev + tester) so everyone agrees on “done.” This is
 <strong>Acceptance-Test-Driven Development (ATDD)</strong>: the agreed scenarios become the
 acceptance criteria and the automated tests at once — they double as <strong>living
 documentation</strong> that can’t drift from the code because they execute.</p>
-<h2 id="pitfalls-189"><a class="header" href="#pitfalls-189">Pitfalls</a></h2>
+<h2 id="pitfalls-191"><a class="header" href="#pitfalls-191">Pitfalls</a></h2>
 <p>❌ <strong>UI-coupled steps</strong> — “When I click the #submit button” makes scenarios
 brittle; describe intent (“When I submit the order”), not mechanics.
 ❌ <strong>Imperative over declarative</strong> — long step-by-step scripts instead of
@@ -423011,7 +423274,7 @@ those exact written steps to prove the cake comes out right.</p>
 <li><a href="https://cucumber.io/docs/cucumber/">Cucumber docs</a></li>
 <li><a href="https://cucumber.io/docs/gherkin/reference/">Gherkin reference</a></li>
 </ul>
-<h2 id="where-this-connects-596"><a class="header" href="#where-this-connects-596">Where this connects</a></h2>
+<h2 id="where-this-connects-597"><a class="header" href="#where-this-connects-597">Where this connects</a></h2>
 <ul>
 <li><a href="#test-driven-development-tdd">TDD</a> — BDD extends the red-green-refactor cycle with behaviour specs</li>
 <li><a href="#unit-testing-1">Unit testing</a>, <a href="#integration-testing-1">Integration testing</a> — the layers scenarios drive</li>
@@ -423021,7 +423284,7 @@ those exact written steps to prove the cake comes out right.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="security-testing"><a class="header" href="#security-testing">Security Testing</a></h1>
-<h2 id="overview-474"><a class="header" href="#overview-474">Overview</a></h2>
+<h2 id="overview-475"><a class="header" href="#overview-475">Overview</a></h2>
 <p>Security testing finds vulnerabilities before attackers do. The modern approach
 is <strong>shift-left</strong>: catch issues early and automatically in development and
 <a href="#cicd-test-automation">CI</a>, rather than in a late, manual pen-test. The main techniques
@@ -423115,7 +423378,7 @@ sure you didn’t leave a key under the mat.</p>
 <li><a href="https://bandit.readthedocs.io/">Bandit</a> · <a href="https://semgrep.dev/">Semgrep</a> · <a href="https://www.zaproxy.org/">OWASP ZAP</a></li>
 <li><a href="https://github.com/gitleaks/gitleaks">gitleaks</a> · <a href="https://google.github.io/osv-scanner/">OSV-Scanner</a></li>
 </ul>
-<h2 id="where-this-connects-597"><a class="header" href="#where-this-connects-597">Where this connects</a></h2>
+<h2 id="where-this-connects-598"><a class="header" href="#where-this-connects-598">Where this connects</a></h2>
 <ul>
 <li><a href="#owasp-top-10">OWASP Top 10</a> — the vulnerability classes to test for</li>
 <li><a href="#threat-modeling-1">Threat modeling</a> — deciding what to test</li>
@@ -423125,7 +423388,7 @@ sure you didn’t leave a key under the mat.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="test-data-management-1"><a class="header" href="#test-data-management-1">Test Data Management</a></h1>
-<h2 id="overview-475"><a class="header" href="#overview-475">Overview</a></h2>
+<h2 id="overview-476"><a class="header" href="#overview-476">Overview</a></h2>
 <p>Tests need data: a user, an order, a populated database row. Hand-building that
 data inline makes tests verbose, fragile, and full of irrelevant detail (the
 “mystery guest” smell — see <a href="#test-smells">Test Smells</a>). Good test-data
@@ -423238,7 +423501,7 @@ detail you care about — “this one’s a kid” — and the rest is filled in
 <li><a href="https://faker.readthedocs.io/">Faker (Python)</a> · <a href="https://fakerjs.dev/">@faker-js/faker</a></li>
 <li><a href="https://github.com/thoughtbot/fishery">Fishery</a></li>
 </ul>
-<h2 id="where-this-connects-598"><a class="header" href="#where-this-connects-598">Where this connects</a></h2>
+<h2 id="where-this-connects-599"><a class="header" href="#where-this-connects-599">Where this connects</a></h2>
 <ul>
 <li><a href="#mocking-3">Mocking</a> — stubs versus real data</li>
 <li><a href="#integration-testing-1">Integration testing</a> — seeding databases for integration tests</li>
@@ -423248,7 +423511,7 @@ detail you care about — “this one’s a kid” — and the rest is filled in
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="cicd-test-automation"><a class="header" href="#cicd-test-automation">CI/CD Test Automation</a></h1>
-<h2 id="overview-476"><a class="header" href="#overview-476">Overview</a></h2>
+<h2 id="overview-477"><a class="header" href="#overview-477">Overview</a></h2>
 <p>Tests deliver the most value when they run <strong>automatically</strong> on every change.
 CI/CD test automation is about making the suite <strong>fast, reliable, and
 informative</strong> in the pipeline so it gates bad code without slowing the team
@@ -423372,7 +423635,7 @@ until it passes its gate.</p>
 <li><a href="https://pytest-xdist.readthedocs.io/">pytest-xdist</a> · <a href="https://jestjs.io/docs/cli">Jest CI guide</a></li>
 <li><a href="https://testing.googleblog.com/2016/05/flaky-tests-at-google-and-how-we.html">Google Testing Blog: Flaky Tests</a></li>
 </ul>
-<h2 id="where-this-connects-599"><a class="header" href="#where-this-connects-599">Where this connects</a></h2>
+<h2 id="where-this-connects-600"><a class="header" href="#where-this-connects-600">Where this connects</a></h2>
 <ul>
 <li><a href="#test-driven-development-tdd">TDD</a> — the fast tests that gate every commit</li>
 <li><a href="#test-coverage-1">Coverage</a>, <a href="#mutation-testing">Mutation testing</a> — quality gates in the pipeline</li>
@@ -423383,7 +423646,7 @@ until it passes its gate.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="test-smells"><a class="header" href="#test-smells">Test Smells</a></h1>
-<h2 id="overview-477"><a class="header" href="#overview-477">Overview</a></h2>
+<h2 id="overview-478"><a class="header" href="#overview-478">Overview</a></h2>
 <p>Test code is real code — it has to be maintained. <strong>Test smells</strong> are recurring
 patterns that make a suite slow, fragile, or untrustworthy. They don’t
 necessarily fail today, but they make tests painful to read, prone to false
@@ -423472,7 +423735,7 @@ that never beeps at all (asserts nothing) — and you stop trusting it.</p>
 <li><a href="http://xunitpatterns.com/Test%20Smells.html">xUnit Test Patterns - Gerard Meszaros (test smells catalogue)</a></li>
 <li><a href="https://martinfowler.com/">Martin Fowler: Test Smells &amp; Refactoring</a></li>
 </ul>
-<h2 id="where-this-connects-600"><a class="header" href="#where-this-connects-600">Where this connects</a></h2>
+<h2 id="where-this-connects-601"><a class="header" href="#where-this-connects-601">Where this connects</a></h2>
 <ul>
 <li><a href="#test-driven-development-tdd">TDD</a> — the discipline that keeps tests clean</li>
 <li><a href="#unit-testing-1">Unit testing</a> — where most smells appear</li>
@@ -423533,7 +423796,7 @@ that never beeps at all (asserts nothing) — and you stop trusting it.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="gdb-gnu-debugger"><a class="header" href="#gdb-gnu-debugger">GDB (GNU Debugger)</a></h1>
 <p>GDB is the GNU Project debugger, allowing you to see what is going on inside a program while it executes or what it was doing at the moment it crashed. It’s an essential tool for debugging C, C++, and other compiled languages.</p>
-<h2 id="overview-478"><a class="header" href="#overview-478">Overview</a></h2>
+<h2 id="overview-479"><a class="header" href="#overview-479">Overview</a></h2>
 <p>GDB provides extensive facilities for tracing and altering program execution, including breakpoints, watchpoints, examining variables, and manipulating program state.</p>
 <p><strong>Key Features:</strong></p>
 <ul>
@@ -424083,7 +424346,7 @@ debug: program
 </table>
 </div>
 <p>GDB is an indispensable tool for debugging compiled programs, offering powerful features for understanding program behavior, finding bugs, and analyzing crashes.</p>
-<h2 id="where-this-connects-601"><a class="header" href="#where-this-connects-601">Where this connects</a></h2>
+<h2 id="where-this-connects-602"><a class="header" href="#where-this-connects-602">Where this connects</a></h2>
 <ul>
 <li><a href="#ptrace--debugger-internals">ptrace &amp; debugger internals</a> — the kernel primitive every breakpoint, watchpoint, and single-step is built on</li>
 <li><a href="#core-dump-analysis-1">Core dump</a> — GDB analyzes core dump files for post-mortem debugging</li>
@@ -424093,7 +424356,7 @@ debug: program
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="lldb"><a class="header" href="#lldb">LLDB</a></h1>
-<h2 id="overview-479"><a class="header" href="#overview-479">Overview</a></h2>
+<h2 id="overview-480"><a class="header" href="#overview-480">Overview</a></h2>
 <p>LLDB is the debugger of the LLVM project — the <a href="#gdb-gnu-debugger">GDB</a> counterpart in the
 Clang/LLVM world. It is the default debugger on macOS and iOS (driving Xcode), and is
 widely used wherever Clang, Swift, or Rust toolchains live. It shares GDB’s job
@@ -424169,7 +424432,7 @@ lldb
 (lldb) platform connect connect://device:1234
 (lldb) file ./prog &amp;&amp; run
 </code></pre>
-<h2 id="pitfalls-190"><a class="header" href="#pitfalls-190">Pitfalls</a></h2>
+<h2 id="pitfalls-192"><a class="header" href="#pitfalls-192">Pitfalls</a></h2>
 <pre><code>- Command grammar differs from GDB: "print" is "expression"; use the aliases if unsure.
 - Optimised builds: variables show as &lt;unavailable&gt;; debug at -O0 or use -Og.
 - On macOS, attaching/launching needs code-signing entitlements or root (taskgated).
@@ -424178,7 +424441,7 @@ lldb
 - Pretty-printers are Python data formatters here, not GDB pretty-printers — not interchangeable.
 - Swift/Obj-C debugging needs the matching LLDB from that toolchain, not a generic build.
 </code></pre>
-<h2 id="where-this-connects-602"><a class="header" href="#where-this-connects-602">Where this connects</a></h2>
+<h2 id="where-this-connects-603"><a class="header" href="#where-this-connects-603">Where this connects</a></h2>
 <ul>
 <li><a href="#gdb-gnu-debugger">GDB</a> — the GNU counterpart; the map above translates between them</li>
 <li><a href="#ptrace--debugger-internals">ptrace &amp; debugger internals</a> — the syscall under every breakpoint and single-step</li>
@@ -424191,7 +424454,7 @@ lldb
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="binary-analysis-and-debugging-tools"><a class="header" href="#binary-analysis-and-debugging-tools">Binary Analysis and Debugging Tools</a></h1>
 <p>A comprehensive guide to essential tools for analyzing, debugging, and understanding compiled binaries, shared libraries, and executables on Linux and Unix systems.</p>
-<h2 id="overview-480"><a class="header" href="#overview-480">Overview</a></h2>
+<h2 id="overview-481"><a class="header" href="#overview-481">Overview</a></h2>
 <p>Binary analysis tools help developers understand compiled programs, debug issues, analyze dependencies, and <a href="#reverse-engineering">reverse engineer</a> executables. These tools are essential for systems programming, security research, performance analysis, and troubleshooting deployment issues.</p>
 <p><strong>Categories:</strong></p>
 <ul>
@@ -425480,7 +425743,7 @@ diff &lt;(ldd working) &lt;(ldd broken)
 </table>
 </div>
 <p>These tools form the foundation of binary analysis and debugging on Unix-like systems. Mastering them enables effective troubleshooting, security analysis, and reverse engineering of compiled programs.</p>
-<h2 id="where-this-connects-603"><a class="header" href="#where-this-connects-603">Where this connects</a></h2>
+<h2 id="where-this-connects-604"><a class="header" href="#where-this-connects-604">Where this connects</a></h2>
 <ul>
 <li><a href="#gdb-gnu-debugger">GDB</a> — GDB is the primary runtime debugger; these tools analyze static binaries</li>
 <li><a href="#ptrace--debugger-internals">ptrace &amp; debugger internals</a> — <code>strace</code>/<code>ltrace</code> are thin loops over <code>PTRACE_SYSCALL</code></li>
@@ -425489,7 +425752,7 @@ diff &lt;(ldd working) &lt;(ldd broken)
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="valgrind"><a class="header" href="#valgrind">Valgrind</a></h1>
-<h2 id="overview-481"><a class="header" href="#overview-481">Overview</a></h2>
+<h2 id="overview-482"><a class="header" href="#overview-482">Overview</a></h2>
 <p>Valgrind is a dynamic binary instrumentation framework: it runs your program on a
 synthetic CPU and watches every memory access and instruction. That makes it the
 go-to tool for catching memory errors and leaks that a normal run hides, and it needs
@@ -425576,7 +425839,7 @@ gdb ./prog
 (gdb) target remote | vgdb            # now inspect state at the error
 (gdb) monitor leak_check              # run memcheck commands from GDB
 </code></pre>
-<h2 id="pitfalls-191"><a class="header" href="#pitfalls-191">Pitfalls</a></h2>
+<h2 id="pitfalls-193"><a class="header" href="#pitfalls-193">Pitfalls</a></h2>
 <pre><code>- Speed: 10–50× slower; not for production or tight timing loops. Reduce the workload.
 - Build with -g; avoid heavy -O2 (inlining/optimised-out vars muddy reports).
 - "still reachable" is usually fine (e.g. global caches) — don't chase every one.
@@ -425587,7 +425850,7 @@ gdb ./prog
 - It catches errors only on paths actually executed — coverage still matters.
 - JIT'd / self-modifying code and some SIMD instructions may be unsupported.
 </code></pre>
-<h2 id="where-this-connects-604"><a class="header" href="#where-this-connects-604">Where this connects</a></h2>
+<h2 id="where-this-connects-605"><a class="header" href="#where-this-connects-605">Where this connects</a></h2>
 <ul>
 <li><a href="#sanitizers-2">Sanitizers</a> — faster compile-time ASan/TSan/UBSan; the modern default</li>
 <li><a href="#perf--flame-graphs">perf &amp; Flame Graphs</a> — real-hardware profiling vs simulated</li>
@@ -425599,7 +425862,7 @@ gdb ./prog
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="sanitizers-2"><a class="header" href="#sanitizers-2">Sanitizers</a></h1>
-<h2 id="overview-482"><a class="header" href="#overview-482">Overview</a></h2>
+<h2 id="overview-483"><a class="header" href="#overview-483">Overview</a></h2>
 <p>Sanitizers are compiler-instrumented runtime bug detectors built into GCC and Clang.
 You add a <code>-fsanitize=</code> flag, recompile, and the compiler injects checks (shadow
 memory, redzones, instrumented loads/stores) that catch bugs the moment they happen,
@@ -425682,7 +425945,7 @@ optimised build.</p>
   Coverage of libs    only instrumented code  all code, including 3rd-party
   Best for            CI on your own code     binaries you can't rebuild
 </code></pre>
-<h2 id="pitfalls-192"><a class="header" href="#pitfalls-192">Pitfalls</a></h2>
+<h2 id="pitfalls-194"><a class="header" href="#pitfalls-194">Pitfalls</a></h2>
 <pre><code>- Sanitizer builds are for testing, NOT production (ASan ~2× memory; all are attack surface).
 - Don't trust an un-instrumented dependency under MSan — you'll get false positives.
 - ASan and the kernel/embedded targets: use KASAN in the kernel, not userspace ASan.
@@ -425691,7 +425954,7 @@ optimised build.</p>
 - Symbolized stacks need llvm-symbolizer/addr2line on PATH, else you get raw addresses.
 - A green sanitizer run only covers executed paths — pair with good test coverage.
 </code></pre>
-<h2 id="where-this-connects-605"><a class="header" href="#where-this-connects-605">Where this connects</a></h2>
+<h2 id="where-this-connects-606"><a class="header" href="#where-this-connects-606">Where this connects</a></h2>
 <ul>
 <li><a href="#valgrind">Valgrind</a> — no-recompile alternative; better for uninitialised-memory and 3rd-party code</li>
 <li><a href="#ptrace--debugger-internals">ptrace &amp; debugger internals</a> — the external-tracer approach sanitizers replace with compile-time instrumentation</li>
@@ -425704,7 +425967,7 @@ optimised build.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="perf--flame-graphs"><a class="header" href="#perf--flame-graphs">perf &amp; Flame Graphs</a></h1>
-<h2 id="overview-483"><a class="header" href="#overview-483">Overview</a></h2>
+<h2 id="overview-484"><a class="header" href="#overview-484">Overview</a></h2>
 <p><code>perf</code> is the Linux kernel’s profiling toolkit. It uses hardware performance counters
 (PMUs) and kernel tracepoints to answer “where is the time/cache/branch budget going?”
 with very low overhead — it <em>samples</em> rather than instruments, so it can profile a
@@ -425775,7 +426038,7 @@ perf c2c                             # cache-line false sharing between cores
 perf annotate &lt;symbol&gt;               # per-instruction hotspots in disassembly
 perf probe --add 'do_sys_openat2 filename:string'   # add a dynamic kprobe
 </code></pre>
-<h2 id="pitfalls-193"><a class="header" href="#pitfalls-193">Pitfalls</a></h2>
+<h2 id="pitfalls-195"><a class="header" href="#pitfalls-195">Pitfalls</a></h2>
 <pre><code>- Broken/short stacks → rebuild with -fno-omit-frame-pointer, or use --call-graph dwarf/lbr.
 - Missing symbols → install -dbg/-debuginfo packages; strip removes them (see tools.md).
 - perf_event_paranoid sysctl restricts unprivileged profiling — to allow more, LOWER it
@@ -425785,7 +426048,7 @@ perf probe --add 'do_sys_openat2 filename:string'   # add a dynamic kprobe
 - In containers/VMs, hardware PMU counters may be unavailable — fall back to software events.
 - Flame graph width is sample count, not wall-clock — off-CPU time is invisible in an on-CPU graph.
 </code></pre>
-<h2 id="where-this-connects-606"><a class="header" href="#where-this-connects-606">Where this connects</a></h2>
+<h2 id="where-this-connects-607"><a class="header" href="#where-this-connects-607">Where this connects</a></h2>
 <ul>
 <li><a href="#valgrind">Valgrind</a> — callgrind/cachegrind give deterministic <em>simulated</em> profiles</li>
 <li><a href="#sanitizers-2">Sanitizers</a> — fix correctness first, then profile</li>
@@ -425797,7 +426060,7 @@ perf probe --add 'do_sys_openat2 filename:string'   # add a dynamic kprobe
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="rr-record--replay"><a class="header" href="#rr-record--replay">rr (Record &amp; Replay)</a></h1>
-<h2 id="overview-484"><a class="header" href="#overview-484">Overview</a></h2>
+<h2 id="overview-485"><a class="header" href="#overview-485">Overview</a></h2>
 <p><code>rr</code> is a record-and-replay debugger from Mozilla. It records a program’s execution
 once — every non-deterministic input (syscalls, signals, thread scheduling) — into a
 trace, then replays that trace <em>deterministically</em> as many times as you like under
@@ -425849,7 +426112,7 @@ rr replay &lt;trace-dir&gt;                # a specific trace
 <p>Because every replay is byte-identical, watchpoints, conditional breakpoints, and
 logging all behave reproducibly — and event numbers (<code>when</code>, <code>seek-ticks</code>) let you jump
 to an exact point in time.</p>
-<h2 id="pitfalls-194"><a class="header" href="#pitfalls-194">Pitfalls</a></h2>
+<h2 id="pitfalls-196"><a class="header" href="#pitfalls-196">Pitfalls</a></h2>
 <pre><code>- Requires hardware performance counters → bare metal or a VM/cloud instance that exposes the PMU
   (many cloud VMs and containers don't; needs perf_event access).
 - Single-core serialised recording: ~1.2–2× slowdown, and true-parallel races may not record
@@ -425860,7 +426123,7 @@ to an exact point in time.</p>
 - It records ONE execution — if you didn't capture the bug, re-record (use --chaos for rare ones).
 - Reverse execution is the point; plain forward debugging is better served by GDB/LLDB directly.
 </code></pre>
-<h2 id="where-this-connects-607"><a class="header" href="#where-this-connects-607">Where this connects</a></h2>
+<h2 id="where-this-connects-608"><a class="header" href="#where-this-connects-608">Where this connects</a></h2>
 <ul>
 <li><a href="#gdb-gnu-debugger">GDB</a> — rr replays inside GDB; reverse-* commands are GDB’s, made fast by rr</li>
 <li><a href="#ptrace--debugger-internals">ptrace &amp; debugger internals</a> — the attach/stop/syscall primitives rr records through (plus seccomp)</li>
@@ -425998,7 +426261,7 @@ crashes are captured on the host and retrieved with <code>coredumpctl</code>.</p
 <li>Strip production binaries but keep debug symbols separate</li>
 </ol>
 <p>Core dumps are invaluable for debugging crashes in production systems.</p>
-<h2 id="where-this-connects-608"><a class="header" href="#where-this-connects-608">Where this connects</a></h2>
+<h2 id="where-this-connects-609"><a class="header" href="#where-this-connects-609">Where this connects</a></h2>
 <ul>
 <li><a href="#gdb-gnu-debugger">GDB</a> — gdb is the primary tool for analyzing core dumps</li>
 <li><a href="#ptrace--debugger-internals">ptrace &amp; debugger internals</a> — the same DWARF mapping, applied live instead of post-mortem</li>
@@ -426008,7 +426271,7 @@ crashes are captured on the host and retrieved with <code>coredumpctl</code>.</p
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="reverse-engineering"><a class="header" href="#reverse-engineering">Reverse Engineering</a></h1>
-<h2 id="overview-485"><a class="header" href="#overview-485">Overview</a></h2>
+<h2 id="overview-486"><a class="header" href="#overview-486">Overview</a></h2>
 <p>Reverse engineering (RE) is debugging without source: recovering structure and
 behaviour from a compiled binary. It builds directly on the <a href="#binary-analysis-and-debugging-tools">Binary Analysis
 Tools</a> (objdump, readelf, nm, strings) but adds interactive disassemblers and
@@ -426065,7 +426328,7 @@ runtime — but run untrusted code only in an isolated VM/sandbox.</p>
 - Obfuscation/anti-debug   → ptrace checks, timing checks; patch them out or use Frida
 - Position-independent     → addresses are relative; let the tool rebase (see tools.md PIE check)
 </code></pre>
-<h2 id="pitfalls-195"><a class="header" href="#pitfalls-195">Pitfalls</a></h2>
+<h2 id="pitfalls-197"><a class="header" href="#pitfalls-197">Pitfalls</a></h2>
 <pre><code>- Decompiler output is a best-effort reconstruction, not the original source — verify against asm.
 - Only analyse code you're authorised to (licensing, anti-circumvention law, malware handling).
 - Run untrusted samples in an isolated VM with no network — malware detonates on execution.
@@ -426073,7 +426336,7 @@ runtime — but run untrusted code only in an isolated VM/sandbox.</p>
 - Don't trust a single view: confirm static hypotheses dynamically (and vice versa).
 - AT&amp;T vs Intel syntax mismatch causes misreads — pick one (objdump -M intel; tools.md).
 </code></pre>
-<h2 id="where-this-connects-609"><a class="header" href="#where-this-connects-609">Where this connects</a></h2>
+<h2 id="where-this-connects-610"><a class="header" href="#where-this-connects-610">Where this connects</a></h2>
 <ul>
 <li><a href="#binary-analysis-and-debugging-tools">Binary Analysis Tools</a> — objdump/readelf/nm/strings, the RE foundation</li>
 <li><a href="#gdb-gnu-debugger">GDB</a> / <a href="#lldb">LLDB</a> — dynamic inspection and patching</li>
@@ -426085,7 +426348,7 @@ runtime — but run untrusted code only in an isolated VM/sandbox.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="debugging-methodology"><a class="header" href="#debugging-methodology">Debugging Methodology</a></h1>
-<h2 id="overview-486"><a class="header" href="#overview-486">Overview</a></h2>
+<h2 id="overview-487"><a class="header" href="#overview-487">Overview</a></h2>
 <p>Tools find bugs faster, but <em>method</em> is what makes debugging reliable instead of
 lucky. This page is the technique layer above the tooling pages — <a href="#gdb-gnu-debugger">GDB</a>,
 <a href="#lldb">LLDB</a>, <a href="#valgrind">Valgrind</a>, <a href="#sanitizers-2">Sanitizers</a>,
@@ -426158,7 +426421,7 @@ thing — see <a href="#git-commands-reference">Git Commands</a>.</p>
 <em>why</em> the change fixed it — a fix you don’t understand may just hide the symptom. Add a
 regression test (ideally your minimal repro from step 2) so it can’t silently return —
 see <a href="#debugging-tests">Test Debugging</a>.</p>
-<h2 id="pitfalls-196"><a class="header" href="#pitfalls-196">Pitfalls</a></h2>
+<h2 id="pitfalls-198"><a class="header" href="#pitfalls-198">Pitfalls</a></h2>
 <pre><code>- Fixing the symptom, not the cause — the bug resurfaces elsewhere later.
 - "Shotgun debugging": changing many things hoping one helps; you lose the causal thread.
 - Trusting your mental model over observation — measure, don't assume.
@@ -426167,7 +426430,7 @@ see <a href="#debugging-tests">Test Debugging</a>.</p>
 - Debugging the optimised build's symptoms while reasoning about the source (inlining lies).
 - Heisenbugs: adding a print/debugger changes timing and hides the race — use rr/TSan instead.
 </code></pre>
-<h2 id="where-this-connects-610"><a class="header" href="#where-this-connects-610">Where this connects</a></h2>
+<h2 id="where-this-connects-611"><a class="header" href="#where-this-connects-611">Where this connects</a></h2>
 <ul>
 <li><a href="#gdb-gnu-debugger">GDB</a> / <a href="#lldb">LLDB</a> — interactive hypothesis testing</li>
 <li><a href="#rr-record--replay">rr (Record &amp; Replay)</a> — bisection in time; deterministic reproduction</li>
@@ -426283,7 +426546,7 @@ echo c | sudo tee /proc/sysrq-trigger
 crash /usr/lib/debug/boot/vmlinux-$(uname -r) /var/crash/*/dump.* 
 </code></pre>
 <p>Kernel debugging requires patience and specialized knowledge, but these tools make it manageable.</p>
-<h2 id="where-this-connects-611"><a class="header" href="#where-this-connects-611">Where this connects</a></h2>
+<h2 id="where-this-connects-612"><a class="header" href="#where-this-connects-612">Where this connects</a></h2>
 <ul>
 <li><a href="#kdump-crash--kgdb">kdump, crash &amp; kgdb</a> — the deep dive on crash-dump capture (<code>kexec</code>/<code>makedumpfile</code>) and analysis (<code>crash</code>, kgdb)</li>
 <li><a href="#gdb-gnu-debugger">GDB</a> — KGDB enables GDB-style debugging of the running kernel</li>
@@ -426294,7 +426557,7 @@ crash /usr/lib/debug/boot/vmlinux-$(uname -r) /var/crash/*/dump.*
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="kprobes--uprobes"><a class="header" href="#kprobes--uprobes">Kprobes &amp; Uprobes</a></h1>
-<h2 id="overview-487"><a class="header" href="#overview-487">Overview</a></h2>
+<h2 id="overview-488"><a class="header" href="#overview-488">Overview</a></h2>
 <p>Kprobes and uprobes are Linux’s <strong>dynamic instrumentation</strong> mechanism: they let you
 insert a probe at <em>almost any</em> instruction address at runtime — a kernel function for
 a <strong>kprobe</strong>, a userspace function for a <strong>uprobe</strong> — without recompiling, restarting,
@@ -426628,7 +426891,7 @@ sudo bpftrace -e 'kprobe:vfs_read /pid == 4821/ {
 caller chain, and the offending call’s arguments — no kernel rebuild, no restart. The same
 pattern (predicate on <code>retval</code> → stack → entry args) localises most “it fails sometimes”
 bugs.</p>
-<h2 id="pitfalls-197"><a class="header" href="#pitfalls-197">Pitfalls</a></h2>
+<h2 id="pitfalls-199"><a class="header" href="#pitfalls-199">Pitfalls</a></h2>
 <pre><code>- Inlined / optimised-away functions have no symbol to probe — build the target with -g,
   and remember -O2 may inline static helpers or drop a frame pointer entirely.
 - -O2 also reshuffles/elides arguments: arg0 may not be the source's first parameter.
@@ -426653,7 +426916,7 @@ bugs.</p>
 - Ambiguous symbols: a name with multiple addresses (static funcs, or inlined copies)
   needs disambiguation by address/file — perf probe and bpftrace will warn.
 </code></pre>
-<h2 id="where-this-connects-612"><a class="header" href="#where-this-connects-612">Where this connects</a></h2>
+<h2 id="where-this-connects-613"><a class="header" href="#where-this-connects-613">Where this connects</a></h2>
 <ul>
 <li><a href="#linux-kernel-debugging">Linux Kernel Debugging</a> — ftrace and static tracepoints: the stable,
 fixed-location counterpart to dynamic probes</li>
@@ -426668,7 +426931,7 @@ without naming internal functions</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="ftrace--tracefs"><a class="header" href="#ftrace--tracefs">ftrace &amp; tracefs</a></h1>
-<h2 id="overview-488"><a class="header" href="#overview-488">Overview</a></h2>
+<h2 id="overview-489"><a class="header" href="#overview-489">Overview</a></h2>
 <p><strong>ftrace</strong> is the kernel’s built-in tracer, driven entirely through a virtual filesystem
 (<strong>tracefs</strong>) — no compiler, no extra tooling, present on essentially every kernel. You turn
 tracing on by writing to files under <code>/sys/kernel/tracing</code> and read the result back from a
@@ -426806,7 +427069,7 @@ via raw files.</p>
 </div>
 <p>Rule of thumb: ftrace answers <em>“what ran and for how long”</em> with zero install; reach for
 bpftrace/eBPF when you need to read arguments, filter richly, or aggregate in-kernel.</p>
-<h2 id="where-this-connects-613"><a class="header" href="#where-this-connects-613">Where this connects</a></h2>
+<h2 id="where-this-connects-614"><a class="header" href="#where-this-connects-614">Where this connects</a></h2>
 <ul>
 <li><a href="#linux-kernel-debugging">Linux Kernel Debugging</a> — ftrace is one tool in the broader kernel-debug
 kit (KGDB, kdump, SystemTap); this page is its deep dive.</li>
@@ -426821,7 +427084,7 @@ fentry/fexit, kprobes); use it when ftrace’s fixed output isn’t enough.</li>
 <li><a href="#interrupts--deferred-work">Interrupts &amp; Deferred Work</a> — the latency tracers (<code>irqsoff</code>/
 <code>preemptoff</code>) directly measure the IRQ/preemption-disabled windows discussed there.</li>
 </ul>
-<h2 id="pitfalls-198"><a class="header" href="#pitfalls-198">Pitfalls</a></h2>
+<h2 id="pitfalls-200"><a class="header" href="#pitfalls-200">Pitfalls</a></h2>
 <ul>
 <li><strong>Leaving a tracer running.</strong> <code>function</code> tracing every function is a real, system-wide overhead;
 always scope with <code>set_ftrace_filter</code> and reset to <code>nop</code> when done.</li>
@@ -426842,7 +427105,7 @@ check <code>available_filter_functions</code>.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="ptrace--debugger-internals"><a class="header" href="#ptrace--debugger-internals">ptrace &amp; Debugger Internals</a></h1>
-<h2 id="overview-489"><a class="header" href="#overview-489">Overview</a></h2>
+<h2 id="overview-490"><a class="header" href="#overview-490">Overview</a></h2>
 <p>Every interactive debugger on Linux — <a href="#gdb-gnu-debugger">gdb</a>, <a href="#lldb">lldb</a>, the system-call
 tracers in <a href="#binary-analysis-and-debugging-tools">tools.md</a> (<code>strace</code>/<code>ltrace</code>), and the record/replay engine
 <a href="#rr-record--replay">rr</a> — is built on one kernel facility: the <strong><code>ptrace(2)</code></strong> system call.
@@ -426960,7 +427223,7 @@ demand. The same debug info feeds <a href="#core-dump-analysis-1">core dump</a> 
 <p>This is why <code>gdb -p &lt;pid&gt;</code> or <code>strace -p &lt;pid&gt;</code> against an unrelated process often fails with
 <code>Operation not permitted</code> until you lower the value or run with <code>CAP_SYS_PTRACE</code>. Containers
 frequently drop this capability, which is why debugging inside one needs <code>--cap-add=SYS_PTRACE</code>.</p>
-<h2 id="where-this-connects-614"><a class="header" href="#where-this-connects-614">Where this connects</a></h2>
+<h2 id="where-this-connects-615"><a class="header" href="#where-this-connects-615">Where this connects</a></h2>
 <ul>
 <li><strong><a href="#gdb-gnu-debugger">gdb</a> / <a href="#lldb">lldb</a></strong> — breakpoints, watchpoints, and stepping are the
 userspace layer over the primitives here.</li>
@@ -426972,7 +427235,7 @@ userspace layer over the primitives here.</li>
 instead of an external tracer, with much lower per-event cost.</li>
 <li><strong><a href="#core-dump-analysis-1">Core dumps</a></strong> — the same DWARF mapping, applied post-mortem.</li>
 </ul>
-<h2 id="pitfalls-199"><a class="header" href="#pitfalls-199">Pitfalls</a></h2>
+<h2 id="pitfalls-201"><a class="header" href="#pitfalls-201">Pitfalls</a></h2>
 <ul>
 <li><strong>One tracer per tracee.</strong> A process can be traced by only one tracer at a time — you can’t
 attach gdb to a process already under strace.</li>
@@ -426988,7 +427251,7 @@ glacially slow software watchpoints when you ask for more.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="bpftrace-1"><a class="header" href="#bpftrace-1">bpftrace</a></h1>
-<h2 id="overview-490"><a class="header" href="#overview-490">Overview</a></h2>
+<h2 id="overview-491"><a class="header" href="#overview-491">Overview</a></h2>
 <p><strong>bpftrace</strong> is a high-level tracing language for Linux — think <code>awk</code> for kernel and
 userspace events. You write a one-liner like <code>bpftrace -e 'tracepoint:syscalls:sys_enter_openat { @[comm] = count(); }'</code> and it compiles to an <a href="#ebpf-extended-berkeley-packet-filter">eBPF</a> program, attaches it to
 the right hooks, and aggregates results in-kernel. It sits at the top of the same stack as
@@ -427074,7 +427337,7 @@ bpftrace -l 'usdt:/usr/lib/.../libpthread.so:*'     # USDT probes in a binary
 <p><code>-lv</code> is the one to remember — it prints the <code>args-&gt;</code> field names you reference in the action,
 saving you from guessing tracepoint formats (which otherwise live under tracefs
 <code>events/*/format</code>, the <a href="#ftrace--tracefs">ftrace</a> source of truth).</p>
-<h2 id="where-this-connects-615"><a class="header" href="#where-this-connects-615">Where this connects</a></h2>
+<h2 id="where-this-connects-616"><a class="header" href="#where-this-connects-616">Where this connects</a></h2>
 <ul>
 <li><strong><a href="#ftrace--tracefs">ftrace &amp; tracefs</a></strong> — bpftrace attaches to the same tracepoints/kprobe sites;
 ftrace is the lower-level, zero-dependency fallback.</li>
@@ -427085,7 +427348,7 @@ libbpf/BCC when you outgrow one-liners.</li>
 <li><strong><a href="#perf--flame-graphs">perf &amp; flame graphs</a></strong> — <code>profile:hz</code> stacks feed the same
 flame-graph workflow.</li>
 </ul>
-<h2 id="pitfalls-200"><a class="header" href="#pitfalls-200">Pitfalls</a></h2>
+<h2 id="pitfalls-202"><a class="header" href="#pitfalls-202">Pitfalls</a></h2>
 <ul>
 <li><strong>Kernel version &amp; BTF.</strong> Modern bpftrace leans on CO-RE/BTF (<code>CONFIG_DEBUG_INFO_BTF</code>);
 on old kernels without it you need matching kernel headers, and some probe types are
@@ -427100,7 +427363,7 @@ to <em>every</em> call — measure before leaving it running in production.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="kdump-crash--kgdb"><a class="header" href="#kdump-crash--kgdb">kdump, crash &amp; kgdb</a></h1>
-<h2 id="overview-491"><a class="header" href="#overview-491">Overview</a></h2>
+<h2 id="overview-492"><a class="header" href="#overview-492">Overview</a></h2>
 <p>When a userspace program dies you get a <a href="#core-dump-analysis-1">core dump</a> and open it in
 <a href="#gdb-gnu-debugger">gdb</a>. When the <strong>kernel</strong> itself panics or oopses, the machine that would inspect the
 wreckage is the same machine that just crashed — so you need a different mechanism. <strong>kdump</strong>
@@ -427192,7 +427455,7 @@ development</a> and early-boot bugs.</p>
 kernel that crashed</strong> (same build ID). Distros ship these as <code>kernel-debuginfo</code> packages, or
 fetch on demand with <code>debuginfod</code>. A <code>vmlinux</code> from a different build silently produces wrong
 symbols and nonsense backtraces — the single most common cause of confusing <code>crash</code> output.</p>
-<h2 id="where-this-connects-616"><a class="header" href="#where-this-connects-616">Where this connects</a></h2>
+<h2 id="where-this-connects-617"><a class="header" href="#where-this-connects-617">Where this connects</a></h2>
 <ul>
 <li><strong><a href="#core-dump-analysis-1">Core dumps</a></strong> — the userspace analogue; same DWARF, different image.</li>
 <li><strong><a href="#linux-kernel-debugging">Linux kernel debugging</a></strong> — oops/panic basics, <code>dmesg</code>, <code>dynamic_debug</code>.</li>
@@ -427201,7 +427464,7 @@ symbols and nonsense backtraces — the single most common cause of confusing <c
 for “what ran just before the crash”.</li>
 <li><strong><a href="#linux-driver-development">Driver development</a></strong> — QEMU+kgdb is the day-to-day loop.</li>
 </ul>
-<h2 id="pitfalls-201"><a class="header" href="#pitfalls-201">Pitfalls</a></h2>
+<h2 id="pitfalls-203"><a class="header" href="#pitfalls-203">Pitfalls</a></h2>
 <ul>
 <li><strong><code>crashkernel=</code> sizing.</strong> Too small and the capture kernel fails to boot (no dump);
 too large and you waste RAM. Modern kernels accept <code>crashkernel=auto</code> or ranged syntax.</li>
@@ -427269,7 +427532,7 @@ Game Theory ─► Adversarial ML (GANs) / Multi-agent RL / Markets
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="discrete-mathematics"><a class="header" href="#discrete-mathematics">Discrete Mathematics</a></h1>
-<h2 id="overview-492"><a class="header" href="#overview-492">Overview</a></h2>
+<h2 id="overview-493"><a class="header" href="#overview-493">Overview</a></h2>
 <p>Discrete mathematics is the study of countable, distinct structures — sets, logic,
 counting, integers, and graphs — as opposed to the continuous world of
 <a href="#calculus">calculus</a>. It is the native language of computer science: it underlies
@@ -427393,14 +427656,14 @@ circuits, and processor <a href="#instruction-set-architecture-isa">ISA</a> desi
 <li><strong>Cryptography</strong> — modular arithmetic, primes, discrete log; see <a href="#encryption-4">encryption</a>.</li>
 <li><strong>Compilers / verification</strong> — logic, lattices, DAGs.</li>
 </ul>
-<h2 id="pitfalls-202"><a class="header" href="#pitfalls-202">Pitfalls</a></h2>
+<h2 id="pitfalls-204"><a class="header" href="#pitfalls-204">Pitfalls</a></h2>
 <ul>
 <li><strong>Confusing converse with contrapositive</strong> — only the contrapositive is equivalent.</li>
 <li><strong>Off-by-one in induction</strong> — forgetting or misstating the base case.</li>
 <li><strong>0! = 1 and C(n,0) = 1</strong> — empty-product conventions that trip up counting.</li>
 <li><strong>Modular division</strong> — you multiply by the modular <em>inverse</em>, not ordinary division.</li>
 </ul>
-<h2 id="where-this-connects-617"><a class="header" href="#where-this-connects-617">Where this connects</a></h2>
+<h2 id="where-this-connects-618"><a class="header" href="#where-this-connects-618">Where this connects</a></h2>
 <ul>
 <li><a href="#abstract-algebra">Abstract algebra</a> — groups, rings, and fields</li>
 <li><a href="#probability">Probability</a> — counting and combinatorics</li>
@@ -427409,7 +427672,7 @@ circuits, and processor <a href="#instruction-set-architecture-isa">ISA</a> desi
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="probability"><a class="header" href="#probability">Probability</a></h1>
-<h2 id="overview-493"><a class="header" href="#overview-493">Overview</a></h2>
+<h2 id="overview-494"><a class="header" href="#overview-494">Overview</a></h2>
 <p>Probability is the mathematics of uncertainty — it assigns numbers between 0 and 1 to
 events and gives consistent rules for combining them. It is the engine underneath
 <a href="#statistics-understanding-data-and-uncertainty">Statistics</a> (which reasons <em>backwards</em> from data to the process that
@@ -427548,7 +427811,7 @@ log-likelihood; softmax outputs a distribution. See <a href="#machine-learning-m
 <li><strong>Systems</strong> — tail-latency reasoning, Bloom filters, hashing, load balancing, and
 retry/backoff all rest on these distributions.</li>
 </ul>
-<h2 id="pitfalls-203"><a class="header" href="#pitfalls-203">Pitfalls</a></h2>
+<h2 id="pitfalls-205"><a class="header" href="#pitfalls-205">Pitfalls</a></h2>
 <ul>
 <li><strong>Base-rate neglect</strong> — ignoring priors (the disease example above).</li>
 <li><strong>Gambler’s fallacy</strong> — independent trials have no memory; past coin flips don’t change
@@ -427557,7 +427820,7 @@ the next.</li>
 <li><strong>Assuming independence</strong> to multiply probabilities when variables are correlated —
 the cause of underestimated tail risk in <a href="#risk-management-3">finance</a>.</li>
 </ul>
-<h2 id="where-this-connects-618"><a class="header" href="#where-this-connects-618">Where this connects</a></h2>
+<h2 id="where-this-connects-619"><a class="header" href="#where-this-connects-619">Where this connects</a></h2>
 <ul>
 <li><a href="#statistics-understanding-data-and-uncertainty">Statistics</a> — inference built on probability</li>
 <li><a href="#stochastic-processes">Stochastic processes</a> — probability evolving over time</li>
@@ -430125,7 +430388,7 @@ CI = x̄ ± z × (σ/√n)
 <li>Explain what statistics mean, not just values</li>
 </ul>
 <p>Statistics is the science of learning from incomplete information. Master it, and you can make better decisions in an uncertain world.</p>
-<h2 id="where-this-connects-619"><a class="header" href="#where-this-connects-619">Where this connects</a></h2>
+<h2 id="where-this-connects-620"><a class="header" href="#where-this-connects-620">Where this connects</a></h2>
 <ul>
 <li><a href="#linear-algebra-1">Linear algebra</a> — PCA, regression, and covariance matrices use linear algebra</li>
 <li><a href="#probability">../maths/probability</a> — statistics is applied probability; distributions and inference</li>
@@ -430133,7 +430396,7 @@ CI = x̄ ± z × (σ/√n)
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="calculus"><a class="header" href="#calculus">Calculus</a></h1>
-<h2 id="overview-494"><a class="header" href="#overview-494">Overview</a></h2>
+<h2 id="overview-495"><a class="header" href="#overview-495">Overview</a></h2>
 <p>Calculus is the mathematical study of continuous change, consisting of two complementary branches: <strong>differential calculus</strong> (concerning rates of change and slopes) and <strong>integral calculus</strong> (concerning accumulation of quantities and areas). Together, they form one of the most powerful frameworks in mathematics, with applications spanning physics, engineering, economics, biology, and beyond. Calculus underpins <a href="#optimization-8">optimization</a> (gradient descent, Lagrange multipliers), <a href="#probability">probability</a> (continuous distributions, expectations), and <a href="#signal-processing--fourier-analysis">signal processing</a> (Fourier/Laplace transforms).</p>
 <h2 id="historical-context-1"><a class="header" href="#historical-context-1">Historical Context</a></h2>
 <p>Calculus was independently developed in the late 17th century by:</p>
@@ -431256,7 +431519,7 @@ Solution using integrating factor <code>μ(x) = e^(∫P(x)dx)</code>:</p>
 <li><strong>Stochastic Calculus:</strong> Calculus with randomness (Ito calculus)</li>
 </ul>
 <hr>
-<h2 id="where-this-connects-620"><a class="header" href="#where-this-connects-620">Where this connects</a></h2>
+<h2 id="where-this-connects-621"><a class="header" href="#where-this-connects-621">Where this connects</a></h2>
 <ul>
 <li><a href="#optimization-8">Optimization</a> — gradient descent, Lagrange multipliers, and convex analysis are applied calculus</li>
 <li><a href="#probability">Probability</a> — continuous distributions are defined by integrals; expectations are integrals</li>
@@ -434437,7 +434700,7 @@ print(f"Speedup: {time_dense/time_sparse:.1f}x")
 </ul>
 <hr>
 <p><strong>Guide Complete!</strong> This comprehensive linear algebra reference covers fundamentals through advanced applications with beginner-friendly intuitions, formal definitions, geometric interpretations, and extensive Python implementations using NumPy and SciPy.</p>
-<h2 id="where-this-connects-621"><a class="header" href="#where-this-connects-621">Where this connects</a></h2>
+<h2 id="where-this-connects-622"><a class="header" href="#where-this-connects-622">Where this connects</a></h2>
 <ul>
 <li><a href="#statistics-understanding-data-and-uncertainty">../maths/statistics</a> — statistics uses linear algebra for PCA, regression, and covariance</li>
 <li><a href="#neural-networks">../machine_learning/neural_networks</a> — neural networks are matrix multiplications; backprop uses Jacobians</li>
@@ -434445,7 +434708,7 @@ print(f"Speedup: {time_dense/time_sparse:.1f}x")
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="optimization-8"><a class="header" href="#optimization-8">Optimization</a></h1>
-<h2 id="overview-495"><a class="header" href="#overview-495">Overview</a></h2>
+<h2 id="overview-496"><a class="header" href="#overview-496">Overview</a></h2>
 <p>Optimization is the search for the input that makes an objective as small (or large) as
 possible, possibly subject to constraints. It is the mathematics under model training —
 every neural net is a minimization of a loss, every SVM a constrained quadratic program —
@@ -434563,7 +434826,7 @@ constraint on weights; see <a href="#deep-learning">deep learning</a>.</li>
 LP/MILP problems.</li>
 <li><strong>Control &amp; robotics</strong> — model-predictive control solves a QP every timestep.</li>
 </ul>
-<h2 id="pitfalls-204"><a class="header" href="#pitfalls-204">Pitfalls</a></h2>
+<h2 id="pitfalls-206"><a class="header" href="#pitfalls-206">Pitfalls</a></h2>
 <ul>
 <li><strong>Bad learning rate</strong> — the number-one cause of training divergence or stalling.</li>
 <li><strong>Treating a non-convex result as global</strong> — restart from multiple inits.</li>
@@ -434571,7 +434834,7 @@ LP/MILP problems.</li>
 <li><strong>Local minima vs saddle points</strong> — in high dimensions, saddles dominate; momentum and
 noise help escape them.</li>
 </ul>
-<h2 id="where-this-connects-622"><a class="header" href="#where-this-connects-622">Where this connects</a></h2>
+<h2 id="where-this-connects-623"><a class="header" href="#where-this-connects-623">Where this connects</a></h2>
 <ul>
 <li><a href="#linear-algebra-1">Linear algebra</a>, <a href="#calculus">Calculus</a> — gradients and Hessians</li>
 <li><a href="#numerical-methods-1">Numerical methods</a> — iterative solvers</li>
@@ -434580,7 +434843,7 @@ noise help escape them.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="information-theory"><a class="header" href="#information-theory">Information Theory</a></h1>
-<h2 id="overview-496"><a class="header" href="#overview-496">Overview</a></h2>
+<h2 id="overview-497"><a class="header" href="#overview-497">Overview</a></h2>
 <p>Information theory, founded by Claude Shannon in 1948, quantifies <em>information</em>,
 <em>uncertainty</em>, and the limits of compression and communication. It is built on
 <a href="#probability">probability</a> — every quantity here is an expectation of a log-
@@ -434673,7 +434936,7 @@ strength are entropy statements. See <a href="#cryptographic-hash-functions">has
 <a href="#key-management-2">key management</a>.</li>
 <li><strong>Communications &amp; storage</strong> — capacity and ECC bound throughput and reliability.</li>
 </ul>
-<h2 id="pitfalls-205"><a class="header" href="#pitfalls-205">Pitfalls</a></h2>
+<h2 id="pitfalls-207"><a class="header" href="#pitfalls-207">Pitfalls</a></h2>
 <ul>
 <li><strong>Bits vs nats</strong> — <code>log₂</code> gives bits, <code>ln</code> gives nats; ML code usually uses nats.</li>
 <li><strong>KL asymmetry</strong> — <code>D_KL(p‖q)</code> ≠ <code>D_KL(q‖p)</code>; “forward” vs “reverse” KL give different
@@ -434681,7 +434944,7 @@ mode-covering vs mode-seeking behaviour in ML.</li>
 <li><strong>Entropy ≠ value</strong> — high entropy means unpredictable, not useful or meaningful.</li>
 <li><strong>Estimating entropy from few samples</strong> — biased low; needs care for large alphabets.</li>
 </ul>
-<h2 id="where-this-connects-623"><a class="header" href="#where-this-connects-623">Where this connects</a></h2>
+<h2 id="where-this-connects-624"><a class="header" href="#where-this-connects-624">Where this connects</a></h2>
 <ul>
 <li><a href="#probability">Probability</a> — entropy is defined over distributions</li>
 <li><a href="#statistics-understanding-data-and-uncertainty">Statistics</a> — estimation and divergence measures</li>
@@ -434690,7 +434953,7 @@ mode-covering vs mode-seeking behaviour in ML.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="numerical-methods-1"><a class="header" href="#numerical-methods-1">Numerical Methods</a></h1>
-<h2 id="overview-497"><a class="header" href="#overview-497">Overview</a></h2>
+<h2 id="overview-498"><a class="header" href="#overview-498">Overview</a></h2>
 <p>Numerical methods are the algorithms that compute <em>approximate</em> answers to continuous
 <a href="#calculus">mathematics</a> on finite, discrete hardware. The gap between the clean math
 and the machine — where real numbers become finite floats, and exact operations become
@@ -434812,7 +435075,7 @@ concerns. See <a href="#optimization-8">optimization</a>, <a href="#quantization
 <a href="#embedded-systems">microcontrollers</a>.</li>
 <li><strong>Finance</strong> — Monte Carlo pricing, numerical PDE solvers for derivatives.</li>
 </ul>
-<h2 id="pitfalls-206"><a class="header" href="#pitfalls-206">Pitfalls</a></h2>
+<h2 id="pitfalls-208"><a class="header" href="#pitfalls-208">Pitfalls</a></h2>
 <ul>
 <li><strong><code>==</code> on floats</strong> — almost always a bug; compare with a tolerance.</li>
 <li><strong>Catastrophic cancellation</strong> — reformulate before it eats your precision.</li>
@@ -434822,7 +435085,7 @@ concerns. See <a href="#optimization-8">optimization</a>, <a href="#quantization
 <li><strong>Ignoring conditioning</strong> — a “correct” algorithm still returns garbage on an
 ill-conditioned problem.</li>
 </ul>
-<h2 id="where-this-connects-624"><a class="header" href="#where-this-connects-624">Where this connects</a></h2>
+<h2 id="where-this-connects-625"><a class="header" href="#where-this-connects-625">Where this connects</a></h2>
 <ul>
 <li><a href="#linear-algebra-1">Linear algebra</a> — solving linear systems numerically</li>
 <li><a href="#calculus">Calculus</a> — differentiation and integration, discretized</li>
@@ -434831,7 +435094,7 @@ ill-conditioned problem.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="stochastic-processes"><a class="header" href="#stochastic-processes">Stochastic Processes</a></h1>
-<h2 id="overview-498"><a class="header" href="#overview-498">Overview</a></h2>
+<h2 id="overview-499"><a class="header" href="#overview-499">Overview</a></h2>
 <p>A stochastic process is a <strong>collection of random variables indexed by time</strong> — a system
 that evolves randomly, so instead of one number you study a whole <em>trajectory</em>. It is the
 time-extended sibling of <a href="#probability">probability</a>: where probability describes a
@@ -434926,7 +435189,7 @@ latency; see <a href="#operating-systems">operating systems</a>.</li>
 <li><strong>Foundations</strong> — extends the Markov chains and distributions in
 <a href="#probability">probability</a>.</li>
 </ul>
-<h2 id="pitfalls-207"><a class="header" href="#pitfalls-207">Pitfalls</a></h2>
+<h2 id="pitfalls-209"><a class="header" href="#pitfalls-209">Pitfalls</a></h2>
 <ul>
 <li><strong>Poisson process vs Poisson distribution</strong> — the first is a time-indexed family, the
 second a single random variable; don’t conflate them.</li>
@@ -434937,7 +435200,7 @@ given enough time; “I’m due for a win” is the gambler’s fallacy.</li>
 <li><strong>Treating Brownian paths as smooth</strong> — they’re nowhere differentiable; ordinary
 calculus chain rules don’t apply (hence Itô’s lemma).</li>
 </ul>
-<h2 id="where-this-connects-625"><a class="header" href="#where-this-connects-625">Where this connects</a></h2>
+<h2 id="where-this-connects-626"><a class="header" href="#where-this-connects-626">Where this connects</a></h2>
 <ul>
 <li><a href="#probability">Probability</a> — the foundation of random processes</li>
 <li><a href="#statistics-understanding-data-and-uncertainty">Statistics</a> — estimating process parameters</li>
@@ -434946,7 +435209,7 @@ calculus chain rules don’t apply (hence Itô’s lemma).</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="signal-processing--fourier-analysis"><a class="header" href="#signal-processing--fourier-analysis">Signal Processing &amp; Fourier Analysis</a></h1>
-<h2 id="overview-499"><a class="header" href="#overview-499">Overview</a></h2>
+<h2 id="overview-500"><a class="header" href="#overview-500">Overview</a></h2>
 <p>Signal processing is the maths of <em>signals</em> — quantities that vary over time or space —
 and its central idea is that any signal can be viewed two ways: as a waveform in time, or
 as a recipe of frequencies. The bridge between those views is the <strong>Fourier transform</strong>.
@@ -435054,7 +435317,7 @@ see <a href="#information-theory">information theory</a>.</li>
 <a href="#numerical-methods-1">numerical stability</a>.</li>
 <li><strong>Systems</strong> — JPEG (DCT), MP3, and OFDM in Wi‑Fi/LTE all rest on these transforms.</li>
 </ul>
-<h2 id="pitfalls-208"><a class="header" href="#pitfalls-208">Pitfalls</a></h2>
+<h2 id="pitfalls-210"><a class="header" href="#pitfalls-210">Pitfalls</a></h2>
 <ul>
 <li><strong>Aliasing</strong> — under-sampling folds high frequencies into low ones, irreversibly;
 always anti-alias filter before sampling.</li>
@@ -435064,7 +435327,7 @@ above <code>N/2</code> are the negative (mirror) frequencies of a real signal.</
 <li><strong>Assuming linearity/time-invariance</strong> — convolution-based reasoning only holds for LTI
 systems; saturating or time-varying systems break it.</li>
 </ul>
-<h2 id="where-this-connects-626"><a class="header" href="#where-this-connects-626">Where this connects</a></h2>
+<h2 id="where-this-connects-627"><a class="header" href="#where-this-connects-627">Where this connects</a></h2>
 <ul>
 <li><a href="#linear-algebra-1">Linear algebra</a> — transforms as linear operators</li>
 <li><a href="#calculus">Calculus</a> — Fourier and Laplace foundations</li>
@@ -435074,7 +435337,7 @@ systems; saturating or time-varying systems break it.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="game-theory"><a class="header" href="#game-theory">Game Theory</a></h1>
-<h2 id="overview-500"><a class="header" href="#overview-500">Overview</a></h2>
+<h2 id="overview-501"><a class="header" href="#overview-501">Overview</a></h2>
 <p>Game theory is the maths of <strong>strategic interaction</strong> — how rational agents should act
 when their payoff depends on what <em>other</em> agents do. It turns “what should I do?” into
 “what should I do given that everyone else is also optimizing?” The central solution
@@ -435163,7 +435426,7 @@ in action.</li>
 <li><strong>Systems</strong> — congestion control, resource allocation, and blockchain incentive design
 are mechanism-design problems.</li>
 </ul>
-<h2 id="pitfalls-209"><a class="header" href="#pitfalls-209">Pitfalls</a></h2>
+<h2 id="pitfalls-211"><a class="header" href="#pitfalls-211">Pitfalls</a></h2>
 <ul>
 <li><strong>Assuming a unique or pure equilibrium</strong> — many games have several, or only mixed ones.</li>
 <li><strong>Equilibrium ≠ optimal</strong> — Nash is about stability, not welfare (Pareto gap).</li>
@@ -435172,7 +435435,7 @@ when opponents are irrational or make errors.</li>
 <li><strong>Ignoring repetition</strong> — one-shot analysis misses cooperation that repeated
 interaction sustains.</li>
 </ul>
-<h2 id="where-this-connects-627"><a class="header" href="#where-this-connects-627">Where this connects</a></h2>
+<h2 id="where-this-connects-628"><a class="header" href="#where-this-connects-628">Where this connects</a></h2>
 <ul>
 <li><a href="#probability">Probability</a> — mixed strategies and expected payoffs</li>
 <li><a href="#optimization-8">Optimization</a> — equilibria as optimization problems</li>
@@ -435181,7 +435444,7 @@ interaction sustains.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="abstract-algebra"><a class="header" href="#abstract-algebra">Abstract Algebra</a></h1>
-<h2 id="overview-501"><a class="header" href="#overview-501">Overview</a></h2>
+<h2 id="overview-502"><a class="header" href="#overview-502">Overview</a></h2>
 <p>Abstract algebra studies <strong>structure</strong> rather than numbers — sets equipped with
 operations that obey a handful of axioms. Strip arithmetic down to “a set, an operation,
 and some rules” and the same skeleton reappears in clock arithmetic, symmetries,
@@ -435263,7 +435526,7 @@ built over GF(2ⁿ); ties into <a href="#information-theory">information theory<
 <li><strong>Foundations</strong> — extends the modular arithmetic and number theory in
 <a href="#discrete-mathematics">discrete math</a>.</li>
 </ul>
-<h2 id="pitfalls-210"><a class="header" href="#pitfalls-210">Pitfalls</a></h2>
+<h2 id="pitfalls-212"><a class="header" href="#pitfalls-212">Pitfalls</a></h2>
 <ul>
 <li><strong>Dropping an axiom</strong> — forgetting closure or inverse is the usual reason a set “isn’t a
 group”; check all four.</li>
@@ -435273,7 +435536,7 @@ arithmetic, not ordinary modular multiplication.</li>
 <li><strong>Fields need prime-power size</strong> — there is no field with 6 elements; <code>ℤₙ</code> is a field
 only when <code>n</code> is prime.</li>
 </ul>
-<h2 id="where-this-connects-628"><a class="header" href="#where-this-connects-628">Where this connects</a></h2>
+<h2 id="where-this-connects-629"><a class="header" href="#where-this-connects-629">Where this connects</a></h2>
 <ul>
 <li><a href="#discrete-mathematics">Discrete math</a> — the foundations groups/rings build on</li>
 <li><a href="#linear-algebra-1">Linear algebra</a> — vector spaces as algebraic structures</li>
@@ -437491,7 +437754,7 @@ plt.show()
 <li><a href="https://github.com/rougier/matplotlib-tutorial">Nicolas Rougier’s Tutorial</a></li>
 <li><a href="https://www.python-graph-gallery.com/">Python Graph Gallery</a></li>
 </ul>
-<h2 id="where-this-connects-629"><a class="header" href="#where-this-connects-629">Where this connects</a></h2>
+<h2 id="where-this-connects-630"><a class="header" href="#where-this-connects-630">Where this connects</a></h2>
 <ul>
 <li><a href="#pandas-complete-guide-for-data-analysis">../misc/pandas</a> — pandas DataFrame.plot() wraps matplotlib for quick EDA charts</li>
 <li><a href="#numpy-for-machine-learning">../machine_learning/numpy</a> — matplotlib visualizes NumPy arrays</li>
@@ -439516,7 +439779,7 @@ assert df[required].notna().all().all(), "Missing required values"
 <li><a href="https://tomaugspurger.github.io/modern-1-intro.html">Modern Pandas</a></li>
 <li><a href="https://github.com/TomAugspurger/effective-pandas">Effective Pandas</a></li>
 </ul>
-<h2 id="where-this-connects-630"><a class="header" href="#where-this-connects-630">Where this connects</a></h2>
+<h2 id="where-this-connects-631"><a class="header" href="#where-this-connects-631">Where this connects</a></h2>
 <ul>
 <li><a href="#matplotlib-complete-guide-for-data-visualization">Matplotlib</a> — pandas uses matplotlib for DataFrame.plot() visualization</li>
 <li><a href="#numpy-for-machine-learning">../machine_learning/numpy</a> — pandas builds on NumPy; .values returns a NumPy array</li>
@@ -440900,7 +441163,7 @@ echidna-test contracts/MyContract.sol
 </ul>
 <hr>
 <p><strong>Last Updated</strong>: 2025-01-19</p>
-<h2 id="where-this-connects-631"><a class="header" href="#where-this-connects-631">Where this connects</a></h2>
+<h2 id="where-this-connects-632"><a class="header" href="#where-this-connects-632">Where this connects</a></h2>
 <ul>
 <li><a href="#solana-1">Solana</a> — Solana is a high-performance blockchain platform covered in detail</li>
 <li><a href="#digital-signatures-2">../security/digital_signatures</a> — blockchains use digital signatures for transaction authentication</li>
@@ -440911,7 +441174,7 @@ echidna-test contracts/MyContract.sol
 <p>Bluetooth Low Energy (BLE), also known as Bluetooth Smart or Bluetooth 4.0+, is a wireless personal area network technology designed for short-range communication with significantly reduced power consumption compared to Classic Bluetooth. BLE is optimized for applications requiring periodic or burst data transfers, making it ideal for IoT devices, wearables, health monitors, beacons, and smart home applications.</p>
 <h2 id="table-of-contents-139"><a class="header" href="#table-of-contents-139">Table of Contents</a></h2>
 <ul>
-<li><a href="#overview-502">Overview</a></li>
+<li><a href="#overview-503">Overview</a></li>
 <li><a href="#ble-vs-classic-bluetooth">BLE vs Classic Bluetooth</a></li>
 <li><a href="#ble-protocol-architecture">BLE Protocol Architecture</a></li>
 <li><a href="#core-concepts-42">Core Concepts</a></li>
@@ -440923,7 +441186,7 @@ echidna-test contracts/MyContract.sol
 <li><a href="#references-9">References</a></li>
 </ul>
 <hr>
-<h2 id="overview-502"><a class="header" href="#overview-502">Overview</a></h2>
+<h2 id="overview-503"><a class="header" href="#overview-503">Overview</a></h2>
 <p>BLE was introduced in the Bluetooth 4.0 specification in 2010. Unlike Classic Bluetooth, which is designed for continuous streaming applications like audio, BLE focuses on:</p>
 <ul>
 <li><strong>Ultra-low power consumption</strong>: Devices can run for months or years on coin cell batteries</li>
@@ -442562,7 +442825,7 @@ dmesg | grep -i bluetooth
 <li><a href="#iot-protocols-mqtt--coap-1">IoT Protocols</a></li>
 <li>Wireless Communication</li>
 </ul>
-<h2 id="where-this-connects-632"><a class="header" href="#where-this-connects-632">Where this connects</a></h2>
+<h2 id="where-this-connects-633"><a class="header" href="#where-this-connects-633">Where this connects</a></h2>
 <ul>
 <li><a href="#bluetooth-low-energy-ble">BLE (embedded)</a> — the firmware-side deep dive on the same protocol</li>
 <li><a href="#802154--low-power-mesh">IEEE 802.15.4</a> — Zigbee/Thread, the mesh alternative</li>
@@ -444418,7 +444681,7 @@ Layer multiple directories:</p>
 </ul>
 </li>
 </ul>
-<h2 id="where-this-connects-633"><a class="header" href="#where-this-connects-633">Where this connects</a></h2>
+<h2 id="where-this-connects-634"><a class="header" href="#where-this-connects-634">Where this connects</a></h2>
 <ul>
 <li><a href="#linux-process-management">../linux/process</a> — Linux process management is a concrete OS implementation</li>
 <li><a href="#linux-memory-management">../linux/memory_management</a> — Linux virtual memory is the OS memory management implementation</li>
@@ -446216,7 +446479,7 @@ void main() {
 <li><strong>Tools</strong>: Blender, Unity, Unreal Engine, Godot</li>
 <li><strong>Websites</strong>: Learn OpenGL, Scratchapixel, ShaderToy</li>
 </ul>
-<h2 id="where-this-connects-634"><a class="header" href="#where-this-connects-634">Where this connects</a></h2>
+<h2 id="where-this-connects-635"><a class="header" href="#where-this-connects-635">Where this connects</a></h2>
 <ul>
 <li><a href="#linear-algebra-1">../maths/linear_algebra</a> — 3D transformations, projection, and lighting all use linear algebra</li>
 <li><a href="#calculus">../maths/calculus</a> — ray marching, implicit surfaces, and animation curves use calculus</li>
@@ -446227,7 +446490,7 @@ void main() {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="u-boot"><a class="header" href="#u-boot">U-Boot</a></h1>
 <p>U-Boot (Universal Boot Loader) is an open-source, primary bootloader used in embedded systems. It provides a flexible and powerful environment for initializing hardware, loading operating systems, and facilitating firmware updates.</p>
-<h2 id="overview-503"><a class="header" href="#overview-503">Overview</a></h2>
+<h2 id="overview-504"><a class="header" href="#overview-504">Overview</a></h2>
 <h3 id="what-is-u-boot"><a class="header" href="#what-is-u-boot">What is U-Boot?</a></h3>
 <p>U-Boot is a feature-rich bootloader that:</p>
 <ul>
@@ -446893,7 +447156,7 @@ setenv uboot_version 'U-Boot 2023.10 Custom Build 1.0'
 <li>Cross-compilation</li>
 <li>Embedded System Development</li>
 </ul>
-<h2 id="where-this-connects-635"><a class="header" href="#where-this-connects-635">Where this connects</a></h2>
+<h2 id="where-this-connects-636"><a class="header" href="#where-this-connects-636">Where this connects</a></h2>
 <ul>
 <li><a href="#device-tree-1">../linux/device_tree</a> — U-Boot loads and passes the device tree blob (DTB) to the Linux kernel</li>
 <li><a href="#cross-compilation-1">../linux/cross_compilation</a> — U-Boot is cross-compiled for the target hardware</li>
@@ -448669,7 +448932,7 @@ tail -f /var/log/syslog                 # Follow syslog
 <hr>
 <p><strong>Last Updated</strong>: January 2025
 <strong>Version</strong>: Ubuntu 24.04 LTS (Noble Numbat)</p>
-<h2 id="where-this-connects-636"><a class="header" href="#where-this-connects-636">Where this connects</a></h2>
+<h2 id="where-this-connects-637"><a class="header" href="#where-this-connects-637">Where this connects</a></h2>
 <ul>
 <li><a href="#essential-linux-commands-reference">../linux/commands</a> — Linux commands reference applies to Ubuntu</li>
 <li><a href="#systemd">../linux/systemd</a> — Ubuntu uses systemd for service management</li>
@@ -450044,7 +450307,7 @@ token::transfer(cpi_ctx, amount)?;            // Then CPI
 <span class="boring">}</span></code></pre>
 <hr>
 <p><strong>Last Updated</strong>: 2025-01-19</p>
-<h2 id="where-this-connects-637"><a class="header" href="#where-this-connects-637">Where this connects</a></h2>
+<h2 id="where-this-connects-638"><a class="header" href="#where-this-connects-638">Where this connects</a></h2>
 <ul>
 <li><a href="#blockchain">Blockchain</a> — Solana is a specific high-performance blockchain implementation</li>
 <li><a href="#digital-signatures-2">../security/digital_signatures</a> — Solana transactions use Ed25519 digital signatures</li>
@@ -450053,7 +450316,7 @@ token::transfer(cpi_ctx, amount)?;            // Then CPI
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="getting-things-done-gtd"><a class="header" href="#getting-things-done-gtd">Getting Things Done (GTD)</a></h1>
-<h2 id="overview-504"><a class="header" href="#overview-504">Overview</a></h2>
+<h2 id="overview-505"><a class="header" href="#overview-505">Overview</a></h2>
 <p><strong>Getting Things Done</strong> (GTD) is a personal productivity method created by David Allen
 (book of the same name, 2001). Its central premise is that the human mind is bad at
 <em>storing</em> commitments but good at <em>processing</em> them: every open loop you keep in your head
@@ -450207,7 +450470,7 @@ Email         turn the inbox into a true capture point; process it to empty, don
 <p>Whatever the tool, the non-negotiables are: a <strong>frictionless capture</strong> path, <strong>lists that
 map to the buckets above</strong>, and a recurring <strong>review</strong> so the system stays trusted. The tool
 matters far less than the discipline.</p>
-<h2 id="where-this-connects-638"><a class="header" href="#where-this-connects-638">Where this connects</a></h2>
+<h2 id="where-this-connects-639"><a class="header" href="#where-this-connects-639">Where this connects</a></h2>
 <ul>
 <li><strong>PARA</strong> (Projects / Areas / Resources / Archives) — Tiago Forte’s organizing scheme for
 digital files; pairs naturally with GTD’s Projects and Areas of Responsibility.</li>
@@ -450222,7 +450485,7 @@ don’t use the inbox as a to-do list).</li>
 <li>Within this book, GTD habits sit well alongside a long-lived knowledge base; this very
 repo’s index-and-cross-link approach mirrors GTD’s “reference” bucket.</li>
 </ul>
-<h2 id="pitfalls-211"><a class="header" href="#pitfalls-211">Pitfalls</a></h2>
+<h2 id="pitfalls-213"><a class="header" href="#pitfalls-213">Pitfalls</a></h2>
 <ul>
 <li><strong>Capturing but never clarifying</strong> — a giant inbox you never process is just a new pile of
 stress. Capture is worthless without regular clarifying.</li>
@@ -450241,7 +450504,7 @@ loudest defeats the point of organizing by context in the first place.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="the-pomodoro-technique"><a class="header" href="#the-pomodoro-technique">The Pomodoro Technique</a></h1>
-<h2 id="overview-505"><a class="header" href="#overview-505">Overview</a></h2>
+<h2 id="overview-506"><a class="header" href="#overview-506">Overview</a></h2>
 <p>The <strong>Pomodoro Technique</strong> is a time-management method created by Francesco Cirillo in the
 late 1980s. The idea is disarmingly simple: work in fixed, undistracted intervals of ~25
 minutes — each called a <em>pomodoro</em> — separated by short breaks. The name comes from the
@@ -450338,7 +450601,7 @@ Dev/CLI    a shell `sleep 1500 &amp;&amp; notify-send` loop, or org-mode's `org-
 </code></pre>
 <p>Whatever you use, keep the timer <em>visible</em> and the break <em>real</em> (step away from the screen).
 The point is the discipline of the closed interval, not the app.</p>
-<h2 id="where-this-connects-639"><a class="header" href="#where-this-connects-639">Where this connects</a></h2>
+<h2 id="where-this-connects-640"><a class="header" href="#where-this-connects-640">Where this connects</a></h2>
 <ul>
 <li><a href="#getting-things-done-gtd">Getting Things Done (GTD)</a> — GTD decides <em>what</em> to do and keeps the trusted
 lists; Pomodoro is the <em>Engage</em> mechanism that gets the chosen action done. The Pomodoro
@@ -450350,7 +450613,7 @@ capture list for internal interruptions mirrors GTD’s inbox.</li>
 sustaining distraction-free concentration, though deep-work sessions often run longer.</li>
 <li><strong>Flow</strong> — short rigid intervals can occasionally cut a session off mid-flow; see Pitfalls.</li>
 </ul>
-<h2 id="pitfalls-212"><a class="header" href="#pitfalls-212">Pitfalls</a></h2>
+<h2 id="pitfalls-214"><a class="header" href="#pitfalls-214">Pitfalls</a></h2>
 <ul>
 <li><strong>Treating the timings as sacred</strong> — rigidly stopping a productive flow state at exactly 25
 minutes can do more harm than good. The interval is a tool; adapt it.</li>
@@ -450367,7 +450630,7 @@ pairing, meetings) resists fixed solo intervals; reserve Pomodoro for focused so
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="kanban"><a class="header" href="#kanban">Kanban</a></h1>
-<h2 id="overview-506"><a class="header" href="#overview-506">Overview</a></h2>
+<h2 id="overview-507"><a class="header" href="#overview-507">Overview</a></h2>
 <p><strong>Kanban</strong> (Japanese for “signboard” or “visual card”) is a method for managing work by
 making it visible and limiting how much is in progress at once. It began on Toyota’s
 factory floor in the 1940s–50s as a <em>pull system</em>: a downstream station signalled an
@@ -450497,7 +450760,7 @@ Dev/CLI    org-mode TODO states as columns, or a Taskwarrior board
 <p>For solo use, <strong>Personal Kanban</strong> (Jim Benson &amp; Tonianne DeMaria Barry) strips it to two
 rules — <em>visualize your work</em> and <em>limit your WIP</em> — and pairs cleanly with a GTD
 next-actions list as the backlog and Pomodoro for executing each card.</p>
-<h2 id="where-this-connects-640"><a class="header" href="#where-this-connects-640">Where this connects</a></h2>
+<h2 id="where-this-connects-641"><a class="header" href="#where-this-connects-641">Where this connects</a></h2>
 <ul>
 <li><a href="#getting-things-done-gtd">Getting Things Done (GTD)</a> — GTD’s <em>Next Actions</em> are an ideal backlog to pull
 cards from; Kanban then manages how many you allow yourself to have in flight.</li>
@@ -450511,7 +450774,7 @@ flow come straight from lean manufacturing.</li>
 the constraint TOC says to identify and exploit first.</li>
 <li><strong>Personal Kanban</strong> (Benson &amp; Barry) — the minimal, individual-scale application.</li>
 </ul>
-<h2 id="pitfalls-213"><a class="header" href="#pitfalls-213">Pitfalls</a></h2>
+<h2 id="pitfalls-215"><a class="header" href="#pitfalls-215">Pitfalls</a></h2>
 <ul>
 <li><strong>A board with no WIP limits</strong> — without limits it’s just a prettier to-do list; the flow
 benefits and bottleneck signals never appear. The limits <em>are</em> the method.</li>
@@ -450529,7 +450792,7 @@ nobody follows defeats the visualization. Map the <em>real</em> current workflow
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="the-eisenhower-matrix"><a class="header" href="#the-eisenhower-matrix">The Eisenhower Matrix</a></h1>
-<h2 id="overview-507"><a class="header" href="#overview-507">Overview</a></h2>
+<h2 id="overview-508"><a class="header" href="#overview-508">Overview</a></h2>
 <p>The <strong>Eisenhower Matrix</strong> (also the <em>urgent–important matrix</em> or <em>Eisenhower box</em>) is a
 prioritization tool that sorts tasks along two axes — how <em>urgent</em> they are and how
 <em>important</em> they are — into four quadrants, each with a different prescribed action. The
@@ -450600,7 +450863,7 @@ things fill the day — and to be ruthless about Q3 and Q4.</p>
 asking; cap Q1 by feeding Q2; and treat the matrix as a recurring sort, not a one-time
 filing. It pairs naturally with <a href="#getting-things-done-gtd">GTD</a> (sort your Next Actions) and
 <a href="#the-pomodoro-technique">Pomodoro</a> (run pomodoros on the Q1/Q2 task you picked).</p>
-<h2 id="where-this-connects-641"><a class="header" href="#where-this-connects-641">Where this connects</a></h2>
+<h2 id="where-this-connects-642"><a class="header" href="#where-this-connects-642">Where this connects</a></h2>
 <ul>
 <li><a href="#getting-things-done-gtd">Getting Things Done (GTD)</a> — GTD captures and organizes everything but is
 deliberately quiet on priority; the matrix is a prioritization lens over its Next Actions.</li>
@@ -450613,7 +450876,7 @@ the important ones) produces most of the value.</li>
 <li><strong>Timeboxing</strong> — the mechanism for honoring Q2: give important-not-urgent work a protected
 slot before the urgent crowds it out.</li>
 </ul>
-<h2 id="pitfalls-214"><a class="header" href="#pitfalls-214">Pitfalls</a></h2>
+<h2 id="pitfalls-216"><a class="header" href="#pitfalls-216">Pitfalls</a></h2>
 <ul>
 <li><strong>Everything feels urgent</strong> — without honest judgment every task lands in Q1 and the matrix
 collapses. Urgency is often manufactured by others’ deadlines, not your importance.</li>
@@ -450630,7 +450893,7 @@ Q1. Re-sort regularly; the grid is a verb, not a filing cabinet.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="deep-work"><a class="header" href="#deep-work">Deep Work</a></h1>
-<h2 id="overview-508"><a class="header" href="#overview-508">Overview</a></h2>
+<h2 id="overview-509"><a class="header" href="#overview-509">Overview</a></h2>
 <p><strong>Deep Work</strong> is a term coined by computer scientist Cal Newport in his 2016 book of the
 same name. He defines it as <em>“professional activities performed in a state of
 distraction-free concentration that push your cognitive capabilities to their limit.”</em> These
@@ -450703,7 +450966,7 @@ minute and quantifying each task’s depth), and be willing to say no to low-val
 <li><strong>Quit social media (or use it deliberately).</strong> Adopt tools only if their benefits
 substantially outweigh the fragmentation they cause.</li>
 </ul>
-<h2 id="where-this-connects-642"><a class="header" href="#where-this-connects-642">Where this connects</a></h2>
+<h2 id="where-this-connects-643"><a class="header" href="#where-this-connects-643">Where this connects</a></h2>
 <ul>
 <li><a href="#the-pomodoro-technique">Pomodoro Technique</a> — a concrete timer-based scaffold for entering deep work;
 the <em>rhythmic</em> philosophy maps directly onto a daily block of pomodoros (though deep
@@ -450718,7 +450981,7 @@ byproduct.</li>
 <li><strong>Timeboxing / time-blocking</strong> — the scheduling mechanism Newport leans on to protect deep
 blocks and budget the shallows.</li>
 </ul>
-<h2 id="pitfalls-215"><a class="header" href="#pitfalls-215">Pitfalls</a></h2>
+<h2 id="pitfalls-217"><a class="header" href="#pitfalls-217">Pitfalls</a></h2>
 <ul>
 <li><strong>No ritual or schedule</strong> — relying on willpower in the moment fails; without a fixed
 block and rules, the deep work never happens. Decide in advance.</li>
@@ -450735,7 +450998,7 @@ single protected hour you actually keep. Start small and rhythmic.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="zettelkasten"><a class="header" href="#zettelkasten">Zettelkasten</a></h1>
-<h2 id="overview-509"><a class="header" href="#overview-509">Overview</a></h2>
+<h2 id="overview-510"><a class="header" href="#overview-510">Overview</a></h2>
 <p><strong>Zettelkasten</strong> (German for “slip box”) is a method of personal knowledge management built
 from small, atomic notes that are densely linked to one another. It was made famous by the
 German sociologist <strong>Niklas Luhmann</strong>, who over his career filled a wooden card cabinet with
@@ -450812,7 +451075,7 @@ Principle  plain-text + bidirectional links beat any single app
 <p>This very <a href="#mdbook">mdBook</a> is a mild relative of the idea: one page per topic, a central index
 (<code>SUMMARY.md</code>), and liberal relative-path cross-links between pages — the index-and-link
 discipline that makes a knowledge base worth more than its individual files.</p>
-<h2 id="where-this-connects-643"><a class="header" href="#where-this-connects-643">Where this connects</a></h2>
+<h2 id="where-this-connects-644"><a class="header" href="#where-this-connects-644">Where this connects</a></h2>
 <ul>
 <li><a href="#getting-things-done-gtd">Getting Things Done (GTD)</a> — the explicit division of labor: GTD for <em>actions</em> and
 reference filing, Zettelkasten for <em>ideas and knowledge</em>. Keep them in separate systems.</li>
@@ -450825,7 +451088,7 @@ developing</em> ideas. Different goals, often used together.</li>
 <li><strong>This repo</strong> — the mdBook’s page-per-topic + <code>SUMMARY.md</code> index + cross-link style mirrors
 the Zettelkasten ethos of small linked units behind a few entry points.</li>
 </ul>
-<h2 id="pitfalls-216"><a class="header" href="#pitfalls-216">Pitfalls</a></h2>
+<h2 id="pitfalls-218"><a class="header" href="#pitfalls-218">Pitfalls</a></h2>
 <ul>
 <li><strong>The collector’s fallacy</strong> — hoarding highlights and PDFs feels productive but isn’t
 knowledge. Value comes from <em>processing</em> into your own permanent notes, not collecting.</li>
@@ -450842,7 +451105,7 @@ emerge from links and a few index notes.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="scrum"><a class="header" href="#scrum">Scrum</a></h1>
-<h2 id="overview-510"><a class="header" href="#overview-510">Overview</a></h2>
+<h2 id="overview-511"><a class="header" href="#overview-511">Overview</a></h2>
 <p><strong>Scrum</strong> is the most widely used <strong>agile</strong> framework for developing and sustaining complex
 products. It organizes work into short, fixed-length iterations called <strong>sprints</strong> (usually
 1–4 weeks), at the end of which the team aims to deliver a usable increment. Rather than
@@ -450923,7 +451186,7 @@ teams or using it as a target corrupts it (see Pitfalls).</p>
 <p><strong>Scrumban</strong> blends the two: keep Scrum’s cadence, roles, and events, but add
 <a href="#kanban">Kanban</a>’s WIP limits and flow metrics to the board. It’s a common landing spot
 for teams that want Scrum’s rhythm without rigidly batching every change into a sprint.</p>
-<h2 id="where-this-connects-644"><a class="header" href="#where-this-connects-644">Where this connects</a></h2>
+<h2 id="where-this-connects-645"><a class="header" href="#where-this-connects-645">Where this connects</a></h2>
 <ul>
 <li><a href="#kanban">Kanban</a> — the continuous-flow alternative; see the Kanban-vs-Scrum comparison
 table there, and Scrumban as the hybrid.</li>
@@ -450936,7 +451199,7 @@ with Kanban.</li>
 <li><a href="#the-pomodoro-technique">Pomodoro Technique</a> — an individual focus mechanism a developer can use to
 execute their slice of the Sprint Backlog.</li>
 </ul>
-<h2 id="pitfalls-217"><a class="header" href="#pitfalls-217">Pitfalls</a></h2>
+<h2 id="pitfalls-219"><a class="header" href="#pitfalls-219">Pitfalls</a></h2>
 <ul>
 <li><strong>Zombie / cargo-cult Scrum</strong> — performing the ceremonies without the empirical mindset;
 going through the motions while ignoring inspect-and-adapt. The rituals aren’t the point.</li>
@@ -451012,7 +451275,7 @@ command-and-control PM defeats the team’s self-management.</li>
 <p>RTOS systems provide deterministic task scheduling essential for time-critical embedded applications.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="freertos"><a class="header" href="#freertos">FreeRTOS</a></h1>
-<h2 id="overview-511"><a class="header" href="#overview-511">Overview</a></h2>
+<h2 id="overview-512"><a class="header" href="#overview-512">Overview</a></h2>
 <p>FreeRTOS is a real-time operating system kernel for embedded devices. Compare with <a href="#zephyr">Zephyr</a> (Linux Foundation, Devicetree/Kconfig-driven, richer subsystem ecosystem), <a href="#threadx-azure-rtos">ThreadX</a> (picokernel architecture, safety-certified), and <a href="#rt-linux-preempt_rt">RT-Linux</a> (PREEMPT_RT for real-time on a full Linux stack). <a href="#interrupts-3">Interrupts</a> drive ISR-safe queue and semaphore operations in FreeRTOS; the idle hook is where a <a href="#watchdog-timers">watchdog</a> feed typically lives.</p>
 <p>FreeRTOS is a real-time operating system kernel for embedded devices. It’s designed to be small, simple, and easy to use, providing deterministic real-time behavior with minimal resource overhead.</p>
 <h2 id="core-concepts-43"><a class="header" href="#core-concepts-43">Core Concepts</a></h2>
@@ -451905,7 +452168,7 @@ void vCPUUtilization(void) {
 <li><strong>Renesas RX</strong></li>
 </ul>
 <h2 id="freertos-provides-essential-rtos-functionality-in-a-small-footprint-ideal-for-resource-constrained-embedded-systems-with-deterministic-real-time-requirements"><a class="header" href="#freertos-provides-essential-rtos-functionality-in-a-small-footprint-ideal-for-resource-constrained-embedded-systems-with-deterministic-real-time-requirements">FreeRTOS provides essential RTOS functionality in a small footprint, ideal for resource-constrained embedded systems with deterministic real-time requirements.</a></h2>
-<h2 id="where-this-connects-645"><a class="header" href="#where-this-connects-645">Where this connects</a></h2>
+<h2 id="where-this-connects-646"><a class="header" href="#where-this-connects-646">Where this connects</a></h2>
 <ul>
 <li><a href="#zephyr">Zephyr</a> — Linux Foundation RTOS with richer networking/Bluetooth stacks and Devicetree hardware description</li>
 <li><a href="#threadx-azure-rtos">ThreadX</a> — picokernel alternative with IEC/ISO safety certifications; same primitives (tasks, queues, mutexes)</li>
@@ -451915,7 +452178,7 @@ void vCPUUtilization(void) {
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="threadx-azure-rtos"><a class="header" href="#threadx-azure-rtos">ThreadX (Azure RTOS)</a></h1>
-<h2 id="overview-512"><a class="header" href="#overview-512">Overview</a></h2>
+<h2 id="overview-513"><a class="header" href="#overview-513">Overview</a></h2>
 <p>ThreadX is a professional-grade RTOS for deeply embedded and IoT applications. Compare with <a href="#freertos">FreeRTOS</a> (the most widely used open-source RTOS for bare-metal MCUs), <a href="#zephyr">Zephyr</a> (Linux Foundation ecosystem with networking stacks and Devicetree), and <a href="#rt-linux-preempt_rt">RT-Linux</a> for POSIX-compatible real-time on application processors.</p>
 <p>ThreadX is a professional-grade real-time operating system (RTOS) designed for deeply embedded, real-time, and IoT applications. Now part of Azure RTOS (open-sourced by Microsoft), it’s known for its small footprint, fast execution, and deterministic real-time performance.</p>
 <h2 id="key-features-32"><a class="header" href="#key-features-32">Key Features</a></h2>
@@ -452517,7 +452780,7 @@ switch(status) {
 <li><strong>Commercial support</strong>: Available through Microsoft and partners</li>
 </ul>
 <p>ThreadX is ideal for resource-constrained embedded systems requiring deterministic real-time performance, safety certification, or long-term support.</p>
-<h2 id="where-this-connects-646"><a class="header" href="#where-this-connects-646">Where this connects</a></h2>
+<h2 id="where-this-connects-647"><a class="header" href="#where-this-connects-647">Where this connects</a></h2>
 <ul>
 <li><a href="#freertos">FreeRTOS</a> — the most widely used open-source alternative; similar task/queue/mutex model with larger community</li>
 <li><a href="#zephyr">Zephyr</a> — Linux Foundation RTOS with broader subsystem ecosystem (networking, Bluetooth, Devicetree)</li>
@@ -452526,7 +452789,7 @@ switch(status) {
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="zephyr"><a class="header" href="#zephyr">Zephyr</a></h1>
-<h2 id="overview-513"><a class="header" href="#overview-513">Overview</a></h2>
+<h2 id="overview-514"><a class="header" href="#overview-514">Overview</a></h2>
 <p>Zephyr is a scalable, vendor-neutral RTOS from the Linux Foundation. Compare <a href="#freertos">FreeRTOS</a> (widely used on bare-metal MCUs, simpler kernel), <a href="#threadx-azure-rtos">ThreadX</a> (safety-certified picokernel), and <a href="#rt-linux-preempt_rt">RT-Linux</a> for real-time on full Linux. Zephyr reuses Linux concepts — <a href="#device-tree-1">Devicetree</a> for hardware description and Kconfig for configuration — applied to bare-metal microcontrollers.</p>
 <p>Zephyr is a scalable, vendor-neutral real-time operating system hosted by the Linux Foundation. It targets resource-constrained microcontrollers as well as more capable application processors, offering a small, configurable kernel alongside a large ecosystem of drivers, networking stacks, and subsystems. Configuration is driven by Kconfig and hardware is described with Devicetree, giving a single source tree that builds for hundreds of boards.</p>
 <h2 id="core-concepts-45"><a class="header" href="#core-concepts-45">Core Concepts</a></h2>
@@ -453052,7 +453315,7 @@ int main(void)
 <li><strong>SPARC</strong>, <strong>MIPS</strong>, <strong>POSIX/native_sim</strong> (host-based testing)</li>
 </ul>
 <h2 id="zephyr-combines-a-small-configurable-real-time-kernel-with-kconfigdevicetree-driven-portability-and-a-broad-subsystem-ecosystem-scaling-from-tiny-mcus-to-multicore-application-processors"><a class="header" href="#zephyr-combines-a-small-configurable-real-time-kernel-with-kconfigdevicetree-driven-portability-and-a-broad-subsystem-ecosystem-scaling-from-tiny-mcus-to-multicore-application-processors">Zephyr combines a small, configurable real-time kernel with Kconfig/Devicetree-driven portability and a broad subsystem ecosystem, scaling from tiny MCUs to multicore application processors.</a></h2>
-<h2 id="where-this-connects-647"><a class="header" href="#where-this-connects-647">Where this connects</a></h2>
+<h2 id="where-this-connects-648"><a class="header" href="#where-this-connects-648">Where this connects</a></h2>
 <ul>
 <li><a href="#freertos">FreeRTOS</a> — simpler alternative for bare-metal MCUs; larger community, fewer built-in subsystems</li>
 <li><a href="#threadx-azure-rtos">ThreadX</a> — picokernel RTOS with IEC/ISO safety certifications; similar thread/queue/mutex primitives</li>
@@ -453062,7 +453325,7 @@ int main(void)
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="rt-linux-preempt_rt"><a class="header" href="#rt-linux-preempt_rt">RT-Linux (PREEMPT_RT)</a></h1>
-<h2 id="overview-514"><a class="header" href="#overview-514">Overview</a></h2>
+<h2 id="overview-515"><a class="header" href="#overview-515">Overview</a></h2>
 <p>“Real-time Linux” today almost always means the <strong>PREEMPT_RT</strong> preemption model — a set of changes that make the mainline Linux kernel fully preemptible, so high-priority tasks meet tight, bounded latency deadlines. Long maintained as an out-of-tree patch set, PREEMPT_RT has been progressively merged upstream, with <code>CONFIG_PREEMPT_RT</code> now selectable in mainline. It delivers <em>soft/firm</em> real-time on a full-featured OS — not the hard guarantees of a bare-metal RTOS like <a href="#freertos">FreeRTOS</a>, <a href="#zephyr">Zephyr</a>, or <a href="#threadx-azure-rtos">ThreadX</a>. <a href="#interrupts-3">Interrupts</a> become threaded IRQs under PREEMPT_RT; understanding <a href="#linux-kernel-development-patterns">Linux kernel patterns</a> (locking, RCU) is necessary to write RT-safe drivers.</p>
 <blockquote>
 <p><strong>Historical note:</strong> the original <em>RTLinux</em> (and relatives RTAI and Xenomai) used a <strong>dual-kernel</strong> approach: a small hard-real-time microkernel ran the RT tasks and scheduled stock Linux as its lowest-priority thread. PREEMPT_RT is fundamentally different — there is one kernel, and it is made preemptible from within. This page covers the PREEMPT_RT, single-kernel approach.</p>
@@ -453318,7 +453581,7 @@ int main(void)
 sudo taskset -c 2 ./rt_cyclic      # pin to isolated CPU 2
 </code></pre>
 <h2 id="preempt_rt-turns-mainline-linux-into-a-fully-preemptible-low-latency-real-time-os--pairing-standard-posix-scheduling-apis-with-careful-system-tuning-memory-locking-cpu-isolation-priority-inheritance-and-cyclictest-driven-measurement-to-achieve-bounded-deterministic-response"><a class="header" href="#preempt_rt-turns-mainline-linux-into-a-fully-preemptible-low-latency-real-time-os--pairing-standard-posix-scheduling-apis-with-careful-system-tuning-memory-locking-cpu-isolation-priority-inheritance-and-cyclictest-driven-measurement-to-achieve-bounded-deterministic-response">PREEMPT_RT turns mainline Linux into a fully preemptible, low-latency real-time OS — pairing standard POSIX scheduling APIs with careful system tuning (memory locking, CPU isolation, priority inheritance) and <code>cyclictest</code>-driven measurement to achieve bounded, deterministic response.</a></h2>
-<h2 id="where-this-connects-648"><a class="header" href="#where-this-connects-648">Where this connects</a></h2>
+<h2 id="where-this-connects-649"><a class="header" href="#where-this-connects-649">Where this connects</a></h2>
 <ul>
 <li><a href="#freertos">FreeRTOS</a> — bare-metal alternative for hard real-time on resource-constrained MCUs; no Linux userspace</li>
 <li><a href="#zephyr">Zephyr</a> — another bare-metal RTOS option with Devicetree and networking stacks</li>
@@ -453328,7 +453591,7 @@ sudo taskset -c 2 ./rt_cyclic      # pin to isolated CPU 2
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="real-time-scheduling"><a class="header" href="#real-time-scheduling">Real-Time Scheduling</a></h1>
-<h2 id="overview-515"><a class="header" href="#overview-515">Overview</a></h2>
+<h2 id="overview-516"><a class="header" href="#overview-516">Overview</a></h2>
 <p>Scheduling is the part of an RTOS that decides <em>which task runs next</em> and <em>for how
 long</em>. In a general-purpose OS the scheduler optimizes for throughput and fairness; in a
 real-time system it optimizes for <strong>meeting deadlines</strong>. That difference is the whole
@@ -453456,7 +453719,7 @@ the worst case. Determinism features like a <a href="#cache--tcm">TCM/cache lock
 and an <a href="#memory-protection-unit-mpu">MPU</a> exist largely to make WCET tighter and provable. Disable
 interrupts as little as possible, since <a href="#interrupts-3">interrupt</a> latency
 directly inflates the response time of every task.</p>
-<h2 id="where-this-connects-649"><a class="header" href="#where-this-connects-649">Where this connects</a></h2>
+<h2 id="where-this-connects-650"><a class="header" href="#where-this-connects-650">Where this connects</a></h2>
 <ul>
 <li><a href="#priority-inversion-1">Priority inversion</a> — blocking term that response-time
 analysis must include; inheritance/ceiling protocols bound it</li>
@@ -453473,7 +453736,7 @@ preemptive schedulers with optional time-slicing</li>
 <li><a href="#functional-safety">Functional safety</a> — deadline guarantees are part
 of safety arguments (ISO 26262, DO-178C)</li>
 </ul>
-<h2 id="pitfalls-218"><a class="header" href="#pitfalls-218">Pitfalls</a></h2>
+<h2 id="pitfalls-220"><a class="header" href="#pitfalls-220">Pitfalls</a></h2>
 <pre><code>- Confusing "fast" with "real-time": a high average throughput can still miss deadlines
   if the worst case is bad. Design and measure the worst case, not the average.
 - Running fixed-priority systems near 100% utilization — leave RMS headroom (~30%).
@@ -453489,7 +453752,7 @@ of safety arguments (ISO 26262, DO-178C)</li>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="priority-inversion-1"><a class="header" href="#priority-inversion-1">Priority Inversion</a></h1>
-<h2 id="overview-516"><a class="header" href="#overview-516">Overview</a></h2>
+<h2 id="overview-517"><a class="header" href="#overview-517">Overview</a></h2>
 <p>Priority inversion is the classic real-time bug where a <strong>high-priority task is blocked
 by a low-priority one</strong> — inverting the priority order the <a href="#real-time-scheduling">scheduler</a> is
 supposed to enforce. It happens whenever tasks share a resource guarded by a
@@ -453562,7 +453825,7 @@ Priority ceiling      : proactive, raises priority on every lock acquire.
                        Needs static config. Prevents deadlock; bounds blocking
                        to one critical section. Required by OSEK (PCP).
 </code></pre>
-<h2 id="where-this-connects-650"><a class="header" href="#where-this-connects-650">Where this connects</a></h2>
+<h2 id="where-this-connects-651"><a class="header" href="#where-this-connects-651">Where this connects</a></h2>
 <ul>
 <li><a href="#inter-task-communication--synchronization">Synchronization</a> — only <em>mutexes</em> carry these protocols; binary
 semaphores used as locks do <strong>not</strong>, which reintroduces inversion</li>
@@ -453577,7 +453840,7 @@ the general (non-real-time) setting</li>
 <li><a href="#watchdog-timers">Watchdog</a> — what catches the symptom (a missed deadline)
 when inversion goes unhandled, as on Pathfinder</li>
 </ul>
-<h2 id="pitfalls-219"><a class="header" href="#pitfalls-219">Pitfalls</a></h2>
+<h2 id="pitfalls-221"><a class="header" href="#pitfalls-221">Pitfalls</a></h2>
 <pre><code>- Using a binary semaphore as a lock: it has NO priority inheritance. Use the RTOS's
   mutex type for mutual exclusion; reserve semaphores for ISR→task signalling.
 - Assuming inheritance is free: it adds context switches and slightly complicates the
@@ -453592,7 +453855,7 @@ when inversion goes unhandled, as on Pathfinder</li>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="inter-task-communication--synchronization"><a class="header" href="#inter-task-communication--synchronization">Inter-Task Communication &amp; Synchronization</a></h1>
-<h2 id="overview-517"><a class="header" href="#overview-517">Overview</a></h2>
+<h2 id="overview-518"><a class="header" href="#overview-518">Overview</a></h2>
 <p>Tasks in an RTOS are mostly independent threads of execution, but they constantly need to
 <strong>pass data</strong> and <strong>coordinate timing</strong> — a sensor task hands samples to a processing
 task, an ISR signals that a DMA transfer finished, two tasks take turns at a shared bus.
@@ -453669,7 +453932,7 @@ Exclusive access to a shared resource              Mutex  (NOT a semaphore)
 Wait on several conditions / any-of                Event group
 Stream of bytes (UART, audio)                      Stream / message buffer
 </code></pre>
-<h2 id="where-this-connects-651"><a class="header" href="#where-this-connects-651">Where this connects</a></h2>
+<h2 id="where-this-connects-652"><a class="header" href="#where-this-connects-652">Where this connects</a></h2>
 <ul>
 <li><a href="#priority-inversion-1">Priority inversion</a> — why locking must use a mutex (with
 inheritance/ceiling), never a plain semaphore</li>
@@ -453684,7 +453947,7 @@ variables, channels) in general multithreading</li>
 <li><a href="#freertos">FreeRTOS</a> / <a href="#threadx-azure-rtos">ThreadX</a> / <a href="#zephyr">Zephyr</a> — concrete APIs
 for every primitive here</li>
 </ul>
-<h2 id="pitfalls-220"><a class="header" href="#pitfalls-220">Pitfalls</a></h2>
+<h2 id="pitfalls-222"><a class="header" href="#pitfalls-222">Pitfalls</a></h2>
 <pre><code>- Using a binary semaphore as a lock: no priority inheritance → priority inversion.
   Use the mutex type for mutual exclusion.
 - Calling a non-ISR-safe API from an ISR (e.g. xQueueSend instead of ...FromISR):
@@ -453702,7 +453965,7 @@ for every primitive here</li>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="context-switching-3"><a class="header" href="#context-switching-3">Context Switching</a></h1>
-<h2 id="overview-518"><a class="header" href="#overview-518">Overview</a></h2>
+<h2 id="overview-519"><a class="header" href="#overview-519">Overview</a></h2>
 <p>A context switch is the act of <strong>saving one task’s CPU state and restoring another’s</strong> —
 the mechanism that actually carries out a <a href="#real-time-scheduling">scheduler</a> decision. Everything
 else in an RTOS (priorities, <a href="#inter-task-communication--synchronization">synchronization</a> primitives,
@@ -453722,7 +453985,7 @@ the exception stack frame — that <a href="#freertos">FreeRTOS</a>, <a href="#t
 </code></pre>
 <p>Each task owns a separate stack; the switch is really just <em>swapping stack pointers</em> plus
 saving/restoring registers. Sizing those stacks is a recurring source of bugs — see
-<a href="#pitfalls-221">Pitfalls</a> and <a href="#rtos-tracing--runtime-analysis">RTOS tracing</a> for stack-overflow detection.</p>
+<a href="#pitfalls-223">Pitfalls</a> and <a href="#rtos-tracing--runtime-analysis">RTOS tracing</a> for stack-overflow detection.</p>
 <h2 id="what-triggers-a-switch"><a class="header" href="#what-triggers-a-switch">What triggers a switch</a></h2>
 <pre><code>Preemption   a higher-priority task becomes ready (ISR gives a semaphore, a timeout
              expires) → switch immediately.
@@ -453782,7 +454045,7 @@ Typical Cortex-M switch: low hundreds of cycles. Count it in your WCET.
 </code></pre>
 <p>Locking hot code/data into <a href="#cache--tcm">TCM or cache</a> reduces the cold-start
 penalty and tightens <a href="#real-time-scheduling">WCET</a>.</p>
-<h2 id="where-this-connects-652"><a class="header" href="#where-this-connects-652">Where this connects</a></h2>
+<h2 id="where-this-connects-653"><a class="header" href="#where-this-connects-653">Where this connects</a></h2>
 <ul>
 <li><a href="#real-time-scheduling">Scheduling</a> — the switch enacts the scheduler’s choice; its cost is per
 task overhead in response-time analysis</li>
@@ -453797,7 +454060,7 @@ a top cause of faults; the stacked frame is what you decode in a fault</li>
 <li><a href="#cache--tcm">Cache &amp; TCM</a> — cold caches inflate post-switch timing</li>
 <li><a href="#tickless-idle">Tickless idle</a> — suppressing the periodic tick that drives switches</li>
 </ul>
-<h2 id="pitfalls-221"><a class="header" href="#pitfalls-221">Pitfalls</a></h2>
+<h2 id="pitfalls-223"><a class="header" href="#pitfalls-223">Pitfalls</a></h2>
 <pre><code>- Stack overflow: each task stack must fit its deepest call chain PLUS the exception
   frame(s) pushed on top. Size with high-water-mark checks; enable stack-overflow
   detection in development.
@@ -453814,7 +454077,7 @@ a top cause of faults; the stacked frame is what you decode in a fault</li>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="rtos-vs-bare-metal"><a class="header" href="#rtos-vs-bare-metal">RTOS vs Bare-Metal</a></h1>
-<h2 id="overview-519"><a class="header" href="#overview-519">Overview</a></h2>
+<h2 id="overview-520"><a class="header" href="#overview-520">Overview</a></h2>
 <p>Not every embedded system needs an RTOS. The default starting point is <strong>bare-metal</strong> — a
 <code>main()</code> super-loop plus <a href="#interrupts-3">interrupts</a>, no kernel. An RTOS like
 <a href="#freertos">FreeRTOS</a>, <a href="#threadx-azure-rtos">ThreadX</a>, or <a href="#zephyr">Zephyr</a> adds preemptive
@@ -453893,7 +454156,7 @@ Latency  context-switch time + tick handling added to every task's budget
 Bugs     priority inversion, deadlock, stack overflow, ISR-safety — absent in a
          single-threaded super-loop
 </code></pre>
-<h2 id="where-this-connects-653"><a class="header" href="#where-this-connects-653">Where this connects</a></h2>
+<h2 id="where-this-connects-654"><a class="header" href="#where-this-connects-654">Where this connects</a></h2>
 <ul>
 <li><a href="#real-time-scheduling">Scheduling</a> — what an RTOS buys you: provable deadlines for competing
 tasks</li>
@@ -453909,7 +454172,7 @@ graduate to</li>
 <li><a href="#power-management-6">Power management</a> — both models idle the CPU; RTOSes
 add <a href="#tickless-idle">tickless idle</a></li>
 </ul>
-<h2 id="pitfalls-222"><a class="header" href="#pitfalls-222">Pitfalls</a></h2>
+<h2 id="pitfalls-224"><a class="header" href="#pitfalls-224">Pitfalls</a></h2>
 <pre><code>- Adopting an RTOS reflexively: for a few periodic jobs it adds RAM, latency, and a whole
   bug class for no benefit. Match the architecture to the problem.
 - Blocking calls (delay loops, busy-wait) inside a super-loop or cooperative task — they
@@ -453923,7 +454186,7 @@ add <a href="#tickless-idle">tickless idle</a></li>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="osekvdx--autosar-classic-os"><a class="header" href="#osekvdx--autosar-classic-os">OSEK/VDX &amp; AUTOSAR Classic OS</a></h1>
-<h2 id="overview-520"><a class="header" href="#overview-520">Overview</a></h2>
+<h2 id="overview-521"><a class="header" href="#overview-521">Overview</a></h2>
 <p>OSEK/VDX and its successor AUTOSAR Classic are the <strong>automotive</strong> RTOS standards — the
 operating systems running in the engine, brake, and body-control ECUs of nearly every
 modern car. Unlike general-purpose kernels such as <a href="#freertos">FreeRTOS</a> or
@@ -454006,7 +454269,7 @@ of the Basic Software (BSW), layered under the Runtime Environment (RTE):</p>
 and <strong>OS-Applications</strong> that group tasks into isolated trust domains — features driven by
 <a href="#functional-safety">ISO 26262 / ASIL</a> freedom-from-interference
 requirements.</p>
-<h2 id="where-this-connects-654"><a class="header" href="#where-this-connects-654">Where this connects</a></h2>
+<h2 id="where-this-connects-655"><a class="header" href="#where-this-connects-655">Where this connects</a></h2>
 <ul>
 <li><a href="#functional-safety">Functional safety</a> — ISO 26262/ASIL is the reason for
 static config, memory/timing protection, and OS-Applications</li>
@@ -454021,7 +454284,7 @@ networks AUTOSAR COM rides on</li>
 <li><a href="#misra-c--defensive-firmware">MISRA / coding standards</a> — the C subset these ECUs
 are written in</li>
 </ul>
-<h2 id="pitfalls-223"><a class="header" href="#pitfalls-223">Pitfalls</a></h2>
+<h2 id="pitfalls-225"><a class="header" href="#pitfalls-225">Pitfalls</a></h2>
 <pre><code>- Treating OSEK like a dynamic RTOS: there is no runtime task creation or heap. Everything
   is declared in OIL and generated.
 - Using extended tasks where basic tasks suffice: extended tasks each need their own stack,
@@ -454037,7 +454300,7 @@ are written in</li>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="arinc-653--partitioned-avionics-rtos"><a class="header" href="#arinc-653--partitioned-avionics-rtos">ARINC 653 — Partitioned Avionics RTOS</a></h1>
-<h2 id="overview-521"><a class="header" href="#overview-521">Overview</a></h2>
+<h2 id="overview-522"><a class="header" href="#overview-522">Overview</a></h2>
 <p>ARINC 653 is the standard that lets multiple applications of <strong>different safety
 criticality</strong> share one processor in an aircraft — the foundation of Integrated Modular
 Avionics (IMA). Where <a href="#osekvdx--autosar-classic-os">OSEK/AUTOSAR</a> groups tasks on a shared automotive
@@ -454110,7 +454373,7 @@ comms            sampling/queuing ports            COM over CAN/FlexRay
 </code></pre>
 <p>Both exist to make <a href="#functional-safety">functional safety</a> arguments
 tractable; they pick different mechanisms suited to their domain’s certification regime.</p>
-<h2 id="where-this-connects-655"><a class="header" href="#where-this-connects-655">Where this connects</a></h2>
+<h2 id="where-this-connects-656"><a class="header" href="#where-this-connects-656">Where this connects</a></h2>
 <ul>
 <li><a href="#functional-safety">Functional safety</a> — DO-178C design assurance levels
 are the reason for robust partitioning</li>
@@ -454121,7 +454384,7 @@ within a partition use fixed-priority preemption</li>
 <li><a href="#inter-task-communication--synchronization">Synchronization</a> — intra-partition buffers/blackboards/semaphores
 mirror the primitives covered there</li>
 </ul>
-<h2 id="pitfalls-224"><a class="header" href="#pitfalls-224">Pitfalls</a></h2>
+<h2 id="pitfalls-226"><a class="header" href="#pitfalls-226">Pitfalls</a></h2>
 <pre><code>- Designing as if partitions share memory: they don't. All cross-partition data goes
   through sampling/queuing ports with statically configured routing.
 - Over-budgeting a partition window: total windows in a major frame are fixed; one
@@ -454137,7 +454400,7 @@ mirror the primitives covered there</li>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="tickless-idle"><a class="header" href="#tickless-idle">Tickless Idle</a></h1>
-<h2 id="overview-522"><a class="header" href="#overview-522">Overview</a></h2>
+<h2 id="overview-523"><a class="header" href="#overview-523">Overview</a></h2>
 <p>The periodic RTOS tick — the timer interrupt that drives <a href="#context-switching-3">context switches</a>
 and wakes delayed tasks — is convenient but power-hungry: it pulls the CPU out of sleep
 hundreds or thousands of times a second even when nothing is due. <strong>Tickless idle</strong>
@@ -454188,7 +454451,7 @@ Zephyr     tickless kernel is the default; the kernel programs the system timer 
 </code></pre>
 <p>Both pick the <em>deepest</em> sleep state whose wake latency and retention suit the expected idle
 time — a short idle uses a light sleep; a long one uses deep sleep.</p>
-<h2 id="where-this-connects-656"><a class="header" href="#where-this-connects-656">Where this connects</a></h2>
+<h2 id="where-this-connects-657"><a class="header" href="#where-this-connects-657">Where this connects</a></h2>
 <ul>
 <li><a href="#real-time-scheduling">Scheduling</a> — the tick this suppresses is what wakes delayed tasks and
 drives time-slicing</li>
@@ -454201,7 +454464,7 @@ always-on low-power timer that must keep time while the main clock is stopped</l
 <li><a href="#bluetooth-low-energy-ble">BLE</a> / <a href="#lora-and-lorawan">LoRa</a> — duty-cycled radios whose battery
 life hinges on staying asleep between events</li>
 </ul>
-<h2 id="pitfalls-225"><a class="header" href="#pitfalls-225">Pitfalls</a></h2>
+<h2 id="pitfalls-227"><a class="header" href="#pitfalls-227">Pitfalls</a></h2>
 <pre><code>- No always-on timer in the chosen sleep state → time is lost and delays drift. Use an
   LPTIM/RTC that survives the sleep mode you enter.
 - Wake-latency longer than the next deadline: too-deep a sleep makes you miss it. Match
@@ -454218,7 +454481,7 @@ life hinges on staying asleep between events</li>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="rtos-tracing--runtime-analysis"><a class="header" href="#rtos-tracing--runtime-analysis">RTOS Tracing &amp; Runtime Analysis</a></h1>
-<h2 id="overview-523"><a class="header" href="#overview-523">Overview</a></h2>
+<h2 id="overview-524"><a class="header" href="#overview-524">Overview</a></h2>
 <p>Debugging an RTOS is harder than debugging bare-metal code: bugs are <em>timing</em> bugs —
 priority inversions, missed deadlines, a task that starves another, a stack that overflows
 only under load. A breakpoint freezes the very timing you’re trying to observe. The answer
@@ -454296,7 +454559,7 @@ MPU guard region  put an unmapped MPU region just past each stack → instant fa
 </code></pre>
 <p>Combine with <a href="#gdb-for-embedded">GDB on embedded</a> for post-mortem inspection of a
 halted system.</p>
-<h2 id="where-this-connects-657"><a class="header" href="#where-this-connects-657">Where this connects</a></h2>
+<h2 id="where-this-connects-658"><a class="header" href="#where-this-connects-658">Where this connects</a></h2>
 <ul>
 <li><a href="#real-time-scheduling">Scheduling</a> — traces let you verify utilization and deadlines against the
 analysis; runtime stats give measured CPU load</li>
@@ -454312,7 +454575,7 @@ streaming traces</li>
 fault cause that these detectors catch</li>
 <li><a href="#memory-protection-unit-mpu">MPU</a> — hardware stack guard regions for precise overflow traps</li>
 </ul>
-<h2 id="pitfalls-226"><a class="header" href="#pitfalls-226">Pitfalls</a></h2>
+<h2 id="pitfalls-228"><a class="header" href="#pitfalls-228">Pitfalls</a></h2>
 <pre><code>- Heisenbugs from heavy instrumentation: a chatty trace adds overhead and shifts timing.
   Prefer low-overhead transports (RTT/ITM) and trace selectively.
 - Snapshot buffer too small: you only capture the last N events and may miss the cause.
@@ -454364,7 +454627,7 @@ fault cause that these detectors catch</li>
 
         <script src="clipboard-1626706a.min.js"></script>
         <script src="highlight-abc7f01d.js"></script>
-        <script src="book-c22b7243.js"></script>
+        <script src="book-609e4cb8.js"></script>
 
         <!-- Custom JS scripts -->
 

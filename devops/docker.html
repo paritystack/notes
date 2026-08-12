@@ -15,8 +15,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-0392ca55.css">
-        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/general-e96d0476.css">
+        <link rel="stylesheet" href="../css/chrome-d279d366.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5ea8065c.js";
+            window.path_to_searchindex_js = "../searchindex-23597fef.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-3689f932.js"></script>
+        <script src="../toc-3bb8e699.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -273,6 +273,42 @@ CMD ["node", "dist/server.js"]
 <pre><code class="language-bash"># Build with custom arguments
 docker build --build-arg NODE_VERSION=20 --build-arg BUILD_ENV=development -t myapp:dev .
 </code></pre>
+<h2 id="how-docker-works-architecture"><a class="header" href="#how-docker-works-architecture">How Docker Works (Architecture)</a></h2>
+<p>A container is not a special kind of object — it is an ordinary Linux process that the
+kernel has wrapped in <a href="../linux/namespace.html">namespaces</a> (so it sees its own pids, network,
+mounts, hostname, IPC, and optionally users), constrained with <a href="../linux/cgroups.html">cgroups</a>
+(so its CPU, memory, and I/O are bounded), and handed a private root filesystem. “It works
+on my machine” goes away because the <em>box the kernel draws around the process</em> travels with
+the image.</p>
+<p>When you type <code>docker run</code>, the request flows through several layers — Docker is a <em>frontend</em>
+over the same OCI plumbing that Podman and CRI-O use:</p>
+<pre><code>docker CLI ──REST──&gt; dockerd ──gRPC──&gt; containerd ──&gt; shim ──&gt; runc ──&gt; [container process]
+                        │                                                 ├ namespaces (pid/net/mnt/uts/ipc/user)
+                        ├ build (BuildKit)                                 ├ cgroups (cpu/mem/io)
+                        └ networking / volumes                             └ overlay2 rootfs (RO layers + RW top)
+</code></pre>
+<ul>
+<li><strong><code>docker</code> CLI</strong> — talks to the daemon over a REST API (unix socket <code>/var/run/docker.sock</code>).</li>
+<li><strong><code>dockerd</code></strong> — the daemon: image builds (BuildKit), networks, volumes, the API.</li>
+<li><strong><code>containerd</code></strong> — manages the container/image lifecycle and pulls.</li>
+<li><strong><code>containerd-shim</code></strong> — one per container; it stays alive as the container’s parent so the
+container survives a daemon restart, and it reaps the process and reports exit status.</li>
+<li><strong><code>runc</code></strong> — the OCI <em>runtime</em>: it does the actual <code>clone()</code>/<code>setns()</code>/<code>pivot_root()</code> and
+<code>exec</code>s your process. See <a href="../linux/container_runtimes.html">container runtimes</a> for the full
+picture (OCI, runc, alternative runtimes).</li>
+</ul>
+<h3 id="images-layers-and-the-union-filesystem"><a class="header" href="#images-layers-and-the-union-filesystem">Images, layers, and the union filesystem</a></h3>
+<p>An image is a stack of <strong>content-addressable, read-only layers</strong> (each the diff produced by
+one Dockerfile instruction). At run time an <a href="../linux/filesystems.html">overlay filesystem</a>
+(<code>overlay2</code>, the default storage driver) stacks those read-only layers and adds a thin
+<strong>writable copy-on-write top layer</strong> per container. Two containers from the same image share
+the read-only layers and only diverge where they write — which is why containers start fast
+and images are cheap to ship. <code>docker history myimage</code> shows the layers and their sizes.</p>
+<h3 id="oci-specifications"><a class="header" href="#oci-specifications">OCI specifications</a></h3>
+<p>Docker images and runtimes conform to two <strong>Open Container Initiative</strong> specs: the
+<em>image-spec</em> (a manifest pointing at the layer blobs) and the <em>runtime-spec</em> (a <code>config.json</code>
+that <code>runc</code> consumes to set up namespaces, cgroups, mounts, and capabilities). Conforming to
+these specs is what lets the same image run under Docker, Podman, or Kubernetes.</p>
 <h2 id="docker-commands"><a class="header" href="#docker-commands">Docker Commands</a></h2>
 <pre><code class="language-bash"># Build
 docker build -t myapp:1.0 .
@@ -1032,6 +1068,55 @@ HEALTHCHECK --interval=30s --timeout=3s \
 EXPOSE 8000
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
 </code></pre>
+<h2 id="storage-logging--rootless"><a class="header" href="#storage-logging--rootless">Storage, Logging &amp; Rootless</a></h2>
+<h3 id="storage-drivers"><a class="header" href="#storage-drivers">Storage Drivers</a></h3>
+<p>The storage driver implements the layered, copy-on-write filesystem described in
+<a href="#how-docker-works-architecture">How Docker Works</a>. <code>overlay2</code> is the default on modern
+kernels and rarely needs changing.</p>
+<pre><code class="language-bash"># Which driver is in use, and where data lives
+docker info | grep "Storage Driver"
+ls /var/lib/docker/overlay2   # layer directories (do not edit by hand)
+</code></pre>
+<p>Read-only image layers are shared between containers; each container only allocates space for
+what it writes into its writable top layer. Write-heavy workloads (databases) should use a
+<a href="#volumes">volume</a> rather than the container’s writable layer — both for performance and so
+data survives the container. See <a href="../linux/filesystems.html">filesystems</a> for how overlay mounts
+work underneath.</p>
+<h3 id="logging-drivers"><a class="header" href="#logging-drivers">Logging Drivers</a></h3>
+<p>By default Docker captures a container’s stdout/stderr with the <code>json-file</code> driver, which
+<strong>grows without bound</strong> and is a common cause of a full host disk. Cap it, or switch drivers.</p>
+<pre><code class="language-bash"># Per-container: cap json-file size and rotation
+docker run --log-opt max-size=10m --log-opt max-file=3 myapp
+
+# Send logs to the host journal instead
+docker run --log-driver=journald myapp
+</code></pre>
+<pre><code class="language-json">// /etc/docker/daemon.json — set the default for all containers
+{
+  "log-driver": "json-file",
+  "log-opts": { "max-size": "10m", "max-file": "3" }
+}
+</code></pre>
+<p>Other drivers: <code>local</code> (efficient binary format), <code>journald</code>
+(<a href="../linux/journald_logging.html">see journald</a>), <code>fluentd</code>, <code>awslogs</code>, <code>gelf</code>. For aggregating
+container logs centrally see <a href="logging.html">logging</a> and <a href="observability.html">observability</a>.</p>
+<h3 id="rootless-docker"><a class="header" href="#rootless-docker">Rootless Docker</a></h3>
+<p>Rootless mode runs <strong>both the daemon and the containers as an unprivileged user</strong>, inside a
+<a href="../linux/namespace.html">user namespace</a>, so a container breakout lands on an unprivileged host
+user rather than root. It pairs with the non-root-<em>inside</em>-the-container practice covered under
+<a href="#running-as-non-root-user">Security Patterns</a>.</p>
+<pre><code class="language-bash">dockerd-rootless-setuptool.sh install
+export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+</code></pre>
+<p>Caveats: binding host ports below 1024 needs extra setup, and some cgroup limits require
+cgroup v2 with delegation enabled.</p>
+<h3 id="docker-contexts"><a class="header" href="#docker-contexts">Docker Contexts</a></h3>
+<p>A <em>context</em> points the CLI at a different daemon — handy for managing a remote host over SSH
+without copying TLS certs around.</p>
+<pre><code class="language-bash">docker context create remote --docker "host=ssh://user@host"
+docker context use remote      # subsequent commands target the remote daemon
+docker context ls
+</code></pre>
 <h2 id="volumes"><a class="header" href="#volumes">Volumes</a></h2>
 <h3 id="volume-types"><a class="header" href="#volume-types">Volume Types</a></h3>
 <p><strong>Named Volumes</strong> (managed by Docker):</p>
@@ -1708,6 +1793,33 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 # Rollback
 VERSION=0.9.0 docker-compose -f docker-compose.prod.yml up -d
 </code></pre>
+<h2 id="pitfalls"><a class="header" href="#pitfalls">Pitfalls</a></h2>
+<ul>
+<li><strong>Your app as PID 1 doesn’t reap zombies or forward signals.</strong> The kernel gives PID 1
+special signal handling; a typical app ignores <code>SIGTERM</code> and never reaps exited children.
+Symptoms: <code>docker stop</code> hangs ~10s then <code>SIGKILL</code>s, and defunct processes accumulate. Run
+with <code>docker run --init</code> (injects a tiny init) or bundle <code>tini</code>. See
+<a href="../linux/process_internals.html">process internals</a>.</li>
+<li><strong><code>CMD app</code> (shell form) ≠ <code>CMD ["app"]</code> (exec form).</strong> Shell form runs your process as a
+child of <code>/bin/sh -c</code>, so the shell is PID 1 and <em>it</em> receives signals, not your app. Use
+exec form (JSON array) so your process is PID 1 and handles <code>SIGTERM</code> itself.</li>
+<li><strong><code>ADD</code> does surprising things.</strong> It auto-extracts local tar archives and can fetch URLs.
+Prefer <code>COPY</code> for plain file copies; reach for <code>ADD</code> only when you actually want extraction.</li>
+<li><strong><code>:latest</code> is not a pinned version.</strong> It’s a mutable tag — builds become non-reproducible
+and cache invalidation gets unpredictable. Pin a real tag or a digest (<code>image@sha256:...</code>).</li>
+<li><strong>A missing <code>.dockerignore</code> bloats the build and leaks secrets.</strong> Without it the whole
+context (including <code>.git</code> and <code>.env</code>) is sent to the daemon and may land in the image. And
+a secret written into an <code>ENV</code> or a layer <strong>persists in the image history even if a later
+layer deletes it</strong> — use BuildKit’s <code>--mount=type=secret</code> (see <a href="#secrets-management">Build Secrets</a>).</li>
+<li><strong>Containers run as root by default.</strong> Combined with a writable root filesystem that
+widens the blast radius of a compromise. Add a non-root <code>USER</code> and run <code>--read-only</code> with a
+<code>tmpfs</code> for scratch space (see <a href="#security-patterns">Security Patterns</a>).</li>
+<li><strong><code>json-file</code> logging fills the host disk.</strong> The default driver grows unbounded — cap it
+with <code>max-size</code>/<code>max-file</code> (see <a href="#logging-drivers">Logging Drivers</a>).</li>
+<li><strong><code>--network host</code> and <code>--privileged</code> dissolve isolation.</strong> Host networking shares the host’s
+network namespace (no port mapping, but no isolation either); <code>--privileged</code> grants nearly
+all capabilities and device access. Reach for the narrow tool (<code>--cap-add</code>, <code>-p</code>) first.</li>
+</ul>
 <h2 id="eli10"><a class="header" href="#eli10">ELI10</a></h2>
 <p>Docker is like shipping containers for code:</p>
 <ul>
@@ -1728,6 +1840,11 @@ VERSION=0.9.0 docker-compose -f docker-compose.prod.yml up -d
 <li><a href="cicd.html">CI/CD</a> — pipelines build and push Docker images on every commit</li>
 <li><a href="github-actions.html">GitHub Actions</a> — the most common platform for Docker build/push workflows</li>
 <li><a href="infrastructure.html">Infrastructure</a> — the cloud VMs or bare-metal hosts that run the Docker daemon</li>
+<li><a href="../linux/namespace.html">Linux namespaces</a> &amp; <a href="../linux/cgroups.html">cgroups</a> — the kernel primitives a container is built from</li>
+<li><a href="../linux/container_runtimes.html">Container runtimes</a> — the OCI / runc / containerd layer Docker sits on top of</li>
+<li><a href="../linux/filesystems.html">Filesystems</a> — the overlay2 / union mounts behind image layers</li>
+<li><a href="container_security.html">Container security</a> — hardening, scanning, and isolation for the images and containers above</li>
+<li><a href="../linux/journald_logging.html">journald logging</a> — where the <code>journald</code> log driver sends container output</li>
 </ul>
 
                     </main>
@@ -1778,7 +1895,7 @@ VERSION=0.9.0 docker-compose -f docker-compose.prod.yml up -d
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-c22b7243.js"></script>
+        <script src="../book-609e4cb8.js"></script>
 
         <!-- Custom JS scripts -->
 
